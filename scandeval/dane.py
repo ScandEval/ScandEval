@@ -1,22 +1,50 @@
-'''Evaluation of a language model on Scandinavian NER tasks'''
+'''NER evaluation of a language model on the DaNE dataset'''
 
 from danlp.datasets import DDT
-from transformers import (AutoConfig,
-                          AutoTokenizer,
-                          AutoModelForTokenClassification,
-                          DataCollatorForTokenClassification,
-                          TrainingArguments,
-                          Trainer)
+from transformers import (AutoModelForTokenClassification,
+                          DataCollatorForTokenClassification)
 from datasets import Dataset, load_metric
 from functools import partial
 import numpy as np
 from typing import Tuple, Dict, List
-import warnings
 
 from .evaluator import Evaluator
+from .utils import doc_inherit
 
 
 class DaneEvaluator(Evaluator):
+    '''Evaluator of language models on the DaNE dataset.
+
+    Args:
+        prefer_flax (bool, optional):
+            Whether to prefer Flax models when loading models from HuggingFace
+            Hub. Defaults to False, meaning that PyTorch models are
+            prioritised.
+        cache_dir (str, optional):
+            Where the downloaded models will be stored. Defaults to
+            '~/.cache/huggingface', which is also the default HuggingFace cache
+            directory.
+        learning_rate (float, optional):
+            What learning rate to use when finetuning the models. Defaults to
+            2e-5.
+        warmup_steps (int, optional):
+            The number of training steps in which the learning rate will be
+            warmed up, meaning starting from nearly 0 and progressing up to
+            `learning_rate` after `warmup_steps` many steps. Defaults to 50.
+        batch_size (int, optional):
+            The batch size used while finetuning. Defaults to 16.
+
+    Attributes:
+        prefer_flax (bool): Whether Flax models are prioritised over PyTorch
+        cache_dir (str): Directory where models are cached
+        learning_rate (float): Learning rate used while finetuning
+        warmup_steps (int): Number of steps used to warm up the learning rate
+        batch_size (int): The batch size used while finetuning
+        epochs (int): The number of epochs to finetune
+        num_labels (int): The number of NER labels in the dataset
+        label2id (dict): Conversion dict from NER labels to their indices
+        id2label (dict): Conversion dict from NER label indices to the labels
+    '''
     def __init__(self,
                  prefer_flax: bool = False,
                  cache_dir: str = '~/.cache/huggingface',
@@ -42,11 +70,23 @@ class DaneEvaluator(Evaluator):
                          warmup_steps=warmup_steps,
                          batch_size=batch_size)
 
+    @doc_inherit
     def _get_model_class(self) -> type:
         return AutoModelForTokenClassification
 
     def _tokenize_and_align_labels(self, examples: dict, tokenizer):
-        '''Tokenize all texts and align the labels with them'''
+        '''Tokenise all texts and align the labels with them.
+
+        Args:
+            examples (dict):
+                The examples to be tokenised.
+            tokenizer (HuggingFace tokenizer):
+                A pretrained tokenizer.
+
+        Returns:
+            dict:
+                A dictionary containing the tokenized data as well as labels.
+        '''
         tokenized_inputs = tokenizer(
             examples['docs'],
             # We use this argument because the texts in our dataset are lists
@@ -76,14 +116,15 @@ class DaneEvaluator(Evaluator):
         tokenized_inputs["labels"] = labels
         return tokenized_inputs
 
+    @doc_inherit
     def _preprocess_data(self, dataset: Dataset, tokenizer) -> Dataset:
-        return (dataset.map(partial(self._tokenize_and_align_labels,
-                                    tokenizer=tokenizer),
-                            batched=True,
-                            num_proc=4)
-                       .remove_columns(['docs', 'orig_labels']))
+        map_fn = partial(self._tokenize_and_align_labels, tokenizer=tokenizer)
+        tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=4)
+        return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
 
+    @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset, Dataset]:
+
         # Load the DaNE data
         train, val, test = DDT().load_as_simple_ner(predefined_splits=True)
 
@@ -102,13 +143,13 @@ class DaneEvaluator(Evaluator):
 
         return train_dataset, val_dataset, test_dataset
 
+    @doc_inherit
     def _load_data_collator(self, tokenizer):
         return DataCollatorForTokenClassification(tokenizer)
 
+    @doc_inherit
     def _compute_metrics(self,
                          predictions_and_labels: tuple) -> Dict[str, float]:
-        '''Helper function for computing metrics'''
-
         # Get the predictions from the model
         predictions, labels = predictions_and_labels
         predictions = np.argmax(predictions, axis=-1)
@@ -127,36 +168,12 @@ class DaneEvaluator(Evaluator):
                                        references=true_labels)
         return dict(micro_f1=results["overall_f1"])
 
-    def _log_metrics(self, metrics: Dict[str, List[dict]]):
-        '''Log the metrics.
-
-        Args:
-            metrics (dict):
-                The metrics that are to be logged. This is a dict with keys
-                'train', 'val' and 'split', with values being lists of
-                dictionaries full of metrics.
-        '''
-        def get_stats(split: str) -> Tuple[float, float]:
-            '''Helper function to compute the mean with confidence intervals.
-
-            Args:
-                split (str):
-                    The dataset split we are calculating statistics of.
-
-            Returns:
-                pair of floats:
-                    The mean micro-average F1-score and the radius of its 95%
-                    confidence interval.
-            '''
-            metric_list = metrics[split]
-            micro_f1s = [dct[f'{split}_micro_f1'] for dct in metric_list]
-            mean_micro_f1 = np.mean(micro_f1s)
-            std_err = np.std(micro_f1s, ddof=1) / np.sqrt(len(micro_f1s))
-            return 100 * mean_micro_f1, 196 * std_err
-
-        train_mean, train_std_err = get_stats('train')
-        val_mean, val_std_err = get_stats('val')
-        test_mean, test_std_err = get_stats('test')
+    @doc_inherit
+    def _log_metrics(self, metrics: Dict[str, List[Dict[str, float]]]):
+        kwargs = dict(metrics=metrics, metric_name='micro_f1')
+        train_mean, train_std_err = self.get_stats(split='train', **kwargs)
+        val_mean, val_std_err = self.get_stats(split='val', **kwargs)
+        test_mean, test_std_err = self.get_stats(split='test', **kwargs)
 
         print('Mean micro-average F1-scores on DaNE:')
         print(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
