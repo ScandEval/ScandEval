@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from datasets import Dataset
 from transformers import (PreTrainedTokenizerBase,
+                          PreTrainedModel,
                           AutoTokenizer,
                           AutoConfig,
                           RobertaPreTrainedModel,
@@ -15,6 +16,8 @@ import warnings
 import datasets.utils.logging as ds_logging
 import transformers.utils.logging as tf_logging
 from tqdm.auto import tqdm
+import copy
+import numpy as np
 
 
 warnings.filterwarnings(
@@ -57,11 +60,17 @@ class Evaluator(ABC):
 
     @abstractmethod
     def _get_model_class(self) -> type:
+        '''Get the model class used for finetuning.
+
+        Returns:
+            type: The model class
+        '''
         pass
 
     def _load_model(self,
                    transformer: str,
-                   prefer_flax: Optional[bool] = None) -> tuple:
+                   prefer_flax: Optional[bool] = None
+                   ) -> Tuple[PreTrainedModel, PreTrainedTokenizerBase]:
         '''Load the model with its tokenizer.
 
         Args:
@@ -109,29 +118,125 @@ class Evaluator(ABC):
 
     @abstractmethod
     def _load_data(self) -> Tuple[Dataset, Dataset, Dataset]:
+        '''Load the datasets.
+
+        Returns:
+            A triple of HuggingFace datasets:
+                The train, validation and test datasets.
+        '''
         pass
 
-    def _preprocess_data(self, dataset: Dataset, tokenizer) -> Dataset:
-        return dataset
+    @abstractmethod
+    def _preprocess_data(self,
+                         dataset: Dataset,
+                         tokenizer: PreTrainedTokenizerBase) -> Dataset:
+        '''Preprocess a dataset by tokenizing and aligning the labels.
+
+        Args:
+            dataset (HuggingFace dataset):
+                The dataset to preprocess.
+            tokenizer (HuggingFace tokenizer):
+                A pretrained tokenizer.
+
+        Returns:
+            HuggingFace dataset: The preprocessed dataset.
+        '''
+        pass
 
     @abstractmethod
     def _load_data_collator(self,
                            tokenizer: Optional[PreTrainedTokenizerBase] = None):
+        '''Load the data collator used to prepare samples during finetuning.
+
+        Args:
+            tokenizer (HuggingFace tokenizer or None, optional):
+                A pretrained tokenizer. Can be None if the tokenizer is not
+                used in the initialisation of the data collator. Defaults to
+                None.
+
+        Returns:
+            HuggingFace data collator: The data collator.
+        '''
         pass
 
     @abstractmethod
     def _compute_metrics(self,
                          predictions_and_labels: tuple) -> Dict[str, float]:
+        '''Compute the metrics needed for evaluation.
+
+        Args:
+            predictions_and_labels (pair of arrays):
+                The first array contains the probability predictions, of shape
+                (num_samples, sequence_length, num_classes), and the second
+                array contains the true labels, of shape (num_samples,
+                sequence_length).
+
+        Returns:
+            dict:
+                A dictionary with key 'micro_f1' and the micro-average F1-score
+                as value.
+        '''
         pass
 
     @abstractmethod
-    def _log_metrics(self, metrics: Dict[str, List[dict]]):
+    def _log_metrics(self, metrics: Dict[str, List[Dict[str, float]]]):
+        '''Log the metrics.
+
+        Args:
+            metrics (dict):
+                The metrics that are to be logged. This is a dict with keys
+                'train', 'val' and 'split', with values being lists of
+                dictionaries full of metrics.
+        '''
         pass
+
+    @staticmethod
+    def get_stats(metrics: Dict[str, List[Dict[str, float]]],
+                  metric_name: str,
+                  split: str) -> Tuple[float, float]:
+        '''Helper function to compute the mean with confidence intervals.
+
+        Args:
+            split (str):
+                The dataset split we are calculating statistics of.
+
+        Returns:
+            pair of floats:
+                The mean micro-average F1-score and the radius of its 95%
+                confidence interval.
+        '''
+        key = f'{split}_{metric_name}'
+        metric_values= [dct[key] for dct in metrics[split]]
+        mean = np.mean(metric_values)
+        sample_std = np.std(metric_values, ddof=1)
+        std_err = sample_std / np.sqrt(len(metric_values))
+        return mean, 1.96 * std_err
 
     def evaluate(self,
                  transformer: str,
                  num_finetunings: int = 10,
-                 progress_bar: bool = True):
+                 progress_bar: bool = True
+                 ) -> Dict[str, List[Dict[str, float]]]:
+        '''Finetune and evaluate a transformer model.
+
+        Args:
+            transformer (str):
+                The full HuggingFace Hub path to the pretrained transformer
+                model.
+            num_finetunings (int, optional):
+                The number of times to finetune. These results will be used to
+                calculate confidence intervals of the means of the metrics.
+                Defaults to 10.
+            progress_bar (bool, optional):
+                Whether to show a progress bar or not. Defaults to True.
+
+        Returns:
+            dict:
+                The keys in the dict are 'train', 'val' and 'test, and the
+                values contain the metrics for that given dataset split.
+        '''
+        # Load the tokenizer and model
+        model, tokenizer = self._load_model(transformer)
 
         # Set up progress bar
         if progress_bar:
@@ -139,9 +244,6 @@ class Evaluator(ABC):
             itr = tqdm(range(num_finetunings), desc=desc)
         else:
             itr = range(num_finetunings)
-
-        # Load the tokenizer and model
-        model, tokenizer = self._load_model(transformer)
 
         # Load the dataset
         train, val, test = self._load_data()
@@ -175,8 +277,12 @@ class Evaluator(ABC):
         metrics = defaultdict(list)
         for _ in itr:
 
+            # Make a copy of the original model, so that we do not continue
+            # training the same one
+            model_copy = copy.deepcopy(model)
+
             # Initialise Trainer
-            trainer = Trainer(model=model,
+            trainer = Trainer(model=model_copy,
                               args=training_args,
                               train_dataset=preprocessed_train,
                               eval_dataset=preprocessed_val,
@@ -189,7 +295,7 @@ class Evaluator(ABC):
             trainer.remove_callback(PrinterCallback)
 
             # Finetune the model
-            train_result = trainer.train()
+            trainer.train()
 
             # Log training metrics and save the state
             train_metrics = trainer.evaluate(preprocessed_train,
