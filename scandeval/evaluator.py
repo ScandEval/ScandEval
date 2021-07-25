@@ -20,6 +20,7 @@ import copy
 import numpy as np
 
 
+# Ignore miscellaneous warnings
 warnings.filterwarnings(
     'ignore',
     module='torch.nn.parallel*',
@@ -29,10 +30,10 @@ warnings.filterwarnings(
 )
 warnings.filterwarnings('ignore', module='seqeval*')
 
-# This disables the tokenizer progress bars
+# Disable the tokenizer progress bars
 ds_logging.get_verbosity = lambda: ds_logging.NOTSET
 
-# This disables most of the `transformers` logging
+# Disable most of the `transformers` logging
 tf_logging.set_verbosity_error()
 
 
