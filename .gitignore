@@ -132,3 +132,6 @@ dmypy.json
 **/*.swp
 **/*.swo
 .vim/
+
+# MacOS
+**/.DS_Store
