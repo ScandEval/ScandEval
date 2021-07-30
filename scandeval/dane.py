@@ -1,8 +1,7 @@
 '''NER evaluation of a language model on the DaNE dataset'''
 
 from danlp.datasets import DDT
-from transformers import (AutoModelForTokenClassification,
-                          DataCollatorForTokenClassification)
+from transformers import DataCollatorForTokenClassification
 from datasets import Dataset, load_metric
 from functools import partial
 import numpy as np
@@ -107,10 +106,16 @@ class DaneEvaluator(Evaluator):
         return tokenized_inputs
 
     @doc_inherit
-    def _preprocess_data(self, dataset: Dataset, tokenizer) -> Dataset:
-        map_fn = partial(self._tokenize_and_align_labels, tokenizer=tokenizer)
-        tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=4)
-        return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
+    def _preprocess_data(self,
+                         dataset: Dataset,
+                         framework: str,
+                         **kwargs) -> Dataset:
+        if framework in ['pytorch', 'tensorflow', 'jax']:
+            map_fn = partial(self._tokenize_and_align_labels, tokenizer=tokenizer)
+            tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=4)
+            return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
+        elif framework == 'spacy':
+            return dataset
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
@@ -164,3 +169,41 @@ class DaneEvaluator(Evaluator):
         print('Mean micro-average F1-scores on DaNE:')
         print(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
         print(f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
+
+    @staticmethod
+    def _extract_spacy_predictions(examples: dict, model) -> dict:
+        # Extract the tokens and join them to a document by including
+        # spaces
+        tokens = examples['docs']
+        doc = ' '.join(tokens)
+
+        # Get the model's named entity predictions
+        ner_tags = {ent.text: ent.label_ for ent in model(doc).ents}
+
+        # Organise the predictions to make them comparable to the labels
+        preds = list()
+        for token in tokens:
+            for ner_tag in ner_tags.keys():
+                if ner_tag.startswith(token):
+                    preds.append('B-' + ner_tags[ner_tag])
+                    break
+                elif token in ner_tag:
+                    preds.append('I-' + ner_tags[ner_tag])
+                    break
+            else:
+                preds.append('O')
+
+        examples['predictions'] = preds
+        return examples
+
+    @doc_inherit
+    def _get_spacy_predictions_and_labels(self,
+                                          model,
+                                          dataset: Dataset) -> tuple:
+        map_fn = partial(self._extract_spacy_predictions, model=model)
+        dataset = dataset.map(map_fn, batched=False, num_proc=4)
+
+        predictions = [data_dict['predictions'] for data_dict in dataset]
+        labels = [data_dict['orig_labels'] for data_dict in dataset]
+
+        return predictions, labels
