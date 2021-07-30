@@ -4,6 +4,8 @@ from functools import wraps
 from typing import Callable
 import warnings
 import datasets.utils.logging as ds_logging
+import pkg_resources
+import re
 import transformers.utils.logging as tf_logging
 from transformers import (AutoModelForTokenClassification,
                           AutoModelForSequenceClassification,
@@ -15,12 +17,29 @@ from transformers import (AutoModelForTokenClassification,
 
 MODEL_CLASSES = {
     'pytorch': {'token-classification': AutoModelForTokenClassification,
-                'text-classification': AutoModelForSequenceClassification}
+                'text-classification': AutoModelForSequenceClassification},
     'tensorflow': {'token-classification': TFAutoModelForTokenClassification,
-                   'text-classification': TFAutoModelForSequenceClassification}
+                   'text-classification': TFAutoModelForSequenceClassification},
     'jax': {'token-classification': FlaxAutoModelForTokenClassification,
             'text-classification': FlaxAutoModelForSequenceClassification}
 }
+
+
+def is_module_installed(module: str) -> bool:
+    '''Check if a module is installed.
+
+    Args:
+        module (str): The name of the module.
+
+    Returns:
+        bool: Whether the module is installed or not.
+    '''
+    installed_modules_with_versions = list(pkg_resources.working_set)
+    installed_modules = [re.sub('[0-9. ]', '', str(module))
+                         for module in installed_modules_with_versions]
+    installed_modules_processed = [module.lower().replace('-', '_')
+                                   for module in installed_modules]
+    return module.lower() in installed_modules_processed
 
 
 def block_terminal_output():
