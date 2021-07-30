@@ -4,8 +4,13 @@ from scandeval import DaneEvaluator
 
 
 def test_dane():
-    dane_eval = DaneEvaluator()#cache_dir='/media/secure/dan/huggingface')
-    dane_eval.evaluate('Maltehb/-l-ctra-danish-electra-small-cased')
+    dane_eval = DaneEvaluator()
+    model_ids = ['Maltehb/danish-bert-botxo',
+                 'chcaa/da_dacy_small_trf',
+                 'chcaa/da_dacy_medium_trf',
+                 'chcaa/da_dacy_large_trf']
+    for model_id in model_ids:
+        dane_eval(model_id)
 
 
 def process_twitter_sent():
@@ -299,4 +304,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    process_twitter_sent()
+    test_dane()
