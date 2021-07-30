@@ -16,10 +16,6 @@ class DaneEvaluator(Evaluator):
     '''Evaluator of language models on the DaNE dataset.
 
     Args:
-        prefer_flax (bool, optional):
-            Whether to prefer Flax models when loading models from HuggingFace
-            Hub. Defaults to False, meaning that PyTorch models are
-            prioritised.
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
             '~/.cache/huggingface', which is also the default HuggingFace cache
@@ -35,7 +31,6 @@ class DaneEvaluator(Evaluator):
             The batch size used while finetuning. Defaults to 16.
 
     Attributes:
-        prefer_flax (bool): Whether Flax models are prioritised over PyTorch
         cache_dir (str): Directory where models are cached
         learning_rate (float): Learning rate used while finetuning
         warmup_steps (int): Number of steps used to warm up the learning rate
@@ -46,7 +41,6 @@ class DaneEvaluator(Evaluator):
         id2label (dict): Conversion dict from NER label indices to the labels
     '''
     def __init__(self,
-                 prefer_flax: bool = False,
                  cache_dir: str = '~/.cache/huggingface',
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
@@ -61,18 +55,14 @@ class DaneEvaluator(Evaluator):
                     'B-MISC': 6,
                     'I-MISC': 7,
                     'O': 8}
-        super().__init__(num_labels=9,
+        super().__init__(task='token-classification',
+                         num_labels=9,
                          label2id=label2id,
-                         prefer_flax=prefer_flax,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          epochs=5,
                          warmup_steps=warmup_steps,
                          batch_size=batch_size)
-
-    @doc_inherit
-    def _get_model_class(self) -> type:
-        return AutoModelForTokenClassification
 
     def _tokenize_and_align_labels(self, examples: dict, tokenizer):
         '''Tokenise all texts and align the labels with them.
@@ -123,25 +113,22 @@ class DaneEvaluator(Evaluator):
         return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
 
     @doc_inherit
-    def _load_data(self) -> Tuple[Dataset, Dataset, Dataset]:
+    def _load_data(self) -> Tuple[Dataset, Dataset]:
 
         # Load the DaNE data
-        train, val, test = DDT().load_as_simple_ner(predefined_splits=True)
+        train, _, test = DDT().load_as_simple_ner(predefined_splits=True)
 
         # Split docs and labels
         train_docs, train_labels = train
-        val_docs, val_labels = val
         test_docs, test_labels = test
 
         # Convert dataset to the HuggingFace format
         train_dataset = Dataset.from_dict(dict(docs=train_docs,
                                                orig_labels=train_labels))
-        val_dataset = Dataset.from_dict(dict(docs=val_docs,
-                                             orig_labels=val_labels))
         test_dataset = Dataset.from_dict(dict(docs=test_docs,
                                               orig_labels=test_labels))
 
-        return train_dataset, val_dataset, test_dataset
+        return train_dataset, test_dataset
 
     @doc_inherit
     def _load_data_collator(self, tokenizer):
@@ -171,11 +158,9 @@ class DaneEvaluator(Evaluator):
     @doc_inherit
     def _log_metrics(self, metrics: Dict[str, List[Dict[str, float]]]):
         kwargs = dict(metrics=metrics, metric_name='micro_f1')
-        train_mean, train_std_err = self.get_stats(split='train', **kwargs)
-        val_mean, val_std_err = self.get_stats(split='val', **kwargs)
-        test_mean, test_std_err = self.get_stats(split='test', **kwargs)
+        train_mean, train_std_err = self._get_stats(split='train', **kwargs)
+        test_mean, test_std_err = self._get_stats(split='test', **kwargs)
 
         print('Mean micro-average F1-scores on DaNE:')
         print(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
-        print(f'  Validation: {val_mean:.2f} +- {val_std_err:.2f}')
         print(f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')

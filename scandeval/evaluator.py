@@ -2,142 +2,180 @@
 
 from abc import ABC, abstractmethod
 from datasets import Dataset
+from transformers.models.auto.auto_factory import _BaseAutoModelClass
 from transformers import (PreTrainedTokenizerBase,
-                          PreTrainedModel,
                           AutoTokenizer,
                           AutoConfig,
                           RobertaPreTrainedModel,
+                          TFRobertaPreTrainedModel,
                           TrainingArguments,
                           Trainer,
                           PrinterCallback)
-from typing import Dict, Optional, Tuple, List
-from collections import defaultdict
-import warnings
-import datasets.utils.logging as ds_logging
-import transformers.utils.logging as tf_logging
-from tqdm.auto import tqdm
-import copy
+from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
+import requests
+from bs4 import BeautifulSoup
+import subprocess
+import spacy
+from tqdm.auto import tqdm
+from collections import defaultdict
+import copy
+
+from .utils import block_terminal_output, MODEL_CLASSES
 
 
-# Ignore miscellaneous warnings
-warnings.filterwarnings(
-    'ignore',
-    module='torch.nn.parallel*',
-    message=('Was asked to gather along dimension 0, but all input '
-             'tensors were scalars; will instead unsqueeze and return '
-             'a vector.')
-)
-warnings.filterwarnings('ignore', module='seqeval*')
-
-# Disable the tokenizer progress bars
-ds_logging.get_verbosity = lambda: ds_logging.NOTSET
-
-# Disable most of the `transformers` logging
-tf_logging.set_verbosity_error()
+block_terminal_output()
 
 
 class Evaluator(ABC):
-    '''Abstract base class for evaluating models'''
+    '''Abstract base class for evaluating models.
+
+    Args:
+        TODO
+
+    Parameters:
+        TODO
+    '''
     def __init__(self,
-                 num_labels: int,
-                 label2id: Dict[str, int],
-                 prefer_flax: bool = False,
+                 task: str,
+                 num_labels: Optional[int] = None,
+                 label2id: Optional[Dict[str, int]] = None,
                  cache_dir: str = '~/.cache/huggingface',
                  learning_rate: float = 2e-5,
                  epochs: int = 5,
                  warmup_steps: int = 50,
                  batch_size: int = 16):
+        self.task = task
         self.num_labels = num_labels
-        self.label2id = label2id
-        self.id2label = {id: label for label, id in label2id.items()}
-        self.prefer_flax = prefer_flax
         self.cache_dir = cache_dir
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.warmup_steps = warmup_steps
         self.batch_size = batch_size
+        self.label2id = label2id
+        if self.label2id is not None:
+            self.id2label = {id: label for label, id in label2id.items()}
+        else:
+            self.id2label = None
 
+    def _get_model_class(self, framework: str) -> _BaseAutoModelClass:
+        return MODEL_CLASSES[framework][self.task]
 
-    @abstractmethod
-    def _get_model_class(self) -> type:
-        '''Get the model class used for finetuning.
-
-        Returns:
-            type: The model class
-        '''
-        pass
-
-    def _load_model(self,
-                   transformer: str,
-                   prefer_flax: Optional[bool] = None
-                   ) -> Tuple[PreTrainedModel, PreTrainedTokenizerBase]:
-        '''Load the model with its tokenizer.
+    @staticmethod
+    def _get_stats(metrics: Dict[str, List[Dict[str, float]]],
+                  metric_name: str,
+                  split: str) -> Tuple[float, float]:
+        '''Helper function to compute the mean with confidence intervals.
 
         Args:
-            transformer (str):
-                The full HuggingFace Hub path to the pretrained transformer
-                model.
-            prefer_flax (bool, optional):
-                Whether to prefer to load the pretrained Flax model from the
-                HuggingFace model repository. Defaults to False.
+            metrics (dict):
+                Dictionary with the names of the metrics as keys, of the form
+                "<split>_<metric_name>", such as "val_f1", and values the
+                metric values.
+            metric_name (str):
+                The name of the metric. Is used to collect the correct metric
+                from `metrics`.
+            split (str):
+                The dataset split we are calculating statistics of. Is used to
+                collect the correct metric from `metrics`.
 
         Returns:
-            tuple: The model and the tokenizer.
+            pair of floats:
+                The mean micro-average F1-score and the radius of its 95%
+                confidence interval.
         '''
-        if prefer_flax is None:
-            prefer_flax = self.prefer_flax
+        key = f'{split}_{metric_name}'
+        metric_values = [dct[key] for dct in metrics[split]]
+        mean = np.mean(metric_values)
+        sample_std = np.std(metric_values, ddof=1)
+        std_err = sample_std / np.sqrt(len(metric_values))
+        return mean, 1.96 * std_err
 
-        config = AutoConfig.from_pretrained(transformer,
-                                            num_labels=self.num_labels,
-                                            label2id=self.label2id,
-                                            id2label=self.id2label)
+    def _load_model(self,
+                    model_id: str,
+                    framework: Optional[str] = None) -> Dict[str, Any]:
+        '''Load the model.
 
-        try:
-            model = self._get_model_class().from_pretrained(transformer,
-                                                     config=config,
-                                                     from_flax=prefer_flax,
-                                                     cache_dir=self.cache_dir)
+        Args:
+            model_id (str):
+                The full HuggingFace Hub path to the pretrained transformer
+                model.
+            framework (str or None, optional):
+                The framework the model has been built in. Currently supports
+                'pytorch', 'tensorflow', 'jax' and 'spacy'. If None then this
+                will be inferred from `model_id`. Defaults to None.
 
-        # Loading of model failed, due to the Flax/PyTorch version not being
-        # available. Trying the other one.
-        except OSError:
-            prefer_flax = not prefer_flax
-            model = self._get_model_class().from_pretrained(transformer,
-                                                     config=config,
-                                                     from_flax=prefer_flax,
-                                                     cache_dir=self.cache_dir)
+        Returns:
+            dict:
+                A dictionary containing at least the key 'model', with the
+                value being the model. Can contain other objects related to the
+                model, such as its tokenizer.
 
-        # If the model is a subclass of `RobertaPreTrainedModel` then we have
-        # to add a prefix space to the tokens, by the way the model is
-        # constructed.
-        prefix = isinstance(model, RobertaPreTrainedModel)
-        tokenizer = AutoTokenizer.from_pretrained(transformer, use_fast=True,
-                                                  add_prefix_space=prefix)
+        Raises:
+            RuntimeError: If the framework is not recognized.
+        '''
+        # Get the name of a framework supported for the model_id
+        if framework is None:
+            framework = self._fetch_model_metadata(model_id)['framework']
 
-        return model, tokenizer
+        if framework in ['pytorch', 'tensorflow', 'jax']:
+            config = AutoConfig.from_pretrained(model_id,
+                                                num_labels=self.num_labels,
+                                                label2id=self.label2id,
+                                                id2label=self.id2label)
+
+            model_cls = self._get_model_class(framework=framework)
+            model = model_cls.from_pretrained(model_id,
+                                              config=config,
+                                              cache_dir=self.cache_dir)
+
+            # If the model is a subclass of `RobertaPreTrainedModel` then we
+            # have to add a prefix space to the tokens, by the way the model is
+            # constructed.
+            prefix = (isinstance(model, RobertaPreTrainedModel) or
+                      isinstance(model, TFRobertaPreTrainedModel))
+            tokenizer = AutoTokenizer.from_pretrained(model_id,
+                                                      use_fast=True,
+                                                      add_prefix_space=prefix)
+
+            return dict(model=model, tokenizer=tokenizer)
+
+        elif framework == 'spacy':
+            # Download the model
+            local_model_id = model_id.split('/')[-1]
+            url = (f'https://huggingface.co/{model_id}/resolve/main/'
+                   f'{local_model_id}-any-py3-none-any.whl')
+            subprocess.run(['pip3', 'install', url])
+
+            # Load the model
+            model = spacy.load(local_model_id)
+
+            return dict(model=model)
+
+        else:
+            raise RuntimeError(f'The framework "{framework}" is not '
+                               f'supported!')
 
     @abstractmethod
-    def _load_data(self) -> Tuple[Dataset, Dataset, Dataset]:
+    def _load_data(self) -> Tuple[Dataset, Dataset]:
         '''Load the datasets.
 
         Returns:
             A triple of HuggingFace datasets:
-                The train, validation and test datasets.
+                The train and test datasets.
         '''
         pass
 
     @abstractmethod
-    def _preprocess_data(self,
-                         dataset: Dataset,
-                         tokenizer: PreTrainedTokenizerBase) -> Dataset:
+    def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
         '''Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
             dataset (HuggingFace dataset):
                 The dataset to preprocess.
-            tokenizer (HuggingFace tokenizer):
-                A pretrained tokenizer.
+            kwargs:
+                Extra keyword arguments containing objects used in
+                preprocessing the dataset.
 
         Returns:
             HuggingFace dataset: The preprocessed dataset.
@@ -186,42 +224,69 @@ class Evaluator(ABC):
         Args:
             metrics (dict):
                 The metrics that are to be logged. This is a dict with keys
-                'train', 'val' and 'split', with values being lists of
-                dictionaries full of metrics.
+                'train' and 'test', with values being lists of dictionaries
+                full of metrics.
         '''
         pass
 
     @staticmethod
-    def get_stats(metrics: Dict[str, List[Dict[str, float]]],
-                  metric_name: str,
-                  split: str) -> Tuple[float, float]:
-        '''Helper function to compute the mean with confidence intervals.
+    def _fetch_model_metadata(model_id: str) -> Dict[str, str]:
+        '''Fetches metdataof a model from the HuggingFace Hub.
 
         Args:
-            split (str):
-                The dataset split we are calculating statistics of.
+            model_id (str):
+                The full HuggingFace Hub path to the pretrained transformer
+                model.
 
         Returns:
-            pair of floats:
-                The mean micro-average F1-score and the radius of its 95%
-                confidence interval.
-        '''
-        key = f'{split}_{metric_name}'
-        metric_values= [dct[key] for dct in metrics[split]]
-        mean = np.mean(metric_values)
-        sample_std = np.std(metric_values, ddof=1)
-        std_err = sample_std / np.sqrt(len(metric_values))
-        return mean, 1.96 * std_err
+            dict:
+                The keys are names of metadata, with the values being the
+                strings that describe the value of that metadata. Keys involve
+                'framework' and 'task', where a framework could be 'pytorch'
+                and a task could be 'token-classification'.
 
-    def evaluate(self,
-                 transformer: str,
+        Raises:
+            RuntimeError: If the extracted framework is not recognized.
+        '''
+        # Parse all the anchor tags from the model website
+        url = 'https://www.huggingface.co/' + model_id
+        html = requests.get(url).text
+        soup = BeautifulSoup(html, 'html.parser')
+        a_tags = soup.find_all('a')
+        a_tags_with_class = [a for a in a_tags if a.get('class') is not None]
+
+        # Fetch the frameworks from the model website
+        frameworks = [a['tag-id'] for a in a_tags_with_class
+                                  if 'tag-red' in a['class']]
+
+        # Extract a single valid framework in which the model has been
+        # implemented
+        valid_frameworks = ['pytorch', 'tensorflow', 'jax', 'spacy']
+        for valid_framework in valid_frameworks:
+            if valid_framework in frameworks:
+                framework = valid_framework
+                break
+        else:
+            raise RuntimeError(f'Cannot detect the framework of {model_id}!')
+
+        # Fetch the model tasks from the model website
+        tasks = [a['tag-id'] for a in a_tags_with_class
+                             if 'tag-white' in a['class']]
+
+        # Extract a single valid task on which the model has been trained
+        task = tasks[0]
+
+        return dict(framework=framework, task=task)
+
+    def __call__(self,
+                 model_id: str,
                  num_finetunings: int = 10,
                  progress_bar: bool = True
                  ) -> Dict[str, List[Dict[str, float]]]:
-        '''Finetune and evaluate a transformer model.
+        '''Finetune and evaluate a model.
 
         Args:
-            transformer (str):
+            model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
                 model.
             num_finetunings (int, optional):
@@ -233,85 +298,110 @@ class Evaluator(ABC):
 
         Returns:
             dict:
-                The keys in the dict are 'train', 'val' and 'test, and the
-                values contain the metrics for that given dataset split.
+                The keys in the dict are 'train' and 'test', and the values
+                contain the metrics for that given dataset split.
+
+        Raises:
+            RuntimeError: If the extracted framework is not recognized.
         '''
-        # Load the tokenizer and model
-        model, tokenizer = self._load_model(transformer)
+        # Load the model and its metadata
+        model_metadata = self._fetch_model_metadata(model_id)
+        framework = model_metadata['framework']
+        task = model_metadata['task']
+        model_dict = self._load_model(model_id, framework=framework)
+
+        # Load the dataset
+        train, test = self._load_data()
 
         # Set up progress bar
         if progress_bar:
-            desc = 'Finetuning and evaluating'
+            desc = 'Evaluating'
             itr = tqdm(range(num_finetunings), desc=desc)
         else:
             itr = range(num_finetunings)
 
-        # Load the dataset
-        train, val, test = self._load_data()
+        if framework in ['pytorch', 'tensorflow', 'jax']:
+            # Extract the model and tokenizer
+            model = model_dict['model']
+            tokenizer = model_dict['tokenizer']
 
-        # Preprocess the datasets
-        preprocessed_train = self._preprocess_data(train, tokenizer)
-        preprocessed_val = self._preprocess_data(val, tokenizer)
-        preprocessed_test = self._preprocess_data(test, tokenizer)
+            # Preprocess the datasets
+            preprocessed_train = self._preprocess_data(train,
+                                                       tokenizer=tokenizer)
+            preprocessed_test = self._preprocess_data(test,
+                                                      tokenizer=tokenizer)
 
-        # Load the data collator
-        data_collator = self._load_data_collator(tokenizer)
+            # Load the data collator
+            data_collator = self._load_data_collator(tokenizer)
 
-        # Initialise training arguments
-        training_args = TrainingArguments(
-            output_dir='.',
-            evaluation_strategy='no',
-            logging_strategy='no',
-            save_strategy='no',
-            per_device_train_batch_size=self.batch_size,
-            per_device_eval_batch_size=self.batch_size,
-            gradient_accumulation_steps=1,
-            learning_rate=self.learning_rate,
-            num_train_epochs=self.epochs,
-            warmup_steps=self.warmup_steps,
-            report_to='all',
-            save_total_limit=0,
-            log_level='error',  # Separate logging levels for Trainer
-            log_level_replica='error'  # Separate logging levels for Trainer
-        )
+            # Initialise training arguments
+            training_args = TrainingArguments(
+                output_dir='.',
+                evaluation_strategy='no',
+                logging_strategy='no',
+                save_strategy='no',
+                per_device_train_batch_size=self.batch_size,
+                gradient_accumulation_steps=1,
+                learning_rate=self.learning_rate,
+                num_train_epochs=self.epochs,
+                warmup_steps=self.warmup_steps,
+                report_to='all',
+                save_total_limit=0,
+                log_level='error',
+                log_level_replica='error'
+            )
 
-        metrics = defaultdict(list)
-        for _ in itr:
+            metrics = defaultdict(list)
+            for _ in itr:
 
-            # Make a copy of the original model, so that we do not continue
-            # training the same one
-            model_copy = copy.deepcopy(model)
+                # Make a copy of the original model, so that we do not continue
+                # training the same one
+                model_copy = copy.deepcopy(model)
 
-            # Initialise Trainer
-            trainer = Trainer(model=model_copy,
-                              args=training_args,
-                              train_dataset=preprocessed_train,
-                              eval_dataset=preprocessed_val,
-                              tokenizer=tokenizer,
-                              data_collator=data_collator,
-                              compute_metrics=self._compute_metrics)
+                # Initialise Trainer
+                trainer = Trainer(model=model_copy,
+                                  args=training_args,
+                                  train_dataset=preprocessed_train,
+                                  tokenizer=tokenizer,
+                                  data_collator=data_collator,
+                                  compute_metrics=self._compute_metrics)
 
-            # Remove the callback which prints the metrics after each
-            # evaluation
-            trainer.remove_callback(PrinterCallback)
+                # Remove the callback which prints the metrics after each
+                # evaluation
+                trainer.remove_callback(PrinterCallback)
 
-            # Finetune the model
-            trainer.train()
+                # Finetune the model
+                if task == 'fill-mask':
+                    trainer.train()
 
-            # Log training metrics and save the state
-            train_metrics = trainer.evaluate(preprocessed_train,
-                                             metric_key_prefix='train')
-            metrics['train'].append(train_metrics)
+                # Log training metrics and save the state
+                train_metrics = trainer.evaluate(preprocessed_train,
+                                                 metric_key_prefix='train')
+                metrics['train'].append(train_metrics)
 
-            # Log validation metrics
-            val_metrics = trainer.evaluate(preprocessed_val,
-                                           metric_key_prefix='val')
-            metrics['val'].append(val_metrics)
+                # Log test metrics
+                test_metrics = trainer.evaluate(preprocessed_test,
+                                                metric_key_prefix='test')
+                metrics['test'].append(test_metrics)
 
-            # Log test metrics
-            test_metrics = trainer.evaluate(preprocessed_test,
-                                            metric_key_prefix='test')
-            metrics['test'].append(test_metrics)
+            self._log_metrics(metrics)
+            return metrics
 
-        self._log_metrics(metrics)
-        return metrics
+        elif framework == 'spacy':
+            # Load the model
+            model = model_dict['model']
+
+            # Preprocess the datasets
+            preprocessed_train = self._preprocess_data(train)
+            preprocessed_test = self._preprocess_data(test)
+
+            metrics = defaultdict(list)
+            for _ in itr:
+                pass # TODO: Get metrics
+
+            self._log_metrics(metrics)
+            return metrics
+
+        else:
+            raise RuntimeError(f'The framework "{framework}" is not '
+                               f'supported!')
