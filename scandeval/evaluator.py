@@ -6,8 +6,6 @@ from transformers.models.auto.auto_factory import _BaseAutoModelClass
 from transformers import (PreTrainedTokenizerBase,
                           AutoTokenizer,
                           AutoConfig,
-                          RobertaPreTrainedModel,
-                          TFRobertaPreTrainedModel,
                           TrainingArguments,
                           Trainer,
                           PrinterCallback)
@@ -21,7 +19,7 @@ from tqdm.auto import tqdm
 from collections import defaultdict
 import copy
 
-from .utils import block_terminal_output, MODEL_CLASSES
+from .utils import block_terminal_output, MODEL_CLASSES, is_module_installed
 
 
 block_terminal_output()
@@ -63,8 +61,8 @@ class Evaluator(ABC):
 
     @staticmethod
     def _get_stats(metrics: Dict[str, List[Dict[str, float]]],
-                  metric_name: str,
-                  split: str) -> Tuple[float, float]:
+                   metric_name: str,
+                   split: str) -> Tuple[float, float]:
         '''Helper function to compute the mean with confidence intervals.
 
         Args:
@@ -129,11 +127,10 @@ class Evaluator(ABC):
                                               config=config,
                                               cache_dir=self.cache_dir)
 
-            # If the model is a subclass of `RobertaPreTrainedModel` then we
-            # have to add a prefix space to the tokens, by the way the model is
+            # If the model is a subclass of a RoBERTa model then we have to add
+            # a prefix space to the tokens, by the way the model is
             # constructed.
-            prefix = (isinstance(model, RobertaPreTrainedModel) or
-                      isinstance(model, TFRobertaPreTrainedModel))
+            prefix = 'RobertaModel' in type(model).__name__
             tokenizer = AutoTokenizer.from_pretrained(model_id,
                                                       use_fast=True,
                                                       add_prefix_space=prefix)
@@ -141,11 +138,13 @@ class Evaluator(ABC):
             return dict(model=model, tokenizer=tokenizer)
 
         elif framework == 'spacy':
-            # Download the model
             local_model_id = model_id.split('/')[-1]
-            url = (f'https://huggingface.co/{model_id}/resolve/main/'
-                   f'{local_model_id}-any-py3-none-any.whl')
-            subprocess.run(['pip3', 'install', url])
+
+            # Download the model if it has not already been so
+            if not is_module_installed(local_model_id):
+                url = (f'https://huggingface.co/{model_id}/resolve/main/'
+                       f'{local_model_id}-any-py3-none-any.whl')
+                subprocess.check_output(['pip3', 'install', url])
 
             # Load the model
             model = spacy.load(local_model_id)
@@ -205,15 +204,13 @@ class Evaluator(ABC):
 
         Args:
             predictions_and_labels (pair of arrays):
-                The first array contains the probability predictions, of shape
-                (num_samples, sequence_length, num_classes), and the second
-                array contains the true labels, of shape (num_samples,
-                sequence_length).
+                The first array contains the probability predictions and the
+                second array contains the true labels.
 
         Returns:
             dict:
-                A dictionary with key 'micro_f1' and the micro-average F1-score
-                as value.
+                A dictionary with the names of the metrics as keys and the
+                metric values as values.
         '''
         pass
 
@@ -226,6 +223,23 @@ class Evaluator(ABC):
                 The metrics that are to be logged. This is a dict with keys
                 'train' and 'test', with values being lists of dictionaries
                 full of metrics.
+        '''
+        pass
+
+    @abstractmethod
+    def _get_spacy_predictions_and_labels(self,
+                                          model,
+                                          dataset: Dataset) -> tuple:
+        '''Get predictions from SpaCy model on dataset.
+
+        Args:
+            model (SpaCy model): The model.
+            dataset (HuggingFace dataset): The dataset.
+
+        Returns:
+            A pair of arrays:
+                The first array contains the probability predictions and the
+                second array contains the true labels.
         '''
         pass
 
@@ -327,8 +341,10 @@ class Evaluator(ABC):
 
             # Preprocess the datasets
             preprocessed_train = self._preprocess_data(train,
+                                                       framework=framework,
                                                        tokenizer=tokenizer)
             preprocessed_test = self._preprocess_data(test,
+                                                      framework=framework,
                                                       tokenizer=tokenizer)
 
             # Load the data collator
@@ -392,12 +408,20 @@ class Evaluator(ABC):
             model = model_dict['model']
 
             # Preprocess the datasets
-            preprocessed_train = self._preprocess_data(train)
-            preprocessed_test = self._preprocess_data(test)
+            preprocessed_train = self._preprocess_data(train,
+                                                       framework=framework)
+            preprocessed_test = self._preprocess_data(test,
+                                                      framework=framework)
 
-            metrics = defaultdict(list)
-            for _ in itr:
-                pass # TODO: Get metrics
+            train_preds_labels = self._get_spacy_predictions_and_labels(
+                model=model, dataset=preprocessed_train
+            )
+            test_preds_labels = self._get_spacy_predictions_and_labels(
+                model=model, dataset=preprocessed_test
+            )
+
+            metrics = dict(train=self._compute_metrics(train_preds_labels),
+                           test=self._compute_metrics(test_preds_labels))
 
             self._log_metrics(metrics)
             return metrics
