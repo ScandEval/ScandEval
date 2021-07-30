@@ -7,25 +7,19 @@ import datasets.utils.logging as ds_logging
 import transformers.utils.logging as tf_logging
 from transformers import (AutoModelForTokenClassification,
                           AutoModelForSequenceClassification,
-                          AutoModelForQuestionAnswering,
                           TFAutoModelForTokenClassification,
                           TFAutoModelForSequenceClassification,
-                          TFAutoModelForQuestionAnswering,
                           FlaxAutoModelForTokenClassification,
-                          FlaxAutoModelForSequenceClassification,
-                          FlaxAutoModelForQuestionAnswering)
+                          FlaxAutoModelForSequenceClassification)
 
 
 MODEL_CLASSES = {
     'pytorch': {'token-classification': AutoModelForTokenClassification,
-                'text-classification': AutoModelForSequenceClassification,
-                'question-answering': AutoModelForQuestionAnswering},
+                'text-classification': AutoModelForSequenceClassification}
     'tensorflow': {'token-classification': TFAutoModelForTokenClassification,
-                   'text-classification': TFAutoModelForSequenceClassification,
-                   'question-answering': TFAutoModelForQuestionAnswering},
+                   'text-classification': TFAutoModelForSequenceClassification}
     'jax': {'token-classification': FlaxAutoModelForTokenClassification,
-            'text-classification': FlaxAutoModelForSequenceClassification,
-            'question-answering': FlaxAutoModelForQuestionAnswering}
+            'text-classification': FlaxAutoModelForSequenceClassification}
 }
 
 
