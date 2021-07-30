@@ -18,6 +18,7 @@ import spacy
 from tqdm.auto import tqdm
 from collections import defaultdict
 import copy
+import warnings
 
 from .utils import block_terminal_output, MODEL_CLASSES, is_module_installed
 
@@ -85,9 +86,11 @@ class Evaluator(ABC):
         key = f'{split}_{metric_name}'
         metric_values = [dct[key] for dct in metrics[split]]
         mean = np.mean(metric_values)
-        sample_std = np.std(metric_values, ddof=1)
-        std_err = sample_std / np.sqrt(len(metric_values))
-        return mean, 1.96 * std_err
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            sample_std = np.std(metric_values, ddof=1)
+            std_err = sample_std / np.sqrt(len(metric_values))
+            return mean, 1.96 * std_err
 
     def _load_model(self,
                     model_id: str,
@@ -215,7 +218,9 @@ class Evaluator(ABC):
         pass
 
     @abstractmethod
-    def _log_metrics(self, metrics: Dict[str, List[Dict[str, float]]]):
+    def _log_metrics(self,
+                     metrics: Dict[str, List[Dict[str, float]]],
+                     model_id: str):
         '''Log the metrics.
 
         Args:
@@ -223,6 +228,9 @@ class Evaluator(ABC):
                 The metrics that are to be logged. This is a dict with keys
                 'train' and 'test', with values being lists of dictionaries
                 full of metrics.
+            model_id (str):
+                The full HuggingFace Hub path to the pretrained transformer
+                model.
         '''
         pass
 
@@ -327,14 +335,18 @@ class Evaluator(ABC):
         # Load the dataset
         train, test = self._load_data()
 
-        # Set up progress bar
-        if progress_bar:
-            desc = 'Evaluating'
-            itr = tqdm(range(num_finetunings), desc=desc)
-        else:
-            itr = range(num_finetunings)
-
         if framework in ['pytorch', 'tensorflow', 'jax']:
+
+            # Set up progress bar
+            if task == 'fill-mask':
+                if progress_bar:
+                    desc = 'Finetuning and evaluating'
+                    itr = tqdm(range(num_finetunings), desc=desc)
+                else:
+                    itr = range(num_finetunings)
+            else:
+                itr = [0]
+
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
@@ -362,9 +374,7 @@ class Evaluator(ABC):
                 num_train_epochs=self.epochs,
                 warmup_steps=self.warmup_steps,
                 report_to='all',
-                save_total_limit=0,
-                log_level='error',
-                log_level_replica='error'
+                save_total_limit=0
             )
 
             metrics = defaultdict(list)
@@ -400,7 +410,7 @@ class Evaluator(ABC):
                                                 metric_key_prefix='test')
                 metrics['test'].append(test_metrics)
 
-            self._log_metrics(metrics)
+            self._log_metrics(metrics, model_id=model_id)
             return metrics
 
         elif framework == 'spacy':
@@ -412,18 +422,27 @@ class Evaluator(ABC):
                                                        framework=framework)
             preprocessed_test = self._preprocess_data(test,
                                                       framework=framework)
-
+            # Get the predictions
             train_preds_labels = self._get_spacy_predictions_and_labels(
-                model=model, dataset=preprocessed_train
+                model=model,
+                dataset=preprocessed_train,
+                progress_bar=progress_bar
             )
             test_preds_labels = self._get_spacy_predictions_and_labels(
-                model=model, dataset=preprocessed_test
+                model=model,
+                dataset=preprocessed_test,
+                progress_bar=progress_bar
             )
 
-            metrics = dict(train=self._compute_metrics(train_preds_labels),
-                           test=self._compute_metrics(test_preds_labels))
+            train_metrics = self._compute_metrics(train_preds_labels)
+            train_metrics = {f'train_{key}': val
+                             for key, val in train_metrics.items()}
+            test_metrics = self._compute_metrics(test_preds_labels)
+            test_metrics = {f'test_{key}': val
+                            for key, val in test_metrics.items()}
+            metrics = dict(train=[train_metrics], test=[test_metrics])
 
-            self._log_metrics(metrics)
+            self._log_metrics(metrics, model_id=model_id)
             return metrics
 
         else:

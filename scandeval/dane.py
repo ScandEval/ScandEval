@@ -5,7 +5,9 @@ from transformers import DataCollatorForTokenClassification
 from datasets import Dataset, load_metric
 from functools import partial
 import numpy as np
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Iterable
+from tqdm.auto import tqdm
+import warnings
 
 from .evaluator import Evaluator
 from .utils import doc_inherit
@@ -105,17 +107,23 @@ class DaneEvaluator(Evaluator):
         tokenized_inputs["labels"] = labels
         return tokenized_inputs
 
+    @staticmethod
+    def _collect_docs(examples: dict) -> str:
+        examples['doc'] = [' '.join(toks) for toks in examples['docs']]
+        return examples
+
     @doc_inherit
     def _preprocess_data(self,
                          dataset: Dataset,
                          framework: str,
                          **kwargs) -> Dataset:
         if framework in ['pytorch', 'tensorflow', 'jax']:
-            map_fn = partial(self._tokenize_and_align_labels, tokenizer=tokenizer)
-            tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=4)
+            map_fn = partial(self._tokenize_and_align_labels,
+                             tokenizer=kwargs['tokenizer'])
+            tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=8)
             return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
         elif framework == 'spacy':
-            return dataset
+            return dataset.map(self._collect_docs, batched=True, num_proc=8)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
@@ -144,41 +152,49 @@ class DaneEvaluator(Evaluator):
                          predictions_and_labels: tuple) -> Dict[str, float]:
         # Get the predictions from the model
         predictions, labels = predictions_and_labels
-        predictions = np.argmax(predictions, axis=-1)
 
-        # Remove ignored index (special tokens)
-        true_predictions = [
-            [self.id2label[p] for p, l in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
-        true_labels = [
-            [self.id2label[l] for _, l in zip(prediction, label) if l != -100]
-            for prediction, label in zip(predictions, labels)
-        ]
+        if isinstance(predictions, np.ndarray):
+            predictions = np.argmax(predictions, axis=-1)
 
-        results = self._metric.compute(predictions=true_predictions,
-                                       references=true_labels)
+            # Remove ignored index (special tokens)
+            predictions = [
+                [self.id2label[p] for p, l in zip(prediction, label)
+                                  if l != -100]
+                for prediction, label in zip(predictions, labels)
+            ]
+            labels = [
+                [self.id2label[l] for _, l in zip(prediction, label)
+                                  if l != -100]
+                for prediction, label in zip(predictions, labels)
+            ]
+
+        results = self._metric.compute(predictions=predictions,
+                                       references=labels)
         return dict(micro_f1=results["overall_f1"])
 
     @doc_inherit
-    def _log_metrics(self, metrics: Dict[str, List[Dict[str, float]]]):
+    def _log_metrics(self,
+                     metrics: Dict[str, List[Dict[str, float]]],
+                     model_id: str):
         kwargs = dict(metrics=metrics, metric_name='micro_f1')
         train_mean, train_std_err = self._get_stats(split='train', **kwargs)
         test_mean, test_std_err = self._get_stats(split='test', **kwargs)
 
-        print('Mean micro-average F1-scores on DaNE:')
-        print(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
-        print(f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
+        if not np.isnan(train_std_err):
+            print(f'Mean micro-average F1-scores on DaNE for {model_id}:')
+            print(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
+            print(f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
+        else:
+            print(f'Micro-average F1-scores on DaNE for {model_id}:')
+            print(f'  Train: {train_mean:.2f}')
+            print(f'  Test: {test_mean:.2f}')
 
     @staticmethod
-    def _extract_spacy_predictions(examples: dict, model) -> dict:
-        # Extract the tokens and join them to a document by including
-        # spaces
-        tokens = examples['docs']
-        doc = ' '.join(tokens)
+    def _extract_spacy_predictions(tokens_processed: tuple) -> dict:
+        tokens, processed = tokens_processed
 
         # Get the model's named entity predictions
-        ner_tags = {ent.text: ent.label_ for ent in model(doc).ents}
+        ner_tags = {ent.text: ent.label_ for ent in processed.ents}
 
         # Organise the predictions to make them comparable to the labels
         preds = list()
@@ -193,17 +209,24 @@ class DaneEvaluator(Evaluator):
             else:
                 preds.append('O')
 
-        examples['predictions'] = preds
-        return examples
+        return preds
 
     @doc_inherit
     def _get_spacy_predictions_and_labels(self,
                                           model,
-                                          dataset: Dataset) -> tuple:
-        map_fn = partial(self._extract_spacy_predictions, model=model)
-        dataset = dataset.map(map_fn, batched=False, num_proc=4)
+                                          dataset: Dataset,
+                                          progress_bar: bool) -> tuple:
+        # Initialise progress bar
+        if progress_bar:
+            itr = tqdm(dataset['doc'], desc='Evaluating')
+        else:
+            itr = dataset['doc']
 
-        predictions = [data_dict['predictions'] for data_dict in dataset]
-        labels = [data_dict['orig_labels'] for data_dict in dataset]
+        disable = ['tok2vec', 'tagger', 'parser',
+                   'attribute_ruler', 'lemmatizer']
+        processed = model.pipe(itr, disable=disable, batch_size=256)
 
-        return predictions, labels
+        map_fn = self._extract_spacy_predictions
+        predictions = map(map_fn, zip(dataset['docs'], processed))
+
+        return list(predictions), dataset['orig_labels']
