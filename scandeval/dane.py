@@ -5,9 +5,8 @@ from transformers import DataCollatorForTokenClassification
 from datasets import Dataset, load_metric
 from functools import partial
 import numpy as np
-from typing import Tuple, Dict, List, Iterable
+from typing import Tuple, Dict, List
 from tqdm.auto import tqdm
-import warnings
 
 from .evaluator import Evaluator
 from .utils import doc_inherit
@@ -45,8 +44,10 @@ class DaneEvaluator(Evaluator):
                  cache_dir: str = '~/.cache/huggingface',
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
-                 batch_size: int = 16):
+                 batch_size: int = 16,
+                 include_misc_tags: bool = True):
         self._metric = load_metric("seqeval")
+        self.include_misc_tags = include_misc_tags
         label2id = {'B-LOC': 0,
                     'I-LOC': 1,
                     'B-ORG': 2,
@@ -65,7 +66,10 @@ class DaneEvaluator(Evaluator):
                          warmup_steps=warmup_steps,
                          batch_size=batch_size)
 
-    def _tokenize_and_align_labels(self, examples: dict, tokenizer):
+    def _tokenize_and_align_labels(self,
+                                   examples: dict,
+                                   tokenizer,
+                                   label2id: dict):
         '''Tokenise all texts and align the labels with them.
 
         Args:
@@ -73,6 +77,8 @@ class DaneEvaluator(Evaluator):
                 The examples to be tokenised.
             tokenizer (HuggingFace tokenizer):
                 A pretrained tokenizer.
+            label2id (dict):
+                A dictionary that converts NER tags to IDs.
 
         Returns:
             dict:
@@ -84,8 +90,8 @@ class DaneEvaluator(Evaluator):
             # of words (with a label for each word)
             is_split_into_words=True,
         )
-        labels = []
-        for i, label in enumerate(examples['orig_labels']):
+        all_labels = []
+        for i, labels in enumerate(examples['orig_labels']):
             word_ids = tokenized_inputs.word_ids(batch_index=i)
             previous_word_idx = None
             label_ids = []
@@ -97,14 +103,28 @@ class DaneEvaluator(Evaluator):
                     label_ids.append(-100)
                 # We set the label for the first token of each word
                 elif word_idx != previous_word_idx:
-                    label_ids.append(self.label2id[label[word_idx]])
+                    label = labels[word_idx]
+                    if not self.include_misc_tags and label[-4:] == 'MISC':
+                        label = 'O'
+                    try:
+                        label_id = label2id[label]
+                    except KeyError:
+                        err_msg = (f'The label {label} was not found in '
+                                   f'the model\'s config.')
+                        if label[-4:] == 'MISC':
+                            err_msg += (' You need to initialise this '
+                                        'Evaluator with `include_misc_tags` '
+                                        'set to False.')
+                        raise IndexError(err_msg)
+                    label_ids.append(label_id)
+
                 # For the other tokens in a word, we set the label to -100
                 else:
                     label_ids.append(-100)
                 previous_word_idx = word_idx
 
-            labels.append(label_ids)
-        tokenized_inputs["labels"] = labels
+            all_labels.append(label_ids)
+        tokenized_inputs["labels"] = all_labels
         return tokenized_inputs
 
     @staticmethod
@@ -119,7 +139,8 @@ class DaneEvaluator(Evaluator):
                          **kwargs) -> Dataset:
         if framework in ['pytorch', 'tensorflow', 'jax']:
             map_fn = partial(self._tokenize_and_align_labels,
-                             tokenizer=kwargs['tokenizer'])
+                             tokenizer=kwargs['tokenizer'],
+                             label2id=kwargs['config'].label2id)
             tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=8)
             return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
         elif framework == 'spacy':
@@ -154,18 +175,18 @@ class DaneEvaluator(Evaluator):
         predictions, labels = predictions_and_labels
 
         if isinstance(predictions, np.ndarray):
-            predictions = np.argmax(predictions, axis=-1)
+            raw_predictions = np.argmax(predictions, axis=-1)
 
             # Remove ignored index (special tokens)
             predictions = [
                 [self.id2label[p] for p, l in zip(prediction, label)
                                   if l != -100]
-                for prediction, label in zip(predictions, labels)
+                for prediction, label in zip(raw_predictions, labels)
             ]
             labels = [
                 [self.id2label[l] for _, l in zip(prediction, label)
                                   if l != -100]
-                for prediction, label in zip(predictions, labels)
+                for prediction, label in zip(raw_predictions, labels)
             ]
 
         results = self._metric.compute(predictions=predictions,
