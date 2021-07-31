@@ -45,12 +45,12 @@ class Evaluator(ABC):
                  warmup_steps: int = 50,
                  batch_size: int = 16):
         self.task = task
-        self.num_labels = num_labels
         self.cache_dir = cache_dir
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.warmup_steps = warmup_steps
         self.batch_size = batch_size
+        self.num_labels = num_labels
         self.label2id = label2id
         if self.label2id is not None:
             self.id2label = {id: label for label, id in label2id.items()}
@@ -94,7 +94,8 @@ class Evaluator(ABC):
 
     def _load_model(self,
                     model_id: str,
-                    framework: Optional[str] = None) -> Dict[str, Any]:
+                    framework: Optional[str] = None,
+                    task: Optional[str] = None) -> Dict[str, Any]:
         '''Load the model.
 
         Args:
@@ -104,6 +105,9 @@ class Evaluator(ABC):
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
                 'pytorch', 'tensorflow', 'jax' and 'spacy'. If None then this
+                will be inferred from `model_id`. Defaults to None.
+            task (str or None, optional):
+                The task for which the model was trained on. If None then this
                 will be inferred from `model_id`. Defaults to None.
 
         Returns:
@@ -116,14 +120,23 @@ class Evaluator(ABC):
             RuntimeError: If the framework is not recognized.
         '''
         # Get the name of a framework supported for the model_id
-        if framework is None:
-            framework = self._fetch_model_metadata(model_id)['framework']
+        if framework is None or task is None:
+            model_metadata = self._fetch_model_metadata(model_id)
+            if framework is None:
+                framework = model_metadata['framework']
+            if task is None:
+                task = model_metadata['task']
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
-            config = AutoConfig.from_pretrained(model_id,
-                                                num_labels=self.num_labels,
-                                                label2id=self.label2id,
-                                                id2label=self.id2label)
+
+            if task == 'fill-mask':
+                params = dict(num_labels=self.num_labels,
+                              label2id=self.label2id,
+                              id2label=self.id2label)
+            else:
+                params = dict()
+
+            config = AutoConfig.from_pretrained(model_id, **params)
 
             model_cls = self._get_model_class(framework=framework)
             model = model_cls.from_pretrained(model_id,
@@ -295,8 +308,10 @@ class Evaluator(ABC):
         tasks = [a['tag-id'] for a in a_tags_with_class
                              if 'tag-white' in a['class']]
 
-        # Extract a single valid task on which the model has been trained
-        task = tasks[0]
+        # Extract a single valid task on which the model has been trained. If
+        # no task has been specified on the model card then assume that it is
+        # 'fill-mask'
+        task = tasks[0] if len(tasks) > 0 else 'fill-mask'
 
         return dict(framework=framework, task=task)
 
@@ -330,7 +345,7 @@ class Evaluator(ABC):
         model_metadata = self._fetch_model_metadata(model_id)
         framework = model_metadata['framework']
         task = model_metadata['task']
-        model_dict = self._load_model(model_id, framework=framework)
+        model_dict = self._load_model(model_id, **model_metadata)
 
         # Load the dataset
         train, test = self._load_data()
@@ -354,9 +369,11 @@ class Evaluator(ABC):
             # Preprocess the datasets
             preprocessed_train = self._preprocess_data(train,
                                                        framework=framework,
+                                                       config=model.config,
                                                        tokenizer=tokenizer)
             preprocessed_test = self._preprocess_data(test,
                                                       framework=framework,
+                                                      config=model.config,
                                                       tokenizer=tokenizer)
 
             # Load the data collator
