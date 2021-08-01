@@ -31,3 +31,5 @@
 - flair/upos-multi-fast
 - flair/upos-multi
 - NbAiLab/nb-bert-base-mnli
+- xlm-roberta-base
+- xlm-roberta-large
