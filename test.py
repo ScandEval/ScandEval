@@ -3,9 +3,17 @@
 from scandeval import DaneEvaluator
 
 
-def test_dane():
+def test_dane_download():
     dane_eval = DaneEvaluator()
-    model_ids = ['Maltehb/danish-bert-botxo',
+    train, test = dane_eval._load_data()
+    print(train)
+    print(test)
+
+
+def test_dane():
+    dane_eval = DaneEvaluator(include_misc_tags=False)
+    model_ids = ['Maltehb/-l-ctra-danish-electra-small-cased-ner-dane',
+                 #'Maltehb/-l-ctra-danish-electra-small-cased',
                  'chcaa/da_dacy_small_trf',
                  'chcaa/da_dacy_medium_trf',
                  'chcaa/da_dacy_large_trf']
