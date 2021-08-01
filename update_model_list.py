@@ -8,21 +8,20 @@ from typing import List
 import logging
 
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 
-LANGUAGES = ['da', 'se', 'no']
-TASKS = ['fill-mask', 'token-classification', 'text-classification']
-
-
-def get_model_ids(language: str, task: str):
+def get_model_ids(language: str, task: str) -> List[str]:
     '''Retrieves all the model IDs in a given language with a given task.
 
     Args:
-        TODO
+        language (str): The language code of the language to consider.
+        task (str): The task to consider.
 
     Returns:
-        TODO
+        list of str: The model IDs of the relevant models.
     '''
     url = 'https://huggingface.co/models'
     params = dict(filter=language, pipeline_tag=task)
@@ -43,8 +42,15 @@ def update_model_list(languages: List[str] = ['da', 'se', 'no'],
                                           'text-classification']):
     '''Updates the model list.
 
+    The model list will be saved as 'data/model_list.yaml'.
+
     Args
-        TODO
+        languages (list of str):
+            The language codes of the languages to include in the list.
+            Defaults to ['da', 'se', 'no'].
+        tasks (list of str):
+            The tasks to consider in the list. Defaults to ['fill-mask',
+            'token-classification', 'text-classification'].
     '''
     # Initialise path to the model list file
     yaml_path = Path('data') / 'model_list.yaml'
@@ -55,6 +61,9 @@ def update_model_list(languages: List[str] = ['da', 'se', 'no'],
         for task in tasks:
             model_ids = get_model_ids(language, task)
             new_model_list.extend(model_ids)
+
+    # Add XLM-RoBERTa models manually
+    new_model_list.extend(['xlm-roberta-base', 'xlm-roberta-large'])
 
     # Read current model list
     with yaml_path.open('r') as f:
@@ -79,8 +88,3 @@ def update_model_list(languages: List[str] = ['da', 'se', 'no'],
 
     with yaml_path.open('w') as f:
         yaml.safe_dump(new_model_list, f)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    update_model_list()
