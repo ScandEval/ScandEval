@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from datasets import Dataset
 from transformers.models.auto.auto_factory import _BaseAutoModelClass
+import transformers.utils.logging as tf_logging
 from transformers import (PreTrainedTokenizerBase,
                           AutoTokenizer,
                           AutoConfig,
@@ -19,6 +20,7 @@ from tqdm.auto import tqdm
 from collections import defaultdict
 import copy
 import warnings
+from functools import partial
 
 from .utils import block_terminal_output, MODEL_CLASSES, is_module_installed
 
@@ -379,6 +381,11 @@ class Evaluator(ABC):
             # Load the data collator
             data_collator = self._load_data_collator(tokenizer)
 
+            # If we are only evaluating then enable `transformers` verbosity to
+            # see a progress bar
+            if len(itr) == 1 and progress_bar:
+                tf_logging.set_verbosity_warning()
+
             # Initialise training arguments
             training_args = TrainingArguments(
                 output_dir='.',
@@ -402,12 +409,14 @@ class Evaluator(ABC):
                 model_copy = copy.deepcopy(model)
 
                 # Initialise Trainer
+                compute_metrics = partial(self._compute_metrics,
+                                          id2label=model.config.id2label)
                 trainer = Trainer(model=model_copy,
                                   args=training_args,
                                   train_dataset=preprocessed_train,
                                   tokenizer=tokenizer,
                                   data_collator=data_collator,
-                                  compute_metrics=self._compute_metrics)
+                                  compute_metrics=compute_metrics)
 
                 # Remove the callback which prints the metrics after each
                 # evaluation
@@ -426,6 +435,9 @@ class Evaluator(ABC):
                 test_metrics = trainer.evaluate(preprocessed_test,
                                                 metric_key_prefix='test')
                 metrics['test'].append(test_metrics)
+
+            # Disable `transformers` verbosity
+            tf_logging.set_verbosity_error()
 
             self._log_metrics(metrics, model_id=model_id)
             return metrics
