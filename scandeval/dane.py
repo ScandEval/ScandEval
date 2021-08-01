@@ -1,12 +1,12 @@
 '''NER evaluation of a language model on the DaNE dataset'''
 
-from danlp.datasets import DDT
-from transformers import DataCollatorForTokenClassification
 from datasets import Dataset, load_metric
 from functools import partial
 import numpy as np
 from typing import Tuple, Dict, List
 from tqdm.auto import tqdm
+import requests
+import json
 
 from .evaluator import Evaluator
 from .utils import doc_inherit
@@ -149,20 +149,21 @@ class DaneEvaluator(Evaluator):
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
 
-        # Load the DaNE data
-        train, _, test = DDT().load_as_simple_ner(predefined_splits=True)
+        base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                   'main/datasets/ddt/')
+        train_url = base_url + 'train.jsonl'
+        test_url = base_url + 'test.jsonl'
 
-        # Split docs and labels
-        train_docs, train_labels = train
-        test_docs, test_labels = test
+        def get_dataset_from_url(url: str) -> Dataset:
+            response = requests.get(url)
+            records = response.text.split('\n')
+            data = [json.loads(record) for record in records if record != '']
+            docs = [data_dict['tokens'] for data_dict in data]
+            labels = [data_dict['ner_tags'] for data_dict in data]
+            dataset = Dataset.from_dict(dict(docs=docs, orig_labels=labels))
+            return dataset
 
-        # Convert dataset to the HuggingFace format
-        train_dataset = Dataset.from_dict(dict(docs=train_docs,
-                                               orig_labels=train_labels))
-        test_dataset = Dataset.from_dict(dict(docs=test_docs,
-                                              orig_labels=test_labels))
-
-        return train_dataset, test_dataset
+        return get_dataset_from_url(train_url), get_dataset_from_url(test_url)
 
     @doc_inherit
     def _load_data_collator(self, tokenizer):
