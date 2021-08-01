@@ -154,7 +154,7 @@ class DaneEvaluator(Evaluator):
     def _load_data(self) -> Tuple[Dataset, Dataset]:
 
         base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                   'main/datasets/ddt/')
+                   'main/data/datasets/dane/')
         train_url = base_url + 'train.jsonl'
         test_url = base_url + 'test.jsonl'
 
