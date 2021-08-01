@@ -1,9 +1,10 @@
 '''NER evaluation of a language model on the DaNE dataset'''
 
+from transformers import DataCollatorForTokenClassification
 from datasets import Dataset, load_metric
 from functools import partial
 import numpy as np
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Optional
 from tqdm.auto import tqdm
 import requests
 import json
@@ -96,11 +97,13 @@ class DaneEvaluator(Evaluator):
             previous_word_idx = None
             label_ids = []
             for word_idx in word_ids:
+
                 # Special tokens have a word id that is None. We set the label
                 # to -100 so they are automatically ignored in the loss
                 # function
                 if word_idx is None:
                     label_ids.append(-100)
+
                 # We set the label for the first token of each word
                 elif word_idx != previous_word_idx:
                     label = labels[word_idx]
@@ -121,6 +124,7 @@ class DaneEvaluator(Evaluator):
                 # For the other tokens in a word, we set the label to -100
                 else:
                     label_ids.append(-100)
+
                 previous_word_idx = word_idx
 
             all_labels.append(label_ids)
@@ -171,24 +175,32 @@ class DaneEvaluator(Evaluator):
 
     @doc_inherit
     def _compute_metrics(self,
-                         predictions_and_labels: tuple) -> Dict[str, float]:
+                         predictions_and_labels: tuple,
+                         id2label: Optional[dict] = None) -> Dict[str, float]:
         # Get the predictions from the model
         predictions, labels = predictions_and_labels
 
-        if isinstance(predictions, np.ndarray):
+        if id2label is not None:
             raw_predictions = np.argmax(predictions, axis=-1)
 
             # Remove ignored index (special tokens)
             predictions = [
-                [self.id2label[p] for p, l in zip(prediction, label)
+                [id2label[p] for p, l in zip(prediction, label)
                                   if l != -100]
                 for prediction, label in zip(raw_predictions, labels)
             ]
             labels = [
-                [self.id2label[l] for _, l in zip(prediction, label)
+                [id2label[l] for _, l in zip(prediction, label)
                                   if l != -100]
                 for prediction, label in zip(raw_predictions, labels)
             ]
+
+            # Remove MISC labels
+            if not self.include_misc_tags:
+                for i, prediction_list in enumerate(predictions):
+                    for j, ner_tag in enumerate(prediction_list):
+                        if ner_tag[-4:] == 'MISC':
+                            predictions[i][j] = 'O'
 
         results = self._metric.compute(predictions=predictions,
                                        references=labels)
