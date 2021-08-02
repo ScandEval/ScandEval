@@ -7,9 +7,12 @@ import subprocess
 import datetime as dt
 
 
-def get_current_version(return_tuple: bool = False) \
-                        -> Union[str, Tuple[int, int, int]]:
-    '''Fetch the current version without import __init__.py.
+PACKAGE_NAME = 'scandeval'
+
+
+def get_current_version(return_tuple: bool = False
+                        ) -> Union[str, Tuple[int, int, int]]:
+    '''Fetch the current version without importing __init__.py.
 
     Args:
         return_tuple (bool, optional):
@@ -19,7 +22,7 @@ def get_current_version(return_tuple: bool = False) \
     Returns:
         str or tuple of three ints: The current version
     '''
-    init_file = Path('scandeval') / '__init__.py'
+    init_file = Path(PACKAGE_NAME) / '__init__.py'
     init = init_file.read_text()
     version_regex = r"(?<=__version__ = ')[0-9]+\.[0-9]+\.[0-9]+(?=')"
     version = re.search(version_regex, init)[0]
@@ -59,7 +62,7 @@ def set_new_version(major: int, minor: int, patch: int):
     changelog_path.write_text(new_changelog)
 
     # Get current __init__.py content
-    init_file = Path('scandeval') / '__init__.py'
+    init_file = Path(PACKAGE_NAME) / '__init__.py'
     init = init_file.read_text()
 
     # Replace __version__ in __init__.py with the new one
@@ -79,7 +82,7 @@ def set_new_version(major: int, minor: int, patch: int):
         f.write(new_sphinx_conf)
 
     # Add to version control
-    subprocess.run(['git', 'add', 'scandeval/__init__.py'])
+    subprocess.run(['git', 'add', str(Path(PACKAGE_NAME) / '__init__.py')])
     subprocess.run(['git', 'add', 'CHANGELOG.md'])
     subprocess.run(['git', 'add', 'docs/source/conf.py'])
     subprocess.run(['git', 'commit', '-m', f'feat: v{version}'])
