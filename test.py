@@ -4,9 +4,8 @@
 def test_benchmark():
     from scandeval import Benchmark
     from scandeval.utils import block_terminal_output; block_terminal_output()
-    benchmark = Benchmark()
-    #benchmark('chcaa/da_dacy_small_trf')
-    benchmark('Maltehb/-l-ctra-danish-electra-small-uncased')
+    benchmark = Benchmark(tasks=['token-classification'])
+    benchmark()
 
 def process_twitter_sent():
     from pathlib import Path
