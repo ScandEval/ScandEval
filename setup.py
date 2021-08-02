@@ -26,4 +26,5 @@ setup(name='scandeval',
                         'requests>=2.26.0',
                         'tqdm>=4.62.0',
                         'sentencepiece>=0.1.96',
-                        'bs4>=0.0.1'])
+                        'bs4>=0.0.1'],
+      entry_points=dict(console_scripts=['benchmark=scandeval.cli:benchmark']))
