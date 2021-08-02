@@ -8,9 +8,13 @@ from typing import Tuple, Dict, List, Optional
 from tqdm.auto import tqdm
 import requests
 import json
+import logging
 
 from .base import BaseBenchmark
 from .utils import doc_inherit
+
+
+logger = logging.getLogger(__name__)
 
 
 class DaneBenchmark(BaseBenchmark):
@@ -219,13 +223,13 @@ class DaneBenchmark(BaseBenchmark):
         test_mean, test_std_err = self._get_stats(split='test', **kwargs)
 
         if not np.isnan(train_std_err):
-            print(f'Mean micro-average F1-scores on DaNE for {model_id}:')
-            print(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
-            print(f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
+            logger.info(f'Mean micro-average F1-scores on DaNE for {model_id}:')
+            logger.info(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
+            logger.info(f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
         else:
-            print(f'Micro-average F1-scores on DaNE for {model_id}:')
-            print(f'  Train: {train_mean:.2f}')
-            print(f'  Test: {test_mean:.2f}')
+            logger.info(f'Micro-average F1-scores on DaNE for {model_id}:')
+            logger.info(f'  Train: {train_mean:.2f}')
+            logger.info(f'  Test: {test_mean:.2f}')
 
     @staticmethod
     def _extract_spacy_predictions(tokens_processed: tuple) -> dict:
