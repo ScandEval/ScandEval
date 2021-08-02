@@ -32,7 +32,7 @@ class Benchmark:
                  verbose: bool = False):
         self.languages = languages
         self.tasks = tasks
-        self._model_list = self._get_model_list()
+        self._model_lists = self._get_model_lists()
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose)
         self._benchmarks = {
@@ -71,20 +71,25 @@ class Benchmark:
                                         'items-center' in header['class']]
         return model_ids
 
-    def _get_model_list(self):
+    def _get_model_lists(self) -> Dict[str, List[str]]:
         '''Updates the model list'''
-        # Get new model list
-        new_model_list = list()
+
+        # Initialise model lists
+        model_lists = defaultdict(list)
         for language in self.languages:
             for task in self.tasks:
                 model_ids = self._get_model_ids(language, task)
-                new_model_list.extend(model_ids)
+                model_lists['all'].extend(model_ids)
+                model_lists[language].extend(model_ids)
+                model_lists[task].extend(model_ids)
 
-        # Add XLM-RoBERTa models manually
-        new_model_list.extend(['xlm-roberta-base', 'xlm-roberta-large'])
+        # Add multilingual models manually
+        multilingual_models = ['xlm-roberta-base', 'xlm-roberta-large']
+        model_lists['all'].extend(multilingual_models)
+        model_lists['multilingual'] = multilingual_models
 
         # Save model list
-        return new_model_list
+        return model_lists
 
     def __call__(self,
                  model_ids: Optional[Union[List[str], str]] = None,
@@ -110,7 +115,7 @@ class Benchmark:
                 having the model IDs as keys.
         '''
         if model_ids is None:
-            model_ids = self._get_model_list()
+            model_ids = self.model_lists['all']
         elif isinstance(model_ids, str):
             model_ids = [model_ids]
 
