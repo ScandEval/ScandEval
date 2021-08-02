@@ -5,7 +5,9 @@ from .utils import block_terminal_output; block_terminal_output()
 
 # Set up logging
 import logging
-format = '%(asctime)s [%(levelname)s] <%(name)s> %(message)s'
+from termcolor import colored
+format = colored('%(asctime)s [%(levelname)s] <%(name)s>\n', 'green') + \
+         colored('    %(message)s', 'yellow')
 logging.basicConfig(level=logging.INFO, format=format)
 
 # Disable parallelisation when tokenizing, as that can lead to errors
