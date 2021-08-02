@@ -21,7 +21,7 @@ from collections import defaultdict
 import warnings
 from functools import partial
 
-from .utils import MODEL_CLASSES, is_module_installed
+from .utils import MODEL_CLASSES, is_module_installed, InvalidBenchmark
 
 
 class BaseBenchmark(ABC):
@@ -138,7 +138,11 @@ class BaseBenchmark(ABC):
             else:
                 params = dict()
 
-            config = AutoConfig.from_pretrained(model_id, **params)
+            try:
+                config = AutoConfig.from_pretrained(model_id, **params)
+            except OSError:
+                raise InvalidBenchmark(f'The model {model_id} could not be '
+                                       f'loaded from the HuggingFace hub.')
 
             model_cls = self._get_model_class(framework=framework)
             model = model_cls.from_pretrained(model_id,
