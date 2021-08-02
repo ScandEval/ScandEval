@@ -2,25 +2,16 @@
 
 import requests
 from bs4 import BeautifulSoup
-import yaml
-from pathlib import Path
 from typing import List, Optional, Union
 from collections import defaultdict
 import logging
-from scandeval.dane import DaneEvaluator
+from .dane import DaneBenchmark
 
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s [%(levelname)s] <%(name)s> %(message)s')
-logger = logging.getLogger(__name__)
-
-
-class Benchmarker:
+class Benchmark:
     '''Benchmarking all the Scandinavian language models.
 
     Args
-        path (str, optional):
-            The path to the model list. Defaults to 'data/model_list.yaml'.
         languages (list of str, optional):
             The language codes of the languages to include in the list.
             Defaults to ['da', 'sv', 'no'].
@@ -29,42 +20,29 @@ class Benchmarker:
             'token-classification', 'text-classification'].
     '''
     def __init__(self,
-                 path: str = 'data/model_list.yaml',
                  languages: List[str] = ['da', 'sv', 'no'],
                  tasks = ['fill-mask',
                           'token-classification',
-                          'text-classification']):
-        self.path = Path(path)
+                          'text-classification'],
+                 verbose: bool = False):
         self.languages = languages
         self.tasks = tasks
         self._model_list = self._get_model_list()
         self.benchmark_results = defaultdict(dict)
+        params = dict(verbose=verbose)
         self._evaluators = {
-            'dane': DaneEvaluator(),
-            'dane_no_misc': DaneEvaluator(include_misc_tags=False)
+            'dane': DaneBenchmark(**params),
+            'dane_no_misc': DaneBenchmark(include_misc_tags=False, **params)
         }
 
-    def _get_model_list(self) -> List[str]:
-        '''Get the current model list.
+        if verbose:
+            logging_level = logging.INFO
+        else:
+            logging_level = logging.WARNING
 
-        Returns:
-            list of str: The model list.
-        '''
-        with self.path.open('r') as f:
-            model_list = yaml.safe_load(f)
-        if model_list is None:
-            model_list = list()
-        return model_list
-
-    def _set_model_list(self, new_model_list: List[str]):
-        '''Update the model list.
-
-        Args:
-            list of str: New model list.
-        '''
-        self.model_list = new_model_list
-        with self.path.open('w') as f:
-            yaml.safe_dump(new_model_list, f)
+        format = '%(asctime)s [%(levelname)s] <%(name)s> %(message)s'
+        logging.basicConfig(level=logging_level, format=format)
+        self.logger = logging.getLogger(__name__)
 
     @staticmethod
     def _get_model_ids(language: str, task: str) -> List[str]:
@@ -89,7 +67,7 @@ class Benchmarker:
                                         'items-center' in header['class']]
         return model_ids
 
-    def _update_model_list(self):
+    def _get_model_list(self):
         '''Updates the model list'''
         # Get new model list
         new_model_list = list()
@@ -101,27 +79,10 @@ class Benchmarker:
         # Add XLM-RoBERTa models manually
         new_model_list.extend(['xlm-roberta-base', 'xlm-roberta-large'])
 
-        # Read current model list
-        old_model_list = self._get_model_list()
+        # Save model list
+        return new_model_list
 
-        # Log what models were added
-        models_added = [model for model in new_model_list
-                              if model not in old_model_list]
-        if len(models_added) > 0:
-            logger.info(f'Added the following new models: {models_added}')
-
-        # Log what models were removed
-        models_removed = [model for model in old_model_list
-                                if model not in new_model_list]
-        if len(models_removed) > 0:
-            logger.info(f'Removed the following models: {models_removed}')
-
-        if len(models_added) == 0 and len(models_removed) == 0:
-            logger.info('No changes in model list.')
-
-        self._set_model_list(new_model_list)
-
-    def benchmark(self, model_ids: Optional[Union[List[str], str]] = None):
+    def __call__(self, model_ids: Optional[Union[List[str], str]] = None):
         '''Benchmarks all models in the model list.
 
         Args:
@@ -130,10 +91,8 @@ class Benchmarker:
         Returns:
             TODO
         '''
-
         if model_ids is None:
-            self._update_model_list()
-            model_ids = self.model_list
+            model_ids = self._get_model_list()
         elif isinstance(model_ids, str):
             model_ids = [model_ids]
 
@@ -143,8 +102,3 @@ class Benchmarker:
                 self.benchmark_results[name][model_id] = results
 
         return self.benchmark_results
-
-
-if __name__ == '__main__':
-    benchmarker = Benchmarker()
-    print(benchmarker.benchmark())
