@@ -25,9 +25,6 @@ from functools import partial
 from .utils import block_terminal_output, MODEL_CLASSES, is_module_installed
 
 
-block_terminal_output()
-
-
 class Evaluator(ABC):
     '''Abstract base class for evaluating models.
 
@@ -45,7 +42,8 @@ class Evaluator(ABC):
                  learning_rate: float = 2e-5,
                  epochs: int = 5,
                  warmup_steps: int = 50,
-                 batch_size: int = 16):
+                 batch_size: int = 16,
+                 verbose: bool = False):
         self.task = task
         self.cache_dir = cache_dir
         self.learning_rate = learning_rate
@@ -54,10 +52,13 @@ class Evaluator(ABC):
         self.batch_size = batch_size
         self.num_labels = num_labels
         self.label2id = label2id
+        self.verbose = verbose
         if self.label2id is not None:
             self.id2label = {id: label for label, id in label2id.items()}
         else:
             self.id2label = None
+        if not verbose:
+            block_terminal_output()
 
     def _get_model_class(self, framework: str) -> _BaseAutoModelClass:
         return MODEL_CLASSES[framework][self.task]
