@@ -400,6 +400,9 @@ class BaseBenchmark(ABC):
                 warmup_steps=self.warmup_steps
             )
 
+            # Disable `transformers` verbosity again
+            tf_logging.set_verbosity_error()
+
             metrics = defaultdict(list)
             for _ in itr:
 
@@ -423,9 +426,6 @@ class BaseBenchmark(ABC):
                 # Finetune the model
                 if task == 'fill-mask':
                     trainer.train()
-
-                # Disable `transformers` verbosity
-                tf_logging.set_verbosity_error()
 
                 # Log training metrics and save the state
                 train_metrics = trainer.evaluate(preprocessed_train,
