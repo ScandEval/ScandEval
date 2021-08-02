@@ -18,7 +18,6 @@ import subprocess
 import spacy
 from tqdm.auto import tqdm
 from collections import defaultdict
-import copy
 import warnings
 from functools import partial
 
@@ -404,14 +403,13 @@ class BaseBenchmark(ABC):
             metrics = defaultdict(list)
             for _ in itr:
 
-                # Make a copy of the original model, so that we do not continue
-                # training the same one
-                model_copy = copy.deepcopy(model)
+                # Reinitialise a new model
+                model = self._load_model(model_id, **model_metadata)['model']
 
                 # Initialise Trainer
                 compute_metrics = partial(self._compute_metrics,
                                           id2label=model.config.id2label)
-                trainer = Trainer(model=model_copy,
+                trainer = Trainer(model=model,
                                   args=training_args,
                                   train_dataset=preprocessed_train,
                                   tokenizer=tokenizer,
@@ -422,8 +420,8 @@ class BaseBenchmark(ABC):
                 # evaluation
                 trainer.remove_callback(PrinterCallback)
 
+                # Finetune the model
                 if task == 'fill-mask':
-                    # Finetune the model
                     trainer.train()
 
                 # Disable `transformers` verbosity
