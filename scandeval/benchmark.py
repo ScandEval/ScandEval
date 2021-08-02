@@ -83,7 +83,9 @@ class Benchmark:
         # Save model list
         return new_model_list
 
-    def __call__(self, model_ids: Optional[Union[List[str], str]] = None):
+    def __call__(self,
+                 model_ids: Optional[Union[List[str], str]] = None,
+                 num_finetunings: int = 10):
         '''Benchmarks all models in the model list.
 
         Args:
@@ -100,7 +102,7 @@ class Benchmark:
         for name, evaluator in self._evaluators.items():
             for model_id in model_ids:
                 self.logger.info(f'Evaluating {model_id} on {name}:')
-                results = evaluator(model_id)
+                results = evaluator(model_id, num_finetunings=num_finetunings)
                 self.benchmark_results[name][model_id] = results
 
         return self.benchmark_results
