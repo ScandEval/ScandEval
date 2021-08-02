@@ -38,14 +38,14 @@ class DaneBenchmark(BaseBenchmark):
             False.
 
     Attributes:
-        cache_dir (str): Directory where models are cached
-        learning_rate (float): Learning rate used while finetuning
-        warmup_steps (int): Number of steps used to warm up the learning rate
-        batch_size (int): The batch size used while finetuning
-        epochs (int): The number of epochs to finetune
-        num_labels (int): The number of NER labels in the dataset
-        label2id (dict): Conversion dict from NER labels to their indices
-        id2label (dict): Conversion dict from NER label indices to the labels
+        cache_dir (str): Directory where models are cached.
+        learning_rate (float): Learning rate used while finetuning.
+        warmup_steps (int): Number of steps used to warm up the learning rate.
+        batch_size (int): The batch size used while finetuning.
+        epochs (int): The number of epochs to finetune.
+        num_labels (int): The number of NER labels in the dataset.
+        label2id (dict): Conversion dict from NER labels to their indices.
+        id2label (dict): Conversion dict from NER label indices to the labels.
     '''
     def __init__(self,
                  cache_dir: str = '.benchmark_models',

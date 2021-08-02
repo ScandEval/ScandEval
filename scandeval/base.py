@@ -28,10 +28,43 @@ class BaseBenchmark(ABC):
     '''Abstract base class for evaluating models.
 
     Args:
-        TODO
+        task (str):
+            The type of task to be benchmarked.
+        num_labels (int or None, optional):
+            The number of labels in the dataset. Defaults to None.
+        label2id (dict or None, optional):
+            A dictionary that converts labels to their indices. This will only
+            be used if the pretrained model does not already have one. Defaults
+            to None.
+        cache_dir (str, optional):
+            Where the downloaded models will be stored. Defaults to
+            '.benchmark_models'.
+        learning_rate (float, optional):
+            What learning rate to use when finetuning the models. Defaults to
+            2e-5.
+        epochs (int, optional):
+            The number of epochs to finetune for. Defaults to 5.
+        warmup_steps (int, optional):
+            The number of training steps in which the learning rate will be
+            warmed up, meaning starting from nearly 0 and progressing up to
+            `learning_rate` after `warmup_steps` many steps. Defaults to 50.
+        batch_size (int, optional):
+            The batch size used while finetuning. Defaults to 16.
+        verbose (bool, optional):
+            Whether to print additional output during evaluation. Defaults to
+            False.
 
     Parameters:
-        TODO
+        task (str): The type of task to be benchmarked.
+        num_labels (int or None): The number of labels in the dataset.
+        label2id (dict or None): A dictionary converting labels to indices.
+        id2label (dict or None): A dictionary converting indices to labels.
+        cache_dir (str): Directory where models are cached.
+        learning_rate (float): Learning rate used while finetuning.
+        epochs (int): The number of epochs to finetune for.
+        warmup_steps (int): Number of steps used to warm up the learning rate.
+        batch_size (int): The batch size used while finetuning.
+        verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
                  task: str,

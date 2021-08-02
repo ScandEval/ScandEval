@@ -2,7 +2,7 @@
 
 import requests
 from bs4 import BeautifulSoup
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 from collections import defaultdict
 import logging
 
@@ -36,8 +36,9 @@ class Benchmark:
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose)
         self._benchmarks = {
-            'dane': DaneBenchmark(**params),
-            'dane_no_misc': DaneBenchmark(include_misc_tags=False, **params)
+            'DaNE with MISC': DaneBenchmark(**params),
+            'DaNE without MISC': DaneBenchmark(include_misc_tags=False,
+                                               **params)
         }
 
         if verbose:
@@ -88,14 +89,25 @@ class Benchmark:
     def __call__(self,
                  model_ids: Optional[Union[List[str], str]] = None,
                  datasets: Optional[Union[List[str], str]] = None,
-                 num_finetunings: int = 10):
+                 num_finetunings: int = 10
+                 ) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks all models in the model list.
 
         Args:
-            TODO
+            model_ids (str, list of str or None, optional):
+                The model ID(s) of the models to benchmark. If None then all
+                relevant model IDs will be benchmarked. Defaults to None.
+            datasets (str, list of str or None, optional):
+                The datasets to benchmark on . If None then all datasets will
+                be benchmarked. Defaults to None.
+            num_finetunings (int, optional):
+                The number of times to finetune each model on. Defaults to 10.
 
         Returns:
-            TODO
+            dict:
+                A nested dictionary of the benchmark results. The keys are the
+                names of the datasets, with values being new dictionaries
+                having the model IDs as keys.
         '''
         if model_ids is None:
             model_ids = self._get_model_list()
