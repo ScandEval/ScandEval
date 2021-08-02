@@ -1,3 +1,5 @@
+__version__ = '0.0.0'  # noqa
+
 from .utils import block_terminal_output; block_terminal_output()
 
 import logging
