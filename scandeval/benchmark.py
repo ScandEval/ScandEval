@@ -7,6 +7,10 @@ from collections import defaultdict
 import logging
 
 from .dane import DaneBenchmark
+from .utils import InvalidBenchmark
+
+
+logger = logging.getLogger(__name__)
 
 
 class Benchmark:
@@ -22,9 +26,9 @@ class Benchmark:
     '''
     def __init__(self,
                  languages: List[str] = ['da', 'sv', 'no'],
-                 tasks = ['fill-mask',
-                          'token-classification',
-                          'text-classification'],
+                 tasks: List[str] = ['fill-mask',
+                                     'token-classification',
+                                     'text-classification'],
                  verbose: bool = False):
         self.languages = languages
         self.tasks = tasks
@@ -41,8 +45,7 @@ class Benchmark:
         else:
             logging_level = logging.INFO
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging_level)
+        logger.setLevel(logging_level)
 
     @staticmethod
     def _get_model_ids(language: str, task: str) -> List[str]:
@@ -106,8 +109,14 @@ class Benchmark:
 
         for name, benchmark in benchmarks.items():
             for model_id in model_ids:
-                self.logger.info(f'Evaluating {model_id} on {name}:')
-                results = benchmark(model_id, num_finetunings=num_finetunings)
-                self.benchmark_results[name][model_id] = results
+                logger.info(f'Evaluating {model_id} on {name}:')
+                try:
+                    results = benchmark(model_id,
+                                        num_finetunings=num_finetunings)
+                    self.benchmark_results[name][model_id] = results
+                    logger.info(f'Results:\n{results}')
+                except InvalidBenchmark:
+                    logger.info(f'{model_id} cannot be benchmarked '
+                                f'on {name}. Skipping.')
 
         return self.benchmark_results

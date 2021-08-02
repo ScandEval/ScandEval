@@ -26,6 +26,13 @@ MODEL_CLASSES = {
 }
 
 
+class InvalidBenchmark(Exception):
+    def __init__(self, message: str = 'This model cannot be benchmarked '
+                                      'on the given dataset.'):
+        self.message = message
+        super().__init__(self.message)
+
+
 def is_module_installed(module: str) -> bool:
     '''Check if a module is installed.
 

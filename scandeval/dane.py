@@ -11,7 +11,7 @@ import json
 import logging
 
 from .base import BaseBenchmark
-from .utils import doc_inherit
+from .utils import doc_inherit, InvalidBenchmark
 
 
 logger = logging.getLogger(__name__)
@@ -124,9 +124,9 @@ class DaneBenchmark(BaseBenchmark):
                                    f'the model\'s config.')
                         if label[-4:] == 'MISC':
                             err_msg += (' You need to initialise this '
-                                        'Evaluator with `include_misc_tags` '
+                                        'benchmark with `include_misc_tags` '
                                         'set to False.')
-                        raise IndexError(err_msg)
+                        raise InvalidBenchmark(err_msg)
                     label_ids.append(label_id)
 
                 # For the other tokens in a word, we set the label to -100
@@ -153,7 +153,7 @@ class DaneBenchmark(BaseBenchmark):
             map_fn = partial(self._tokenize_and_align_labels,
                              tokenizer=kwargs['tokenizer'],
                              label2id=kwargs['config'].label2id)
-            tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=8)
+            tokenised_dataset = dataset.map(map_fn, batched=True)
             return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
         elif framework == 'spacy':
             return dataset.map(self._collect_docs, batched=True)
