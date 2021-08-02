@@ -22,7 +22,7 @@ import copy
 import warnings
 from functools import partial
 
-from .utils import block_terminal_output, MODEL_CLASSES, is_module_installed
+from .utils import MODEL_CLASSES, is_module_installed
 
 
 class BaseBenchmark(ABC):
@@ -57,8 +57,8 @@ class BaseBenchmark(ABC):
             self.id2label = {id: label for label, id in label2id.items()}
         else:
             self.id2label = None
-        if not verbose:
-            block_terminal_output()
+        if verbose:
+            tf_logging.set_verbosity_warning()
 
     def _get_model_class(self, framework: str) -> _BaseAutoModelClass:
         return MODEL_CLASSES[framework][self.task]
@@ -382,9 +382,8 @@ class BaseBenchmark(ABC):
             # Load the data collator
             data_collator = self._load_data_collator(tokenizer)
 
-            # If we are only evaluating then enable `transformers` verbosity to
-            # see a progress bar
-            if len(itr) == 1 and progress_bar:
+            # Enable `transformers` verbosity to see a training progress bar
+            if progress_bar:
                 tf_logging.set_verbosity_warning()
 
             # Initialise training arguments
