@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Callable
 import warnings
 import datasets.utils.logging as ds_logging
+import logging
 import pkg_resources
 import re
 import transformers.utils.logging as tf_logging
@@ -54,6 +55,7 @@ def block_terminal_output():
                                      'a vector.'))
     warnings.filterwarnings('ignore', module='seqeval*')
 
+    logging.getLogger('filelock').setLevel(logging.ERROR)
 
     # Disable the tokenizer progress bars
     ds_logging.get_verbosity = lambda: ds_logging.NOTSET
