@@ -46,14 +46,14 @@ def block_terminal_output():
     '''Blocks libraries from writing output to the terminal'''
 
     # Ignore miscellaneous warnings
-    warnings.filterwarnings(
-        'ignore',
-        module='torch.nn.parallel*',
-        message=('Was asked to gather along dimension 0, but all input '
-                 'tensors were scalars; will instead unsqueeze and return '
-                 'a vector.')
-    )
+    warnings.filterwarnings('ignore',
+                            module='torch.nn.parallel*',
+                            message=('Was asked to gather along dimension 0, '
+                                     'but all input tensors were scalars; '
+                                     'will instead unsqueeze and return '
+                                     'a vector.'))
     warnings.filterwarnings('ignore', module='seqeval*')
+
 
     # Disable the tokenizer progress bars
     ds_logging.get_verbosity = lambda: ds_logging.NOTSET
