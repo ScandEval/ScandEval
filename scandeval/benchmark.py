@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from typing import List, Optional, Union
 from collections import defaultdict
 import logging
+
 from .dane import DaneBenchmark
 
 
@@ -36,9 +37,9 @@ class Benchmark:
         }
 
         if verbose:
-            logging_level = logging.INFO
+            logging_level = logging.DEBUG
         else:
-            logging_level = logging.WARNING
+            logging_level = logging.INFO
 
         format = '%(asctime)s [%(levelname)s] <%(name)s> %(message)s'
         logging.basicConfig(level=logging_level, format=format)
@@ -98,6 +99,7 @@ class Benchmark:
 
         for name, evaluator in self._evaluators.items():
             for model_id in model_ids:
+                self.logger.info(f'Evaluating {model_id} on {name}:')
                 results = evaluator(model_id)
                 self.benchmark_results[name][model_id] = results
 
