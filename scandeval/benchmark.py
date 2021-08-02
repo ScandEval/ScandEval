@@ -31,7 +31,7 @@ class Benchmark:
         self._model_list = self._get_model_list()
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose)
-        self._evaluators = {
+        self._benchmarks = {
             'dane': DaneBenchmark(**params),
             'dane_no_misc': DaneBenchmark(include_misc_tags=False, **params)
         }
@@ -41,9 +41,8 @@ class Benchmark:
         else:
             logging_level = logging.INFO
 
-        format = '%(asctime)s [%(levelname)s] <%(name)s> %(message)s'
-        logging.basicConfig(level=logging_level, format=format)
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging_level)
 
     @staticmethod
     def _get_model_ids(language: str, task: str) -> List[str]:
@@ -85,6 +84,7 @@ class Benchmark:
 
     def __call__(self,
                  model_ids: Optional[Union[List[str], str]] = None,
+                 datasets: Optional[Union[List[str], str]] = None,
                  num_finetunings: int = 10):
         '''Benchmarks all models in the model list.
 
@@ -99,10 +99,15 @@ class Benchmark:
         elif isinstance(model_ids, str):
             model_ids = [model_ids]
 
-        for name, evaluator in self._evaluators.items():
+        if datasets is None:
+            datasets = list(self._benchmarks.keys())
+
+        benchmarks = {d: self._benchmarks[d] for d in datasets}
+
+        for name, benchmark in benchmarks.items():
             for model_id in model_ids:
                 self.logger.info(f'Evaluating {model_id} on {name}:')
-                results = evaluator(model_id, num_finetunings=num_finetunings)
+                results = benchmark(model_id, num_finetunings=num_finetunings)
                 self.benchmark_results[name][model_id] = results
 
         return self.benchmark_results
