@@ -1,7 +1,9 @@
 absl-py==0.13.0
+alabaster==0.7.12
 astroid==2.6.5
 astunparse==1.6.3
 attrs==21.2.0
+Babel==2.9.1
 beautifulsoup4==4.9.3
 blis==0.7.4
 bs4==0.0.1
@@ -13,9 +15,13 @@ chex==0.0.8
 click==7.1.2
 cycler==0.10.0
 cymem==2.0.5
+da-dacy-large-trf @ https://huggingface.co/chcaa/da_dacy_large_trf/resolve/main/da_dacy_large_trf-any-py3-none-any.whl
+da-dacy-medium-trf @ https://huggingface.co/chcaa/da_dacy_medium_trf/resolve/main/da_dacy_medium_trf-any-py3-none-any.whl
+da-dacy-small-trf @ https://huggingface.co/chcaa/da_dacy_small_trf/resolve/main/da_dacy_small_trf-any-py3-none-any.whl
 datasets==1.11.0
 dill==0.3.4
 dm-tree==0.1.6
+docutils==0.16
 filelock==3.0.12
 flake8==3.9.2
 flatbuffers==1.12
@@ -29,6 +35,7 @@ grpcio==1.34.1
 h5py==3.1.0
 huggingface-hub==0.0.8
 idna==3.2
+imagesize==1.2.0
 iniconfig==1.1.1
 isort==5.9.3
 jax==0.2.18
@@ -66,6 +73,7 @@ pyasn1-modules==0.2.8
 pycodestyle==2.7.0
 pydantic==1.8.2
 pyflakes==2.3.1
+Pygments==2.9.0
 pylint==2.9.6
 pyparsing==2.4.7
 pytest==6.2.4
@@ -78,17 +86,27 @@ requests==2.26.0
 requests-oauthlib==1.3.0
 rsa==4.7.2
 sacremoses==0.0.45
+-e git+ssh://git@github.com/saattrupdan/ScandEval.git@61a96a0928cee3783e5cf6aed4fc679d3d9154ba#egg=scandeval
 scikit-learn==0.24.2
 scipy==1.7.1
 sentencepiece==0.1.96
 seqeval==1.2.2
 six==1.15.0
 smart-open==5.1.0
+snowballstemmer==2.1.0
 soupsieve==2.2.1
 spacy==3.1.1
 spacy-alignments==0.8.3
 spacy-legacy==3.0.8
 spacy-transformers==1.0.3
+Sphinx==4.1.2
+sphinx-rtd-theme==0.5.2
+sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-devhelp==1.0.2
+sphinxcontrib-htmlhelp==2.0.0
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==1.0.3
+sphinxcontrib-serializinghtml==1.1.5
 srsly==2.4.1
 tensorboard==2.5.0
 tensorboard-data-server==0.6.1
