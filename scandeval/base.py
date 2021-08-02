@@ -149,7 +149,7 @@ class BaseBenchmark(ABC):
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
             # constructed.
-            prefix = 'RobertaModel' in type(model).__name__
+            prefix = 'Roberta' in type(model).__name__
             tokenizer = AutoTokenizer.from_pretrained(model_id,
                                                       use_fast=True,
                                                       add_prefix_space=prefix)
