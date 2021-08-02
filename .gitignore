@@ -135,3 +135,6 @@ dmypy.json
 
 # MacOS
 **/.DS_Store
+
+# Cache
+.benchmark_models
