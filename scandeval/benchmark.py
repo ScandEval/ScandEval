@@ -36,9 +36,9 @@ class Benchmark:
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose)
         self._benchmarks = {
-            'DaNE with MISC': DaneBenchmark(**params),
-            'DaNE without MISC': DaneBenchmark(include_misc_tags=False,
-                                               **params)
+            'DaNE with MISC tags': DaneBenchmark(**params),
+            'DaNE without MISC tags': DaneBenchmark(include_misc_tags=False,
+                                                    **params)
         }
 
         if verbose:
