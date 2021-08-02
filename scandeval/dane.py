@@ -29,6 +29,9 @@ class DaneBenchmark(BaseBenchmark):
             `learning_rate` after `warmup_steps` many steps. Defaults to 50.
         batch_size (int, optional):
             The batch size used while finetuning. Defaults to 16.
+        verbose (bool, optional):
+            Whether to print additional output during evaluation. Defaults to
+            False.
 
     Attributes:
         cache_dir (str): Directory where models are cached
@@ -45,7 +48,8 @@ class DaneBenchmark(BaseBenchmark):
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
                  batch_size: int = 16,
-                 include_misc_tags: bool = True):
+                 include_misc_tags: bool = True,
+                 verbose: bool = False):
         self._metric = load_metric("seqeval")
         self.include_misc_tags = include_misc_tags
         label2id = {'B-LOC': 0,
@@ -64,7 +68,8 @@ class DaneBenchmark(BaseBenchmark):
                          learning_rate=learning_rate,
                          epochs=5,
                          warmup_steps=warmup_steps,
-                         batch_size=batch_size)
+                         batch_size=batch_size,
+                         verbose=verbose)
 
     def _tokenize_and_align_labels(self,
                                    examples: dict,
