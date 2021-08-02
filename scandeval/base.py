@@ -146,19 +146,6 @@ class BaseBenchmark(ABC):
                                               config=config,
                                               cache_dir=self.cache_dir)
 
-            # Freeze pre-trained part
-            if framework == 'pytorch':
-                for child in list(model.children())[:-1]:
-                    for param in child.parameters():
-                        param.requires_grad = False
-            elif framework == 'tensorflow':
-                for layer in model.layers[:-1]:
-                    layer.trainable = False
-                model.compile()
-            elif framework == 'jax':
-                raise NotImplementedError('Freezing of Jax layers have not '
-                                          'been implemented yet.')
-
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
             # constructed.
@@ -395,7 +382,8 @@ class BaseBenchmark(ABC):
             # Load the data collator
             data_collator = self._load_data_collator(tokenizer)
 
-            # Enable `transformers` verbosity to see a training progress bar
+            # Enable `transformers` verbosity to see a training
+            # progress bar
             if progress_bar:
                 tf_logging.set_verbosity_warning()
 
@@ -434,9 +422,12 @@ class BaseBenchmark(ABC):
                 # evaluation
                 trainer.remove_callback(PrinterCallback)
 
-                # Finetune the model
                 if task == 'fill-mask':
+                    # Finetune the model
                     trainer.train()
+
+                # Disable `transformers` verbosity
+                tf_logging.set_verbosity_error()
 
                 # Log training metrics and save the state
                 train_metrics = trainer.evaluate(preprocessed_train,
@@ -447,9 +438,6 @@ class BaseBenchmark(ABC):
                 test_metrics = trainer.evaluate(preprocessed_test,
                                                 metric_key_prefix='test')
                 metrics['test'].append(test_metrics)
-
-            # Disable `transformers` verbosity
-            tf_logging.set_verbosity_error()
 
             self._log_metrics(metrics, model_id=model_id)
             return metrics
