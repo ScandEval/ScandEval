@@ -38,7 +38,7 @@ class BaseBenchmark(ABC):
                  task: str,
                  num_labels: Optional[int] = None,
                  label2id: Optional[Dict[str, int]] = None,
-                 cache_dir: str = '~/.cache/huggingface',
+                 cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
                  epochs: int = 5,
                  warmup_steps: int = 50,
@@ -392,13 +392,12 @@ class BaseBenchmark(ABC):
                 evaluation_strategy='no',
                 logging_strategy='no',
                 save_strategy='no',
+                report_to='none',
+                save_total_limit=0,
                 per_device_train_batch_size=self.batch_size,
-                gradient_accumulation_steps=1,
                 learning_rate=self.learning_rate,
                 num_train_epochs=self.epochs,
-                warmup_steps=self.warmup_steps,
-                report_to='all',
-                save_total_limit=0
+                warmup_steps=self.warmup_steps
             )
 
             metrics = defaultdict(list)
