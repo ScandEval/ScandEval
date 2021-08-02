@@ -146,6 +146,19 @@ class BaseBenchmark(ABC):
                                               config=config,
                                               cache_dir=self.cache_dir)
 
+            # Freeze pre-trained part
+            if framework == 'pytorch':
+                for child in list(model.children())[:-1]:
+                    for param in child.parameters():
+                        param.requires_grad = False
+            elif framework == 'tensorflow':
+                for layer in model.layers[:-1]:
+                    layer.trainable = False
+                model.compile()
+            elif framework == 'jax':
+                raise NotImplementedError('Freezing of Jax layers have not '
+                                          'been implemented yet.')
+
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
             # constructed.
