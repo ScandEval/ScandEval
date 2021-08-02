@@ -158,7 +158,7 @@ class DaneBenchmark(BaseBenchmark):
     def _load_data(self) -> Tuple[Dataset, Dataset]:
 
         base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                   'main/data/datasets/dane/')
+                   'main/datasets/dane/')
         train_url = base_url + 'train.jsonl'
         test_url = base_url + 'test.jsonl'
 
