@@ -1,1 +1,1 @@
-from .dane import DaneEvaluator
+from .dane import DaneBenchmark

@@ -9,18 +9,17 @@ from tqdm.auto import tqdm
 import requests
 import json
 
-from .evaluator import Evaluator
+from .evaluator import BaseBenchmark
 from .utils import doc_inherit
 
 
-class DaneEvaluator(Evaluator):
-    '''Evaluator of language models on the DaNE dataset.
+class DaneBenchmark(BaseBenchmark):
+    '''Benchmark of language models on the DaNE dataset.
 
     Args:
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
-            '~/.cache/huggingface', which is also the default HuggingFace cache
-            directory.
+            '.benchmark_models'.
         learning_rate (float, optional):
             What learning rate to use when finetuning the models. Defaults to
             2e-5.
@@ -42,7 +41,7 @@ class DaneEvaluator(Evaluator):
         id2label (dict): Conversion dict from NER label indices to the labels
     '''
     def __init__(self,
-                 cache_dir: str = '~/.cache/huggingface',
+                 cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
                  batch_size: int = 16,

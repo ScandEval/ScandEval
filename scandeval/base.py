@@ -25,7 +25,7 @@ from functools import partial
 from .utils import block_terminal_output, MODEL_CLASSES, is_module_installed
 
 
-class Evaluator(ABC):
+class BaseBenchmark(ABC):
     '''Abstract base class for evaluating models.
 
     Args:
