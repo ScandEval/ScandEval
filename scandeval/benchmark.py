@@ -121,7 +121,7 @@ class Benchmark:
 
         for name, benchmark in benchmarks.items():
             for model_id in model_ids:
-                logger.info(f'Evaluating {model_id} on {name}:')
+                logger.info(f'Benchmarking {model_id} on {name}:')
                 try:
                     results = benchmark(model_id,
                                         num_finetunings=num_finetunings)
