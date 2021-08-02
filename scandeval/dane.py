@@ -222,12 +222,18 @@ class DaneBenchmark(BaseBenchmark):
         train_mean, train_std_err = self._get_stats(split='train', **kwargs)
         test_mean, test_std_err = self._get_stats(split='test', **kwargs)
 
+        # Multiply scores by x100 to make them easier to read
+        train_mean *= 100
+        test_mean *= 100
+        train_std_err *= 100
+        test_std_err *= 100
+
         if not np.isnan(train_std_err):
             msg = (f'Mean micro-average F1-scores on DaNE for {model_id}:\n'
                    f'  Train: {train_mean:.2f} +- {train_std_err:.2f}\n'
                    f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
         else:
-            msg = (f'Mean micro-average F1-scores on DaNE for {model_id}:\n'
+            msg = (f'Micro-average F1-scores on DaNE for {model_id}:\n'
                    f'  Train: {train_mean:.2f}\n'
                    f'  Test: {test_mean:.2f}')
 
