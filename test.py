@@ -1,25 +1,12 @@
 '''Testing script'''
 
-from scandeval import DaneEvaluator
 
-
-def test_dane_download():
-    dane_eval = DaneEvaluator()
-    train, test = dane_eval._load_data()
-    print(train)
-    print(test)
-
-
-def test_dane():
-    dane_eval = DaneEvaluator(include_misc_tags=False)
-    model_ids = ['Maltehb/-l-ctra-danish-electra-small-cased-ner-dane',
-                 #'Maltehb/-l-ctra-danish-electra-small-cased',
-                 'chcaa/da_dacy_small_trf',
-                 'chcaa/da_dacy_medium_trf',
-                 'chcaa/da_dacy_large_trf']
-    for model_id in model_ids:
-        dane_eval(model_id)
-
+def test_benchmark():
+    from scandeval import Benchmark
+    from scandeval.utils import block_terminal_output; block_terminal_output()
+    benchmark = Benchmark()
+    #benchmark('chcaa/da_dacy_small_trf')
+    benchmark('Maltehb/-l-ctra-danish-electra-small-uncased')
 
 def process_twitter_sent():
     from pathlib import Path
@@ -312,4 +299,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    test_dane()
+    test_benchmark()
