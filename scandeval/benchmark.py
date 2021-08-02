@@ -116,7 +116,7 @@ class Benchmark:
                     self.benchmark_results[name][model_id] = results
                     logger.info(f'Results:\n{results}')
                 except InvalidBenchmark:
-                    logger.info(f'{model_id} cannot be benchmarked '
+                    logger.info(f'{model_id} could not be benchmarked '
                                 f'on {name}. Skipping.')
 
         return self.benchmark_results
