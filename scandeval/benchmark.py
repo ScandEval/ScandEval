@@ -126,9 +126,10 @@ class Benchmark:
                     results = benchmark(model_id,
                                         num_finetunings=num_finetunings)
                     self.benchmark_results[name][model_id] = results
-                    logger.info(f'Results:\n{results}')
-                except InvalidBenchmark:
+                    logger.debug(f'Results:\n{results}')
+                except InvalidBenchmark as e:
                     logger.info(f'{model_id} could not be benchmarked '
                                 f'on {name}. Skipping.')
+                    logger.debug(f'The error message was "{e}"')
 
         return self.benchmark_results
