@@ -115,7 +115,7 @@ class Benchmark:
                 having the model IDs as keys.
         '''
         if model_ids is None:
-            model_ids = self.model_lists['all']
+            model_ids = self._model_lists['all']
         elif isinstance(model_ids, str):
             model_ids = [model_ids]
 
