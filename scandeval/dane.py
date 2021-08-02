@@ -152,7 +152,7 @@ class DaneBenchmark(BaseBenchmark):
             tokenised_dataset = dataset.map(map_fn, batched=True, num_proc=8)
             return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
         elif framework == 'spacy':
-            return dataset.map(self._collect_docs, batched=True, num_proc=8)
+            return dataset.map(self._collect_docs, batched=True)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
