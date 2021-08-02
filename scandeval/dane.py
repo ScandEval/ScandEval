@@ -223,13 +223,15 @@ class DaneBenchmark(BaseBenchmark):
         test_mean, test_std_err = self._get_stats(split='test', **kwargs)
 
         if not np.isnan(train_std_err):
-            logger.info(f'Mean micro-average F1-scores on DaNE for {model_id}:')
-            logger.info(f'  Train: {train_mean:.2f} +- {train_std_err:.2f}')
-            logger.info(f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
+            msg = (f'Mean micro-average F1-scores on DaNE for {model_id}:\n'
+                   f'  Train: {train_mean:.2f} +- {train_std_err:.2f}\n'
+                   f'  Test: {test_mean:.2f} +- {test_std_err:.2f}')
         else:
-            logger.info(f'Micro-average F1-scores on DaNE for {model_id}:')
-            logger.info(f'  Train: {train_mean:.2f}')
-            logger.info(f'  Test: {test_mean:.2f}')
+            msg = (f'Mean micro-average F1-scores on DaNE for {model_id}:\n'
+                   f'  Train: {train_mean:.2f}\n'
+                   f'  Test: {test_mean:.2f}')
+
+        logger.info(msg)
 
     @staticmethod
     def _extract_spacy_predictions(tokens_processed: tuple) -> dict:
@@ -266,7 +268,7 @@ class DaneBenchmark(BaseBenchmark):
 
         disable = ['tok2vec', 'tagger', 'parser',
                    'attribute_ruler', 'lemmatizer']
-        processed = model.pipe(itr, disable=disable, batch_size=256)
+        processed = model.pipe(itr, disable=disable, batch_size=32)
 
         map_fn = self._extract_spacy_predictions
         predictions = map(map_fn, zip(dataset['docs'], processed))
