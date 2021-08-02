@@ -268,7 +268,7 @@ class DaneBenchmark(BaseBenchmark):
                                           progress_bar: bool) -> tuple:
         # Initialise progress bar
         if progress_bar:
-            itr = tqdm(dataset['doc'], desc='Evaluating')
+            itr = tqdm(dataset['doc'])
         else:
             itr = dataset['doc']
 

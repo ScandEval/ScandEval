@@ -394,8 +394,7 @@ class BaseBenchmark(ABC):
             # Set up progress bar
             if task == 'fill-mask':
                 if progress_bar:
-                    desc = 'Finetuning and evaluating'
-                    itr = tqdm(range(num_finetunings), desc=desc)
+                    itr = tqdm(range(num_finetunings))
                 else:
                     itr = range(num_finetunings)
             else:
