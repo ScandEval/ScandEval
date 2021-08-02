@@ -9,7 +9,7 @@ from tqdm.auto import tqdm
 import requests
 import json
 
-from .evaluator import BaseBenchmark
+from .base import BaseBenchmark
 from .utils import doc_inherit
 
 
