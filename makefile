@@ -2,7 +2,7 @@ include .env
 export $(shell sed 's/=.*//' .env)
 
 documentation:
-	sphinx-apidoc -o docs/source --force doubt && \
+	sphinx-apidoc -o docs/source --force scandeval && \
 	make -C docs html
 
 release-major:
