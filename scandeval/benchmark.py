@@ -35,11 +35,11 @@ class Benchmark:
         self._model_lists = self._get_model_lists()
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose)
-        self._benchmarks = {
-            'DaNE with MISC tags': DaneBenchmark(**params),
-            'DaNE without MISC tags': DaneBenchmark(include_misc_tags=False,
-                                                    **params)
-        }
+        self._benchmarks = [
+            ('dane', 'DaNE with MISC tags', DaneBenchmark(**params)),
+            ('dane-no-misc', 'DaNE without MISC tags',
+             DaneBenchmark(include_misc_tags=False, **params))
+        ]
 
         if verbose:
             logging_level = logging.DEBUG
@@ -103,7 +103,7 @@ class Benchmark:
                 The model ID(s) of the models to benchmark. If None then all
                 relevant model IDs will be benchmarked. Defaults to None.
             datasets (str, list of str or None, optional):
-                The datasets to benchmark on . If None then all datasets will
+                The datasets to benchmark on. If None then all datasets will
                 be benchmarked. Defaults to None.
             num_finetunings (int, optional):
                 The number of times to finetune each model on. Defaults to 10.
@@ -120,21 +120,22 @@ class Benchmark:
             model_ids = [model_ids]
 
         if datasets is None:
-            datasets = list(self._benchmarks.keys())
+            datasets = [dataset for dataset, _, _ in  self._benchmarks]
 
-        benchmarks = {d: self._benchmarks[d] for d in datasets}
+        benchmarks = [(dataset, alias, cls)
+                      for dataset, alias, cls in self._benchmarks
+                      if dataset in datasets]
 
-        for name, benchmark in benchmarks.items():
+        for dataset, alias, cls in benchmarks:
             for model_id in model_ids:
-                logger.info(f'Benchmarking {model_id} on {name}:')
+                logger.info(f'Benchmarking {model_id} on {alias}:')
                 try:
-                    results = benchmark(model_id,
-                                        num_finetunings=num_finetunings)
-                    self.benchmark_results[name][model_id] = results
+                    results = cls(model_id, num_finetunings=num_finetunings)
+                    self.benchmark_results[dataset][model_id] = results
                     logger.debug(f'Results:\n{results}')
                 except InvalidBenchmark as e:
                     logger.info(f'{model_id} could not be benchmarked '
-                                f'on {name}. Skipping.')
+                                f'on {alias}. Skipping.')
                     logger.debug(f'The error message was "{e}"')
 
         return self.benchmark_results

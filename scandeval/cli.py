@@ -18,6 +18,7 @@ from .benchmark import Benchmark
               default=None,
               show_default=True,
               multiple=True,
+              type=click.Choice(['dane', 'dane-no-misc']),
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',
@@ -27,11 +28,14 @@ from .benchmark import Benchmark
               help='The languages to benchmark. Only relevant if `model_id` '
                    'is not specified.')
 @click.option('--task', '-t',
-              default=['fill-mask',
+              default=('fill-mask',
                        'token-classification',
-                       'text-classification'],
+                       'text-classification'),
               show_default=True,
               multiple=True,
+              type=click.Choice(['fill-mask',
+                                 'token-classification',
+                                 'text-classification']),
               help='The tasks to benchmark. Only relevant if `model_id` '
                    'is not specified.')
 @click.option('--num_finetunings', '-n',
@@ -50,8 +54,17 @@ def benchmark(model_id: Tuple[str],
               task: Tuple[str],
               num_finetunings: int,
               verbose: bool = False):
-    '''Benchmark language models on Scandinavian language tasks.'''
-    benchmarker = Benchmark(languages=language, tasks=task, verbose=verbose)
-    benchmarker(model_ids=None if len(model_id) == 0 else model_id,
-                datasets=None if len(dataset) == 0 else dataset,
+    '''Benchmark language models on Scandinavian language tasks.
+
+    Args:
+        TODO
+    '''
+    # Initialise the benchmarker class
+    benchmarker = Benchmark(languages=list(language),
+                            tasks=list(task),
+                            verbose=verbose)
+
+    # Perform the benchmark evaluation
+    benchmarker(model_ids=None if len(model_id) == 0 else list(model_id),
+                datasets=None if len(dataset) == 0 else list(dataset),
                 num_finetunings=num_finetunings)
