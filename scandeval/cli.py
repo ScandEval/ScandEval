@@ -54,11 +54,7 @@ def benchmark(model_id: Tuple[str],
               task: Tuple[str],
               num_finetunings: int,
               verbose: bool = False):
-    '''Benchmark language models on Scandinavian language tasks.
-
-    Args:
-        TODO
-    '''
+    '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
     benchmarker = Benchmark(languages=list(language),
                             tasks=list(task),
