@@ -14,6 +14,13 @@ logging.basicConfig(level=logging.INFO, format=format)
 import os
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
-# Import classes
-from .dane import DaneBenchmark  # noqa
+# Import benchmark classes
 from .benchmark import Benchmark  # noqa
+from .angry_tweets import AngryTweetsBenchmark  # noqa
+from .dane import DaneBenchmark  # noqa
+from .dkhate import DkHateBenchmark  # noqa
+from .europarl1 import Europarl1Benchmark  # noqa
+from .europarl2 import Europarl2Benchmark  # noqa
+from .lcc1 import Lcc1Benchmark  # noqa
+from .lcc2 import Lcc2Benchmark  # noqa
+from .twitter_sent import TwitterSentBenchmark  # noqa
