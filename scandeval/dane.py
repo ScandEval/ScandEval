@@ -1,8 +1,6 @@
 '''NER evaluation of a language model on the DaNE dataset'''
 
-from transformers import DataCollatorForTokenClassification
-from datasets import Dataset, load_metric
-from functools import partial
+from datasets import Dataset
 import numpy as np
 from typing import Tuple, Dict, List, Optional
 from tqdm.auto import tqdm
@@ -10,14 +8,14 @@ import requests
 import json
 import logging
 
-from .base import BaseBenchmark
-from .utils import doc_inherit, InvalidBenchmark
+from .token_classification import TokenClassificationBenchmark
+from .utils import doc_inherit
 
 
 logger = logging.getLogger(__name__)
 
 
-class DaneBenchmark(BaseBenchmark):
+class DaneBenchmark(TokenClassificationBenchmark):
     '''Benchmark of language models on the DaNE dataset.
 
     Args:
@@ -54,7 +52,6 @@ class DaneBenchmark(BaseBenchmark):
                  batch_size: int = 16,
                  include_misc_tags: bool = True,
                  verbose: bool = False):
-        self._metric = load_metric("seqeval")
         self.include_misc_tags = include_misc_tags
         label2id = {'B-LOC': 0,
                     'I-LOC': 1,
@@ -65,98 +62,14 @@ class DaneBenchmark(BaseBenchmark):
                     'B-MISC': 6,
                     'I-MISC': 7,
                     'O': 8}
-        super().__init__(task='token-classification',
-                         num_labels=9,
+        super().__init__(num_labels=9,
+                         epochs=5,
                          label2id=label2id,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
-                         epochs=5,
                          warmup_steps=warmup_steps,
                          batch_size=batch_size,
                          verbose=verbose)
-
-    def _tokenize_and_align_labels(self,
-                                   examples: dict,
-                                   tokenizer,
-                                   label2id: dict):
-        '''Tokenise all texts and align the labels with them.
-
-        Args:
-            examples (dict):
-                The examples to be tokenised.
-            tokenizer (HuggingFace tokenizer):
-                A pretrained tokenizer.
-            label2id (dict):
-                A dictionary that converts NER tags to IDs.
-
-        Returns:
-            dict:
-                A dictionary containing the tokenized data as well as labels.
-        '''
-        tokenized_inputs = tokenizer(
-            examples['docs'],
-            # We use this argument because the texts in our dataset are lists
-            # of words (with a label for each word)
-            is_split_into_words=True,
-        )
-        all_labels = []
-        for i, labels in enumerate(examples['orig_labels']):
-            word_ids = tokenized_inputs.word_ids(batch_index=i)
-            previous_word_idx = None
-            label_ids = []
-            for word_idx in word_ids:
-
-                # Special tokens have a word id that is None. We set the label
-                # to -100 so they are automatically ignored in the loss
-                # function
-                if word_idx is None:
-                    label_ids.append(-100)
-
-                # We set the label for the first token of each word
-                elif word_idx != previous_word_idx:
-                    label = labels[word_idx]
-                    if not self.include_misc_tags and label[-4:] == 'MISC':
-                        label = 'O'
-                    try:
-                        label_id = label2id[label]
-                    except KeyError:
-                        err_msg = (f'The label {label} was not found in '
-                                   f'the model\'s config.')
-                        if label[-4:] == 'MISC':
-                            err_msg += (' You need to initialise this '
-                                        'benchmark with `include_misc_tags` '
-                                        'set to False.')
-                        raise InvalidBenchmark(err_msg)
-                    label_ids.append(label_id)
-
-                # For the other tokens in a word, we set the label to -100
-                else:
-                    label_ids.append(-100)
-
-                previous_word_idx = word_idx
-
-            all_labels.append(label_ids)
-        tokenized_inputs["labels"] = all_labels
-        return tokenized_inputs
-
-    @staticmethod
-    def _collect_docs(examples: dict) -> str:
-        examples['doc'] = [' '.join(toks) for toks in examples['docs']]
-        return examples
-
-    @doc_inherit
-    def _preprocess_data(self,
-                         dataset: Dataset,
-                         framework: str,
-                         **kwargs) -> Dataset:
-        if framework in ['pytorch', 'tensorflow', 'jax']:
-            map_fn = partial(self._tokenize_and_align_labels,
-                             tokenizer=kwargs['tokenizer'],
-                             label2id=kwargs['config'].label2id)
-            tokenised_dataset = dataset.map(map_fn, batched=True)
-            return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
-        elif framework == 'spacy':
-            return dataset.map(self._collect_docs, batched=True)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
@@ -178,10 +91,6 @@ class DaneBenchmark(BaseBenchmark):
         return get_dataset_from_url(train_url), get_dataset_from_url(test_url)
 
     @doc_inherit
-    def _load_data_collator(self, tokenizer):
-        return DataCollatorForTokenClassification(tokenizer)
-
-    @doc_inherit
     def _compute_metrics(self,
                          predictions_and_labels: tuple,
                          id2label: Optional[dict] = None) -> Dict[str, float]:
@@ -194,12 +103,12 @@ class DaneBenchmark(BaseBenchmark):
             # Remove ignored index (special tokens)
             predictions = [
                 [id2label[p] for p, l in zip(prediction, label)
-                                  if l != -100]
+                             if l != -100]
                 for prediction, label in zip(raw_predictions, labels)
             ]
             labels = [
                 [id2label[l] for _, l in zip(prediction, label)
-                                  if l != -100]
+                             if l != -100]
                 for prediction, label in zip(raw_predictions, labels)
             ]
 
