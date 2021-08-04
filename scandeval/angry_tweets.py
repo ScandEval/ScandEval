@@ -92,7 +92,8 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
         test_std_err *= 100
 
         if not np.isnan(train_std_err):
-            msg = (f'Mean macro-average F1-scores on AngryTweets for {model_id}:\n'
+            msg = (f'Mean macro-average F1-scores on AngryTweets for '
+                   f'{model_id}:\n'
                    f'  - Train: {train_mean:.2f} +- {train_std_err:.2f}\n'
                    f'  - Test: {test_mean:.2f} +- {test_std_err:.2f}')
         else:

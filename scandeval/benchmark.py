@@ -80,11 +80,12 @@ class Benchmark:
         html = requests.get(url, params=params).text
         soup = BeautifulSoup(html, 'html.parser')
         articles = soup.find_all('article')
-        model_ids = [header['title'] for article in articles
-                                     for header in article.find_all('header')
-                                     if header.get('class') is not None and
-                                        header.get('title') is not None and
-                                        'items-center' in header['class']]
+        model_ids = [header['title']
+                     for article in articles
+                     for header in article.find_all('header')
+                     if header.get('class') is not None and
+                     header.get('title') is not None and
+                     'items-center' in header['class']]
         return model_ids
 
     def _get_model_lists(self) -> Dict[str, List[str]]:
