@@ -142,3 +142,7 @@ dmypy.json
 # Raw datasets
 **/raw_train.jsonl
 **/raw_test.jsonl
+
+# Raw images
+gfx/satw.png
+**/*.xcf
