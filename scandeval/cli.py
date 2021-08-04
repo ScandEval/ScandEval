@@ -63,6 +63,9 @@ def benchmark(model_id: Tuple[str],
                             verbose=verbose)
 
     # Perform the benchmark evaluation
-    benchmarker(model_ids=None if len(model_id) == 0 else list(model_id),
-                datasets=None if len(dataset) == 0 else list(dataset),
-                num_finetunings=num_finetunings)
+    model_ids = None if len(model_id) == 0 else list(model_id)
+    datasets = None if len(dataset) == 0 else list(dataset)
+    benchmarker(model_ids=model_ids,
+                datasets=datasets,
+                num_finetunings=num_finetunings,
+                save_results=True)
