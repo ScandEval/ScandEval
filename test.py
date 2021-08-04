@@ -1,5 +1,9 @@
 '''Testing script'''
 
+def test_angry_tweets():
+    from scandeval.angry_tweets import AngryTweetsBenchmark
+    angry_tweets = AngryTweetsBenchmark()
+    angry_tweets('Maltehb/-l-ctra-danish-electra-small-cased')
 
 def test_benchmark():
     from scandeval import Benchmark
@@ -298,4 +302,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    test_benchmark()
+    test_angry_tweets()
