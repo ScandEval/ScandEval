@@ -105,17 +105,11 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 # We set the label for the first token of each word
                 elif word_idx != previous_word_idx:
                     label = labels[word_idx]
-                    if not self.include_misc_tags and label[-4:] == 'MISC':
-                        label = 'O'
                     try:
                         label_id = label2id[label]
                     except KeyError:
                         err_msg = (f'The label {label} was not found in '
                                    f'the model\'s config.')
-                        if label[-4:] == 'MISC':
-                            err_msg += (' You need to initialise this '
-                                        'benchmark with `include_misc_tags` '
-                                        'set to False.')
                         raise InvalidBenchmark(err_msg)
                     label_ids.append(label_id)
 
@@ -130,7 +124,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         return tokenized_inputs
 
     @staticmethod
-    def _collect_docs(examples: dict) -> str:
+    def _collect_docs(examples: dict) -> dict:
         examples['doc'] = [' '.join(toks) for toks in examples['docs']]
         return examples
 

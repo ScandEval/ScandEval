@@ -90,6 +90,23 @@ class DaneBenchmark(TokenClassificationBenchmark):
 
         return get_dataset_from_url(train_url), get_dataset_from_url(test_url)
 
+    @staticmethod
+    def _remove_misc_tags(examples: dict) -> dict:
+        examples['orig_labels'] = [['O' if label[-4:] == 'MISC' else label
+                                        for label in label_list]
+                                   for label_list in examples['orig_labels']]
+        return examples
+
+    @doc_inherit
+    def _preprocess_data(self,
+                         dataset: Dataset,
+                         framework: str,
+                         **kwargs) -> Dataset:
+        if not self.include_misc_tags:
+            dataset = dataset.map(self._remove_misc_tags, batched=True)
+        preprocessed = super()._preprocess_data(dataset, framework, **kwargs)
+        return preprocessed
+
     @doc_inherit
     def _compute_metrics(self,
                          predictions_and_labels: tuple,
