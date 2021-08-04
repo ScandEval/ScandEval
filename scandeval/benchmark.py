@@ -150,6 +150,6 @@ class Benchmark:
                 except InvalidBenchmark as e:
                     logger.info(f'{model_id} could not be benchmarked '
                                 f'on {alias}. Skipping.')
-                    logger.debug(f'The error message was "{e}"')
+                    logger.debug(f'The error message was {e}.')
 
         return self.benchmark_results
