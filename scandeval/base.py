@@ -15,7 +15,6 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 import subprocess
-import spacy
 from tqdm.auto import tqdm
 from collections import defaultdict
 import warnings
@@ -162,6 +161,23 @@ class BaseBenchmark(ABC):
             if task is None:
                 task = model_metadata['task']
 
+        # Ensure that the framework is installed
+        try:
+            if framework == 'pytorch':
+                import torch  # noqa
+            elif framework == 'tensorflow':
+                import tensorflow  # noqa
+            elif framework == 'jax':
+                import flax  # noqa
+            elif framework == 'spacy':
+                import spacy
+        except ModuleNotFoundError:
+            msg = (f'The model {model_id} is built using the {framework} '
+                   f'framework which is not installed. Try installing the '
+                   f'ScandEval package as `pip install '
+                   f'scandeval[{framework}]`.')
+            raise ModuleNotFoundError(msg)
+
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
             if task == 'fill-mask':
@@ -178,6 +194,7 @@ class BaseBenchmark(ABC):
                                        f'loaded from the HuggingFace hub.')
 
             model_cls = self._get_model_class(framework=framework)
+
             model = model_cls.from_pretrained(model_id,
                                               config=config,
                                               cache_dir=self.cache_dir)
@@ -193,6 +210,7 @@ class BaseBenchmark(ABC):
             return dict(model=model, tokenizer=tokenizer)
 
         elif framework == 'spacy':
+            import spacy
             local_model_id = model_id.split('/')[-1]
 
             # Download the model if it has not already been so
