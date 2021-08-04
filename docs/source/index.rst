@@ -10,6 +10,7 @@ Welcome to scandeval's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   scandeval
 
 
 Indices and tables
