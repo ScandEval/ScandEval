@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from typing import List, Optional, Union, Dict
 from collections import defaultdict
 import logging
+import json
+from pathlib import Path
 
 from .dane import DaneBenchmark
 from .angry_tweets import AngryTweetsBenchmark
@@ -108,7 +110,8 @@ class Benchmark:
     def __call__(self,
                  model_ids: Optional[Union[List[str], str]] = None,
                  datasets: Optional[Union[List[str], str]] = None,
-                 num_finetunings: int = 10
+                 num_finetunings: int = 10,
+                 save_results: bool = False
                  ) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks all models in the model list.
 
@@ -121,6 +124,9 @@ class Benchmark:
                 be benchmarked. Defaults to None.
             num_finetunings (int, optional):
                 The number of times to finetune each model on. Defaults to 10.
+            save_results (bool, optional):
+                Whether to save the benchmark results to
+                'scandeval_benchmark_results.json'. Defaults to False.
 
         Returns:
             dict:
@@ -151,5 +157,11 @@ class Benchmark:
                     logger.info(f'{model_id} could not be benchmarked '
                                 f'on {alias}. Skipping.')
                     logger.debug(f'The error message was {e}.')
+
+        # Save the benchmark results
+        if save_results:
+            output_path = Path.cwd() / 'scandeval_benchmark_results.json'
+            with output_path.open('w') as f:
+                json.dump(self.benchmark_results, f)
 
         return self.benchmark_results
