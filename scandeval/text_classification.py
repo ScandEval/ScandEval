@@ -80,7 +80,13 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
         return DataCollatorWithPadding(tokenizer, padding='longest')
 
     def create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
-        examples['label'] = [label2id[lbl] for lbl in examples['orig_label']]
+        try:
+            examples['label'] = [label2id[lbl]
+                                 for lbl in examples['orig_label']]
+        except KeyError:
+            raise InvalidBenchmark(f'One of the labels in the dataset, '
+                                   f'{examples["orig_label"]}, does not occur '
+                                   f'in the label2id dictionary {label2id}.')
         return examples
 
     def _preprocess_data(self,
