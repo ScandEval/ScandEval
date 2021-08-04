@@ -220,7 +220,11 @@ class BaseBenchmark(ABC):
         '''
         pass
 
-    def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
+    @abstractmethod
+    def _preprocess_data(self,
+                         dataset: Dataset,
+                         framework: str,
+                         **kwargs) -> Dataset:
         '''Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
@@ -233,7 +237,7 @@ class BaseBenchmark(ABC):
         Returns:
             HuggingFace dataset: The preprocessed dataset.
         '''
-        return dataset
+        pass
 
     @abstractmethod
     def _load_data_collator(self,
