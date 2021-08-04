@@ -95,7 +95,7 @@ Here `X_train` and `X_test` will be lists containing the relevant texts, and
 If you want to cite the framework then feel free to use this:
 ```bibtex
 @article{nielsen2021scandeval,
-  title={ScandEval},
+  title={ScandEval: Evaluation of language models on mono- or multilingual Scandinavian language tasks.},
   author={Nielsen, Dan Saattrup},
   journal={GitHub. Note: https://github.com/saattrupdan/ScandEval},
   year={2021}
@@ -103,4 +103,5 @@ If you want to cite the framework then feel free to use this:
 ```
 
 ### Remarks
-The image used in the logo has been created by the amazing [Scandinavia and the World](https://satwcomic.com/) team. Go check them out!
+The image used in the logo has been created by the amazing [Scandinavia and the
+World](https://satwcomic.com/) team. Go check them out!
