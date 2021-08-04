@@ -26,8 +26,8 @@ def load_angry_tweets() -> Tuple[list, list, list, list]:
             training and test split, respectively, and `y_train` and `y_test`
             contains the target vectors.
     '''
-    base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-               'main/datasets/angry_tweets/')
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/angry_tweets/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'tweet', 'label')
@@ -45,8 +45,8 @@ def load_dane() -> Tuple[list, list, list, list]:
             training and test split, respectively, and `y_train` and `y_test`
             contains the target vectors.
     '''
-    base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-               'main/datasets/dane/')
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/dane/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'tokens', 'ner_tags')
@@ -64,8 +64,8 @@ def load_dkhate() -> Tuple[list, list, list, list]:
             training and test split, respectively, and `y_train` and `y_test`
             contains the target vectors.
     '''
-    base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-               'main/datasets/dkhate/')
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/dkhate/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'tweet', 'label')
@@ -83,8 +83,8 @@ def load_europarl1() -> Tuple[list, list, list, list]:
             training and test split, respectively, and `y_train` and `y_test`
             contains the target vectors.
     '''
-    base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-               'main/datasets/europarl1/')
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/europarl1/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -102,8 +102,8 @@ def load_europarl2() -> Tuple[list, list, list, list]:
             training and test split, respectively, and `y_train` and `y_test`
             contains the target vectors.
     '''
-    base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-               'main/datasets/europarl2/')
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/europarl2/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
