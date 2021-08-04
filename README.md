@@ -17,7 +17,7 @@ $ pip install scandeval[all]
 
 This will install all the model frameworks currently supported (`pytorch`,
 `tensorflow`, `jax` and `spacy`). If you know you only need one of these, you
-can install the slimmer package like so:
+can install a slimmer package like so:
 ```shell
 $ pip install scandeval[pytorch]
 ```
@@ -68,7 +68,8 @@ with your favorite models and/or datasets:
 >>> benchmark('<model_id>')
 ```
 
-To benchmark on a specific dataset, you simply specify the second argument:
+To benchmark on a specific dataset, you simply specify the second argument,
+shown here with the `AngryTweets` dataset again:
 ```python
 >>> benchmark('<model_id>', 'angry-tweets')
 ```
