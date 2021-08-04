@@ -3,12 +3,11 @@
 from datasets import Dataset
 import numpy as np
 from typing import Tuple, Dict, List, Optional
-import requests
-import json
 import logging
 
 from .text_classification import TextClassificationBenchmark
 from .utils import doc_inherit, InvalidBenchmark
+from .datasets import load_angry_tweets
 
 
 logger = logging.getLogger(__name__)
@@ -62,22 +61,10 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-
-        base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                   'main/datasets/angry_tweets/')
-        train_url = base_url + 'train.jsonl'
-        test_url = base_url + 'test.jsonl'
-
-        def get_dataset_from_url(url: str) -> Dataset:
-            response = requests.get(url)
-            records = response.text.split('\n')
-            data = [json.loads(record) for record in records if record != '']
-            docs = [data_dict['tweet'] for data_dict in data]
-            labels = [data_dict['label'] for data_dict in data]
-            dataset = Dataset.from_dict(dict(doc=docs, orig_label=labels))
-            return dataset
-
-        return get_dataset_from_url(train_url), get_dataset_from_url(test_url)
+        X_train, X_test, y_train, y_test = load_angry_tweets()
+        train = Dataset.from_dict(dict(doc=X_train, orig_label=y_train))
+        test = Dataset.from_dict(dict(doc=X_test, orig_label=y_test))
+        return train, test
 
     @doc_inherit
     def _compute_metrics(self,

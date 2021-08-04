@@ -4,11 +4,10 @@ from datasets import Dataset
 import numpy as np
 from typing import Tuple, Dict, List, Optional
 from tqdm.auto import tqdm
-import requests
-import json
 import logging
 
 from .token_classification import TokenClassificationBenchmark
+from .datasets import load_dane
 from .utils import doc_inherit
 
 
@@ -73,22 +72,10 @@ class DaneBenchmark(TokenClassificationBenchmark):
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-
-        base_url= ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                   'main/datasets/dane/')
-        train_url = base_url + 'train.jsonl'
-        test_url = base_url + 'test.jsonl'
-
-        def get_dataset_from_url(url: str) -> Dataset:
-            response = requests.get(url)
-            records = response.text.split('\n')
-            data = [json.loads(record) for record in records if record != '']
-            docs = [data_dict['tokens'] for data_dict in data]
-            labels = [data_dict['ner_tags'] for data_dict in data]
-            dataset = Dataset.from_dict(dict(docs=docs, orig_labels=labels))
-            return dataset
-
-        return get_dataset_from_url(train_url), get_dataset_from_url(test_url)
+        X_train, X_test, y_train, y_test = load_dane()
+        train = Dataset.from_dict(dict(docs=X_train, orig_labels=y_train))
+        test = Dataset.from_dict(dict(docs=X_test, orig_labels=y_test))
+        return train, test
 
     @staticmethod
     def _remove_misc_tags(examples: dict) -> dict:
