@@ -27,6 +27,7 @@ from .benchmark import Benchmark
               default=['da' ,'sv', 'no'],
               show_default=True,
               multiple=True,
+              type=click.Choice(['da', 'sv', 'no']),
               help='The languages to benchmark. Only relevant if `model_id` '
                    'is not specified.')
 @click.option('--task', '-t',
