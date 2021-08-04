@@ -146,3 +146,6 @@ dmypy.json
 # Raw images
 gfx/satw.png
 **/*.xcf
+
+# Bat files
+**/*.bat
