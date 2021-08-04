@@ -16,7 +16,7 @@ $ pip install scandeval[all]
 ```
 
 This will install all the model frameworks currently supported (`pytorch`,
-`tensorflow`, `flax` and `spacy`). If you know you only need one of these, you
+`tensorflow`, `jax` and `spacy`). If you know you only need one of these, you
 can install the slimmer package like so:
 ```shell
 $ pip install scandeval[pytorch]
