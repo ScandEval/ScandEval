@@ -30,7 +30,7 @@ $ pip install scandeval
 ```
 
 ## Quickstart
-### In the Command Line
+### Benchmarking from the Command Line
 The easiest way to benchmark models is via the command line interface. After
 having installed the package, you can benchmark your favorite model like so:
 ```shell
@@ -58,7 +58,7 @@ typing
 $ scandeval --help
 ```
 
-### In a Script
+### Benchmarking from a Script
 In a script, the syntax is similar to the command line interface. You simply
 initialise an object of the `Benchmark` class, and call this benchmark object
 with your favorite models and/or datasets:
