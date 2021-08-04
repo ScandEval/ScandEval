@@ -53,7 +53,10 @@ $ scandeval --languages da
 ```
 
 See all the arguments and options available for the `scandeval` command by
-typing `scandeval --help`.
+typing
+```shell
+$ scandeval --help
+```
 
 ### In a Script
 In a script, the syntax is similar to the command line interface. You simply
