@@ -1,7 +1,8 @@
 __version__ = '0.0.0'  # noqa
 
 # Block unwanted terminal outputs
-from .utils import block_terminal_output; block_terminal_output()
+from .utils import block_terminal_output
+block_terminal_output()
 
 # Set up logging
 import logging
