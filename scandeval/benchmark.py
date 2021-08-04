@@ -7,6 +7,13 @@ from collections import defaultdict
 import logging
 
 from .dane import DaneBenchmark
+from .angry_tweets import AngryTweetsBenchmark
+from .twitter_sent import TwitterSentBenchmark
+from .europarl1 import Europarl1Benchmark
+from .europarl2 import Europarl2Benchmark
+from .lcc1 import Lcc1Benchmark
+from .lcc2 import Lcc2Benchmark
+from .dkhate import DkHateBenchmark
 from .utils import InvalidBenchmark
 
 
@@ -38,7 +45,14 @@ class Benchmark:
         self._benchmarks = [
             ('dane', 'DaNE with MISC tags', DaneBenchmark(**params)),
             ('dane-no-misc', 'DaNE without MISC tags',
-             DaneBenchmark(include_misc_tags=False, **params))
+             DaneBenchmark(include_misc_tags=False, **params)),
+            ('angry-tweets', 'Angry Tweets', AngryTweetsBenchmark(**params)),
+            ('twitter-sent', 'Twitter Sent', TwitterSentBenchmark(**params)),
+            ('dkhate', 'DKHate', DkHateBenchmark(**params)),
+            ('europarl1', 'Europarl1', Europarl1Benchmark(**params)),
+            ('europarl2', 'Europarl2', Europarl2Benchmark(**params)),
+            ('lcc1', 'LCC1', Lcc1Benchmark(**params)),
+            ('lcc2', 'LCC2', Lcc2Benchmark(**params))
         ]
 
         if verbose:
