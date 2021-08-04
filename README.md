@@ -2,8 +2,7 @@
 
 <img src="gfx/scandeval.png" width="370" height="200">
 
-**Evaluation of language models on mono- or multilingual Scandinavian language
-tasks.**
+### Evaluation of language models on mono- or multilingual Scandinavian language tasks.
 
 ______________________________________________________________________
 
