@@ -9,6 +9,9 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- Documentation section and link to `README`
+
 ### Changed
 - `Benchmark` arguments `languages` and `tasks` have been renamed to `language`
   and `task`, to keep it consistent with the CLI.
