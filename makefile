@@ -9,9 +9,9 @@ release-major:
 	pytest -n 4 scandeval && \
 	make documentation && \
 	python bump_version.py --major && \
-	git pull origin master && \
+	git pull origin main && \
 	git push && \
-	git checkout master && \
+	git checkout main && \
 	git merge dev && \
 	git push && \
 	git push --tags && \
@@ -23,9 +23,9 @@ release-minor:
 	pytest -n 4 scandeval && \
 	make documentation && \
 	python bump_version.py --minor && \
-	git pull origin master && \
+	git pull origin main && \
 	git push && \
-	git checkout master && \
+	git checkout main && \
 	git merge dev && \
 	git push && \
 	git push --tags && \
@@ -37,9 +37,9 @@ release-patch:
 	pytest -n 4 scandeval && \
 	make documentation && \
 	python bump_version.py --patch && \
-	git pull origin master && \
+	git pull origin main && \
 	git push && \
-	git checkout master && \
+	git checkout main && \
 	git merge dev && \
 	git push && \
 	git push --tags && \
