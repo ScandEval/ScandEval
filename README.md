@@ -108,6 +108,6 @@ If you want to cite the framework then feel free to use this:
 }
 ```
 
-### Remarks
+## Remarks
 The image used in the logo has been created by the amazing [Scandinavia and the
 World](https://satwcomic.com/) team. Go check them out!
