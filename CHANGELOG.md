@@ -9,8 +9,12 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- `Benchmark` arguments `languages` and `tasks` have been renamed to `language`
+  and `task`, to keep it consistent with the CLI.
+
 ### Fixed
-- `README` image now renders on the [PyPI website](https://pypi.org/project/scandeval).
+- `README` typos fixed, and image renders correctly
 
 
 ## [v0.1.0] - 2021-08-05

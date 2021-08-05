@@ -26,21 +26,21 @@ class Benchmark:
     '''Benchmarking all the Scandinavian language models.
 
     Args
-        languages (list of str, optional):
+        language (str or list of str, optional):
             The language codes of the languages to include in the list.
             Defaults to ['da', 'sv', 'no'].
-        tasks (list of str, optional):
+        task (str or list of str, optional):
             The tasks to consider in the list. Defaults to ['fill-mask',
             'token-classification', 'text-classification'].
     '''
     def __init__(self,
-                 languages: List[str] = ['da', 'sv', 'no'],
-                 tasks: List[str] = ['fill-mask',
-                                     'token-classification',
-                                     'text-classification'],
+                 language: Union[str, List[str]] = ['da', 'sv', 'no'],
+                 task: Union[str, List[str]] = ['fill-mask',
+                                                'token-classification',
+                                                'text-classification'],
                  verbose: bool = False):
-        self.languages = languages
-        self.tasks = tasks
+        self.languages = [language] if isinstance(language, str) else language
+        self.tasks = [task] if isinstance(task, str) else task
         self._model_lists = self._get_model_lists()
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose)

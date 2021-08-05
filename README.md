@@ -52,9 +52,9 @@ $ scandeval --model_id <model_id> --dataset angry-tweets
 ```
 
 If you want to benchmark _all_ Danish models, this can be done using the
-`languages` tag, like so:
+`language` tag, like so:
 ```shell
-$ scandeval --languages da
+$ scandeval --language da
 ```
 
 See all the arguments and options available for the `scandeval` command by
@@ -81,7 +81,7 @@ shown here with the `AngryTweets` dataset again:
 
 To benchmark _all_ Danish models, this is given at initialisation:
 ```python
->>> benchmark = Benchmark(languages='da')
+>>> benchmark = Benchmark(language='da')
 >>> benchmark()
 ```
 
