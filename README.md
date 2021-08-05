@@ -5,7 +5,7 @@
 ### Evaluation of language models on mono- or multilingual Scandinavian language tasks.
 
 ______________________________________________________________________
-[![LastCommit](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)
+[![LastCommit](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/commits/main)
 [![ReadTheDocs](https://readthedocs.org/projects/scandeval/badge/?version=latest)](https://scandeval.readthedocs.io/en/latest/?badge=latest)
 [![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://badge.fury.io/py/scandeval)
 [![License](https://img.shields.io/github/license/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/blob/main/LICENSE)
