@@ -97,6 +97,11 @@ Here `X_train` and `X_test` will be lists containing the relevant texts, and
 `y_train` and `y_test` will be lists containing the associated labels.
 
 
+## Documentation
+The full documentation can be found on
+[ReadTheDocs](https://scandeval.readthedocs.io/en/latest).
+
+
 ## Citing ScandEval
 If you want to cite the framework then feel free to use this:
 ```bibtex
