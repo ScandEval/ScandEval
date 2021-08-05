@@ -1,6 +1,6 @@
 <div align='center'>
 
-<img src="gfx/scandeval.png" width="370" height="200">
+<img src="https://raw.githubusercontent.com/saattrupdan/ScandEval/main/gfx/scandeval.png" width="370" height="200">
 
 ### Evaluation of language models on mono- or multilingual Scandinavian language tasks.
 
