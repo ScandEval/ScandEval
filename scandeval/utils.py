@@ -16,14 +16,13 @@ from transformers import (AutoModelForTokenClassification,
                           FlaxAutoModelForSequenceClassification)
 
 
-MODEL_CLASSES = {
-    'pytorch': {'token-classification': AutoModelForTokenClassification,
-                'text-classification': AutoModelForSequenceClassification},
-    'tensorflow': {'token-classification': TFAutoModelForTokenClassification,
-                   'text-classification': TFAutoModelForSequenceClassification},
-    'jax': {'token-classification': FlaxAutoModelForTokenClassification,
-            'text-classification': FlaxAutoModelForSequenceClassification}
-}
+PT_CLS = {'token-classification': AutoModelForTokenClassification,
+          'text-classification': AutoModelForSequenceClassification}
+TF_CLS = {'token-classification': TFAutoModelForTokenClassification,
+          'text-classification': TFAutoModelForSequenceClassification}
+JAX_CLS = {'token-classification': FlaxAutoModelForTokenClassification,
+           'text-classification': FlaxAutoModelForSequenceClassification}
+MODEL_CLASSES = dict(pytorch=PT_CLS, tensorflow=TF_CLS, jax=JAX_CLS)
 
 
 class InvalidBenchmark(Exception):
@@ -99,7 +98,8 @@ class DocInherit(object):
     def get_no_inst(self, cls):
         for parent in cls.__mro__[1:]:
             overridden = getattr(parent, self.name, None)
-            if overridden: break
+            if overridden:
+                break
 
         @wraps(self.mthd, assigned=('__name__', '__module__'))
         def f(*args, **kwargs):
@@ -112,5 +112,6 @@ class DocInherit(object):
             raise NameError(f'Can\'t find "{self.name}" in parents')
         func.__doc__ = source.__doc__
         return func
+
 
 doc_inherit = DocInherit

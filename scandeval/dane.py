@@ -80,7 +80,7 @@ class DaneBenchmark(TokenClassificationBenchmark):
     @staticmethod
     def _remove_misc_tags(examples: dict) -> dict:
         examples['orig_labels'] = [['O' if label[-4:] == 'MISC' else label
-                                        for label in label_list]
+                                    for label in label_list]
                                    for label_list in examples['orig_labels']]
         return examples
 
@@ -106,13 +106,13 @@ class DaneBenchmark(TokenClassificationBenchmark):
 
             # Remove ignored index (special tokens)
             predictions = [
-                [id2label[p] for p, l in zip(prediction, label)
-                             if l != -100]
+                [id2label[pred] for pred, lbl in zip(prediction, label)
+                 if lbl != -100]
                 for prediction, label in zip(raw_predictions, labels)
             ]
             labels = [
-                [id2label[l] for _, l in zip(prediction, label)
-                             if l != -100]
+                [id2label[lbl] for _, lbl in zip(prediction, label)
+                 if lbl != -100]
                 for prediction, label in zip(raw_predictions, labels)
             ]
 

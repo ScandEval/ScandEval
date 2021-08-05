@@ -64,8 +64,9 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                          batch_size=batch_size,
                          verbose=verbose)
 
-    def _load_data_collator(self,
-                           tokenizer: Optional[PreTrainedTokenizerBase] = None):
+    def _load_data_collator(
+            self,
+            tokenizer: Optional[PreTrainedTokenizerBase] = None):
         '''Load the data collator used to prepare samples during finetuning.
 
         Args:
@@ -107,14 +108,15 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
         '''
         if framework in ['pytorch', 'tensorflow', 'jax']:
             tokenizer = kwargs['tokenizer']
-            map_fn = lambda examples: tokenizer(examples['doc'],
-                                                truncation=True,
-                                                padding=True)
-            tokenised = dataset.map(map_fn, batched=True)
 
-            map_fn = partial(self.create_numerical_labels,
-                             label2id=kwargs['config'].label2id)
-            preprocessed = tokenised.map(map_fn, batched=True)
+            def tokenise(examples: dict) -> dict:
+                doc = examples['doc']
+                return tokenizer(doc, truncation=True, padding=True)
+            tokenised = dataset.map(tokenise, batched=True)
+
+            numericalise = partial(self.create_numerical_labels,
+                                   label2id=kwargs['config'].label2id)
+            preprocessed = tokenised.map(numericalise, batched=True)
 
             return preprocessed.remove_columns(['doc', 'orig_label'])
 

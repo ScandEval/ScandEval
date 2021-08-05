@@ -141,7 +141,7 @@ class Benchmark:
             model_ids = [model_ids]
 
         if datasets is None:
-            datasets = [dataset for dataset, _, _ in  self._benchmarks]
+            datasets = [dataset for dataset, _, _ in self._benchmarks]
 
         benchmarks = [(dataset, alias, cls)
                       for dataset, alias, cls in self._benchmarks

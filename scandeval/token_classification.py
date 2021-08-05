@@ -153,8 +153,9 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         elif framework == 'spacy':
             return dataset.map(self._collect_docs, batched=True)
 
-    def _load_data_collator(self,
-                           tokenizer: Optional[PreTrainedTokenizerBase] = None):
+    def _load_data_collator(
+            self,
+            tokenizer: Optional[PreTrainedTokenizerBase] = None):
         '''Load the data collator used to prepare samples during finetuning.
 
         Args:

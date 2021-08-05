@@ -210,7 +210,6 @@ class BaseBenchmark(ABC):
             return dict(model=model, tokenizer=tokenizer)
 
         elif framework == 'spacy':
-            import spacy
             local_model_id = model_id.split('/')[-1]
 
             # Download the model if it has not already been so
@@ -258,8 +257,9 @@ class BaseBenchmark(ABC):
         pass
 
     @abstractmethod
-    def _load_data_collator(self,
-                           tokenizer: Optional[PreTrainedTokenizerBase] = None):
+    def _load_data_collator(
+            self,
+            tokenizer: Optional[PreTrainedTokenizerBase] = None):
         '''Load the data collator used to prepare samples during finetuning.
 
         Args:
@@ -352,7 +352,7 @@ class BaseBenchmark(ABC):
 
         # Fetch the frameworks from the model website
         frameworks = [a['tag-id'] for a in a_tags_with_class
-                                  if 'tag-red' in a['class']]
+                      if 'tag-red' in a['class']]
 
         # Extract a single valid framework in which the model has been
         # implemented
@@ -366,7 +366,7 @@ class BaseBenchmark(ABC):
 
         # Fetch the model tasks from the model website
         tasks = [a['tag-id'] for a in a_tags_with_class
-                             if 'tag-white' in a['class']]
+                 if 'tag-white' in a['class']]
 
         # Extract a single valid task on which the model has been trained. If
         # no task has been specified on the model card then assume that it is
