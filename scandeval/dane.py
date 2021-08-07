@@ -187,7 +187,9 @@ class DaneBenchmark(TokenClassificationBenchmark):
 
         disable = ['tok2vec', 'tagger', 'parser',
                    'attribute_ruler', 'lemmatizer']
-        processed = model.pipe(itr, disable=disable, batch_size=32)
+        processed = model.pipe(itr,
+                               disable=disable,
+                               batch_size=self.batch_size)
 
         map_fn = self._extract_spacy_predictions
         predictions = map(map_fn, zip(dataset['docs'], processed))
