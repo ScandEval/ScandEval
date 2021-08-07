@@ -110,18 +110,18 @@ class Benchmark:
         return model_lists
 
     def __call__(self,
-                 model_ids: Optional[Union[List[str], str]] = None,
-                 datasets: Optional[Union[List[str], str]] = None,
+                 model_id: Optional[Union[List[str], str]] = None,
+                 dataset: Optional[Union[List[str], str]] = None,
                  num_finetunings: int = 10,
                  save_results: bool = False
                  ) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks all models in the model list.
 
         Args:
-            model_ids (str, list of str or None, optional):
+            model_id (str, list of str or None, optional):
                 The model ID(s) of the models to benchmark. If None then all
                 relevant model IDs will be benchmarked. Defaults to None.
-            datasets (str, list of str or None, optional):
+            dataset (str, list of str or None, optional):
                 The datasets to benchmark on. If None then all datasets will
                 be benchmarked. Defaults to None.
             num_finetunings (int, optional):
@@ -136,13 +136,19 @@ class Benchmark:
                 names of the datasets, with values being new dictionaries
                 having the model IDs as keys.
         '''
-        if model_ids is None:
+        if model_id is None:
             model_ids = self._model_lists['all']
-        elif isinstance(model_ids, str):
-            model_ids = [model_ids]
+        elif isinstance(model_id, str):
+            model_ids = [model_id]
+        else:
+            model_ids = model_id
 
-        if datasets is None:
-            datasets = [dataset for dataset, _, _ in self._benchmarks]
+        if dataset is None:
+            datasets = [d for d, _, _ in self._benchmarks]
+        elif isinstance(dataset, str):
+            datasets = [dataset]
+        else:
+            datasets = dataset
 
         benchmarks = [(dataset, alias, cls)
                       for dataset, alias, cls in self._benchmarks
