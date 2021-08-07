@@ -123,11 +123,6 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         tokenized_inputs["labels"] = all_labels
         return tokenized_inputs
 
-    @staticmethod
-    def _collect_docs(examples: dict) -> dict:
-        examples['doc'] = [' '.join(toks) for toks in examples['docs']]
-        return examples
-
     def _preprocess_data(self,
                          dataset: Dataset,
                          framework: str,
@@ -151,7 +146,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
             tokenised_dataset = dataset.map(map_fn, batched=True)
             return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
         elif framework == 'spacy':
-            return dataset.map(self._collect_docs, batched=True)
+            return dataset
 
     def _load_data_collator(
             self,
