@@ -225,7 +225,7 @@ class BaseBenchmark(ABC):
             if not is_module_installed(local_model_id):
                 url = (f'https://huggingface.co/{model_id}/resolve/main/'
                        f'{local_model_id}-any-py3-none-any.whl')
-                subprocess.check_output(['pip3', 'install', url])
+                subprocess.run(['pip3', 'install', url])
 
             # Load the model
             model = spacy.load(local_model_id)
