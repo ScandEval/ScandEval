@@ -492,7 +492,19 @@ class BaseBenchmark(ABC):
 
                 # Finetune the model
                 if task == 'fill-mask':
-                    trainer.train()
+                    while True:
+                        try:
+                            trainer.train()
+                            break
+                        except RuntimeError as e:
+                            if not str(e).startswith('CUDA out of memory'):
+                                raise e
+                            bs = training_args.per_device_train_batch_size
+                            if bs == 1:
+                                raise RuntimeError('CUDA out of memory, even '
+                                                   'with a batch size of 1!')
+                            training_args.per_device_train_batch_size = bs // 2
+                            trainer.args = training_args
 
                 # Log training metrics and save the state
                 train_metrics = trainer.evaluate(preprocessed_train,
