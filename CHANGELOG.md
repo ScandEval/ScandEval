@@ -21,6 +21,8 @@ and this project adheres to
   corresponding gradient accumulation will be set to 32, 16, 8, 4, 2 and 1,
   respectively. This is to ensure that all finetuning is done using the same
   effective batch size, to ensure fair comparisons.
+- Batch sizes are automatically halved if the GPU runs out of memory, with
+  gradient accumulation correspondingly doubles.
 
 ### Fixed
 - `README` typos fixed, and image renders correctly
