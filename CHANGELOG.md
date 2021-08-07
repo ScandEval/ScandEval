@@ -11,10 +11,15 @@ and this project adheres to
 ## [Unreleased]
 ### Added
 - Documentation section and link to `README`
+- The `Benchmark` class and the CLI now accepts a `batch_size` argument
 
 ### Changed
 - `Benchmark` arguments `languages` and `tasks` have been renamed to `language`
   and `task`, to keep it consistent with the CLI.
+- `batch_size` arguments can now only be among 1, 2, 4, 8, 16 and 32, and the
+  corresponding gradient accumulation will be set to 32, 16, 8, 4, 2 and 1,
+  respectively. This is to ensure that all finetuning is done using the same
+  effective batch size, to ensure fair comparisons.
 
 ### Fixed
 - `README` typos fixed, and image renders correctly
