@@ -38,12 +38,13 @@ class Benchmark:
                  task: Union[str, List[str]] = ['fill-mask',
                                                 'token-classification',
                                                 'text-classification'],
+                 batch_size: int = 32,
                  verbose: bool = False):
         self.languages = [language] if isinstance(language, str) else language
         self.tasks = [task] if isinstance(task, str) else task
         self._model_lists = self._get_model_lists()
         self.benchmark_results = defaultdict(dict)
-        params = dict(verbose=verbose)
+        params = dict(verbose=verbose, batch_size=batch_size)
         self._benchmarks = [
             ('dane', 'DaNE with MISC tags', DaneBenchmark(**params)),
             ('dane-no-misc', 'DaNE without MISC tags',

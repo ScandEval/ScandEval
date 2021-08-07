@@ -48,7 +48,8 @@ class BaseBenchmark(ABC):
             warmed up, meaning starting from nearly 0 and progressing up to
             `learning_rate` after `warmup_steps` many steps. Defaults to 50.
         batch_size (int, optional):
-            The batch size used while finetuning. Defaults to 16.
+            The batch size used while finetuning. Must be a multiple of 2, and
+            at most 32. Defaults to 32.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -64,6 +65,10 @@ class BaseBenchmark(ABC):
         warmup_steps (int): Number of steps used to warm up the learning rate.
         batch_size (int): The batch size used while finetuning.
         verbose (bool): Whether to print additional output.
+
+    Raises:
+        TypeError:
+            If `batch_size` is not among 1, 2, 4, 8, 16 or 32.
     '''
     def __init__(self,
                  task: str,
@@ -73,14 +78,18 @@ class BaseBenchmark(ABC):
                  learning_rate: float = 2e-5,
                  epochs: int = 5,
                  warmup_steps: int = 50,
-                 batch_size: int = 16,
+                 batch_size: int = 32,
                  verbose: bool = False):
+        if batch_size not in [1, 2, 4, 8, 16, 32]:
+            raise TypeError('The batch size must be either 1, 2, 4, 8, '
+                            '16 or 32.')
+        self.batch_size = batch_size
+        self.gradient_accumulation = 32 // batch_size
         self.task = task
         self.cache_dir = cache_dir
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.warmup_steps = warmup_steps
-        self.batch_size = batch_size
         self.num_labels = num_labels
         self.label2id = label2id
         self.verbose = verbose
@@ -454,7 +463,8 @@ class BaseBenchmark(ABC):
                 per_device_train_batch_size=self.batch_size,
                 learning_rate=self.learning_rate,
                 num_train_epochs=self.epochs,
-                warmup_steps=self.warmup_steps
+                warmup_steps=self.warmup_steps,
+                gradient_accumulation_steps=self.gradient_accumulation
             )
 
             # Disable `transformers` verbosity again

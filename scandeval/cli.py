@@ -46,6 +46,12 @@ from .benchmark import Benchmark
               show_default=True,
               help='The number of times a language model should be '
                    'finetuned.')
+@click.option('--batch_size', '-b',
+              default=32,
+              type=int,
+              show_default=True,
+              help=('The batch size used to finetune the models. This '
+                    'have to be among 1, 2, 4, 8, 16 and 32.'))
 @click.option('--verbose', '-v',
               is_flag=True,
               show_default=True,
@@ -56,11 +62,13 @@ def benchmark(model_id: Tuple[str],
               language: Tuple[str],
               task: Tuple[str],
               num_finetunings: int,
+              batch_size: int,
               verbose: bool = False):
     '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
-    benchmarker = Benchmark(languages=list(language),
-                            tasks=list(task),
+    benchmarker = Benchmark(language=list(language),
+                            task=list(task),
+                            batch_size=batch_size,
                             verbose=verbose)
 
     # Perform the benchmark evaluation
