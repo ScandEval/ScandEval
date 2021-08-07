@@ -266,40 +266,58 @@ def process_dane():
     from pathlib import Path
     import json
     from tqdm.auto import tqdm
+    import re
 
-    input_paths = [Path('datasets/ddt/ddt.train.conllu'),
-                   Path('datasets/ddt/ddt.dev.conllu'),
-                   Path('datasets/ddt/ddt.test.conllu')]
-    output_paths = [Path('datasets/ddt/dane_train.jsonl'),
-                    Path('datasets/ddt/dane_val.jsonl'),
-                    Path('datasets/ddt/dane_test.jsonl')]
+    input_paths = [Path('datasets/dane/ddt.train.conllu'),
+                   Path('datasets/dane/ddt.dev.conllu'),
+                   Path('datasets/dane/ddt.test.conllu')]
+    output_paths = [Path('datasets/dane/dane_train.jsonl'),
+                    Path('datasets/dane/dane_val.jsonl'),
+                    Path('datasets/dane/dane_test.jsonl')]
 
     for input_path, output_path in zip(input_paths, output_paths):
         tokens = list()
         pos_tags = list()
+        heads = list()
+        deps  = list()
         ner_tags = list()
+        ids = list()
+        doc = ''
         lines = input_path.read_text().split('\n')
         for idx, line in enumerate(tqdm(lines)):
-            if line.startswith('#'):
+            if line.startswith('# text = '):
+                doc = re.sub('# text = ', '', line)
+            elif line.startswith('#'):
                 continue
             elif line == '':
                 if tokens != []:
-                    data_dict = dict(tokens=tokens,
+                    data_dict = dict(ids=ids,
+                                     doc=doc,
+                                     tokens=tokens,
                                      pos_tags=pos_tags,
+                                     heads=heads,
+                                     deps=deps,
                                      ner_tags=ner_tags)
                     json_line = json.dumps(data_dict)
                     with output_path.open('a') as f:
                         f.write(json_line)
                         if idx < len(lines) - 1:
                             f.write('\n')
+                ids = list()
                 tokens = list()
                 pos_tags = list()
+                heads = list()
+                deps = list()
                 ner_tags = list()
+                doc = ''
             else:
                 data = line.split('\t')
+                ids.append(data[0])
                 tokens.append(data[1])
                 pos_tags.append(data[3])
+                heads.append(data[6])
+                deps.append(data[7])
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    test_angry_tweets()
+    process_dane()
