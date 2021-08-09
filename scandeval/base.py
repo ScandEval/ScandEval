@@ -73,7 +73,7 @@ class BaseBenchmark(ABC):
     def __init__(self,
                  task: str,
                  num_labels: Optional[int] = None,
-                 label2id: Optional[Dict[str, int]] = None,
+                 id2label: Optional[List[str]] = None,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
                  epochs: int = 5,
@@ -91,12 +91,12 @@ class BaseBenchmark(ABC):
         self.epochs = epochs
         self.warmup_steps = warmup_steps
         self.num_labels = num_labels
-        self.label2id = label2id
+        self.id2label = id2label
         self.verbose = verbose
-        if self.label2id is not None:
-            self.id2label = {id: label for label, id in label2id.items()}
+        if self.id2label is not None:
+            self.label2id = {label: id for id, label in enumerate(id2label)}
         else:
-            self.id2label = None
+            self.label2id = None
         if verbose:
             tf_logging.set_verbosity_warning()
 

@@ -47,7 +47,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         id2label (dict): Conversion dict from NER label indices to the labels.
     '''
     def __init__(self,
-                 label2id: dict,
+                 id2label: list,
                  epochs: int,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
@@ -56,8 +56,8 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                  verbose: bool = False):
         self._metric = load_metric('seqeval')
         super().__init__(task='token-classification',
-                         num_labels=len(label2id),
-                         label2id=label2id,
+                         num_labels=len(id2label),
+                         id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          epochs=epochs,
@@ -194,7 +194,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
 
         return list(predictions), dataset['orig_labels']
 
-    def _extract_spacy_predictions(self, tokens_processed: tuple) -> List[str]:
+    def _extract_spacy_predictions(self, tokens_processed: tuple) -> list:
         '''Helper function that extracts the predictions from a SpaCy model.
 
         Aside from extracting the predictions from the model, it also aligns
@@ -207,7 +207,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 processed document, being a Spacy `Doc` instance.
 
         Returns:
-            list of str:
+            list:
                 A list of predictions for each token, of the same length as the
                 gold tokens (first entry of `tokens_processed`).
         '''
@@ -235,7 +235,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         return predictions
 
     @abstractmethod
-    def _get_spacy_token_labels(self, processed) -> List[str]:
+    def _get_spacy_token_labels(self, processed) -> list:
         '''Function that extracts the desired predictions from a SpaCy Doc.
 
         Args:
@@ -244,7 +244,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 some text.
 
         Returns:
-            list of str:
+            list:
                 A list of labels, for each SpaCy token.
         '''
         pass
