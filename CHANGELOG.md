@@ -19,6 +19,8 @@ and this project adheres to
 - `Benchmark` arguments `languages`, `tasks`, `model_ids` and `datasets` have
   been renamed to `language`, `task`, `model_id` and `dataset`, to keep it
   consistent with the CLI.
+- When loading datasets, these will now be four dictionaries instead of lists,
+  to allow for distinguishing features and labels.
 - `batch_size` arguments can now only be among 1, 2, 4, 8, 16 and 32, and the
   corresponding gradient accumulation will be set to 32, 16, 8, 4, 2 and 1,
   respectively. This is to ensure that all finetuning is done using the same
