@@ -72,8 +72,14 @@ class DaneBenchmark(TokenClassificationBenchmark):
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
         X_train, X_test, y_train, y_test = load_dane()
-        train = Dataset.from_dict(dict(docs=X_train, orig_labels=y_train))
-        test = Dataset.from_dict(dict(docs=X_test, orig_labels=y_test))
+        train_dict = dict(doc=X_train['doc'],
+                          tokens=X_train['tokens'],
+                          orig_labels=y_train['ner_tags'])
+        test_dict = dict(doc=X_test['doc'],
+                         tokens=X_test['tokens'],
+                         orig_labels=y_test['ner_tags'])
+        train = Dataset.from_dict(train_dict)
+        test = Dataset.from_dict(test_dict)
         return train, test
 
     @staticmethod
