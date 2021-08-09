@@ -4,9 +4,10 @@ from transformers import (DataCollatorForTokenClassification,
                           PreTrainedTokenizerBase)
 from datasets import Dataset, load_metric
 from functools import partial
-from typing import Optional
+from typing import Optional, List
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
+from tqdm.auto import tqdm
 
 from .base import BaseBenchmark
 from .utils import InvalidBenchmark
@@ -162,3 +163,88 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
             HuggingFace data collator: The data collator.
         '''
         return DataCollatorForTokenClassification(tokenizer)
+
+    def _get_spacy_predictions_and_labels(self,
+                                          model,
+                                          dataset: Dataset,
+                                          progress_bar: bool) -> tuple:
+        '''Get predictions from SpaCy model on dataset.
+
+        Args:
+            model (SpaCy model): The model.
+            dataset (HuggingFace dataset): The dataset.
+
+        Returns:
+            A pair of arrays:
+                The first array contains the probability predictions and the
+                second array contains the true labels.
+        '''
+        # Initialise progress bar
+        if progress_bar:
+            itr = tqdm(dataset['doc'])
+        else:
+            itr = dataset['doc']
+
+        disable = ['attribute_ruler']
+        processed = model.pipe(itr,
+                               disable=disable,
+                               batch_size=self.batch_size)
+        map_fn = self._extract_spacy_predictions
+        predictions = map(map_fn, zip(dataset['tokens'], processed))
+
+        return list(predictions), dataset['orig_labels']
+
+    def _extract_spacy_predictions(self, tokens_processed: tuple) -> List[str]:
+        '''Helper function that extracts the predictions from a SpaCy model.
+
+        Aside from extracting the predictions from the model, it also aligns
+        the predictions with the gold tokens, in case the SpaCy tokeniser
+        tokenises the text different from those.
+
+        Args:
+            tokens_processed (tuple):
+                A pair of the labels, being a list of strings, and the SpaCy
+                processed document, being a Spacy `Doc` instance.
+
+        Returns:
+            list of str:
+                A list of predictions for each token, of the same length as the
+                gold tokens (first entry of `tokens_processed`).
+        '''
+        tokens, processed = tokens_processed
+
+        # Get the token labels
+        token_labels = self._get_spacy_token_labels(processed)
+
+        # Get the alignment between the SpaCy model's tokens and the gold
+        # tokens
+        token_idxs = [tok_idx for tok_idx, tok in enumerate(tokens)
+                      for _ in str(tok)]
+        pred_token_idxs  = [tok_idx for tok_idx, tok in enumerate(processed)
+                            for _ in str(tok)]
+        alignment = list(zip(token_idxs, pred_token_idxs))
+
+        # Get the aligned predictions
+        predictions = list()
+        for tok_idx, _ in enumerate(tokens):
+            aligned_pred_token = [pred_token_idx
+                                  for token_idx, pred_token_idx in alignment
+                                  if token_idx == tok_idx][0]
+            predictions.append(token_labels[aligned_pred_token])
+
+        return predictions
+
+    @abstractmethod
+    def _get_spacy_token_labels(self, processed) -> List[str]:
+        '''Function that extracts the desired predictions from a SpaCy Doc.
+
+        Args:
+            processed (SpaCy Doc instance):
+                The processed text, from the output of a SpaCy model applied on
+                some text.
+
+        Returns:
+            list of str:
+                A list of labels, for each SpaCy token.
+        '''
+        pass
