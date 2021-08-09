@@ -100,14 +100,14 @@ def load_ddt_dep() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/dane/')
+                'dev/datasets/dane/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
-                                             ['ids', 'doc', 'tokens'],
+                                             ['doc', 'tokens'],
                                              ['heads', 'deps'])
     X_test, y_test = _get_dataset_from_url(test_url,
-                                           ['ids', 'doc', 'tokens'],
+                                           ['doc', 'tokens'],
                                            ['heads', 'deps'])
     return X_train, X_test, y_train, y_test
 

@@ -12,6 +12,8 @@ and this project adheres to
 ### Added
 - Added the part-of-speech tagging task from the Danish Dependency Treebank.
   Can be loaded with `load_ddt_pos` and used in `Benchmark` as `ddt-pos`.
+- Added the dependency parsing task from the Danish Dependency Treebank.
+  Can be loaded with `load_ddt_ddt` and used in `Benchmark` as `ddt-dep`.
 - Documentation section and link to `README`
 - The `Benchmark` class and the CLI now accepts a `batch_size` argument
 

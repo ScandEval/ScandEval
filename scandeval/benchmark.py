@@ -10,6 +10,7 @@ from pathlib import Path
 
 from .dane import DaneBenchmark
 from .ddt_pos import DdtPosBenchmark
+from .ddt_dep import DdtDepBenchmark
 from .angry_tweets import AngryTweetsBenchmark
 from .twitter_sent import TwitterSentBenchmark
 from .europarl1 import Europarl1Benchmark
@@ -51,6 +52,7 @@ class Benchmark:
             ('dane-no-misc', 'DaNE without MISC tags',
              DaneBenchmark(include_misc_tags=False, **params)),
             ('ddt-pos', 'the POS part of DDT', DdtPosBenchmark(**params)),
+            ('ddt-dep', 'the DEP part of DDT', DdtDepBenchmark(**params)),
             ('angry-tweets', 'Angry Tweets', AngryTweetsBenchmark(**params)),
             ('twitter-sent', 'Twitter Sent', TwitterSentBenchmark(**params)),
             ('dkhate', 'DKHate', DkHateBenchmark(**params)),
