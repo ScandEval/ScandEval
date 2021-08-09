@@ -61,8 +61,7 @@ class DaneBenchmark(TokenClassificationBenchmark):
                     'B-MISC': 6,
                     'I-MISC': 7,
                     'O': 8}
-        super().__init__(num_labels=9,
-                         epochs=5,
+        super().__init__(epochs=5,
                          label2id=label2id,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,

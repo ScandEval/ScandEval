@@ -50,8 +50,7 @@ class Europarl2Benchmark(TextClassificationBenchmark):
                  batch_size: int = 16,
                  verbose: bool = False):
         label2id = dict(neutral=0, positiv=1, negativ=2)
-        super().__init__(num_labels=3,
-                         epochs=5,
+        super().__init__(epochs=5,
                          label2id=label2id,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
