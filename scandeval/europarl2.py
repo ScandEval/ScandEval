@@ -93,8 +93,8 @@ class Europarl2Benchmark(TextClassificationBenchmark):
         if not np.isnan(train_std_err):
             msg = (f'Mean macro-average F1-scores on Europarl2 for '
                    f'{model_id}:\n'
-                   f'  - Train: {train_mean:.2f} +- {train_std_err:.2f}\n'
-                   f'  - Test: {test_mean:.2f} +- {test_std_err:.2f}')
+                   f'  - Train: {train_mean:.2f} ± {train_std_err:.2f}\n'
+                   f'  - Test: {test_mean:.2f} ± {test_std_err:.2f}')
         else:
             msg = (f'Macro-average F1-scores on Europarl2 for {model_id}:\n'
                    f'  - Train: {train_mean:.2f}\n'

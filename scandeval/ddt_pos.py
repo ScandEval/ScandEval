@@ -115,8 +115,8 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
 
         if not np.isnan(train_std_err):
             msg = (f'Mean accuracy on the POS part of DDT for {model_id}:\n'
-                   f'  - Train: {train_mean:.2f} +- {train_std_err:.2f}\n'
-                   f'  - Test: {test_mean:.2f} +- {test_std_err:.2f}')
+                   f'  - Train: {train_mean:.2f} ± {train_std_err:.2f}\n'
+                   f'  - Test: {test_mean:.2f} ± {test_std_err:.2f}')
         else:
             msg = (f'Accuracy on the POS part of DDT for {model_id}:\n'
                    f'  - Train: {train_mean:.2f}\n'
