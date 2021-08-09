@@ -1,22 +1,10 @@
 '''Testing script'''
 
-def test_angry_tweets():
-    from scandeval.angry_tweets import AngryTweetsBenchmark
-    angry_tweets = AngryTweetsBenchmark()
-    angry_tweets('Maltehb/-l-ctra-danish-electra-small-cased')
-
-def test_benchmark():
-    from scandeval import Benchmark
-    from scandeval.utils import block_terminal_output; block_terminal_output()
-    benchmark = Benchmark(tasks=['token-classification'])
-    benchmark()
-
 def process_twitter_sent():
     from pathlib import Path
     import json
     from tqdm.auto import tqdm
     import pandas as pd
-    from sklearn.model_selection import train_test_split
 
     Path('datasets/twitter_sent').mkdir()
 
