@@ -3,7 +3,6 @@
 from datasets import Dataset
 import numpy as np
 from typing import Tuple, Dict, List, Optional
-from tqdm.auto import tqdm
 import logging
 
 from .token_classification import TokenClassificationBenchmark
@@ -157,46 +156,12 @@ class DaneBenchmark(TokenClassificationBenchmark):
 
         logger.info(msg)
 
-    @staticmethod
-    def _extract_spacy_predictions(tokens_processed: tuple) -> dict:
-        tokens, processed = tokens_processed
-
-        # Get the model's named entity predictions
-        ner_tags = {ent.text: ent.label_ for ent in processed.ents}
-
-        # Organise the predictions to make them comparable to the labels
-        preds = list()
-        for token in tokens:
-            for ner_tag in ner_tags.keys():
-                if ner_tag.startswith(token):
-                    preds.append('B-' + ner_tags[ner_tag])
-                    break
-                elif token in ner_tag:
-                    preds.append('I-' + ner_tags[ner_tag])
-                    break
-            else:
-                preds.append('O')
-
-        return preds
-
     @doc_inherit
-    def _get_spacy_predictions_and_labels(self,
-                                          model,
-                                          dataset: Dataset,
-                                          progress_bar: bool) -> tuple:
-        # Initialise progress bar
-        if progress_bar:
-            itr = tqdm(dataset['doc'])
-        else:
-            itr = dataset['doc']
+    def _get_spacy_token_labels(self, processed) -> List[str]:
+        def get_ent(token) -> str:
+            if token.ent_iob_ == 'O':
+                return 'O'
+            else:
+                return f'{token.ent_iob_}-{token.ent_type_}'
 
-        disable = ['tok2vec', 'tagger', 'parser',
-                   'attribute_ruler', 'lemmatizer']
-        processed = model.pipe(itr,
-                               disable=disable,
-                               batch_size=self.batch_size)
-
-        map_fn = self._extract_spacy_predictions
-        predictions = map(map_fn, zip(dataset['docs'], processed))
-
-        return list(predictions), dataset['orig_labels']
+        return [get_ent(token) for token in processed]
