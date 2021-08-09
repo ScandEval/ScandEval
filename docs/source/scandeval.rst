@@ -52,6 +52,22 @@ scandeval.datasets module
    :undoc-members:
    :show-inheritance:
 
+scandeval.ddt\_dep module
+-------------------------
+
+.. automodule:: scandeval.ddt_dep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.ddt\_pos module
+-------------------------
+
+.. automodule:: scandeval.ddt_pos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.dkhate module
 -----------------------
 
