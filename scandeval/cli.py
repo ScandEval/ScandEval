@@ -18,9 +18,9 @@ from .benchmark import Benchmark
               default=None,
               show_default=True,
               multiple=True,
-              type=click.Choice(['dane', 'dane-no-misc', 'angry-tweets',
-                                 'twitter-sent', 'dkhate', 'europarl1',
-                                 'europarl2', 'lcc1', 'lcc2']),
+              type=click.Choice(['dane', 'dane-no-misc', 'ddt-pos',
+                                 'angry-tweets', 'twitter-sent', 'dkhate',
+                                 'europarl1', 'europarl2', 'lcc1', 'lcc2']),
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',
