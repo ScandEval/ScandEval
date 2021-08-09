@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- The `W036` warning message from SpaCy is no longer shown.
+
+
 ## [v0.2.0] - 2021-08-09
 ### Added
 - Added the part-of-speech tagging task from the Danish Dependency Treebank.
