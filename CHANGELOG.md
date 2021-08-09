@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.2.0] - 2021-08-09
 ### Added
 - Added the part-of-speech tagging task from the Danish Dependency Treebank.
   Can be loaded with `load_ddt_pos` and used in `Benchmark` as `ddt-pos`.
