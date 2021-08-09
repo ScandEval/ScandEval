@@ -4,7 +4,7 @@ from transformers import (DataCollatorForTokenClassification,
                           PreTrainedTokenizerBase)
 from datasets import Dataset, load_metric
 from functools import partial
-from typing import Optional, List
+from typing import Optional
 import logging
 from abc import ABC, abstractmethod
 from tqdm.auto import tqdm
@@ -120,7 +120,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 previous_word_idx = word_idx
 
             all_labels.append(label_ids)
-        tokenized_inputs["labels"] = all_labels
+        tokenized_inputs['labels'] = all_labels
         return tokenized_inputs
 
     def _preprocess_data(self,
@@ -185,9 +185,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         else:
             itr = dataset['doc']
 
-        disable = ['attribute_ruler']
         processed = model.pipe(itr,
-                               disable=disable,
                                batch_size=self.batch_size)
         map_fn = self._extract_spacy_predictions
         predictions = map(map_fn, zip(dataset['tokens'], processed))
