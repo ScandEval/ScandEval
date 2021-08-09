@@ -45,7 +45,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
         id2label (dict): Conversion dict from NER label indices to the labels.
     '''
     def __init__(self,
-                 label2id: dict,
+                 id2label: dict,
                  epochs: int,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
@@ -54,8 +54,8 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                  verbose: bool = False):
         self._metric = load_metric('f1')
         super().__init__(task='text-classification',
-                         num_labels=len(label2id),
-                         label2id=label2id,
+                         num_labels=len(id2label),
+                         id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          epochs=epochs,

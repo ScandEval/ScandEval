@@ -49,11 +49,11 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
                  warmup_steps: int = 50,
                  batch_size: int = 16,
                  verbose: bool = False):
-        label2id = dict(ADJ=0, ADV=1, INTJ=2, NOUN=3, PROPN=4, VERB=5, ADP=6,
-                        AUX=7, CCONJ=8, DET=9, NUM=10, PART=11, PRON=12,
-                        SCONJ=13, PUNCT=14, SYM=15, X=16)
+        id2label = ['ADJ', 'ADV', 'INTJ', 'NOUN', 'PROPN', 'VERB', 'ADP',
+                    'AUX', 'CCONJ', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ',
+                    'PUNCT', 'SYM', 'X']
         super().__init__(epochs=5,
-                         label2id=label2id,
+                         id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          warmup_steps=warmup_steps,

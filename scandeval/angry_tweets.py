@@ -49,9 +49,9 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
                  warmup_steps: int = 50,
                  batch_size: int = 16,
                  verbose: bool = False):
-        label2id = dict(neutral=0, positiv=1, negativ=2)
+        id2label = ['neutral', 'positiv', 'negativ']
         super().__init__(epochs=5,
-                         label2id=label2id,
+                         id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          warmup_steps=warmup_steps,

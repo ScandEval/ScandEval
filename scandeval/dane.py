@@ -51,17 +51,10 @@ class DaneBenchmark(TokenClassificationBenchmark):
                  include_misc_tags: bool = True,
                  verbose: bool = False):
         self.include_misc_tags = include_misc_tags
-        label2id = {'B-LOC': 0,
-                    'I-LOC': 1,
-                    'B-ORG': 2,
-                    'I-ORG': 3,
-                    'B-PER': 4,
-                    'I-PER': 5,
-                    'B-MISC': 6,
-                    'I-MISC': 7,
-                    'O': 8}
+        id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
+                    'I-PER', 'B-MISC', 'I-MISC', 'O']
         super().__init__(epochs=5,
-                         label2id=label2id,
+                         id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          warmup_steps=warmup_steps,
