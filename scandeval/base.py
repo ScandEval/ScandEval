@@ -180,6 +180,13 @@ class BaseBenchmark(ABC):
                 import flax  # noqa
             elif framework == 'spacy':
                 import spacy
+
+                # Ignore warnings from SpaCy. This has to be called after the
+                # import, as the __init__.py file of SpaCy sets the warning
+                # levels of SpaCy warning W036
+                import warnings
+                warnings.filterwarnings('ignore', module='spacy*')
+
         except ModuleNotFoundError:
             msg = (f'The model {model_id} is built using the {framework} '
                    f'framework which is not installed. Try installing the '

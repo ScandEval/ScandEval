@@ -60,7 +60,6 @@ def block_terminal_output():
                                      'will instead unsqueeze and return '
                                      'a vector.'))
     warnings.filterwarnings('ignore', module='seqeval*')
-    warnings.filterwarnings('ignore', module='spacy*')
 
     logging.getLogger('filelock').setLevel(logging.ERROR)
 
