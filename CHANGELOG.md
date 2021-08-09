@@ -10,6 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
+- Added the part-of-speech tagging task from the Danish Dependency Treebank.
+  Can be loaded with `load_ddt_pos` and used in `Benchmark` as `ddt-pos`.
 - Documentation section and link to `README`
 - The `Benchmark` class and the CLI now accepts a `batch_size` argument
 
@@ -23,6 +25,7 @@ and this project adheres to
   effective batch size, to ensure fair comparisons.
 - Batch sizes are automatically halved if the GPU runs out of memory, with
   gradient accumulation correspondingly doubles.
+- Evaluation of `SpaCy` models on token classification tasks are more accurate.
 
 ### Fixed
 - `README` typos fixed, and image renders correctly
