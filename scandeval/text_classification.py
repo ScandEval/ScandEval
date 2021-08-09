@@ -46,7 +46,6 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
     '''
     def __init__(self,
                  label2id: dict,
-                 num_labels: int,
                  epochs: int,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
@@ -55,7 +54,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                  verbose: bool = False):
         self._metric = load_metric('f1')
         super().__init__(task='text-classification',
-                         num_labels=num_labels,
+                         num_labels=len(label2id),
                          label2id=label2id,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
