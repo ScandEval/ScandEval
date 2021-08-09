@@ -218,8 +218,8 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         # tokens
         token_idxs = [tok_idx for tok_idx, tok in enumerate(tokens)
                       for _ in str(tok)]
-        pred_token_idxs  = [tok_idx for tok_idx, tok in enumerate(processed)
-                            for _ in str(tok)]
+        pred_token_idxs = [tok_idx for tok_idx, tok in enumerate(processed)
+                           for _ in str(tok)]
         alignment = list(zip(token_idxs, pred_token_idxs))
 
         # Get the aligned predictions

@@ -136,8 +136,8 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
                           tokens=X_train['tokens'],
                           orig_labels=train_labels)
         test_dict = dict(doc=X_test['doc'],
-                          tokens=X_test['tokens'],
-                          orig_labels=test_labels)
+                         tokens=X_test['tokens'],
+                         orig_labels=test_labels)
         train = Dataset.from_dict(train_dict)
         test = Dataset.from_dict(test_dict)
         return train, test
