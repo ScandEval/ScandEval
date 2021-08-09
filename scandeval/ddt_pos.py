@@ -97,13 +97,13 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
 
         results = self._metric.compute(predictions=predictions,
                                        references=labels)
-        return dict(micro_f1=results["overall_f1"])
+        return dict(accuracy=results['overall_accuracy'])
 
     @doc_inherit
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
                      model_id: str):
-        kwargs = dict(metrics=metrics, metric_name='micro_f1')
+        kwargs = dict(metrics=metrics, metric_name='accuracy')
         train_mean, train_std_err = self._get_stats(split='train', **kwargs)
         test_mean, test_std_err = self._get_stats(split='test', **kwargs)
 
@@ -114,13 +114,11 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
         test_std_err *= 100
 
         if not np.isnan(train_std_err):
-            msg = (f'Mean micro-average F1-scores on the POS part of DDT '
-                   f'for {model_id}:\n'
+            msg = (f'Mean accuracy on the POS part of DDT for {model_id}:\n'
                    f'  - Train: {train_mean:.2f} +- {train_std_err:.2f}\n'
                    f'  - Test: {test_mean:.2f} +- {test_std_err:.2f}')
         else:
-            msg = (f'Micro-average F1-scores on the POS part of DDT '
-                   f'for {model_id}:\n'
+            msg = (f'Accuracy on the POS part of DDT for {model_id}:\n'
                    f'  - Train: {train_mean:.2f}\n'
                    f'  - Test: {test_mean:.2f}')
 
