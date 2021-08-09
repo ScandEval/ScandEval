@@ -319,7 +319,8 @@ class BaseBenchmark(ABC):
     @abstractmethod
     def _get_spacy_predictions_and_labels(self,
                                           model,
-                                          dataset: Dataset) -> tuple:
+                                          dataset: Dataset,
+                                          progress_bar: bool) -> tuple:
         '''Get predictions from SpaCy model on dataset.
 
         Args:
