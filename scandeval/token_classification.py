@@ -83,7 +83,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 A dictionary containing the tokenized data as well as labels.
         '''
         tokenized_inputs = tokenizer(
-            examples['docs'],
+            examples['tokens'],
             # We use this argument because the texts in our dataset are lists
             # of words (with a label for each word)
             is_split_into_words=True,
