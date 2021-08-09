@@ -143,7 +143,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                              tokenizer=kwargs['tokenizer'],
                              label2id=kwargs['config'].label2id)
             tokenised_dataset = dataset.map(map_fn, batched=True)
-            return tokenised_dataset.remove_columns(['docs', 'orig_labels'])
+            return tokenised_dataset
         elif framework == 'spacy':
             return dataset
 
