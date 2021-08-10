@@ -12,6 +12,9 @@ and this project adheres to
 ### Changed
 - The `W036` warning message from SpaCy is no longer shown.
 
+### Fixed
+- Raise `InvalidBenchmark` if model cannot be loaded from the HuggingFace Hub.
+
 
 ## [v0.2.0] - 2021-08-09
 ### Added
