@@ -499,31 +499,38 @@ class BaseBenchmark(ABC):
                 trainer.remove_callback(PrinterCallback)
 
                 # Finetune the model
-                if task == 'fill-mask':
-                    while True:
-                        try:
+                while True:
+                    try:
+                        if task == 'fill-mask':
                             trainer.train()
-                            break
-                        except RuntimeError as e:
-                            if not str(e).startswith('CUDA out of memory'):
-                                raise e
-                            bs = training_args.per_device_train_batch_size
-                            ga = training_args.gradient_accumulation_steps
-                            if bs == 1:
-                                raise RuntimeError('CUDA out of memory, even '
-                                                   'with a batch size of 1!')
-                            training_args.per_device_train_batch_size = bs // 2
-                            training_args.gradient_accumulation_steps = ga * 2
-                            trainer.args = training_args
 
-                # Log training metrics and save the state
-                train_metrics = trainer.evaluate(preprocessed_train,
-                                                 metric_key_prefix='train')
+                        # Log training metrics and save the state
+                        train_metrics = trainer.evaluate(
+                            preprocessed_train,
+                            metric_key_prefix='train'
+                        )
+
+                        # Log test metrics
+                        test_metrics = trainer.evaluate(
+                            preprocessed_test,
+                            metric_key_prefix='test'
+                        )
+
+                        break
+
+                    except RuntimeError as e:
+                        if not str(e).startswith('CUDA out of memory'):
+                            raise e
+                        bs = training_args.per_device_train_batch_size
+                        ga = training_args.gradient_accumulation_steps
+                        if bs == 1:
+                            raise RuntimeError('CUDA out of memory, even '
+                                               'with a batch size of 1!')
+                        training_args.per_device_train_batch_size = bs // 2
+                        training_args.gradient_accumulation_steps = ga * 2
+                        trainer.args = training_args
+
                 metrics['train'].append(train_metrics)
-
-                # Log test metrics
-                test_metrics = trainer.evaluate(preprocessed_test,
-                                                metric_key_prefix='test')
                 metrics['test'].append(test_metrics)
 
             self._log_metrics(metrics, model_id=model_id)

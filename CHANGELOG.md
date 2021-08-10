@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Reduces batch size if CUDA runs out of memory during evaluation
+
+
 ## [v0.3.0] - 2021-08-10
 ### Changed
 - The `W036` warning message from SpaCy is no longer shown.
