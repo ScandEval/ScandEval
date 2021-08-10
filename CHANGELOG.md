@@ -10,7 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- Reduces batch size if CUDA runs out of memory during evaluation
+- Reduces batch size if CUDA runs out of memory during evaluation.
+- Loading of text classification datasets now working properly.
 
 
 ## [v0.3.0] - 2021-08-10
