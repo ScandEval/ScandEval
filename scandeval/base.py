@@ -205,15 +205,15 @@ class BaseBenchmark(ABC):
 
             try:
                 config = AutoConfig.from_pretrained(model_id, **params)
+
+                model_cls = self._get_model_class(framework=framework)
+
+                model = model_cls.from_pretrained(model_id,
+                                                  config=config,
+                                                  cache_dir=self.cache_dir)
             except OSError:
                 raise InvalidBenchmark(f'The model {model_id} could not be '
                                        f'loaded from the HuggingFace hub.')
-
-            model_cls = self._get_model_class(framework=framework)
-
-            model = model_cls.from_pretrained(model_id,
-                                              config=config,
-                                              cache_dir=self.cache_dir)
 
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
