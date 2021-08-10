@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.3.1] - 2021-08-10
 ### Fixed
 - Reduces batch size if CUDA runs out of memory during evaluation.
 - Loading of text classification datasets now working properly.
