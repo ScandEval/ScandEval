@@ -61,8 +61,12 @@ class DkHateBenchmark(TextClassificationBenchmark):
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
         X_train, X_test, y_train, y_test = load_dkhate()
-        train = Dataset.from_dict(dict(doc=X_train, orig_label=y_train))
-        test = Dataset.from_dict(dict(doc=X_test, orig_label=y_test))
+        train_dict = dict(doc=X_train['tweet'],
+                          orig_label=y_train['label'])
+        test_dict = dict(doc=X_test['tweet'],
+                         orig_label=y_test['label'])
+        train = Dataset.from_dict(train_dict)
+        test = Dataset.from_dict(test_dict)
         return train, test
 
     @doc_inherit
