@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- New model is initialised if CUDA runs out of memory, to ensure that we are
+  now continuing to train the previous model
+
+
 ## [v0.3.1] - 2021-08-10
 ### Fixed
 - Reduces batch size if CUDA runs out of memory during evaluation.
