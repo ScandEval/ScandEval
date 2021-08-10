@@ -480,27 +480,31 @@ class BaseBenchmark(ABC):
 
             metrics = defaultdict(list)
             for _ in itr:
-
-                # Reinitialise a new model
-                model = self._load_model(model_id, **model_metadata)['model']
-
-                # Initialise Trainer
-                compute_metrics = partial(self._compute_metrics,
-                                          id2label=model.config.id2label)
-                trainer = Trainer(model=model,
-                                  args=training_args,
-                                  train_dataset=preprocessed_train,
-                                  tokenizer=tokenizer,
-                                  data_collator=data_collator,
-                                  compute_metrics=compute_metrics)
-
-                # Remove the callback which prints the metrics after each
-                # evaluation
-                trainer.remove_callback(PrinterCallback)
-
-                # Finetune the model
                 while True:
                     try:
+                        # Reinitialise a new model
+                        model = self._load_model(model_id,
+                                                 **model_metadata)['model']
+
+                        # Initialise compute_metrics function
+                        compute_metrics = partial(
+                            self._compute_metrics,
+                            id2label=model.config.id2label
+                        )
+
+                        # Initialise Trainer
+                        trainer = Trainer(model=model,
+                                          args=training_args,
+                                          train_dataset=preprocessed_train,
+                                          tokenizer=tokenizer,
+                                          data_collator=data_collator,
+                                          compute_metrics=compute_metrics)
+
+                        # Remove the callback which prints the metrics after
+                        # each evaluation
+                        trainer.remove_callback(PrinterCallback)
+
+                        # Finetune the model
                         if task == 'fill-mask':
                             trainer.train()
 
