@@ -9,6 +9,14 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- Added confidence intervals for finetuned models, where there is a 95%
+  likelihood that the true score would belong to the interval, given infinite
+  data from the same distribution. In the case of "raw" pretrained models, this
+  radius is added onto the existing interval, so that both the uncertainty in
+  model initialisation as well as sample size of the validation dataset affects
+  the size of the interval.
+
 ### Changed
 - Allow the possibility to include all languages and/or tasks in the CLI and
   the `Benchmark` class.
