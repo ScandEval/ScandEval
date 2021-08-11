@@ -111,6 +111,7 @@ class BaseBenchmark(ABC):
     @staticmethod
     def _get_stats(metrics: Dict[str, List[Dict[str, float]]],
                    metric_name: str,
+                   num_samples: int,
                    split: str) -> Tuple[float, float]:
         '''Helper function to compute the mean with confidence intervals.
 
@@ -122,6 +123,8 @@ class BaseBenchmark(ABC):
             metric_name (str):
                 The name of the metric. Is used to collect the correct metric
                 from `metrics`.
+            num_samples (int):
+                The number of samples in the data the model is evaluated on.
             split (str):
                 The dataset split we are calculating statistics of. Is used to
                 collect the correct metric from `metrics`.
@@ -133,12 +136,21 @@ class BaseBenchmark(ABC):
         '''
         key = f'{split}_{metric_name}'
         metric_values = [dct[key] for dct in metrics[split]]
+
+        # Set Z-value to 1.96, corresponding to a 95% confidence interval
+        z = 1.96
+
         mean = np.mean(metric_values)
+        std_err = np.sqrt(mean * (1 - mean) / num_samples)
+
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            sample_std = np.std(metric_values, ddof=1)
-            std_err = sample_std / np.sqrt(len(metric_values))
-            return mean, 1.96 * std_err
+
+            if len(metric_values) > 1:
+                sample_std = np.std(metric_values, ddof=1)
+                std_err += sample_std / np.sqrt(len(metric_values))
+
+        return mean, z * std_err
 
     def _load_model(self,
                     model_id: str,
@@ -314,6 +326,8 @@ class BaseBenchmark(ABC):
     @abstractmethod
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
+                     num_train: int,
+                     num_test: int,
                      model_id: str):
         '''Log the metrics.
 
@@ -322,6 +336,10 @@ class BaseBenchmark(ABC):
                 The metrics that are to be logged. This is a dict with keys
                 'train' and 'test', with values being lists of dictionaries
                 full of metrics.
+            num_train (int):
+                The number of training samples.
+            num_test (int):
+                The number of test samples.
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
                 model.
@@ -547,7 +565,10 @@ class BaseBenchmark(ABC):
                 metrics['train'].append(train_metrics)
                 metrics['test'].append(test_metrics)
 
-            self._log_metrics(metrics, model_id=model_id)
+            self._log_metrics(metrics,
+                              model_id=model_id,
+                              num_train=len(train),
+                              num_test=len(test))
             return metrics
 
         elif framework == 'spacy':
@@ -579,7 +600,10 @@ class BaseBenchmark(ABC):
                             for key, val in test_metrics.items()}
             metrics = dict(train=[train_metrics], test=[test_metrics])
 
-            self._log_metrics(metrics, model_id=model_id)
+            self._log_metrics(metrics,
+                              model_id=model_id,
+                              num_train=len(train),
+                              num_test=len(test))
             return metrics
 
         else:

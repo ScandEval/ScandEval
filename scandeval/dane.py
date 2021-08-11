@@ -127,26 +127,26 @@ class DaneBenchmark(TokenClassificationBenchmark):
     @doc_inherit
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
+                     num_train: int,
+                     num_test: int,
                      model_id: str):
         kwargs = dict(metrics=metrics, metric_name='micro_f1')
-        train_mean, train_std_err = self._get_stats(split='train', **kwargs)
-        test_mean, test_std_err = self._get_stats(split='test', **kwargs)
+        train_mean, train_se = self._get_stats(split='train',
+                                               num_samples=num_train,
+                                               **kwargs)
+        test_mean, test_se = self._get_stats(split='test',
+                                             num_samples=num_test,
+                                             **kwargs)
 
         # Multiply scores by x100 to make them easier to read
         train_mean *= 100
         test_mean *= 100
-        train_std_err *= 100
-        test_std_err *= 100
+        train_se *= 100
+        test_se *= 100
 
-        if not np.isnan(train_std_err):
-            msg = (f'Mean micro-average F1-scores on DaNE for {model_id}:\n'
-                   f'  - Train: {train_mean:.2f} ± {train_std_err:.2f}\n'
-                   f'  - Test: {test_mean:.2f} ± {test_std_err:.2f}')
-        else:
-            msg = (f'Micro-average F1-scores on DaNE for {model_id}:\n'
-                   f'  - Train: {train_mean:.2f}\n'
-                   f'  - Test: {test_mean:.2f}')
-
+        msg = (f'Mean micro-average F1-scores on DaNE for {model_id}:\n'
+               f'  - Train: {train_mean:.2f} ± {train_se:.2f}\n'
+               f'  - Test: {test_mean:.2f} ± {test_se:.2f}')
         logger.info(msg)
 
     @doc_inherit

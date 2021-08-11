@@ -231,12 +231,18 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
     @doc_inherit
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
+                     num_train: int,
+                     num_test: int,
                      model_id: str):
 
         for metric_name in ['uas', 'las']:
             kwargs = dict(metrics=metrics, metric_name=metric_name)
-            train_mean, train_se = self._get_stats(split='train', **kwargs)
-            test_mean, test_se = self._get_stats(split='test', **kwargs)
+            train_mean, train_se = self._get_stats(split='train',
+                                                   num_samples=num_train,
+                                                   **kwargs)
+            test_mean, test_se = self._get_stats(split='test',
+                                                 num_samples=num_test,
+                                                 **kwargs)
 
             # Multiply scores by x100 to make them easier to read
             train_mean *= 100
@@ -244,17 +250,10 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
             train_se *= 100
             test_se *= 100
 
-            if not np.isnan(train_se):
-                msg = (f'Mean {metric_name.upper()} on the DEP part of DDT '
-                       f'for {model_id}:\n'
-                       f'  - Train: {train_mean:.2f} ± {train_se:.2f}\n'
-                       f'  - Test: {test_mean:.2f} ± {test_se:.2f}')
-            else:
-                msg = (f'{metric_name.upper()} on the DEP part of DDT '
-                       f'for {model_id}:\n'
-                       f'  - Train: {train_mean:.2f}\n'
-                       f'  - Test: {test_mean:.2f}')
-
+            msg = (f'{metric_name.upper()} on the DEP part of DDT '
+                   f'for {model_id}:\n'
+                   f'  - Train: {train_mean:.2f} ± {train_se:.2f}\n'
+                   f'  - Test: {test_mean:.2f} ± {test_se:.2f}')
             logger.info(msg)
 
     @doc_inherit
