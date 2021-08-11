@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.4.0] - 2021-08-11
 ### Added
 - Added confidence intervals for finetuned models, where there is a 95%
   likelihood that the true score would belong to the interval, given infinite
