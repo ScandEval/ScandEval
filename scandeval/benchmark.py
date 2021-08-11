@@ -116,6 +116,18 @@ class Benchmark:
     def _get_model_lists(self) -> Dict[str, List[str]]:
         '''Updates the model list'''
 
+        # Log fetching message
+        log_msg = 'Fetching list of models'
+        if None not in self.languages:
+            log_msg += f' for the languages {self.languages}'
+            if None not in self.tasks:
+                log_msg += f' and tasks {self.tasks}'
+        else:
+            if None not in self.tasks:
+                log_msg += f' for the tasks {self.tasks}'
+        log_msg += ' from the HuggingFace Hub.'
+        logger.info(log_msg)
+
         # Initialise model lists
         model_lists = defaultdict(list)
         for language in self.languages:
