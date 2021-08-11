@@ -16,6 +16,8 @@ and this project adheres to
   radius is added onto the existing interval, so that both the uncertainty in
   model initialisation as well as sample size of the validation dataset affects
   the size of the interval.
+- Added garbage collection after each benchmark, which will (hopefully) prevent
+  memory leaking when benchmarking several models.
 
 ### Changed
 - Allow the possibility to include all languages and/or tasks in the CLI and
