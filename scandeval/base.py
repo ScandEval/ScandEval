@@ -538,8 +538,8 @@ class BaseBenchmark(ABC):
                         bs = training_args.per_device_train_batch_size
                         ga = training_args.gradient_accumulation_steps
                         if bs == 1:
-                            raise RuntimeError('CUDA out of memory, even '
-                                               'with a batch size of 1!')
+                            raise InvalidBenchmark('CUDA out of memory, even '
+                                                   'with a batch size of 1!')
                         training_args.per_device_train_batch_size = bs // 2
                         training_args.gradient_accumulation_steps = ga * 2
                         trainer.args = training_args
