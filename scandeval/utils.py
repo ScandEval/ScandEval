@@ -8,13 +8,14 @@ import logging
 import pkg_resources
 import re
 import transformers.utils.logging as tf_logging
+import torch
 from transformers import (AutoModelForTokenClassification,
                           AutoModelForSequenceClassification,
                           TFAutoModelForTokenClassification,
                           TFAutoModelForSequenceClassification,
                           FlaxAutoModelForTokenClassification,
-                          FlaxAutoModelForSequenceClassification)
-
+                          FlaxAutoModelForSequenceClassification,
+                          Trainer)
 
 PT_CLS = {'token-classification': AutoModelForTokenClassification,
           'text-classification': AutoModelForSequenceClassification}
@@ -23,6 +24,34 @@ TF_CLS = {'token-classification': TFAutoModelForTokenClassification,
 JAX_CLS = {'token-classification': FlaxAutoModelForTokenClassification,
            'text-classification': FlaxAutoModelForSequenceClassification}
 MODEL_CLASSES = dict(pytorch=PT_CLS, tensorflow=TF_CLS, jax=JAX_CLS)
+
+
+class TwolabelTrainer(Trainer):
+    '''Trainer class which deals with two labels.'''
+    def __init__(self, split_point: int, **kwargs):
+        self.split_point = split_point
+        super().__init__(**kwargs)
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.pop('labels')
+        labels1 = labels[:, :, 0]
+        labels2 = labels[:, :, 1]
+        labels2 = torch.where(labels2 > 0, labels2 - self.split_point, labels2)
+
+        outputs = model(**inputs)
+        logits = outputs.logits
+
+        logits1 = logits[:, :, :self.split_point]
+        logits2 = logits[:, :, self.split_point:]
+        num_classes2 = logits2.size(2)
+
+        loss_fct = torch.nn.CrossEntropyLoss()
+        loss1 = loss_fct(logits1.view(-1, self.split_point),
+                              labels1.view(-1))
+        loss2 = loss_fct(logits2.view(-1, num_classes2),
+                             labels2.view(-1))
+        loss = loss1 + loss2
+        return (loss, outputs) if return_outputs else loss
 
 
 class InvalidBenchmark(Exception):

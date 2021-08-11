@@ -20,7 +20,8 @@ from collections import defaultdict
 import warnings
 from functools import partial
 
-from .utils import MODEL_CLASSES, is_module_installed, InvalidBenchmark
+from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
+                    TwolabelTrainer)
 
 
 class BaseBenchmark(ABC):
@@ -79,6 +80,8 @@ class BaseBenchmark(ABC):
                  epochs: int = 5,
                  warmup_steps: int = 50,
                  batch_size: int = 32,
+                 multilabel: bool = False,
+                 split_point: Optional[int] = None,
                  verbose: bool = False):
         if batch_size not in [1, 2, 4, 8, 16, 32]:
             raise TypeError('The batch size must be either 1, 2, 4, 8, '
@@ -92,6 +95,8 @@ class BaseBenchmark(ABC):
         self.warmup_steps = warmup_steps
         self.num_labels = num_labels
         self.id2label = id2label
+        self.multilabel = multilabel
+        self.split_point = split_point
         self.verbose = verbose
         if self.id2label is not None:
             self.label2id = {label: id for id, label in enumerate(id2label)}
@@ -493,12 +498,17 @@ class BaseBenchmark(ABC):
                         )
 
                         # Initialise Trainer
-                        trainer = Trainer(model=model,
-                                          args=training_args,
-                                          train_dataset=preprocessed_train,
-                                          tokenizer=tokenizer,
-                                          data_collator=data_collator,
-                                          compute_metrics=compute_metrics)
+                        trainer_args = dict(model=model,
+                                            args=training_args,
+                                            train_dataset=preprocessed_train,
+                                            tokenizer=tokenizer,
+                                            data_collator=data_collator,
+                                            compute_metrics=compute_metrics)
+                        if self.multilabel:
+                            trainer_args['split_point'] = self.split_point
+                            trainer = TwolabelTrainer(**trainer_args)
+                        else:
+                            trainer = Trainer(**trainer_args)
 
                         # Remove the callback which prints the metrics after
                         # each evaluation

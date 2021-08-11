@@ -53,6 +53,8 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
                  batch_size: int = 16,
+                 multilabel: bool = False,
+                 split_point: Optional[int] = None,
                  verbose: bool = False):
         self._metric = load_metric('seqeval')
         super().__init__(task='token-classification',
@@ -63,6 +65,8 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                          epochs=epochs,
                          warmup_steps=warmup_steps,
                          batch_size=batch_size,
+                         multilabel=multilabel,
+                         split_point=split_point,
                          verbose=verbose)
 
     def _tokenize_and_align_labels(self,
@@ -100,22 +104,44 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 # to -100 so they are automatically ignored in the loss
                 # function
                 if word_idx is None:
-                    label_ids.append(-100)
+                    if self.multilabel:
+                        label_ids.append([-100, -100])
+                    else:
+                        label_ids.append(-100)
 
                 # We set the label for the first token of each word
                 elif word_idx != previous_word_idx:
                     label = labels[word_idx]
-                    try:
-                        label_id = label2id[label]
-                    except KeyError:
-                        err_msg = (f'The label {label} was not found in '
-                                   f'the model\'s config.')
-                        raise InvalidBenchmark(err_msg)
+                    if self.multilabel:
+                        try:
+                            label_id1 = label2id[label[0]]
+                        except KeyError:
+                            err_msg = (f'The label {label[0]} was not found '
+                                       f'in the model\'s config.')
+                            raise InvalidBenchmark(err_msg)
+                        try:
+                            label_id2 = label2id[label[1]]
+                        except KeyError:
+                            err_msg = (f'The label {label[1]} was not found '
+                                       f'in the model\'s config.')
+                            raise InvalidBenchmark(err_msg)
+                        label_id = [label_id1, label_id2]
+
+                    else:
+                        try:
+                            label_id = label2id[label]
+                        except KeyError:
+                            err_msg = (f'The label {label} was not found '
+                                       f'in the model\'s config.')
+                            raise InvalidBenchmark(err_msg)
                     label_ids.append(label_id)
 
                 # For the other tokens in a word, we set the label to -100
                 else:
-                    label_ids.append(-100)
+                    if self.multilabel:
+                        label_ids.append([-100, -100])
+                    else:
+                        label_ids.append(-100)
 
                 previous_word_idx = word_idx
 
@@ -162,7 +188,11 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         Returns:
             HuggingFace data collator: The data collator.
         '''
-        return DataCollatorForTokenClassification(tokenizer)
+        if self.multilabel:
+            params = dict(label_pad_token_id=[-100, -100])
+        else:
+            params = dict(label_pad_token_id=-100)
+        return DataCollatorForTokenClassification(tokenizer, **params)
 
     def _get_spacy_predictions_and_labels(self,
                                           model,
@@ -185,8 +215,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         else:
             itr = dataset['doc']
 
-        processed = model.pipe(itr,
-                               batch_size=self.batch_size)
+        processed = model.pipe(itr, batch_size=self.batch_size)
         map_fn = self._extract_spacy_predictions
         predictions = map(map_fn, zip(dataset['tokens'], processed))
 
