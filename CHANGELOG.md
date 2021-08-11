@@ -12,6 +12,9 @@ and this project adheres to
 ### Fixed
 - New model is initialised if CUDA runs out of memory, to ensure that we are
   now continuing to train the previous model
+- Dependency parsing now implemented properly as two-label classification, with
+  associated UAS and LAS metric computations. Works for pretrained SpaCy models
+  as well as finetuning general language models.
 
 
 ## [v0.3.1] - 2021-08-10
