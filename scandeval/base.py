@@ -138,7 +138,7 @@ class BaseBenchmark(ABC):
         key = f'{split}_{metric_name}'
         metric_values = [dct[key] for dct in metrics[split]]
 
-        # Set Z-value to 1.96, corresponding to a 95% confidence interval
+        # Set Z-value to 1.96, corresponding to a 95% confidence interval
         z = 1.96
 
         mean = np.mean(metric_values)

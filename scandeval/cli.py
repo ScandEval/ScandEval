@@ -36,8 +36,8 @@ from .benchmark import Benchmark
               multiple=True,
               type=click.Choice(['all',
                                  'fill-mask',
-                                  'token-classification',
-                                  'text-classification']),
+                                 'token-classification',
+                                 'text-classification']),
               help='The tasks to benchmark. Only relevant if `model_id` '
                    'is not specified.')
 @click.option('--num_finetunings', '-n',

@@ -47,9 +47,9 @@ class TwolabelTrainer(Trainer):
 
         loss_fct = torch.nn.CrossEntropyLoss()
         loss1 = loss_fct(logits1.view(-1, self.split_point),
-                              labels1.view(-1))
+                         labels1.view(-1))
         loss2 = loss_fct(logits2.view(-1, num_classes2),
-                             labels2.view(-1))
+                         labels2.view(-1))
         loss = loss1 + loss2
         return (loss, outputs) if return_outputs else loss
 

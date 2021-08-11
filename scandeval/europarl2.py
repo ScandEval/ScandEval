@@ -1,7 +1,6 @@
 '''Sentiment evaluation of a language model on the Europarl2 dataset'''
 
 from datasets import Dataset
-import numpy as np
 from typing import Tuple, Dict, List, Optional
 import logging
 
