@@ -9,9 +9,19 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- Allow the possibility to include all languages and/or tasks in the CLI and
+  the `Benchmark` class.
+- Added Icelandic and Faroese to default list of languages in CLI and the
+  `Benchmark` class.
+- The default value for `task` is now all tasks, which also includes models
+  that haven't been assigned any task on the HuggingFace Hub;
+- If a model cannot be trained without running out of CUDA memory, even with a
+  batch size of 1, then the model will be skipped in `Benchmark` and the CLI.
+
 ### Fixed
 - New model is initialised if CUDA runs out of memory, to ensure that we are
-  now continuing to train the previous model
+  now continuing to train the previous model.
 - Dependency parsing now implemented properly as two-label classification, with
   associated UAS and LAS metric computations. Works for pretrained SpaCy models
   as well as finetuning general language models.
