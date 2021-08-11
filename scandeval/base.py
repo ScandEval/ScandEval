@@ -19,6 +19,7 @@ from tqdm.auto import tqdm
 from collections import defaultdict
 import warnings
 from functools import partial
+import gc
 
 from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
                     TwolabelTrainer)
@@ -569,6 +570,12 @@ class BaseBenchmark(ABC):
                               model_id=model_id,
                               num_train=len(train),
                               num_test=len(test))
+
+            # Garbage collection, to avoid memory issues
+            del model, model_dict
+            del preprocessed_train, preprocessed_test, train, test
+            gc.collect()
+
             return metrics
 
         elif framework == 'spacy':
@@ -604,6 +611,12 @@ class BaseBenchmark(ABC):
                               model_id=model_id,
                               num_train=len(train),
                               num_test=len(test))
+
+            # Garbage collection, to avoid memory issues
+            del model, model_dict
+            del preprocessed_train, preprocessed_test, train, test
+            gc.collect()
+
             return metrics
 
         else:
