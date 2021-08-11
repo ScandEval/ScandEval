@@ -42,8 +42,19 @@ class Benchmark:
                  task: Optional[Union[str, List[str]]] = None,
                  batch_size: int = 32,
                  verbose: bool = False):
-        self.languages = [language] if isinstance(language, str) else language
-        self.tasks = [task] if isinstance(task, str) else task
+
+        # Ensure that `self.languages` is a list
+        if isinstance(language, str) or language is None:
+            self.languages = [language]
+        else:
+            self.languages = language
+
+        # Ensure that `self.tasks` is a list
+        if isinstance(task, str) or task is None:
+            self.tasks = [task]
+        else:
+            self.tasks = task
+
         self._model_lists = self._get_model_lists()
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose, batch_size=batch_size)
@@ -70,18 +81,27 @@ class Benchmark:
         logger.setLevel(logging_level)
 
     @staticmethod
-    def _get_model_ids(language: str, task: str) -> List[str]:
+    def _get_model_ids(language: Optional[str] = None,
+                       task: Optional[str] = None) -> List[str]:
         '''Retrieves all the model IDs in a given language with a given task.
 
         Args:
-            language (str): The language code of the language to consider.
-            task (str): The task to consider.
+            language (str or None):
+                The language code of the language to consider. If None then the
+                models will not be filtered on language. Defaults to None.
+            task (str or None):
+                The task to consider. If None then the models will not be
+                filtered on task. Defaults to None.
 
         Returns:
             list of str: The model IDs of the relevant models.
         '''
         url = 'https://huggingface.co/models'
-        params = dict(filter=language, pipeline_tag=task)
+        params = dict()
+        if language is not None:
+            params['filter'] = language
+        if task is not None:
+            params['pipeline_tag'] = task
         html = requests.get(url, params=params).text
         soup = BeautifulSoup(html, 'html.parser')
         articles = soup.find_all('article')
