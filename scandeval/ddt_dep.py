@@ -179,12 +179,12 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
             predictions1 = [
                 [id2label[pred] for pred, lbl in zip(prediction, label)
                  if lbl != -100]
-                for prediction, label in zip(raw_predictions1, labels)
+                for prediction, label in zip(raw_predictions1, labels1)
             ]
             predictions2 = [
                 [id2label[pred] for pred, lbl in zip(prediction, label)
                  if lbl != -100]
-                for prediction, label in zip(raw_predictions2, labels)
+                for prediction, label in zip(raw_predictions2, labels2)
             ]
             labels1 = [[id2label[lbl] for lbl in label if lbl != -100]
                        for label in labels1]
