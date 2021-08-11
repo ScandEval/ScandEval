@@ -20,6 +20,7 @@ and this project adheres to
   memory leaking when benchmarking several models.
 
 ### Changed
+- New logo, including the Faroe Islands!
 - Allow the possibility to include all languages and/or tasks in the CLI and
   the `Benchmark` class.
 - Added Icelandic and Faroese to default list of languages in CLI and the
