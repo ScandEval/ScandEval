@@ -55,7 +55,7 @@ class Benchmark:
         else:
             self.tasks = task
 
-        self._model_lists = self._get_model_lists()
+        self._model_lists = None
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose, batch_size=batch_size)
         self._benchmarks = [
@@ -173,6 +173,8 @@ class Benchmark:
                 having the model IDs as keys.
         '''
         if model_id is None:
+            if self._model_lists is None:
+                self._model_lists = self._get_model_lists()
             model_ids = self._model_lists['all']
         elif isinstance(model_id, str):
             model_ids = [model_id]
