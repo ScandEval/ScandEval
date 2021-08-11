@@ -31,14 +31,13 @@ from .benchmark import Benchmark
               help='The languages to benchmark. Only relevant if `model_id` '
                    'is not specified.')
 @click.option('--task', '-t',
-              default=('fill-mask',
-                       'token-classification',
-                       'text-classification'),
+              default=['all'],
               show_default=True,
               multiple=True,
-              type=click.Choice(['fill-mask',
-                                 'token-classification',
-                                 'text-classification']),
+              type=click.Choice(['all',
+                                 'fill-mask',
+                                  'token-classification',
+                                  'text-classification']),
               help='The tasks to benchmark. Only relevant if `model_id` '
                    'is not specified.')
 @click.option('--num_finetunings', '-n',
@@ -67,7 +66,7 @@ def benchmark(model_id: Tuple[str],
     '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
     benchmarker = Benchmark(language=list(language),
-                            task=list(task),
+                            task=None if 'all' in task else list(task),
                             batch_size=batch_size,
                             verbose=verbose)
 
