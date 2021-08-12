@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now catching the error where tokenisation is not possible, due to the model
+  having been trained on a different task than what is present in the dataset.
+  E.g., if a generator model is trained on a classification task.
+
+
 ## [v0.4.1] - 2021-08-12
 ### Fixed
 - Now catching the error when the model's config does not align with the model

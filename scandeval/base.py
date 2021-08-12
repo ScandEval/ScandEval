@@ -467,14 +467,18 @@ class BaseBenchmark(ABC):
             tokenizer = model_dict['tokenizer']
 
             # Preprocess the datasets
-            preprocessed_train = self._preprocess_data(train,
-                                                       framework=framework,
-                                                       config=model.config,
-                                                       tokenizer=tokenizer)
-            preprocessed_test = self._preprocess_data(test,
-                                                      framework=framework,
-                                                      config=model.config,
-                                                      tokenizer=tokenizer)
+            try:
+                preprocessed_train = self._preprocess_data(train,
+                                                           framework=framework,
+                                                           config=model.config,
+                                                           tokenizer=tokenizer)
+                preprocessed_test = self._preprocess_data(test,
+                                                          framework=framework,
+                                                          config=model.config,
+                                                          tokenizer=tokenizer)
+            except ValueError:
+                raise InvalidBenchmark('Preprocessing of the dataset could '
+                                       'not be done.')
 
             # Load the data collator
             data_collator = self._load_data_collator(tokenizer)
