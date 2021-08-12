@@ -229,7 +229,7 @@ class BaseBenchmark(ABC):
                 model = model_cls.from_pretrained(model_id,
                                                   config=config,
                                                   cache_dir=self.cache_dir)
-            except OSError:
+            except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
                                        f'loaded from the HuggingFace hub.')
 
