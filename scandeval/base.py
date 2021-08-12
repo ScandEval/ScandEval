@@ -515,8 +515,8 @@ class BaseBenchmark(ABC):
             # Initialise training arguments
             training_args = TrainingArguments(
                 output_dir='.',
-                evaluation_strategy='no',
-                logging_strategy='no',
+                #evaluation_strategy='no',
+                #logging_strategy='no',
                 save_strategy='no',
                 report_to='none',
                 save_total_limit=0,
@@ -548,6 +548,7 @@ class BaseBenchmark(ABC):
                         trainer_args = dict(model=model,
                                             args=training_args,
                                             train_dataset=trains[idx],
+                                            eval_dataset=tests[0],
                                             tokenizer=tokenizer,
                                             data_collator=data_collator,
                                             compute_metrics=compute_metrics)
