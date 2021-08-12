@@ -51,6 +51,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
                  batch_size: int = 16,
+                 evaluate_train: bool = False,
                  multilabel: bool = False,
                  verbose: bool = False):
         self._metric = load_metric('f1')
@@ -62,6 +63,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                          epochs=epochs,
                          warmup_steps=warmup_steps,
                          batch_size=batch_size,
+                         evaluate_train=evaluate_train,
                          multilabel=multilabel,
                          verbose=verbose)
 

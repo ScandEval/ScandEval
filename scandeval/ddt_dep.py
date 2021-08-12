@@ -48,6 +48,7 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
                  batch_size: int = 16,
+                 evaluate_train: bool = False,
                  verbose: bool = False):
         id2label_head = [str(i) for i in range(100)]
         id2label_dep = ['acl',
@@ -122,6 +123,7 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
                          batch_size=batch_size,
                          multilabel=True,
                          split_point=len(id2label_head),
+                         evaluate_train=evaluate_train,
                          verbose=verbose)
 
     @doc_inherit
@@ -231,29 +233,24 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
     @doc_inherit
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
-                     num_train: int,
-                     num_test: int,
                      model_id: str):
 
-        for metric_name in ['uas', 'las']:
-            kwargs = dict(metrics=metrics, metric_name=metric_name)
-            train_mean, train_se = self._get_stats(split='train',
-                                                   num_samples=num_train,
-                                                   **kwargs)
-            test_mean, test_se = self._get_stats(split='test',
-                                                 num_samples=num_test,
-                                                 **kwargs)
-
-            # Multiply scores by x100 to make them easier to read
-            train_mean *= 100
-            test_mean *= 100
-            train_se *= 100
+        for metric_name in ['las', 'uas']:
+            scores = self._get_stats(metrics, metric_name)
+            test_score, test_se = scores['test']
+            test_score *= 100
             test_se *= 100
 
             msg = (f'{metric_name.upper()} on the DEP part of DDT '
                    f'for {model_id}:\n'
-                   f'  - Train: {train_mean:.2f} ± {train_se:.2f}\n'
-                   f'  - Test: {test_mean:.2f} ± {test_se:.2f}')
+                   f'  - Test: {test_score:.2f} ± {test_se:.2f}')
+
+            if 'train' in scores.keys():
+                train_score, train_se = scores['train']
+                train_score *= 100
+                train_se *= 100
+                msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
+
             logger.info(msg)
 
     @doc_inherit

@@ -8,6 +8,19 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- It is possible to only evaluate on the test sets, to save some time. This can
+  be done in the `Benchmark` class using the `evaluate_train` argument, and in
+  the CLI with the `--evaluate_train` flag.
+
+### Changed
+- Changed calculation of confidence intervals, which is now based on
+  bootstrapping rather than the analytic approach. It will now evaluate ten
+  times on the test set and compute a bootstrap estimate of the standard error,
+  which is uses to compute an interval around the score on the entire test set.
+
+
 ## [v0.4.3] - 2021-08-12
 ### Fixed
 - RuntimeErrors occuring during training will now raise an `InvalidBenchmark`

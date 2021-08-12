@@ -37,6 +37,9 @@ class BaseBenchmark(ABC):
             A dictionary that converts labels to their indices. This will only
             be used if the pretrained model does not already have one. Defaults
             to None.
+        evaluate_train (bool, optional):
+            Whether the models should be evaluated on the training scores.
+            Defaults to False.
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
             '.benchmark_models'.
@@ -76,6 +79,7 @@ class BaseBenchmark(ABC):
                  task: str,
                  num_labels: Optional[int] = None,
                  id2label: Optional[List[str]] = None,
+                 evaluate_train: bool = False,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
                  epochs: int = 5,
@@ -89,6 +93,7 @@ class BaseBenchmark(ABC):
                             '16 or 32.')
         self.batch_size = batch_size
         self.gradient_accumulation = 32 // batch_size
+        self.evaluate_train = evaluate_train
         self.task = task
         self.cache_dir = cache_dir
         self.learning_rate = learning_rate
@@ -111,9 +116,7 @@ class BaseBenchmark(ABC):
 
     @staticmethod
     def _get_stats(metrics: Dict[str, List[Dict[str, float]]],
-                   metric_name: str,
-                   num_samples: int,
-                   split: str) -> Tuple[float, float]:
+                   metric_name: str) -> Dict[str, Tuple[float, float]]:
         '''Helper function to compute the mean with confidence intervals.
 
         Args:
@@ -124,34 +127,45 @@ class BaseBenchmark(ABC):
             metric_name (str):
                 The name of the metric. Is used to collect the correct metric
                 from `metrics`.
-            num_samples (int):
-                The number of samples in the data the model is evaluated on.
-            split (str):
-                The dataset split we are calculating statistics of. Is used to
-                collect the correct metric from `metrics`.
 
         Returns:
-            pair of floats:
-                The mean micro-average F1-score and the radius of its 95%
-                confidence interval.
+            dict:
+                Dictionary with keys among 'train' and 'test', with
+                corresponding values being a pair of floats, containing the
+                score and the radius of its 95% confidence interval.
         '''
-        key = f'{split}_{metric_name}'
-        metric_values = [dct[key] for dct in metrics[split]]
-
-        # Set Z-value to 1.96, corresponding to a 95% confidence interval
-        z = 1.96
-
-        mean = np.mean(metric_values)
-        std_err = np.sqrt(mean * (1 - mean) / num_samples)
-
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
 
-            if len(metric_values) > 1:
-                sample_std = np.std(metric_values, ddof=1)
-                std_err += sample_std / np.sqrt(len(metric_values))
+            results = dict()
 
-        return mean, z * std_err
+            if 'train' in metrics.keys():
+                train_scores = [dct[f'train_{metric_name}']
+                                for dct in metrics['train']]
+                train_score = train_scores[0]
+
+                if len(train_scores) > 1:
+                    sample_std = np.std(train_scores, ddof=1)
+                    train_se = sample_std / np.sqrt(len(train_scores))
+                else:
+                    train_se = np.nan
+
+                results['train'] = (train_score, 1.96 * train_se)
+
+            if 'test' in metrics.keys():
+                test_scores = [dct[f'test_{metric_name}']
+                                for dct in metrics['test']]
+                test_score = test_scores[0]
+
+                if len(test_scores) > 1:
+                    sample_std = np.std(test_scores, ddof=1)
+                    test_se = sample_std / np.sqrt(len(test_scores))
+                else:
+                    test_se = np.nan
+
+                results['test'] = (test_score, 1.96 * test_se)
+
+            return results
 
     def _load_model(self,
                     model_id: str,
@@ -327,8 +341,6 @@ class BaseBenchmark(ABC):
     @abstractmethod
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
-                     num_train: int,
-                     num_test: int,
                      model_id: str):
         '''Log the metrics.
 
@@ -337,10 +349,6 @@ class BaseBenchmark(ABC):
                 The metrics that are to be logged. This is a dict with keys
                 'train' and 'test', with values being lists of dictionaries
                 full of metrics.
-            num_train (int):
-                The number of training samples.
-            num_test (int):
-                The number of test samples.
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
                 model.
@@ -451,7 +459,37 @@ class BaseBenchmark(ABC):
         # Load the dataset
         train, test = self._load_data()
 
+        # Initialise random number generator
+        rng = np.random.default_rng(4242)
+
+        # Get bootstrap sample indices
+        if task == 'fill-mask' or self.evaluate_train:
+            train_bidxs = rng.integers(0, len(train),
+                                      size=(num_finetunings, len(train)))
+        test_bidxs = rng.integers(0, len(test), size=(10, len(test)))
+
         if framework in ['pytorch', 'tensorflow', 'jax']:
+
+            # Preprocess the datasets
+            try:
+                params = dict(framework=framework,
+                              config=model.config,
+                              tokenizer=tokenizer)
+                if task == 'fill-mask' or self.evaluate_train:
+                    preprocessed_train = self._preprocess_data(train, **params)
+                preprocessed_test = self._preprocess_data(test, **params)
+            except ValueError:
+                raise InvalidBenchmark('Preprocessing of the dataset could '
+                                       'not be done.')
+
+            # Get bootstrapped datasets
+            if task == 'fill-mask' or self.evaluate_train:
+                trains = [preprocessed_train]
+                trains = trains + [preprocessed_train[train_bidxs[idx]]
+                                   for idx in range(num_finetunings - 1)]
+            tests = [preprocessed_test]
+            tests = tests + [preprocessed_test[test_bidxs[idx]]
+                             for idx in range(10)]
 
             # Set up progress bar
             if task == 'fill-mask':
@@ -465,20 +503,6 @@ class BaseBenchmark(ABC):
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
-
-            # Preprocess the datasets
-            try:
-                preprocessed_train = self._preprocess_data(train,
-                                                           framework=framework,
-                                                           config=model.config,
-                                                           tokenizer=tokenizer)
-                preprocessed_test = self._preprocess_data(test,
-                                                          framework=framework,
-                                                          config=model.config,
-                                                          tokenizer=tokenizer)
-            except ValueError:
-                raise InvalidBenchmark('Preprocessing of the dataset could '
-                                       'not be done.')
 
             # Load the data collator
             data_collator = self._load_data_collator(tokenizer)
@@ -507,7 +531,7 @@ class BaseBenchmark(ABC):
             tf_logging.set_verbosity_error()
 
             metrics = defaultdict(list)
-            for _ in itr:
+            for idx in itr:
                 while True:
                     try:
                         # Reinitialise a new model
@@ -523,7 +547,7 @@ class BaseBenchmark(ABC):
                         # Initialise Trainer
                         trainer_args = dict(model=model,
                                             args=training_args,
-                                            train_dataset=preprocessed_train,
+                                            train_dataset=trains[idx],
                                             tokenizer=tokenizer,
                                             data_collator=data_collator,
                                             compute_metrics=compute_metrics)
@@ -542,16 +566,20 @@ class BaseBenchmark(ABC):
                             trainer.train()
 
                         # Log training metrics and save the state
-                        train_metrics = trainer.evaluate(
-                            preprocessed_train,
-                            metric_key_prefix='train'
-                        )
+                        if evaluate_train:
+                            train_metrics = trainer.evaluate(
+                                preprocessed_train,
+                                metric_key_prefix='train'
+                            )
+                            metrics['train'].append(train_metrics)
 
                         # Log test metrics
-                        test_metrics = trainer.evaluate(
-                            preprocessed_test,
-                            metric_key_prefix='test'
-                        )
+                        for test_idx in range(10):
+                            test_metrics = trainer.evaluate(
+                                tests[test_idx],
+                                metric_key_prefix='test'
+                            )
+                            metrics[f'test'].append(test_metrics)
 
                         break
 
@@ -567,13 +595,7 @@ class BaseBenchmark(ABC):
                         training_args.gradient_accumulation_steps = ga * 2
                         trainer.args = training_args
 
-                metrics['train'].append(train_metrics)
-                metrics['test'].append(test_metrics)
-
-            self._log_metrics(metrics,
-                              model_id=model_id,
-                              num_train=len(train),
-                              num_test=len(test))
+            self._log_metrics(metrics, model_id=model_id)
 
             # Garbage collection, to avoid memory issues
             del model, model_dict
@@ -586,39 +608,54 @@ class BaseBenchmark(ABC):
             # Load the model
             model = model_dict['model']
 
-            # Preprocess the datasets
-            preprocessed_train = self._preprocess_data(train,
-                                                       framework=framework)
-            preprocessed_test = self._preprocess_data(test,
-                                                      framework=framework)
-            # Get the predictions
-            train_preds_labels = self._get_spacy_predictions_and_labels(
-                model=model,
-                dataset=preprocessed_train,
-                progress_bar=progress_bar
-            )
-            test_preds_labels = self._get_spacy_predictions_and_labels(
-                model=model,
-                dataset=preprocessed_test,
-                progress_bar=progress_bar
-            )
+            # Preprocess the test datasets
+            params = dict(framework=framework)
+            preprocessed_test = self._preprocess_data(test, **params)
+            tests = [preprocessed_test]
+            tests = tests + [preprocessed_test[test_bidxs[idx]]
+                             for idx in range(10)]
 
-            train_metrics = self._compute_metrics(train_preds_labels)
-            train_metrics = {f'train_{key}': val
-                             for key, val in train_metrics.items()}
-            test_metrics = self._compute_metrics(test_preds_labels)
-            test_metrics = {f'test_{key}': val
-                            for key, val in test_metrics.items()}
-            metrics = dict(train=[train_metrics], test=[test_metrics])
+            # Get the test predictions
+            all_test_metrics = list()
+            for dataset in tests:
+                preds_labels = self._get_spacy_predictions_and_labels(
+                    model=model,
+                    dataset=dataset,
+                    progress_bar=progress_bar
+                )
 
-            self._log_metrics(metrics,
-                              model_id=model_id,
-                              num_train=len(train),
-                              num_test=len(test))
+                test_metrics = self._compute_metrics(preds_labels)
+                test_metrics = {f'test_{key}': val
+                                for key, val in test_metrics.items()}
+                all_test_metrics.append(test_metrics)
+            metrics = dict(test=all_test_metrics)
+
+            # Preprocess the train datasets
+            if self.evaluate_train:
+                preprocessed_train = self._preprocess_data(train, **params)
+                trains = [preprocessed_train]
+                trains = trains + [preprocessed_train[train_bidxs[idx]]
+                                   for idx in range(num_finetunings - 1)]
+
+            # Get the train predictions
+            if self.evaluate_train:
+                all_train_metrics = list()
+                for dataset in trains:
+                    preds_labels = self._get_spacy_predictions_and_labels(
+                        model=model,
+                        dataset=dataset,
+                        progress_bar=progress_bar
+                    )
+                    train_metrics = self._compute_metrics(preds_labels)
+                    train_metrics = {f'train_{key}': val
+                                     for key, val in train_metrics.items()}
+                all_train_metrics.append(train_metrics)
+                metrics['train'] = all_train_metrics
+
+            self._log_metrics(metrics, model_id=model_id)
 
             # Garbage collection, to avoid memory issues
             del model, model_dict
-            del preprocessed_train, preprocessed_test, train, test
             gc.collect()
 
             return metrics
