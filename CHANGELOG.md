@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.4.3] - 2021-08-12
 ### Fixed
 - RuntimeErrors occuring during training will now raise an `InvalidBenchmark`
   exception, which means that the CLI and the `Benchmark` class will skip it.
