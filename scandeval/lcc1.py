@@ -46,7 +46,7 @@ class Lcc1Benchmark(TextClassificationBenchmark):
                  verbose: bool = False):
         id2label = ['neutral', 'positiv', 'negativ']
         super().__init__(epochs=30,
-                         warmup_steps=0,
+                         warmup_steps=2,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,

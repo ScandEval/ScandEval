@@ -49,7 +49,7 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
                     'AUX', 'CCONJ', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ',
                     'PUNCT', 'SYM', 'X']
         super().__init__(epochs=5,
-                         warmup_steps=(495 // 32),
+                         warmup_steps=38,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,

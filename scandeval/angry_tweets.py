@@ -46,7 +46,7 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
                  verbose: bool = False):
         id2label = ['neutral', 'positiv', 'negativ']
         super().__init__(epochs=10,
-                         warmup_steps=(244 // 32),
+                         warmup_steps=19,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,

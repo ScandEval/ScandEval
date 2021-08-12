@@ -46,7 +46,7 @@ class DkHateBenchmark(TextClassificationBenchmark):
                  verbose: bool = False):
         id2label = ['NOT', 'OFF']
         super().__init__(epochs=100,
-                         warmup_steps=(296 // 32),
+                         warmup_steps=23,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,

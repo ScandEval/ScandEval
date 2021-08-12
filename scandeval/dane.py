@@ -50,7 +50,7 @@ class DaneBenchmark(TokenClassificationBenchmark):
         id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
                     'I-PER', 'B-MISC', 'I-MISC', 'O']
         super().__init__(epochs=10,
-                         warmup_steps=(495 // 32),
+                         warmup_steps=38,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
