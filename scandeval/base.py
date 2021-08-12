@@ -515,8 +515,8 @@ class BaseBenchmark(ABC):
             # Initialise training arguments
             training_args = TrainingArguments(
                 output_dir='.',
-                #evaluation_strategy='no',
-                #logging_strategy='no',
+                evaluation_strategy='epoch',
+                logging_strategy='epoch',
                 save_strategy='no',
                 report_to='none',
                 save_total_limit=0,
@@ -528,7 +528,8 @@ class BaseBenchmark(ABC):
             )
 
             # Disable `transformers` verbosity again
-            tf_logging.set_verbosity_error()
+            if not self.verbose:
+                tf_logging.set_verbosity_error()
 
             metrics = defaultdict(list)
             for idx in itr:
@@ -560,14 +561,15 @@ class BaseBenchmark(ABC):
 
                         # Remove the callback which prints the metrics after
                         # each evaluation
-                        trainer.remove_callback(PrinterCallback)
+                        if not self.verbose:
+                            trainer.remove_callback(PrinterCallback)
 
                         # Finetune the model
                         if task == 'fill-mask':
                             trainer.train()
 
                         # Log training metrics and save the state
-                        if evaluate_train:
+                        if self.evaluate_train:
                             train_metrics = trainer.evaluate(
                                 tests[idx],
                                 metric_key_prefix='train'
