@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.4.2] - 2021-08-12
 ### Fixed
 - Now catching the error where tokenisation is not possible, due to the model
   having been trained on a different task than what is present in the dataset.
