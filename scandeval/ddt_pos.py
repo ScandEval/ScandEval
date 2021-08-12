@@ -23,10 +23,6 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
         learning_rate (float, optional):
             What learning rate to use when finetuning the models. Defaults to
             2e-5.
-        warmup_steps (int, optional):
-            The number of training steps in which the learning rate will be
-            warmed up, meaning starting from nearly 0 and progressing up to
-            `learning_rate` after `warmup_steps` many steps. Defaults to 50.
         batch_size (int, optional):
             The batch size used while finetuning. Defaults to 16.
         verbose (bool, optional):
@@ -46,18 +42,17 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
     def __init__(self,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
-                 warmup_steps: int = 50,
                  batch_size: int = 16,
                  evaluate_train: bool = False,
                  verbose: bool = False):
         id2label = ['ADJ', 'ADV', 'INTJ', 'NOUN', 'PROPN', 'VERB', 'ADP',
                     'AUX', 'CCONJ', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ',
                     'PUNCT', 'SYM', 'X']
-        super().__init__(epochs=100,
+        super().__init__(epochs=5,
+                         warmup_steps=(495 // 32),
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
-                         warmup_steps=warmup_steps,
                          batch_size=batch_size,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
