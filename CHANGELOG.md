@@ -18,6 +18,8 @@ and this project adheres to
   reason.
 
 ### Changed
+- Updated `epochs` and `warmup_steps` of all the datasets to something more
+  reasonable, enabling better comparisons of the finetuned models.
 - Changed calculation of confidence intervals, which is now based on
   bootstrapping rather than the analytic approach. It will now evaluate ten
   times on the test set and compute a bootstrap estimate of the standard error,
