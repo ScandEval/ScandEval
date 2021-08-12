@@ -71,7 +71,7 @@ def benchmark(model_id: Tuple[str],
               num_finetunings: int,
               batch_size: int,
               evaluate_train: bool,
-              progress_bar: bool,
+              no_progress_bar: bool,
               verbose: bool = False):
     '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
