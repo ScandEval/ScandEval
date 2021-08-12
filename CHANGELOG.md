@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.5.0] - 2021-08-12
 ### Added
 - It is possible to only evaluate on the test sets, to save some time. This can
   be done in the `Benchmark` class using the `evaluate_train` argument, and in
