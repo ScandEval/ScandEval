@@ -115,7 +115,7 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
                         'vocative',
                         'xcomp']
         id2label = id2label_head + id2label_dep
-        super().__init__(epochs=5,
+        super().__init__(epochs=100,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,

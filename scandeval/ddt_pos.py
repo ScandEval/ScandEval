@@ -53,7 +53,7 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
         id2label = ['ADJ', 'ADV', 'INTJ', 'NOUN', 'PROPN', 'VERB', 'ADP',
                     'AUX', 'CCONJ', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ',
                     'PUNCT', 'SYM', 'X']
-        super().__init__(epochs=5,
+        super().__init__(epochs=100,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,

@@ -50,7 +50,7 @@ class Europarl1Benchmark(TextClassificationBenchmark):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         id2label = ['neutral', 'positiv', 'negativ']
-        super().__init__(epochs=50,
+        super().__init__(epochs=30,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
