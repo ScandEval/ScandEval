@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.4.1] - 2021-08-12
 ### Fixed
 - Now catching the error when the model's config does not align with the model
   class. When using the CLI or `Benchmark`, these will be skipped.
