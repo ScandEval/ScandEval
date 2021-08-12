@@ -45,7 +45,7 @@ class DkHateBenchmark(TextClassificationBenchmark):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         id2label = ['NOT', 'OFF']
-        super().__init__(epochs=100,
+        super().__init__(epochs=10,
                          warmup_steps=23,
                          id2label=id2label,
                          cache_dir=cache_dir,

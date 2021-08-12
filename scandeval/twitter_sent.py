@@ -45,7 +45,7 @@ class TwitterSentBenchmark(TextClassificationBenchmark):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         id2label = ['neutral', 'positiv', 'negativ']
-        super().__init__(epochs=100,
+        super().__init__(epochs=20,
                          warmup_steps=7,
                          id2label=id2label,
                          cache_dir=cache_dir,
