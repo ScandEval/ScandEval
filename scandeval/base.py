@@ -470,6 +470,10 @@ class BaseBenchmark(ABC):
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
+            # Extract the model and tokenizer
+            model = model_dict['model']
+            tokenizer = model_dict['tokenizer']
+
             # Preprocess the datasets
             try:
                 params = dict(framework=framework,
@@ -499,10 +503,6 @@ class BaseBenchmark(ABC):
                     itr = range(num_finetunings)
             else:
                 itr = [0]
-
-            # Extract the model and tokenizer
-            model = model_dict['model']
-            tokenizer = model_dict['tokenizer']
 
             # Load the data collator
             data_collator = self._load_data_collator(tokenizer)
