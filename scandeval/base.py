@@ -154,7 +154,7 @@ class BaseBenchmark(ABC):
 
             if 'test' in metrics.keys():
                 test_scores = [dct[f'test_{metric_name}']
-                                for dct in metrics['test']]
+                               for dct in metrics['test']]
                 test_score = test_scores[0]
 
                 if len(test_scores) > 1:
@@ -465,7 +465,7 @@ class BaseBenchmark(ABC):
         # Get bootstrap sample indices
         if task == 'fill-mask' or self.evaluate_train:
             train_bidxs = rng.integers(0, len(train),
-                                      size=(num_finetunings, len(train)))
+                                       size=(num_finetunings, len(train)))
         test_bidxs = rng.integers(0, len(test), size=(10, len(test)))
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
@@ -582,7 +582,7 @@ class BaseBenchmark(ABC):
                                 tests[test_idx],
                                 metric_key_prefix='test'
                             )
-                            metrics[f'test'].append(test_metrics)
+                            metrics['test'].append(test_metrics)
 
                         break
 
