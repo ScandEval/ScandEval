@@ -42,7 +42,6 @@ class Benchmark:
                  task: Optional[Union[str, List[str]]] = None,
                  batch_size: int = 32,
                  evaluate_train: bool = False,
-                 progress_bar: bool = True,
                  verbose: bool = False):
 
         # Ensure that `self.languages` is a list
@@ -61,7 +60,6 @@ class Benchmark:
         self.benchmark_results = defaultdict(dict)
         params = dict(verbose=verbose,
                       batch_size=batch_size,
-                      progress_bar=progress_bar,
                       evaluate_train=evaluate_train)
         self._benchmarks = [
             ('dane', 'DaNE with MISC tags', DaneBenchmark(**params)),
