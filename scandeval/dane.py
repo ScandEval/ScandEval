@@ -135,7 +135,12 @@ class DaneBenchmark(TokenClassificationBenchmark):
         test_score *= 100
         test_se *= 100
 
-        msg = (f'Micro-average F1-scores on DaNE for {model_id}:\n'
+        if self.include_misc_tags:
+            misc_txt = 'without MISC tags'
+        else:
+            misc_txt = ''
+
+        msg = (f'Micro-average F1-scores on DaNE {misc_txt} for {model_id}:\n'
                f'  - Test: {test_score:.2f} ± {test_se:.2f}')
 
         if 'train' in scores.keys():
