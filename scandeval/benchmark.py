@@ -42,6 +42,7 @@ class Benchmark:
                  task: Optional[Union[str, List[str]]] = None,
                  batch_size: int = 32,
                  evaluate_train: bool = False,
+                 progress_bar: bool = True,
                  verbose: bool = False):
 
         # Ensure that `self.languages` is a list
@@ -152,6 +153,7 @@ class Benchmark:
                  model_id: Optional[Union[List[str], str]] = None,
                  dataset: Optional[Union[List[str], str]] = None,
                  num_finetunings: int = 10,
+                 progress_bar: bool = True,
                  save_results: bool = False
                  ) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks all models in the model list.
@@ -165,6 +167,8 @@ class Benchmark:
                 be benchmarked. Defaults to None.
             num_finetunings (int, optional):
                 The number of times to finetune each model on. Defaults to 10.
+            progress_bar (bool, optional):
+                Whether progress bars should be shown. Defaults to True.
             save_results (bool, optional):
                 Whether to save the benchmark results to
                 'scandeval_benchmark_results.json'. Defaults to False.
@@ -199,7 +203,9 @@ class Benchmark:
             for model_id in model_ids:
                 logger.info(f'Benchmarking {model_id} on {alias}:')
                 try:
-                    results = cls(model_id, num_finetunings=num_finetunings)
+                    params = dict(num_finetunings=num_finetunings,
+                                  progress_bar=progress_bar)
+                    results = cls(model_id, **params)
                     self.benchmark_results[dataset][model_id] = results
                     logger.debug(f'Results:\n{results}')
                 except InvalidBenchmark as e:

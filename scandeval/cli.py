@@ -55,6 +55,10 @@ from .benchmark import Benchmark
               is_flag=True,
               show_default=True,
               help='Whether the training set should be evaluated.')
+@click.option('--no_progress_bar', '-p',
+              is_flag=True,
+              show_default=True,
+              help='Whether progress bars should be shown.')
 @click.option('--verbose', '-v',
               is_flag=True,
               show_default=True,
@@ -67,6 +71,7 @@ def benchmark(model_id: Tuple[str],
               num_finetunings: int,
               batch_size: int,
               evaluate_train: bool,
+              progress_bar: bool,
               verbose: bool = False):
     '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
@@ -82,4 +87,5 @@ def benchmark(model_id: Tuple[str],
     benchmarker(model_id=model_id,
                 dataset=dataset,
                 num_finetunings=num_finetunings,
+                progress_bar=(not no_progress_bar),
                 save_results=True)

@@ -13,6 +13,9 @@ and this project adheres to
 - It is possible to only evaluate on the test sets, to save some time. This can
   be done in the `Benchmark` class using the `evaluate_train` argument, and in
   the CLI with the `--evaluate_train` flag.
+- Added `progress_bar` argument to `Benchmark` to control whether progress bars
+  should be shown, and added the `no_progress_bar` flag to the CLI for the same
+  reason.
 
 ### Changed
 - Changed calculation of confidence intervals, which is now based on
