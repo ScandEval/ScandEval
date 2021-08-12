@@ -557,7 +557,7 @@ class BaseBenchmark(ABC):
 
                     except RuntimeError as e:
                         if not str(e).startswith('CUDA out of memory'):
-                            raise e
+                            raise InvalidBenchmark(str(e))
                         bs = training_args.per_device_train_batch_size
                         ga = training_args.gradient_accumulation_steps
                         if bs == 1:

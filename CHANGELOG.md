@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- RuntimeErrors occuring during training will now raise an `InvalidBenchmark`
+  exception, which means that the CLI and the `Benchmark` class will skip it.
+  This is for instance caused when `max_length` has not been specified in the
+  model config, meaning that the tokeniser does not know how much to truncate.
+
+
 ## [v0.4.2] - 2021-08-12
 ### Fixed
 - Now catching the error where tokenisation is not possible, due to the model
