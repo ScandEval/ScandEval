@@ -4,7 +4,6 @@ from datasets import Dataset
 import numpy as np
 from typing import Tuple, Dict, List, Optional
 import logging
-import torch
 
 from .token_classification import TokenClassificationBenchmark
 from .datasets import load_ddt_dep
@@ -172,9 +171,7 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
             # label. Here we extract the two different labels.
             labels1 = labels[:, :, 0]
             labels2 = labels[:, :, 1]
-            labels2 = torch.where(labels2 > 0,
-                                  labels2 - self.split_point,
-                                  labels2)
+            labels2 = np.where(labels2 > 0, labels2-self.split_point, labels2)
 
             # Remove ignored indices from predictions and labels
             predictions1 = [
