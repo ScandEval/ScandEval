@@ -549,7 +549,6 @@ class BaseBenchmark(ABC):
                         trainer_args = dict(model=model,
                                             args=training_args,
                                             train_dataset=trains[idx],
-                                            eval_dataset=tests[0],
                                             tokenizer=tokenizer,
                                             data_collator=data_collator,
                                             compute_metrics=compute_metrics)
@@ -577,9 +576,9 @@ class BaseBenchmark(ABC):
                             metrics['train'].append(train_metrics)
 
                         # Log test metrics
-                        for test_idx in range(10):
+                        for dataset in tests:
                             test_metrics = trainer.evaluate(
-                                tests[test_idx],
+                                dataset,
                                 metric_key_prefix='test'
                             )
                             metrics['test'].append(test_metrics)
@@ -612,11 +611,10 @@ class BaseBenchmark(ABC):
             model = model_dict['model']
 
             # Preprocess the test datasets
-            params = dict(framework=framework)
-            preprocessed_test = self._preprocess_data(test, **params)
-            tests = [preprocessed_test]
-            tests = tests + [preprocessed_test[test_bidxs[idx]]
-                             for idx in range(10)]
+            test = self._preprocess_data(test, framework=framework)
+            tests = [test]
+            tests += [Dataset.from_dict(preprocessed_test[test_bidxs[idx]])
+                      for idx in range(10)]
 
             # Get the test predictions
             all_test_metrics = list()
@@ -635,10 +633,10 @@ class BaseBenchmark(ABC):
 
             # Preprocess the train datasets
             if self.evaluate_train:
-                preprocessed_train = self._preprocess_data(train, **params)
-                trains = [preprocessed_train]
-                trains = trains + [preprocessed_train[train_bidxs[idx]]
-                                   for idx in range(num_finetunings - 1)]
+                train = self._preprocess_data(train, framework=framework)
+                trains = [train]
+                trains += [Dataset.from_dict(train[train_bidxs[idx]])
+                           for idx in range(num_finetunings - 1)]
 
             # Get the train predictions
             if self.evaluate_train:
