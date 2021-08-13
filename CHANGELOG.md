@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.5.1] - 2021-08-13
 ### Fixed
 - The bootstrapping of the datasets is now done properly. Previously the
   bootstrapped datasets were not converted to HuggingFace Dataset objects.

@@ -13,7 +13,7 @@ from .lcc2 import Lcc2Benchmark  # noqa
 from .twitter_sent import TwitterSentBenchmark  # noqa
 from .utils import block_terminal_output
 
-__version__ = '0.5.0'  # noqa
+__version__ = '0.5.1'  # noqa
 
 # Block unwanted terminal outputs
 block_terminal_output()
