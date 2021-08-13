@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.5.2] - 2021-08-13
 ### Fixed
 - Fixed bug when `evaluate_train` was set to False.
 
