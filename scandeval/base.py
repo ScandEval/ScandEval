@@ -597,6 +597,10 @@ class BaseBenchmark(ABC):
                         training_args.gradient_accumulation_steps = ga * 2
                         trainer.args = training_args
 
+                        # Garbage collection, to avoid memory issues
+                        del model, model_dict
+                        gc.collect()
+
             self._log_metrics(metrics, model_id=model_id)
 
             # Garbage collection, to avoid memory issues
