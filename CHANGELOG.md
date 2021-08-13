@@ -10,7 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- The bootstrapping of the datasets is now done properly.
+- The bootstrapping of the datasets is now done properly. Previously the
+  bootstrapped datasets were not converted to HuggingFace Dataset objects.
 
 
 ## [v0.5.0] - 2021-08-12
