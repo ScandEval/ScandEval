@@ -480,20 +480,20 @@ class BaseBenchmark(ABC):
                               config=model.config,
                               tokenizer=tokenizer)
                 if task == 'fill-mask' or self.evaluate_train:
-                    preprocessed_train = self._preprocess_data(train, **params)
-                preprocessed_test = self._preprocess_data(test, **params)
+                    train = self._preprocess_data(train, **params)
+                test = self._preprocess_data(test, **params)
             except ValueError:
                 raise InvalidBenchmark('Preprocessing of the dataset could '
                                        'not be done.')
 
             # Get bootstrapped datasets
             if task == 'fill-mask' or self.evaluate_train:
-                trains = [preprocessed_train]
-                trains = trains + [preprocessed_train[train_bidxs[idx]]
-                                   for idx in range(num_finetunings - 1)]
-            tests = [preprocessed_test]
-            tests = tests + [preprocessed_test[test_bidxs[idx]]
-                             for idx in range(10)]
+                trains = [train]
+                trains += [Dataset.from_dict(train[train_bidxs[idx]])
+                           for idx in range(num_finetunings - 1)]
+            tests = [test]
+            tests += [Dataset.from_dict(test[test_bidxs[idx]])
+                      for idx in range(test_bidxs.shape[0])]
 
             # Set up progress bar
             if task == 'fill-mask':
@@ -601,7 +601,7 @@ class BaseBenchmark(ABC):
 
             # Garbage collection, to avoid memory issues
             del model, model_dict
-            del preprocessed_train, preprocessed_test, train, test
+            del train, test
             gc.collect()
 
             return metrics
@@ -613,8 +613,8 @@ class BaseBenchmark(ABC):
             # Preprocess the test datasets
             test = self._preprocess_data(test, framework=framework)
             tests = [test]
-            tests += [Dataset.from_dict(preprocessed_test[test_bidxs[idx]])
-                      for idx in range(10)]
+            tests += [Dataset.from_dict(test[test_bidxs[idx]])
+                      for idx in range(test_bidxs.shape[0])]
 
             # Get the test predictions
             all_test_metrics = list()
