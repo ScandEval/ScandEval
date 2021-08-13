@@ -515,8 +515,8 @@ class BaseBenchmark(ABC):
             # Initialise training arguments
             training_args = TrainingArguments(
                 output_dir='.',
-                evaluation_strategy='epoch',
-                logging_strategy='epoch',
+                evaluation_strategy='no',
+                logging_strategy='no',
                 save_strategy='no',
                 report_to='none',
                 save_total_limit=0,
