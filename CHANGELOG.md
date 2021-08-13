@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Fixed bug when `evaluate_train` was set to False.
+
+
 ## [v0.5.1] - 2021-08-13
 ### Fixed
 - The bootstrapping of the datasets is now done properly. Previously the

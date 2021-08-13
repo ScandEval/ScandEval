@@ -487,8 +487,8 @@ class BaseBenchmark(ABC):
                                        'not be done.')
 
             # Get bootstrapped datasets
+            trains = [train]
             if task == 'fill-mask' or self.evaluate_train:
-                trains = [train]
                 trains += [Dataset.from_dict(train[train_bidxs[idx]])
                            for idx in range(num_finetunings - 1)]
             tests = [test]
@@ -631,15 +631,15 @@ class BaseBenchmark(ABC):
                 all_test_metrics.append(test_metrics)
             metrics = dict(test=all_test_metrics)
 
-            # Preprocess the train datasets
             if self.evaluate_train:
+
+                # Preprocess the train datasets
                 train = self._preprocess_data(train, framework=framework)
                 trains = [train]
                 trains += [Dataset.from_dict(train[train_bidxs[idx]])
                            for idx in range(num_finetunings - 1)]
 
-            # Get the train predictions
-            if self.evaluate_train:
+                # Get the train predictions
                 all_train_metrics = list()
                 for dataset in trains:
                     preds_labels = self._get_spacy_predictions_and_labels(
@@ -650,6 +650,7 @@ class BaseBenchmark(ABC):
                     train_metrics = self._compute_metrics(preds_labels)
                     train_metrics = {f'train_{key}': val
                                      for key, val in train_metrics.items()}
+
                 all_train_metrics.append(train_metrics)
                 metrics['train'] = all_train_metrics
 
