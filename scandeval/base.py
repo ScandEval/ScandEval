@@ -525,7 +525,7 @@ class BaseBenchmark(ABC):
                 num_train_epochs=self.epochs,
                 warmup_steps=self.warmup_steps,
                 gradient_accumulation_steps=self.gradient_accumulation,
-                #load_best_model_at_end=True
+                load_best_model_at_end=True
             )
 
             # Disable `transformers` verbosity again
@@ -547,11 +547,11 @@ class BaseBenchmark(ABC):
                         )
 
                         # Initialise Trainer
-                        train, val = trains[idx].train_test_split(0.1)
+                        split = trains[idx].train_test_split(0.1)
                         trainer_args = dict(model=model,
                                             args=training_args,
-                                            train_dataset=train,
-                                            eval_dataset=val,
+                                            train_dataset=split['train'],
+                                            eval_dataset=split['test'],
                                             tokenizer=tokenizer,
                                             data_collator=data_collator,
                                             compute_metrics=compute_metrics)
