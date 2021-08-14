@@ -525,7 +525,7 @@ class BaseBenchmark(ABC):
                 num_train_epochs=self.epochs,
                 warmup_steps=self.warmup_steps,
                 gradient_accumulation_steps=self.gradient_accumulation,
-                load_best_model_at_end=True
+                #load_best_model_at_end=True
             )
 
             # Disable `transformers` verbosity again
