@@ -9,6 +9,12 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- When finetuning models, 10% of the training data is used to evaluate the
+  models, which is used to choose the best performing model across all the
+  epochs trained. This will allow for a more fair comparison, as some models
+  degrade over time, while other models need a longer time to train.
+
 ### Fixed
 - Garbage collects when downsizing batch size, to not keep all the previous
   models in memory.
