@@ -515,16 +515,17 @@ class BaseBenchmark(ABC):
             # Initialise training arguments
             training_args = TrainingArguments(
                 output_dir='.',
-                evaluation_strategy='no',
-                logging_strategy='no',
-                save_strategy='no',
+                evaluation_strategy='epoch',
+                logging_strategy='epoch' if self.verbose else 'no',
+                save_strategy='epoch',
                 report_to='none',
-                save_total_limit=0,
+                save_total_limit=1,
                 per_device_train_batch_size=self.batch_size,
                 learning_rate=self.learning_rate,
                 num_train_epochs=self.epochs,
                 warmup_steps=self.warmup_steps,
-                gradient_accumulation_steps=self.gradient_accumulation
+                gradient_accumulation_steps=self.gradient_accumulation,
+                load_best_model_at_end=True
             )
 
             # Disable `transformers` verbosity again
@@ -546,9 +547,11 @@ class BaseBenchmark(ABC):
                         )
 
                         # Initialise Trainer
+                        train, val = trains[idx].train_test_split(0.1)
                         trainer_args = dict(model=model,
                                             args=training_args,
-                                            train_dataset=trains[idx],
+                                            train_dataset=train,
+                                            eval_dataset=val,
                                             tokenizer=tokenizer,
                                             data_collator=data_collator,
                                             compute_metrics=compute_metrics)
