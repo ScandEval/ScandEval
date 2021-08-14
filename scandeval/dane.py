@@ -130,7 +130,7 @@ class DaneBenchmark(TokenClassificationBenchmark):
         test_score *= 100
         test_se *= 100
 
-        if self.include_misc_tags:
+        if not self.include_misc_tags:
             misc_txt = 'without MISC tags'
         else:
             misc_txt = ''

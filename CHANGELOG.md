@@ -12,6 +12,7 @@ and this project adheres to
 ### Fixed
 - Garbage collects when downsizing batch size, to not keep all the previous
   models in memory.
+- Typos in logging.
 
 
 ## [v0.5.2] - 2021-08-13
