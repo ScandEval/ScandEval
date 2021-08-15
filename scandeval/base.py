@@ -568,8 +568,7 @@ class BaseBenchmark(ABC):
 
             # Disable `transformers` verbosity again
             if not self.verbose:
-                tf_logging.get_verbosity = lambda: logging.NOTSET
-                # tf_logging.set_verbosity_error()
+                tf_logging.set_verbosity_error()
 
             metrics = defaultdict(list)
             for idx in itr:
