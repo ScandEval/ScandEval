@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.6.0] - 2021-08-15
 ### Added
 - When finetuning models, 10% of the training data is used to evaluate the
   models, which is used to choose the best performing model across all the
