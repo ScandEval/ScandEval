@@ -238,7 +238,7 @@ class BaseBenchmark(ABC):
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
-            if finetune:
+            if task == 'fill-mask':
                 params = dict(num_labels=self.num_labels,
                               label2id=self.label2id,
                               id2label=self.id2label)
