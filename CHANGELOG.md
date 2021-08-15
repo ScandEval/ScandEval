@@ -7,6 +7,10 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Fixed bug when evaluating SpaCy models.
+
 
 ## [v0.6.0] - 2021-08-15
 ### Added

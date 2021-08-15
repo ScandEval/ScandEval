@@ -699,7 +699,7 @@ class BaseBenchmark(ABC):
                 all_train_metrics.append(train_metrics)
                 metrics['train'] = all_train_metrics
 
-            self._log_metrics(metrics, model_id=model_id)
+            self._log_metrics(metrics, model_id=model_id, finetuned=False)
 
             # Garbage collection, to avoid memory issues
             del model, model_dict
