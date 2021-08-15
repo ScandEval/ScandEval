@@ -228,7 +228,7 @@ class BaseBenchmark(ABC):
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
-            if task == 'fill-mask':
+            if finetune:
                 params = dict(num_labels=self.num_labels,
                               label2id=self.label2id,
                               id2label=self.id2label)
@@ -456,6 +456,9 @@ class BaseBenchmark(ABC):
         task = model_metadata['task']
         model_dict = self._load_model(model_id, **model_metadata)
 
+        # Define variable that determines if the model should be finetuned
+        finetune = (task == 'fill-mask')
+
         # Load the dataset
         train, test = self._load_data()
 
@@ -463,7 +466,7 @@ class BaseBenchmark(ABC):
         rng = np.random.default_rng(4242)
 
         # Get bootstrap sample indices
-        if task == 'fill-mask' or self.evaluate_train:
+        if finetune or self.evaluate_train:
             train_bidxs = rng.integers(0, len(train),
                                        size=(num_finetunings, len(train)))
         test_bidxs = rng.integers(0, len(test), size=(10, len(test)))
@@ -479,7 +482,7 @@ class BaseBenchmark(ABC):
                 params = dict(framework=framework,
                               config=model.config,
                               tokenizer=tokenizer)
-                if task == 'fill-mask' or self.evaluate_train:
+                if finetune or self.evaluate_train:
                     train = self._preprocess_data(train, **params)
                 test = self._preprocess_data(test, **params)
             except ValueError:
@@ -488,7 +491,7 @@ class BaseBenchmark(ABC):
 
             # Get bootstrapped datasets
             trains = [train]
-            if task == 'fill-mask' or self.evaluate_train:
+            if finetune or self.evaluate_train:
                 trains += [Dataset.from_dict(train[train_bidxs[idx]])
                            for idx in range(num_finetunings - 1)]
             tests = [test]
@@ -496,7 +499,7 @@ class BaseBenchmark(ABC):
                       for idx in range(test_bidxs.shape[0])]
 
             # Set up progress bar
-            if task == 'fill-mask':
+            if finetune:
                 if progress_bar:
                     itr = tqdm(range(num_finetunings))
                 else:
@@ -567,7 +570,7 @@ class BaseBenchmark(ABC):
                             trainer.remove_callback(PrinterCallback)
 
                         # Finetune the model
-                        if task == 'fill-mask':
+                        if finetune:
                             trainer.train()
 
                         # Log training metrics and save the state
@@ -604,7 +607,7 @@ class BaseBenchmark(ABC):
                         del model, model_dict
                         gc.collect()
 
-            self._log_metrics(metrics, model_id=model_id)
+            self._log_metrics(metrics, model_id=model_id, finetuned=finetune)
 
             # Garbage collection, to avoid memory issues
             del model, model_dict
