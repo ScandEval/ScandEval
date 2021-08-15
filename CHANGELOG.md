@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Always ensure that a model can deal with the labels in the dataset when
+  finetuning. If the model has not been trained on the label, then this will
+  result in the model always getting that label wrong. For instance, this is
+  the case for finetuned NER models not having been trained on MISC tags, if
+  they are being evaluated on the DaNE dataset.
+
 ### Fixed
 - Fixed bug when evaluating SpaCy models.
 - Only removing objects at memory cleanup if they exist at all.

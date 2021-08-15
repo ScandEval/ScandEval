@@ -252,12 +252,40 @@ class BaseBenchmark(ABC):
                                                   config=config,
                                                   cache_dir=self.cache_dir)
 
-                # If the model does not already have a way of assigning labels
-                # to IDs then use the one from the constructor
-                if (model.config.get('label2id') is None or
-                        model.config.get('id2label') is None):
+                # Get the `label2id` and `id2label` conversions from the model
+                # config
+                model_label2id = model.config.get('label2id')
+                model_id2label = model.config.get('id2label')
+
+                # If one of `label2id` or `id2label` exists in the model
+                # config, then define the other one from it
+                if model_label2id is not None and model_id2label is None:
+                    model_id2label = [label for label in model_label2id.keys()]
+                    model.config['id2label'] = model_id2label
+                if model_label2id is None and model_id2label is not None:
+                    model_label2id = {lbl: id
+                                      for id, lbl in enumerate(model_id2label)]
+                    model.config['label2id'] = model_label2id
+
+                # If the model does not have `label2id` or `id2label`
+                # conversions, then use the defaults
+                if model_label2id  is None or model_id2label is None:
                     model.config['label2id'] = self.label2id
                     model.config['id2label'] = self.id2label
+
+                # If the model *does* have conversions, then ensure that it can
+                # deal with all the labels in the default conversions. This
+                # ensures that we can smoothly deal with labels that the model
+                # have not been trained on (it will just always get those
+                # labels wrong)
+                else:
+                    for label in self.id2label:
+                        if label not in model_id2label:
+                            model_id2label.append(label)
+                    model_label2id = {lbl: id
+                                      for id, lbl in enumerate(model_id2label)]
+                    model.config['id2label'] = model_id2label
+                    model.config['label2id'] = model_label2id
 
             except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
