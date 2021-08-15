@@ -122,27 +122,24 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                         try:
                             label_id1 = label2id[label[0]]
                         except KeyError:
-                            logger.info(f'The label {label[0]} was not found '
-                                        f'in the model\'s config. Replacing '
-                                        f'with "O" tag.')
-                            label_id1 = label2id['O']
+                            msg = (f'The label {label[0]} was not found '
+                                   f'in the model\'s config.')
+                            raise InvalidBenchmark(msg)
                         try:
                             label_id2 = label2id[label[1]]
                         except KeyError:
-                            logger.info(f'The label {label[1]} was not found '
-                                        f'in the model\'s config. Replacing '
-                                        f'with "O" tag.')
-                            label_id2 = label2id['O']
+                            msg = (f'The label {label[1]} was not found '
+                                   f'in the model\'s config.')
+                            raise InvalidBenchmark(msg)
                         label_id = [label_id1, label_id2]
 
                     else:
                         try:
                             label_id = label2id[label]
                         except KeyError:
-                            logger.info(f'The label {label} was not found '
-                                        f'in the model\'s config. Replacing '
-                                        f'with "O" tag.')
-                            label_id = label2id['O']
+                            msg = (f'The label {label} was not found '
+                                   f'in the model\'s config.')
+                            raise InvalidBenchmark(msg)
                     label_ids.append(label_id)
 
                 # For the other tokens in a word, we set the label to -100
