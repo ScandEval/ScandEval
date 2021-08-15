@@ -5,7 +5,7 @@ from datasets import Dataset, load_metric
 from functools import partial
 import logging
 from abc import ABC
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from .base import BaseBenchmark
 from .utils import InvalidBenchmark
@@ -49,6 +49,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                  metric_names: Dict[str, str],
                  id2label: list,
                  epochs: int,
+                 label_synonyms: Optional[List[List[str]]] = None,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
                  warmup_steps: int = 50,
@@ -62,6 +63,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                          name=name,
                          metric_names=metric_names,
                          id2label=id2label,
+                         label_synonyms=label_synonyms,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          epochs=epochs,
