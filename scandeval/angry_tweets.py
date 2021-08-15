@@ -49,7 +49,7 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
             ['negativ', 'LABEL_0', 'negative', 'neikvætt'],
             ['neutral', 'LABEL_1', 'nøytral', 'hlutlaus'],
             ['positiv', 'LABEL_2', 'positive', 'jákvætt']
-        }
+        ]
         super().__init__(name='AngryTweets',
                          metric_names=dict(macro_f1='Macro-average F1-score'),
                          epochs=10,
