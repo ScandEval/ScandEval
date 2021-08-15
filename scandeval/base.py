@@ -262,8 +262,14 @@ class BaseBenchmark(ABC):
 
                 # Get the `label2id` and `id2label` conversions from the model
                 # config
-                model_label2id = model.config.get('label2id')
-                model_id2label = model.config.get('id2label')
+                try:
+                    model_label2id = model.config.label2id
+                except AttributeError:
+                    model_label2id = None
+                try:
+                    model_id2label = model.config.id2label
+                except AttributeError:
+                    model_id2label = None
 
                 # If one of `label2id` or `id2label` exists in the model
                 # config, then define the other one from it
