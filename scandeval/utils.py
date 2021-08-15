@@ -96,7 +96,8 @@ def block_terminal_output():
     ds_logging.get_verbosity = lambda: ds_logging.NOTSET
 
     # Disable most of the `transformers` logging
-    tf_logging.set_verbosity_error()
+    tf_logging.get_verbosity = lambda: tf_logging.NOTSET
+    #tf_logging.set_verbosity_error()
 
 
 class DocInherit(object):
