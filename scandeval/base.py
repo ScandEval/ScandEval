@@ -267,7 +267,14 @@ class BaseBenchmark(ABC):
                 except AttributeError:
                     model_label2id = None
                 try:
-                    model_id2label = model.config.id2label
+                    model_num_labels = len(model.config.id2label)
+                    try:
+                        model_id2label = [model.config.id2label[idx]
+                                          for idx in range(model_num_labels)]
+                    except IndexError:
+                        raise InvalidBenchmark('There is a gap in the '
+                                               'indexing dictionary of the '
+                                               'model.')
                 except AttributeError:
                     model_id2label = None
 
