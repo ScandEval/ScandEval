@@ -547,7 +547,7 @@ class BaseBenchmark(ABC):
                         )
 
                         # Initialise Trainer
-                        split = trains[idx].train_test_split(0.1)
+                        split = trains[idx].train_test_split(0.1, seed=4242)
                         trainer_args = dict(model=model,
                                             args=training_args,
                                             train_dataset=split['train'],
