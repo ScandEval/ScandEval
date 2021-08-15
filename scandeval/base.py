@@ -239,9 +239,7 @@ class BaseBenchmark(ABC):
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
             if task == 'fill-mask':
-                params = dict(num_labels=self.num_labels,
-                              label2id=self.label2id,
-                              id2label=self.id2label)
+                params = dict(num_labels=self.num_labels)
             else:
                 params = dict()
 
@@ -253,6 +251,14 @@ class BaseBenchmark(ABC):
                 model = model_cls.from_pretrained(model_id,
                                                   config=config,
                                                   cache_dir=self.cache_dir)
+
+                # If the model does not already have a way of assigning labels
+                # to IDs then use the one from the constructor
+                if (model.config.get('label2id') is None or
+                        model.config.get('id2label') is None):
+                    model.config['label2id'] = self.label2id
+                    model.config['id2label'] = self.id2label
+
             except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
                                        f'loaded from the HuggingFace hub.')
