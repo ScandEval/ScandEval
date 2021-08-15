@@ -282,17 +282,20 @@ class BaseBenchmark(ABC):
                 # config, then define the other one from it
                 if model_label2id is not None and model_id2label is None:
                     model_id2label = [label for label in model_label2id.keys()]
-                    model.config['id2label'] = model_id2label
+                    model.config.id2label = model_id2label
+                    model.config.num_labels = len(model_id2label)
                 if model_label2id is None and model_id2label is not None:
                     model_label2id = {lbl: id
                                       for id, lbl in enumerate(model_id2label)}
-                    model.config['label2id'] = model_label2id
+                    model.config.label2id = model_label2id
+                    model.config.num_labels = len(model_id2label)
 
                 # If the model does not have `label2id` or `id2label`
                 # conversions, then use the defaults
                 if model_label2id is None and model_id2label is None:
-                    model.config['label2id'] = self.label2id
-                    model.config['id2label'] = self.id2label
+                    model.config.label2id = self.label2id
+                    model.config.id2label = self.id2label
+                    model.config.num_labels = len(self.id2label)
 
                 # If the model *does* have conversions, then ensure that it can
                 # deal with all the labels in the default conversions. This
@@ -314,8 +317,9 @@ class BaseBenchmark(ABC):
                                       for label_syns in synonyms
                                       for label in label_syns
                                       if lbl in label_syns}
-                    model.config['id2label'] = model_id2label
-                    model.config['label2id'] = model_label2id
+                    model.config.id2label = model_id2label
+                    model.config.label2id = model_label2id
+                    model.config.num_labels = len(model_id2label)
 
             except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
