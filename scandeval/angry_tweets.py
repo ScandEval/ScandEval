@@ -44,12 +44,18 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
                  batch_size: int = 16,
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        id2label = ['neutral', 'positiv', 'negativ']
+        id2label = ['negativ', 'neutral', 'positiv']
+        label_synonyms = [
+            ['negativ', 'LABEL_0', 'negative', 'neikvætt'],
+            ['neutral', 'LABEL_1', 'nøytral', 'hlutlaus'],
+            ['positiv', 'LABEL_2', 'positive', 'jákvætt']
+        }
         super().__init__(name='AngryTweets',
                          metric_names=dict(macro_f1='Macro-average F1-score'),
                          epochs=10,
                          warmup_steps=19,
                          id2label=id2label,
+                         label_synonyms=label_synonyms,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
                          batch_size=batch_size,

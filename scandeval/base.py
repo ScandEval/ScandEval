@@ -87,6 +87,7 @@ class BaseBenchmark(ABC):
                  metric_names: Dict[str, str],
                  num_labels: Optional[int] = None,
                  id2label: Optional[List[str]] = None,
+                 label_synonyms: Optional[List[List[str]]] = None,
                  evaluate_train: bool = False,
                  cache_dir: str = '.benchmark_models',
                  learning_rate: float = 2e-5,
@@ -114,8 +115,15 @@ class BaseBenchmark(ABC):
         self.multilabel = multilabel
         self.split_point = split_point
         self.verbose = verbose
+        self.label_synonyms = label_synonyms
         if self.id2label is not None:
-            self.label2id = {label: id for id, label in enumerate(id2label)}
+            if label_synonyms is not None:
+                self.label2id = {label: id for id, lbl in enumerate(id2label)
+                                  for label_syns in label_synonyms
+                                  for label in label_syns
+                                  if lbl in label_syns}
+            else:
+                self.label2id = {lbl: id for id, lbl in enumerate(id2label)}
         else:
             self.label2id = None
         if verbose:
@@ -264,12 +272,12 @@ class BaseBenchmark(ABC):
                     model.config['id2label'] = model_id2label
                 if model_label2id is None and model_id2label is not None:
                     model_label2id = {lbl: id
-                                      for id, lbl in enumerate(model_id2label)]
+                                      for id, lbl in enumerate(model_id2label)}
                     model.config['label2id'] = model_label2id
 
                 # If the model does not have `label2id` or `id2label`
                 # conversions, then use the defaults
-                if model_label2id  is None or model_id2label is None:
+                if model_label2id is None and model_id2label is None:
                     model.config['label2id'] = self.label2id
                     model.config['id2label'] = self.id2label
 
@@ -282,8 +290,11 @@ class BaseBenchmark(ABC):
                     for label in self.id2label:
                         if label not in model_id2label:
                             model_id2label.append(label)
-                    model_label2id = {lbl: id
-                                      for id, lbl in enumerate(model_id2label)]
+                    model_label2id = {label: id
+                                      for id, lbl in enumerate(model_id2label)
+                                      for label_syns in self.label_synonyms
+                                      for label in label_syns
+                                      if lbl in label_syns}
                     model.config['id2label'] = model_id2label
                     model.config['label2id'] = model_label2id
 
