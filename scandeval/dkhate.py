@@ -1,7 +1,7 @@
 '''Hate speech classification of a language model on the DKHate dataset'''
 
 from datasets import Dataset
-from typing import Tuple, Dict, List, Optional
+from typing import Tuple, Dict, Optional
 import logging
 
 from .text_classification import TextClassificationBenchmark
@@ -45,7 +45,9 @@ class DkHateBenchmark(TextClassificationBenchmark):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         id2label = ['NOT', 'OFF']
-        super().__init__(epochs=10,
+        super().__init__(name='DKHate',
+                         metric_names=dict(f1='F1-score'),
+                         epochs=10,
                          warmup_steps=23,
                          id2label=id2label,
                          cache_dir=cache_dir,
@@ -74,26 +76,6 @@ class DkHateBenchmark(TextClassificationBenchmark):
         results = self._metric.compute(predictions=predictions,
                                        references=labels)
         return dict(f1=results['f1'])
-
-    @doc_inherit
-    def _log_metrics(self,
-                     metrics: Dict[str, List[Dict[str, float]]],
-                     model_id: str):
-        scores = self._get_stats(metrics, 'f1')
-        test_score, test_se = scores['test']
-        test_score *= 100
-        test_se *= 100
-
-        msg = (f'F1-scores on DKHate for {model_id}:\n'
-               f'  - Test: {test_score:.2f} ± {test_se:.2f}')
-
-        if 'train' in scores.keys():
-            train_score, train_se = scores['train']
-            train_score *= 100
-            train_se *= 100
-            msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
-
-        logger.info(msg)
 
     @doc_inherit
     def _get_spacy_predictions_and_labels(self,

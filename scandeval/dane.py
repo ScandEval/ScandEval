@@ -49,8 +49,11 @@ class DaneBenchmark(TokenClassificationBenchmark):
         self.include_misc_tags = include_misc_tags
         id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
                     'I-PER', 'B-MISC', 'I-MISC', 'O']
+        name = 'DaNE' if self.include_misc_tags else 'DaNE without MISC tags'
         super().__init__(epochs=10,
                          warmup_steps=38,
+                         metric_names=dict(micro_f1='Micro-average F1-score'),
+                         name=name,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
@@ -120,31 +123,6 @@ class DaneBenchmark(TokenClassificationBenchmark):
         results = self._metric.compute(predictions=predictions,
                                        references=labels)
         return dict(micro_f1=results["overall_f1"])
-
-    @doc_inherit
-    def _log_metrics(self,
-                     metrics: Dict[str, List[Dict[str, float]]],
-                     model_id: str):
-        scores = self._get_stats(metrics, 'micro_f1')
-        test_score, test_se = scores['test']
-        test_score *= 100
-        test_se *= 100
-
-        if not self.include_misc_tags:
-            misc_txt = 'without MISC tags'
-        else:
-            misc_txt = ''
-
-        msg = (f'Micro-average F1-scores on DaNE {misc_txt} for {model_id}:\n'
-               f'  - Test: {test_score:.2f} ± {test_se:.2f}')
-
-        if 'train' in scores.keys():
-            train_score, train_se = scores['train']
-            train_score *= 100
-            train_se *= 100
-            msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
-
-        logger.info(msg)
 
     @doc_inherit
     def _get_spacy_token_labels(self, processed) -> List[str]:

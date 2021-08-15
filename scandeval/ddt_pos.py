@@ -48,7 +48,9 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
         id2label = ['ADJ', 'ADV', 'INTJ', 'NOUN', 'PROPN', 'VERB', 'ADP',
                     'AUX', 'CCONJ', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ',
                     'PUNCT', 'SYM', 'X']
-        super().__init__(epochs=5,
+        super().__init__(name='the POS part of DDT',
+                         metric_names=dict(accuracy='Accuracy'),
+                         epochs=5,
                          warmup_steps=38,
                          id2label=id2label,
                          cache_dir=cache_dir,
@@ -95,26 +97,6 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
         results = self._metric.compute(predictions=predictions,
                                        references=labels)
         return dict(accuracy=results['overall_accuracy'])
-
-    @doc_inherit
-    def _log_metrics(self,
-                     metrics: Dict[str, List[Dict[str, float]]],
-                     model_id: str):
-        scores = self._get_stats(metrics, 'accuracy')
-        test_score, test_se = scores['test']
-        test_score *= 100
-        test_se *= 100
-
-        msg = (f'Accuracy on the POS part of DDT for {model_id}:\n'
-               f'  - Test: {test_score:.2f} ± {test_se:.2f}')
-
-        if 'train' in scores.keys():
-            train_score, train_se = scores['train']
-            train_score *= 100
-            train_se *= 100
-            msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
-
-        logger.info(msg)
 
     @doc_inherit
     def _get_spacy_token_labels(self, processed) -> List[str]:

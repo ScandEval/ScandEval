@@ -1,7 +1,7 @@
 '''Sentiment evaluation of a language model on the LCC2 dataset'''
 
 from datasets import Dataset
-from typing import Tuple, Dict, List, Optional
+from typing import Tuple, Dict, Optional
 import logging
 
 from .text_classification import TextClassificationBenchmark
@@ -45,7 +45,9 @@ class Lcc2Benchmark(TextClassificationBenchmark):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         id2label = ['neutral', 'positiv', 'negativ']
-        super().__init__(epochs=50,
+        super().__init__(name='LCC2',
+                         metric_names=dict(macro_f1='Macro-average F1-score'),
+                         epochs=50,
                          warmup_steps=0,
                          id2label=id2label,
                          cache_dir=cache_dir,
@@ -75,26 +77,6 @@ class Lcc2Benchmark(TextClassificationBenchmark):
                                        references=labels,
                                        average='macro')
         return dict(macro_f1=results['f1'])
-
-    @doc_inherit
-    def _log_metrics(self,
-                     metrics: Dict[str, List[Dict[str, float]]],
-                     model_id: str):
-        scores = self._get_stats(metrics, 'macro_f1')
-        test_score, test_se = scores['test']
-        test_score *= 100
-        test_se *= 100
-
-        msg = (f'Macro-average F1-scores on LCC2 for {model_id}:\n'
-               f'  - Test: {test_score:.2f} ± {test_se:.2f}')
-
-        if 'train' in scores.keys():
-            train_score, train_se = scores['train']
-            train_score *= 100
-            train_se *= 100
-            msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
-
-        logger.info(msg)
 
     @doc_inherit
     def _get_spacy_predictions_and_labels(self,

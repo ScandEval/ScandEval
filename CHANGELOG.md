@@ -15,6 +15,10 @@ and this project adheres to
   epochs trained. This will allow for a more fair comparison, as some models
   degrade over time, while other models need a longer time to train.
 
+### Changed
+- Uniformised the `_log_metrics` method for all benchmarks, now only defined in
+  `BaseBenchmark`.
+
 ### Fixed
 - Garbage collects when downsizing batch size, to not keep all the previous
   models in memory.

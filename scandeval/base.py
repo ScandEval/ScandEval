@@ -20,15 +20,21 @@ from collections import defaultdict
 import warnings
 from functools import partial
 import gc
+import logging
 
 from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
                     TwolabelTrainer)
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseBenchmark(ABC):
     '''Abstract base class for evaluating models.
 
     Args:
+        name (str):
+            The name of the dataset.
         task (str):
             The type of task to be benchmarked.
         num_labels (int or None, optional):
@@ -76,7 +82,9 @@ class BaseBenchmark(ABC):
             If `batch_size` is not among 1, 2, 4, 8, 16 or 32.
     '''
     def __init__(self,
+                 name: str,
                  task: str,
+                 metric_names: Dict[str, str],
                  num_labels: Optional[int] = None,
                  id2label: Optional[List[str]] = None,
                  evaluate_train: bool = False,
@@ -93,6 +101,8 @@ class BaseBenchmark(ABC):
                             '16 or 32.')
         self.batch_size = batch_size
         self.gradient_accumulation = 32 // batch_size
+        self.name = name
+        self.metric_names = metric_names
         self.evaluate_train = evaluate_train
         self.task = task
         self.cache_dir = cache_dir
@@ -338,9 +348,9 @@ class BaseBenchmark(ABC):
         '''
         pass
 
-    @abstractmethod
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
+                     finetuned: bool,
                      model_id: str):
         '''Log the metrics.
 
@@ -349,11 +359,36 @@ class BaseBenchmark(ABC):
                 The metrics that are to be logged. This is a dict with keys
                 'train' and 'test', with values being lists of dictionaries
                 full of metrics.
+            ta
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
                 model.
         '''
-        pass
+        # Initial logging message
+        if finetuned:
+            msg = (f'Finished finetuning and evaluation of {model_id} on '
+                   f'{self.name}.')
+        else:
+            msg = (f'Finished evaluation of {model_id} on {self.name}.')
+        logger.info(msg)
+
+        # Logging of the metric(s)
+        for metric_key, metric_name in self.metric_names.items():
+            scores = self._get_stats(metrics, metric_key)
+            test_score, test_se = scores['test']
+            test_score *= 100
+            test_se *= 100
+
+            msg = (f'{metric_name}:\n'
+                   f'  - Test: {test_score:.2f} ± {test_se:.2f}')
+
+            if 'train' in scores.keys():
+                train_score, train_se = scores['train']
+                train_score *= 100
+                train_se *= 100
+                msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
+
+            logger.info(msg)
 
     @abstractmethod
     def _get_spacy_predictions_and_labels(self,

@@ -4,7 +4,7 @@ from transformers import (DataCollatorForTokenClassification,
                           PreTrainedTokenizerBase)
 from datasets import Dataset, load_metric
 from functools import partial
-from typing import Optional
+from typing import Optional, Dict
 import logging
 from abc import ABC, abstractmethod
 from tqdm.auto import tqdm
@@ -47,6 +47,8 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         id2label (dict): Conversion dict from NER label indices to the labels.
     '''
     def __init__(self,
+                 name: str,
+                 metric_names: Dict[str, str],
                  id2label: list,
                  epochs: int,
                  cache_dir: str = '.benchmark_models',
@@ -60,6 +62,8 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         self._metric = load_metric('seqeval')
         super().__init__(task='token-classification',
                          num_labels=len(id2label),
+                         name=name,
+                         metric_names=metric_names,
                          id2label=id2label,
                          cache_dir=cache_dir,
                          learning_rate=learning_rate,
