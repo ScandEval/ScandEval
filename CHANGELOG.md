@@ -10,6 +10,7 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Fixed bug when evaluating SpaCy models.
+- Only removing objects at memory cleanup if they exist at all.
 
 
 ## [v0.6.0] - 2021-08-15

@@ -645,14 +645,25 @@ class BaseBenchmark(ABC):
                         trainer.args = training_args
 
                         # Garbage collection, to avoid memory issues
-                        del model
+                        try:
+                            del model, model_dict
+                        except UnboundLocalError:
+                            try:
+                                del model
+                            except UnboundLocalError:
+                                pass
                         gc.collect()
 
             self._log_metrics(metrics, model_id=model_id, finetuned=finetune)
 
             # Garbage collection, to avoid memory issues
-            del model
-            del train, test
+            try:
+                del model, model_dict
+            except UnboundLocalError:
+                try:
+                    del model
+                except UnboundLocalError:
+                    pass
             gc.collect()
 
             return metrics
@@ -708,7 +719,13 @@ class BaseBenchmark(ABC):
             self._log_metrics(metrics, model_id=model_id, finetuned=False)
 
             # Garbage collection, to avoid memory issues
-            del model, model_dict
+            try:
+                del model, model_dict
+            except UnboundLocalError:
+                try:
+                    del model
+                except UnboundLocalError:
+                    pass
             gc.collect()
 
             return metrics
