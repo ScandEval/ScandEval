@@ -124,7 +124,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
             tokenised = dataset.map(tokenise, batched=True)
 
             numericalise = partial(self.create_numerical_labels,
-                                   label2id=kwargs['config'].label2id)
+                                   label2id=self._model_label2id)
             preprocessed = tokenised.map(numericalise, batched=True)
 
             return preprocessed.remove_columns(['doc', 'orig_label'])

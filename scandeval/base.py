@@ -21,6 +21,9 @@ import warnings
 from functools import partial
 import gc
 import logging
+import torch
+import torch.nn as nn
+from torch.nn import Parameter
 
 from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
                     TwolabelTrainer)
@@ -116,6 +119,8 @@ class BaseBenchmark(ABC):
         self.split_point = split_point
         self.verbose = verbose
         self.label_synonyms = label_synonyms
+        self._model_id2label = list()
+        self._model_label2id = dict()
         if self.id2label is not None:
             if label_synonyms is not None:
                 self.label2id = {label: id for id, lbl in enumerate(id2label)
@@ -263,13 +268,13 @@ class BaseBenchmark(ABC):
                 # Get the `label2id` and `id2label` conversions from the model
                 # config
                 try:
-                    model_label2id = model.config.label2id
+                    model_label2id = dict(model.config.label2id)
                 except AttributeError:
                     model_label2id = None
                 try:
-                    model_num_labels = len(model.config.id2label)
                     try:
-                        model_id2label = [model.config.id2label[idx]
+                        model_num_labels = len(model.config.id2label)
+                        model_id2label = [dict(model.config.id2label)[idx]
                                           for idx in range(model_num_labels)]
                     except IndexError:
                         raise InvalidBenchmark('There is a gap in the '
@@ -282,20 +287,17 @@ class BaseBenchmark(ABC):
                 # config, then define the other one from it
                 if model_label2id is not None and model_id2label is None:
                     model_id2label = [label for label in model_label2id.keys()]
-                    model.config.id2label = model_id2label
-                    model.config.num_labels = len(model_id2label)
+                    self._model_id2label = model_id2label
                 if model_label2id is None and model_id2label is not None:
                     model_label2id = {lbl: id
                                       for id, lbl in enumerate(model_id2label)}
-                    model.config.label2id = model_label2id
-                    model.config.num_labels = len(model_id2label)
+                    self._model_label2id = model_label2id
 
                 # If the model does not have `label2id` or `id2label`
                 # conversions, then use the defaults
                 if model_label2id is None and model_id2label is None:
-                    model.config.label2id = self.label2id
-                    model.config.id2label = self.id2label
-                    model.config.num_labels = len(self.id2label)
+                    self._model_label2id = self.label2id
+                    self._model_id2label = self.id2label
 
                 # If the model *does* have conversions, then ensure that it can
                 # deal with all the labels in the default conversions. This
@@ -317,9 +319,48 @@ class BaseBenchmark(ABC):
                                       for label_syns in synonyms
                                       for label in label_syns
                                       if lbl in label_syns}
-                    model.config.id2label = model_id2label
-                    model.config.label2id = model_label2id
-                    model.config.num_labels = len(model_id2label)
+                    self._model_id2label = model_id2label
+                    self._model_label2id = model_label2id
+
+                    # This changes the classification layer in the finetuned
+                    # model to be consistent with all the labels in the
+                    # dataset. If the model was previously finetuned on a
+                    # dataset which left out a label, say, then that label will
+                    # be inserted in the model architecture here, but without
+                    # the model ever predicting it. This will allow the model
+                    # to be benchmarked on such datasets, however.
+                    # NOTE: This only works on classification tasks. This code
+                    #       needs to be rewritten when we add other types of
+                    #       tasks.
+                    if len(model_id2label) > len(dict(model.config.label2id)):
+
+                        # Count the number of new labels to add to the model
+                        num_new_labels = (len(model_id2label) -
+                                          len(dict(model.config.label2id)))
+
+                        # Load the weights from the model's current
+                        # classification layer
+                        clf_weight = model.classifier.weight.data
+
+                        # Create the new weights, which have zeros at all the
+                        # new entries
+                        zeros = torch.zeros(num_new_labels, config.hidden_size)
+                        new_clf_weight = torch.cat((clf_weight, zeros), dim=0)
+                        new_clf_weight = Parameter(new_clf_weight)
+
+                        # Create the new classification layer
+                        new_clf = nn.Linear(config.hidden_size,
+                                            len(model_id2label))
+
+                        # Assign the new weights to the new classification
+                        # layer, and replace the old classification layer with
+                        # this one
+                        new_clf.weight = new_clf_weight
+                        model.classifier = new_clf
+
+                        # Update the number of labels the model think it has.
+                        # This is required to avoid exceptions when evaluating
+                        model.config.num_labels = len(model_id2label)
 
             except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
@@ -649,7 +690,7 @@ class BaseBenchmark(ABC):
                         # Initialise compute_metrics function
                         compute_metrics = partial(
                             self._compute_metrics,
-                            id2label=model.config.id2label
+                            id2label=self._model_id2label
                         )
 
                         # Initialise Trainer
