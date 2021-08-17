@@ -174,7 +174,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         if framework in ['pytorch', 'tensorflow', 'jax']:
             map_fn = partial(self._tokenize_and_align_labels,
                              tokenizer=kwargs['tokenizer'],
-                             label2id=self._model_label2id)
+                             label2id=kwargs['config'].label2id)
             tokenised_dataset = dataset.map(map_fn, batched=True)
             return tokenised_dataset
         elif framework == 'spacy':

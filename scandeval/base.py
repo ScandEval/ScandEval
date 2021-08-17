@@ -119,8 +119,6 @@ class BaseBenchmark(ABC):
         self.split_point = split_point
         self.verbose = verbose
         self.label_synonyms = label_synonyms
-        self._model_id2label = list()
-        self._model_label2id = dict()
         if self.id2label is not None:
             if label_synonyms is not None:
                 self.label2id = {label: id for id, lbl in enumerate(id2label)
@@ -287,17 +285,17 @@ class BaseBenchmark(ABC):
                 # config, then define the other one from it
                 if model_label2id is not None and model_id2label is None:
                     model_id2label = [label for label in model_label2id.keys()]
-                    self._model_id2label = model_id2label
+                    model.config.id2label = model_id2label
                 if model_label2id is None and model_id2label is not None:
                     model_label2id = {lbl: id
                                       for id, lbl in enumerate(model_id2label)}
-                    self._model_label2id = model_label2id
+                    model.config.label2id = model_label2id
 
                 # If the model does not have `label2id` or `id2label`
                 # conversions, then use the defaults
                 if model_label2id is None and model_id2label is None:
-                    self._model_label2id = self.label2id
-                    self._model_id2label = self.id2label
+                    model.config.label2id = self.label2id
+                    model.config.id2label = self.id2label
 
                 # If the model *does* have conversions, then ensure that it can
                 # deal with all the labels in the default conversions. This
@@ -314,13 +312,13 @@ class BaseBenchmark(ABC):
                     else:
                         synonyms = self.label_synonyms
 
+                    # Add all the synonyms of the labels into the label2id
+                    # conversion dictionary
                     model_label2id = {label: id
                                       for id, lbl in enumerate(model_id2label)
                                       for label_syns in synonyms
                                       for label in label_syns
                                       if lbl in label_syns}
-                    self._model_id2label = model_id2label
-                    self._model_label2id = model_label2id
 
                     # This changes the classification layer in the finetuned
                     # model to be consistent with all the labels in the
@@ -362,8 +360,10 @@ class BaseBenchmark(ABC):
                         # This is required to avoid exceptions when evaluating
                         model.config.num_labels = len(model_id2label)
                         model.num_labels = len(model_id2label)
-                        model.config.id2label = model_id2label
-                        model.config.label2id = model_label2id
+
+                    # Update the model's own conversions with the new ones
+                    model.config.id2label = model_id2label
+                    model.config.label2id = model_label2id
 
             except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
@@ -693,7 +693,7 @@ class BaseBenchmark(ABC):
                         # Initialise compute_metrics function
                         compute_metrics = partial(
                             self._compute_metrics,
-                            id2label=self._model_id2label
+                            id2label=model.config.id2label
                         )
 
                         # Initialise Trainer
