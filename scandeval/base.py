@@ -617,7 +617,7 @@ class BaseBenchmark(ABC):
         if finetune or self.evaluate_train:
             train_bidxs = rng.integers(0, len(train),
                                        size=(num_finetunings - 1, len(train)))
-        test_bidxs = rng.integers(0, len(test), size=(10, len(test)))
+        test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
