@@ -50,7 +50,7 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
                     'PUNCT', 'SYM', 'X']
         super().__init__(name='the POS part of DDT',
                          metric_names=dict(accuracy='Accuracy'),
-                         epochs=5,
+                         epochs=10,
                          warmup_steps=38,
                          id2label=id2label,
                          cache_dir=cache_dir,
