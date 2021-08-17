@@ -249,7 +249,9 @@ class BaseBenchmark(ABC):
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
             if task == 'fill-mask':
-                params = dict(num_labels=self.num_labels)
+                params = dict(num_labels=self.num_labels,
+                              id2label=self.id2label,
+                              label2id=self.label2id)
             else:
                 params = dict()
 
@@ -271,7 +273,11 @@ class BaseBenchmark(ABC):
                 try:
                     try:
                         model_num_labels = len(model.config.id2label)
-                        model_id2label = [dict(model.config.id2label)[idx]
+                        if not isinstance(model.config.id2label, list):
+                            model_id2label = dict(model.config.id2label)
+                        else:
+                            model_id2label = model.config.id2label
+                        model_id2label = [model_id2label[idx]
                                           for idx in range(model_num_labels)]
                     except IndexError:
                         raise InvalidBenchmark('There is a gap in the '
@@ -319,6 +325,12 @@ class BaseBenchmark(ABC):
                                       for label in label_syns
                                       if lbl in label_syns}
 
+                    # Get the old id2label conversion
+                    if not isinstance(model.config.id2label, list):
+                        old_model_id2label = dict(model.config.id2label)
+                    else:
+                        old_model_id2label = model.config.id2label
+
                     # This changes the classification layer in the finetuned
                     # model to be consistent with all the labels in the
                     # dataset. If the model was previously finetuned on a
@@ -330,12 +342,12 @@ class BaseBenchmark(ABC):
                     #       needs to be rewritten when we add other types of
                     #       tasks.
                     # NOTE: Only works for pytorch models at the moment
-                    if (len(model_id2label) > len(dict(model.config.id2label))
+                    if (len(model_id2label) > len(old_model_id2label)
                             and framework == 'pytorch'):
 
                         # Count the number of new labels to add to the model
                         num_new_labels = (len(model_id2label) -
-                                          len(dict(model.config.label2id)))
+                                          len(old_model_id2label))
 
                         # Load the weights from the model's current
                         # classification layer
@@ -366,9 +378,10 @@ class BaseBenchmark(ABC):
                     model.config.id2label = model_id2label
                     model.config.label2id = model_label2id
 
-            except (OSError, ValueError):
+            except (OSError, ValueError) as e:
+                raise e
                 raise InvalidBenchmark(f'The model {model_id} could not be '
-                                       f'loaded from the HuggingFace hub.')
+                                       f'loaded from the HuggingFace hub')
 
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
