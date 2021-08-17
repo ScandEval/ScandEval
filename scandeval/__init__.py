@@ -5,6 +5,7 @@ from .benchmark import Benchmark  # noqa
 from .angry_tweets import AngryTweetsBenchmark  # noqa
 from .dane import DaneBenchmark  # noqa
 from .ddt_pos import DdtPosBenchmark  # noqa
+from .ddt_dep import DdtDepBenchmark  # noqa
 from .dkhate import DkHateBenchmark  # noqa
 from .europarl1 import Europarl1Benchmark  # noqa
 from .europarl2 import Europarl2Benchmark  # noqa
