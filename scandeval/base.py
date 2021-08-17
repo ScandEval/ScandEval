@@ -21,9 +21,6 @@ import warnings
 from functools import partial
 import gc
 import logging
-import torch
-import torch.nn as nn
-from torch.nn import Parameter
 
 from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
                     TwolabelTrainer)
@@ -226,7 +223,9 @@ class BaseBenchmark(ABC):
         # Ensure that the framework is installed
         try:
             if framework == 'pytorch':
-                import torch  # noqa
+                import torch
+                import torch.nn as nn
+                from torch.nn import Parameter
             elif framework == 'tensorflow':
                 import tensorflow  # noqa
             elif framework == 'jax':
@@ -330,7 +329,9 @@ class BaseBenchmark(ABC):
                     # NOTE: This only works on classification tasks. This code
                     #       needs to be rewritten when we add other types of
                     #       tasks.
-                    if len(model_id2label) > len(dict(model.config.id2label)):
+                    # NOTE: Only works for pytorch models at the moment
+                    if (len(model_id2label) > len(dict(model.config.id2label))
+                            and framework == 'pytorch'):
 
                         # Count the number of new labels to add to the model
                         num_new_labels = (len(model_id2label) -
@@ -615,7 +616,7 @@ class BaseBenchmark(ABC):
         # Get bootstrap sample indices
         if finetune or self.evaluate_train:
             train_bidxs = rng.integers(0, len(train),
-                                       size=(num_finetunings, len(train)))
+                                       size=(num_finetunings - 1, len(train)))
         test_bidxs = rng.integers(0, len(test), size=(10, len(test)))
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
