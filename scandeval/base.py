@@ -332,7 +332,7 @@ class BaseBenchmark(ABC):
                     # NOTE: This only works on classification tasks. This code
                     #       needs to be rewritten when we add other types of
                     #       tasks.
-                    if len(model_id2label) > len(dict(model.config.label2id)):
+                    if len(model_id2label) > len(dict(model.config.id2label)):
 
                         # Count the number of new labels to add to the model
                         num_new_labels = (len(model_id2label) -
@@ -361,6 +361,9 @@ class BaseBenchmark(ABC):
                         # Update the number of labels the model think it has.
                         # This is required to avoid exceptions when evaluating
                         model.config.num_labels = len(model_id2label)
+                        model.num_labels = len(model_id2label)
+                        model.config.id2label = model_id2label
+                        model.config.label2id = model_label2id
 
             except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
