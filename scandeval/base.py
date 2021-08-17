@@ -119,9 +119,9 @@ class BaseBenchmark(ABC):
         if self.id2label is not None:
             if label_synonyms is not None:
                 self.label2id = {label: id for id, lbl in enumerate(id2label)
-                                  for label_syns in label_synonyms
-                                  for label in label_syns
-                                  if lbl in label_syns}
+                                 for label_syns in label_synonyms
+                                 for label in label_syns
+                                 if lbl in label_syns}
             else:
                 self.label2id = {lbl: id for id, lbl in enumerate(id2label)}
         else:
