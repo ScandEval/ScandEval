@@ -112,7 +112,7 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
         id2label = id2label_head + id2label_dep
         super().__init__(name='the DEP part of DDT',
                          metric_names=dict(las='LAS', uas='UAS'),
-                         epochs=40,
+                         epochs=100,
                          warmup_steps=38,
                          id2label=id2label,
                          cache_dir=cache_dir,
