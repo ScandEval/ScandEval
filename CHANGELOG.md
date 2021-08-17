@@ -7,7 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.7.0] - 2021-08-17
 ### Changed
 - Always ensure that a model can deal with the labels in the dataset when
   finetuning. If the model has not been trained on the label, then this will
