@@ -378,8 +378,7 @@ class BaseBenchmark(ABC):
                     model.config.id2label = model_id2label
                     model.config.label2id = model_label2id
 
-            except (OSError, ValueError) as e:
-                raise e
+            except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
                                        f'loaded from the HuggingFace hub')
 
