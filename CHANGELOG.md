@@ -7,6 +7,17 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Models are now being trained for much longer, but with an early stopping
+  callback with patience 2. This will enable a more uniform comparison between
+  models that require a different number of finetuning epochs.
+
+### Fixed
+- There was a bug when evaluating a finetuned PyTorch model on a sequence
+  classification task, if the model had only been trained on a proper subset of
+  the labels present in the dataset.
+
 ## [v0.7.0] - 2021-08-17
 ### Changed
 - Always ensure that a model can deal with the labels in the dataset when
