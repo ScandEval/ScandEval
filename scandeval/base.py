@@ -9,7 +9,8 @@ from transformers import (PreTrainedTokenizerBase,
                           AutoConfig,
                           TrainingArguments,
                           Trainer,
-                          PrinterCallback)
+                          PrinterCallback,
+                          EarlyStoppingCallback)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
 import requests
@@ -717,6 +718,10 @@ class BaseBenchmark(ABC):
                             id2label=model.config.id2label
                         )
 
+                        # Initialise early stopping callback
+                        params = dict(early_stopping_patience=2)
+                        early_stopping = EarlyStoppingCallback(**params)
+
                         # Initialise Trainer
                         split = trains[idx].train_test_split(0.1, seed=4242)
                         trainer_args = dict(model=model,
@@ -725,7 +730,8 @@ class BaseBenchmark(ABC):
                                             eval_dataset=split['test'],
                                             tokenizer=tokenizer,
                                             data_collator=data_collator,
-                                            compute_metrics=compute_metrics)
+                                            compute_metrics=compute_metrics,
+                                            callbacks=[early_stopping])
                         if self.multilabel:
                             trainer_args['split_point'] = self.split_point
                             trainer = TwolabelTrainer(**trainer_args)

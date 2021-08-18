@@ -50,7 +50,7 @@ class DaneBenchmark(TokenClassificationBenchmark):
         id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
                     'I-PER', 'B-MISC', 'I-MISC', 'O']
         name = 'DaNE' if self.include_misc_tags else 'DaNE without MISC tags'
-        super().__init__(epochs=20,
+        super().__init__(epochs=100,
                          warmup_steps=38,
                          metric_names=dict(micro_f1='Micro-average F1-score'),
                          name=name,

@@ -47,7 +47,7 @@ class DkHateBenchmark(TextClassificationBenchmark):
         id2label = ['NOT', 'OFF']
         super().__init__(name='DKHate',
                          metric_names=dict(f1='F1-score'),
-                         epochs=10,
+                         epochs=100,
                          warmup_steps=23,
                          id2label=id2label,
                          cache_dir=cache_dir,

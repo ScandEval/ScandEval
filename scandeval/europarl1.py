@@ -47,7 +47,7 @@ class Europarl1Benchmark(TextClassificationBenchmark):
         id2label = ['negativ', 'neutral', 'positiv']
         super().__init__(name='Europarl1',
                          metric_names=dict(macro_f1='Macro-average F1-score'),
-                         epochs=30,
+                         epochs=100,
                          warmup_steps=1,
                          id2label=id2label,
                          cache_dir=cache_dir,

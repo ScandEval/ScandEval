@@ -52,7 +52,7 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
         ]
         super().__init__(name='AngryTweets',
                          metric_names=dict(macro_f1='Macro-average F1-score'),
-                         epochs=10,
+                         epochs=100,
                          warmup_steps=19,
                          id2label=id2label,
                          label_synonyms=label_synonyms,

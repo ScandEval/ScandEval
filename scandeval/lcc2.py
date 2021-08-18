@@ -47,7 +47,7 @@ class Lcc2Benchmark(TextClassificationBenchmark):
         id2label = ['neutral', 'positiv', 'negativ']
         super().__init__(name='LCC2',
                          metric_names=dict(macro_f1='Macro-average F1-score'),
-                         epochs=50,
+                         epochs=100,
                          warmup_steps=0,
                          id2label=id2label,
                          cache_dir=cache_dir,
