@@ -113,7 +113,7 @@ class DaneBenchmark(TokenClassificationBenchmark):
                 for prediction, label in zip(raw_predictions, labels)
             ]
 
-            # Remove MISC labels
+            # Remove MISC labels if MISC tags are not included
             if not self.include_misc_tags:
                 for i, prediction_list in enumerate(predictions):
                     for j, ner_tag in enumerate(prediction_list):
@@ -127,8 +127,19 @@ class DaneBenchmark(TokenClassificationBenchmark):
     @doc_inherit
     def _get_spacy_token_labels(self, processed) -> List[str]:
         def get_ent(token) -> str:
-            if token.ent_iob_ == 'O':
+            '''Helper function that extracts the entity from a SpaCy token'''
+
+            # Replace predicted MISC tags with O tags if MISC tags are not
+            # included
+            if token.ent_type_ == 'MISC' and not self.include_misc_tags:
                 return 'O'
+
+            # Deal with the O tag separately, as it is the only tag not of the
+            # form B-tag or I-tag
+            elif token.ent_iob_ == 'O':
+                return 'O'
+
+            # In general return a tag of the form B-tag or I-tag
             else:
                 return f'{token.ent_iob_}-{token.ent_type_}'
 
