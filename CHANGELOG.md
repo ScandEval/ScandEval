@@ -12,6 +12,13 @@ and this project adheres to
 ### Added
 - Added the separate `nb` (Norwegian Bokmål) and `nn` (Norwegian Nynorsk), on
   top of the general `no` (Norwegian).
+- Added more multilingual models.
+
+### Changed
+- Changed `Benchmark` API. Now the constructor and the `__call__` method have
+  the same arguments, except the `model_id` and `dataset` in `__call__`, where
+  the constructor sets the default values and the `__call__` method can change
+  these to specific cases.
 
 
 ## [v0.8.0] - 2021-08-18
