@@ -24,10 +24,10 @@ from .benchmark import Benchmark
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',
-              default=['da', 'sv', 'no', 'is', 'fo'],
+              default=['da', 'sv', 'no', 'nb', 'nn', 'is', 'fo'],
               show_default=True,
               multiple=True,
-              type=click.Choice(['da', 'sv', 'no', 'is', 'fo']),
+              type=click.Choice(['da', 'sv', 'no', 'nb', 'nn', 'is', 'fo']),
               help='The languages to benchmark. Only relevant if `model_id` '
                    'is not specified.')
 @click.option('--task', '-t',

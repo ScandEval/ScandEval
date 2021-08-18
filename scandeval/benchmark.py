@@ -31,14 +31,15 @@ class Benchmark:
         language (str or list of str or None, optional):
             The language codes of the languages to include in the list. If None
             then all languages will be considered.  Defaults to ['da', 'sv',
-            'no', 'is', 'fo'].
+            'no', 'nb', 'nn', 'is', 'fo'].
         task (str or list of str or None, optional):
             The tasks to consider in the list. If None then all tasks will be
             considered. Defaults to None.
     '''
     def __init__(self,
                  language: Optional[Union[str, List[str]]] = ['da', 'sv', 'no',
-                                                              'is', 'fo'],
+                                                              'nb', 'nn', 'is',
+                                                              'fo'],
                  task: Optional[Union[str, List[str]]] = None,
                  batch_size: int = 32,
                  evaluate_train: bool = False,

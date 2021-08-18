@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added the separate `nb` (Norwegian Bokmål) and `nn` (Norwegian Nynorsk), on
+  top of the general `no` (Norwegian).
+
+
 ## [v0.8.0] - 2021-08-18
 ### Changed
 - Models are now being trained for much longer, but with an early stopping
