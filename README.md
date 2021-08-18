@@ -51,10 +51,16 @@ instance evaluate the model on the `AngryTweets` dataset:
 $ scandeval --model_id <model_id> --dataset angry-tweets
 ```
 
-If you want to benchmark _all_ Danish models, this can be done using the
-`language` tag, like so:
+We can also separate by language. To benchmark all Danish models, say, this can
+be done using the `language` tag, like so:
 ```shell
 $ scandeval --language da
+```
+
+Multiple models, datasets and/or languages can be specified by just attaching
+multiple arguments. Here is an example with two models:
+```shell
+$ scandeval --model_id <model_id1> --model_id <model_id2> --dataset angry-tweets
 ```
 
 See all the arguments and options available for the `scandeval` command by
@@ -79,11 +85,14 @@ shown here with the `AngryTweets` dataset again:
 >>> benchmark('<model_id>', 'angry-tweets')
 ```
 
-To benchmark _all_ Danish models, this is given at initialisation:
+This would benchmark all Danish models:
 ```python
->>> benchmark = Benchmark(language='da')
->>> benchmark()
+>>> benchmark(language='da')
 ```
+
+See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a more
+in-depth description.
+
 
 ### Downloading Datasets
 If you are just interested in downloading a dataset rather than benchmarking,
@@ -95,6 +104,9 @@ this can be done as follows:
 
 Here `X_train` and `X_test` will be lists containing the relevant texts, and
 `y_train` and `y_test` will be lists containing the associated labels.
+
+See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a list
+of all the datasets that can be loaded.
 
 
 ## Documentation
