@@ -76,7 +76,10 @@ def benchmark(model_id: Tuple[str],
     '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
     benchmarker = Benchmark(language=list(language),
-                            task=None if 'all' in task else list(task),
+                            task='all' if 'all' in task else list(task),
+                            num_finetunings=num_finetunings,
+                            progress_bar=(not no_progress_bar),
+                            save_results=True,
                             batch_size=batch_size,
                             evaluate_train=evaluate_train,
                             verbose=verbose)
@@ -84,8 +87,4 @@ def benchmark(model_id: Tuple[str],
     # Perform the benchmark evaluation
     model_id = None if len(model_id) == 0 else list(model_id)
     dataset = None if len(dataset) == 0 else list(dataset)
-    benchmarker(model_id=model_id,
-                dataset=dataset,
-                num_finetunings=num_finetunings,
-                progress_bar=(not no_progress_bar),
-                save_results=True)
+    benchmarker(model_id=model_id, dataset=dataset)
