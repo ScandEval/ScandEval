@@ -7,6 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
 ### Changed
 - Models are now being trained for much longer, but with an early stopping
@@ -17,6 +18,13 @@ and this project adheres to
 - There was a bug when evaluating a finetuned PyTorch model on a sequence
   classification task, if the model had only been trained on a proper subset of
   the labels present in the dataset.
+
+### Removed
+- All individual benchmarks have been removed from `__init__.py`. They can
+  still be imported using their individual modules, for instance
+  `from scandeval.dane import DaneBenchmark`, but the idea is to use the
+  general `Benchmark` class instead.
+
 
 ## [v0.7.0] - 2021-08-17
 ### Changed
