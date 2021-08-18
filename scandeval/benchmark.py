@@ -224,7 +224,6 @@ class Benchmark:
                  save_results: Optional[bool] = None,
                  language: Optional[Union[str, List[str]]] = None,
                  task: Optional[Union[str, List[str]]] = None,
-                 batch_size: Optional[int] = None,
                  evaluate_train: Optional[bool] = None,
                  verbose: Optional[bool] = None) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks all models in the model list.
@@ -256,11 +255,6 @@ class Benchmark:
                 The tasks to consider in the list. Set this to 'all' if all
                 tasks should be considered. If None then the default value from
                 the constructor will be used. Defaults to None.
-            batch_size (int or None, optional):
-                The batch size used to finetune and evaluate the model. This
-                value must be among 1, 2, 4, 8, 16 and 32. If None then the
-                default value from the constructor will be used. Defaults to
-                None.
             evaluate_train (bool or None, optional):
                 Whether to evaluate the training set as well. If None then the
                 default value from the constructor will be used. Defaults to
@@ -286,8 +280,6 @@ class Benchmark:
             language = self.language
         if task is None:
             task = self.task
-        if batch_size is None:
-            batch_size = self.batch_size
         if evaluate_train is None:
             evaluate_train = self.evaluate_train
         if verbose is None:
