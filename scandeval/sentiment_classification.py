@@ -1,6 +1,6 @@
 '''Abstract sentiment classification benchmark'''
 
-from datasets import Dataset, load_metric
+from datasets import Dataset
 import logging
 from abc import ABC
 from typing import Optional, Dict
