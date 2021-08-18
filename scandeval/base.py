@@ -350,8 +350,16 @@ class BaseBenchmark(ABC):
                                           len(old_model_id2label))
 
                         # Load the weights from the model's current
-                        # classification layer
-                        clf_weight = model.classifier.weight.data
+                        # classification layer. This handles both the token
+                        # classification case and the sequence classification
+                        # case.
+                        # NOTE: This might need additional cases (or a general
+                        #       solution) when we start dealing with other
+                        #       tasks.
+                        try:
+                            clf_weight = model.classifier.weight.data
+                        except AttributeError:
+                            clf_weight = model.classifier.out_proj.weight.data
 
                         # Create the new weights, which have zeros at all the
                         # new entries
