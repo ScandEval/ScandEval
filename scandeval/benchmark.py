@@ -27,9 +27,11 @@ logger = logging.getLogger(__name__)
 class Benchmark:
     '''Benchmarking all the Scandinavian language models.
 
-    Args
+    Args:
         num_finetunings (int, optional):
-            The number of times to finetune each model on. Defaults to 10.
+            The number of times to finetune each model on. Must be at least 2.
+            Smaller number of finetunings result in larger confidence intervals
+            of the scores. Defaults to 10.
         progress_bar (bool, optional):
             Whether progress bars should be shown. Defaults to True.
         save_results (bool, optional):
@@ -43,13 +45,14 @@ class Benchmark:
         task (str or list of str, optional):
             The tasks to consider in the list. Set this to 'all' if all
             tasks should be considered. Defaults to 'all'.
-        batch_size (int, optional):
-            The batch size used to finetune and evaluate the model. This
-            value must be among 1, 2, 4, 8, 16 and 32. Defaults to 32.
         evaluate_train (bool, optional):
             Whether to evaluate the training set as well. Defaults to False.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
+
+    Raises:
+        ValueError:
+            If `num_finetunings` is smaller than 2.
     '''
     def __init__(self,
                  num_finetunings: int = 10,
@@ -58,9 +61,11 @@ class Benchmark:
                  language: Union[str, List[str]] = ['da', 'sv', 'no', 'nb',
                                                     'nn', 'is', 'fo'],
                  task: Union[str, List[str]] = 'all',
-                 batch_size: int = 32,
                  evaluate_train: bool = False,
                  verbose: bool = False):
+
+        if num_finetunings < 2:
+            raise ValueError('The number of finetunings must be at least 2.')
 
         # Set parameters
         self.num_finetunings = num_finetunings
@@ -68,7 +73,6 @@ class Benchmark:
         self.save_results = save_results
         self.language = language
         self.task = task
-        self.batch_size = batch_size
         self.evaluate_train = evaluate_train
         self.verbose = verbose
 
@@ -83,7 +87,6 @@ class Benchmark:
         # Initialise the list of all benchmarks, along with their variable
         # names and the more descriptive names
         params = dict(verbose=verbose,
-                      batch_size=batch_size,
                       evaluate_train=evaluate_train)
         self._benchmarks = [
             ('dane', 'DaNE with MISC tags', DaneBenchmark(**params)),

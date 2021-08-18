@@ -44,13 +44,7 @@ from .benchmark import Benchmark
               default=10,
               show_default=True,
               help='The number of times a language model should be '
-                   'finetuned.')
-@click.option('--batch_size', '-b',
-              default=32,
-              type=int,
-              show_default=True,
-              help=('The batch size used to finetune the models. This '
-                    'have to be among 1, 2, 4, 8, 16 and 32.'))
+                   'finetuned. Must be at least 2.')
 @click.option('--evaluate_train',
               is_flag=True,
               show_default=True,
@@ -69,7 +63,6 @@ def benchmark(model_id: Tuple[str],
               language: Tuple[str],
               task: Tuple[str],
               num_finetunings: int,
-              batch_size: int,
               evaluate_train: bool,
               no_progress_bar: bool,
               verbose: bool = False):
@@ -80,7 +73,6 @@ def benchmark(model_id: Tuple[str],
                             num_finetunings=num_finetunings,
                             progress_bar=(not no_progress_bar),
                             save_results=True,
-                            batch_size=batch_size,
                             evaluate_train=evaluate_train,
                             verbose=verbose)
 
