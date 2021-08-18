@@ -14,6 +14,10 @@ and this project adheres to
   top of the general `no` (Norwegian).
 - Added more multilingual models.
 
+### Fixed
+- SpaCy models was evaluated wrongly on the `dane-no-misc` dataset, as their
+  `MISC` predictions was not replaced with `O` tags.
+
 ### Changed
 - Changed `Benchmark` API. Now the constructor and the `__call__` method have
   the same arguments, except the `model_id` and `dataset` in `__call__`, where
