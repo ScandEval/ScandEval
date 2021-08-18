@@ -29,9 +29,9 @@ class Benchmark:
 
     Args:
         num_finetunings (int, optional):
-            The number of times to finetune each model on. Must be at least 2.
-            Smaller number of finetunings result in larger confidence intervals
-            of the scores. Defaults to 10.
+            The number of times to finetune each model on. Smaller number of
+            finetunings result in larger confidence intervals of the scores.
+            Defaults to 10.
         progress_bar (bool, optional):
             Whether progress bars should be shown. Defaults to True.
         save_results (bool, optional):
@@ -49,10 +49,6 @@ class Benchmark:
             Whether to evaluate the training set as well. Defaults to False.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
-
-    Raises:
-        ValueError:
-            If `num_finetunings` is smaller than 2.
     '''
     def __init__(self,
                  num_finetunings: int = 10,
@@ -63,9 +59,6 @@ class Benchmark:
                  task: Union[str, List[str]] = 'all',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-
-        if num_finetunings < 2:
-            raise ValueError('The number of finetunings must be at least 2.')
 
         # Set parameters
         self.num_finetunings = num_finetunings

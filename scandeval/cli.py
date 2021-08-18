@@ -44,7 +44,8 @@ from .benchmark import Benchmark
               default=10,
               show_default=True,
               help='The number of times a language model should be '
-                   'finetuned. Must be at least 2.')
+                   'finetuned. Smaller number of finetunings result in larger '
+                   'confidence intervals of the scores.')
 @click.option('--evaluate_train',
               is_flag=True,
               show_default=True,
