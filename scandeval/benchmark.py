@@ -362,8 +362,8 @@ class Benchmark:
 
         # Benchmark all the models in `model_ids` on all the datasets in
         # `benchmarks`
-        for dataset, alias, cls in benchmarks:
-            for model_id in model_ids:
+        for model_id in model_ids:
+            for dataset, alias, cls in benchmarks:
                 logger.info(f'Benchmarking {model_id} on {alias}:')
                 try:
                     params = dict(num_finetunings=num_finetunings,

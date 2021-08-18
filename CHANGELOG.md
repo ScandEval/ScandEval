@@ -26,6 +26,8 @@ and this project adheres to
   the same arguments, except the `model_id` and `dataset` in `__call__`, where
   the constructor sets the default values and the `__call__` method can change
   these to specific cases.
+- Changed the benchmarking order. Now benchmarks all datasets for a model,
+  before moving on to the next model
 
 
 ## [v0.8.0] - 2021-08-18
