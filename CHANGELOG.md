@@ -17,6 +17,9 @@ and this project adheres to
 ### Fixed
 - SpaCy models was evaluated wrongly on the `dane-no-misc` dataset, as their
   `MISC` predictions was not replaced with `O` tags.
+- When evaluating models finetuned for token classification on a text
+  classification task, a `ValueError` was raised, rather than an
+  `InvalidBenchmark` exception.
 
 ### Changed
 - Changed `Benchmark` API. Now the constructor and the `__call__` method have
