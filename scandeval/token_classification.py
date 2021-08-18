@@ -235,7 +235,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         else:
             itr = dataset['doc']
 
-        processed = model.pipe(itr, batch_size=self.batch_size)
+        processed = model.pipe(itr, batch_size=32)
         map_fn = self._extract_spacy_predictions
         predictions = map(map_fn, zip(dataset['tokens'], processed))
 
