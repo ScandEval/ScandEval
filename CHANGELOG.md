@@ -10,8 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
-- Added the separate `nb` (Norwegian Bokmål) and `nn` (Norwegian Nynorsk), on
-  top of the general `no` (Norwegian).
+- Added the separate `nb` (Norwegian Bokmål) and `nn` (Norwegian Nynorsk)
+  language tags, on top of the general `no` (Norwegian).
 - Added more multilingual models.
 
 ### Fixed
