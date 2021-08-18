@@ -28,6 +28,14 @@ and this project adheres to
   these to specific cases.
 - Changed the benchmarking order. Now benchmarks all datasets for a model,
   before moving on to the next model
+- Renamed the `multilabel` argument to the more descriptive `two_labels`.
+- Updated docstrings to be more accurate.
+
+### Removed
+- Removed `learning_rate`, `batch_size` and `warmup_steps` arguments from the
+  benchmarks. These are now fixed to 2e-5, 32 and 25% of the training dataset,
+  respectively. Note that the batch size will still automatically decrease if
+  the GPU runs out of memory.
 
 
 ## [v0.8.0] - 2021-08-18

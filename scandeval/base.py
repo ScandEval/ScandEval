@@ -31,93 +31,83 @@ logger = logging.getLogger(__name__)
 
 
 class BaseBenchmark(ABC):
-    '''Abstract base class for evaluating models.
+    '''Abstract base class for finetuning and evaluating models.
 
     Args:
         name (str):
             The name of the dataset.
         task (str):
             The type of task to be benchmarked.
-        num_labels (int or None, optional):
-            The number of labels in the dataset. Defaults to None.
-        label2id (dict or None, optional):
-            A dictionary that converts labels to their indices. This will only
-            be used if the pretrained model does not already have one. Defaults
-            to None.
+        metric_names (dict):
+            A dictionary with the variable names of the metrics used in the
+            dataset as keys, and a more human readable name of them as values.
+        id2label (list or None, optional):
+            A list of all the labels, which is used to convert indices to their
+            labels. This will only be used if the pretrained model does not
+            already have one. Defaults to None.
+        label_synonyms (list of lists of str or None, optional):
+            A list of synonyms for each label. Every entry in `label_synonyms`
+            is a list of synonyms, where one of the synonyms is contained in
+            `id2label`. If None then no synonyms will be used. Defaults to
+            None.
         evaluate_train (bool, optional):
             Whether the models should be evaluated on the training scores.
             Defaults to False.
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
             '.benchmark_models'.
-        learning_rate (float, optional):
-            What learning rate to use when finetuning the models. Defaults to
-            2e-5.
-        epochs (int, optional):
-            The number of epochs to finetune for. Defaults to 5.
-        warmup_steps (int, optional):
-            The number of training steps in which the learning rate will be
-            warmed up, meaning starting from nearly 0 and progressing up to
-            `learning_rate` after `warmup_steps` many steps. Defaults to 50.
-        batch_size (int, optional):
-            The batch size used while finetuning. Must be a multiple of 2, and
-            at most 32. Defaults to 32.
+        two_labels (bool, optional):
+            Whether two labels should be predicted in the dataset.  If this is
+            True then `split_point` has to be set. Defaults to False.
+        split_point (int or None, optional):
+            When there are two labels to be predicted, this is the index such
+            that `id2label[:split_point]` contains the labels for the first
+            label, and `id2label[split_point]` contains the labels for the
+            second label. Only relevant if `two_labels` is True. Defaults to
+            None.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
 
     Parameters:
+        name (str): The name of the dataset.
         task (str): The type of task to be benchmarked.
-        num_labels (int or None): The number of labels in the dataset.
-        label2id (dict or None): A dictionary converting labels to indices.
+        metric_names (dict): The names of the metrics.
         id2label (dict or None): A dictionary converting indices to labels.
+        label2id (dict or None): A dictionary converting labels to indices.
+        num_labels (int or None): The number of labels in the dataset.
+        label_synonyms (list of lists of str): Synonyms of the dataset labels.
+        evaluate_train (bool): Whether the training set should be evaluated.
         cache_dir (str): Directory where models are cached.
-        learning_rate (float): Learning rate used while finetuning.
-        epochs (int): The number of epochs to finetune for.
-        warmup_steps (int): Number of steps used to warm up the learning rate.
-        batch_size (int): The batch size used while finetuning.
+        two_labels (bool): Whether two labels should be predicted.
+        split_point (int or None): Splitting point of `id2label` into labels.
         verbose (bool): Whether to print additional output.
-
-    Raises:
-        TypeError:
-            If `batch_size` is not among 1, 2, 4, 8, 16 or 32.
     '''
     def __init__(self,
                  name: str,
                  task: str,
                  metric_names: Dict[str, str],
-                 num_labels: Optional[int] = None,
                  id2label: Optional[List[str]] = None,
                  label_synonyms: Optional[List[List[str]]] = None,
                  evaluate_train: bool = False,
                  cache_dir: str = '.benchmark_models',
-                 learning_rate: float = 2e-5,
-                 epochs: int = 5,
-                 warmup_steps: int = 50,
-                 batch_size: int = 32,
-                 multilabel: bool = False,
+                 two_labels: bool = False,
                  split_point: Optional[int] = None,
                  verbose: bool = False):
-        if batch_size not in [1, 2, 4, 8, 16, 32]:
-            raise TypeError('The batch size must be either 1, 2, 4, 8, '
-                            '16 or 32.')
-        self.batch_size = batch_size
-        self.gradient_accumulation = 32 // batch_size
+
         self.name = name
-        self.metric_names = metric_names
-        self.evaluate_train = evaluate_train
         self.task = task
-        self.cache_dir = cache_dir
-        self.learning_rate = learning_rate
-        self.epochs = epochs
-        self.warmup_steps = warmup_steps
-        self.num_labels = num_labels
+        self.metric_names = metric_names
         self.id2label = id2label
-        self.multilabel = multilabel
+        self.label_synonyms = label_synonyms
+        self.evaluate_train = evaluate_train
+        self.cache_dir = cache_dir
+        self.two_labels = two_labels
         self.split_point = split_point
         self.verbose = verbose
-        self.label_synonyms = label_synonyms
-        if self.id2label is not None:
+
+        if id2label is not None:
+            self.num_labels = len(id2label)
             if label_synonyms is not None:
                 self.label2id = {label: id for id, lbl in enumerate(id2label)
                                  for label_syns in label_synonyms
@@ -126,7 +116,9 @@ class BaseBenchmark(ABC):
             else:
                 self.label2id = {lbl: id for id, lbl in enumerate(id2label)}
         else:
+            self.num_labels = None
             self.label2id = None
+
         if verbose:
             tf_logging.set_verbosity_warning()
 
@@ -467,13 +459,16 @@ class BaseBenchmark(ABC):
 
     @abstractmethod
     def _compute_metrics(self,
-                         predictions_and_labels: tuple) -> Dict[str, float]:
+                         predictions_and_labels: tuple,
+                         id2label: Optional[list] = None) -> Dict[str, float]:
         '''Compute the metrics needed for evaluation.
 
         Args:
             predictions_and_labels (pair of arrays):
                 The first array contains the probability predictions and the
                 second array contains the true labels.
+            id2label (list or None, optional):
+                Conversion of indices to labels. Defaults to None.
 
         Returns:
             dict:
@@ -692,11 +687,11 @@ class BaseBenchmark(ABC):
                 save_strategy='epoch',
                 report_to='none',
                 save_total_limit=1,
-                per_device_train_batch_size=self.batch_size,
-                learning_rate=self.learning_rate,
-                num_train_epochs=self.epochs,
-                warmup_steps=self.warmup_steps,
-                gradient_accumulation_steps=self.gradient_accumulation,
+                per_device_train_batch_size=32,
+                learning_rate=2e-5,
+                num_train_epochs=1000,
+                warmup_steps=(len(train) // 4),
+                gradient_accumulation_steps=1,
                 load_best_model_at_end=True
             )
 
@@ -732,7 +727,7 @@ class BaseBenchmark(ABC):
                                             data_collator=data_collator,
                                             compute_metrics=compute_metrics,
                                             callbacks=[early_stopping])
-                        if self.multilabel:
+                        if self.two_labels:
                             trainer_args['split_point'] = self.split_point
                             trainer = TwolabelTrainer(**trainer_args)
                         else:

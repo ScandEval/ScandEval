@@ -4,7 +4,7 @@ from transformers import (DataCollatorForTokenClassification,
                           PreTrainedTokenizerBase)
 from datasets import Dataset, load_metric
 from functools import partial
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 import logging
 from abc import ABC, abstractmethod
 from tqdm.auto import tqdm
@@ -20,58 +20,72 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
     '''Abstract token classification benchmark.
 
     Args:
+        name (str):
+            The name of the dataset.
+        metric_names (dict):
+            A dictionary with the variable names of the metrics used in the
+            dataset as keys, and a more human readable name of them as values.
+        id2label (list or None, optional):
+            A list of all the labels, which is used to convert indices to their
+            labels. This will only be used if the pretrained model does not
+            already have one. Defaults to None.
+        label_synonyms (list of lists of str or None, optional):
+            A list of synonyms for each label. Every entry in `label_synonyms`
+            is a list of synonyms, where one of the synonyms is contained in
+            `id2label`. If None then no synonyms will be used. Defaults to
+            None.
+        evaluate_train (bool, optional):
+            Whether the models should be evaluated on the training scores.
+            Defaults to False.
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
             '.benchmark_models'.
-        learning_rate (float, optional):
-            What learning rate to use when finetuning the models. Defaults to
-            2e-5.
-        warmup_steps (int, optional):
-            The number of training steps in which the learning rate will be
-            warmed up, meaning starting from nearly 0 and progressing up to
-            `learning_rate` after `warmup_steps` many steps. Defaults to 50.
-        batch_size (int, optional):
-            The batch size used while finetuning. Defaults to 16.
+        two_labels (bool, optional):
+            Whether two labels should be predicted in the dataset.  If this is
+            True then `split_point` has to be set. Defaults to False.
+        split_point (int or None, optional):
+            When there are two labels to be predicted, this is the index such
+            that `id2label[:split_point]` contains the labels for the first
+            label, and `id2label[split_point]` contains the labels for the
+            second label. Only relevant if `two_labels` is True. Defaults to
+            None.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
 
     Attributes:
+        name (str): The name of the dataset.
+        task (str): The type of task to be benchmarked.
+        metric_names (dict): The names of the metrics.
+        id2label (dict or None): A dictionary converting indices to labels.
+        label2id (dict or None): A dictionary converting labels to indices.
+        num_labels (int or None): The number of labels in the dataset.
+        label_synonyms (list of lists of str): Synonyms of the dataset labels.
+        evaluate_train (bool): Whether the training set should be evaluated.
         cache_dir (str): Directory where models are cached.
-        learning_rate (float): Learning rate used while finetuning.
-        warmup_steps (int): Number of steps used to warm up the learning rate.
-        batch_size (int): The batch size used while finetuning.
-        epochs (int): The number of epochs to finetune.
-        num_labels (int): The number of NER labels in the dataset.
-        label2id (dict): Conversion dict from NER labels to their indices.
-        id2label (dict): Conversion dict from NER label indices to the labels.
+        two_labels (bool): Whether two labels should be predicted.
+        split_point (int or None): Splitting point of `id2label` into labels.
+        verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
                  name: str,
                  metric_names: Dict[str, str],
                  id2label: list,
-                 epochs: int,
-                 cache_dir: str = '.benchmark_models',
-                 learning_rate: float = 2e-5,
-                 warmup_steps: int = 50,
-                 batch_size: int = 16,
+                 label_synonyms: Optional[List[List[str]]] = None,
                  evaluate_train: bool = False,
-                 multilabel: bool = False,
+                 cache_dir: str = '.benchmark_models',
+                 two_labels: bool = False,
                  split_point: Optional[int] = None,
                  verbose: bool = False):
         self._metric = load_metric('seqeval')
         super().__init__(task='token-classification',
-                         num_labels=len(id2label),
                          name=name,
                          metric_names=metric_names,
                          id2label=id2label,
+                         label_synonyms=label_synonyms,
                          cache_dir=cache_dir,
-                         learning_rate=learning_rate,
-                         epochs=epochs,
-                         warmup_steps=warmup_steps,
-                         batch_size=batch_size,
                          evaluate_train=evaluate_train,
-                         multilabel=multilabel,
+                         two_labels=two_labels,
                          split_point=split_point,
                          verbose=verbose)
 
@@ -110,7 +124,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 # to -100 so they are automatically ignored in the loss
                 # function
                 if word_idx is None:
-                    if self.multilabel:
+                    if self.two_labels:
                         label_ids.append([-100, -100])
                     else:
                         label_ids.append(-100)
@@ -118,7 +132,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 # We set the label for the first token of each word
                 elif word_idx != previous_word_idx:
                     label = labels[word_idx]
-                    if self.multilabel:
+                    if self.two_labels:
                         try:
                             label_id1 = label2id[label[0]]
                         except KeyError:
@@ -144,7 +158,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
 
                 # For the other tokens in a word, we set the label to -100
                 else:
-                    if self.multilabel:
+                    if self.two_labels:
                         label_ids.append([-100, -100])
                     else:
                         label_ids.append(-100)
@@ -194,7 +208,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         Returns:
             HuggingFace data collator: The data collator.
         '''
-        if self.multilabel:
+        if self.two_labels:
             params = dict(label_pad_token_id=[-100, -100])
         else:
             params = dict(label_pad_token_id=-100)

@@ -19,40 +19,36 @@ class DkHateBenchmark(TextClassificationBenchmark):
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
             '.benchmark_models'.
-        learning_rate (float, optional):
-            What learning rate to use when finetuning the models. Defaults to
-            2e-5.
-        batch_size (int, optional):
-            The batch size used while finetuning. Defaults to 16.
+        evaluate_train (bool, optional):
+            Whether the models should be evaluated on the training scores.
+            Defaults to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
 
     Attributes:
+        name (str): The name of the dataset.
+        task (str): The type of task to be benchmarked.
+        metric_names (dict): The names of the metrics.
+        id2label (dict or None): A dictionary converting indices to labels.
+        label2id (dict or None): A dictionary converting labels to indices.
+        num_labels (int or None): The number of labels in the dataset.
+        label_synonyms (list of lists of str): Synonyms of the dataset labels.
+        evaluate_train (bool): Whether the training set should be evaluated.
         cache_dir (str): Directory where models are cached.
-        learning_rate (float): Learning rate used while finetuning.
-        warmup_steps (int): Number of steps used to warm up the learning rate.
-        batch_size (int): The batch size used while finetuning.
-        epochs (int): The number of epochs to finetune.
-        num_labels (int): The number of NER labels in the dataset.
-        label2id (dict): Conversion dict from NER labels to their indices.
-        id2label (dict): Conversion dict from NER label indices to the labels.
+        two_labels (bool): Whether two labels should be predicted.
+        split_point (int or None): Splitting point of `id2label` into labels.
+        verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
                  cache_dir: str = '.benchmark_models',
-                 learning_rate: float = 2e-5,
-                 batch_size: int = 16,
                  evaluate_train: bool = False,
                  verbose: bool = False):
         id2label = ['NOT', 'OFF']
         super().__init__(name='DKHate',
                          metric_names=dict(f1='F1-score'),
-                         epochs=100,
-                         warmup_steps=23,
                          id2label=id2label,
                          cache_dir=cache_dir,
-                         learning_rate=learning_rate,
-                         batch_size=batch_size,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
 
