@@ -182,9 +182,37 @@ class Benchmark:
                 model_lists[task].extend(model_ids)
 
         # Add multilingual models manually
-        multilingual_models = ['xlm-roberta-base', 'xlm-roberta-large']
-        model_lists['all'].extend(multilingual_models)
-        model_lists['multilingual'] = multilingual_models
+        multi_models = ['xlm-roberta-base',
+                        'xlm-roberta-large',
+                        'bert-base-multilingual-cased',
+                        'distilbert-base-multilingual-cased',
+                        'cardiffnlp/twitter-xlm-roberta-base']
+        model_lists['multilingual'] = multi_models
+        model_lists['all'].extend(multi_models)
+
+        # Add some multilingual Danish models manually that have not marked
+        # 'da' as their language
+        if 'da' in languages:
+            multi_da_models = ['Geotrend/bert-base-en-da-cased',
+                               'Geotrend/bert-base-25lang-cased',
+                               'Geotrend/bert-base-en-fr-de-no-da-cased',
+                               'Geotrend/distilbert-base-en-da-cased',
+                               'Geotrend/distilbert-base-25lang-cased',
+                               'Geotrend/distilbert-base-en-fr-de-no-da-cased']
+            model_lists['da'].extend(multi_da_models)
+            model_lists['all'].extend(multi_da_models)
+
+        # Add some multilingual Norwegian models manually that have not marked
+        # 'no' as their language
+        if 'no' in languages:
+            multi_no_models = ['Geotrend/bert-base-en-no-cased',
+                               'Geotrend/bert-base-25lang-cased',
+                               'Geotrend/bert-base-en-fr-de-no-da-cased',
+                               'Geotrend/distilbert-base-en-no-cased',
+                               'Geotrend/distilbert-base-25lang-cased',
+                               'Geotrend/distilbert-base-en-fr-de-no-da-cased']
+            model_lists['no'].extend(multi_no_models)
+            model_lists['all'].extend(multi_no_models)
 
         # Remove duplicates from the lists
         for lang, model_list in model_lists.items():
