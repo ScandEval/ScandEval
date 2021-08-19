@@ -710,6 +710,7 @@ class BaseBenchmark(ABC):
                 report_to='none',
                 save_total_limit=1,
                 per_device_train_batch_size=32,
+                per_device_eval_batch_size=32,
                 learning_rate=2e-5,
                 num_train_epochs=1000,
                 warmup_steps=(len(train) // 4),
