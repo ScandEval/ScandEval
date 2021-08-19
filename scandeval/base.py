@@ -353,6 +353,17 @@ class BaseBenchmark(ABC):
                         num_new_labels = (len(model_id2label) -
                                           len(old_id2label))
 
+                        # If *all* the new labels are new and aren't even
+                        # synonyms of the model's labels, then raise an
+                        # exception
+                        if num_new_labels == self.num_labels:
+                            if len(set(flat_old_synonyms)
+                                    .intersection(old_id2label)) == 0:
+                                msg = ('The model has not been trained on '
+                                       'any of the labels in the dataset, or '
+                                       'synonyms thereof.')
+                                raise InvalidBenchmark(msg)
+
                         # Load the weights from the model's current
                         # classification layer. This handles both the token
                         # classification case and the sequence classification
