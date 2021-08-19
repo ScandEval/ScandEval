@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- All the benchmark classes and `Benchmark` now has a `benchmark` method, which
+  does the same as the `__call__` method. This is primarily so that it shows up
+  in the Sphinx documentation.
+
+
 ## [v0.9.0] - 2021-08-19
 ### Added
 - Added the separate `nb` (Norwegian Bokmål) and `nn` (Norwegian Nynorsk)
