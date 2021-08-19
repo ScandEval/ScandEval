@@ -108,6 +108,14 @@ scandeval.lcc2 module
    :undoc-members:
    :show-inheritance:
 
+scandeval.sentiment\_classification module
+------------------------------------------
+
+.. automodule:: scandeval.sentiment_classification
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.text\_classification module
 -------------------------------------
 

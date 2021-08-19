@@ -616,11 +616,11 @@ class BaseBenchmark(ABC):
 
         return dict(framework=framework, task=task)
 
-    def __call__(self,
-                 model_id: str,
-                 progress_bar: bool = True
-                 ) -> Dict[str, List[Dict[str, float]]]:
-        '''Finetune and evaluate a model.
+    def benchmark(self,
+                  model_id: str,
+                  progress_bar: bool = True
+                  ) -> Dict[str, List[Dict[str, float]]]:
+        '''Benchmark a model.
 
         Args:
             model_id (str):
@@ -885,3 +885,7 @@ class BaseBenchmark(ABC):
         else:
             raise RuntimeError(f'The framework "{framework}" is not '
                                f'supported!')
+
+    def __call__(self, *args, **kwargs):
+        __doc__ = self.benchmark.__doc__
+        return self.benchmark(*args, **kwargs)

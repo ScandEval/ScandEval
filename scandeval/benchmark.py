@@ -210,16 +210,16 @@ class Benchmark:
 
         return model_lists
 
-    def __call__(self,
-                 model_id: Optional[Union[List[str], str]] = None,
-                 dataset: Optional[Union[List[str], str]] = None,
-                 progress_bar: Optional[bool] = None,
-                 save_results: Optional[bool] = None,
-                 language: Optional[Union[str, List[str]]] = None,
-                 task: Optional[Union[str, List[str]]] = None,
-                 evaluate_train: Optional[bool] = None,
-                 verbose: Optional[bool] = None) -> Dict[str, Dict[str, dict]]:
-        '''Benchmarks all models in the model list.
+    def benchmark(self,
+                  model_id: Optional[Union[List[str], str]] = None,
+                  dataset: Optional[Union[List[str], str]] = None,
+                  progress_bar: Optional[bool] = None,
+                  save_results: Optional[bool] = None,
+                  language: Optional[Union[str, List[str]]] = None,
+                  task: Optional[Union[str, List[str]]] = None,
+                  evaluate_train: Optional[bool] = None,
+                  verbose: Optional[bool] = None) -> Dict[str, Dict[str, dict]]:
+        '''Benchmarks models on datasets.
 
         Args:
             model_id (str, list of str or None, optional):
@@ -357,3 +357,7 @@ class Benchmark:
                 json.dump(self.benchmark_results, f)
 
         return self.benchmark_results
+
+    def __call__(self, *args, **kwargs):
+        __doc__ = self.benchmark.__doc__
+        return self.benchmark(*args, **kwargs)
