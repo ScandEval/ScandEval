@@ -40,12 +40,6 @@ from .benchmark import Benchmark
                                  'text-classification']),
               help='The tasks to benchmark. Only relevant if `model_id` '
                    'is not specified.')
-@click.option('--num_finetunings', '-n',
-              default=10,
-              show_default=True,
-              help='The number of times a language model should be '
-                   'finetuned. Smaller number of finetunings result in larger '
-                   'confidence intervals of the scores.')
 @click.option('--evaluate_train',
               is_flag=True,
               show_default=True,
@@ -63,7 +57,6 @@ def benchmark(model_id: Tuple[str],
               dataset: Tuple[str],
               language: Tuple[str],
               task: Tuple[str],
-              num_finetunings: int,
               evaluate_train: bool,
               no_progress_bar: bool,
               verbose: bool = False):
@@ -71,7 +64,6 @@ def benchmark(model_id: Tuple[str],
     # Initialise the benchmarker class
     benchmarker = Benchmark(language=list(language),
                             task='all' if 'all' in task else list(task),
-                            num_finetunings=num_finetunings,
                             progress_bar=(not no_progress_bar),
                             save_results=True,
                             evaluate_train=evaluate_train,

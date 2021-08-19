@@ -28,10 +28,6 @@ class Benchmark:
     '''Benchmarking all the Scandinavian language models.
 
     Args:
-        num_finetunings (int, optional):
-            The number of times to finetune each model on. Smaller number of
-            finetunings result in larger confidence intervals of the scores.
-            Defaults to 10.
         progress_bar (bool, optional):
             Whether progress bars should be shown. Defaults to True.
         save_results (bool, optional):
@@ -51,7 +47,6 @@ class Benchmark:
             Whether to output additional output. Defaults to False.
     '''
     def __init__(self,
-                 num_finetunings: int = 10,
                  progress_bar: bool = True,
                  save_results: bool = False,
                  language: Union[str, List[str]] = ['da', 'sv', 'no', 'nb',
@@ -61,7 +56,6 @@ class Benchmark:
                  verbose: bool = False):
 
         # Set parameters
-        self.num_finetunings = num_finetunings
         self.progress_bar = progress_bar
         self.save_results = save_results
         self.language = language
@@ -219,7 +213,6 @@ class Benchmark:
     def __call__(self,
                  model_id: Optional[Union[List[str], str]] = None,
                  dataset: Optional[Union[List[str], str]] = None,
-                 num_finetunings: Optional[int] = None,
                  progress_bar: Optional[bool] = None,
                  save_results: Optional[bool] = None,
                  language: Optional[Union[str, List[str]]] = None,
@@ -235,10 +228,6 @@ class Benchmark:
             dataset (str, list of str or None, optional):
                 The datasets to benchmark on. If None then all datasets will
                 be benchmarked. Defaults to None.
-            num_finetunings (int or None, optional):
-                The number of times to finetune each model on. If None then the
-                default value from the constructor will be used. Defaults to
-                None.
             progress_bar (bool or None, optional):
                 Whether progress bars should be shown. If None then the default
                 value from the constructor will be used. Defaults to None.
@@ -270,8 +259,6 @@ class Benchmark:
                 having the model IDs as keys.
         '''
         # Set default values if the arguments are not set
-        if num_finetunings is None:
-            num_finetunings = self.num_finetunings
         if progress_bar is None:
             progress_bar = self.progress_bar
         if save_results is None:
@@ -354,8 +341,7 @@ class Benchmark:
             for dataset, alias, cls in benchmarks:
                 logger.info(f'Benchmarking {model_id} on {alias}:')
                 try:
-                    params = dict(num_finetunings=num_finetunings,
-                                  progress_bar=progress_bar)
+                    params = dict(progress_bar=progress_bar)
                     results = cls(model_id, **params)
                     self.benchmark_results[dataset][model_id] = results
                     logger.debug(f'Results:\n{results}')

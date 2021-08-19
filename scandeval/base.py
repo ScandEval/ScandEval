@@ -618,7 +618,6 @@ class BaseBenchmark(ABC):
 
     def __call__(self,
                  model_id: str,
-                 num_finetunings: int = 10,
                  progress_bar: bool = True
                  ) -> Dict[str, List[Dict[str, float]]]:
         '''Finetune and evaluate a model.
@@ -627,10 +626,6 @@ class BaseBenchmark(ABC):
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
                 model.
-            num_finetunings (int, optional):
-                The number of times to finetune. These results will be used to
-                calculate confidence intervals of the means of the metrics.
-                Defaults to 10.
             progress_bar (bool, optional):
                 Whether to show a progress bar or not. Defaults to True.
 
@@ -659,8 +654,7 @@ class BaseBenchmark(ABC):
 
         # Get bootstrap sample indices
         if finetune or self.evaluate_train:
-            train_bidxs = rng.integers(0, len(train),
-                                       size=(num_finetunings - 1, len(train)))
+            train_bidxs = rng.integers(0, len(train), size=(9, len(train)))
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
@@ -685,7 +679,7 @@ class BaseBenchmark(ABC):
             trains = [train]
             if finetune or self.evaluate_train:
                 trains += [Dataset.from_dict(train[train_bidxs[idx]])
-                           for idx in range(num_finetunings - 1)]
+                           for idx in range(9)]
             tests = [test]
             tests += [Dataset.from_dict(test[test_bidxs[idx]])
                       for idx in range(test_bidxs.shape[0])]
@@ -693,9 +687,9 @@ class BaseBenchmark(ABC):
             # Set up progress bar
             if finetune:
                 if progress_bar:
-                    itr = tqdm(range(num_finetunings))
+                    itr = tqdm(range(10))
                 else:
-                    itr = range(num_finetunings)
+                    itr = range(10)
             else:
                 itr = [0]
 
@@ -856,7 +850,7 @@ class BaseBenchmark(ABC):
                 train = self._preprocess_data(train, framework=framework)
                 trains = [train]
                 trains += [Dataset.from_dict(train[train_bidxs[idx]])
-                           for idx in range(num_finetunings - 1)]
+                           for idx in range(9)]
 
                 # Get the train predictions
                 all_train_metrics = list()
