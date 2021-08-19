@@ -23,6 +23,8 @@ and this project adheres to
 - If none of the model's labels are among the dataset's labels, and are not
   even synonyms of them, then raise an `InvalidBenchmark`. This prevents things
   like evaluating a finetuned sentiment model on a NER task.
+- When `evaluate_train` was `True`, this previously evaluated the test set
+  instead.
 
 ### Changed
 - Changed `Benchmark` API. Now the constructor and the `__call__` method have
