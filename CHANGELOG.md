@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.9.0] - 2021-08-19
 ### Added
 - Added the separate `nb` (Norwegian Bokmål) and `nn` (Norwegian Nynorsk)
   language tags, on top of the general `no` (Norwegian).
