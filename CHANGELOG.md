@@ -20,6 +20,9 @@ and this project adheres to
 - When evaluating models finetuned for token classification on a text
   classification task, a `ValueError` was raised, rather than an
   `InvalidBenchmark` exception.
+- If none of the model's labels are among the dataset's labels, and are not
+  even synonyms of them, then raise an `InvalidBenchmark`. This prevents things
+  like evaluating a finetuned sentiment model on a NER task.
 
 ### Changed
 - Changed `Benchmark` API. Now the constructor and the `__call__` method have
