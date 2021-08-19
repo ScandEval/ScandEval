@@ -768,7 +768,7 @@ class BaseBenchmark(ABC):
                         # Log training metrics and save the state
                         if self.evaluate_train:
                             train_metrics = trainer.evaluate(
-                                tests[idx],
+                                trains[idx],
                                 metric_key_prefix='train'
                             )
                             metrics['train'].append(train_metrics)
