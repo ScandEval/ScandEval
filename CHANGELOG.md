@@ -9,6 +9,14 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- Properly filters by languages now via the `language` argument in the CLI and
+  the `Benchmark` class. As HuggingFace Hub does not have a keyword for
+  language, a search for language also means that any other non-language tag
+  with that name also shows up in the results. These are now manually removed.
+  This means it takes a few more seconds to compile the model list, but it will
+  at least be accurate.
+
 ### Added
 - All the benchmark classes and `Benchmark` now has a `benchmark` method, which
   does the same as the `__call__` method. This is primarily so that it shows up
