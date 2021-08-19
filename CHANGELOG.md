@@ -21,6 +21,8 @@ and this project adheres to
 - All the benchmark classes and `Benchmark` now has a `benchmark` method, which
   does the same as the `__call__` method. This is primarily so that it shows up
   in the Sphinx documentation.
+- Added the default `LABEL_0` and `LABEL_1` label synonyms for `NOT` and `OFF`
+  in the `DKHate` benchmark.
 
 
 ## [v0.9.0] - 2021-08-19
