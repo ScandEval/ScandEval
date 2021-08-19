@@ -311,10 +311,16 @@ class BaseBenchmark(ABC):
                 # have not been trained on (it will just always get those
                 # labels wrong)
                 else:
+                    # Collect the dataset labels and model labels in the
+                    # `model_id2label` conversion list
                     for label in self.id2label:
-                        if label not in model_id2label:
+                        syns = [syn for lst in self.label_synonyms
+                                    for syn in lst
+                                    if label in lst]
+                        if all([syn not in model_id2label for syn in syns]):
                             model_id2label.append(label)
 
+                    # Get the synonyms of all the labels, new ones included
                     new_synonyms = self.label_synonyms
                     flat_old_synonyms = [syn for lst in self.label_synonyms
                                      for syn in lst]
