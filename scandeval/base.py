@@ -107,18 +107,28 @@ class BaseBenchmark(ABC):
         self.verbose = verbose
 
         if id2label is not None:
+
+            # Store the number of labels
             self.num_labels = len(id2label)
-            if label_synonyms is not None:
-                self.label2id = {label: id for id, lbl in enumerate(id2label)
-                                 for label_syns in label_synonyms
-                                 for label in label_syns
-                                 if lbl in label_syns}
-            else:
-                self.label2id = {lbl: id for id, lbl in enumerate(id2label)}
+
+            # Set default value of label synonyms, if None was given
+            if label_synonyms is None:
+                self.label_synonyms = [[label] for label in self.id2label]
+
+            # Define the label2id conversion dictionary
+            self.label2id = {label: id for id, lbl in enumerate(id2label)
+                             for label_syns in self.label_synonyms
+                             for label in label_syns
+                             if lbl in label_syns}
+
+        # If the id2label conversion list was not given, then set the number of
+        # labels to zero and set the label2id conversion dict to None as well
         else:
             self.num_labels = None
             self.label2id = None
 
+        # If verbose is set to True then enable transformers output, which is
+        # done by setting it to warning (the default)
         if verbose:
             tf_logging.set_verbosity_warning()
 
@@ -305,24 +315,25 @@ class BaseBenchmark(ABC):
                         if label not in model_id2label:
                             model_id2label.append(label)
 
-                    if self.label_synonyms is None:
-                        synonyms = [[label] for label in model_id2label]
-                    else:
-                        synonyms = self.label_synonyms
+                    new_synonyms = self.label_synonyms
+                    flat_old_synonyms = [syn for lst in self.label_synonyms
+                                     for syn in lst]
+                    new_synonyms += [[label] for label in model_id2label
+                                     if label not in flat_old_synonyms]
 
                     # Add all the synonyms of the labels into the label2id
                     # conversion dictionary
                     model_label2id = {label: id
                                       for id, lbl in enumerate(model_id2label)
-                                      for label_syns in synonyms
+                                      for label_syns in new_synonyms
                                       for label in label_syns
                                       if lbl in label_syns}
 
                     # Get the old id2label conversion
                     if not isinstance(model.config.id2label, list):
-                        old_model_id2label = dict(model.config.id2label)
+                        old_id2label = dict(model.config.id2label)
                     else:
-                        old_model_id2label = model.config.id2label
+                        old_id2label = model.config.id2label
 
                     # This changes the classification layer in the finetuned
                     # model to be consistent with all the labels in the
@@ -335,12 +346,12 @@ class BaseBenchmark(ABC):
                     #       needs to be rewritten when we add other types of
                     #       tasks.
                     # NOTE: Only works for pytorch models at the moment
-                    if (len(model_id2label) > len(old_model_id2label)
+                    if (len(model_id2label) > len(old_id2label)
                             and framework == 'pytorch'):
 
                         # Count the number of new labels to add to the model
                         num_new_labels = (len(model_id2label) -
-                                          len(old_model_id2label))
+                                          len(old_id2label))
 
                         # Load the weights from the model's current
                         # classification layer. This handles both the token
