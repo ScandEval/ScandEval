@@ -33,6 +33,9 @@ and this project adheres to
   before moving on to the next model
 - Renamed the `multilabel` argument to the more descriptive `two_labels`.
 - Updated docstrings to be more accurate.
+- Early stopping patience is now set to `2 + 250 // len(train)`, so that
+  smaller datasets can enjoy a bit more patience, but if the dataset contains
+  at least 250 samples then it will remain at the current 2 patience.
 
 ### Removed
 - Removed `learning_rate`, `batch_size`, `warmup_steps` and `num_finetunings`
