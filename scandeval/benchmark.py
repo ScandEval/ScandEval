@@ -1,5 +1,6 @@
 '''Fetches an updated list of all Scandinavian models on the HuggingFace Hub'''
 
+
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Optional, Union, Dict
@@ -18,7 +19,7 @@ from .europarl2 import Europarl2Benchmark
 from .lcc1 import Lcc1Benchmark
 from .lcc2 import Lcc2Benchmark
 from .dkhate import DkHateBenchmark
-from .utils import InvalidBenchmark
+from .utils import InvalidBenchmark, is_documented_by
 
 
 logger = logging.getLogger(__name__)
@@ -239,7 +240,8 @@ class Benchmark:
                   language: Optional[Union[str, List[str]]] = None,
                   task: Optional[Union[str, List[str]]] = None,
                   evaluate_train: Optional[bool] = None,
-                  verbose: Optional[bool] = None) -> Dict[str, Dict[str, dict]]:
+                  verbose: Optional[bool] = None
+                  ) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks models on datasets.
 
         Args:
@@ -379,6 +381,6 @@ class Benchmark:
 
         return self.benchmark_results
 
+    @is_documented_by(self.benchmark)
     def __call__(self, *args, **kwargs):
-        __doc__ = self.benchmark.__doc__
         return self.benchmark(*args, **kwargs)

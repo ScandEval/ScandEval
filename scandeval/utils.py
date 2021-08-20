@@ -144,3 +144,11 @@ class DocInherit(object):
 
 
 doc_inherit = DocInherit
+
+
+def is_documented_by(original):
+    '''Decorator that copies the docstring from another function'''
+    def wrapper(target):
+        target.__doc__ = original.__doc__
+        return target
+    return wrapper
