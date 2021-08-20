@@ -263,7 +263,7 @@ class BaseBenchmark(ABC):
             try:
                 # If the model ID specifies a random model, then load that.
                 if model_id.startswith('random'):
-                    rnd_id = 'xlm-roberta-large'
+                    rnd_id = 'xlm-roberta-base'
                     config = AutoConfig.from_pretrained(rnd_id, **params)
 
                     if model_id == 'random-roberta-sequence-clf':
