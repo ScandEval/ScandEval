@@ -399,7 +399,10 @@ class BaseBenchmark(ABC):
                             clf_weight = model.classifier.weight.data
                         except AttributeError:
                             try:
-                                clf_weight = model.classifier.out_proj.weight.data
+                                clf_weight = (model.classifier
+                                                   .out_proj
+                                                   .weight
+                                                   .data)
                             except AttributeError:
                                 msg = ('Model does not seem to be a '
                                        'classification model.')
