@@ -380,7 +380,12 @@ class BaseBenchmark(ABC):
                         try:
                             clf_weight = model.classifier.weight.data
                         except AttributeError:
-                            clf_weight = model.classifier.out_proj.weight.data
+                            try:
+                                clf_weight = model.classifier.out_proj.weight.data
+                            except AttributeError:
+                                msg = ('Model does not seem to be a '
+                                       'classification model.')
+                                raise InvalidBenchmark(msg)
 
                         # Create the new weights, which have zeros at all the
                         # new entries

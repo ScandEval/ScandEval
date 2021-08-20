@@ -20,6 +20,8 @@ and this project adheres to
   defaults to the value of `max_position_embeddings`. This fixes a problem with
   some models not being able to be trained on datasets whose texts were too
   long.
+- Now handles the case where a non-classification model, such as a seq-to-seq
+  model, are being benchmarked on a classification dataset.
 
 ### Added
 - All the benchmark classes and `Benchmark` now has a `benchmark` method, which
