@@ -16,6 +16,10 @@ and this project adheres to
   with that name also shows up in the results. These are now manually removed.
   This means it takes a few more seconds to compile the model list, but it will
   at least be accurate.
+- In case `model_max_length` has not been set in a model configuration, it
+  defaults to the value of `max_position_embeddings`. This fixes a problem with
+  some models not being able to be trained on datasets whose texts were too
+  long.
 
 ### Added
 - All the benchmark classes and `Benchmark` now has a `benchmark` method, which

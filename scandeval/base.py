@@ -419,6 +419,13 @@ class BaseBenchmark(ABC):
                                                       use_fast=True,
                                                       add_prefix_space=prefix)
 
+            # Set the maximal length of the tokenizer to the model's maximal
+            # length. This is required for proper truncation
+            try:
+                tokenizer.model_max_length = config.max_position_embeddings
+            except AttributeError:
+                pass
+
             return dict(model=model, tokenizer=tokenizer)
 
         elif framework == 'spacy':
