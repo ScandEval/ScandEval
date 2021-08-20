@@ -10,7 +10,9 @@ from transformers import (PreTrainedTokenizerBase,
                           TrainingArguments,
                           Trainer,
                           PrinterCallback,
-                          EarlyStoppingCallback)
+                          EarlyStoppingCallback,
+                          RobertaForSequenceClassification,
+                          RobertaForTokenClassification)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
 import requests
@@ -259,13 +261,29 @@ class BaseBenchmark(ABC):
                 params = dict()
 
             try:
-                config = AutoConfig.from_pretrained(model_id, **params)
+                # If the model ID specifies a random model, then load that.
+                if model_id.startswith('random'):
+                    rnd_id = 'xlm-roberta-large'
+                    config = AutoConfig.from_pretrained(rnd_id, **params)
 
-                model_cls = self._get_model_class(framework=framework)
+                    if model_id == 'random-roberta-sequence-clf':
+                        model_cls = RobertaForSequenceClassification
+                    elif model_id == 'random-roberta-token-clf':
+                        model_cls = RobertaForTokenClassification
+                    else:
+                        raise ValueError(f'A random model was chosen, '
+                                         f'"{model_id}", but it was not '
+                                         f'recognized.')
 
-                model = model_cls.from_pretrained(model_id,
-                                                  config=config,
-                                                  cache_dir=self.cache_dir)
+                    model = model_cls(config)
+
+                # Otherwise load the pretrained model
+                else:
+                    config = AutoConfig.from_pretrained(model_id, **params)
+                    model_cls = self._get_model_class(framework=framework)
+                    model = model_cls.from_pretrained(model_id,
+                                                      config=config,
+                                                      cache_dir=self.cache_dir)
 
                 # Get the `label2id` and `id2label` conversions from the model
                 # config
@@ -419,10 +437,13 @@ class BaseBenchmark(ABC):
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
             # constructed.
-            prefix = 'Roberta' in type(model).__name__
-            tokenizer = AutoTokenizer.from_pretrained(model_id,
-                                                      use_fast=True,
-                                                      add_prefix_space=prefix)
+            if model_id.startswith('random'):
+                params = dict(use_fast=True, add_prefix_space=True)
+                tokenizer = AutoTokenizer.from_pretrained(rnd_id, **params)
+            else:
+                prefix = 'Roberta' in type(model).__name__
+                params = dict(use_fast=True, add_prefix_space=prefix)
+                tokenizer = AutoTokenizer.from_pretrained(model_id, **params)
 
             # Set the maximal length of the tokenizer to the model's maximal
             # length. This is required for proper truncation
@@ -596,6 +617,11 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the extracted framework is not recognized.
         '''
+        # If the model ID specifies a random ID, then return a hardcoded
+        # metadata dictionary
+        if model_id.startswith('random'):
+            return dict(task='fill-mask', framework='pytorch')
+
         # Parse all the anchor tags from the model website
         url = 'https://www.huggingface.co/' + model_id
         html = requests.get(url).text
@@ -649,7 +675,6 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the extracted framework is not recognized.
         '''
-        # Load the model and its metadata
         model_metadata = self._fetch_model_metadata(model_id)
         framework = model_metadata['framework']
         task = model_metadata['task']

@@ -29,6 +29,9 @@ and this project adheres to
   in the Sphinx documentation.
 - Added the default `LABEL_0` and `LABEL_1` label synonyms for `NOT` and `OFF`
   in the `DKHate` benchmark.
+- Added the possibility of benchmarking randomly initialised RoBERTa models,
+  using the model IDs `random-roberta-sequence-clf` and
+  `random-roberta-token-clf`.
 
 
 ## [v0.9.0] - 2021-08-19
