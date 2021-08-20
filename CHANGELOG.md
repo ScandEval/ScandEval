@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.10.0] - 2021-08-20
 ### Fixed
 - Properly filters by languages now via the `language` argument in the CLI and
   the `Benchmark` class. As HuggingFace Hub does not have a keyword for
