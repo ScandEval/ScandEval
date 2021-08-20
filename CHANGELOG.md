@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now catches `IndexError` during training.
+
+
 ## [v0.10.0] - 2021-08-20
 ### Fixed
 - Properly filters by languages now via the `language` argument in the CLI and

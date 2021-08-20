@@ -824,7 +824,7 @@ class BaseBenchmark(ABC):
 
                         break
 
-                    except (RuntimeError, ValueError) as e:
+                    except (RuntimeError, ValueError, IndexError) as e:
                         if not str(e).startswith('CUDA out of memory'):
                             raise InvalidBenchmark(str(e))
                         bs = training_args.per_device_train_batch_size
