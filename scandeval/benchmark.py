@@ -19,7 +19,7 @@ from .europarl2 import Europarl2Benchmark
 from .lcc1 import Lcc1Benchmark
 from .lcc2 import Lcc2Benchmark
 from .dkhate import DkHateBenchmark
-from .utils import InvalidBenchmark, is_documented_by
+from .utils import InvalidBenchmark
 
 
 logger = logging.getLogger(__name__)
@@ -381,6 +381,5 @@ class Benchmark:
 
         return self.benchmark_results
 
-    @is_documented_by(self.benchmark)
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)

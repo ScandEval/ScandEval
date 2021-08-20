@@ -26,7 +26,7 @@ import gc
 import logging
 
 from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
-                    TwolabelTrainer, is_documented_by)
+                    TwolabelTrainer)
 
 
 logger = logging.getLogger(__name__)
@@ -926,6 +926,5 @@ class BaseBenchmark(ABC):
             raise RuntimeError(f'The framework "{framework}" is not '
                                f'supported!')
 
-    @is_documented_by(self.benchmark)
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)
