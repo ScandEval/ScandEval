@@ -8,6 +8,16 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- The subjective/objective part of the `TwitterSent` dataset has now been added
+  as a binary classification task, which is called `TwitterSubj`. This can now
+  be benchmarked with the `Benchmark` class and the CLI.
+- Added an abstract `BinaryClassificationBenchmark`, to streamline the binary
+  classification benchmark datasets, which now includes the DKHate and
+  TwitterSubj datasets.
+
+
 ## [v0.10.1] - 2021-08-20
 ### Fixed
 - Now catches `IndexError` during training.
