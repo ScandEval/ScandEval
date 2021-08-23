@@ -1,4 +1,4 @@
-'''Hate speech classification of a language model on the DKHate dataset'''
+'''Subjectivity classification on the TwitterSubj dataset'''
 
 from datasets import Dataset
 from typing import Tuple
