@@ -14,6 +14,7 @@ from .ddt_pos import DdtPosBenchmark
 from .ddt_dep import DdtDepBenchmark
 from .angry_tweets import AngryTweetsBenchmark
 from .twitter_sent import TwitterSentBenchmark
+from .twitter_subj import TwitterSubjBenchmark
 from .europarl1 import Europarl1Benchmark
 from .europarl2 import Europarl2Benchmark
 from .lcc1 import Lcc1Benchmark
@@ -83,7 +84,8 @@ class Benchmark:
             ('ddt-pos', 'the POS part of DDT', DdtPosBenchmark(**params)),
             ('ddt-dep', 'the DEP part of DDT', DdtDepBenchmark(**params)),
             ('angry-tweets', 'Angry Tweets', AngryTweetsBenchmark(**params)),
-            ('twitter-sent', 'Twitter Sent', TwitterSentBenchmark(**params)),
+            ('twitter-sent', 'TwitterSent', TwitterSentBenchmark(**params)),
+            ('twitter-subj', 'TwitterSubj', TwitterSubjBenchmark(**params)),
             ('dkhate', 'DKHate', DkHateBenchmark(**params)),
             ('europarl1', 'Europarl1', Europarl1Benchmark(**params)),
             ('europarl2', 'Europarl2', Europarl2Benchmark(**params)),

@@ -5,15 +5,15 @@ from typing import Tuple
 import logging
 
 from .binary_classification import BinaryClassificationBenchmark
-from .datasets import load_dkhate
+from .datasets import load_twitter_subj
 from .utils import doc_inherit
 
 
 logger = logging.getLogger(__name__)
 
 
-class DkHateBenchmark(BinaryClassificationBenchmark):
-    '''Benchmark of language models on the DKHate dataset.
+class TwitterSubjBenchmark(BinaryClassificationBenchmark):
+    '''Benchmark of language models on the TwitterSubj dataset.
 
     Args:
         cache_dir (str, optional):
@@ -44,15 +44,15 @@ class DkHateBenchmark(BinaryClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        super().__init__(name='DKHate',
-                         id2label=['NOT', 'OFF'],
+        super().__init__(name='TwitterSubj',
+                         id2label=['objektivt', 'subjektivt'],
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_dkhate()
+        X_train, X_test, y_train, y_test = load_twitter_subj()
         train_dict = dict(doc=X_train['tweet'],
                           orig_label=y_train['label'])
         test_dict = dict(doc=X_test['tweet'],
