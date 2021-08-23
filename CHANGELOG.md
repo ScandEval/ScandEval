@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.11.0] - 2021-08-23
 ### Added
 - The subjective/objective part of the `TwitterSent` and `Europarl2` datasets
   have now been added as binary classification tasks, called `TwitterSubj` and
