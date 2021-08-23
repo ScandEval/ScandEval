@@ -28,6 +28,14 @@ scandeval.benchmark module
    :undoc-members:
    :show-inheritance:
 
+scandeval.binary\_classification module
+---------------------------------------
+
+.. automodule:: scandeval.binary_classification
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.cli module
 --------------------
 
@@ -92,6 +100,14 @@ scandeval.europarl2 module
    :undoc-members:
    :show-inheritance:
 
+scandeval.europarl\_subj module
+-------------------------------
+
+.. automodule:: scandeval.europarl_subj
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.lcc1 module
 ---------------------
 
@@ -136,6 +152,14 @@ scandeval.twitter\_sent module
 ------------------------------
 
 .. automodule:: scandeval.twitter_sent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.twitter\_subj module
+------------------------------
+
+.. automodule:: scandeval.twitter_subj
    :members:
    :undoc-members:
    :show-inheritance:
