@@ -1,6 +1,37 @@
 '''Testing script'''
 
-def process_twitter_sent():
+
+def process_twitter_subj():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import pandas as pd
+
+    Path('datasets/twitter_subj').mkdir()
+
+    input_path = Path('datasets/twitter_sent.csv')
+    output_paths = [Path('datasets/twitter_subj/train.jsonl'),
+                    Path('datasets/twitter_subj/test.jsonl')]
+
+    df = pd.read_csv(input_path, header=0).dropna()
+
+    train = df.query('part == "train"')
+    test = df.query('part == "test"')
+
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
+
+    for split, output_path in zip([train, test], output_paths):
+        for idx, row in tqdm(split.iterrows()):
+            data_dict = dict(tweet_id=row.twitterid, label=row['sub/obj'])
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(split) - 1:
+                    f.write('\n')
+
+
+def process_twitter_sent_sentiment():
     from pathlib import Path
     import json
     from tqdm.auto import tqdm
@@ -22,7 +53,7 @@ def process_twitter_sent():
 
     for split, output_path in zip([train, test], output_paths):
         for idx, row in tqdm(split.iterrows()):
-            data_dict = dict(tweet_id=row.twitterid, label=row.polarity)
+            data_dict = dict(tweet_id=row.twitterid, label=row.sentiment)
             json_line = json.dumps(data_dict)
             with output_path.open('a') as f:
                 f.write(json_line)
@@ -115,6 +146,35 @@ def process_lcc1():
     for split, output_path in zip([train, test], output_paths):
         for idx, row in tqdm(split.iterrows()):
             data_dict = dict(text=row.text, label=row.valence)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(split) - 1:
+                    f.write('\n')
+
+
+def process_europarl_subj():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+
+    Path('datasets/europarl_subj').mkdir()
+
+    input_path = Path('datasets/europarl2.csv')
+    output_paths = [Path('datasets/europarl_subj/train.jsonl'),
+                    Path('datasets/europarl_subj/test.jsonl')]
+
+    df = pd.read_csv(input_path, header=0).dropna()
+
+    train, test = train_test_split(df, test_size=0.3, stratify=df['sub/obj'])
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
+
+    for split, output_path in zip([train, test], output_paths):
+        for idx, row in tqdm(split.iterrows(), total=len(split)):
+            data_dict = dict(text=row.text, label=row['sub/obj'])
             json_line = json.dumps(data_dict)
             with output_path.open('a') as f:
                 f.write(json_line)
@@ -308,4 +368,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    process_dane()
+    process_europarl_subj()
