@@ -142,7 +142,7 @@ def load_twitter_subj() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'dev/datasets/twitter_subj/')
+                'main/datasets/twitter_subj/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'tweet', 'label')
@@ -161,7 +161,7 @@ def load_europarl_subj() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'dev/datasets/europarl_subj/')
+                'main/datasets/europarl_subj/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
