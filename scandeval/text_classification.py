@@ -144,5 +144,5 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
             return preprocessed.remove_columns(['doc', 'orig_label'])
 
         elif framework == 'spacy':
-            raise InvalidBenchmark('Evaluation of sentiment predictions '
+            raise InvalidBenchmark('Evaluation of text predictions '
                                    'for SpaCy models is not yet implemented.')
