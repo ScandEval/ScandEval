@@ -10,12 +10,14 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
-- The subjective/objective part of the `TwitterSent` dataset has now been added
-  as a binary classification task, which is called `TwitterSubj`. This can now
-  be benchmarked with the `Benchmark` class and the CLI.
+- The subjective/objective part of the `TwitterSent` and `Europarl2` datasets
+  have now been added as binary classification tasks, called `TwitterSubj` and
+  `EuroparlSubj`, respectively. These can now be benchmarked with the
+  `Benchmark` class and the CLI using the `twitter-subj` and `europarl-subj`
+  names, respectively.
 - Added an abstract `BinaryClassificationBenchmark`, to streamline the binary
-  classification benchmark datasets, which now includes the DKHate and
-  TwitterSubj datasets.
+  classification benchmark datasets, which now includes the `DKHate`,
+  `TwitterSubj` and `EuroparlSubj` datasets.
 
 
 ## [v0.10.1] - 2021-08-20
