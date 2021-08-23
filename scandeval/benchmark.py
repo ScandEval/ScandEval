@@ -74,10 +74,22 @@ class Benchmark:
         # updated as more models are benchmarked
         self.benchmark_results = defaultdict(dict)
 
-        # Initialise the list of all benchmarks, along with their variable
-        # names and the more descriptive names
-        params = dict(verbose=verbose,
-                      evaluate_train=evaluate_train)
+        # Set logging level based on verbosity
+        if verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
+        logger.setLevel(logging_level)
+
+    def _update_benchmarks(self, **params):
+        '''Updates the internal list of all benchmarks.
+
+        This list will be stored in the `_benchmarks` variable.
+
+        Args:
+            params:
+                Dictionary of benchmark parameters.
+        '''
         self._benchmarks = [
             ('dane', 'DaNE with MISC tags', DaneBenchmark(**params)),
             ('dane-no-misc', 'DaNE without MISC tags',
@@ -94,13 +106,6 @@ class Benchmark:
             ('lcc1', 'LCC1', Lcc1Benchmark(**params)),
             ('lcc2', 'LCC2', Lcc2Benchmark(**params))
         ]
-
-        # Set logging level based on verbosity
-        if verbose:
-            logging_level = logging.DEBUG
-        else:
-            logging_level = logging.INFO
-        logger.setLevel(logging_level)
 
     @staticmethod
     def _get_model_ids(language: Optional[str] = None,
@@ -298,6 +303,9 @@ class Benchmark:
             evaluate_train = self.evaluate_train
         if verbose is None:
             verbose = self.verbose
+
+        # Update benchmark list
+        self._update_benchmarks(evaluate_train=evaluate_train, verbose=verbose)
 
         # Ensure that `language` is a list
         if language == 'all':

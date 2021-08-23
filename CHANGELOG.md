@@ -18,6 +18,9 @@ and this project adheres to
 ### Fixed
 - A random seed is now set for all libraries, via the `transformers.set_seed`
   function.
+- Always update the list of all the benchmarks when calling the
+  `Benchmark.benchmark` method, to allow for possibility of setting new
+  benchmark parameters after initialisation.
 
 
 ## [v0.11.0] - 2021-08-23
