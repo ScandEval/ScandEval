@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def create_tweet_dataset(dataset: str):
     dataset_dir = Path('datasets') / dataset
-    for name in ['train', 'test']:
+    for name in ['raw_train', 'raw_test']:
 
         logger.info(f'Now processing the {name} split of {dataset}')
 
@@ -63,5 +63,4 @@ def create_tweet_dataset(dataset: str):
 
 
 if __name__ == '__main__':
-    for dataset in ['angry_tweets', 'twitter_sent']:
-        create_tweet_dataset(dataset)
+    create_tweet_dataset('twitter_subj')
