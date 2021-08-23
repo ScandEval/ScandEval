@@ -44,8 +44,10 @@ class BinaryClassificationBenchmark(TextClassificationBenchmark, ABC):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         label_synonyms = [
-            ['LABEL_0', 'negative', 'negativ', 'falsk', 'false', id2label[0]],
-            ['LABEL_1', 'positive', 'positiv', 'sand', 'true', id2label[1]]
+            ['LABEL_0', 'negative', 'negativ', 'falsk', 'false', 'objective',
+                'hlutlægt', id2label[0]],
+            ['LABEL_1', 'positive', 'positiv', 'sand', 'true', 'subjective',
+                'huglægt', id2label[1]]
         ]
         super().__init__(name=name,
                          metric_names=dict(f1='F1-score'),
