@@ -8,6 +8,18 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Rather than bootstrapping the training dataset and using the results to
+  compute an estimator of the standard deviation, the same training dataset is
+  trained on all ten times, and the mean of these along with a confidence
+  interval is outputted.
+
+### Fixed
+- A random seed is now set for all libraries, via the `transformers.set_seed`
+  function.
+
+
 ## [v0.11.0] - 2021-08-23
 ### Added
 - The subjective/objective part of the `TwitterSent` and `Europarl2` datasets
