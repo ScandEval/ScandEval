@@ -12,7 +12,8 @@ from transformers import (PreTrainedTokenizerBase,
                           PrinterCallback,
                           EarlyStoppingCallback,
                           RobertaForSequenceClassification,
-                          RobertaForTokenClassification)
+                          RobertaForTokenClassification,
+                          set_seed)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
 import requests
@@ -165,7 +166,7 @@ class BaseBenchmark(ABC):
             if 'train' in metrics.keys():
                 train_scores = [dct[f'train_{metric_name}']
                                 for dct in metrics['train']]
-                train_score = train_scores[0]
+                train_score = np.mean(train_scores)
 
                 if len(train_scores) > 1:
                     sample_std = np.std(train_scores, ddof=1)
@@ -178,7 +179,7 @@ class BaseBenchmark(ABC):
             if 'test' in metrics.keys():
                 test_scores = [dct[f'test_{metric_name}']
                                for dct in metrics['test']]
-                test_score = test_scores[0]
+                test_score = np.mean(test_scores)
 
                 if len(test_scores) > 1:
                     sample_std = np.std(test_scores, ddof=1)
@@ -693,11 +694,12 @@ class BaseBenchmark(ABC):
         rng = np.random.default_rng(4242)
 
         # Get bootstrap sample indices
-        if finetune or self.evaluate_train:
-            train_bidxs = rng.integers(0, len(train), size=(9, len(train)))
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
+
+            # Set random seed
+            set_seed(4242)
 
             # Extract the model and tokenizer
             model = model_dict['model']
@@ -716,10 +718,6 @@ class BaseBenchmark(ABC):
                                        'not be done.')
 
             # Get bootstrapped datasets
-            trains = [train]
-            if finetune or self.evaluate_train:
-                trains += [Dataset.from_dict(train[train_bidxs[idx]])
-                           for idx in range(9)]
             tests = [test]
             tests += [Dataset.from_dict(test[test_bidxs[idx]])
                       for idx in range(test_bidxs.shape[0])]
@@ -763,7 +761,7 @@ class BaseBenchmark(ABC):
                 tf_logging.set_verbosity_error()
 
             metrics = defaultdict(list)
-            for idx in itr:
+            for _ in itr:
                 while True:
                     try:
                         # Reinitialise a new model
@@ -782,7 +780,7 @@ class BaseBenchmark(ABC):
                         early_stopping = EarlyStoppingCallback(**params)
 
                         # Initialise Trainer
-                        split = trains[idx].train_test_split(0.1, seed=4242)
+                        split = train.train_test_split(0.1, seed=4242)
                         trainer_args = dict(model=model,
                                             args=training_args,
                                             train_dataset=split['train'],
@@ -809,7 +807,7 @@ class BaseBenchmark(ABC):
                         # Log training metrics and save the state
                         if self.evaluate_train:
                             train_metrics = trainer.evaluate(
-                                trains[idx],
+                                train,
                                 metric_key_prefix='train'
                             )
                             metrics['train'].append(train_metrics)
@@ -889,16 +887,13 @@ class BaseBenchmark(ABC):
 
                 # Preprocess the train datasets
                 train = self._preprocess_data(train, framework=framework)
-                trains = [train]
-                trains += [Dataset.from_dict(train[train_bidxs[idx]])
-                           for idx in range(9)]
 
                 # Get the train predictions
                 all_train_metrics = list()
-                for dataset in trains:
+                for _ in range(10):
                     preds_labels = self._get_spacy_predictions_and_labels(
                         model=model,
-                        dataset=dataset,
+                        dataset=train,
                         progress_bar=progress_bar
                     )
                     train_metrics = self._compute_metrics(preds_labels)
