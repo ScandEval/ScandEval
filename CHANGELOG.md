@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.11.1] - 2021-08-24
 ### Changed
 - Rather than bootstrapping the training dataset and using the results to
   compute an estimator of the standard deviation, the same training dataset is
