@@ -25,6 +25,7 @@ import warnings
 from functools import partial
 import gc
 import logging
+import re
 
 from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
                     TwolabelTrainer)
@@ -634,7 +635,8 @@ class BaseBenchmark(ABC):
         a_tags_with_class = [a for a in a_tags if a.get('class') is not None]
 
         # Fetch the frameworks from the model website
-        frameworks = [a['tag-id'] for a in a_tags_with_class
+        frameworks = [re.sub(r'.*=', '', a['href'])
+                      for a in a_tags_with_class
                       if 'tag-red' in a['class']]
 
         # Extract a single valid framework in which the model has been
@@ -645,10 +647,12 @@ class BaseBenchmark(ABC):
                 framework = valid_framework
                 break
         else:
-            raise RuntimeError(f'Cannot detect the framework of {model_id}!')
+            msg = f'Cannot detect the framework of {model_id}!'
+            raise InvalidBenchmark(msg)
 
         # Fetch the model tasks from the model website
-        tasks = [a['tag-id'] for a in a_tags_with_class
+        tasks = [re.sub(r'.*=', '', a['href'])
+                 for a in a_tags_with_class
                  if 'tag-white' in a['class']]
 
         # Extract a single valid task on which the model has been trained. If

@@ -126,7 +126,7 @@ class Benchmark:
         # Set GET request parameter values
         params = dict()
         if language is not None:
-            params['filter'] = language
+            params['language'] = language
         if task is not None:
             params['pipeline_tag'] = task
 
@@ -143,21 +143,6 @@ class Benchmark:
                      if header.get('class') is not None and
                      header.get('title') is not None and
                      'items-center' in header['class']]
-
-        # There might still be models in the list, which is *not* in the given
-        # language, but still ended up in the search results, as the
-        # HuggingFace Hub only searches generally for the language code. We
-        # filter these out here.
-        for model_id in model_ids:
-            model_url = f'https://huggingface.co/{model_id}'
-            html = requests.get(model_url).text
-            soup = BeautifulSoup(html, 'html.parser')
-            a_tags_with_class = [a for a in soup.find_all('a')
-                                 if a.get('class') is not None]
-            languages = [a['tag-id'] for a in a_tags_with_class
-                         if 'tag-green' in a['class']]
-            if language not in languages:
-                model_ids.remove(model_id)
 
         return model_ids
 

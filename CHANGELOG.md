@@ -16,6 +16,8 @@ and this project adheres to
   interval is outputted.
 
 ### Fixed
+- Updated the model metadata fetching to the new HTML structure of the
+  HuggingFace Hub.
 - A random seed is now set for all libraries, via the `transformers.set_seed`
   function.
 - Always update the list of all the benchmarks when calling the
