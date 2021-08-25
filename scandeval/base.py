@@ -716,9 +716,6 @@ class BaseBenchmark(ABC):
                 import tensorflow as tf
                 tf.random.set_seed(4242)
 
-            # Enforce more reproducibility
-            if framework == 'pytorch':
-
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
