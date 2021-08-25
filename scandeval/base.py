@@ -25,6 +25,7 @@ from functools import partial
 import gc
 import logging
 import re
+import random
 
 from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
                     TwolabelTrainer)
