@@ -9,6 +9,12 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- Issue with `model_max_length` in tokenizer meant that models with an ill-set
+  value of `max_position_embeddings` could not be benchmarked. Now, if
+  `model_max_length` is not set then the minimal value of the sizes in
+  `max_model_input_sizes` will be used (which is usually 512).
+
 ### Changed
 - Disabling CUDNN benchmark when using the `pytorch` framework, to enforce
   better reproducibility.

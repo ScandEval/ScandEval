@@ -452,10 +452,15 @@ class BaseBenchmark(ABC):
 
             # Set the maximal length of the tokenizer to the model's maximal
             # length. This is required for proper truncation
-            try:
-                tokenizer.model_max_length = config.max_position_embeddings
-            except AttributeError:
-                pass
+            if (not hasattr(tokenizer, 'model_max_length') or
+                    tokenizer.model_max_length > 1_000):
+
+                if hasattr(tokenizer, 'max_model_input_sizes'):
+                    all_max_lengths = tokenizer.max_model_input_sizes.values()
+                    min_max_length = min(list(all_max_lengths))
+                    tokenizer.model_max_length = min_max_length
+                else:
+                    tokenizer.model_max_length = 512
 
             return dict(model=model, tokenizer=tokenizer)
 
