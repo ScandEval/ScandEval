@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Disabling CUDNN benchmark when using the `pytorch` framework, to enforce
+  better reproducibility.
+
+
 ## [v0.11.1] - 2021-08-24
 ### Changed
 - Rather than bootstrapping the training dataset and using the results to

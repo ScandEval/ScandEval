@@ -705,6 +705,11 @@ class BaseBenchmark(ABC):
             # Set random seed
             set_seed(4242)
 
+            # Enforce more reproducibility
+            if framework == 'pytorch':
+                import torch
+                torch.backends.cudnn.benchmark = False
+
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
