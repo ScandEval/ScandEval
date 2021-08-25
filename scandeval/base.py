@@ -854,12 +854,13 @@ class BaseBenchmark(ABC):
 
                         # Garbage collection, to avoid memory issues
                         try:
-                            del model, model_dict
+                            del model
                         except UnboundLocalError:
-                            try:
-                                del model
-                            except UnboundLocalError:
-                                pass
+                            pass
+                        try:
+                            del model_dict
+                        except UnboundLocalError:
+                            pass
                         gc.collect()
 
             self._log_metrics(metrics, model_id=model_id, finetuned=finetune)
