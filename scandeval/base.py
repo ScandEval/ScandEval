@@ -12,8 +12,7 @@ from transformers import (PreTrainedTokenizerBase,
                           PrinterCallback,
                           EarlyStoppingCallback,
                           RobertaForSequenceClassification,
-                          RobertaForTokenClassification,
-                          set_seed)
+                          RobertaForTokenClassification)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
 import requests
@@ -694,6 +693,10 @@ class BaseBenchmark(ABC):
         # Load the dataset
         train, test = self._load_data()
 
+        # Set platform-independent random seeds
+        random.seed(4242)
+        np.random.seed(4242)
+
         # Initialise random number generator
         rng = np.random.default_rng(4242)
 
@@ -702,13 +705,19 @@ class BaseBenchmark(ABC):
 
         if framework in ['pytorch', 'tensorflow', 'jax']:
 
-            # Set random seed
-            set_seed(4242)
+            # Set platform-dependent random seeds
+            if framework == 'pytorch':
+                import torch
+                torch.manual_seed(4242)
+                torch.cuda.manual_seed_all(4242)
+                torch.backends.cudnn.benchmark = False
+
+            elif framework == 'tensorflow':
+                import tensorflow as tf
+                tf.random.set_seed(4242)
 
             # Enforce more reproducibility
             if framework == 'pytorch':
-                import torch
-                torch.backends.cudnn.benchmark = False
 
             # Extract the model and tokenizer
             model = model_dict['model']
