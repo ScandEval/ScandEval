@@ -844,8 +844,23 @@ class BaseBenchmark(ABC):
                         break
 
                     except (RuntimeError, ValueError, IndexError) as e:
+
+                        # If it is an unknown error, then simply report it
                         if not str(e).startswith('CUDA out of memory'):
+                            # Garbage collection, to avoid memory issues
+                            try:
+                                del model
+                            except UnboundLocalError:
+                                pass
+                            try:
+                                del model_dict
+                            except UnboundLocalError:
+                                pass
+                            gc.collect()
                             raise InvalidBenchmark(str(e))
+
+                        # If it is a CUDA memory error, then reduce batch size
+                        # and up gradient accumulation
                         bs = training_args.per_device_train_batch_size
                         ga = training_args.gradient_accumulation_steps
                         if bs == 1:

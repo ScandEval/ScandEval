@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- If errors occur during benchmarking, then garbage collect before skipping to
+  the next benchmark, to avoid memory issues.
+
+
 ## [v0.11.2] - 2021-08-25
 ### Fixed
 - Issue with `model_max_length` in tokenizer meant that models with an ill-set
