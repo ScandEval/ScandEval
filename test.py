@@ -61,6 +61,59 @@ def process_twitter_sent_sentiment():
                     f.write('\n')
 
 
+def process_lcc():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+
+    Path('datasets/lcc').mkdir()
+
+    input_paths = [Path('datasets/lcc1.csv'), Path('datasets/lcc2.csv')]
+    output_paths = [Path('datasets/lcc/train.jsonl'),
+                    Path('datasets/lcc/test.jsonl')]
+
+    dfs = list()
+    for input_path in input_paths:
+        df = (pd.read_csv(input_path, header=0)
+                .dropna(subset=['valence', 'text']))
+
+        for idx, row in df.iterrows():
+            try:
+                int(row.valence)
+            except:
+                df = df.drop(idx)
+                continue
+            if row.text.strip() == '':
+                df = df.drop(idx)
+            else:
+                if int(row.valence) > 0:
+                    sentiment = 'positiv'
+                elif int(row.valence) < 0:
+                    sentiment = 'negativ'
+                else:
+                    sentiment = 'neutral'
+                df.loc[idx, 'valence'] = sentiment
+
+        dfs.append(df)
+
+    df = pd.concat(dfs, axis=0, ignore_index=True)
+
+    train, test = train_test_split(df, test_size=0.3, stratify=df.valence)
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
+
+    for split, output_path in zip([train, test], output_paths):
+        for idx, row in tqdm(split.iterrows()):
+            data_dict = dict(text=row.text, label=row.valence)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(split) - 1:
+                    f.write('\n')
+
+
 def process_lcc2():
     from pathlib import Path
     import json
@@ -368,4 +421,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    process_europarl_subj()
+    process_lcc()
