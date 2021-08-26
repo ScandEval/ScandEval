@@ -1,4 +1,4 @@
-'''Sentiment evaluation of a language model on the LCC2 dataset'''
+'''Sentiment evaluation of a language model on the EuroparlSent dataset'''
 
 from datasets import Dataset
 from typing import Tuple
@@ -6,14 +6,14 @@ import logging
 
 from .sentiment_classification import SentimentClassificationBenchmark
 from .utils import doc_inherit
-from .datasets import load_lcc2
+from .datasets import load_europarl_sent
 
 
 logger = logging.getLogger(__name__)
 
 
-class Lcc2Benchmark(SentimentClassificationBenchmark):
-    '''Benchmark of language models on the LCC2 dataset.
+class EuroparlSentBenchmark(SentimentClassificationBenchmark):
+    '''Benchmark of language models on the EuroparlSent dataset.
 
     Args:
         cache_dir (str, optional):
@@ -44,14 +44,14 @@ class Lcc2Benchmark(SentimentClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        super().__init__(name='LCC2',
+        super().__init__(name='EuroparlSent',
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_lcc2()
+        X_train, X_test, y_train, y_test = load_europarl_sent()
         train_dict = dict(doc=X_train['text'],
                           orig_label=y_train['label'])
         test_dict = dict(doc=X_test['text'],

@@ -9,6 +9,18 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- Merged the `lcc1` and `lcc2` datasets into one `lcc` dataset, which is
+  reasonable as they have been annotated by the same person. The `lcc2` dataset
+  was too small to give reasonable benchmarking results.
+- Renamed the `europarl2` dataset to `europarl_sent`
+
+## Removed
+- Removed the `europarl1` dataset, as it was too small to give reliable
+  benchmarking results. This dataset could not simply be added to the
+  `europarl2` dataset, as with the new `lcc` dataset, as the annotaters are not
+  the same.
+
 ### Fixed
 - If errors occur during benchmarking, then garbage collect before skipping to
   the next benchmark, to avoid memory issues.
