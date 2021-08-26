@@ -44,9 +44,9 @@ class SentimentClassificationBenchmark(TextClassificationBenchmark, ABC):
                  verbose: bool = False):
         id2label = ['negative', 'neutral', 'positive']
         label_synonyms = [
-            ['LABEL_0', 'negativ', 'negative', 'neikvætt'],
-            ['LABEL_1', 'neutral', 'nøytral', 'hlutlaus'],
-            ['LABEL_2', 'positiv', 'positive', 'jákvætt']
+            ['LABEL_0', 'negativ', 'negative', 'neikvætt', 'Negative'],
+            ['LABEL_1', 'neutral', 'nøytral', 'hlutlaus', 'Neutral'],
+            ['LABEL_2', 'positiv', 'positive', 'jákvætt', 'Positive']
         ]
         super().__init__(name=name,
                          metric_names=dict(macro_f1='Macro-average F1-score'),
