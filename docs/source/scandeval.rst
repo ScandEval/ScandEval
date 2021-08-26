@@ -84,18 +84,10 @@ scandeval.dkhate module
    :undoc-members:
    :show-inheritance:
 
-scandeval.europarl1 module
---------------------------
+scandeval.europarl\_sent module
+-------------------------------
 
-.. automodule:: scandeval.europarl1
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-scandeval.europarl2 module
---------------------------
-
-.. automodule:: scandeval.europarl2
+.. automodule:: scandeval.europarl_sent
    :members:
    :undoc-members:
    :show-inheritance:
@@ -108,18 +100,10 @@ scandeval.europarl\_subj module
    :undoc-members:
    :show-inheritance:
 
-scandeval.lcc1 module
----------------------
+scandeval.lcc module
+--------------------
 
-.. automodule:: scandeval.lcc1
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-scandeval.lcc2 module
----------------------
-
-.. automodule:: scandeval.lcc2
+.. automodule:: scandeval.lcc
    :members:
    :undoc-members:
    :show-inheritance:
