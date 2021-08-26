@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.12.0] - 2021-08-26
 ### Changed
 - Merged the `lcc1` and `lcc2` datasets into one `lcc` dataset, which is
   reasonable as they have been annotated by the same person. The `lcc2` dataset
