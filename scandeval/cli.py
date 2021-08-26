@@ -21,7 +21,8 @@ from .benchmark import Benchmark
               type=click.Choice(['dane', 'dane-no-misc', 'ddt-pos', 'ddt-dep',
                                  'angry-tweets', 'twitter-sent',
                                  'twitter-subj', 'europarl-sent',
-                                 'europarl-subj', 'dkhate', 'lcc', 'norec']),
+                                 'europarl-subj', 'dkhate', 'lcc', 'norec',
+                                 'nordial']),
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',
