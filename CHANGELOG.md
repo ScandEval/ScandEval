@@ -15,6 +15,11 @@ and this project adheres to
 - Added the Bokmål/Nynorsk part of the Norwegian Dialect dataset (NoReC), a
   binary classification dataset in Norwegian.
 
+### Changed
+- Changed the early stopping patience to `2 + 1000 // len(train)` from `2 + 250
+  // len(train)`, to allow more patience (and thus, more stability), for
+  smaller datasets.
+
 
 ## [v0.12.0] - 2021-08-26
 ### Changed
