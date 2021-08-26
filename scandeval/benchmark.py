@@ -19,6 +19,7 @@ from .europarl_subj import EuroparlSubjBenchmark
 from .europarl_sent import EuroparlSentBenchmark
 from .lcc import LccBenchmark
 from .dkhate import DkHateBenchmark
+from .norec import NoReCBenchmark
 from .utils import InvalidBenchmark
 
 
@@ -100,7 +101,8 @@ class Benchmark:
             ('europarl-sent', 'EuroparlSent', EuroparlSentBenchmark(**params)),
             ('europarl-subj', 'EuroparlSubj', EuroparlSubjBenchmark(**params)),
             ('dkhate', 'DKHate', DkHateBenchmark(**params)),
-            ('lcc', 'LCC', LccBenchmark(**params))
+            ('lcc', 'LCC', LccBenchmark(**params)),
+            ('norec', 'NoReC', NoReCBenchmark(**params))
         ]
 
     @staticmethod

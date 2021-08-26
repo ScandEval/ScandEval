@@ -1,6 +1,37 @@
 '''Testing script'''
 
 
+def process_norec():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import pandas as pd
+    import json
+
+    dataset_dir = Path('datasets/norec')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    train_input_path = Path('datasets/norec_train.json')
+    val_input_path = Path('datasets/norec_val.json')
+    test_input_path = Path('datasets/norec_test.json')
+    output_paths = [dataset_dir / 'train.jsonl', dataset_dir / 'test.jsonl']
+
+    train = pd.read_json(train_input_path, orient='records').dropna()
+    val = pd.read_json(val_input_path, orient='records').dropna()
+    train = train.append(val)
+    test = pd.read_json(test_input_path, orient='records').dropna()
+
+    for split, output_path in zip([train, test], output_paths):
+        for idx, row in tqdm(split.iterrows()):
+            data_dict = dict(text=row.text, label=row.label)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(split) - 1:
+                    f.write('\n')
+
+
 def process_twitter_subj():
     from pathlib import Path
     import json
@@ -421,4 +452,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    process_lcc()
+    process_norec()

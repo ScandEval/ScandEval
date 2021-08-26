@@ -24,6 +24,25 @@ def _get_dataset_from_url(url: str,
     return docs, labels
 
 
+def load_norec() -> Tuple[dict, dict, dict, dict]:
+    '''Load the NoReC dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/norec/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
 def load_angry_tweets() -> Tuple[dict, dict, dict, dict]:
     '''Load the AngryTweets dataset.
 
