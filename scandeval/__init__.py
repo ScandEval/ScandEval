@@ -4,7 +4,7 @@ import os
 from .benchmark import Benchmark  # noqa
 from .utils import block_terminal_output
 
-__version__ = '0.12.0'  # noqa
+__version__ = '0.13.0'  # noqa
 
 # Block unwanted terminal outputs
 block_terminal_output()

@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.13.0] - 2021-08-30
 ### Added
 - Added the Norwegian Review Corpus (NoReC), a sentiment classification dataset
   in Norwegian.
