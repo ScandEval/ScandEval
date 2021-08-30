@@ -108,6 +108,22 @@ scandeval.lcc module
    :undoc-members:
    :show-inheritance:
 
+scandeval.nordial module
+------------------------
+
+.. automodule:: scandeval.nordial
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.norec module
+----------------------
+
+.. automodule:: scandeval.norec
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.sentiment\_classification module
 ------------------------------------------
 
