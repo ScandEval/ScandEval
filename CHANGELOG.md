@@ -12,7 +12,7 @@ and this project adheres to
 ### Added
 - Added the Norwegian Review Corpus (NoReC), a sentiment classification dataset
   in Norwegian.
-- Added the Bokmål/Nynorsk part of the Norwegian Dialect dataset (NoReC), a
+- Added the Bokmål/Nynorsk part of the Norwegian Dialect dataset (NorDial), a
   binary classification dataset in Norwegian.
 
 ### Changed
