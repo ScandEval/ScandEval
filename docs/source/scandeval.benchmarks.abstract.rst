@@ -20,14 +20,6 @@ scandeval.benchmarks.abstract.binary\_classification module
    :undoc-members:
    :show-inheritance:
 
-scandeval.benchmarks.abstract.dep module
-----------------------------------------
-
-.. automodule:: scandeval.benchmarks.abstract.dep
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 scandeval.benchmarks.abstract.sentiment\_classification module
 --------------------------------------------------------------
 
