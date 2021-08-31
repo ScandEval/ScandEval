@@ -3,6 +3,7 @@ export $(shell sed 's/=.*//' .env)
 
 documentation:
 	sphinx-apidoc -o docs/source --force scandeval && \
+	rm docs/source/modules.rst || echo "Did not have to remove modules.rst"
 	make -C docs html
 
 release-major:
