@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.14.0] - 2021-08-31
 ### Added
 - Added the Bokmål and Nynorsk parts of the NorNE dataset, for named entity
   recognition. They can be loaded with the `norne-nb` and `norne-nn` names.
