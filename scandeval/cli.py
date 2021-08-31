@@ -4,6 +4,7 @@ import click
 from typing import Tuple
 
 from .benchmark import Benchmark
+from .utils import ALL_DATASETS
 
 
 @click.command()
@@ -18,11 +19,7 @@ from .benchmark import Benchmark
               default=None,
               show_default=True,
               multiple=True,
-              type=click.Choice(['dane', 'dane-no-misc', 'ddt-pos', 'ddt-dep',
-                                 'angry-tweets', 'twitter-sent',
-                                 'twitter-subj', 'europarl-sent',
-                                 'europarl-subj', 'dkhate', 'lcc', 'norec',
-                                 'nordial']),
+              type=click.Choice([name for name, _, _, _ in ALL_DATASETS]),
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',

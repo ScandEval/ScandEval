@@ -1,6 +1,5 @@
 '''Fetches an updated list of all Scandinavian models on the HuggingFace Hub'''
 
-
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Optional, Union, Dict
@@ -9,19 +8,12 @@ import logging
 import json
 from pathlib import Path
 
-from .dane import DaneBenchmark
-from .ddt_pos import DdtPosBenchmark
-from .ddt_dep import DdtDepBenchmark
-from .angry_tweets import AngryTweetsBenchmark
-from .twitter_sent import TwitterSentBenchmark
-from .twitter_subj import TwitterSubjBenchmark
-from .europarl_subj import EuroparlSubjBenchmark
-from .europarl_sent import EuroparlSentBenchmark
-from .lcc import LccBenchmark
-from .dkhate import DkHateBenchmark
-from .norec import NoReCBenchmark
-from .nordial import NorDialBenchmark
-from .utils import InvalidBenchmark
+from .benchmarks import (DaneBenchmark, DdtPosBenchmark, DdtDepBenchmark,
+                         AngryTweetsBenchmark, TwitterSentBenchmark,
+                         TwitterSubjBenchmark, EuroparlSubjBenchmark,
+                         EuroparlSentBenchmark, LccBenchmark, DkHateBenchmark,
+                         NoReCBenchmark, NorDialBenchmark)
+from .utils import InvalidBenchmark, ALL_DATASETS
 
 
 logger = logging.getLogger(__name__)
@@ -90,22 +82,8 @@ class Benchmark:
             params:
                 Dictionary of benchmark parameters.
         '''
-        self._benchmarks = [
-            ('dane', 'DaNE with MISC tags', DaneBenchmark(**params)),
-            ('dane-no-misc', 'DaNE without MISC tags',
-             DaneBenchmark(include_misc_tags=False, **params)),
-            ('ddt-pos', 'the POS part of DDT', DdtPosBenchmark(**params)),
-            ('ddt-dep', 'the DEP part of DDT', DdtDepBenchmark(**params)),
-            ('angry-tweets', 'Angry Tweets', AngryTweetsBenchmark(**params)),
-            ('twitter-sent', 'TwitterSent', TwitterSentBenchmark(**params)),
-            ('twitter-subj', 'TwitterSubj', TwitterSubjBenchmark(**params)),
-            ('europarl-sent', 'EuroparlSent', EuroparlSentBenchmark(**params)),
-            ('europarl-subj', 'EuroparlSubj', EuroparlSubjBenchmark(**params)),
-            ('dkhate', 'DKHate', DkHateBenchmark(**params)),
-            ('lcc', 'LCC', LccBenchmark(**params)),
-            ('norec', 'NoReC', NoReCBenchmark(**params)),
-            ('nordial', 'NorDial', NorDialBenchmark(**params))
-        ]
+        self._benchmarks = [(short_name, name, cls(**params))
+                            for short_name, name, cls, _ in ALL_DATASETS]
 
     @staticmethod
     def _get_model_ids(language: Optional[str] = None,

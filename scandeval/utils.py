@@ -16,6 +16,36 @@ from transformers import (AutoModelForTokenClassification,
                           FlaxAutoModelForTokenClassification,
                           FlaxAutoModelForSequenceClassification,
                           Trainer)
+from .benchmarks import (DaneBenchmark, DaneNoMiscBenchmark, DdtPosBenchmark,
+                         DdtDepBenchmark, AngryTweetsBenchmark,
+                         TwitterSentBenchmark, TwitterSubjBenchmark,
+                         EuroparlSubjBenchmark, EuroparlSentBenchmark,
+                         LccBenchmark, DkHateBenchmark, NoReCBenchmark,
+                         NorDialBenchmark)
+from .datasets import (load_dane, load_dane_no_misc, load_ddt_pos,
+                       load_ddt_dep, load_angry_tweets, load_twitter_sent,
+                       load_twitter_subj, load_europarl_subj,
+                       load_europarl_sent, load_lcc, load_dkhate,
+                       load_norec, load_nordial)
+
+
+ALL_DATASETS = [
+    ('dane', 'DaNE with MISC tags', DaneBenchmark, load_dane),
+    ('dane-no-misc', 'DaNE without MISC tags', DaneNoMiscBenchmark,
+        load_dane_no_misc),
+    ('ddt-pos', 'the POS part of DDT', DdtPosBenchmark, load_ddt_pos),
+    ('ddt-dep', 'the DEP part of DDT', DdtDepBenchmark, load_ddt_dep),
+    ('angry-tweets', 'AngryTweets', AngryTweetsBenchmark, load_angry_tweets),
+    ('twitter-sent', 'TwitterSent', TwitterSentBenchmark, load_twitter_sent),
+    ('twitter-subj', 'TwitterSubj', TwitterSubjBenchmark, load_twitter_subj),
+    ('europarl-sent', 'EuroparlSent', EuroparlSentBenchmark, load_europarl_sent),
+    ('europarl-subj', 'EuroparlSubj', EuroparlSubjBenchmark, load_europarl_subj),
+    ('dkhate', 'DKHate', DkHateBenchmark, load_dkhate),
+    ('lcc', 'LCC', LccBenchmark, load_lcc),
+    ('norec', 'NoReC', NoReCBenchmark, load_norec),
+    ('nordial', 'NorDial', NorDialBenchmark, load_nordial)
+]
+
 
 PT_CLS = {'token-classification': AutoModelForTokenClassification,
           'text-classification': AutoModelForSequenceClassification}
