@@ -21,12 +21,12 @@ from .benchmarks import (DaneBenchmark, DaneNoMiscBenchmark, DdtPosBenchmark,
                          TwitterSentBenchmark, TwitterSubjBenchmark,
                          EuroparlSubjBenchmark, EuroparlSentBenchmark,
                          LccBenchmark, DkHateBenchmark, NoReCBenchmark,
-                         NorDialBenchmark)
+                         NorDialBenchmark, NorneNBBenchmark, NorneNNBenchmark)
 from .datasets import (load_dane, load_dane_no_misc, load_ddt_pos,
                        load_ddt_dep, load_angry_tweets, load_twitter_sent,
                        load_twitter_subj, load_europarl_subj,
                        load_europarl_sent, load_lcc, load_dkhate,
-                       load_norec, load_nordial)
+                       load_norec, load_nordial, load_norne_nb, load_norne_nn)
 
 
 ALL_DATASETS = [
@@ -43,7 +43,9 @@ ALL_DATASETS = [
     ('dkhate', 'DKHate', DkHateBenchmark, load_dkhate),
     ('lcc', 'LCC', LccBenchmark, load_lcc),
     ('norec', 'NoReC', NoReCBenchmark, load_norec),
-    ('nordial', 'NorDial', NorDialBenchmark, load_nordial)
+    ('nordial', 'NorDial', NorDialBenchmark, load_nordial),
+    ('norne-nb', 'the Bokmål part of NorNE', NorneNBBenchmark, load_norne_nb),
+    ('norne-nn', 'the Nynorsk part of NorNE', NorneNNBenchmark, load_norne_nn),
 ]
 
 
