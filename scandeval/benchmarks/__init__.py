@@ -11,3 +11,5 @@ from .lcc import LccBenchmark  # noqa
 from .dkhate import DkHateBenchmark  # noqa
 from .norec import NoReCBenchmark  # noqa
 from .nordial import NorDialBenchmark  # noqa
+from .norne_nb import NorneNBBenchmark  # noqa
+from .norne_nn import NorneNNBenchmark  # noqa
