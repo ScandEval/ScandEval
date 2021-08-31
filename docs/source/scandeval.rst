@@ -36,14 +36,6 @@ scandeval.datasets module
    :undoc-members:
    :show-inheritance:
 
-scandeval.dep module
---------------------
-
-.. automodule:: scandeval.dep
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 scandeval.utils module
 ----------------------
 
