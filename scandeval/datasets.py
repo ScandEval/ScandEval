@@ -179,6 +179,29 @@ def load_dane() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
+def load_dane_no_misc() -> Tuple[dict, dict, dict, dict]:
+    '''Load the the DaNE dataset without MISC tags.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/dane_no_misc/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             'ner_tags')
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           'ner_tags')
+    return X_train, X_test, y_train, y_test
+
+
 def load_ddt_pos() -> Tuple[dict, dict, dict, dict]:
     '''Load the POS part of the DDT dataset.
 
