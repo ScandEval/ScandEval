@@ -1,6 +1,130 @@
 '''Testing script'''
 
 
+def process_norne_nn():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import re
+
+    norne_dir = Path('datasets/norne_nn')
+    if not norne_dir.exists():
+        norne_dir.mkdir()
+
+    input_paths = [Path('datasets/no_nynorsk-ud-train.conllu'),
+                   Path('datasets/no_nynorsk-ud-dev.conllu'),
+                   Path('datasets/no_nynorsk-ud-test.conllu')]
+    output_paths = [Path('datasets/norne_nn/train.jsonl'),
+                    Path('datasets/norne_nn/val.jsonl'),
+                    Path('datasets/norne_nn/test.jsonl')]
+
+    for input_path, output_path in zip(input_paths, output_paths):
+        tokens = list()
+        pos_tags = list()
+        heads = list()
+        deps  = list()
+        ner_tags = list()
+        ids = list()
+        doc = ''
+        lines = input_path.read_text().split('\n')
+        for idx, line in enumerate(tqdm(lines)):
+            if line.startswith('# text = '):
+                doc = re.sub('# text = ', '', line)
+            elif line.startswith('#'):
+                continue
+            elif line == '':
+                if tokens != []:
+                    data_dict = dict(ids=ids,
+                                     doc=doc,
+                                     tokens=tokens,
+                                     pos_tags=pos_tags,
+                                     heads=heads,
+                                     deps=deps,
+                                     ner_tags=ner_tags)
+                    json_line = json.dumps(data_dict)
+                    with output_path.open('a') as f:
+                        f.write(json_line)
+                        if idx < len(lines) - 1:
+                            f.write('\n')
+                ids = list()
+                tokens = list()
+                pos_tags = list()
+                heads = list()
+                deps = list()
+                ner_tags = list()
+                doc = ''
+            else:
+                data = line.split('\t')
+                ids.append(data[0])
+                tokens.append(data[1])
+                pos_tags.append(data[3])
+                heads.append(data[6])
+                deps.append(data[7])
+                ner_tags.append(data[9].replace('name=', '').split('|')[-1])
+
+
+def process_norne_nb():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import re
+
+    norne_dir = Path('datasets/norne_nb')
+    if not norne_dir.exists():
+        norne_dir.mkdir()
+
+    input_paths = [Path('datasets/no_bokmaal-ud-train.conllu'),
+                   Path('datasets/no_bokmaal-ud-dev.conllu'),
+                   Path('datasets/no_bokmaal-ud-test.conllu')]
+    output_paths = [Path('datasets/norne_nb/train.jsonl'),
+                    Path('datasets/norne_nb/val.jsonl'),
+                    Path('datasets/norne_nb/test.jsonl')]
+
+    for input_path, output_path in zip(input_paths, output_paths):
+        tokens = list()
+        pos_tags = list()
+        heads = list()
+        deps  = list()
+        ner_tags = list()
+        ids = list()
+        doc = ''
+        lines = input_path.read_text().split('\n')
+        for idx, line in enumerate(tqdm(lines)):
+            if line.startswith('# text = '):
+                doc = re.sub('# text = ', '', line)
+            elif line.startswith('#'):
+                continue
+            elif line == '':
+                if tokens != []:
+                    data_dict = dict(ids=ids,
+                                     doc=doc,
+                                     tokens=tokens,
+                                     pos_tags=pos_tags,
+                                     heads=heads,
+                                     deps=deps,
+                                     ner_tags=ner_tags)
+                    json_line = json.dumps(data_dict)
+                    with output_path.open('a') as f:
+                        f.write(json_line)
+                        if idx < len(lines) - 1:
+                            f.write('\n')
+                ids = list()
+                tokens = list()
+                pos_tags = list()
+                heads = list()
+                deps = list()
+                ner_tags = list()
+                doc = ''
+            else:
+                data = line.split('\t')
+                ids.append(data[0])
+                tokens.append(data[1])
+                pos_tags.append(data[3])
+                heads.append(data[6])
+                deps.append(data[7])
+                ner_tags.append(data[9].replace('name=', '').split('|')[-1])
+
+
 def process_nordial():
     from pathlib import Path
     import json
@@ -484,4 +608,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    process_nordial()
+    process_norne_nb()
