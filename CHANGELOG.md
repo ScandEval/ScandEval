@@ -11,7 +11,7 @@ and this project adheres to
 ## [Unreleased]
 ### Added
 - Added the Bokmål and Nynorsk parts of the NorNE dataset, for named entity
-  recognition.
+  recognition. They can be loaded with the `norne-nb` and `norne-nn` names.
 - There is now a `load_dataset` function, which can load any dataset, using the
   dataset's name (same name as in the CLI). For instance,
   `load_dataset('angry-tweets')` loads the `AngryTweets` dataset. This can be
