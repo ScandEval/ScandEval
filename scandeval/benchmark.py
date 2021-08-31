@@ -8,11 +8,6 @@ import logging
 import json
 from pathlib import Path
 
-from .benchmarks import (DaneBenchmark, DdtPosBenchmark, DdtDepBenchmark,
-                         AngryTweetsBenchmark, TwitterSentBenchmark,
-                         TwitterSubjBenchmark, EuroparlSubjBenchmark,
-                         EuroparlSentBenchmark, LccBenchmark, DkHateBenchmark,
-                         NoReCBenchmark, NorDialBenchmark)
 from .utils import InvalidBenchmark, ALL_DATASETS
 
 
