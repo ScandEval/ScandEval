@@ -7,12 +7,11 @@ from .utils import get_all_datasets
 
 
 def load_dataset(name: str) -> Tuple[dict, dict, dict, dict]:
-    __doc__ = f'''Load a benchmark dataset.
+    '''Load a benchmark dataset.
 
     Args:
         name (str):
-            Name of the dataset. Can be
-            {', '.join([name for name, _, _, _ in get_all_datasets()])}.
+            Name of the dataset.
 
     Returns:
         tuple:
