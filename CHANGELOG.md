@@ -10,6 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
+- Added the Bokmål and Nynorsk parts of the NorNE dataset, for named entity
+  recognition.
 - There is now a `load_dataset` function, which can load any dataset, using the
   dataset's name (same name as in the CLI). For instance,
   `load_dataset('angry-tweets')` loads the `AngryTweets` dataset. This can be
@@ -336,5 +338,5 @@ and this project adheres to
 ## [v0.1.0] - 2021-08-05
 ### Added
 - First beta release
-- Features Danish sentiment, hate speech detection and named entitity
+- Features Danish sentiment, hate speech detection and named entity
   recognition datasets for benchmarking
