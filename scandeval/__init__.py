@@ -2,6 +2,7 @@ from termcolor import colored
 import logging
 import os
 from .benchmark import Benchmark  # noqa
+from .datasets import load_dataset  # noqa
 from .utils import block_terminal_output
 
 __version__ = '0.13.0'  # noqa

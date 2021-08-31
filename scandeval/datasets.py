@@ -3,6 +3,35 @@
 import requests
 import json
 from typing import Tuple, Union, List
+from .utils import ALL_DATASETS
+
+
+def load_dataset(name: str) -> Tuple[dict, dict, dict, dict]:
+    __doc__ = f'''Load a benchmark dataset.
+
+    Args:
+        name (str):
+            Name of the dataset. Can be
+            {', '.join([name for name, _, _, _ in ALL_DATASETS])}.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+
+    Raises:
+        RuntimeError:
+            If `name` is not a valid dataset name.
+    '''
+    dataset_names = [name for name, _, _, _ in ALL_DATASETS]
+    if name in dataset_names:
+        loader = [loader for dataset_name, _, _, loader in ALL_DATASETS
+                  if dataset_name == name][0]
+        return loader()
+    else:
+        raise RuntimeError(f'The dataset "{name}" was not recognised.')
 
 
 def _get_dataset_from_url(url: str,
