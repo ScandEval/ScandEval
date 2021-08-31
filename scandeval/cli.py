@@ -19,7 +19,7 @@ from .utils import get_all_datasets
               default=None,
               show_default=True,
               multiple=True,
-              type=click.Choice([name for name, _, _, _ in get_all_datasets()]),
+              type=click.Choice([n for n, _, _, _ in get_all_datasets()]),
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',
