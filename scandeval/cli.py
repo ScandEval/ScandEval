@@ -4,7 +4,7 @@ import click
 from typing import Tuple
 
 from .benchmark import Benchmark
-from .utils import ALL_DATASETS
+from .utils import get_all_datasets
 
 
 @click.command()
@@ -19,7 +19,7 @@ from .utils import ALL_DATASETS
               default=None,
               show_default=True,
               multiple=True,
-              type=click.Choice([name for name, _, _, _ in ALL_DATASETS]),
+              type=click.Choice([name for name, _, _, _ in get_all_datasets()]),
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',

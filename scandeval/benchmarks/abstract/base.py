@@ -28,7 +28,7 @@ import re
 import random
 
 from ...utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
-                      TwolabelTrainer, ALL_DATASETS)
+                      TwolabelTrainer, get_all_datasets)
 
 
 logger = logging.getLogger(__name__)
@@ -100,7 +100,8 @@ class BaseBenchmark(ABC):
                  verbose: bool = False):
 
         self.short_name = name
-        self.name = [long_name for short_name, long_name, _, _ in ALL_DATASETS
+        self.name = [long_name
+                     for short_name, long_name, _, _ in get_all_datasets()
                      if name == short_name][0]
         self.task = task
         self.metric_names = metric_names

@@ -3,7 +3,7 @@
 import requests
 import json
 from typing import Tuple, Union, List
-from .utils import ALL_DATASETS
+from .utils import get_all_datasets
 
 
 def load_dataset(name: str) -> Tuple[dict, dict, dict, dict]:
@@ -12,7 +12,7 @@ def load_dataset(name: str) -> Tuple[dict, dict, dict, dict]:
     Args:
         name (str):
             Name of the dataset. Can be
-            {', '.join([name for name, _, _, _ in ALL_DATASETS])}.
+            {', '.join([name for name, _, _, _ in get_all_datasets()])}.
 
     Returns:
         tuple:
@@ -25,9 +25,9 @@ def load_dataset(name: str) -> Tuple[dict, dict, dict, dict]:
         RuntimeError:
             If `name` is not a valid dataset name.
     '''
-    dataset_names = [name for name, _, _, _ in ALL_DATASETS]
+    dataset_names = [name for name, _, _, _ in get_all_datasets()]
     if name in dataset_names:
-        loader = [loader for dataset_name, _, _, loader in ALL_DATASETS
+        loader = [loader for dataset_name, _, _, loader in get_all_datasets()
                   if dataset_name == name][0]
         return loader()
     else:

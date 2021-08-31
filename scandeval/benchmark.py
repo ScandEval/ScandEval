@@ -8,7 +8,7 @@ import logging
 import json
 from pathlib import Path
 
-from .utils import InvalidBenchmark, ALL_DATASETS
+from .utils import InvalidBenchmark, get_all_datasets
 
 
 logger = logging.getLogger(__name__)
@@ -78,7 +78,7 @@ class Benchmark:
                 Dictionary of benchmark parameters.
         '''
         self._benchmarks = [(short_name, name, cls(**params))
-                            for short_name, name, cls, _ in ALL_DATASETS]
+                            for short_name, name, cls, _ in get_all_datasets()]
 
     @staticmethod
     def _get_model_ids(language: Optional[str] = None,
