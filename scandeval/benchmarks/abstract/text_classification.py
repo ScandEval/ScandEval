@@ -8,7 +8,7 @@ from abc import ABC
 from typing import Optional, Dict, List
 
 from .base import BaseBenchmark
-from .utils import InvalidBenchmark
+from ...utils import InvalidBenchmark
 
 
 logger = logging.getLogger(__name__)

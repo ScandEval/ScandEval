@@ -1,19 +1,19 @@
-'''Sentiment evaluation of a language model on the EuroparlSent dataset'''
+'''Subjectivity classification on the EuroparlSubj dataset'''
 
 from datasets import Dataset
 from typing import Tuple
 import logging
 
-from .sentiment_classification import SentimentClassificationBenchmark
-from .utils import doc_inherit
-from .datasets import load_europarl_sent
+from .abstract import BinaryClassificationBenchmark
+from ..utils import doc_inherit
+from ..datasets import load_dataset
 
 
 logger = logging.getLogger(__name__)
 
 
-class EuroparlSentBenchmark(SentimentClassificationBenchmark):
-    '''Benchmark of language models on the EuroparlSent dataset.
+class EuroparlSubjBenchmark(BinaryClassificationBenchmark):
+    '''Benchmark of language models on the EuroparlSubj dataset.
 
     Args:
         cache_dir (str, optional):
@@ -44,14 +44,15 @@ class EuroparlSentBenchmark(SentimentClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        super().__init__(name='EuroparlSent',
+        super().__init__(name='europarl-subj',
+                         id2label=['objektivt', 'subjektivt'],
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_europarl_sent()
+        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
         train_dict = dict(doc=X_train['text'],
                           orig_label=y_train['label'])
         test_dict = dict(doc=X_test['text'],

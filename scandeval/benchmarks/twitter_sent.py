@@ -1,19 +1,19 @@
-'''Sentiment evaluation of a language model on the NoReC dataset'''
+'''Sentiment evaluation of a language model on the TwitterSent dataset'''
 
 from datasets import Dataset
 from typing import Tuple
 import logging
 
-from .sentiment_classification import SentimentClassificationBenchmark
-from .utils import doc_inherit
-from .datasets import load_norec
+from .abstract import SentimentClassificationBenchmark
+from ..utils import doc_inherit
+from ..datasets import load_dataset
 
 
 logger = logging.getLogger(__name__)
 
 
-class NoReCBenchmark(SentimentClassificationBenchmark):
-    '''Benchmark of language models on the NoReC dataset.
+class TwitterSentBenchmark(SentimentClassificationBenchmark):
+    '''Benchmark of language models on the TwitterSent dataset.
 
     Args:
         cache_dir (str, optional):
@@ -44,17 +44,17 @@ class NoReCBenchmark(SentimentClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        super().__init__(name='NoReC',
+        super().__init__(name='twitter-sent',
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_norec()
-        train_dict = dict(doc=X_train['text'],
+        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
+        train_dict = dict(doc=X_train['tweet'],
                           orig_label=y_train['label'])
-        test_dict = dict(doc=X_test['text'],
+        test_dict = dict(doc=X_test['tweet'],
                          orig_label=y_test['label'])
         train = Dataset.from_dict(train_dict)
         test = Dataset.from_dict(test_dict)

@@ -1,19 +1,19 @@
-'''Subjectivity classification on the TwitterSubj dataset'''
+'''Sentiment evaluation of a language model on the EuroparlSent dataset'''
 
 from datasets import Dataset
 from typing import Tuple
 import logging
 
-from .binary_classification import BinaryClassificationBenchmark
-from .datasets import load_twitter_subj
-from .utils import doc_inherit
+from .abstract import SentimentClassificationBenchmark
+from ..utils import doc_inherit
+from ..datasets import load_dataset
 
 
 logger = logging.getLogger(__name__)
 
 
-class TwitterSubjBenchmark(BinaryClassificationBenchmark):
-    '''Benchmark of language models on the TwitterSubj dataset.
+class EuroparlSentBenchmark(SentimentClassificationBenchmark):
+    '''Benchmark of language models on the EuroparlSent dataset.
 
     Args:
         cache_dir (str, optional):
@@ -44,18 +44,17 @@ class TwitterSubjBenchmark(BinaryClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        super().__init__(name='TwitterSubj',
-                         id2label=['objektivt', 'subjektivt'],
+        super().__init__(name='europarl-sent',
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_twitter_subj()
-        train_dict = dict(doc=X_train['tweet'],
+        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
+        train_dict = dict(doc=X_train['text'],
                           orig_label=y_train['label'])
-        test_dict = dict(doc=X_test['tweet'],
+        test_dict = dict(doc=X_test['text'],
                          orig_label=y_test['label'])
         train = Dataset.from_dict(train_dict)
         test = Dataset.from_dict(test_dict)

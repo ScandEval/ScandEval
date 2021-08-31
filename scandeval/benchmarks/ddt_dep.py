@@ -5,9 +5,9 @@ import numpy as np
 from typing import Tuple, Dict, List, Optional
 import logging
 
-from .token_classification import TokenClassificationBenchmark
-from .datasets import load_ddt_dep
-from .utils import doc_inherit
+from .abstract import TokenClassificationBenchmark
+from ..utils import doc_inherit
+from ..datasets import load_dataset
 
 
 logger = logging.getLogger(__name__)
@@ -110,7 +110,7 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
                         'vocative',
                         'xcomp']
         id2label = id2label_head + id2label_dep
-        super().__init__(name='the DEP part of DDT',
+        super().__init__(name='ddt-dep',
                          metric_names=dict(las='LAS', uas='UAS'),
                          id2label=id2label,
                          cache_dir=cache_dir,
@@ -121,7 +121,7 @@ class DdtDepBenchmark(TokenClassificationBenchmark):
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_ddt_dep()
+        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
 
         train_labels = [list(zip(head, dep))
                         for head, dep in zip(y_train['heads'],

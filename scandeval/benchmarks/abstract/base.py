@@ -27,8 +27,8 @@ import logging
 import re
 import random
 
-from .utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
-                    TwolabelTrainer)
+from ...utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
+                      TwolabelTrainer, ALL_DATASETS)
 
 
 logger = logging.getLogger(__name__)
@@ -99,7 +99,9 @@ class BaseBenchmark(ABC):
                  split_point: Optional[int] = None,
                  verbose: bool = False):
 
-        self.name = name
+        self.short_name = name
+        self.name = [long_name for short_name, long_name, _, _ in ALL_DATASETS
+                     if name == short_name][0]
         self.task = task
         self.metric_names = metric_names
         self.id2label = id2label

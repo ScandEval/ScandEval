@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from tqdm.auto import tqdm
 
 from .base import BaseBenchmark
-from .utils import InvalidBenchmark
+from ...utils import InvalidBenchmark
 
 
 logger = logging.getLogger(__name__)

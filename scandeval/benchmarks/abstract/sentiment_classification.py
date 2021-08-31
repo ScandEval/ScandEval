@@ -1,19 +1,19 @@
-'''Abstract binary classification benchmark'''
+'''Abstract sentiment classification benchmark'''
 
 from datasets import Dataset
 import logging
 from abc import ABC
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 
 from .text_classification import TextClassificationBenchmark
-from .utils import InvalidBenchmark
+from ...utils import InvalidBenchmark
 
 
 logger = logging.getLogger(__name__)
 
 
-class BinaryClassificationBenchmark(TextClassificationBenchmark, ABC):
-    '''Abstract binary classification benchmark.
+class SentimentClassificationBenchmark(TextClassificationBenchmark, ABC):
+    '''Abstract sentiment classification benchmark.
 
     Args:
         cache_dir (str, optional):
@@ -39,18 +39,17 @@ class BinaryClassificationBenchmark(TextClassificationBenchmark, ABC):
     '''
     def __init__(self,
                  name: str,
-                 id2label: List[str],
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
+        id2label = ['negative', 'neutral', 'positive']
         label_synonyms = [
-            ['LABEL_0', 'negative', 'negativ', 'falsk', 'false', 'objective',
-                'hlutlægt', id2label[0]],
-            ['LABEL_1', 'positive', 'positiv', 'sand', 'true', 'subjective',
-                'huglægt', id2label[1]]
+            ['LABEL_0', 'negativ', 'negative', 'neikvætt', 'Negative'],
+            ['LABEL_1', 'neutral', 'nøytral', 'hlutlaus', 'Neutral'],
+            ['LABEL_2', 'positiv', 'positive', 'jákvætt', 'Positive']
         ]
         super().__init__(name=name,
-                         metric_names=dict(f1='F1-score'),
+                         metric_names=dict(macro_f1='Macro-average F1-score'),
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,
@@ -78,8 +77,9 @@ class BinaryClassificationBenchmark(TextClassificationBenchmark, ABC):
         predictions, labels = predictions_and_labels
         predictions = predictions.argmax(axis=-1)
         results = self._metric.compute(predictions=predictions,
-                                       references=labels)
-        return dict(f1=results['f1'])
+                                       references=labels,
+                                       average='macro')
+        return dict(macro_f1=results['f1'])
 
     def _get_spacy_predictions_and_labels(self,
                                           model,
@@ -96,5 +96,5 @@ class BinaryClassificationBenchmark(TextClassificationBenchmark, ABC):
                 The first array contains the probability predictions and the
                 second array contains the true labels.
         '''
-        raise InvalidBenchmark('Evaluation of text classification predictions '
+        raise InvalidBenchmark('Evaluation of sentiment predictions '
                                'for SpaCy models is not yet implemented.')

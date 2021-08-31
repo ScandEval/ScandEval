@@ -5,9 +5,9 @@ import numpy as np
 from typing import Tuple, Dict, List, Optional
 import logging
 
-from .token_classification import TokenClassificationBenchmark
-from .datasets import load_ddt_pos
-from .utils import doc_inherit
+from .abstract import TokenClassificationBenchmark
+from ..utils import doc_inherit
+from ..datasets import load_dataset
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
         id2label = ['ADJ', 'ADV', 'INTJ', 'NOUN', 'PROPN', 'VERB', 'ADP',
                     'AUX', 'CCONJ', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ',
                     'PUNCT', 'SYM', 'X']
-        super().__init__(name='the POS part of DDT',
+        super().__init__(name='ddt-pos',
                          metric_names=dict(accuracy='Accuracy'),
                          id2label=id2label,
                          cache_dir=cache_dir,
@@ -57,7 +57,7 @@ class DdtPosBenchmark(TokenClassificationBenchmark):
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_ddt_pos()
+        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
         train_dict = dict(doc=X_train['doc'],
                           tokens=X_train['tokens'],
                           orig_labels=y_train['pos_tags'])

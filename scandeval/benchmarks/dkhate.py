@@ -1,19 +1,19 @@
-'''Sentiment evaluation of a language model on the TwitterSent dataset'''
+'''Hate speech classification of a language model on the DKHate dataset'''
 
 from datasets import Dataset
 from typing import Tuple
 import logging
 
-from .sentiment_classification import SentimentClassificationBenchmark
-from .utils import doc_inherit
-from .datasets import load_twitter_sent
+from .abstract import BinaryClassificationBenchmark
+from ..utils import doc_inherit
+from ..datasets import load_dataset
 
 
 logger = logging.getLogger(__name__)
 
 
-class TwitterSentBenchmark(SentimentClassificationBenchmark):
-    '''Benchmark of language models on the TwitterSent dataset.
+class DkHateBenchmark(BinaryClassificationBenchmark):
+    '''Benchmark of language models on the DKHate dataset.
 
     Args:
         cache_dir (str, optional):
@@ -44,14 +44,15 @@ class TwitterSentBenchmark(SentimentClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        super().__init__(name='TwitterSent',
+        super().__init__(name='dkhate',
+                         id2label=['NOT', 'OFF'],
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
 
     @doc_inherit
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_twitter_sent()
+        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
         train_dict = dict(doc=X_train['tweet'],
                           orig_label=y_train['label'])
         test_dict = dict(doc=X_test['tweet'],
