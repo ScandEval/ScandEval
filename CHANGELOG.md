@@ -8,6 +8,21 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- There is now a `load_dataset` function, which can load any dataset, using the
+  dataset's name (same name as in the CLI). For instance,
+  `load_dataset('angry-tweets')` loads the `AngryTweets` dataset. This can be
+  imported directly from the package: `from scandeval import load_dataset`. The
+  individual dataset loading functions can still be imported as before; e.g.,
+  `from scandeval.datasets import load_angry_tweets`.
+
+### Changed
+- Refactored folder structure with benchmarks and datasets.
+- Separated `dane` and `dane-no-misc` into two distinct benchmark classes. The
+  `dane-no-misc` can now also be loaded with the `load_dataset` function.
+
+
 ## [v0.13.0] - 2021-08-30
 ### Added
 - Added the Norwegian Review Corpus (NoReC), a sentiment classification dataset
