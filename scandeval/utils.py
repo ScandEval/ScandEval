@@ -57,7 +57,7 @@ def get_all_datasets() -> list:
             locate('scandeval.benchmarks.EuroparlSubjBenchmark'),
             locate('scandeval.datasets.load_europarl_subj')),
         ('dkhate', 'DKHate',
-            locate('scandeval.benchmarks.DKHateBenchmark'),
+            locate('scandeval.benchmarks.DkHateBenchmark'),
             locate('scandeval.datasets.load_dkhate')),
         ('lcc', 'LCC',
             locate('scandeval.benchmarks.LccBenchmark'),
