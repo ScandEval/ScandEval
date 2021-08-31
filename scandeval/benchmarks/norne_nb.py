@@ -45,8 +45,10 @@ class NorneNBBenchmark(TokenClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
-                    'I-PER', 'B-MISC', 'I-MISC', 'O']
+        id2label = ['B-GPE_LOC', 'B-ORG', 'I-PER', 'B-GPE_ORG', 'B-LOC',
+                    'I-MISC', 'I-PROD', 'B-MISC', 'I-LOC', 'I-GPE_ORG',
+                    'I-GPE_LOC', 'B-PROD', 'B-PER', 'B-DRV', 'I-DRV',
+                    'I-ORG', 'I-EVT', 'O', 'B-EVT']
         super().__init__(name='norne-nb',
                          metric_names=dict(micro_f1='Micro-average F1-score'),
                          id2label=id2label,
