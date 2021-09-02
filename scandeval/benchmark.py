@@ -309,6 +309,9 @@ class Benchmark:
                     model_ids.extend(self._model_lists[task])
                 model_ids.extend(self._model_lists['multilingual'])
 
+            # Remove duplicate model IDs
+            model_ids = list(set(model_ids))
+
         # Define `model_ids` variable, storing all the relevant model IDs
         elif isinstance(model_id, str):
             model_ids = [model_id]

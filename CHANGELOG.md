@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Remove duplicate model IDs when calling the CLI or `Benchmark` class without
+  any specified model IDs.
+
+
 ## [v0.14.0] - 2021-08-31
 ### Added
 - Added the Bokmål and Nynorsk parts of the NorNE dataset, for named entity
