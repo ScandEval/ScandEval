@@ -4,9 +4,7 @@ from .ddt_pos import DdtPosBenchmark  # noqa
 from .ddt_dep import DdtDepBenchmark  # noqa
 from .angry_tweets import AngryTweetsBenchmark  # noqa
 from .twitter_sent import TwitterSentBenchmark  # noqa
-from .twitter_subj import TwitterSubjBenchmark  # noqa
-from .europarl_subj import EuroparlSubjBenchmark  # noqa
-from .europarl_sent import EuroparlSentBenchmark  # noqa
+from .europarl import EuroparlBenchmark  # noqa
 from .lcc import LccBenchmark  # noqa
 from .dkhate import DkHateBenchmark  # noqa
 from .norec import NoReCBenchmark  # noqa
