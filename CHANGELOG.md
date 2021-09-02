@@ -19,6 +19,7 @@ and this project adheres to
 ### Changed
 - Changed the name of `europarl-sent` to `europarl`, as `europarl-subj` now
   does not exist anymore.
+- Changed the `nordial` dataset to the original 4-way classification dataset.
 
 
 ## [v0.14.1] - 2021-09-02
