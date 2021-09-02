@@ -60,18 +60,10 @@ scandeval.benchmarks.dkhate module
    :undoc-members:
    :show-inheritance:
 
-scandeval.benchmarks.europarl\_sent module
-------------------------------------------
+scandeval.benchmarks.europarl module
+------------------------------------
 
-.. automodule:: scandeval.benchmarks.europarl_sent
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-scandeval.benchmarks.europarl\_subj module
-------------------------------------------
-
-.. automodule:: scandeval.benchmarks.europarl_subj
+.. automodule:: scandeval.benchmarks.europarl
    :members:
    :undoc-members:
    :show-inheritance:
@@ -80,6 +72,38 @@ scandeval.benchmarks.lcc module
 -------------------------------
 
 .. automodule:: scandeval.benchmarks.lcc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.ndt\_nb\_dep module
+----------------------------------------
+
+.. automodule:: scandeval.benchmarks.ndt_nb_dep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.ndt\_nb\_pos module
+----------------------------------------
+
+.. automodule:: scandeval.benchmarks.ndt_nb_pos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.ndt\_nn\_dep module
+----------------------------------------
+
+.. automodule:: scandeval.benchmarks.ndt_nn_dep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.ndt\_nn\_pos module
+----------------------------------------
+
+.. automodule:: scandeval.benchmarks.ndt_nn_pos
    :members:
    :undoc-members:
    :show-inheritance:
@@ -120,14 +144,6 @@ scandeval.benchmarks.twitter\_sent module
 -----------------------------------------
 
 .. automodule:: scandeval.benchmarks.twitter_sent
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-scandeval.benchmarks.twitter\_subj module
------------------------------------------
-
-.. automodule:: scandeval.benchmarks.twitter_subj
    :members:
    :undoc-members:
    :show-inheritance:

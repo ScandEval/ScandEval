@@ -12,22 +12,6 @@ scandeval.benchmarks.abstract.base module
    :undoc-members:
    :show-inheritance:
 
-scandeval.benchmarks.abstract.binary\_classification module
------------------------------------------------------------
-
-.. automodule:: scandeval.benchmarks.abstract.binary_classification
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-scandeval.benchmarks.abstract.sentiment\_classification module
---------------------------------------------------------------
-
-.. automodule:: scandeval.benchmarks.abstract.sentiment_classification
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 scandeval.benchmarks.abstract.text\_classification module
 ---------------------------------------------------------
 
