@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.15.0] - 2021-09-02
 ### Added
 - Added the Bokmål and Nynorsk POS and DEP parts of the Norwegian Dependency
   Treebank dataset (NDT). They can be loaded as `ndt-nb-pos`, `ndt-nn-pos`,
