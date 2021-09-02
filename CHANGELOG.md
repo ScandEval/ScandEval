@@ -10,9 +10,10 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
-- Added the Bokmål and Nynorsk POS parts of the Norwegian Dependency Treebank
-  dataset (NDT). They can be loaded as `ndt-nb-pos` and `ndt-nn-pos` from the
-  CLI and the `Benchmark` class.
+- Added the Bokmål and Nynorsk POS and DEP parts of the Norwegian Dependency
+  Treebank dataset (NDT). They can be loaded as `ndt-nb-pos`, `ndt-nn-pos`,
+  `ndt-nb-dep` and `ndt-nn-dep`, respectively, from the CLI and the `Benchmark`
+  class.
 
 ### Removed
 - Removed the `EuroparlSubj` and `TwitterSubj` datasets, as they were too easy
