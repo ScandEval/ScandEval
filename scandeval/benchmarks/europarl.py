@@ -1,4 +1,4 @@
-'''Sentiment evaluation of a language model on the EuroparlSent dataset'''
+'''Sentiment evaluation of a language model on the Europarl dataset'''
 
 from datasets import Dataset
 from typing import Tuple
@@ -12,8 +12,8 @@ from ..datasets import load_dataset
 logger = logging.getLogger(__name__)
 
 
-class EuroparlSentBenchmark(SentimentClassificationBenchmark):
-    '''Benchmark of language models on the EuroparlSent dataset.
+class EuroparlBenchmark(SentimentClassificationBenchmark):
+    '''Benchmark of language models on the Europarl dataset.
 
     Args:
         cache_dir (str, optional):
@@ -44,7 +44,7 @@ class EuroparlSentBenchmark(SentimentClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        super().__init__(name='europarl-sent',
+        super().__init__(name='europarl',
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)

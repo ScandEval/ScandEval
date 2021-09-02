@@ -8,6 +8,16 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Removed
+- Removed the `EuroparlSubj` and `TwitterSubj` datasets, as they were too easy
+  and did not really differentiate models.
+
+### Changed
+- Changed the name of `europarl-sent` to `europarl`, as `europarl-subj` now
+  does not exist anymore.
+
+
 ## [v0.14.1] - 2021-09-02
 ### Fixed
 - Remove duplicate model IDs when calling the CLI or `Benchmark` class without
