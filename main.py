@@ -148,13 +148,12 @@ def process_nordial():
 
     for split, output_path in zip([train, test], output_paths):
         for idx, row in tqdm(split.iterrows()):
-            if row.category in ['bokmål', 'nynorsk']:
-                data_dict = dict(text=row.text, label=row.category)
-                json_line = json.dumps(data_dict)
-                with output_path.open('a') as f:
-                    f.write(json_line)
-                    if idx < len(split) - 1:
-                        f.write('\n')
+            data_dict = dict(text=row.text, label=row.category)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(split) - 1:
+                    f.write('\n')
 
 
 def process_norec():
@@ -608,4 +607,4 @@ def process_dane():
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 if __name__ == '__main__':
-    process_norne_nb()
+    process_nordial()
