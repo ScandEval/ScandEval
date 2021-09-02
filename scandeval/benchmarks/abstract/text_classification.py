@@ -67,7 +67,6 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
     '''
     def __init__(self,
                  name: str,
-                 metric_names: Dict[str, str],
                  id2label: list,
                  label_synonyms: Optional[List[List[str]]] = None,
                  evaluate_train: bool = False,
@@ -78,7 +77,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
         self._metric = load_metric('f1')
         super().__init__(task='text-classification',
                          name=name,
-                         metric_names=metric_names,
+                         metric_names=dict(macro_f1='Macro-average F1-score'),
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,
@@ -146,3 +145,45 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
         elif framework == 'spacy':
             raise InvalidBenchmark('Evaluation of text predictions '
                                    'for SpaCy models is not yet implemented.')
+
+    def _compute_metrics(self,
+                         predictions_and_labels: tuple,
+                         id2label: Optional[list] = None) -> Dict[str, float]:
+        '''Compute the metrics needed for evaluation.
+
+        Args:
+            predictions_and_labels (pair of arrays):
+                The first array contains the probability predictions and the
+                second array contains the true labels.
+            id2label (list or None, optional):
+                Conversion of indices to labels. Defaults to None.
+
+        Returns:
+            dict:
+                A dictionary with the names of the metrics as keys and the
+                metric values as values.
+        '''
+        predictions, labels = predictions_and_labels
+        predictions = predictions.argmax(axis=-1)
+        results = self._metric.compute(predictions=predictions,
+                                       references=labels,
+                                       average='macro')
+        return dict(macro_f1=results['f1'])
+
+    def _get_spacy_predictions_and_labels(self,
+                                          model,
+                                          dataset: Dataset,
+                                          progress_bar: bool) -> tuple:
+        '''Get predictions from SpaCy model on dataset.
+
+        Args:
+            model (SpaCy model): The model.
+            dataset (HuggingFace dataset): The dataset.
+
+        Returns:
+            A pair of arrays:
+                The first array contains the probability predictions and the
+                second array contains the true labels.
+        '''
+        raise InvalidBenchmark('Evaluation of classification tasks '
+                               'for SpaCy models is not yet implemented.')

@@ -12,6 +12,9 @@ and this project adheres to
 ### Removed
 - Removed the `EuroparlSubj` and `TwitterSubj` datasets, as they were too easy
   and did not really differentiate models.
+- Removed the abstract `SentimentClassificationBenchmark` and
+  `BinaryClassificationBenchmark`, to simplify the classes. There is now only
+  one `TextClassificationBenchmark`, which always evaluates with macro-F1.
 
 ### Changed
 - Changed the name of `europarl-sent` to `europarl`, as `europarl-subj` now

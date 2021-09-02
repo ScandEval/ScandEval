@@ -4,7 +4,7 @@ from datasets import Dataset
 from typing import Tuple
 import logging
 
-from .abstract import BinaryClassificationBenchmark
+from .abstract import TextClassificationBenchmark
 from ..utils import doc_inherit
 from ..datasets import load_dataset
 
@@ -12,7 +12,7 @@ from ..datasets import load_dataset
 logger = logging.getLogger(__name__)
 
 
-class NorDialBenchmark(BinaryClassificationBenchmark):
+class NorDialBenchmark(TextClassificationBenchmark):
     '''Benchmark of language models on the NorDial dataset.
 
     Args:
@@ -44,8 +44,15 @@ class NorDialBenchmark(BinaryClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
+        id2label = ['bokmål', 'nynorsk']
+        label_synonyms = [
+            ['LABEL_0', id2label[0]],
+            ['LABEL_1', id2label[1]],
+            ['LABEL_2', id2label[2]]
+        ]
         super().__init__(name='nordial',
-                         id2label=['bokmål', 'nynorsk'],
+                         id2label=id2label,
+                         label_synonyms=label_synonyms,
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
