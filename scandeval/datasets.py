@@ -212,7 +212,7 @@ def load_ndt_nb_pos() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne-nb/')
+                'main/datasets/norne_nb/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -235,7 +235,7 @@ def load_ndt_nn_pos() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne-nn/')
+                'main/datasets/norne_nn/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -258,7 +258,7 @@ def load_ndt_nb_dep() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne-nb/')
+                'main/datasets/norne_nb/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -281,7 +281,7 @@ def load_ndt_nn_dep() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne-nn/')
+                'main/datasets/norne_nn/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
