@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.14.1] - 2021-09-02
 ### Fixed
 - Remove duplicate model IDs when calling the CLI or `Benchmark` class without
   any specified model IDs.
