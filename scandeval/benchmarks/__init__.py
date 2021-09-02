@@ -11,3 +11,7 @@ from .norec import NoReCBenchmark  # noqa
 from .nordial import NorDialBenchmark  # noqa
 from .norne_nb import NorneNBBenchmark  # noqa
 from .norne_nn import NorneNNBenchmark  # noqa
+from .ndt_nb_pos import NdtNBPosBenchmark  # noqa
+from .ndt_nn_pos import NdtNNPosBenchmark  # noqa
+from .ndt_nb_dep import NdtNBDepBenchmark  # noqa
+from .ndt_nn_dep import NdtNNDepBenchmark  # noqa
