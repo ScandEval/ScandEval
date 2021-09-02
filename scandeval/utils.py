@@ -67,7 +67,13 @@ def get_all_datasets() -> list:
             locate('scandeval.datasets.load_norne_nb')),
         ('norne-nn', 'the Nynorsk part of NorNE',
             locate('scandeval.benchmarks.NorneNNBenchmark'),
-            locate('scandeval.datasets.load_norne_nn'))
+            locate('scandeval.datasets.load_norne_nn')),
+        ('ndt-nb-pos', 'the Bokmål POS part of NDT',
+            locate('scandeval.benchmarks.NdtNBPosBenchmark'),
+            locate('scandeval.datasets.load_ndt_nb_pos')),
+        ('ndt-nn-pos', 'the Nynorsk POS part of NDT',
+            locate('scandeval.benchmarks.NdtNNPosBenchmark'),
+            locate('scandeval.datasets.load_ndt_nn_pos')),
     ]
 
 

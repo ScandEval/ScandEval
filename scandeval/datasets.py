@@ -201,6 +201,52 @@ def load_dane_no_misc() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
+def load_ndt_nb_pos() -> Tuple[dict, dict, dict, dict]:
+    '''Load the Bokmål POS part of the NDT dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/norne-nb/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             'pos_tags')
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           'pos_tags')
+    return X_train, X_test, y_train, y_test
+
+
+def load_ndt_nn_pos() -> Tuple[dict, dict, dict, dict]:
+    '''Load the Nynorsk POS part of the NDT dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/norne-nn/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             'pos_tags')
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           'pos_tags')
+    return X_train, X_test, y_train, y_test
+
+
 def load_ddt_pos() -> Tuple[dict, dict, dict, dict]:
     '''Load the POS part of the DDT dataset.
 
