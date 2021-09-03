@@ -12,6 +12,8 @@ and this project adheres to
 ### Fixed
 - The list of dependency tags in the `ndt-nb-dep` and `ndt-nn-dep` were wrong.
   They have now been changed to all the tags occurring in the training sets.
+- The `europarl_sent` data folder has now been renamed to `europarl`, so that
+  it can be loaded correctly with `load_dataset`.
 
 
 ## [v0.15.0] - 2021-09-02
