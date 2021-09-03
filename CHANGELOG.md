@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- The list of dependency tags in the `ndt-nb-dep` and `ndt-nn-dep` were wrong.
+  They have now been changed to all the tags occurring in the training sets.
+
+
 ## [v0.15.0] - 2021-09-02
 ### Added
 - Added the Bokmål and Nynorsk POS and DEP parts of the Norwegian Dependency
