@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.15.1] - 2021-09-03
 ### Fixed
 - The list of dependency tags in the `ndt-nb-dep` and `ndt-nn-dep` were wrong.
   They have now been changed to all the tags occurring in the training sets.
