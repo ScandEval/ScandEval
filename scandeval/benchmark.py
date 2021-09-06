@@ -169,6 +169,11 @@ class Benchmark:
         model_lists['multilingual'] = multi_models
         model_lists['all'].extend(multi_models)
 
+        # Add random models
+        random_models = ['random-roberta-sequence-clf',
+                         'random-roberta-token-clf']]
+        model_lists['all'].extend(random_models)
+
         # Add some multilingual Danish models manually that have not marked
         # 'da' as their language
         if 'da' in languages:

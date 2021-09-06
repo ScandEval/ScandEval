@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added the random models `random-roberta-sequence-clf` and
+  `random-roberta-token-clf` to the default list of model IDs when benchmarking
+  all models.
+
+
 ## [v0.15.1] - 2021-09-03
 ### Fixed
 - The list of dependency tags in the `ndt-nb-dep` and `ndt-nn-dep` were wrong.
