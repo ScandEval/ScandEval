@@ -23,9 +23,6 @@ project = 'scandeval'
 copyright = '2021, Dan Saattrup Nielsen'
 author = 'Dan Saattrup Nielsen'
 
-# The full version, including alpha/beta/rc tags
-release = '0.0.0'
-
 
 # -- General configuration ---------------------------------------------------
 
