@@ -171,7 +171,7 @@ class Benchmark:
 
         # Add random models
         random_models = ['random-roberta-sequence-clf',
-                         'random-roberta-token-clf']]
+                         'random-roberta-token-clf']
         model_lists['all'].extend(random_models)
 
         # Add some multilingual Danish models manually that have not marked
