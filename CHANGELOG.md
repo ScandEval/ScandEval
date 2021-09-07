@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.16.0] - 2021-09-07
 ### Fixed
 - Upped the number index tokens for dependency parsing from 100 to 512. This
   will need to be done better in the future, but is a fix for now.
