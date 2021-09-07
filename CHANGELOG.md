@@ -9,6 +9,10 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- Upped the number index tokens for dependency parsing from 100 to 512. This
+  will need to be done better in the future, but is a fix for now.
+
 ### Added
 - Added the random models `random-roberta-sequence-clf` and
   `random-roberta-token-clf` to the default list of model IDs when benchmarking

@@ -45,7 +45,7 @@ class NdtNBDepBenchmark(TokenClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        id2label_head = [str(i) for i in range(100)]
+        id2label_head = [str(i) for i in range(512)]
         id2label_dep = ['acl',
                         'acl:cleft',
                         'acl:relcl',
