@@ -92,6 +92,9 @@ def get_all_datasets() -> list:
         ('sdt-dep', 'the DEP part of SDT',
             locate('scandeval.benchmarks.SdtDepBenchmark'),
             locate('scandeval.datasets.load_sdt_dep')),
+        ('suc3', 'SUC 3.0',
+            locate('scandeval.benchmarks.Suc3Benchmark'),
+            locate('scandeval.datasets.load_suc3')),
     ]
 
 

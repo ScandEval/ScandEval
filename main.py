@@ -1,6 +1,80 @@
 '''Testing script'''
 
 
+def process_suc3():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import re
+    import xml.etree.ElementTree as ET
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+
+    sdt_dir = Path('datasets/suc3')
+    if not sdt_dir.exists():
+        sdt_dir.mkdir()
+
+    input_path = Path('datasets/suc3.xml')
+    train_output_path = Path('datasets/suc3/train.jsonl')
+    test_output_path = Path('datasets/suc3/test.jsonl')
+
+    print('Parsing XML file...')
+    tree = ET.parse(str(input_path))
+    root = tree.getroot()
+    records = []
+    for text in tqdm(root.findall('text')):
+        for sentence in text.findall('sentence'):
+            tokens = []
+            tags = []
+            for token in sentence:
+                if token.tag == 'w':
+                    tokens.append(token.text)
+                    tags.append('O')
+                elif token.tag == 'ne':
+                    for subtoken in token:
+                        if subtoken.tag == 'name':
+                            for subsubtoken in subtoken:
+                                if subsubtoken.tag == 'w':
+                                    tokens.append(subsubtoken.text.strip())
+                                    tags.append(subtoken.attrib['type'])
+                                else:
+                                    raise Exception(f'{token} # {subtoken} # {subsubtoken}')
+                elif token.tag == 'name':
+                    for subtoken in token:
+                        if subtoken.tag == 'w':
+                            tokens.append(subtoken.text)
+                            tags.append(token.attrib['type'])
+                        elif subtoken.tag == 'ne':
+                            for subsubtoken in subtoken:
+                                if subsubtoken.tag == 'w':
+                                    tokens.append(subsubtoken.text.strip())
+                                    tags.append(token.attrib['type'])
+                                else:
+                                    raise Exception(f'{token} # {subtoken} # {subsubtoken}')
+            doc = ' '.join(tokens)
+            doc = re.sub(' ([.,])', '\1', doc)
+            assert len(tokens) == len(tags)
+            record = dict(doc=doc, tokens=tokens, ner_tags=tags)
+            records.append(record)
+
+    df = pd.DataFrame.from_records(records)
+    train, test = train_test_split(df, test_size=0.3)
+
+    def export_as_jsonl(df: pd.DataFrame, output_path: Path):
+        for idx, row in tqdm(df.iterrows()):
+            data_dict = dict(doc=row.doc,
+                             tokens=row.tokens,
+                             ner_tags=row.ner_tags)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(df) - 1:
+                    f.write('\n')
+
+    export_as_jsonl(train, train_output_path)
+    export_as_jsonl(test, test_output_path)
+
+
 def process_sdt():
     from pathlib import Path
     import json
@@ -754,4 +828,4 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
-    process_sdt()
+    process_suc3()

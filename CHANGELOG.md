@@ -23,6 +23,8 @@ and this project adheres to
 - Added the POS and dependency parsing parts of the Swedish Dependency Treebank
   (SDT). They can be loaded as `sdt-pos` and `sdt-dep` in the CLI and via the
   `Benchmark` class.
+- Added the Stockholm-Umeå corpus 3.0 (SUC 3.0), a Swedish NER dataset. It can
+  be loaded as `suc3` in the CLI and via the `Benchmark` class.
 
 ### Changed
 - Changed the columns in all text classification datasets to `text` and
