@@ -83,6 +83,15 @@ def get_all_datasets() -> list:
         ('dalaj', 'DaLaJ',
             locate('scandeval.benchmarks.DalajBenchmark'),
             locate('scandeval.datasets.load_dalaj')),
+        ('absabank-imm', 'ABSAbank-Imm',
+            locate('scandeval.benchmarks.AbsabankImmBenchmark'),
+            locate('scandeval.datasets.load_absabank_imm')),
+        ('sdt-pos', 'the POS part of SDT',
+            locate('scandeval.benchmarks.SdtPosBenchmark'),
+            locate('scandeval.datasets.load_sdt_pos')),
+        ('sdt-dep', 'the DEP part of SDT',
+            locate('scandeval.benchmarks.SdtDepBenchmark'),
+            locate('scandeval.datasets.load_sdt_dep')),
     ]
 
 
