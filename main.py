@@ -1,6 +1,67 @@
 '''Testing script'''
 
 
+def process_sdt():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import re
+
+    sdt_dir = Path('datasets/sdt')
+    if not sdt_dir.exists():
+        sdt_dir.mkdir()
+
+    input_paths = [Path('datasets/sdt-train.conllu'),
+                   Path('datasets/sdt-dev.conllu'),
+                   Path('datasets/sdt-test.conllu')]
+    output_paths = [Path('datasets/sdt/train.jsonl'),
+                    Path('datasets/sdt/val.jsonl'),
+                    Path('datasets/sdt/test.jsonl')]
+
+    for input_path, output_path in zip(input_paths, output_paths):
+        tokens = list()
+        pos_tags = list()
+        heads = list()
+        deps  = list()
+        ids = list()
+        doc = ''
+        lines = input_path.read_text().split('\n')
+        for idx, line in enumerate(tqdm(lines)):
+            if line.startswith('# text = '):
+                doc = re.sub('# text = ', '', line)
+            elif line.startswith('#'):
+                continue
+            elif line == '':
+                if tokens != []:
+                    data_dict = dict(ids=ids,
+                                     doc=doc,
+                                     tokens=tokens,
+                                     pos_tags=pos_tags,
+                                     heads=heads,
+                                     deps=deps)
+                    json_line = json.dumps(data_dict)
+                    with output_path.open('a') as f:
+                        f.write(json_line)
+                        if idx < len(lines) - 1:
+                            f.write('\n')
+                ids = list()
+                tokens = list()
+                pos_tags = list()
+                heads = list()
+                deps = list()
+                doc = ''
+            else:
+                try:
+                    data = line.split('\t')
+                    ids.append(data[0])
+                    tokens.append(data[1])
+                    pos_tags.append(data[3])
+                    heads.append(data[6])
+                    deps.append(data[7])
+                except:
+                    print(data)
+
+
 def process_norne_nn():
     from pathlib import Path
     import json
@@ -641,7 +702,7 @@ def process_dalaj():
 
     def export_as_jsonl(df: pd.DataFrame, output_path: Path):
         for idx, row in tqdm(df.iterrows()):
-            data_dict = dict(doc=row.doc, label=row.label)
+            data_dict = dict(text=row.doc, label=row.label)
             json_line = json.dumps(data_dict)
             with output_path.open('a') as f:
                 f.write(json_line)
@@ -652,5 +713,45 @@ def process_dalaj():
     export_as_jsonl(test, test_output_path)
 
 
+def process_absabank_imm():
+    from pathlib import Path
+    import pandas as pd
+    import json
+    from tqdm.auto import tqdm
+
+    dataset_dir = Path('datasets/absabank_imm')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    input_paths = [Path('datasets/split10_consecutive_average/train00.tsv'),
+                   Path('datasets/split10_consecutive_average/dev00.tsv'),
+                   Path('datasets/split10_consecutive_average/test00.tsv')]
+    output_paths = [Path('datasets/absabank_imm/train.jsonl'),
+                   Path('datasets/absabank_imm/val.jsonl'),
+                   Path('datasets/absabank_imm/test.jsonl')]
+
+    def export_as_jsonl(df: pd.DataFrame, output_path: Path):
+        for idx, row in tqdm(df.iterrows()):
+            data_dict = dict(text=row.text, label=row.label)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(df) - 1:
+                    f.write('\n')
+
+    def convert_label(label: float) -> str:
+        if label < 2.5:
+            return 'negative'
+        elif label > 3.5:
+            return 'positive'
+        else:
+            return 'neutral'
+
+    for input_path, output_path in zip(input_paths, output_paths):
+        df = pd.read_csv(input_path, sep='\t')[['text', 'label']]
+        df['label'] = df.label.map(convert_label)
+        export_as_jsonl(df, output_path)
+
+
 if __name__ == '__main__':
-    process_dalaj()
+    process_sdt()
