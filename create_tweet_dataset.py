@@ -48,7 +48,7 @@ def create_tweet_dataset(dataset: str):
                     text = re.sub(r'@[a-zA-Z0-9]+', '@USER', text)
                     text = re.sub(r' *http[.\/?&a-zA-Z0-9\-\:]+ *', '', text)
                     text = re.sub(r' +', ' ', text)
-                    record = dict(tweet=text.strip(), label=data_dict['label'])
+                    record = dict(text=text.strip(), label=data_dict['label'])
                     records.append(json.dumps(record))
 
         # Save the anonymised tweets

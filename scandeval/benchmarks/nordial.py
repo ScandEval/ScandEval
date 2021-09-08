@@ -1,12 +1,8 @@
 '''Dialect classification of a language model on the NorDial dataset'''
 
-from datasets import Dataset
-from typing import Tuple
 import logging
 
 from .abstract import TextClassificationBenchmark
-from ..utils import doc_inherit
-from ..datasets import load_dataset
 
 
 logger = logging.getLogger(__name__)
@@ -57,14 +53,3 @@ class NorDialBenchmark(TextClassificationBenchmark):
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
-
-    @doc_inherit
-    def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
-        train_dict = dict(doc=X_train['text'],
-                          orig_label=y_train['label'])
-        test_dict = dict(doc=X_test['text'],
-                         orig_label=y_test['label'])
-        train = Dataset.from_dict(train_dict)
-        test = Dataset.from_dict(test_dict)
-        return train, test

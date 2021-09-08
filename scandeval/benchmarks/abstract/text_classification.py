@@ -5,9 +5,10 @@ from datasets import Dataset, load_metric
 from functools import partial
 import logging
 from abc import ABC
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 
 from .base import BaseBenchmark
+from ...datasets import load_dataset
 from ...utils import InvalidBenchmark
 
 
@@ -85,6 +86,16 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                          two_labels=two_labels,
                          split_point=split_point,
                          verbose=verbose)
+
+    def _load_data(self) -> Tuple[Dataset, Dataset]:
+        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
+        train_dict = dict(doc=X_train['text'],
+                          orig_label=y_train['label'])
+        test_dict = dict(doc=X_test['text'],
+                         orig_label=y_test['label'])
+        train = Dataset.from_dict(train_dict)
+        test = Dataset.from_dict(test_dict)
+        return train, test
 
     def _load_data_collator(
             self,

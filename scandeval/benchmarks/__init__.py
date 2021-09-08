@@ -15,3 +15,4 @@ from .ndt_nb_pos import NdtNBPosBenchmark  # noqa
 from .ndt_nn_pos import NdtNNPosBenchmark  # noqa
 from .ndt_nb_dep import NdtNBDepBenchmark  # noqa
 from .ndt_nn_dep import NdtNNDepBenchmark  # noqa
+from .dalaj import DalajBenchmark  # noqa
