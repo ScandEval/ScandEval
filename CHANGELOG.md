@@ -8,6 +8,18 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added the Dataset for Linguistic Acceptability Judgments (DaLaJ) dataset,
+  which is here used as a binary classification dataset, in which sentences
+  have to be classified as correct Swedish or not. It can be loaded as `dalaj`
+  in the CLI and via the `Benchmark` class.
+
+### Changed
+- Changed the columns in all text classification datasets to `text` and
+  `label`, to make it more uniform.
+
+
 ## [v0.16.0] - 2021-09-07
 ### Fixed
 - Upped the number index tokens for dependency parsing from 100 to 512. This
