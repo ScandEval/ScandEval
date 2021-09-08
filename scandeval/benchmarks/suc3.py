@@ -45,8 +45,8 @@ class Suc3Benchmark(TokenClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
-                    'I-PER', 'B-MISC', 'I-MISC', 'O']
+        id2label = ['O', 'animal', 'event', 'inst', 'myth', 'other', 'person',
+                    'place', 'product', 'work']
         super().__init__(name='suc3',
                          metric_names=dict(micro_f1='Micro-average F1-score'),
                          id2label=id2label,
