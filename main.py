@@ -59,6 +59,8 @@ def process_suc3():
 
     df = pd.DataFrame.from_records(records)
     train, test = train_test_split(df, test_size=0.3)
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
 
     def export_as_jsonl(df: pd.DataFrame, output_path: Path):
         for idx, row in tqdm(df.iterrows()):
