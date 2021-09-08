@@ -14,6 +14,15 @@ and this project adheres to
   which is here used as a binary classification dataset, in which sentences
   have to be classified as correct Swedish or not. It can be loaded as `dalaj`
   in the CLI and via the `Benchmark` class.
+- Added the ABSAbank-Imm dataset, which is an aspect-based sentiment analysis
+  dataset in Swedish, namely, the sentiment towards immigration. The original
+  dataset featured a floating point score between 0 and 5, which has been
+  reduced to a classifical three-way classification (`negative`, `neutral` and
+  `positive`). It can be loaded as `absabank-imm` in the CLI and via the
+  `Benchmark` class.
+- Added the POS and dependency parsing parts of the Swedish Dependency Treebank
+  (SDT). They can be loaded as `sdt-pos` and `sdt-dep` in the CLI and via the
+  `Benchmark` class.
 
 ### Changed
 - Changed the columns in all text classification datasets to `text` and
