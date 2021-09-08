@@ -542,7 +542,7 @@ def process_dkhate():
     for input_path, output_path in zip(input_paths, output_paths):
         df = pd.read_csv(input_path, sep='\t')
         for idx, row in tqdm(df.iterrows()):
-            data_dict = dict(tweet=row.tweet, label=row.subtask_a)
+            data_dict = dict(text=row.tweet, label=row.subtask_a)
             json_line = json.dumps(data_dict)
             with output_path.open('a') as f:
                 f.write(json_line)
@@ -606,5 +606,51 @@ def process_dane():
                 deps.append(data[7])
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
+def process_dalaj():
+    from pathlib import Path
+    import pandas as pd
+    import json
+    from tqdm.auto import tqdm
+
+    dataset_dir = Path('datasets/dalaj')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    input_path = Path('datasets/datasetDaLAJsplit.csv')
+    train_output_path = dataset_dir / 'train.jsonl'
+    test_output_path = dataset_dir / 'test.jsonl'
+
+    cols = ['original sentence', 'corrected sentence', 'split']
+    df = pd.read_csv(input_path)[cols]
+
+    train = (df.query('(split == "train") or (split == "valid")')
+               .drop(columns='split'))
+    test = df.query('split == "test"').drop(columns='split')
+
+    def reorganise(df: pd.DataFrame) -> pd.DataFrame:
+        df_correct = (df[['corrected sentence']]
+                      .rename(columns={'corrected sentence': 'doc'}))
+        df_incorrect = (df[['original sentence']]
+                        .rename(columns={'original sentence': 'doc'}))
+        df_correct['label'] = ['correct' for _ in range(len(df_correct))]
+        df_incorrect['label'] = ['incorrect' for _ in range(len(df_incorrect))]
+        return pd.concat((df_correct, df_incorrect), ignore_index=True)
+
+    train = reorganise(train)
+    test = reorganise(test)
+
+    def export_as_jsonl(df: pd.DataFrame, output_path: Path):
+        for idx, row in tqdm(df.iterrows()):
+            data_dict = dict(doc=row.doc, label=row.label)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(df) - 1:
+                    f.write('\n')
+
+    export_as_jsonl(train, train_output_path)
+    export_as_jsonl(test, test_output_path)
+
+
 if __name__ == '__main__':
-    process_nordial()
+    process_dalaj()

@@ -80,6 +80,9 @@ def get_all_datasets() -> list:
         ('ndt-nn-dep', 'the Nynorsk DEP part of NDT',
             locate('scandeval.benchmarks.NdtNNDepBenchmark'),
             locate('scandeval.datasets.load_ndt_nn_dep')),
+        ('dalaj', 'DaLaJ',
+            locate('scandeval.benchmarks.DalajBenchmark'),
+            locate('scandeval.datasets.load_dalaj')),
     ]
 
 
