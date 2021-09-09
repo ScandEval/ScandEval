@@ -585,6 +585,8 @@ def process_sdt():
                                              .replace('S k', 'S.k.')
                                              .replace(' bl a', ' bl.a.')
                                              .replace('Bl a', 'Bl.a.')
+                                             .replace(' t ex', ' t.ex.')
+                                             .replace('T ex', 'T.ex.')
                                              .replace(' f n', ' f.n.')
                                              .replace('F n', 'F.n.')),
                                      tokens=tokens,
@@ -606,8 +608,11 @@ def process_sdt():
                 data = line.split('\t')
                 ids.append(data[0])
                 tokens.append(data[1].replace('s k', 's.k.')
+                                     .replace('S k', 'S.k.')
                                      .replace('bl a', 'bl.a.')
                                      .replace('Bl a', 'Bl.a.')
+                                     .replace('t ex', 't.ex.')
+                                     .replace('T ex', 'T.ex.')
                                      .replace('f n', 'f.n.')
                                      .replace('F n', 'F.n.'))
                 pos_tags.append(data[3])
