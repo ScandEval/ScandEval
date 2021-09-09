@@ -123,7 +123,7 @@ def process_fdt():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1].replace(' ', '.'))
+                tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 try:
@@ -156,7 +156,7 @@ def process_wikiann_fo():
     for line in corpus:
         if line != '':
             data = line.split(' ')
-            tokens.append(data[0].replace(' ', '.'))
+            tokens.append(data[0])
             ner_tags.append(data[-1])
 
         else:
@@ -222,7 +222,7 @@ def process_wikiann_is():
     for line in corpus:
         if line != '':
             data = line.split(' ')
-            tokens.append(data[0].replace(' ', '.'))
+            tokens.append(data[0])
             ner_tags.append(data[-1])
 
         else:
@@ -385,7 +385,7 @@ def process_idt():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1].replace(' ', '.'))
+                tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 try:
@@ -431,7 +431,7 @@ def process_suc3():
 
         elif elt.tag == 'w' and action == 'start':
             if elt.text:
-                tokens.append(elt.text.replace(' ', '.'))
+                tokens.append(elt.text)
                 ner_tags.append(ner_tag)
 
         elif elt.tag == 'w' and action == 'end':
@@ -581,7 +581,12 @@ def process_sdt():
             elif line == '':
                 if tokens != [] and store:
                     data_dict = dict(ids=ids,
-                                     doc=doc,
+                                     doc=(doc.replace(' s k', ' s.k.')
+                                             .replace('S k', 'S.k.')
+                                             .replace(' bl a', ' bl.a.')
+                                             .replace('Bl a', 'Bl.a.')
+                                             .replace(' f n', ' f.n.')
+                                             .replace('F n', 'F.n.')),
                                      tokens=tokens,
                                      pos_tags=pos_tags,
                                      heads=heads,
@@ -600,7 +605,11 @@ def process_sdt():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1].replace(' ', '.'))
+                tokens.append(data[1].replace('s k', ' s.k.')
+                                     .replace('bl a', 'bl.a.')
+                                     .replace('Bl a', 'Bl.a.')
+                                     .replace('f n', 'f.n.')
+                                     .replace('F n', 'F.n.'))
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 try:
@@ -752,7 +761,7 @@ def process_norne_nn():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1].replace(' ', '.'))
+                tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 deps.append(dep_conversion_dict[data[7]])
@@ -903,7 +912,7 @@ def process_norne_nb():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1].replace(' ', '.'))
+                tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 deps.append(dep_conversion_dict[data[7]])
@@ -1458,7 +1467,7 @@ def process_dane():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1].replace(' ', '.'))
+                tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 deps.append(conversion_dict[data[7]])
@@ -1551,11 +1560,4 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
-    process_dane()
-    process_norne_nb()
-    process_norne_nn()
     process_sdt()
-    process_idt()
-    process_fdt()
-    process_wikiann_is()
-    process_wikiann_fo()
