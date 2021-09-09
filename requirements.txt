@@ -98,7 +98,6 @@ requests-toolbelt==0.9.1
 rfc3986==1.5.0
 rsa==4.7.2
 sacremoses==0.0.45
--e git+ssh://git@github.com/saattrupdan/ScandEval.git@369878cb3c2c02116e5a3ba6667e41cdc0f70622#egg=scandeval
 scikit-learn==0.24.2
 scipy==1.7.1
 sentencepiece==0.1.96
