@@ -45,9 +45,9 @@ class SdtPosBenchmark(TokenClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        id2label = ['ADJ', 'ADP', 'ADV', 'AUX', 'CCONJ', 'DET', 'INTJ',
-                    'NOUN', 'NUM', 'PART', 'PRON', 'PROPN', 'PUNCT',
-                    'SCONJ', 'SYM', 'VERB']
+        id2label = ['ADJ', 'ADV', 'INTJ', 'NOUN', 'PROPN', 'VERB', 'ADP',
+                    'AUX', 'CCONJ', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ',
+                    'PUNCT', 'SYM', 'X']
         super().__init__(name='sdt-pos',
                          metric_names=dict(accuracy='Accuracy'),
                          id2label=id2label,
