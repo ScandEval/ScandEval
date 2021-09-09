@@ -5,7 +5,7 @@ from .benchmark import Benchmark  # noqa
 from .datasets import load_dataset  # noqa
 from .utils import block_terminal_output
 
-__version__ = '0.16.0'  # noqa
+__version__ = '0.17.0'  # noqa
 
 # Block unwanted terminal outputs
 block_terminal_output()

@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v0.17.0] - 2021-09-09
 ### Added
 - Added the Dataset for Linguistic Acceptability Judgments (DaLaJ) dataset,
   which is here used as a binary classification dataset, in which sentences
