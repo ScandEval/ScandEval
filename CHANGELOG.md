@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- The URLs for the `wikiann-is` and `wikiann-fo` were wrong and have been
+  corrected.
+
+
 ## [v1.0.0] - 2021-09-09
 ### Added
 - Added the Icelandic and Faroese WikiANN datasets, for NER evaluation. They
