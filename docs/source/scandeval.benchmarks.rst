@@ -12,6 +12,14 @@ Subpackages
 Submodules
 ----------
 
+scandeval.benchmarks.absabank\_imm module
+-----------------------------------------
+
+.. automodule:: scandeval.benchmarks.absabank_imm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.benchmarks.angry\_tweets module
 -----------------------------------------
 
@@ -20,18 +28,18 @@ scandeval.benchmarks.angry\_tweets module
    :undoc-members:
    :show-inheritance:
 
-scandeval.benchmarks.dane module
---------------------------------
+scandeval.benchmarks.dalaj module
+---------------------------------
 
-.. automodule:: scandeval.benchmarks.dane
+.. automodule:: scandeval.benchmarks.dalaj
    :members:
    :undoc-members:
    :show-inheritance:
 
-scandeval.benchmarks.dane\_no\_misc module
-------------------------------------------
+scandeval.benchmarks.dane module
+--------------------------------
 
-.. automodule:: scandeval.benchmarks.dane_no_misc
+.. automodule:: scandeval.benchmarks.dane
    :members:
    :undoc-members:
    :show-inheritance:
@@ -136,6 +144,30 @@ scandeval.benchmarks.norne\_nn module
 -------------------------------------
 
 .. automodule:: scandeval.benchmarks.norne_nn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.sdt\_dep module
+------------------------------------
+
+.. automodule:: scandeval.benchmarks.sdt_dep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.sdt\_pos module
+------------------------------------
+
+.. automodule:: scandeval.benchmarks.sdt_pos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.suc3 module
+--------------------------------
+
+.. automodule:: scandeval.benchmarks.suc3
    :members:
    :undoc-members:
    :show-inheritance:

@@ -12,6 +12,30 @@ scandeval.benchmarks.abstract.base module
    :undoc-members:
    :show-inheritance:
 
+scandeval.benchmarks.abstract.dep module
+----------------------------------------
+
+.. automodule:: scandeval.benchmarks.abstract.dep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.abstract.ner module
+----------------------------------------
+
+.. automodule:: scandeval.benchmarks.abstract.ner
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.abstract.pos module
+----------------------------------------
+
+.. automodule:: scandeval.benchmarks.abstract.pos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.benchmarks.abstract.text\_classification module
 ---------------------------------------------------------
 
