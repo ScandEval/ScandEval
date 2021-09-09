@@ -153,3 +153,4 @@ gfx/satw.png
 # Data files
 **/*.xml
 **/*.conllu
+**/*.bio
