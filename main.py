@@ -123,7 +123,7 @@ def process_fdt():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1])
+                tokens.append(data[1].replace(' ', '.'))
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 try:
@@ -140,13 +140,13 @@ def process_wikiann_fo():
     from sklearn.model_selection import train_test_split
     import re
 
-    dataset_dir = Path('datasets/wikiann-fo')
+    dataset_dir = Path('datasets/wikiann_fo')
     if not dataset_dir.exists():
         dataset_dir.mkdir()
 
     input_path = Path('datasets/wikiann-fo.bio')
-    train_output_path = Path('datasets/wikiann-fo/train.jsonl')
-    test_output_path = Path('datasets/wikiann-fo/test.jsonl')
+    train_output_path = Path('datasets/wikiann_fo/train.jsonl')
+    test_output_path = Path('datasets/wikiann_fo/test.jsonl')
 
     corpus = input_path.read_text().split('\n')
 
@@ -156,7 +156,7 @@ def process_wikiann_fo():
     for line in corpus:
         if line != '':
             data = line.split(' ')
-            tokens.append(data[0])
+            tokens.append(data[0].replace(' ', '.'))
             ner_tags.append(data[-1])
 
         else:
@@ -206,13 +206,13 @@ def process_wikiann_is():
     from sklearn.model_selection import train_test_split
     import re
 
-    dataset_dir = Path('datasets/wikiann-is')
+    dataset_dir = Path('datasets/wikiann_is')
     if not dataset_dir.exists():
         dataset_dir.mkdir()
 
     input_path = Path('datasets/wikiann-is.bio')
-    train_output_path = Path('datasets/wikiann-is/train.jsonl')
-    test_output_path = Path('datasets/wikiann-is/test.jsonl')
+    train_output_path = Path('datasets/wikiann_is/train.jsonl')
+    test_output_path = Path('datasets/wikiann_is/test.jsonl')
 
     corpus = input_path.read_text().split('\n')
 
@@ -222,7 +222,7 @@ def process_wikiann_is():
     for line in corpus:
         if line != '':
             data = line.split(' ')
-            tokens.append(data[0])
+            tokens.append(data[0].replace(' ', '.'))
             ner_tags.append(data[-1])
 
         else:
@@ -385,7 +385,7 @@ def process_idt():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1])
+                tokens.append(data[1].replace(' ', '.'))
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 try:
@@ -431,7 +431,7 @@ def process_suc3():
 
         elif elt.tag == 'w' and action == 'start':
             if elt.text:
-                tokens.append(elt.text)
+                tokens.append(elt.text.replace(' ', '.'))
                 ner_tags.append(ner_tag)
 
         elif elt.tag == 'w' and action == 'end':
@@ -600,7 +600,7 @@ def process_sdt():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1])
+                tokens.append(data[1].replace(' ', '.'))
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 try:
@@ -752,7 +752,7 @@ def process_norne_nn():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1])
+                tokens.append(data[1].replace(' ', '.'))
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 deps.append(dep_conversion_dict[data[7]])
@@ -903,7 +903,7 @@ def process_norne_nb():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1])
+                tokens.append(data[1].replace(' ', '.'))
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 deps.append(dep_conversion_dict[data[7]])
@@ -1458,7 +1458,7 @@ def process_dane():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1])
+                tokens.append(data[1].replace(' ', '.'))
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 deps.append(conversion_dict[data[7]])
@@ -1551,4 +1551,11 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
+    process_dane()
+    process_norne_nb()
+    process_norne_nn()
+    process_sdt()
+    process_idt()
     process_fdt()
+    process_wikiann_is()
+    process_wikiann_fo()
