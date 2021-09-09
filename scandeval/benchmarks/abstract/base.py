@@ -429,7 +429,7 @@ class BaseBenchmark(ABC):
                         new_clf.weight = new_clf_weight
                         model.classifier = new_clf
 
-                        # Update the number of labels the model think it has.
+                        # Update the number of labels the model thinks it has.
                         # This is required to avoid exceptions when evaluating
                         model.config.num_labels = len(model_id2label)
                         model.num_labels = len(model_id2label)
