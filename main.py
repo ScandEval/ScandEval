@@ -91,13 +91,81 @@ def process_sdt():
     from tqdm.auto import tqdm
     import re
 
+    dep_conversion_dict = {
+       'acl': 'acl',
+       'acl:relcl': 'acl',
+       'acl:cleft': 'acl',
+       'advcl': 'advcl',
+       'advmod': 'advmod',
+       'advmod:emph': 'advmod',
+       'advmod:lmod': 'advmod',
+       'amod': 'amod',
+       'appos': 'appos',
+       'aux': 'aux',
+       'aux:pass': 'aux',
+       'case': 'case',
+       'cc': 'cc',
+       'cc:preconj': 'cc',
+       'ccomp': 'ccomp',
+       'clf': 'clf',
+       'compound': 'compound',
+       'compound:lvc': 'compound',
+       'compound:prt': 'compound',
+       'compound:redup': 'compound',
+       'compound:svc': 'compound',
+       'conj': 'conj',
+       'cop': 'cop',
+       'csubj': 'csubj',
+       'csubj:pass': 'csubj',
+       'dep': 'dep',
+       'det': 'det',
+       'det:numgov': 'det',
+       'det:nummod': 'det',
+       'det:poss': 'det',
+       'discourse': 'discourse',
+       'dislocated': 'dislocated',
+       'expl': 'expl',
+       'expl:impers': 'expl',
+       'expl:pass': 'expl',
+       'expl:pv': 'expl',
+       'fixed': 'fixed',
+       'flat': 'flat',
+       'flat:foreign': 'flat',
+       'flat:name': 'flat',
+       'goeswith': 'goeswith',
+       'iobj': 'iobj',
+       'list': 'list',
+       'mark': 'mark',
+       'nmod': 'nmod',
+       'nmod:poss': 'nmod',
+       'nmod:tmod': 'nmod',
+       'nsubj': 'nsubj',
+       'nsubj:pass': 'nsubj',
+       'nummod': 'nummod',
+       'nummod:gov': 'nummod',
+       'obj': 'obj',
+       'obl': 'obl',
+       'obl:agent': 'obl',
+       'obl:arg': 'obl',
+       'obl:lmod': 'obl',
+       'obl:loc': 'obl',
+       'obl:tmod': 'obl',
+       'orphan': 'orphan',
+       'parataxis': 'parataxis',
+       'punct': 'punct',
+       'reparandum': 'reparandum',
+       'root': 'root',
+       'vocative': 'vocative',
+       'xcomp': 'xcomp'
+    }
+
     sdt_dir = Path('datasets/sdt')
     if not sdt_dir.exists():
         sdt_dir.mkdir()
 
-    input_paths = [Path('datasets/sdt-train.conllu'),
-                   Path('datasets/sdt-dev.conllu'),
-                   Path('datasets/sdt-test.conllu')]
+    input_paths = [Path('datasets/sv_talbanken-ud-train.conllu'),
+                   Path('datasets/sv_talbanken-ud-dev.conllu'),
+                   Path('datasets/sv_talbanken-ud-test.conllu')]
     output_paths = [Path('datasets/sdt/train.jsonl'),
                     Path('datasets/sdt/val.jsonl'),
                     Path('datasets/sdt/test.jsonl')]
@@ -110,9 +178,11 @@ def process_sdt():
         ids = list()
         doc = ''
         lines = input_path.read_text().split('\n')
+        store = True
         for idx, line in enumerate(tqdm(lines)):
             if line.startswith('# text = '):
                 doc = re.sub('# text = ', '', line)
+                store = True
             elif line.startswith('#'):
                 continue
             elif line == '':
@@ -135,15 +205,15 @@ def process_sdt():
                 deps = list()
                 doc = ''
             else:
+                data = line.split('\t')
+                ids.append(data[0])
+                tokens.append(data[1])
+                pos_tags.append(data[3])
+                heads.append(data[6])
                 try:
-                    data = line.split('\t')
-                    ids.append(data[0])
-                    tokens.append(data[1])
-                    pos_tags.append(data[3])
-                    heads.append(data[6])
-                    deps.append(data[7])
-                except:
-                    print(data)
+                    deps.append(dep_conversion_dict[data[7]])
+                except KeyError:
+                    store = False
 
 
 def process_norne_nn():
@@ -152,25 +222,93 @@ def process_norne_nn():
     from tqdm.auto import tqdm
     import re
 
-    conversion_dict = {'O': 'O',
-                       'B-LOC': 'B-LOC',
-                       'I-LOC': 'I-LOC',
-                       'B-PER': 'B-PER',
-                       'I-PER': 'I-PER',
-                       'B-ORG': 'B-ORG',
-                       'I-ORG': 'I-ORG',
-                       'B-MISC': 'B-MISC',
-                       'I-MISC': 'I-MISC',
-                       'B-GPE_LOC': 'B-LOC',
-                       'I-GPE_LOC': 'I-LOC',
-                       'B-GPE_ORG': 'B-ORG',
-                       'I-GPE_ORG': 'I-ORG',
-                       'B-PROD': 'B-MISC',
-                       'I-PROD': 'I-MISC',
-                       'B-DRV': 'B-MISC',
-                       'I-DRV': 'I-MISC',
-                       'B-EVT': 'B-MISC',
-                       'I-EVT': 'I-MISC'}
+    ner_conversion_dict = {'O': 'O',
+                           'B-LOC': 'B-LOC',
+                           'I-LOC': 'I-LOC',
+                           'B-PER': 'B-PER',
+                           'I-PER': 'I-PER',
+                           'B-ORG': 'B-ORG',
+                           'I-ORG': 'I-ORG',
+                           'B-MISC': 'B-MISC',
+                           'I-MISC': 'I-MISC',
+                           'B-GPE_LOC': 'B-LOC',
+                           'I-GPE_LOC': 'I-LOC',
+                           'B-GPE_ORG': 'B-ORG',
+                           'I-GPE_ORG': 'I-ORG',
+                           'B-PROD': 'B-MISC',
+                           'I-PROD': 'I-MISC',
+                           'B-DRV': 'B-MISC',
+                           'I-DRV': 'I-MISC',
+                           'B-EVT': 'B-MISC',
+                           'I-EVT': 'I-MISC'}
+
+    dep_conversion_dict = {
+       'acl': 'acl',
+       'acl:relcl': 'acl',
+       'acl:cleft': 'acl',
+       'advcl': 'advcl',
+       'advmod': 'advmod',
+       'advmod:emph': 'advmod',
+       'advmod:lmod': 'advmod',
+       'amod': 'amod',
+       'appos': 'appos',
+       'aux': 'aux',
+       'aux:pass': 'aux',
+       'case': 'case',
+       'cc': 'cc',
+       'cc:preconj': 'cc',
+       'ccomp': 'ccomp',
+       'clf': 'clf',
+       'compound': 'compound',
+       'compound:lvc': 'compound',
+       'compound:prt': 'compound',
+       'compound:redup': 'compound',
+       'compound:svc': 'compound',
+       'conj': 'conj',
+       'cop': 'cop',
+       'csubj': 'csubj',
+       'csubj:pass': 'csubj',
+       'dep': 'dep',
+       'det': 'det',
+       'det:numgov': 'det',
+       'det:nummod': 'det',
+       'det:poss': 'det',
+       'discourse': 'discourse',
+       'dislocated': 'dislocated',
+       'expl': 'expl',
+       'expl:impers': 'expl',
+       'expl:pass': 'expl',
+       'expl:pv': 'expl',
+       'fixed': 'fixed',
+       'flat': 'flat',
+       'flat:foreign': 'flat',
+       'flat:name': 'flat',
+       'goeswith': 'goeswith',
+       'iobj': 'iobj',
+       'list': 'list',
+       'mark': 'mark',
+       'nmod': 'nmod',
+       'nmod:poss': 'nmod',
+       'nmod:tmod': 'nmod',
+       'nsubj': 'nsubj',
+       'nsubj:pass': 'nsubj',
+       'nummod': 'nummod',
+       'nummod:gov': 'nummod',
+       'obj': 'obj',
+       'obl': 'obl',
+       'obl:agent': 'obl',
+       'obl:arg': 'obl',
+       'obl:lmod': 'obl',
+       'obl:loc': 'obl',
+       'obl:tmod': 'obl',
+       'orphan': 'orphan',
+       'parataxis': 'parataxis',
+       'punct': 'punct',
+       'reparandum': 'reparandum',
+       'root': 'root',
+       'vocative': 'vocative',
+       'xcomp': 'xcomp'
+    }
 
     norne_dir = Path('datasets/norne_nn')
     if not norne_dir.exists():
@@ -224,9 +362,9 @@ def process_norne_nn():
                 tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
-                deps.append(data[7])
+                deps.append(dep_conversion_dict[data[7]])
                 tag = data[9].replace('name=', '').split('|')[-1]
-                ner_tags.append(conversion_dict[tag])
+                ner_tags.append(ner_conversion_dict[tag])
 
 
 def process_norne_nb():
@@ -235,25 +373,93 @@ def process_norne_nb():
     from tqdm.auto import tqdm
     import re
 
-    conversion_dict = {'O': 'O',
-                       'B-LOC': 'B-LOC',
-                       'I-LOC': 'I-LOC',
-                       'B-PER': 'B-PER',
-                       'I-PER': 'I-PER',
-                       'B-ORG': 'B-ORG',
-                       'I-ORG': 'I-ORG',
-                       'B-MISC': 'B-MISC',
-                       'I-MISC': 'I-MISC',
-                       'B-GPE_LOC': 'B-LOC',
-                       'I-GPE_LOC': 'I-LOC',
-                       'B-GPE_ORG': 'B-ORG',
-                       'I-GPE_ORG': 'I-ORG',
-                       'B-PROD': 'B-MISC',
-                       'I-PROD': 'I-MISC',
-                       'B-DRV': 'B-MISC',
-                       'I-DRV': 'I-MISC',
-                       'B-EVT': 'B-MISC',
-                       'I-EVT': 'I-MISC'}
+    ner_conversion_dict = {'O': 'O',
+                           'B-LOC': 'B-LOC',
+                           'I-LOC': 'I-LOC',
+                           'B-PER': 'B-PER',
+                           'I-PER': 'I-PER',
+                           'B-ORG': 'B-ORG',
+                           'I-ORG': 'I-ORG',
+                           'B-MISC': 'B-MISC',
+                           'I-MISC': 'I-MISC',
+                           'B-GPE_LOC': 'B-LOC',
+                           'I-GPE_LOC': 'I-LOC',
+                           'B-GPE_ORG': 'B-ORG',
+                           'I-GPE_ORG': 'I-ORG',
+                           'B-PROD': 'B-MISC',
+                           'I-PROD': 'I-MISC',
+                           'B-DRV': 'B-MISC',
+                           'I-DRV': 'I-MISC',
+                           'B-EVT': 'B-MISC',
+                           'I-EVT': 'I-MISC'}
+
+    dep_conversion_dict = {
+       'acl': 'acl',
+       'acl:relcl': 'acl',
+       'acl:cleft': 'acl',
+       'advcl': 'advcl',
+       'advmod': 'advmod',
+       'advmod:emph': 'advmod',
+       'advmod:lmod': 'advmod',
+       'amod': 'amod',
+       'appos': 'appos',
+       'aux': 'aux',
+       'aux:pass': 'aux',
+       'case': 'case',
+       'cc': 'cc',
+       'cc:preconj': 'cc',
+       'ccomp': 'ccomp',
+       'clf': 'clf',
+       'compound': 'compound',
+       'compound:lvc': 'compound',
+       'compound:prt': 'compound',
+       'compound:redup': 'compound',
+       'compound:svc': 'compound',
+       'conj': 'conj',
+       'cop': 'cop',
+       'csubj': 'csubj',
+       'csubj:pass': 'csubj',
+       'dep': 'dep',
+       'det': 'det',
+       'det:numgov': 'det',
+       'det:nummod': 'det',
+       'det:poss': 'det',
+       'discourse': 'discourse',
+       'dislocated': 'dislocated',
+       'expl': 'expl',
+       'expl:impers': 'expl',
+       'expl:pass': 'expl',
+       'expl:pv': 'expl',
+       'fixed': 'fixed',
+       'flat': 'flat',
+       'flat:foreign': 'flat',
+       'flat:name': 'flat',
+       'goeswith': 'goeswith',
+       'iobj': 'iobj',
+       'list': 'list',
+       'mark': 'mark',
+       'nmod': 'nmod',
+       'nmod:poss': 'nmod',
+       'nmod:tmod': 'nmod',
+       'nsubj': 'nsubj',
+       'nsubj:pass': 'nsubj',
+       'nummod': 'nummod',
+       'nummod:gov': 'nummod',
+       'obj': 'obj',
+       'obl': 'obl',
+       'obl:agent': 'obl',
+       'obl:arg': 'obl',
+       'obl:lmod': 'obl',
+       'obl:loc': 'obl',
+       'obl:tmod': 'obl',
+       'orphan': 'orphan',
+       'parataxis': 'parataxis',
+       'punct': 'punct',
+       'reparandum': 'reparandum',
+       'root': 'root',
+       'vocative': 'vocative',
+       'xcomp': 'xcomp'
+    }
 
     norne_dir = Path('datasets/norne_nb')
     if not norne_dir.exists():
@@ -307,8 +513,9 @@ def process_norne_nb():
                 tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
+                deps.append(dep_conversion_dict[data[7]])
                 tag = data[9].replace('name=', '').split('|')[-1]
-                ner_tags.append(conversion_dict[tag])
+                ner_tags.append(ner_conversion_dict[tag])
 
 
 def process_nordial():
@@ -741,12 +948,84 @@ def process_dane():
     from tqdm.auto import tqdm
     import re
 
-    input_paths = [Path('datasets/dane/ddt.train.conllu'),
-                   Path('datasets/dane/ddt.dev.conllu'),
-                   Path('datasets/dane/ddt.test.conllu')]
-    output_paths = [Path('datasets/dane/dane_train.jsonl'),
-                    Path('datasets/dane/dane_val.jsonl'),
-                    Path('datasets/dane/dane_test.jsonl')]
+    conversion_dict = {
+       'acl': 'acl',
+       'acl:relcl': 'acl',
+       'acl:cleft': 'acl',
+       'advcl': 'advcl',
+       'advmod': 'advmod',
+       'advmod:emph': 'advmod',
+       'advmod:lmod': 'advmod',
+       'amod': 'amod',
+       'appos': 'appos',
+       'aux': 'aux',
+       'aux:pass': 'aux',
+       'case': 'case',
+       'cc': 'cc',
+       'cc:preconj': 'cc',
+       'ccomp': 'ccomp',
+       'clf': 'clf',
+       'compound': 'compound',
+       'compound:lvc': 'compound',
+       'compound:prt': 'compound',
+       'compound:redup': 'compound',
+       'compound:svc': 'compound',
+       'conj': 'conj',
+       'cop': 'cop',
+       'csubj': 'csubj',
+       'csubj:pass': 'csubj',
+       'dep': 'dep',
+       'det': 'det',
+       'det:numgov': 'det',
+       'det:nummod': 'det',
+       'det:poss': 'det',
+       'discourse': 'discourse',
+       'dislocated': 'dislocated',
+       'expl': 'expl',
+       'expl:impers': 'expl',
+       'expl:pass': 'expl',
+       'expl:pv': 'expl',
+       'fixed': 'fixed',
+       'flat': 'flat',
+       'flat:foreign': 'flat',
+       'flat:name': 'flat',
+       'goeswith': 'goeswith',
+       'iobj': 'iobj',
+       'list': 'list',
+       'mark': 'mark',
+       'nmod': 'nmod',
+       'nmod:poss': 'nmod',
+       'nmod:tmod': 'nmod',
+       'nsubj': 'nsubj',
+       'nsubj:pass': 'nsubj',
+       'nummod': 'nummod',
+       'nummod:gov': 'nummod',
+       'obj': 'obj',
+       'obl': 'obl',
+       'obl:agent': 'obl',
+       'obl:arg': 'obl',
+       'obl:lmod': 'obl',
+       'obl:loc': 'obl',
+       'obl:tmod': 'obl',
+       'orphan': 'orphan',
+       'parataxis': 'parataxis',
+       'punct': 'punct',
+       'reparandum': 'reparandum',
+       'root': 'root',
+       'vocative': 'vocative',
+       'xcomp': 'xcomp'
+    }
+
+    dataset_dir = Path('datasets/dane')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    input_paths = [Path('datasets/ddt.train.conllu'),
+                   Path('datasets/ddt.dev.conllu'),
+                   Path('datasets/ddt.test.conllu')]
+    output_paths = [Path('datasets/dane/train.jsonl'),
+                    Path('datasets/dane/val.jsonl'),
+                    Path('datasets/dane/test.jsonl')]
 
     for input_path, output_path in zip(input_paths, output_paths):
         tokens = list()
@@ -789,7 +1068,7 @@ def process_dane():
                 tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
-                deps.append(data[7])
+                deps.append(conversion_dict[data[7]])
                 ner_tags.append(data[9].replace('name=', '').split('|')[0])
 
 def process_dalaj():
@@ -881,3 +1160,5 @@ def process_absabank_imm():
 if __name__ == '__main__':
     process_norne_nb()
     process_norne_nn()
+    process_sdt()
+    process_dane()
