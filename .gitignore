@@ -149,3 +149,7 @@ gfx/satw.png
 
 # Bat files
 **/*.bat
+
+# Data files
+**/*.xml
+**/*.conllu
