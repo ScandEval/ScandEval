@@ -76,6 +76,38 @@ scandeval.benchmarks.europarl module
    :undoc-members:
    :show-inheritance:
 
+scandeval.benchmarks.fdt\_dep module
+------------------------------------
+
+.. automodule:: scandeval.benchmarks.fdt_dep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.fdt\_pos module
+------------------------------------
+
+.. automodule:: scandeval.benchmarks.fdt_pos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.idt\_dep module
+------------------------------------
+
+.. automodule:: scandeval.benchmarks.idt_dep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.idt\_pos module
+------------------------------------
+
+.. automodule:: scandeval.benchmarks.idt_pos
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.benchmarks.lcc module
 -------------------------------
 
@@ -176,6 +208,22 @@ scandeval.benchmarks.twitter\_sent module
 -----------------------------------------
 
 .. automodule:: scandeval.benchmarks.twitter_sent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.wikiann\_fo module
+---------------------------------------
+
+.. automodule:: scandeval.benchmarks.wikiann_fo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.wikiann\_is module
+---------------------------------------
+
+.. automodule:: scandeval.benchmarks.wikiann_is
    :members:
    :undoc-members:
    :show-inheritance:
