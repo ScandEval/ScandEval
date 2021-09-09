@@ -27,6 +27,11 @@ and this project adheres to
   be loaded as `suc3` in the CLI and via the `Benchmark` class.
 
 ### Changed
+- Uniformised all the NER datasets. They now all only have the NER tags `PER`,
+  `LOC`, `ORG` and `MISC`.
+- Uniformised all the dependency parsing datasets. They now all only have the
+  main dependency parsing tags, without the subtags (so `acl:cleft` has been
+  changed to `acl`, for instance).
 - Changed the columns in all text classification datasets to `text` and
   `label`, to make it more uniform.
 
