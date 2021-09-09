@@ -104,6 +104,12 @@ def get_all_datasets() -> list:
         ('wikiann-fo', 'the Faroese part of WikiANN',
             locate('scandeval.benchmarks.WikiannFoBenchmark'),
             locate('scandeval.datasets.load_wikiann_fo')),
+        ('fdt-pos', 'the POS part of FDT',
+            locate('scandeval.benchmarks.FdtPosBenchmark'),
+            locate('scandeval.datasets.load_fdt_pos')),
+        ('fdt-dep', 'the DEP part of FDT',
+            locate('scandeval.benchmarks.FdtDepBenchmark'),
+            locate('scandeval.datasets.load_fdt_dep')),
     ]
 
 
