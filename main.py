@@ -605,7 +605,7 @@ def process_sdt():
             else:
                 data = line.split('\t')
                 ids.append(data[0])
-                tokens.append(data[1].replace('s k', ' s.k.')
+                tokens.append(data[1].replace('s k', 's.k.')
                                      .replace('bl a', 'bl.a.')
                                      .replace('Bl a', 'Bl.a.')
                                      .replace('f n', 'f.n.')
