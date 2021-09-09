@@ -45,12 +45,13 @@ class NorneNNBenchmark(TokenClassificationBenchmark):
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
-        id2label = ['B-GPE_LOC', 'B-ORG', 'I-PER', 'B-GPE_ORG', 'B-LOC',
-                    'I-MISC', 'I-PROD', 'B-MISC', 'I-LOC', 'I-GPE_ORG',
-                    'I-GPE_LOC', 'B-PROD', 'B-PER', 'B-DRV', 'I-DRV',
-                    'I-ORG', 'I-EVT', 'O', 'B-EVT']
+        id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
+                    'I-PER', 'B-MISC', 'I-MISC', 'O']
         super().__init__(name='norne-nn',
-                         metric_names=dict(micro_f1='Micro-average F1-score'),
+                         metric_names=dict(micro_f1='Micro-average F1-score',
+                                           micro_f1_no_misc='Micro-average '
+                                                            'F1-score without '
+                                                            'MISC tags'),
                          id2label=id2label,
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
@@ -93,7 +94,24 @@ class NorneNNBenchmark(TokenClassificationBenchmark):
 
         results = self._metric.compute(predictions=predictions,
                                        references=labels)
-        return dict(micro_f1=results["overall_f1"])
+
+        # Remove MISC labels from predictions
+        for i, prediction_list in enumerate(predictions):
+            for j, ner_tag in enumerate(prediction_list):
+                if ner_tag[-4:] == 'MISC':
+                    predictions[i][j] = 'O'
+
+        # Remove MISC labels from labels
+        for i, label_list in enumerate(labels):
+            for j, ner_tag in enumerate(label_list):
+                if ner_tag[-4:] == 'MISC':
+                    labels[i][j] = 'O'
+
+        results_no_misc = self._metric.compute(predictions=predictions,
+                                               references=labels)
+
+        return dict(micro_f1=results["overall_f1"],
+                    micro_f1_no_misc=results_no_misc['overall_f1'])
 
     @doc_inherit
     def _get_spacy_token_labels(self, processed) -> List[str]:
@@ -110,3 +128,4 @@ class NorneNNBenchmark(TokenClassificationBenchmark):
                 return f'{token.ent_iob_}-{token.ent_type_}'
 
         return [get_ent(token) for token in processed]
+

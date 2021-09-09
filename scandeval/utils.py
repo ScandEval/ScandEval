@@ -29,12 +29,9 @@ def get_all_datasets() -> list:
             entry the loading function.
     '''
     return [
-        ('dane', 'DaNE with MISC tags',
+        ('dane', 'DaNE',
             locate('scandeval.benchmarks.DaneBenchmark'),
             locate('scandeval.datasets.load_dane')),
-        ('dane-no-misc', 'DaNE without MISC tags',
-            locate('scandeval.benchmarks.DaneNoMiscBenchmark'),
-            locate('scandeval.datasets.load_dane_no_misc')),
         ('ddt-pos', 'the POS part of DDT',
             locate('scandeval.benchmarks.DdtPosBenchmark'),
             locate('scandeval.datasets.load_ddt_pos')),

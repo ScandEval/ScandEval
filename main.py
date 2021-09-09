@@ -6,56 +6,64 @@ def process_suc3():
     import json
     from tqdm.auto import tqdm
     import re
-    import xml.etree.ElementTree as ET
+    from lxml import etree
     import pandas as pd
     from sklearn.model_selection import train_test_split
+    import io
 
     sdt_dir = Path('datasets/suc3')
     if not sdt_dir.exists():
         sdt_dir.mkdir()
+
+    conversion_dict = dict(O='O', animal='MISC', event='MISC', inst='ORG',
+                           myth='MISC', other='MISC', person='PER',
+                           place='LOC', product='MISC', work='MISC')
 
     input_path = Path('datasets/suc3.xml')
     train_output_path = Path('datasets/suc3/train.jsonl')
     test_output_path = Path('datasets/suc3/test.jsonl')
 
     print('Parsing XML file...')
-    tree = ET.parse(str(input_path))
-    root = tree.getroot()
-    records = []
-    for text in tqdm(root.findall('text')):
-        for sentence in text.findall('sentence'):
-            tokens = []
-            tags = []
-            for token in sentence:
-                if token.tag == 'w':
-                    tokens.append(token.text)
-                    tags.append('O')
-                elif token.tag == 'ne':
-                    for subtoken in token:
-                        if subtoken.tag == 'name':
-                            for subsubtoken in subtoken:
-                                if subsubtoken.tag == 'w':
-                                    tokens.append(subsubtoken.text.strip())
-                                    tags.append(subtoken.attrib['type'])
-                                else:
-                                    raise Exception(f'{token} # {subtoken} # {subsubtoken}')
-                elif token.tag == 'name':
-                    for subtoken in token:
-                        if subtoken.tag == 'w':
-                            tokens.append(subtoken.text)
-                            tags.append(token.attrib['type'])
-                        elif subtoken.tag == 'ne':
-                            for subsubtoken in subtoken:
-                                if subsubtoken.tag == 'w':
-                                    tokens.append(subsubtoken.text.strip())
-                                    tags.append(token.attrib['type'])
-                                else:
-                                    raise Exception(f'{token} # {subtoken} # {subsubtoken}')
-            doc = ' '.join(tokens)
-            doc = re.sub(' ([.,])', '\1', doc)
-            assert len(tokens) == len(tags)
-            record = dict(doc=doc, tokens=tokens, ner_tags=tags)
-            records.append(record)
+    xml_data = input_path.read_bytes()
+    context = etree.iterparse(io.BytesIO(xml_data), events=('start', 'end'))
+
+    ner_tag = 'O'
+    records = list()
+    for action, elt in context:
+        if elt.tag == 'name' and action == 'start':
+            ner_tag = f'B-{conversion_dict[elt.attrib["type"]]}'
+
+        elif elt.tag == 'name' and action == 'end':
+            ner_tag = 'O'
+
+        elif elt.tag == 'w' and action == 'start':
+            if elt.text:
+                tokens.append(elt.text)
+                ner_tags.append(ner_tag)
+
+        elif elt.tag == 'w' and action == 'end':
+            if ner_tag.startswith('B-'):
+                ner_tag = f'I-{ner_tag[2:]}'
+
+        elif elt.tag == 'sentence' and action == 'end':
+            if len(tokens):
+                doc = ' '.join(tokens)
+                doc = re.sub(' ([.,])', '\1', doc)
+                assert len(tokens) == len(ner_tags)
+                record = dict(doc=doc, tokens=tokens, ner_tags=ner_tags)
+                records.append(record)
+
+        elif elt.tag == 'sentence' and action == 'start':
+            tokens = list()
+            ner_tags = list()
+            ner_tag = 'O'
+
+    # Count the number of each NER tag, as a sanity check
+    tags = ['PER', 'LOC', 'ORG', 'MISC']
+    for tag in tags:
+        num = len([t for record in records for t in record['ner_tags']
+                   if t[2:] == tag])
+        print(tag, num)
 
     df = pd.DataFrame.from_records(records)
     train, test = train_test_split(df, test_size=0.3)
@@ -144,6 +152,26 @@ def process_norne_nn():
     from tqdm.auto import tqdm
     import re
 
+    conversion_dict = {'O': 'O',
+                       'B-LOC': 'B-LOC',
+                       'I-LOC': 'I-LOC',
+                       'B-PER': 'B-PER',
+                       'I-PER': 'I-PER',
+                       'B-ORG': 'B-ORG',
+                       'I-ORG': 'I-ORG',
+                       'B-MISC': 'B-MISC',
+                       'I-MISC': 'I-MISC',
+                       'B-GPE_LOC': 'B-LOC',
+                       'I-GPE_LOC': 'I-LOC',
+                       'B-GPE_ORG': 'B-ORG',
+                       'I-GPE_ORG': 'I-ORG',
+                       'B-PROD': 'B-MISC',
+                       'I-PROD': 'I-MISC',
+                       'B-DRV': 'B-MISC',
+                       'I-DRV': 'I-MISC',
+                       'B-EVT': 'B-MISC',
+                       'I-EVT': 'I-MISC'}
+
     norne_dir = Path('datasets/norne_nn')
     if not norne_dir.exists():
         norne_dir.mkdir()
@@ -197,7 +225,8 @@ def process_norne_nn():
                 pos_tags.append(data[3])
                 heads.append(data[6])
                 deps.append(data[7])
-                ner_tags.append(data[9].replace('name=', '').split('|')[-1])
+                tag = data[9].replace('name=', '').split('|')[-1]
+                ner_tags.append(conversion_dict[tag])
 
 
 def process_norne_nb():
@@ -205,6 +234,26 @@ def process_norne_nb():
     import json
     from tqdm.auto import tqdm
     import re
+
+    conversion_dict = {'O': 'O',
+                       'B-LOC': 'B-LOC',
+                       'I-LOC': 'I-LOC',
+                       'B-PER': 'B-PER',
+                       'I-PER': 'I-PER',
+                       'B-ORG': 'B-ORG',
+                       'I-ORG': 'I-ORG',
+                       'B-MISC': 'B-MISC',
+                       'I-MISC': 'I-MISC',
+                       'B-GPE_LOC': 'B-LOC',
+                       'I-GPE_LOC': 'I-LOC',
+                       'B-GPE_ORG': 'B-ORG',
+                       'I-GPE_ORG': 'I-ORG',
+                       'B-PROD': 'B-MISC',
+                       'I-PROD': 'I-MISC',
+                       'B-DRV': 'B-MISC',
+                       'I-DRV': 'I-MISC',
+                       'B-EVT': 'B-MISC',
+                       'I-EVT': 'I-MISC'}
 
     norne_dir = Path('datasets/norne_nb')
     if not norne_dir.exists():
@@ -258,8 +307,8 @@ def process_norne_nb():
                 tokens.append(data[1])
                 pos_tags.append(data[3])
                 heads.append(data[6])
-                deps.append(data[7])
-                ner_tags.append(data[9].replace('name=', '').split('|')[-1])
+                tag = data[9].replace('name=', '').split('|')[-1]
+                ner_tags.append(conversion_dict[tag])
 
 
 def process_nordial():
@@ -830,4 +879,5 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
-    process_suc3()
+    process_norne_nb()
+    process_norne_nn()
