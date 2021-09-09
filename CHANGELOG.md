@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.0.1] - 2021-09-09
 ### Fixed
 - The URLs for the `wikiann-is` and `wikiann-fo` were wrong and have been
   corrected.
