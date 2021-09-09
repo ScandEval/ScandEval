@@ -63,7 +63,7 @@ def load_suc3() -> Tuple[dict, dict, dict, dict]:
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'dev/datasets/suc3/')
+                'main/datasets/suc3/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
