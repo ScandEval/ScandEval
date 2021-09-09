@@ -499,3 +499,141 @@ def load_sdt_dep() -> Tuple[dict, dict, dict, dict]:
                                            ['doc', 'tokens'],
                                            ['heads', 'deps'])
     return X_train, X_test, y_train, y_test
+
+
+def load_idt_pos() -> Tuple[dict, dict, dict, dict]:
+    '''Load the POS part of the IDT dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/idt/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             'pos_tags')
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           'pos_tags')
+    return X_train, X_test, y_train, y_test
+
+
+def load_idt_dep() -> Tuple[dict, dict, dict, dict]:
+    '''Load the dependency parsing part of the IDT dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/idt/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             ['heads', 'deps'])
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           ['heads', 'deps'])
+    return X_train, X_test, y_train, y_test
+
+
+def load_wikiann_is() -> Tuple[dict, dict, dict, dict]:
+    '''Load the the Icelandic WikiANN dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/wikiann_is/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             'ner_tags')
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           'ner_tags')
+    return X_train, X_test, y_train, y_test
+
+
+def load_wikiann_fo() -> Tuple[dict, dict, dict, dict]:
+    '''Load the the Faroese WikiANN dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/wikiann_fo/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             'ner_tags')
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           'ner_tags')
+    return X_train, X_test, y_train, y_test
+
+
+def load_fdt_pos() -> Tuple[dict, dict, dict, dict]:
+    '''Load the POS part of the FDT dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/fdt/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             'pos_tags')
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           'pos_tags')
+    return X_train, X_test, y_train, y_test
+
+
+def load_fdt_dep() -> Tuple[dict, dict, dict, dict]:
+    '''Load the dependency parsing part of the FDT dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/fdt/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url,
+                                             ['doc', 'tokens'],
+                                             ['heads', 'deps'])
+    X_test, y_test = _get_dataset_from_url(test_url,
+                                           ['doc', 'tokens'],
+                                           ['heads', 'deps'])
+    return X_train, X_test, y_train, y_test

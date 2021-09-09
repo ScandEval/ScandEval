@@ -1,6 +1,399 @@
 '''Testing script'''
 
 
+def process_fdt():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import re
+
+    dep_conversion_dict = {
+       'acl': 'acl',
+       'acl:relcl': 'acl',
+       'acl:cleft': 'acl',
+       'advcl': 'advcl',
+       'advmod': 'advmod',
+       'advmod:emph': 'advmod',
+       'advmod:lmod': 'advmod',
+       'amod': 'amod',
+       'appos': 'appos',
+       'aux': 'aux',
+       'aux:pass': 'aux',
+       'case': 'case',
+       'cc': 'cc',
+       'cc:preconj': 'cc',
+       'ccomp': 'ccomp',
+       'clf': 'clf',
+       'compound': 'compound',
+       'compound:lvc': 'compound',
+       'compound:prt': 'compound',
+       'compound:redup': 'compound',
+       'compound:svc': 'compound',
+       'conj': 'conj',
+       'cop': 'cop',
+       'csubj': 'csubj',
+       'csubj:pass': 'csubj',
+       'dep': 'dep',
+       'det': 'det',
+       'det:numgov': 'det',
+       'det:nummod': 'det',
+       'det:poss': 'det',
+       'discourse': 'discourse',
+       'dislocated': 'dislocated',
+       'expl': 'expl',
+       'expl:impers': 'expl',
+       'expl:pass': 'expl',
+       'expl:pv': 'expl',
+       'fixed': 'fixed',
+       'flat': 'flat',
+       'flat:foreign': 'flat',
+       'flat:name': 'flat',
+       'goeswith': 'goeswith',
+       'iobj': 'iobj',
+       'list': 'list',
+       'mark': 'mark',
+       'nmod': 'nmod',
+       'nmod:poss': 'nmod',
+       'nmod:tmod': 'nmod',
+       'nsubj': 'nsubj',
+       'nsubj:pass': 'nsubj',
+       'nummod': 'nummod',
+       'nummod:gov': 'nummod',
+       'obj': 'obj',
+       'obl': 'obl',
+       'obl:agent': 'obl',
+       'obl:arg': 'obl',
+       'obl:lmod': 'obl',
+       'obl:loc': 'obl',
+       'obl:tmod': 'obl',
+       'orphan': 'orphan',
+       'parataxis': 'parataxis',
+       'punct': 'punct',
+       'reparandum': 'reparandum',
+       'root': 'root',
+       'vocative': 'vocative',
+       'xcomp': 'xcomp'
+    }
+
+    dataset_dir = Path('datasets/fdt')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    input_paths = [Path('datasets/fo_farpahc-ud-train.conllu'),
+                   Path('datasets/fo_farpahc-ud-dev.conllu'),
+                   Path('datasets/fo_farpahc-ud-test.conllu')]
+    output_paths = [Path('datasets/fdt/train.jsonl'),
+                    Path('datasets/fdt/val.jsonl'),
+                    Path('datasets/fdt/test.jsonl')]
+
+    for input_path, output_path in zip(input_paths, output_paths):
+        tokens = list()
+        pos_tags = list()
+        heads = list()
+        deps  = list()
+        ids = list()
+        doc = ''
+        lines = input_path.read_text().split('\n')
+        store = True
+        for idx, line in enumerate(tqdm(lines)):
+            if line.startswith('# text = '):
+                doc = re.sub('# text = ', '', line)
+                store = True
+            elif line.startswith('#'):
+                continue
+            elif line == '':
+                if tokens != [] and store:
+                    data_dict = dict(ids=ids,
+                                     doc=doc,
+                                     tokens=tokens,
+                                     pos_tags=pos_tags,
+                                     heads=heads,
+                                     deps=deps)
+                    json_line = json.dumps(data_dict)
+                    with output_path.open('a') as f:
+                        f.write(json_line)
+                        if idx < len(lines) - 1:
+                            f.write('\n')
+                ids = list()
+                tokens = list()
+                pos_tags = list()
+                heads = list()
+                deps = list()
+                doc = ''
+            else:
+                data = line.split('\t')
+                ids.append(data[0])
+                tokens.append(data[1])
+                pos_tags.append(data[3])
+                heads.append(data[6])
+                try:
+                    deps.append(dep_conversion_dict[data[7]])
+                except KeyError:
+                    store = False
+
+
+def process_wikiann_fo():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    import re
+
+    dataset_dir = Path('datasets/wikiann-fo')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    input_path = Path('datasets/wikiann-fo.bio')
+    train_output_path = Path('datasets/wikiann-fo/train.jsonl')
+    test_output_path = Path('datasets/wikiann-fo/test.jsonl')
+
+    corpus = input_path.read_text().split('\n')
+
+    tokens = list()
+    ner_tags = list()
+    records = list()
+    for line in corpus:
+        if line != '':
+            data = line.split(' ')
+            tokens.append(data[0])
+            ner_tags.append(data[-1])
+
+        else:
+            assert len(tokens) == len(ner_tags)
+            doc = ' '.join(tokens)
+            doc = re.sub(' ([.,])', '\1', doc)
+            records.append(dict(doc=doc, tokens=tokens, ner_tags=ner_tags))
+            tokens = list()
+            ner_tags = list()
+
+    # Show the NER tags in the dataset, as a sanity check
+    print(sorted(set([tag for record in records
+                      for tag in record['ner_tags']])))
+
+    # Count the number of each NER tag, as a sanity check
+    tags = ['PER', 'LOC', 'ORG', 'MISC']
+    for tag in tags:
+        num = len([t for record in records for t in record['ner_tags']
+                   if t[2:] == tag])
+        print(tag, num)
+
+    df = pd.DataFrame.from_records(records)
+    train, test = train_test_split(df, test_size=0.3)
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
+
+    def export_as_jsonl(df: pd.DataFrame, output_path: Path):
+        for idx, row in tqdm(df.iterrows()):
+            data_dict = dict(doc=row.doc,
+                             tokens=row.tokens,
+                             ner_tags=row.ner_tags)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(df) - 1:
+                    f.write('\n')
+
+    export_as_jsonl(train, train_output_path)
+    export_as_jsonl(test, test_output_path)
+
+
+def process_wikiann_is():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    import re
+
+    dataset_dir = Path('datasets/wikiann-is')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    input_path = Path('datasets/wikiann-is.bio')
+    train_output_path = Path('datasets/wikiann-is/train.jsonl')
+    test_output_path = Path('datasets/wikiann-is/test.jsonl')
+
+    corpus = input_path.read_text().split('\n')
+
+    tokens = list()
+    ner_tags = list()
+    records = list()
+    for line in corpus:
+        if line != '':
+            data = line.split(' ')
+            tokens.append(data[0])
+            ner_tags.append(data[-1])
+
+        else:
+            assert len(tokens) == len(ner_tags)
+            doc = ' '.join(tokens)
+            doc = re.sub(' ([.,])', '\1', doc)
+            records.append(dict(doc=doc, tokens=tokens, ner_tags=ner_tags))
+            tokens = list()
+            ner_tags = list()
+
+    # Show the NER tags in the dataset, as a sanity check
+    print(sorted(set([tag for record in records
+                      for tag in record['ner_tags']])))
+
+    # Count the number of each NER tag, as a sanity check
+    tags = ['PER', 'LOC', 'ORG', 'MISC']
+    for tag in tags:
+        num = len([t for record in records for t in record['ner_tags']
+                   if t[2:] == tag])
+        print(tag, num)
+
+    df = pd.DataFrame.from_records(records)
+    train, test = train_test_split(df, test_size=0.3)
+    train = train.reset_index(drop=True)
+    test = test.reset_index(drop=True)
+
+    def export_as_jsonl(df: pd.DataFrame, output_path: Path):
+        for idx, row in tqdm(df.iterrows()):
+            data_dict = dict(doc=row.doc,
+                             tokens=row.tokens,
+                             ner_tags=row.ner_tags)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(df) - 1:
+                    f.write('\n')
+
+    export_as_jsonl(train, train_output_path)
+    export_as_jsonl(test, test_output_path)
+
+def process_idt():
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import re
+
+    dep_conversion_dict = {
+       'acl': 'acl',
+       'acl:relcl': 'acl',
+       'acl:cleft': 'acl',
+       'advcl': 'advcl',
+       'advmod': 'advmod',
+       'advmod:emph': 'advmod',
+       'advmod:lmod': 'advmod',
+       'amod': 'amod',
+       'appos': 'appos',
+       'aux': 'aux',
+       'aux:pass': 'aux',
+       'case': 'case',
+       'cc': 'cc',
+       'cc:preconj': 'cc',
+       'ccomp': 'ccomp',
+       'clf': 'clf',
+       'compound': 'compound',
+       'compound:lvc': 'compound',
+       'compound:prt': 'compound',
+       'compound:redup': 'compound',
+       'compound:svc': 'compound',
+       'conj': 'conj',
+       'cop': 'cop',
+       'csubj': 'csubj',
+       'csubj:pass': 'csubj',
+       'dep': 'dep',
+       'det': 'det',
+       'det:numgov': 'det',
+       'det:nummod': 'det',
+       'det:poss': 'det',
+       'discourse': 'discourse',
+       'dislocated': 'dislocated',
+       'expl': 'expl',
+       'expl:impers': 'expl',
+       'expl:pass': 'expl',
+       'expl:pv': 'expl',
+       'fixed': 'fixed',
+       'flat': 'flat',
+       'flat:foreign': 'flat',
+       'flat:name': 'flat',
+       'goeswith': 'goeswith',
+       'iobj': 'iobj',
+       'list': 'list',
+       'mark': 'mark',
+       'nmod': 'nmod',
+       'nmod:poss': 'nmod',
+       'nmod:tmod': 'nmod',
+       'nsubj': 'nsubj',
+       'nsubj:pass': 'nsubj',
+       'nummod': 'nummod',
+       'nummod:gov': 'nummod',
+       'obj': 'obj',
+       'obl': 'obl',
+       'obl:agent': 'obl',
+       'obl:arg': 'obl',
+       'obl:lmod': 'obl',
+       'obl:loc': 'obl',
+       'obl:tmod': 'obl',
+       'orphan': 'orphan',
+       'parataxis': 'parataxis',
+       'punct': 'punct',
+       'reparandum': 'reparandum',
+       'root': 'root',
+       'vocative': 'vocative',
+       'xcomp': 'xcomp'
+    }
+
+    dataset_dir = Path('datasets/idt')
+    if not dataset_dir.exists():
+        dataset_dir.mkdir()
+
+    input_paths = [Path('datasets/is_modern-ud-train.conllu'),
+                   Path('datasets/is_modern-ud-dev.conllu'),
+                   Path('datasets/is_modern-ud-test.conllu')]
+    output_paths = [Path('datasets/idt/train.jsonl'),
+                    Path('datasets/idt/val.jsonl'),
+                    Path('datasets/idt/test.jsonl')]
+
+    for input_path, output_path in zip(input_paths, output_paths):
+        tokens = list()
+        pos_tags = list()
+        heads = list()
+        deps  = list()
+        ids = list()
+        doc = ''
+        lines = input_path.read_text().split('\n')
+        store = True
+        for idx, line in enumerate(tqdm(lines)):
+            if line.startswith('# text = '):
+                doc = re.sub('# text = ', '', line)
+                store = True
+            elif line.startswith('#'):
+                continue
+            elif line == '':
+                if tokens != [] and store:
+                    data_dict = dict(ids=ids,
+                                     doc=doc,
+                                     tokens=tokens,
+                                     pos_tags=pos_tags,
+                                     heads=heads,
+                                     deps=deps)
+                    json_line = json.dumps(data_dict)
+                    with output_path.open('a') as f:
+                        f.write(json_line)
+                        if idx < len(lines) - 1:
+                            f.write('\n')
+                ids = list()
+                tokens = list()
+                pos_tags = list()
+                heads = list()
+                deps = list()
+                doc = ''
+            else:
+                data = line.split('\t')
+                ids.append(data[0])
+                tokens.append(data[1])
+                pos_tags.append(data[3])
+                heads.append(data[6])
+                try:
+                    deps.append(dep_conversion_dict[data[7]])
+                except KeyError:
+                    store = False
+
+
 def process_suc3():
     from pathlib import Path
     import json
@@ -186,7 +579,7 @@ def process_sdt():
             elif line.startswith('#'):
                 continue
             elif line == '':
-                if tokens != []:
+                if tokens != [] and store:
                     data_dict = dict(ids=ids,
                                      doc=doc,
                                      tokens=tokens,
@@ -1158,7 +1551,4 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
-    process_norne_nb()
-    process_norne_nn()
-    process_sdt()
-    process_dane()
+    process_fdt()

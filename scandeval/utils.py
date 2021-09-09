@@ -92,6 +92,18 @@ def get_all_datasets() -> list:
         ('suc3', 'SUC 3.0',
             locate('scandeval.benchmarks.Suc3Benchmark'),
             locate('scandeval.datasets.load_suc3')),
+        ('idt-pos', 'the POS part of IDT',
+            locate('scandeval.benchmarks.IdtPosBenchmark'),
+            locate('scandeval.datasets.load_idt_pos')),
+        ('idt-dep', 'the DEP part of IDT',
+            locate('scandeval.benchmarks.IdtDepBenchmark'),
+            locate('scandeval.datasets.load_idt_dep')),
+        ('wikiann-is', 'the Icelandic part of WikiANN',
+            locate('scandeval.benchmarks.WikiannIsBenchmark'),
+            locate('scandeval.datasets.load_wikiann_is')),
+        ('wikiann-fo', 'the Faroese part of WikiANN',
+            locate('scandeval.benchmarks.WikiannFoBenchmark'),
+            locate('scandeval.datasets.load_wikiann_fo')),
     ]
 
 

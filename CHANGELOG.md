@@ -8,6 +8,16 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added the Icelandic and Faroese WikiANN datasets, for NER evaluation. They
+  can be loaded as `wikiann-is` and `wikiann-fo` in the CLI and via the
+  `Benchmark` class.
+- Added the Icelandic and Faroese parts of the Universal Dependencies datasets,
+  containing POS and dependency parsing tags. They can be loaded as `idt-pos`,
+  `idt-dep`, `fdt-pos` and `fdt-dep`, respectively.
+
+
 ## [v0.17.0] - 2021-09-09
 ### Added
 - Added the Dataset for Linguistic Acceptability Judgments (DaLaJ) dataset,
