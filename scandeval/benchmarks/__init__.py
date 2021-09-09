@@ -1,5 +1,4 @@
 from .dane import DaneBenchmark  # noqa
-from .dane_no_misc import DaneNoMiscBenchmark  # noqa
 from .ddt_pos import DdtPosBenchmark  # noqa
 from .ddt_dep import DdtDepBenchmark  # noqa
 from .angry_tweets import AngryTweetsBenchmark  # noqa
