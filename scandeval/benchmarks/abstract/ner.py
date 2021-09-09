@@ -157,4 +157,3 @@ class NerBenchmark(TokenClassificationBenchmark):
                 return f'{token.ent_iob_}-{token.ent_type_}'
 
         return [get_ent(token) for token in processed]
-
