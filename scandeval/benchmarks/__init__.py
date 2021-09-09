@@ -19,3 +19,9 @@ from .absabank_imm import AbsabankImmBenchmark # noqa
 from .sdt_pos import SdtPosBenchmark  # noqa
 from .sdt_dep import SdtDepBenchmark  # noqa
 from .suc3 import Suc3Benchmark  # noqa
+from .idt_pos import IdtPosBenchmark  # noqa
+from .idt_dep import IdtDepBenchmark  # noqa
+from .fdt_pos import FdtPosBenchmark  # noqa
+from .fdt_dep import FdtDepBenchmark  # noqa
+from .wikiann_is import WikiannIsBenchmark  # noqa
+from .wikiann_fo import WikiannFoBenchmark  # noqa
