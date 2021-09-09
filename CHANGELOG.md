@@ -25,6 +25,8 @@ and this project adheres to
   `Benchmark` class.
 - Added the Stockholm-Umeå corpus 3.0 (SUC 3.0), a Swedish NER dataset. It can
   be loaded as `suc3` in the CLI and via the `Benchmark` class.
+- Added abstract `NerBenchmark`, `PosBenchmark` and `DepBenchmark` classes, to
+  ensure uniformity.
 
 ### Changed
 - Uniformised all the NER datasets. They now all only have the NER tags `PER`,
