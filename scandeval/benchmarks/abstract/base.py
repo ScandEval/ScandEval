@@ -917,9 +917,14 @@ class BaseBenchmark(ABC):
                     progress_bar=progress_bar
                 )
 
+                # Check if the SpaCy model has been trained on the task at
+                # hand. If not, then skip this benchmark.
                 sample_preds = preds_labels[0][0]
-                if ('' in sample_preds or (isinstance(sample_preds, list) and
-                            '' in sample_preds[0])):
+                pos_ner_test = (isinstance(sample_preds, list) and
+                                '' in sample_preds)
+                dep_test = (isinstance(sample_preds[0], list) and
+                            '' in sample_preds[0])
+                if pos_ner_test or dep_test:
                     raise InvalidBenchmark('This SpaCy model have not been '
                                            'trained on this task. Skipping.')
 
