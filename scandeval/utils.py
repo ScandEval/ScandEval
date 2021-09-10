@@ -111,10 +111,10 @@ def get_all_datasets() -> list:
             locate('scandeval.benchmarks.FdtDepBenchmark'),
             locate('scandeval.datasets.load_fdt_dep')),
         ('norec-is', 'NoReC-IS',
-            locate('scandeval.benchmarks.NorecIsBenchmark'),
+            locate('scandeval.benchmarks.NorecISBenchmark'),
             locate('scandeval.datasets.load_norec_is')),
         ('norec-fo', 'NoReC-FO',
-            locate('scandeval.benchmarks.NorecFoBenchmark'),
+            locate('scandeval.benchmarks.NorecFOBenchmark'),
             locate('scandeval.datasets.load_norec_fo')),
     ]
 
