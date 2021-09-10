@@ -34,7 +34,7 @@ def build_norec_is_fo():
         norec_fo_dir.mkdir()
 
     # Translate NoReC train
-    for json_line in tqdm(norec_train[:10]):
+    for json_line in tqdm(norec_train):
         record = json.loads(json_line)
         is_text, fo_text = translate(record['text'])
 
@@ -49,7 +49,7 @@ def build_norec_is_fo():
             f.write(json.dumps(fo_record) + '\n')
 
     # Translate NoReC test
-    for json_line in tqdm(norec_test[:10]):
+    for json_line in tqdm(norec_test):
         record = json.loads(json_line)
         is_text, fo_text = translate(record['text'])
 
