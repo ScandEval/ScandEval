@@ -20,9 +20,9 @@ and this project adheres to
   dictionaries, this maintains backwards compatibility.
 
 ### Fixed
-- There was an error when a SpaCy NER model was benchmarked on a POS dataset.
-  It now raises an appropriate `InvalidBenchmark` exception, and will be
-  skipped in the CLI and with the `Benchmark` class.
+- There was an error when a SpaCy model was benchmarked on a dataset that it
+  was not trained on. It now raises an appropriate `InvalidBenchmark`
+  exception, and will be skipped in the CLI and with the `Benchmark` class.
 
 
 ## [v1.0.2] - 2021-09-09
