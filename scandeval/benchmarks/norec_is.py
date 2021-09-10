@@ -1,4 +1,4 @@
-'''Sentiment evaluation of a language model on the NoReC dataset'''
+'''Sentiment evaluation of a language model on the NoReC-IS dataset'''
 
 import logging
 
@@ -8,8 +8,8 @@ from .abstract import TextClassificationBenchmark
 logger = logging.getLogger(__name__)
 
 
-class NorecBenchmark(TextClassificationBenchmark):
-    '''Benchmark of language models on the NoReC dataset.
+class NorecISBenchmark(TextClassificationBenchmark):
+    '''Benchmark of language models on the NoReC-IS dataset.
 
     Args:
         cache_dir (str, optional):
@@ -46,7 +46,7 @@ class NorecBenchmark(TextClassificationBenchmark):
             ['LABEL_1', 'nøytral', 'hlutlaus', 'Neutral', id2label[1]],
             ['LABEL_2', 'positiv', 'jákvætt', 'Positive', id2label[2]]
         ]
-        super().__init__(name='norec',
+        super().__init__(name='norec-is',
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,

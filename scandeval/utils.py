@@ -54,7 +54,7 @@ def get_all_datasets() -> list:
             locate('scandeval.benchmarks.LccBenchmark'),
             locate('scandeval.datasets.load_lcc')),
         ('norec', 'NoReC',
-            locate('scandeval.benchmarks.NoReCBenchmark'),
+            locate('scandeval.benchmarks.NorecBenchmark'),
             locate('scandeval.datasets.load_norec')),
         ('nordial', 'NorDial',
             locate('scandeval.benchmarks.NorDialBenchmark'),
@@ -110,6 +110,12 @@ def get_all_datasets() -> list:
         ('fdt-dep', 'the DEP part of FDT',
             locate('scandeval.benchmarks.FdtDepBenchmark'),
             locate('scandeval.datasets.load_fdt_dep')),
+        ('norec-is', 'NoReC-IS',
+            locate('scandeval.benchmarks.NorecIsBenchmark'),
+            locate('scandeval.datasets.load_norec_is')),
+        ('norec-fo', 'NoReC-FO',
+            locate('scandeval.benchmarks.NorecFoBenchmark'),
+            locate('scandeval.datasets.load_norec_fo')),
     ]
 
 
