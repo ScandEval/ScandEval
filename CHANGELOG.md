@@ -19,17 +19,20 @@ and this project adheres to
   rather than dictionaries.
 
 
-## [v1.0.2] - 2021-09-09 ### Fixed
+## [v1.0.2] - 2021-09-09
+### Fixed
 - Replaced abbreviations with spaces, such as "o s v" in the SDT corpus, with
   their proper version "o.s.v.".
 
 
-## [v1.0.1] - 2021-09-09 ### Fixed
+## [v1.0.1] - 2021-09-09
+### Fixed
 - The URLs for the `wikiann-is` and `wikiann-fo` were wrong and have been
   corrected.
 
 
-## [v1.0.0] - 2021-09-09 ### Added
+## [v1.0.0] - 2021-09-09
+### Added
 - Added the Icelandic and Faroese WikiANN datasets, for NER evaluation. They
   can be loaded as `wikiann-is` and `wikiann-fo` in the CLI and via the
   `Benchmark` class.
@@ -38,7 +41,8 @@ and this project adheres to
   `idt-dep`, `fdt-pos` and `fdt-dep`, respectively.
 
 
-## [v0.17.0] - 2021-09-09 ### Added
+## [v0.17.0] - 2021-09-09
+### Added
 - Added the Dataset for Linguistic Acceptability Judgments (DaLaJ) dataset,
   which is here used as a binary classification dataset, in which sentences
   have to be classified as correct Swedish or not. It can be loaded as `dalaj`
@@ -67,7 +71,8 @@ and this project adheres to
   `label`, to make it more uniform.
 
 
-## [v0.16.0] - 2021-09-07 ### Fixed
+## [v0.16.0] - 2021-09-07
+### Fixed
 - Upped the number index tokens for dependency parsing from 100 to 512. This
   will need to be done better in the future, but is a fix for now.
 
@@ -77,14 +82,16 @@ and this project adheres to
   all models.
 
 
-## [v0.15.1] - 2021-09-03 ### Fixed
+## [v0.15.1] - 2021-09-03
+### Fixed
 - The list of dependency tags in the `ndt-nb-dep` and `ndt-nn-dep` were wrong.
   They have now been changed to all the tags occurring in the training sets.
 - The `europarl_sent` data folder has now been renamed to `europarl`, so that
   it can be loaded correctly with `load_dataset`.
 
 
-## [v0.15.0] - 2021-09-02 ### Added
+## [v0.15.0] - 2021-09-02
+### Added
 - Added the Bokmål and Nynorsk POS and DEP parts of the Norwegian Dependency
   Treebank dataset (NDT). They can be loaded as `ndt-nb-pos`, `ndt-nn-pos`,
   `ndt-nb-dep` and `ndt-nn-dep`, respectively, from the CLI and the `Benchmark`
