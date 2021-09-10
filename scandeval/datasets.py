@@ -3,10 +3,12 @@
 import requests
 import json
 from typing import Tuple, Union, List
+import pandas as pd
 from .utils import get_all_datasets
 
 
-def load_dataset(name: str) -> Tuple[dict, dict, dict, dict]:
+def load_dataset(name: str) -> Tuple[pd.DataFrame, pd.DataFrame,
+                                     pd.DataFrame, pd.DataFrame]:
     '''Load a benchmark dataset.
 
     Args:
@@ -36,7 +38,7 @@ def load_dataset(name: str) -> Tuple[dict, dict, dict, dict]:
 def _get_dataset_from_url(url: str,
                           feature_key: Union[str, List[str]],
                           label_key: Union[str, List[str]]
-                          ) -> Tuple[dict, dict]:
+                          ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     response = requests.get(url)
     records = response.text.split('\n')
     data = [json.loads(record) for record in records if record != '']
@@ -49,10 +51,11 @@ def _get_dataset_from_url(url: str,
     docs = {key: [data_dict[key] for data_dict in data] for key in feature_key}
     labels = {key: [data_dict[key] for data_dict in data] for key in label_key}
 
-    return docs, labels
+    return pd.DataFrame(docs), pd.DataFrame(labels)
 
 
-def load_suc3() -> Tuple[dict, dict, dict, dict]:
+def load_suc3() -> Tuple[pd.DataFrame, pd.DataFrame,
+                         pd.DataFrame, pd.DataFrame]:
     '''Load the SUC 3.0 dataset.
 
     Returns:
@@ -75,7 +78,8 @@ def load_suc3() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_norne_nb() -> Tuple[dict, dict, dict, dict]:
+def load_norne_nb() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
     '''Load the the Bokmål part of the NorNE dataset.
 
     Returns:
@@ -98,7 +102,8 @@ def load_norne_nb() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_norne_nn() -> Tuple[dict, dict, dict, dict]:
+def load_norne_nn() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
     '''Load the the Nynorsk part of the NorNE dataset.
 
     Returns:
@@ -121,7 +126,8 @@ def load_norne_nn() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_nordial() -> Tuple[dict, dict, dict, dict]:
+def load_nordial() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the Bokmål/Nynorsk part of the NorDial dataset.
 
     Returns:
@@ -140,7 +146,8 @@ def load_nordial() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_norec() -> Tuple[dict, dict, dict, dict]:
+def load_norec() -> Tuple[pd.DataFrame, pd.DataFrame,
+                          pd.DataFrame, pd.DataFrame]:
     '''Load the NoReC dataset.
 
     Returns:
@@ -159,7 +166,48 @@ def load_norec() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_angry_tweets() -> Tuple[dict, dict, dict, dict]:
+def load_norec_is() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the NoReC-IS dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/norec_is/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
+def load_norec_fo() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the NoReC-FO dataset.
+
+    Returns:
+        tuple:
+            Four dicts, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'main/datasets/norec_fo/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
+def load_angry_tweets() -> Tuple[pd.DataFrame, pd.DataFrame,
+                                 pd.DataFrame, pd.DataFrame]:
     '''Load the AngryTweets dataset.
 
     Returns:
@@ -178,7 +226,8 @@ def load_angry_tweets() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_dane() -> Tuple[dict, dict, dict, dict]:
+def load_dane() -> Tuple[pd.DataFrame, pd.DataFrame,
+                         pd.DataFrame, pd.DataFrame]:
     '''Load the the DaNE dataset.
 
     Returns:
@@ -201,7 +250,8 @@ def load_dane() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_ndt_nb_pos() -> Tuple[dict, dict, dict, dict]:
+def load_ndt_nb_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
+                               pd.DataFrame, pd.DataFrame]:
     '''Load the Bokmål POS part of the NDT dataset.
 
     Returns:
@@ -224,7 +274,8 @@ def load_ndt_nb_pos() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_ndt_nn_pos() -> Tuple[dict, dict, dict, dict]:
+def load_ndt_nn_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
+                               pd.DataFrame, pd.DataFrame]:
     '''Load the Nynorsk POS part of the NDT dataset.
 
     Returns:
@@ -247,7 +298,8 @@ def load_ndt_nn_pos() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_ndt_nb_dep() -> Tuple[dict, dict, dict, dict]:
+def load_ndt_nb_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
+                               pd.DataFrame, pd.DataFrame]:
     '''Load the Bokmål POS part of the NDT dataset.
 
     Returns:
@@ -270,7 +322,8 @@ def load_ndt_nb_dep() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_ndt_nn_dep() -> Tuple[dict, dict, dict, dict]:
+def load_ndt_nn_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
+                               pd.DataFrame, pd.DataFrame]:
     '''Load the Nynorsk POS part of the NDT dataset.
 
     Returns:
@@ -293,7 +346,8 @@ def load_ndt_nn_dep() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_ddt_pos() -> Tuple[dict, dict, dict, dict]:
+def load_ddt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the POS part of the DDT dataset.
 
     Returns:
@@ -316,7 +370,8 @@ def load_ddt_pos() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_ddt_dep() -> Tuple[dict, dict, dict, dict]:
+def load_ddt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the dependency parsing part of the DDT dataset.
 
     Returns:
@@ -339,7 +394,8 @@ def load_ddt_dep() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_dkhate() -> Tuple[dict, dict, dict, dict]:
+def load_dkhate() -> Tuple[pd.DataFrame, pd.DataFrame,
+                           pd.DataFrame, pd.DataFrame]:
     '''Load the DKHate dataset.
 
     Returns:
@@ -358,7 +414,8 @@ def load_dkhate() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_europarl() -> Tuple[dict, dict, dict, dict]:
+def load_europarl() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
     '''Load the Europarl dataset.
 
     Returns:
@@ -377,7 +434,8 @@ def load_europarl() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_lcc() -> Tuple[dict, dict, dict, dict]:
+def load_lcc() -> Tuple[pd.DataFrame, pd.DataFrame,
+                        pd.DataFrame, pd.DataFrame]:
     '''Load the LCC dataset.
 
     This dataset is the concatenation of the LCC1 and LCC2 datasets.
@@ -398,7 +456,8 @@ def load_lcc() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_twitter_sent() -> Tuple[dict, dict, dict, dict]:
+def load_twitter_sent() -> Tuple[pd.DataFrame, pd.DataFrame,
+                                 pd.DataFrame, pd.DataFrame]:
     '''Load the TwitterSent dataset.
 
     Returns:
@@ -417,7 +476,8 @@ def load_twitter_sent() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_dalaj() -> Tuple[dict, dict, dict, dict]:
+def load_dalaj() -> Tuple[pd.DataFrame, pd.DataFrame,
+                          pd.DataFrame, pd.DataFrame]:
     '''Load the DaLaJ dataset.
 
     Returns:
@@ -436,7 +496,8 @@ def load_dalaj() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_absabank_imm() -> Tuple[dict, dict, dict, dict]:
+def load_absabank_imm() -> Tuple[pd.DataFrame, pd.DataFrame,
+                                 pd.DataFrame, pd.DataFrame]:
     '''Load the ABSAbank-Imm dataset.
 
     Returns:
@@ -455,7 +516,8 @@ def load_absabank_imm() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_sdt_pos() -> Tuple[dict, dict, dict, dict]:
+def load_sdt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the POS part of the SDT dataset.
 
     Returns:
@@ -478,7 +540,8 @@ def load_sdt_pos() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_sdt_dep() -> Tuple[dict, dict, dict, dict]:
+def load_sdt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the dependency parsing part of the SDT dataset.
 
     Returns:
@@ -501,7 +564,8 @@ def load_sdt_dep() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_idt_pos() -> Tuple[dict, dict, dict, dict]:
+def load_idt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the POS part of the IDT dataset.
 
     Returns:
@@ -524,7 +588,8 @@ def load_idt_pos() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_idt_dep() -> Tuple[dict, dict, dict, dict]:
+def load_idt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the dependency parsing part of the IDT dataset.
 
     Returns:
@@ -547,7 +612,8 @@ def load_idt_dep() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_wikiann_is() -> Tuple[dict, dict, dict, dict]:
+def load_wikiann_is() -> Tuple[pd.DataFrame, pd.DataFrame,
+                               pd.DataFrame, pd.DataFrame]:
     '''Load the the Icelandic WikiANN dataset.
 
     Returns:
@@ -570,7 +636,8 @@ def load_wikiann_is() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_wikiann_fo() -> Tuple[dict, dict, dict, dict]:
+def load_wikiann_fo() -> Tuple[pd.DataFrame, pd.DataFrame,
+                               pd.DataFrame, pd.DataFrame]:
     '''Load the the Faroese WikiANN dataset.
 
     Returns:
@@ -593,7 +660,8 @@ def load_wikiann_fo() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_fdt_pos() -> Tuple[dict, dict, dict, dict]:
+def load_fdt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the POS part of the FDT dataset.
 
     Returns:
@@ -616,7 +684,8 @@ def load_fdt_pos() -> Tuple[dict, dict, dict, dict]:
     return X_train, X_test, y_train, y_test
 
 
-def load_fdt_dep() -> Tuple[dict, dict, dict, dict]:
+def load_fdt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
+                            pd.DataFrame, pd.DataFrame]:
     '''Load the dependency parsing part of the FDT dataset.
 
     Returns:

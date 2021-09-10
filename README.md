@@ -98,12 +98,13 @@ in-depth description.
 If you are just interested in downloading a dataset rather than benchmarking,
 this can be done as follows:
 ```python
->>> from scandeval.datasets import load_angry_tweets
->>> X_train, X_test, y_train, y_test = load_angry_tweets()
+>>> from scandeval import load_dataset
+>>> X_train, X_test, y_train, y_test = load_dataset('angry-tweets')
 ```
 
-Here `X_train` and `X_test` will be lists containing the relevant texts, and
-`y_train` and `y_test` will be lists containing the associated labels.
+Here `X_train` and `X_test` will be Pandas dataframes containing the relevant
+texts, and `y_train` and `y_test` will be Pandas dataframes containing the
+associated labels.
 
 See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a list
 of all the datasets that can be loaded.
