@@ -25,5 +25,5 @@ from .fdt_pos import FdtPosBenchmark  # noqa
 from .fdt_dep import FdtDepBenchmark  # noqa
 from .wikiann_is import WikiannIsBenchmark  # noqa
 from .wikiann_fo import WikiannFoBenchmark  # noqa
-from .norec_is import NorecIsBenchmark  # noqa
-from .norec_fo import NorecFoBenchmark  # noqa
+from .norec_is import NorecISBenchmark  # noqa
+from .norec_fo import NorecFOBenchmark  # noqa
