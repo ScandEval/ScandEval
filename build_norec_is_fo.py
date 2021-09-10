@@ -35,33 +35,35 @@ def build_norec_is_fo():
 
     # Translate NoReC train
     for json_line in tqdm(norec_train):
-        record = json.loads(json_line)
-        is_text, fo_text = translate(record['text'])
+        if json_line != '':
+            record = json.loads(json_line)
+            is_text, fo_text = translate(record['text'])
 
-        with (norec_is_dir / 'train.jsonl').open('a') as f:
-            is_record = dict(record)
-            is_record['text'] = is_text
-            f.write(json.dumps(is_record) + '\n')
+            with (norec_is_dir / 'train.jsonl').open('a') as f:
+                is_record = dict(record)
+                is_record['text'] = is_text
+                f.write(json.dumps(is_record) + '\n')
 
-        with (norec_fo_dir / 'train.jsonl').open('a') as f:
-            fo_record = dict(record)
-            fo_record['text'] = fo_text
-            f.write(json.dumps(fo_record) + '\n')
+            with (norec_fo_dir / 'train.jsonl').open('a') as f:
+                fo_record = dict(record)
+                fo_record['text'] = fo_text
+                f.write(json.dumps(fo_record) + '\n')
 
     # Translate NoReC test
     for json_line in tqdm(norec_test):
-        record = json.loads(json_line)
-        is_text, fo_text = translate(record['text'])
+        if json_line != '':
+            record = json.loads(json_line)
+            is_text, fo_text = translate(record['text'])
 
-        with (norec_is_dir / 'test.jsonl').open('w') as f:
-            is_record = dict(record)
-            is_record['text'] = is_text
-            f.write(json.dumps(is_record) + '\n')
+            with (norec_is_dir / 'test.jsonl').open('a') as f:
+                is_record = dict(record)
+                is_record['text'] = is_text
+                f.write(json.dumps(is_record) + '\n')
 
-        with (norec_fo_dir / 'test.jsonl').open('w') as f:
-            fo_record = dict(record)
-            fo_record['text'] = fo_text
-            f.write(json.dumps(fo_record) + '\n')
+            with (norec_fo_dir / 'test.jsonl').open('a') as f:
+                fo_record = dict(record)
+                fo_record['text'] = fo_text
+                f.write(json.dumps(fo_record) + '\n')
 
 
 if __name__ == '__main__':
