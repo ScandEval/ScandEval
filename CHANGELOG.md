@@ -16,7 +16,8 @@ and this project adheres to
 
 ### Changed
 - When loading datasets with `load_dataset`, the result is now four dataframes,
-  rather than dictionaries.
+  rather than dictionaries. As the data can be accessed in the same way as with
+  dictionaries, this maintains backwards compatibility.
 
 
 ## [v1.0.2] - 2021-09-09
