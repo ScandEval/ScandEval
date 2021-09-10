@@ -19,6 +19,11 @@ and this project adheres to
   rather than dictionaries. As the data can be accessed in the same way as with
   dictionaries, this maintains backwards compatibility.
 
+### Fixed
+- There was an error when a SpaCy NER model was benchmarked on a POS dataset.
+  It now raises an appropriate `InvalidBenchmark` exception, and will be
+  skipped in the CLI and with the `Benchmark` class.
+
 
 ## [v1.0.2] - 2021-09-09
 ### Fixed

@@ -909,41 +909,47 @@ class BaseBenchmark(ABC):
                       for idx in range(test_bidxs.shape[0])]
 
             # Get the test predictions
-            all_test_metrics = list()
-            for dataset in tests:
-                preds_labels = self._get_spacy_predictions_and_labels(
-                    model=model,
-                    dataset=dataset,
-                    progress_bar=progress_bar
-                )
-
-                test_metrics = self._compute_metrics(preds_labels)
-                test_metrics = {f'test_{key}': val
-                                for key, val in test_metrics.items()}
-                all_test_metrics.append(test_metrics)
-            metrics = dict(test=all_test_metrics)
-
-            if self.evaluate_train:
-
-                # Preprocess the train datasets
-                train = self._preprocess_data(train, framework=framework)
-
-                # Get the train predictions
-                all_train_metrics = list()
-                for _ in range(10):
+            try:
+                all_test_metrics = list()
+                for dataset in tests:
                     preds_labels = self._get_spacy_predictions_and_labels(
                         model=model,
-                        dataset=train,
+                        dataset=dataset,
                         progress_bar=progress_bar
                     )
-                    train_metrics = self._compute_metrics(preds_labels)
-                    train_metrics = {f'train_{key}': val
-                                     for key, val in train_metrics.items()}
 
-                all_train_metrics.append(train_metrics)
-                metrics['train'] = all_train_metrics
+                    test_metrics = self._compute_metrics(preds_labels)
+                    test_metrics = {f'test_{key}': val
+                                    for key, val in test_metrics.items()}
+                    all_test_metrics.append(test_metrics)
+                metrics = dict(test=all_test_metrics)
 
-            self._log_metrics(metrics, model_id=model_id, finetuned=False)
+                if self.evaluate_train:
+
+                    # Preprocess the train datasets
+                    train = self._preprocess_data(train, framework=framework)
+
+                    # Get the train predictions
+                    all_train_metrics = list()
+                    for _ in range(10):
+                        preds_labels = self._get_spacy_predictions_and_labels(
+                            model=model,
+                            dataset=train,
+                            progress_bar=progress_bar
+                        )
+                        train_metrics = self._compute_metrics(preds_labels)
+                        train_metrics = {f'train_{key}': val
+                                         for key, val in train_metrics.items()}
+
+                    all_train_metrics.append(train_metrics)
+                    metrics['train'] = all_train_metrics
+
+                self._log_metrics(metrics, model_id=model_id, finetuned=False)
+
+            except IndexError as e:
+                raise InvalidBenchmark(f'Could not benchmark {model_id} '
+                                       f'on {self.name}. The error message '
+                                       f'was "{e}".')
 
             # Garbage collection, to avoid memory issues
             try:
