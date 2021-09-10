@@ -11,7 +11,7 @@ def build_norec_is_fo():
     '''Translates the NoReC corpus into Icelandic and Norwegian'''
 
     # Initialise translation pipeline
-    translation_model = 'Helsinki-NLP/opus-mt-NORTH_EU-NORTH_EU'
+    translation_model = 'Helsinki-NLP/opus-mt-SCANDINAVIA-SCANDINAVIA'
     translator = pipeline('translation', translation_model)
 
     # Initialise translation helper function
