@@ -46,7 +46,7 @@ def build_norec_is_fo():
         with (norec_fo_dir / 'train.jsonl').open('a') as f:
             fo_record = dict(record)
             fo_record['text'] = fo_text
-            f.write(json.dumps(is_record) + '\n')
+            f.write(json.dumps(fo_record) + '\n')
 
     # Translate NoReC test
     for json_line in tqdm(norec_test[:10]):
@@ -61,7 +61,7 @@ def build_norec_is_fo():
         with (norec_fo_dir / 'test.jsonl').open('w') as f:
             fo_record = dict(record)
             fo_record['text'] = fo_text
-            f.write(json.dumps(is_record) + '\n')
+            f.write(json.dumps(fo_record) + '\n')
 
 
 if __name__ == '__main__':
