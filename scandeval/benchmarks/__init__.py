@@ -6,7 +6,7 @@ from .twitter_sent import TwitterSentBenchmark  # noqa
 from .europarl import EuroparlBenchmark  # noqa
 from .lcc import LccBenchmark  # noqa
 from .dkhate import DkHateBenchmark  # noqa
-from .norec import NoReCBenchmark  # noqa
+from .norec import NorecBenchmark  # noqa
 from .nordial import NorDialBenchmark  # noqa
 from .norne_nb import NorneNBBenchmark  # noqa
 from .norne_nn import NorneNNBenchmark  # noqa
