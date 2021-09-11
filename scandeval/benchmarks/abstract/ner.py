@@ -122,9 +122,10 @@ class NerBenchmark(TokenClassificationBenchmark):
 
         # Replace predicted tag with either MISC or O tags if they are not part
         # of the dataset
+        labels_no_misc = set(self.id2label).difference({'B-MISC', 'I-MISC'})
         for i, prediction_list in enumerate(predictions):
             for j, ner_tag in enumerate(prediction_list):
-                if ner_tag not in self.id2label:
+                if ner_tag not in labels_no_misc:
                     if self.has_misc_tags and ner_tag[:2] == 'B-':
                         predictions[i][j] = 'B-MISC'
                     elif self.has_misc_tags and ner_tag[:2] == 'I-':
