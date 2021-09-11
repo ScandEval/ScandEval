@@ -75,6 +75,14 @@ class NerBenchmark(TokenClassificationBenchmark):
                          orig_labels=y_test['ner_tags'])
         train = Dataset.from_dict(train_dict)
         test = Dataset.from_dict(test_dict)
+
+        # Check what labels are present in the dataset, and store if MISC tags
+        # are not present
+        labels_in_train = set([tag for tag_list in y_train['ner_tags'].tolist()
+                               for tag in tag_list])
+        self.has_misc_tags = ('B-MISC' in labels_in_train and
+                              'I-MISC' in labels_in_train)
+
         return train, test
 
     def _compute_metrics(self,
@@ -111,6 +119,18 @@ class NerBenchmark(TokenClassificationBenchmark):
                  if lbl != -100]
                 for prediction, label in zip(raw_predictions, labels)
             ]
+
+        # Replace predicted tag with either MISC or O tags if they are not part
+        # of the dataset
+        for i, prediction_list in enumerate(predictions):
+            for j, ner_tag in enumerate(prediction_list):
+                if ner_tag not in self.id2label:
+                    if self.has_misc_tags and ner_tag[:2] == 'B-':
+                        predictions[i][j] = 'B-MISC'
+                    elif self.has_misc_tags and ner_tag[:2] == 'I-':
+                        predictions[i][j] = 'I-MISC'
+                    else:
+                        predictions[i][j] = 'O'
 
         results = self._metric.compute(predictions=predictions,
                                        references=labels)

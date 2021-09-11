@@ -18,6 +18,10 @@ and this project adheres to
 - When loading datasets with `load_dataset`, the result is now four dataframes,
   rather than dictionaries. As the data can be accessed in the same way as with
   dictionaries, this maintains backwards compatibility.
+- If a finetuned NER model has been trained on NER tags not present amongst the
+  ones in the dataset, then these are either converted to `MISC` tags (if these
+  are present in the dataset) and otherwise `O` tags. This will make the
+  benchmarking of finetuned diverse NER models more fair.
 
 ### Fixed
 - There was an error when a SpaCy model was benchmarked on a dataset that it
