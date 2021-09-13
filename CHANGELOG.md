@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.1.0] - 2021-09-13
 ### Added
 - Added Icelandic and Faroese translations of the Norwegian `NoReC` sentiment
   analysis dataset. These can be loaded as `norec-is` and `norec-fo`,
