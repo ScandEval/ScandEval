@@ -164,6 +164,22 @@ scandeval.benchmarks.norec module
    :undoc-members:
    :show-inheritance:
 
+scandeval.benchmarks.norec\_fo module
+-------------------------------------
+
+.. automodule:: scandeval.benchmarks.norec_fo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scandeval.benchmarks.norec\_is module
+-------------------------------------
+
+.. automodule:: scandeval.benchmarks.norec_is
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.benchmarks.norne\_nb module
 -------------------------------------
 
