@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.1.1] - 2021-09-27
 ### Fixed
 - Reduce validation batch size if CUDA runs out of memory, rather than only
   reducing training batch size.
