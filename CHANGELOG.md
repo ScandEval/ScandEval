@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Reduce validation batch size if CUDA runs out of memory, rather than only
+  reducing training batch size.
+
+
 ## [v1.1.0] - 2021-09-13
 ### Added
 - Added Icelandic and Faroese translations of the Norwegian `NoReC` sentiment
