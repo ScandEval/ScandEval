@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.1.3] - 2021-10-04
 ### Fixed
 - Added truncation and padding when tokenising token classification datasets.
 
