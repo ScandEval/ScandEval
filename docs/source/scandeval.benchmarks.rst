@@ -116,6 +116,14 @@ scandeval.benchmarks.lcc module
    :undoc-members:
    :show-inheritance:
 
+scandeval.benchmarks.mim\_gold\_ner module
+------------------------------------------
+
+.. automodule:: scandeval.benchmarks.mim_gold_ner
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scandeval.benchmarks.ndt\_nb\_dep module
 ----------------------------------------
 
@@ -232,14 +240,6 @@ scandeval.benchmarks.wikiann\_fo module
 ---------------------------------------
 
 .. automodule:: scandeval.benchmarks.wikiann_fo
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-scandeval.benchmarks.wikiann\_is module
----------------------------------------
-
-.. automodule:: scandeval.benchmarks.wikiann_is
    :members:
    :undoc-members:
    :show-inheritance:
