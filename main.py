@@ -62,17 +62,12 @@ def process_mim_gold_ner():
                 if idx < len(df) - 1:
                     f.write('\n')
 
-    input_dir = Path('datasets') / 'train-valid-test-split'
-    train_input_path = input_dir / 'train' / 'train'
-    val_input_path = input_dir / 'valid' / 'valid'
-    test_input_path = input_dir / 'test' / 'test'
-
-    output_dir = Path('datasets') / 'mim_gold_ner'
-    train_output_path = output_dir / 'train.jsonl'
-    test_output_path = output_dir / 'test.jsonl'
-
-    if not output_dir.exists():
-        output_dir.mkdir()
+    data_dir = Path('datasets') / 'mim_gold_ner'
+    train_input_path = data_dir / 'raw_train'
+    val_input_path = data_dir / 'raw_val'
+    test_input_path = data_dir / 'raw_test'
+    train_output_path = data_dir / 'train.jsonl'
+    test_output_path = data_dir / 'test.jsonl'
 
     train_df = pd.concat((get_df(train_input_path), get_df(val_input_path)))
     test_df = get_df(test_input_path)
