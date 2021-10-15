@@ -7,6 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
 ### Added
 - Added the Icelandic NER dataset MIM-GOLD-NER. This can now be loaded as
