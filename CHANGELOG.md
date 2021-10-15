@@ -12,6 +12,10 @@ and this project adheres to
 - Added the Icelandic NER dataset MIM-GOLD-NER. This can now be loaded as
   `mim-gold-ner` in the `Benchmark` class and through the CLI.
 
+### Removed
+- Removed the Icelandic WikiANN-IS dataset, as this has now been replaced by
+  the MIM-GOLD-NER dataset.
+
 
 ## [v1.1.3] - 2021-10-04
 ### Fixed
