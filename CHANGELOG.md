@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Removed
+- Properly removed the Icelandic WikiANN-IS data files. It was removed from the
+  package, but the underlying files were still lying in the repository.
+
+
 ## [v1.2.0] - 2021-10-15
 ### Added
 - Added the Icelandic NER dataset MIM-GOLD-NER. This can now be loaded as
