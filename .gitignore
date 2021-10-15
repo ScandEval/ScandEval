@@ -140,8 +140,9 @@ dmypy.json
 .benchmark_models
 
 # Raw datasets
-**/raw_train.jsonl
-**/raw_test.jsonl
+**/raw_train*
+**/raw_val*
+**/raw_test*
 
 # Raw images
 gfx/satw.png
