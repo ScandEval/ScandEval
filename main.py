@@ -19,14 +19,14 @@ def process_mim_gold_ner():
         'I-Organization': 'I-ORG',
         'B-Miscellaneous': 'B-MISC',
         'I-Miscellaneous': 'I-MISC',
-        'B-Date': 'B-MISC',
-        'I-Date': 'I-MISC',
-        'B-Time': 'B-MISC',
-        'I-Time': 'I-MISC',
-        'B-Money': 'B-MISC',
-        'I-Money': 'I-MISC',
-        'B-Percent': 'B-MISC',
-        'I-Percent': 'I-MISC'
+        'B-Date': 'O',
+        'I-Date': 'O',
+        'B-Time': 'O',
+        'I-Time': 'O',
+        'B-Money': 'O',
+        'I-Money': 'O',
+        'B-Percent': 'O',
+        'I-Percent': 'O'
     }
 
     def get_df(path: Path):
