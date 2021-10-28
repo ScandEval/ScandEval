@@ -624,7 +624,7 @@ def load_mim_gold_ner() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/mim_gold_ner/')
+                'dev/datasets/mim_gold_ner/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
