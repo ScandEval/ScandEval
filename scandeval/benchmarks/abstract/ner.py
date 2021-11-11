@@ -58,7 +58,11 @@ class NerBenchmark(TokenClassificationBenchmark):
             ['I-Person', 'I-person', id2label[5]],
             ['B-Miscellaneous', 'B-Misc', 'B-misc', id2label[6]],
             ['I-Miscellaneous', 'I-Misc', 'I-misc', id2label[7]],
-            [id2label[8]]
+            ['B-Date', 'B-date', 'I-Date', 'I-date',
+             'B-Time', 'B-time', 'I-Time', 'I-time',
+             'B-Money', 'B-money', 'I-Money', 'I-money',
+             'B-Percent', 'B-percent', 'I-Percent', 'I-percent',
+             id2label[8]]
         ]
         super().__init__(name=name,
                          metric_names=dict(micro_f1='Micro-average F1-score',
@@ -187,6 +191,11 @@ class NerBenchmark(TokenClassificationBenchmark):
 
             # In general return a tag of the form B-tag or I-tag
             else:
-                return f'{token.ent_iob_}-{token.ent_type_}'
+                # Extract tag from spaCy token
+                ent = f'{token.ent_iob_}-{token.ent_type_}'
+
+                # Convert the tag to the its canonical synonym
+                alt_idx = self.label2id[f'{token.ent_iob_}-MISC']
+                return self.id2label[self.label2id.get(ent, alt_idx)]
 
         return [get_ent(token) for token in processed]
