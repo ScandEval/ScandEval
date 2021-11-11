@@ -155,3 +155,4 @@ gfx/satw.png
 **/*.xml
 **/*.conllu
 **/*.bio
+**/*.csv
