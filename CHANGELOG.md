@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- When a finetuned model has labels which are synonyms of each other, they are
+  now properly treated as synonyms, where previously this caused the model to
+  have misaligned `id2label` and `label2id` conversion dictionaries.
+
+
 ## [v1.3.2] - 2021-11-11
 ### Fixed
 - Added the NER label synonyms `GPE_LOC=LOC`, `GPE_ORG=ORG`, `LOC/ORG=LOC`,

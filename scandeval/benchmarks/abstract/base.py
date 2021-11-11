@@ -334,6 +334,7 @@ class BaseBenchmark(ABC):
                 # have not been trained on (it will just always get those
                 # labels wrong)
                 else:
+
                     # Collect the dataset labels and model labels in the
                     # `model_id2label` conversion list
                     for label in self.id2label:
@@ -342,6 +343,14 @@ class BaseBenchmark(ABC):
                                 if label in lst]
                         if all([syn not in model_id2label for syn in syns]):
                             model_id2label.append(label)
+
+                    # Ensure that the model_id2label does not contain
+                    # duplicates modulo synonyms
+                    for idx, label in enumerate(model_id2label):
+                        canonical_syn = [syn_lst
+                                         for syn_lst in self.label_synonyms
+                                         if label in syn_lst][0][-1]
+                        model_id2label[idx] = canonical_syn
 
                     # Get the synonyms of all the labels, new ones included
                     new_synonyms = self.label_synonyms
