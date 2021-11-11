@@ -705,8 +705,6 @@ class BaseBenchmark(ABC):
         task = model_metadata['task']
         model_dict = self._load_model(model_id, **model_metadata)
 
-        breakpoint()
-
         # Define variable that determines if the model should be finetuned
         finetune = (task == 'fill-mask')
 
