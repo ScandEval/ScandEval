@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.3.0] - 2021-11-11
 ### Added
 - Added label synonyms for NER benchmarking, which will enforce a more fair
   comparison of finetuned NER models, if the models have been trained on
