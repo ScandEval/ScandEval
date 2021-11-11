@@ -50,10 +50,12 @@ class NerBenchmark(TokenClassificationBenchmark):
         id2label = ['B-LOC', 'I-LOC', 'B-ORG', 'I-ORG', 'B-PER',
                     'I-PER', 'B-MISC', 'I-MISC', 'O']
         label_synonyms = [
-            ['B-Location', 'B-location', 'B-place', id2label[0]],
-            ['I-Location', 'I-location', 'I-place', id2label[1]],
-            ['B-Organization', 'B-organization', 'B-inst', id2label[2]],
-            ['I-Organization', 'I-organization', 'I-inst', id2label[3]],
+            ['B-Location', 'B-location', 'B-place', 'B-GPE_LOC', id2label[0]],
+            ['I-Location', 'I-location', 'I-place', 'I-GPE_LOC', id2label[1]],
+            ['B-Organization', 'B-organization', 'B-inst', 'B-GPE_ORG',
+             id2label[2]],
+            ['I-Organization', 'I-organization', 'I-inst', 'I-GPE_ORG',
+             id2label[3]],
             ['B-Person', 'B-person', id2label[4]],
             ['I-Person', 'I-person', id2label[5]],
             ['B-Miscellaneous', 'B-Misc', 'B-misc', id2label[6]],
