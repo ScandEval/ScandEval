@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.3.4] - 2021-11-11
 ### Fixed
 - Indexing error during synonym setup of finetuned models.
 
