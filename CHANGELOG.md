@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.3.1] - 2021-11-11
 ### Fixed
 - Fixed a bug in label synonyms when benchmarking a finetuned spaCy for NER.
 
