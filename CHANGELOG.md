@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Indexing error during synonym setup of finetuned models.
+
+
 ## [v1.3.3] - 2021-11-11
 ### Fixed
 - When a finetuned model has labels which are synonyms of each other, they are

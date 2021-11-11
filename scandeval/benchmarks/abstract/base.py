@@ -347,10 +347,18 @@ class BaseBenchmark(ABC):
                     # Ensure that the model_id2label does not contain
                     # duplicates modulo synonyms
                     for idx, label in enumerate(model_id2label):
-                        canonical_syn = [syn_lst
-                                         for syn_lst in self.label_synonyms
-                                         if label in syn_lst][0][-1]
-                        model_id2label[idx] = canonical_syn
+                        try:
+                            canonical_syn = [syn_lst
+                                             for syn_lst in self.label_synonyms
+                                             if label in syn_lst][0][-1]
+                            model_id2label[idx] = canonical_syn
+
+                        # IndexError appears when the label does not appear
+                        # within the label_synonyms (i.e. that we added it in
+                        # the previous step). In this case, we just skip the
+                        # label.
+                        except IndexError:
+                            continue
 
                     # Get the synonyms of all the labels, new ones included
                     new_synonyms = self.label_synonyms
