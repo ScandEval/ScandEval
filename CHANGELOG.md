@@ -10,8 +10,9 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- Added the NER label synonyms `GPE_LOC=LOC` and `GPE_ORG=ORG`, as the
-  Norwegian models tend to use both all four labels.
+- Added the NER label synonyms `GPE_LOC=LOC`, `GPE_ORG=ORG`, `LOC/ORG=LOC`,
+  `ORG/PRS=ORG`, `OBJ/ORG=ORG`, as Norwegian and Swedish models tend to use
+  these.
 
 
 ## [v1.3.1] - 2021-11-11
