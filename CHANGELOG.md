@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.2.1] - 2021-11-11
 ### Removed
 - Properly removed the Icelandic WikiANN-IS data files. It was removed from the
   package, but the underlying files were still lying in the repository.
