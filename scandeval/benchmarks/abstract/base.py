@@ -486,6 +486,7 @@ class BaseBenchmark(ABC):
 
         elif framework == 'spacy':
             local_model_id = model_id.split('/')[-1]
+            local_model_id = 'sv_pipeline'
 
             # Download the model if it has not already been so
             if not is_module_installed(local_model_id):
