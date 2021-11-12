@@ -489,7 +489,6 @@ class BaseBenchmark(ABC):
 
             # Download the model if it has not already been so
             if not is_module_installed(local_model_id):
-                local_model_id = 'sv_pipeline'
                 url = (f'https://huggingface.co/{model_id}/resolve/main/'
                        f'{local_model_id}-any-py3-none-any.whl')
                 subprocess.run(['pip3', 'install', url])
