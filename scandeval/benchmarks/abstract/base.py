@@ -489,12 +489,17 @@ class BaseBenchmark(ABC):
 
             # Download the model if it has not already been so
             if not is_module_installed(local_model_id):
+                local_model_id = 'sv_pipeline'
                 url = (f'https://huggingface.co/{model_id}/resolve/main/'
                        f'{local_model_id}-any-py3-none-any.whl')
                 subprocess.run(['pip3', 'install', url])
 
             # Load the model
-            model = spacy.load(local_model_id)
+            try:
+                model = spacy.load(local_model_id)
+            except OSError:
+                raise InvalidBenchmark(f'The model {model_id} could not '
+                                       f'be installed from spaCy.')
 
             return dict(model=model)
 
