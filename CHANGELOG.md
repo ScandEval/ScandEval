@@ -11,6 +11,10 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Added the NER label synonyms `OBJORG=ORG`, `LOCPRS=LOC`, `LOCORG=LOC` and `ORGPRS=ORG`.
+- Explicitly added `numpy` to the `install_requires` list. This is normally not
+  a problem, as it's a requirement for other required packages, but this
+  depends on the order in which the requirements are installed. This avoids
+  such errors caused by misordering the requirements.
 
 
 ## [v1.3.4] - 2021-11-11
