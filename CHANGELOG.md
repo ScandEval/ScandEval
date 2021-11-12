@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Added the NER label synonyms `OBJORG=ORG`, `LOCPRS=LOC`, `LOCORG=LOC` and `ORGPRS=ORG`.
+
+
 ## [v1.3.4] - 2021-11-11
 ### Fixed
 - Indexing error during synonym setup of finetuned models.
