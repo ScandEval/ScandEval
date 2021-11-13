@@ -114,7 +114,7 @@ of all the datasets that can be loaded.
 The full documentation can be found on
 [ReadTheDocs](https://scandeval.readthedocs.io/en/latest).
 
-<!--
+
 ## Citing ScandEval
 If you want to cite the framework then feel free to use this:
 ```bibtex
@@ -125,7 +125,6 @@ If you want to cite the framework then feel free to use this:
   year={2021}
 }
 ```
--->
 
 ## Remarks
 The image used in the logo has been created by the amazing [Scandinavia and the
