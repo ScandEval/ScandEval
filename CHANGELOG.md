@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.3.5] - 2021-11-23
 ### Fixed
 - Set the number of warmup steps to be the intended one training set pass,
   where previously it was effectively 8x that amount, due to gradient
