@@ -68,6 +68,10 @@ class Benchmark:
             logging_level = logging.INFO
         logger.setLevel(logging_level)
 
+        # Update the list of benchmarks
+        logger.info('Updating the list of benchmark datasets')
+        self._update_benchmarks(evaluate_train=evaluate_train, verbose=verbose)
+
     def _update_benchmarks(self, **params):
         '''Updates the internal list of all benchmarks.
 
@@ -268,7 +272,10 @@ class Benchmark:
             verbose = self.verbose
 
         # Update benchmark list
-        self._update_benchmarks(evaluate_train=evaluate_train, verbose=verbose)
+        if evaluate_train != self.evaluate_train or verbose != self.verbose:
+            logger.info('Updating the list of benchmark datasets')
+            self._update_benchmarks(evaluate_train=evaluate_train,
+                                    verbose=verbose)
 
         # Ensure that `language` is a list
         if language == 'all':
