@@ -849,10 +849,6 @@ class BaseBenchmark(ABC):
                         if not self.verbose:
                             trainer.remove_callback(PrinterCallback)
 
-                        # Finetune the model
-                        if finetune:
-                            trainer.train()
-
                         # Remove the progress bar callback
                         trainer.remove_callback(ProgressCallback)
 
@@ -860,6 +856,10 @@ class BaseBenchmark(ABC):
                         # True
                         if progress_bar:
                             trainer.add_callback(NeverLeaveProgressCallback)
+
+                        # Finetune the model
+                        if finetune:
+                            trainer.train()
 
                         # Log training metrics and save the state
                         if self.evaluate_train:
