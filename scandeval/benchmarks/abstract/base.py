@@ -14,6 +14,7 @@ from transformers import (PreTrainedTokenizerBase,
                           RobertaForSequenceClassification,
                           RobertaForTokenClassification)
 from typing import Dict, Optional, Tuple, List, Any
+from types import MethodType
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
@@ -839,6 +840,9 @@ class BaseBenchmark(ABC):
                         # Set transformers logging back to error
                         tf_logging.set_verbosity_error()
 
+                        # Remove trainer logging
+                        trainer.log = lambda _: None
+
                         # Remove the callback which prints the metrics after
                         # each evaluation
                         if not self.verbose:
@@ -848,9 +852,6 @@ class BaseBenchmark(ABC):
                         if finetune:
                             trainer.train()
 
-                        # Set transformers logging back to error
-                        tf_logging.set_verbosity_error()
-
                         # Log training metrics and save the state
                         if self.evaluate_train:
                             train_metrics = trainer.evaluate(
@@ -858,9 +859,6 @@ class BaseBenchmark(ABC):
                                 metric_key_prefix='train'
                             )
                             metrics['train'].append(train_metrics)
-
-                        # Set transformers logging back to error
-                        tf_logging.set_verbosity_error()
 
                         # Log test metrics
                         for dataset in tests:
