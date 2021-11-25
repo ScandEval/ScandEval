@@ -8,6 +8,16 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now only updating the list of benchmarks in the `Benchmark` during
+  initialisation, and also logs it. This should make subsequent calls to the
+  `benchmark` method faster.
+
+### Fixed
+- Removed `transformers` logging properly.
+
+
 ## [v1.3.5] - 2021-11-23
 ### Fixed
 - Set the number of warmup steps to be the intended one training set pass,
