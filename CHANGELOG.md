@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.4.0] - 2021-11-25
 ### Changed
 - Now also outputting aggregated metrics in the resulting
   `scandeval_benchmark_results.json` file. This `json` file now has keys
