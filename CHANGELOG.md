@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Removed `transformers` logging during evaluation as well.
+
+
 ## [v1.3.6] - 2021-11-25
 ### Changed
 - Now only updating the list of benchmarks in the `Benchmark` during
