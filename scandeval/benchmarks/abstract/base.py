@@ -629,11 +629,11 @@ class BaseBenchmark(ABC):
                 total_dict[f'train_{metric_key}'] = train_score
                 total_dict[f'train_{metric_key}_se'] = train_se
 
-            # Store the aggregated test metrics
+            # Store the aggregated test metrics
             total_dict[f'test_{metric_key}'] = test_score
             total_dict[f'test_{metric_key}_se'] = test_se
 
-            # Log the scores
+            # Log the scores
             logger.info(msg)
 
         # Define a dict with both the raw metrics and the aggregated metrics
