@@ -848,6 +848,9 @@ class BaseBenchmark(ABC):
                         if finetune:
                             trainer.train()
 
+                        # Set transformers logging back to error
+                        tf_logging.set_verbosity_error()
+
                         # Log training metrics and save the state
                         if self.evaluate_train:
                             train_metrics = trainer.evaluate(
@@ -855,6 +858,9 @@ class BaseBenchmark(ABC):
                                 metric_key_prefix='train'
                             )
                             metrics['train'].append(train_metrics)
+
+                        # Set transformers logging back to error
+                        tf_logging.set_verbosity_error()
 
                         # Log test metrics
                         for dataset in tests:
