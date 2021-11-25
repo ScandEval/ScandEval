@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Removed progress bars during evaluation.
+
+
 ## [v1.3.7] - 2021-11-25
 ### Fixed
 - Removed `transformers` logging during evaluation as well.

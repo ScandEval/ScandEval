@@ -12,7 +12,8 @@ from transformers import (PreTrainedTokenizerBase,
                           PrinterCallback,
                           EarlyStoppingCallback,
                           RobertaForSequenceClassification,
-                          RobertaForTokenClassification)
+                          RobertaForTokenClassification,
+                          ProgressCallback)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
 import requests
@@ -851,6 +852,10 @@ class BaseBenchmark(ABC):
                         if finetune:
                             trainer.train()
 
+                        # Pop the progress bar callback, to avoid showing
+                        # evaluation progress bars
+                        progress_cb = trainer.pop_callback(ProgressCallback)
+
                         # Log training metrics and save the state
                         if self.evaluate_train:
                             train_metrics = trainer.evaluate(
@@ -866,6 +871,9 @@ class BaseBenchmark(ABC):
                                 metric_key_prefix='test'
                             )
                             metrics['test'].append(test_metrics)
+
+                        # Restore the progress bar callback
+                        trainer.add_callback(progress_cb)
 
                         break
 
