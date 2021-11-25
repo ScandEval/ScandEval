@@ -779,11 +779,6 @@ class BaseBenchmark(ABC):
             # Load the data collator
             data_collator = self._load_data_collator(tokenizer)
 
-            # Enable `transformers` verbosity to see a training
-            # progress bar
-            if progress_bar:
-                tf_logging.set_verbosity_warning()
-
             # Initialise training arguments
             training_args = TrainingArguments(
                 output_dir='.',
@@ -801,9 +796,10 @@ class BaseBenchmark(ABC):
                 load_best_model_at_end=True
             )
 
-            # Disable `transformers` verbosity again
-            if not self.verbose:
-                tf_logging.set_verbosity_error()
+            # Manually set `disable_tqdm` to `False` if `progress_bar` is
+            # `True`
+            if progress_bar:
+                training_args.disable_tqdm = False
 
             metrics = defaultdict(list)
             for _ in itr:
@@ -839,6 +835,9 @@ class BaseBenchmark(ABC):
                             trainer = TwolabelTrainer(**trainer_args)
                         else:
                             trainer = Trainer(**trainer_args)
+
+                        # Set transformers logging back to error
+                        tf_logging.set_verbosity_error()
 
                         # Remove the callback which prints the metrics after
                         # each evaluation
