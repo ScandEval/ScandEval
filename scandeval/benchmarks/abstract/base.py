@@ -772,8 +772,7 @@ class BaseBenchmark(ABC):
             # Set up progress bar
             if finetune:
                 if progress_bar:
-                    desc = f'Benchmarking {model_id} on {self.name}'
-                    itr = tqdm(range(10), desc=desc)
+                    itr = tqdm(range(10), desc='Benchmarking')
                 else:
                     itr = range(10)
             else:
