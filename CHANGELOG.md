@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.3.8] - 2021-11-25
 ### Changed
 - All training/evaluation progress bars are now removed when they are finished,
   and the training progress bar has no total anymore, as it was misleading.
