@@ -14,7 +14,6 @@ from transformers import (PreTrainedTokenizerBase,
                           RobertaForSequenceClassification,
                           RobertaForTokenClassification)
 from typing import Dict, Optional, Tuple, List, Any
-from types import MethodType
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
