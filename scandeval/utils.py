@@ -256,7 +256,8 @@ class NeverLeaveProgressCallback(ProgressCallback):
 
     def on_train_begin(self, args, state, control, **kwargs):
         if state.is_local_process_zero:
-            self.training_bar = tqdm(total=None, leave=False)
+            desc = 'Finetuning model'
+            self.training_bar = tqdm(total=None, leave=False, desc=desc)
         self.current_step = 0
 
     def on_prediction_step(self, args, state, control, eval_dataloader=None,
@@ -264,6 +265,8 @@ class NeverLeaveProgressCallback(ProgressCallback):
         correct_dtype = isinstance(eval_dataloader.dataset, Sized)
         if state.is_local_process_zero and correct_dtype:
             if self.prediction_bar is None:
+                desc = 'Evaluating model'
                 self.prediction_bar = tqdm(total=len(eval_dataloader),
-                                           leave=False)
+                                           leave=False,
+                                           desc=desc)
             self.prediction_bar.update(1)
