@@ -8,6 +8,15 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now also outputting aggregated metrics in the resulting
+  `scandeval_benchmark_results.json` file. This `json` file now has keys
+  `raw_metrics` and `total`, with `raw_metrics` containing the previous (raw)
+  scores, and the value of the new `total` key has aggregated scores (means and
+  standard errors).
+
+
 ## [v1.3.8] - 2021-11-25
 ### Changed
 - All training/evaluation progress bars are now removed when they are finished,

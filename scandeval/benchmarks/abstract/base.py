@@ -577,7 +577,7 @@ class BaseBenchmark(ABC):
     def _log_metrics(self,
                      metrics: Dict[str, List[Dict[str, float]]],
                      finetuned: bool,
-                     model_id: str):
+                     model_id: str) -> Dict[str, dict]:
         '''Log the metrics.
 
         Args:
@@ -585,10 +585,18 @@ class BaseBenchmark(ABC):
                 The metrics that are to be logged. This is a dict with keys
                 'train' and 'test', with values being lists of dictionaries
                 full of metrics.
-            ta
+            finetuned (bool):
+                Whether the model is finetuned or not.
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
                 model.
+
+        Returns:
+            dict:
+                A dictionary with keys 'raw_metrics' and 'total', with
+                'raw_metrics' being identical to `metrics` and 'total' being
+                a dictionary with the aggregated metrics (means and standard
+                errors).
         '''
         # Initial logging message
         if finetuned:
@@ -597,6 +605,9 @@ class BaseBenchmark(ABC):
         else:
             msg = (f'Finished evaluation of {model_id} on {self.name}.')
         logger.info(msg)
+
+        # Initialise the total dict
+        total_dict = dict()
 
         # Logging of the metric(s)
         for metric_key, metric_name in self.metric_names.items():
@@ -614,7 +625,21 @@ class BaseBenchmark(ABC):
                 train_se *= 100
                 msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
 
+                # Store the aggregated train metrics
+                total_dict[f'train_{metric_key}'] = train_score
+                total_dict[f'train_{metric_key}_se'] = train_se
+
+            # Store the aggregated test metrics
+            total_dict[f'test_{metric_key}'] = test_score
+            total_dict[f'test_{metric_key}_se'] = test_se
+
             logger.info(msg)
+
+        # Define a dict with both the raw metrics and the aggregated metrics
+        extended_metrics = dict(raw_metrics=metrics, total=total_dict)
+
+        # Return the extended metrics
+        return extended_metrics
 
     @abstractmethod
     def _get_spacy_predictions_and_labels(self,
@@ -696,7 +721,7 @@ class BaseBenchmark(ABC):
     def benchmark(self,
                   model_id: str,
                   progress_bar: bool = True
-                  ) -> Dict[str, List[Dict[str, float]]]:
+                  ) -> Dict[str, dict]:
         '''Benchmark a model.
 
         Args:
@@ -708,8 +733,9 @@ class BaseBenchmark(ABC):
 
         Returns:
             dict:
-                The keys in the dict are 'train' and 'test', and the values
-                contain the metrics for that given dataset split.
+                The keys in the dict are 'raw_metrics' and 'total', with all
+                the raw metrics in the first dictionary and the aggregated
+                metrics in the second.
 
         Raises:
             RuntimeError: If the extracted framework is not recognized.
@@ -918,7 +944,9 @@ class BaseBenchmark(ABC):
                             pass
                         gc.collect()
 
-            self._log_metrics(metrics, model_id=model_id, finetuned=finetune)
+            metrics = self._log_metrics(metrics=metrics,
+                                        model_id=model_id,
+                                        finetuned=finetune)
 
             # Garbage collection, to avoid memory issues
             try:
@@ -988,7 +1016,9 @@ class BaseBenchmark(ABC):
                 all_train_metrics.append(train_metrics)
                 metrics['train'] = all_train_metrics
 
-            self._log_metrics(metrics, model_id=model_id, finetuned=False)
+            metrics = self._log_metrics(metrics=metrics,
+                                        model_id=model_id,
+                                        finetuned=False)
 
             # Garbage collection, to avoid memory issues
             try:
