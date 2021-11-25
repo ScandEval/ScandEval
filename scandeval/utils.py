@@ -16,7 +16,10 @@ from transformers import (AutoModelForTokenClassification,
                           TFAutoModelForSequenceClassification,
                           FlaxAutoModelForTokenClassification,
                           FlaxAutoModelForSequenceClassification,
-                          Trainer)
+                          Trainer,
+                          ProgressCallback)
+from tqdm.auto import tqdm
+from collections.abc import Sized
 
 
 def get_all_datasets() -> list:
@@ -246,3 +249,21 @@ class DocInherit(object):
 
 
 doc_inherit = DocInherit
+
+
+class NeverLeaveProgressCallback(ProgressCallback):
+    '''Progress callback which never leaves the progress bar'''
+
+    def on_train_begin(self, args, state, control, **kwargs):
+        if state.is_local_process_zero:
+            self.training_bar = tqdm(total=state.max_steps, leave=False)
+        self.current_step = 0
+
+    def on_prediction_step(self, args, state, control, eval_dataloader=None,
+                           **kwargs):
+        correct_dtype = isinstance(eval_dataloader.dataset, Sized)
+        if state.is_local_process_zero and correct_dtype:
+            if self.prediction_bar is None:
+                self.prediction_bar = tqdm(total=len(eval_dataloader),
+                                           leave=False)
+            self.prediction_bar.update(1)

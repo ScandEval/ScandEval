@@ -29,7 +29,8 @@ import re
 import random
 
 from ...utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
-                      TwolabelTrainer, get_all_datasets)
+                      TwolabelTrainer, get_all_datasets,
+                      NeverLeaveProgressCallback)
 
 
 logger = logging.getLogger(__name__)
@@ -852,9 +853,13 @@ class BaseBenchmark(ABC):
                         if finetune:
                             trainer.train()
 
-                        # Pop the progress bar callback, to avoid showing
-                        # evaluation progress bars
-                        progress_cb = trainer.pop_callback(ProgressCallback)
+                        # Remove the progress bar callback
+                        trainer.remove_callback(ProgressCallback)
+
+                        # Add the custom progress callback if `progress_bar` is
+                        # True
+                        if progress_bar:
+                            trainer.add_callback(NeverLeaveProgressCallback)
 
                         # Log training metrics and save the state
                         if self.evaluate_train:
@@ -871,9 +876,6 @@ class BaseBenchmark(ABC):
                                 metric_key_prefix='test'
                             )
                             metrics['test'].append(test_metrics)
-
-                        # Restore the progress bar callback
-                        trainer.add_callback(progress_cb)
 
                         break
 
