@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.3.6] - 2021-11-25
 ### Changed
 - Now only updating the list of benchmarks in the `Benchmark` during
   initialisation, and also logs it. This should make subsequent calls to the
