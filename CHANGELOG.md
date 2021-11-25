@@ -9,8 +9,8 @@ and this project adheres to
 
 
 ## [Unreleased]
-### Fixed
-- Removed progress bars during evaluation.
+### Changed
+- All training/evaluation progress bars are now removed when they are finished.
 
 
 ## [v1.3.7] - 2021-11-25
