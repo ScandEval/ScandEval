@@ -196,6 +196,7 @@ def block_terminal_output():
     warnings.filterwarnings('ignore', module='seqeval*')
 
     logging.getLogger('filelock').setLevel(logging.ERROR)
+    logging.getLogger('absl').setLevel(logging.ERROR)
 
     # Disable the tokenizer progress bars
     ds_logging.get_verbosity = lambda: ds_logging.NOTSET

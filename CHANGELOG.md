@@ -16,6 +16,9 @@ and this project adheres to
   before considering models in other frameworks. This is only relevant when
   models in multiple frameworks are available for the same model ID.
 
+### Fixed
+- Removed `absl` logging, which appears when dealing with Flax models.
+
 
 ## [v1.4.0] - 2021-11-25
 ### Changed
