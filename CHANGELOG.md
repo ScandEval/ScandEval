@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.5.0] - 2021-11-26
 ### Changed
 - Added progress bar description when evaluating models without finetuning them
   first.
