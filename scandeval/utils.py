@@ -12,10 +12,6 @@ import torch
 from pydoc import locate
 from transformers import (AutoModelForTokenClassification,
                           AutoModelForSequenceClassification,
-                          TFAutoModelForTokenClassification,
-                          TFAutoModelForSequenceClassification,
-                          FlaxAutoModelForTokenClassification,
-                          FlaxAutoModelForSequenceClassification,
                           Trainer,
                           ProgressCallback)
 from tqdm.auto import tqdm
@@ -124,11 +120,7 @@ def get_all_datasets() -> list:
 
 PT_CLS = {'token-classification': AutoModelForTokenClassification,
           'text-classification': AutoModelForSequenceClassification}
-TF_CLS = {'token-classification': TFAutoModelForTokenClassification,
-          'text-classification': TFAutoModelForSequenceClassification}
-JAX_CLS = {'token-classification': FlaxAutoModelForTokenClassification,
-           'text-classification': FlaxAutoModelForSequenceClassification}
-MODEL_CLASSES = dict(pytorch=PT_CLS, tensorflow=TF_CLS, jax=JAX_CLS)
+MODEL_CLASSES = dict(pytorch=PT_CLS)
 
 
 class TwolabelTrainer(Trainer):

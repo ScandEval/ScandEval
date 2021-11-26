@@ -71,9 +71,6 @@ class BaseBenchmark(ABC):
             label, and `id2label[split_point]` contains the labels for the
             second label. Only relevant if `two_labels` is True. Defaults to
             None.
-        prefer_jax (bool, optional):
-            Whether to prefer Jax for the benchmarking, if available. Defaults
-            to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -90,7 +87,6 @@ class BaseBenchmark(ABC):
         cache_dir (str): Directory where models are cached.
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
-        prefer_jax (bool): Whether to prefer Jax for the benchmarking.
         verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
@@ -103,7 +99,6 @@ class BaseBenchmark(ABC):
                  cache_dir: str = '.benchmark_models',
                  two_labels: bool = False,
                  split_point: Optional[int] = None,
-                 prefer_jax: bool = False,
                  verbose: bool = False):
 
         self.short_name = name
@@ -118,7 +113,6 @@ class BaseBenchmark(ABC):
         self.cache_dir = cache_dir
         self.two_labels = two_labels
         self.split_point = split_point
-        self.prefer_jax = prefer_jax
         self.verbose = verbose
 
         if id2label is not None:
@@ -215,8 +209,8 @@ class BaseBenchmark(ABC):
                 model.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
-                'pytorch', 'tensorflow', 'jax' and 'spacy'. If None then this
-                will be inferred from `model_id`. Defaults to None.
+                'pytorch' and 'spacy'. If None then this will be inferred from
+                `model_id`. Defaults to None.
             task (str or None, optional):
                 The task for which the model was trained on. If None then this
                 will be inferred from `model_id`. Defaults to None.
@@ -244,10 +238,6 @@ class BaseBenchmark(ABC):
                 import torch
                 import torch.nn as nn
                 from torch.nn import Parameter
-            elif framework == 'tensorflow':
-                import tensorflow  # noqa
-            elif framework == 'jax':
-                import flax  # noqa
             elif framework == 'spacy':
                 import spacy
 
@@ -264,7 +254,7 @@ class BaseBenchmark(ABC):
                    f'scandeval[{framework}]`.')
             raise ModuleNotFoundError(msg)
 
-        if framework in ['pytorch', 'tensorflow', 'jax']:
+        if framework == 'pytorch':
 
             if task == 'fill-mask':
                 params = dict(num_labels=self.num_labels,
@@ -702,10 +692,7 @@ class BaseBenchmark(ABC):
                       if 'tag-red' in a['class']]
 
         # Set up the order of the frameworks
-        if self.prefer_jax:
-            valid_frameworks = ['jax', 'pytorch', 'tensorflow', 'spacy']
-        else:
-            valid_frameworks = ['pytorch', 'tensorflow', 'jax', 'spacy']
+        valid_frameworks = ['pytorch', 'spacy']
 
         # Extract a single valid framework in which the model has been
         # implemented
@@ -772,7 +759,7 @@ class BaseBenchmark(ABC):
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
-        if framework in ['pytorch', 'tensorflow', 'jax']:
+        if framework in ['pytorch']:
 
             # Set platform-dependent random seeds
             if framework == 'pytorch':
@@ -780,10 +767,6 @@ class BaseBenchmark(ABC):
                 torch.manual_seed(4242)
                 torch.cuda.manual_seed_all(4242)
                 torch.backends.cudnn.benchmark = False
-
-            elif framework == 'tensorflow':
-                import tensorflow as tf
-                tf.random.set_seed(4242)
 
             # Extract the model and tokenizer
             model = model_dict['model']

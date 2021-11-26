@@ -18,8 +18,6 @@ class FdtPosBenchmark(PosBenchmark):
         evaluate_train (bool, optional):
             Whether the models should be evaluated on the training scores.
             Defaults to False.
-        prefer_jax (bool, optional):
-            Whether to prefer Jax for the evaluation. Defaults to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -36,16 +34,13 @@ class FdtPosBenchmark(PosBenchmark):
         cache_dir (str): Directory where models are cached.
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
-        prefer_jax (bool): Whether to prefer JAX for evaluation.
         verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
-                 prefer_jax: bool = False,
                  verbose: bool = False):
         super().__init__(name='fdt-pos',
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
-                         prefer_jax=prefer_jax,
                          verbose=verbose)

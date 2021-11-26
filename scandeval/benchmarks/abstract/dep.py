@@ -24,8 +24,6 @@ class DepBenchmark(TokenClassificationBenchmark):
         evaluate_train (bool, optional):
             Whether the models should be evaluated on the training scores.
             Defaults to False.
-        prefer_jax (bool, optional):
-            Whether to prefer Jax for the evaluation. Defaults to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -42,14 +40,12 @@ class DepBenchmark(TokenClassificationBenchmark):
         cache_dir (str): Directory where models are cached.
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
-        prefer_jax (bool): Whether to prefer Jax for the evaluation.
         verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
                  name: str,
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
-                 prefer_jax: bool = False,
                  verbose: bool = False):
         id2label_head = [str(i) for i in range(512)]
         id2label_dep = ['acl', 'advcl', 'advmod', 'amod', 'appos', 'aux',
@@ -67,7 +63,6 @@ class DepBenchmark(TokenClassificationBenchmark):
                          two_labels=True,
                          split_point=len(id2label_head),
                          evaluate_train=evaluate_train,
-                         prefer_jax=prefer_jax,
                          verbose=verbose)
 
     def _load_data(self) -> Tuple[Dataset, Dataset]:

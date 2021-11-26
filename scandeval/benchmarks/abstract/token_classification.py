@@ -49,8 +49,6 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
             label, and `id2label[split_point]` contains the labels for the
             second label. Only relevant if `two_labels` is True. Defaults to
             None.
-        prefer_jax (bool, optional):
-            Whether to prefer Jax for the evaluation. Defaults to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -67,7 +65,6 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         cache_dir (str): Directory where models are cached.
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
-        prefer_jax (bool): Whether to prefer Jax for the evaluation.
         verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
@@ -79,7 +76,6 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                  cache_dir: str = '.benchmark_models',
                  two_labels: bool = False,
                  split_point: Optional[int] = None,
-                 prefer_jax: bool = False,
                  verbose: bool = False):
         self._metric = load_metric('seqeval')
         super().__init__(task='token-classification',
@@ -91,7 +87,6 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                          evaluate_train=evaluate_train,
                          two_labels=two_labels,
                          split_point=split_point,
-                         prefer_jax=prefer_jax,
                          verbose=verbose)
 
     def _tokenize_and_align_labels(self,
@@ -192,7 +187,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         Returns:
             HuggingFace dataset: The preprocessed dataset.
         '''
-        if framework in ['pytorch', 'tensorflow', 'jax']:
+        if framework == 'pytorch':
             map_fn = partial(self._tokenize_and_align_labels,
                              tokenizer=kwargs['tokenizer'],
                              label2id=kwargs['config'].label2id)
