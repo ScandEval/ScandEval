@@ -666,8 +666,7 @@ class BaseBenchmark(ABC):
         '''
         pass
 
-    @staticmethod
-    def _fetch_model_metadata(model_id: str) -> Dict[str, str]:
+    def _fetch_model_metadata(self, model_id: str) -> Dict[str, str]:
         '''Fetches metdataof a model from the HuggingFace Hub.
 
         Args:
