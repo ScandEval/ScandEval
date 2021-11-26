@@ -33,8 +33,21 @@ class Benchmark:
             tasks should be considered. Defaults to 'all'.
         evaluate_train (bool, optional):
             Whether to evaluate the training set as well. Defaults to False.
+        prefer_jax (bool, optional):
+            Whether to prefer Jax for benchmarking, if available. Defaults to
+            False.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
+
+    Attributes:
+        progress_bar (bool): Whether progress bars should be shown.
+        save_results (bool): Whether to save the benchmark results.
+        language (str or list of str): The languages to include in the list.
+        task (str or list of str): The tasks to consider in the list.
+        evaluate_train (bool): Whether to evaluate the training set as well.
+        prefer_jax (bool): Whether to prefer Jax for benchmarking.
+        verbose (bool): Whether to output additional output.
+        benchmark_results (dict): The benchmark results.
     '''
     def __init__(self,
                  progress_bar: bool = True,
@@ -43,6 +56,7 @@ class Benchmark:
                                                     'nn', 'is', 'fo'],
                  task: Union[str, List[str]] = 'all',
                  evaluate_train: bool = False,
+                 prefer_jax: bool = False,
                  verbose: bool = False):
 
         # Set parameters
@@ -51,6 +65,7 @@ class Benchmark:
         self.language = language
         self.task = task
         self.evaluate_train = evaluate_train
+        self.prefer_jax = prefer_jax
         self.verbose = verbose
 
         # Initialise variable storing model lists, so we only have to fetch it
@@ -70,7 +85,9 @@ class Benchmark:
 
         # Update the list of benchmarks
         logger.info('Updating the list of benchmark datasets')
-        self._update_benchmarks(evaluate_train=evaluate_train, verbose=verbose)
+        self._update_benchmarks(evaluate_train=evaluate_train,
+                                prefer_jax=prefer_jax,
+                                verbose=verbose)
 
     def _update_benchmarks(self, **params):
         '''Updates the internal list of all benchmarks.
@@ -216,6 +233,7 @@ class Benchmark:
                   language: Optional[Union[str, List[str]]] = None,
                   task: Optional[Union[str, List[str]]] = None,
                   evaluate_train: Optional[bool] = None,
+                  prefer_jax: Optional[bool] = None,
                   verbose: Optional[bool] = None
                   ) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks models on datasets.
@@ -247,6 +265,9 @@ class Benchmark:
                 Whether to evaluate the training set as well. If None then the
                 default value from the constructor will be used. Defaults to
                 None.
+            prefer_jax (bool or None, optional):
+                Whether to prefer Jax for evaluation. If None then the default
+                value from the constructor will be used. Defaults to None.
             verbose (bool or None, optional):
                 Whether to output additional output. If None then the default
                 value from the constructor will be used. Defaults to None.
@@ -268,13 +289,18 @@ class Benchmark:
             task = self.task
         if evaluate_train is None:
             evaluate_train = self.evaluate_train
+        if prefer_jax is None:
+            prefer_jax = self.prefer_jax
         if verbose is None:
             verbose = self.verbose
 
         # Update benchmark list
-        if evaluate_train != self.evaluate_train or verbose != self.verbose:
+        if (evaluate_train != self.evaluate_train or
+                prefer_jax != self.prefer_jax or
+                verbose != self.verbose):
             logger.info('Updating the list of benchmark datasets')
             self._update_benchmarks(evaluate_train=evaluate_train,
+                                    prefer_jax=prefer_jax,
                                     verbose=verbose)
 
         # Ensure that `language` is a list

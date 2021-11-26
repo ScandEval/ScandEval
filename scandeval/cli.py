@@ -47,6 +47,10 @@ from .utils import get_all_datasets
               is_flag=True,
               show_default=True,
               help='Whether progress bars should be shown.')
+@click.option('--prefer_jax',
+              is_flag=True,
+              show_default=True,
+              help='Whether Jax models should be preferred, if available.')
 @click.option('--verbose', '-v',
               is_flag=True,
               show_default=True,
@@ -58,6 +62,7 @@ def benchmark(model_id: Tuple[str],
               task: Tuple[str],
               evaluate_train: bool,
               no_progress_bar: bool,
+              prefer_jax: bool,
               verbose: bool = False):
     '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
@@ -66,6 +71,7 @@ def benchmark(model_id: Tuple[str],
                             progress_bar=(not no_progress_bar),
                             save_results=True,
                             evaluate_train=evaluate_train,
+                            prefer_jax=prefer_jax,
                             verbose=verbose)
 
     # Perform the benchmark evaluation

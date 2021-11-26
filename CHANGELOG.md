@@ -8,6 +8,15 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added `prefer_jax` option to the `Benchmark` class (both during
+  initialisation and when calling the `benchmark` method), as well as to the
+  CLI with the `--prefer_jax` flag. This will prefer to load in Jax models
+  before considering models in other frameworks. This is only relevant when
+  models in multiple frameworks are available for the same model ID.
+
+
 ## [v1.4.0] - 2021-11-25
 ### Changed
 - Now also outputting aggregated metrics in the resulting
