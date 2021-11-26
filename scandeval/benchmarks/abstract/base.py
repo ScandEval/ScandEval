@@ -889,8 +889,16 @@ class BaseBenchmark(ABC):
                             )
                             metrics['train'].append(train_metrics)
 
+                        # Set up a progress bar for the test datasets if we are
+                        # not finetuning
+                        if not finetune:
+                            if progress_bar:
+                                test_itr = tqdm(tests, desc='Benchmarking')
+                            else:
+                                test_itr = tests
+
                         # Log test metrics
-                        for dataset in tests:
+                        for dataset in test_itr:
                             test_metrics = trainer.evaluate(
                                 dataset,
                                 metric_key_prefix='test'
