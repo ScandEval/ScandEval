@@ -489,7 +489,9 @@ class BaseBenchmark(ABC):
             if not is_module_installed(local_model_id):
                 url = (f'https://huggingface.co/{model_id}/resolve/main/'
                        f'{local_model_id}-any-py3-none-any.whl')
-                subprocess.run(['pip3', 'install', url])
+                logger.info(f'Model not installed. Downloading model')
+                subprocess.run(['pip3', 'install', url, '--quiet'])
+                logger.info(f'Finished downloading model. Resuming benchmark:')
 
             # Load the model
             try:
