@@ -9,6 +9,9 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Removed
+- Removed support for TensorFlow and Jax models, due to them not working
+  properly anyway. They might be included at a later point, properly.
 
 
 ## [v1.4.0] - 2021-11-25
