@@ -12,6 +12,7 @@ and this project adheres to
 ### Changed
 - Added progress bar description when evaluating models without finetuning them
   first.
+- Lowered the package requirements to the earliest possible versions.
 
 ### Removed
 - Removed support for TensorFlow and Jax models, due to them not working
