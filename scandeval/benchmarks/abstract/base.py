@@ -489,9 +489,9 @@ class BaseBenchmark(ABC):
             if not is_module_installed(local_model_id):
                 url = (f'https://huggingface.co/{model_id}/resolve/main/'
                        f'{local_model_id}-any-py3-none-any.whl')
-                logger.info(f'Model not installed. Downloading model')
+                logger.info('Model not installed. Downloading model')
                 subprocess.run(['pip3', 'install', url, '--quiet'])
-                logger.info(f'Finished downloading model. Resuming benchmark:')
+                logger.info('Finished downloading model. Resuming benchmark:')
 
             # Load the model
             try:
@@ -693,7 +693,7 @@ class BaseBenchmark(ABC):
                       for a in a_tags_with_class
                       if 'tag-red' in a['class']]
 
-        # Set up the order of the frameworks
+        # Set up the order of the frameworks
         valid_frameworks = ['pytorch', 'spacy']
 
         # Extract a single valid framework in which the model has been
