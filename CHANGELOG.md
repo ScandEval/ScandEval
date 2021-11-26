@@ -9,6 +9,9 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- Added progress bar description when evaluating SpaCy models.
+
 ### Removed
 - Removed support for TensorFlow and Jax models, due to them not working
   properly anyway. They might be included at a later point, properly.

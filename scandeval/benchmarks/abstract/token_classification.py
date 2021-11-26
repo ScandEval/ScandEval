@@ -233,7 +233,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         '''
         # Initialise progress bar
         if progress_bar:
-            itr = tqdm(dataset['doc'])
+            itr = tqdm(dataset['doc'], desc='Evaluating model')
         else:
             itr = dataset['doc']
 
