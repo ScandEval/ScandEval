@@ -966,7 +966,7 @@ class BaseBenchmark(ABC):
 
             # Get the test predictions
             all_test_metrics = list()
-            for dataset in tests:
+            for dataset in tqdm(tests, desc='Benchmarking'):
                 preds_labels = self._get_spacy_predictions_and_labels(
                     model=model,
                     dataset=dataset,
