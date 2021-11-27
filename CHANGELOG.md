@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.5.1] - 2021-11-27
 ### Fixed
 - Fixed bug when evaluating a finetuned model.
 
