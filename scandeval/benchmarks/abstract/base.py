@@ -79,7 +79,7 @@ class BaseBenchmark(ABC):
         name (str): The name of the dataset.
         task (str): The type of task to be benchmarked.
         metric_names (dict): The names of the metrics.
-        id2label (dict or None): A dictionary converting indices to labels.
+        id2label (list or None): A list converting indices to labels.
         label2id (dict or None): A dictionary converting labels to indices.
         num_labels (int or None): The number of labels in the dataset.
         label_synonyms (list of lists of str): Synonyms of the dataset labels.
@@ -402,7 +402,7 @@ class BaseBenchmark(ABC):
                         # exception
                         if num_new_labels == self.num_labels:
                             if len(set(flat_old_synonyms)
-                                    .intersection(old_id2label)) == 0:
+                                   .intersection(old_id2label)) == 0:
                                 msg = ('The model has not been trained on '
                                        'any of the labels in the dataset, or '
                                        'synonyms thereof.')
