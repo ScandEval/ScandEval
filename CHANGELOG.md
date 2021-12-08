@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Deal with models with tasks `feature-extraction` or `sentence-similarity` as
+  if they were `fill-mask`, meaning assume that they are merely pretrained
+  models, rather than finetuned.
+
+
 ## [v1.5.1] - 2021-11-27
 ### Fixed
 - Fixed bug when evaluating a finetuned model.

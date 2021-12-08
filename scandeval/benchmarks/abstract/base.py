@@ -141,6 +141,24 @@ class BaseBenchmark(ABC):
         if verbose:
             tf_logging.set_verbosity_warning()
 
+    @staticmethod
+    def _get_model_task(task: Optional[str]) -> str:
+        '''Get the task of the model.
+
+        Args:
+            task (str or None): The task of the model.
+
+        Returns:
+            str: The task of the model.
+        '''
+        pretrained_tasks = ['fill-mask',
+                            'sentence-similarity',
+                            'feature-extraction']
+        if task is None or task in pretrained_tasks:
+            return 'fill-mask'
+        else:
+            return task
+
     def _get_model_class(self, framework: str) -> _BaseAutoModelClass:
         return MODEL_CLASSES[framework][self.task]
 
@@ -714,7 +732,7 @@ class BaseBenchmark(ABC):
         # Extract a single valid task on which the model has been trained. If
         # no task has been specified on the model card then assume that it is
         # 'fill-mask'
-        task = tasks[0] if len(tasks) > 0 else 'fill-mask'
+        task = self._get_model_task(tasks[0]) if len(tasks) else 'fill-mask'
 
         return dict(framework=framework, task=task)
 
