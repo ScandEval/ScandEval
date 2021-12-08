@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.5.4] - 2021-12-08
 ### Fixed
 - Remove reference to `trainer` when CUDA OOM error is dealt with.
 
