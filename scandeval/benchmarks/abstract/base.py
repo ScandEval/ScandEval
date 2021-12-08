@@ -930,7 +930,7 @@ class BaseBenchmark(ABC):
                     except (RuntimeError, ValueError, IndexError) as e:
 
                         # If it is an unknown error, then simply report it
-                        if not str(e).startswith('CUDA out of memory'):
+                        if 'CUDA out of memory' not in str(e):
                             # Garbage collection, to avoid memory issues
                             try:
                                 del model
