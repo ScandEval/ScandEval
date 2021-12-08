@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.5.5] - 2021-12-08
 ### Fixed
 - Deal with CUDA OOM errors when they occur on a replica, when multiple cores
   are used.
