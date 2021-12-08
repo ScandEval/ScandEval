@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Remove reference to `trainer` when CUDA OOM error is dealt with.
+
+
 ## [v1.5.3] - 2021-12-08
 ### Fixed
 - Only try to to merge the `id2label` and `label2id` conversions if the model
