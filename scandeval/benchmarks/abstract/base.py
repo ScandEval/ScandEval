@@ -340,7 +340,8 @@ class BaseBenchmark(ABC):
 
                 # If the model does not have `label2id` or `id2label`
                 # conversions, then use the defaults
-                if model_label2id is None and model_id2label is None:
+                if (task == 'fill-mask' or
+                        (model_label2id is None and model_id2label is None)):
                     model.config.label2id = self.label2id
                     model.config.id2label = self.id2label
 
