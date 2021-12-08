@@ -9,6 +9,16 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- When benchmarking a token classification dataset with a model whose tokenizer
+  does not have a fast variant yet, this raised an error as the `word_ids`
+  method of `BatchEncoding` objects only works when the tokenizer is fast. In
+  that case these word IDs are now computed manually. This can currently handle
+  WordPiece and SentencePiece prefixes (i.e., `##` and `▁`), and will raise an
+  error if the manual alignment of words and tokens fail.
+
+
+## [v1.5.5] - 2021-12-08
 ### Fixed
 - Deal with CUDA OOM errors when they occur on a replica, when multiple cores
   are used.
