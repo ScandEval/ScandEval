@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.5.7] - 2021-12-10
 ### Fixed
 - Now catching _all_ `CUDA error` exceptions and treating them as running out
   of memory. No harm done if this is not the case, however, as the script will
