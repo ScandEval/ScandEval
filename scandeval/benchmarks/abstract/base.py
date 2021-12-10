@@ -929,8 +929,15 @@ class BaseBenchmark(ABC):
 
                     except (RuntimeError, ValueError, IndexError) as e:
 
+                        # These are known CUDA OOM errors
+                        cuda_errs = [
+                            'CUDA out of memory',
+                            'CUDA error: CUBLAS_STATUS_ALLOC_FAILED'
+                        ]
+
                         # If it is an unknown error, then simply report it
-                        if 'CUDA out of memory' not in str(e):
+                        if all([err not in str(e) for err in cuda_errs]):
+
                             # Garbage collection, to avoid memory issues
                             try:
                                 del model

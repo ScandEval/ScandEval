@@ -16,6 +16,8 @@ and this project adheres to
   that case these word IDs are now computed manually. This can currently handle
   WordPiece and SentencePiece prefixes (i.e., `##` and `▁`), and will raise an
   error if the manual alignment of words and tokens fail.
+- Catch the CUDA error `CUDA error: CUBLAS_STATUS_ALLOC_FAILED`, which in this
+  case is due to OOM.
 
 
 ## [v1.5.5] - 2021-12-08
