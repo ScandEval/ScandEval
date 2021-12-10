@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now catching _all_ `CUDA error` exceptions and treating them as running out
+  of memory. No harm done if this is not the case, however, as the script will
+  simply decrease the batch size until it reaches 1, and if CUDA errors persist
+  then it will skip that benchmark.
+
+
 ## [v1.5.6] - 2021-12-10
 ### Fixed
 - When benchmarking a token classification dataset with a model whose tokenizer

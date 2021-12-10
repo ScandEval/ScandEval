@@ -929,10 +929,11 @@ class BaseBenchmark(ABC):
 
                     except (RuntimeError, ValueError, IndexError) as e:
 
-                        # These are known CUDA OOM errors
+                        # We assume that all these CUDA errors are caused by
+                        # insufficient GPU memory
                         cuda_errs = [
                             'CUDA out of memory',
-                            'CUDA error: CUBLAS_STATUS_ALLOC_FAILED'
+                            'CUDA error'
                         ]
 
                         # If it is an unknown error, then simply report it
