@@ -117,7 +117,66 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         )
         all_labels = []
         for i, labels in enumerate(examples['orig_labels']):
-            word_ids = tokenized_inputs.word_ids(batch_index=i)
+            try:
+                word_ids = tokenized_inputs.word_ids(batch_index=i)
+
+            # This happens if the tokenizer is not of the fast variant, in
+            # which case the `word_ids` method is not available, so we have to
+            # extract this manually. It's slower, but it works, and it should
+            # only occur rarely, when the HuggingFace team has not implemented
+            # a fast variant of the tokenizer yet.
+            except ValueError:
+
+                # Get the list of words in the document
+                words = examples['tokens'][i]
+
+                # Get the list of token IDs in the document
+                tok_ids = tokenized_inputs.input_ids[i]
+
+                # Decode the token IDs
+                tokens = tokenizer.convert_ids_to_tokens(tok_ids)
+
+                # Remove prefixes from the tokens
+                prefixes_to_remove = ['▁', '##']
+                for tok_idx, tok in enumerate(tokens):
+                    for prefix in prefixes_to_remove:
+                        tok = tok.lstrip(prefix)
+                    tokens[tok_idx] = tok
+
+                # Replace special tokens with `None`
+                sp_toks = tokenizer.special_tokens_map.values()
+                tokens = [None if tok in sp_toks else tok for tok in tokens]
+
+                # Get the alignment between the words and the tokens, on a
+                # character level
+                word_idxs = [word_idx for word_idx, word in enumerate(words)
+                             for _ in str(word)]
+                token_idxs = [tok_idx for tok_idx, tok in enumerate(tokens)
+                              for _ in str(tok) if tok is not None]
+                alignment = list(zip(word_idxs, token_idxs))
+
+                # Raise error if there are not as many characters in the words
+                # as in the tokens. This can be due to the use of a different
+                # prefix.
+                if len(word_idxs) != len(token_idxs):
+                    raise InvalidBenchmark('The tokens could not be aligned '
+                                           'with the words during manual '
+                                           'word-token alignment. It seems '
+                                           'that the tokenizer is neither of '
+                                           'the fast variant nor of a '
+                                           'SentencePiece/WordPiece variant.')
+
+                # Get the aligned word IDs
+                word_ids = list()
+                for tok_idx, tok in enumerate(tokens):
+                    if tok is None or tok == '':
+                        word_ids.append(None)
+                    else:
+                        word_idx = [word_idx
+                                    for word_idx, token_idx in alignment
+                                    if token_idx == tok_idx][0]
+                        word_ids.append(word_idx)
+
             previous_word_idx = None
             label_ids = []
             for word_idx in word_ids:
