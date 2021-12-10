@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.5.6] - 2021-12-10
 ### Fixed
 - When benchmarking a token classification dataset with a model whose tokenizer
   does not have a fast variant yet, this raised an error as the `word_ids`
