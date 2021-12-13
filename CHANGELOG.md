@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now explicitly removing empty tokenisations from the dataset.
+
+
 ## [v1.5.7] - 2021-12-10
 ### Fixed
 - Now catching _all_ `CUDA error` exceptions and treating them as running out
