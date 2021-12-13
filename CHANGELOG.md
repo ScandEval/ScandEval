@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v1.5.8] - 2021-12-13
 ### Fixed
 - Now explicitly removing empty tokenisations from the dataset.
 
