@@ -778,8 +778,15 @@ class BaseBenchmark(ABC):
         rng = np.random.default_rng(4242)
 
         # Remove empty examples from the datasets
-        train = train.filter(lambda x: len(x['tokens']) > 0)
-        test = test.filter(lambda x: len(x['tokens']) > 0)
+        try:
+            train = train.filter(lambda x: len(x['tokens']) > 0)
+            test = test.filter(lambda x: len(x['tokens']) > 0)
+        except KeyError:
+            try:
+                train = train.filter(lambda x: len(x['doc']) > 0)
+                test = test.filter(lambda x: len(x['doc']) > 0)
+            except KeyError:
+                pass
 
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
