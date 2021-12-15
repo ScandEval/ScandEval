@@ -63,4 +63,4 @@ def create_tweet_dataset(dataset: str):
 
 
 if __name__ == '__main__':
-    create_tweet_dataset('angry_tweets')
+    create_tweet_dataset('twitter_sent')

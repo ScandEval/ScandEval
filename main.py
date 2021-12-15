@@ -1053,9 +1053,9 @@ def process_twitter_sent_sentiment():
     from tqdm.auto import tqdm
     import pandas as pd
 
-    Path('datasets/twitter_sent').mkdir()
+    Path('datasets/twitter_sent').mkdir(exist_ok=True)
 
-    input_path = Path('datasets/twitter_sent.csv')
+    input_path = Path('datasets/twitter_sent/twitter_sent.csv')
     output_paths = [Path('datasets/twitter_sent/train.jsonl'),
                     Path('datasets/twitter_sent/test.jsonl')]
 
@@ -1069,7 +1069,7 @@ def process_twitter_sent_sentiment():
 
     for split, output_path in zip([train, test], output_paths):
         for idx, row in tqdm(split.iterrows()):
-            data_dict = dict(tweet_id=row.twitterid, label=row.sentiment)
+            data_dict = dict(tweet_id=row.twitterid, label=row.polarity)
             json_line = json.dumps(data_dict)
             with output_path.open('a') as f:
                 f.write(json_line)
@@ -1595,4 +1595,4 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
-    process_angrytweets()
+    process_twitter_sent_sentiment()
