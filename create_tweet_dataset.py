@@ -45,8 +45,8 @@ def create_tweet_dataset(dataset: str):
             for data_dict in data_dicts:
                 if data_dict['tweet_id'] == tweet['id']:
                     text = tweet['full_text']
-                    text = re.sub(r'@[a-zA-Z0-9]+', '@USER', text)
-                    text = re.sub(r' *http[.\/?&a-zA-Z0-9\-\:]+ *', '', text)
+                    text = re.sub(r'@[a-zA-Z0-9_]+', '@USER', text)
+                    text = re.sub(r' *http[.\/?&a-zA-Z0-9\-\:]+ *', 'LINK', text)
                     text = re.sub(r' +', ' ', text)
                     record = dict(text=text.strip(), label=data_dict['label'])
                     records.append(json.dumps(record))
