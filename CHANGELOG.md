@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Changed the anonymisation procedure for tweet datasets, now replacing user
+  names by @USER and links by [LINK].
+
+
 ## [v1.5.9] - 2021-12-14
 ### Fixed
 - Now removing all empty documents from datasets, as well as catching
