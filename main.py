@@ -1331,7 +1331,7 @@ def process_angrytweets():
     import pandas as pd
     from sklearn.model_selection import train_test_split
 
-    input_path = Path('datasets/angry_tweets.csv')
+    input_path = Path('datasets/angry_tweets/angry_tweets.csv')
     output_paths = [Path('datasets/angry_tweets/train.jsonl'),
                     Path('datasets/angry_tweets/test.jsonl')]
 
@@ -1595,4 +1595,4 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
-    process_mim_gold_ner()
+    process_angrytweets()
