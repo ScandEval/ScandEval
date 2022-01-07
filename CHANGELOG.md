@@ -10,8 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- Changed the anonymisation procedure for tweet datasets, now replacing user
-  names by @USER and links by [LINK].
+- Changed the anonymisation procedure for the tweet datasets `angry-tweets` and
+  `twitter-sent`, now replacing user names by @USER and links by [LINK].
 
 
 ## [v1.5.9] - 2021-12-14
