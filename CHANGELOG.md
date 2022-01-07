@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v2.0.0] - 2022-01-07
 ### Fixed
 - Changed the anonymisation procedure for the tweet datasets `angry-tweets` and
   `twitter-sent`, now replacing user names by @USER and links by [LINK].
