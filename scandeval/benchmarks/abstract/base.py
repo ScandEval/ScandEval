@@ -227,7 +227,7 @@ class BaseBenchmark(ABC):
                 model.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
-                'pytorch' and 'spacy'. If None then this will be inferred from
+                'pytorch', 'jax', and 'spacy'. If None then this will be inferred from
                 `model_id`. Defaults to None.
             task (str or None, optional):
                 The task for which the model was trained on. If None then this
@@ -251,11 +251,16 @@ class BaseBenchmark(ABC):
                 task = model_metadata['task']
 
         # Ensure that the framework is installed
+        from_flax = False
         try:
-            if framework == 'pytorch':
+            if framework in ('pytorch', 'jax'):
                 import torch
                 import torch.nn as nn
                 from torch.nn import Parameter
+                if framework == 'jax':
+                    from_flax = True
+                    import jax
+                    framework = 'pytorch'
             elif framework == 'spacy':
                 import spacy
 
@@ -304,7 +309,8 @@ class BaseBenchmark(ABC):
                     model_cls = self._get_model_class(framework=framework)
                     model = model_cls.from_pretrained(model_id,
                                                       config=config,
-                                                      cache_dir=self.cache_dir)
+                                                      cache_dir=self.cache_dir,
+                                                      from_flax=from_flax)
 
                 # Get the `label2id` and `id2label` conversions from the model
                 # config
@@ -713,7 +719,7 @@ class BaseBenchmark(ABC):
                       if 'tag-red' in a['class']]
 
         # Set up the order of the frameworks
-        valid_frameworks = ['pytorch', 'spacy']
+        valid_frameworks = ['pytorch', 'spacy', 'jax']
 
         # Extract a single valid framework in which the model has been
         # implemented
@@ -791,15 +797,15 @@ class BaseBenchmark(ABC):
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
-        if framework in ['pytorch']:
+        if framework in ('pytorch', 'jax'):
+            framework = 'pytorch'
 
             # Set platform-dependent random seeds
-            if framework == 'pytorch':
-                import torch
-                torch.manual_seed(4242)
-                torch.cuda.manual_seed_all(4242)
-                torch.backends.cudnn.benchmark = False
-
+            import torch
+            torch.manual_seed(4242)
+            torch.cuda.manual_seed_all(4242)
+            torch.backends.cudnn.benchmark = False
+            
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
