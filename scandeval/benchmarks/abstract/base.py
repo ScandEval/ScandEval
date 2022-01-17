@@ -805,7 +805,7 @@ class BaseBenchmark(ABC):
                 torch.manual_seed(4242)
                 torch.cuda.manual_seed_all(4242)
                 torch.backends.cudnn.benchmark = False
-
+            framework = 'pytorch'
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
