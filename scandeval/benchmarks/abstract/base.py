@@ -797,7 +797,7 @@ class BaseBenchmark(ABC):
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
-        if framework in ['pytorch']:
+        if framework in ['pytorch', 'jax']:
 
             # Set platform-dependent random seeds
             if framework == 'pytorch':
