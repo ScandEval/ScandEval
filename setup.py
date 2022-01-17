@@ -33,5 +33,6 @@ setup(name='scandeval',
                         'termcolor>=1.0.0'],
       extras_require=dict(pytorch=PYTORCH_REQUIRES,
                           spacy=SPACY_REQUIRES,
+                          jax=JAX_REQUIRES,
                           all=ALL_REQUIRES),
       entry_points=dict(console_scripts=['scandeval=scandeval.cli:benchmark']))
