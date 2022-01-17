@@ -251,11 +251,16 @@ class BaseBenchmark(ABC):
                 task = model_metadata['task']
 
         # Ensure that the framework is installed
+        from_flax = False
         try:
-            if framework == 'pytorch':
+            if framework in ('pytorch', 'jax'):
                 import torch
                 import torch.nn as nn
                 from torch.nn import Parameter
+                if framework == 'jax':
+                    from_flax = True
+                    import jax
+                    framework = 'pytorch'
             elif framework == 'spacy':
                 import spacy
 
@@ -304,7 +309,8 @@ class BaseBenchmark(ABC):
                     model_cls = self._get_model_class(framework=framework)
                     model = model_cls.from_pretrained(model_id,
                                                       config=config,
-                                                      cache_dir=self.cache_dir)
+                                                      cache_dir=self.cache_dir,
+                                                      from_flax=from_flax)
 
                 # Get the `label2id` and `id2label` conversions from the model
                 # config
