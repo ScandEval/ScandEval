@@ -719,7 +719,7 @@ class BaseBenchmark(ABC):
                       if 'tag-red' in a['class']]
 
         # Set up the order of the frameworks
-        valid_frameworks = ['pytorch', 'spacy']
+        valid_frameworks = ['pytorch', 'spacy', 'jax']
 
         # Extract a single valid framework in which the model has been
         # implemented
