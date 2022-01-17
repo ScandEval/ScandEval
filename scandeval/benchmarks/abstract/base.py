@@ -227,7 +227,7 @@ class BaseBenchmark(ABC):
                 model.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
-                'pytorch' and 'spacy'. If None then this will be inferred from
+                'pytorch', 'jax', and 'spacy'. If None then this will be inferred from
                 `model_id`. Defaults to None.
             task (str or None, optional):
                 The task for which the model was trained on. If None then this
@@ -797,15 +797,15 @@ class BaseBenchmark(ABC):
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
-        if framework in ['pytorch', 'jax']:
+        if framework in ('pytorch', 'jax'):
+            framework = 'pytorch'
 
             # Set platform-dependent random seeds
-            if framework == 'pytorch':
-                import torch
-                torch.manual_seed(4242)
-                torch.cuda.manual_seed_all(4242)
-                torch.backends.cudnn.benchmark = False
-            framework = 'pytorch'
+            import torch
+            torch.manual_seed(4242)
+            torch.cuda.manual_seed_all(4242)
+            torch.backends.cudnn.benchmark = False
+            
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']

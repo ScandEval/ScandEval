@@ -6,6 +6,7 @@ PYTORCH_REQUIRES = ['torch>=1.6.0']
 JAX_REQUIRES = PYTORCH_REQUIRES + ['jaxlib>=0.1.75', 'jax>=0.2.26', 'flax>=0.3.6']
 SPACY_REQUIRES = ['spacy>=3.2.0', 'spacy-transformers>=1.1.0']
 ALL_REQUIRES = (PYTORCH_REQUIRES +
+                JAX_REQUIRES +
                 SPACY_REQUIRES)
 
 setup(name='scandeval',
