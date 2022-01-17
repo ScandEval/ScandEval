@@ -227,8 +227,8 @@ class BaseBenchmark(ABC):
                 model.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
-                'pytorch', 'jax', and 'spacy'. If None then this will be inferred from
-                `model_id`. Defaults to None.
+                'pytorch', 'jax', and 'spacy'. If None then this will be
+                inferred from `model_id`. Defaults to None.
             task (str or None, optional):
                 The task for which the model was trained on. If None then this
                 will be inferred from `model_id`. Defaults to None.
@@ -259,7 +259,7 @@ class BaseBenchmark(ABC):
                 from torch.nn import Parameter
                 if framework == 'jax':
                     from_flax = True
-                    import jax
+                    import jax  # noqa
                     framework = 'pytorch'
             elif framework == 'spacy':
                 import spacy
@@ -805,7 +805,7 @@ class BaseBenchmark(ABC):
             torch.manual_seed(4242)
             torch.cuda.manual_seed_all(4242)
             torch.backends.cudnn.benchmark = False
-            
+
             # Extract the model and tokenizer
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
