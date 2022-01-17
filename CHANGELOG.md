@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added support for `flax` models. Thanks to
+  [@versae](https://github.com/versae) for contributing!
+
+
 ## [v2.0.0] - 2022-01-07
 ### Fixed
 - Changed the anonymisation procedure for the tweet datasets `angry-tweets` and
