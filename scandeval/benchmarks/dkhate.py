@@ -42,8 +42,8 @@ class DkHateBenchmark(TextClassificationBenchmark):
                  verbose: bool = False):
         id2label = ['NOT', 'OFF']
         label_synonyms = [
-            ['LABEL_0', id2label[0]],
-            ['LABEL_1', id2label[1]],
+            ['LABEL_0', 'not offensive', id2label[0]],
+            ['LABEL_1', 'offensive', id2label[1]],
         ]
         super().__init__(name='dkhate',
                          id2label=id2label,
