@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v2.2.0] - 2022-01-18
 ### Added
 - Added more label synonyms for the DKHate dataset.
 
