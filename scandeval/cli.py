@@ -16,9 +16,10 @@ from .utils import get_all_datasets
                    'benchmarked. If not specified then all models will be '
                    'benchmarked, filtered by `language` and `task`. '
                    'The specific model version to use can be added after '
-                   'the suffix "@": "model_id@v1.0.0". It can be a branch name, '
-                   'a tag name, or a commit id (currently only supported for '
-                   'HuggingFace models, and it defaults to "main" for latest).')
+                   'the suffix "@": "model_id@v1.0.0". It can be a branch '
+                   'name, a tag name, or a commit id (currently only '
+                   'supported for HuggingFace models, and it defaults to '
+                   '"main" for latest).')
 @click.option('--dataset', '-d',
               default=None,
               show_default=True,
