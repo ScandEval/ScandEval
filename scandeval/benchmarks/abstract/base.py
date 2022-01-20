@@ -721,6 +721,7 @@ class BaseBenchmark(ABC):
             return dict(task='fill-mask', framework='pytorch')
 
         # Parse all the anchor tags from the model website
+        model_id, *_ = model_id.split('@', 1)
         url = 'https://www.huggingface.co/' + model_id
         html = requests.get(url).text
         soup = BeautifulSoup(html, 'html.parser')
