@@ -217,6 +217,7 @@ class BaseBenchmark(ABC):
 
     def _load_model(self,
                     model_id: str,
+                    revision: Optional[str] = 'main',
                     framework: Optional[str] = None,
                     task: Optional[str] = None) -> Dict[str, Any]:
         '''Load the model.
@@ -225,6 +226,10 @@ class BaseBenchmark(ABC):
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
                 model.
+            revision (str or None, optional):
+                The specific model version to use. It can be a branch name,
+                a tag name, or a commit id. Currently only supported for 
+                HuggingFace models. Defaults to 'main' for latest.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
                 'pytorch', 'jax', and 'spacy'. If None then this will be
@@ -290,7 +295,9 @@ class BaseBenchmark(ABC):
                 # If the model ID specifies a random model, then load that.
                 if model_id.startswith('random'):
                     rnd_id = 'xlm-roberta-base'
-                    config = AutoConfig.from_pretrained(rnd_id, **params)
+                    config = AutoConfig.from_pretrained(rnd_id,
+                                                        revision=revision,
+                                                        **params)
 
                     if model_id == 'random-roberta-sequence-clf':
                         model_cls = RobertaForSequenceClassification
@@ -305,9 +312,12 @@ class BaseBenchmark(ABC):
 
                 # Otherwise load the pretrained model
                 else:
-                    config = AutoConfig.from_pretrained(model_id, **params)
+                    config = AutoConfig.from_pretrained(model_id,
+                                                        revision=revision,
+                                                        **params)
                     model_cls = self._get_model_class(framework=framework)
                     model = model_cls.from_pretrained(model_id,
+                                                      revision=revision,
                                                       config=config,
                                                       cache_dir=self.cache_dir,
                                                       from_flax=from_flax)
@@ -487,11 +497,15 @@ class BaseBenchmark(ABC):
             # constructed.
             if model_id.startswith('random'):
                 params = dict(use_fast=True, add_prefix_space=True)
-                tokenizer = AutoTokenizer.from_pretrained(rnd_id, **params)
+                tokenizer = AutoTokenizer.from_pretrained(rnd_id,
+                                                          revision=revision,
+                                                          **params)
             else:
                 prefix = 'Roberta' in type(model).__name__
                 params = dict(use_fast=True, add_prefix_space=prefix)
-                tokenizer = AutoTokenizer.from_pretrained(model_id, **params)
+                tokenizer = AutoTokenizer.from_pretrained(model_id,
+                                                          revision=revision,
+                                                          **params)
 
             # Set the maximal length of the tokenizer to the model's maximal
             # length. This is required for proper truncation
@@ -707,6 +721,7 @@ class BaseBenchmark(ABC):
             return dict(task='fill-mask', framework='pytorch')
 
         # Parse all the anchor tags from the model website
+        model_id, *_ = model_id.split('@', 1)
         url = 'https://www.huggingface.co/' + model_id
         html = requests.get(url).text
         soup = BeautifulSoup(html, 'html.parser')
@@ -752,7 +767,10 @@ class BaseBenchmark(ABC):
         Args:
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
-                model.
+                model. The specific model version to use can be added after 
+                the suffix '@': "model_id@v1.0.0". It can be a branch name,
+                a tag name, or a commit id (currently only supported for 
+                HuggingFace models, and it defaults to 'main' for latest).
             progress_bar (bool, optional):
                 Whether to show a progress bar or not. Defaults to True.
 
@@ -768,7 +786,11 @@ class BaseBenchmark(ABC):
         model_metadata = self._fetch_model_metadata(model_id)
         framework = model_metadata['framework']
         task = model_metadata['task']
-        model_dict = self._load_model(model_id, **model_metadata)
+        if '@' in model_id:
+            model_id, revision = model_id.split('@', 1)
+        else:
+            revision = 'main'
+        model_dict = self._load_model(model_id, revision=revision, **model_metadata)
 
         # Define variable that determines if the model should be finetuned
         finetune = (task == 'fill-mask')
@@ -867,6 +889,7 @@ class BaseBenchmark(ABC):
                     try:
                         # Reinitialise a new model
                         model = self._load_model(model_id,
+                                                 revision=revision,
                                                  **model_metadata)['model']
 
                         # Initialise compute_metrics function
