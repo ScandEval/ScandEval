@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v2.3.0] - 2022-01-20
 ### Added
 - Specific branches/commits/tags can now be benchmarked, using the `@`
   delimiter. For instance, `scandeval -m model_id@commit_hash` will benchmark
