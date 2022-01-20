@@ -8,6 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Specific branches/commits/tags can now be benchmarked, using the `@`
+  delimiter. For instance, `scandeval -m model_id@commit_hash` will benchmark
+  the model with model ID `model_id`, stored at commit with hash `commit_hash`.
+  Thanks to [@versae](https://github.com/versae) for contributing!
+
+
 ## [v2.2.0] - 2022-01-18
 ### Added
 - Added more label synonyms for the DKHate dataset.
