@@ -228,7 +228,7 @@ class BaseBenchmark(ABC):
                 model.
             revision (str or None, optional):
                 The specific model version to use. It can be a branch name,
-                a tag name, or a commit id. Currently only supported for 
+                a tag name, or a commit id. Currently only supported for
                 HuggingFace models. Defaults to 'main' for latest.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
@@ -767,9 +767,9 @@ class BaseBenchmark(ABC):
         Args:
             model_id (str):
                 The full HuggingFace Hub path to the pretrained transformer
-                model. The specific model version to use can be added after 
+                model. The specific model version to use can be added after
                 the suffix '@': "model_id@v1.0.0". It can be a branch name,
-                a tag name, or a commit id (currently only supported for 
+                a tag name, or a commit id (currently only supported for
                 HuggingFace models, and it defaults to 'main' for latest).
             progress_bar (bool, optional):
                 Whether to show a progress bar or not. Defaults to True.
@@ -790,7 +790,9 @@ class BaseBenchmark(ABC):
             model_id, revision = model_id.split('@', 1)
         else:
             revision = 'main'
-        model_dict = self._load_model(model_id, revision=revision, **model_metadata)
+        model_dict = self._load_model(model_id,
+                                      revision=revision,
+                                      **model_metadata)
 
         # Define variable that determines if the model should be finetuned
         finetune = (task == 'fill-mask')
