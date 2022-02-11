@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Fixed a bug where a model's framework and pipeline tag were
+  indistinguishable, as they are both using the same `tag-white` tag now.
+
+
 ## [v2.3.1] - 2022-02-11
 ### Fixed
 - Changed the `tag-red`, which referred to the HTML class containing the model

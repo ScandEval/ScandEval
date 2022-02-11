@@ -729,9 +729,9 @@ class BaseBenchmark(ABC):
         a_tags_with_class = [a for a in a_tags if a.get('class') is not None]
 
         # Fetch the frameworks from the model website
-        frameworks = [re.sub(r'.*library=', '', a['href'])
+        frameworks = [re.sub(r'.*=', '', a['href'])
                       for a in a_tags_with_class
-                      if 'tag-white' in a['class']]
+                      if 'tag-white' in a['class'] and 'library' in a['href']]
 
         # Set up the order of the frameworks
         valid_frameworks = ['pytorch', 'spacy', 'jax']
@@ -747,9 +747,9 @@ class BaseBenchmark(ABC):
             raise InvalidBenchmark(msg)
 
         # Fetch the model tasks from the model website
-        tasks = [re.sub(r'.*pipeline_tag=', '', a['href'])
+        tasks = [re.sub(r'.*=', '', a['href'])
                  for a in a_tags_with_class
-                 if 'tag-white' in a['class']]
+                 if 'tag-white' in a['class'] and 'pipeline_tag' in a['href']]
 
         # Extract a single valid task on which the model has been trained. If
         # no task has been specified on the model card then assume that it is
