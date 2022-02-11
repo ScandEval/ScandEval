@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v2.3.1] - 2022-02-11
 ### Fixed
 - Changed the `tag-red`, which referred to the HTML class containing the model
   framework, to `tag-white`. This caused models to not be benchmarkable, as
