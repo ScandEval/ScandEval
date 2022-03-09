@@ -1,7 +1,6 @@
-'''Abstract token classification benchmark'''
+"""Abstract token classification benchmark"""
 
-from transformers import (DataCollatorForTokenClassification,
-                          PreTrainedTokenizerBase)
+from transformers import DataCollatorForTokenClassification, PreTrainedTokenizerBase
 from datasets import Dataset, load_metric
 from functools import partial
 from typing import Optional, Dict, List
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class TokenClassificationBenchmark(BaseBenchmark, ABC):
-    '''Abstract token classification benchmark.
+    """Abstract token classification benchmark.
 
     Args:
         name (str):
@@ -66,34 +65,36 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
         verbose (bool): Whether to print additional output.
-    '''
-    def __init__(self,
-                 name: str,
-                 metric_names: Dict[str, str],
-                 id2label: list,
-                 label_synonyms: Optional[List[List[str]]] = None,
-                 evaluate_train: bool = False,
-                 cache_dir: str = '.benchmark_models',
-                 two_labels: bool = False,
-                 split_point: Optional[int] = None,
-                 verbose: bool = False):
-        self._metric = load_metric('seqeval')
-        super().__init__(task='token-classification',
-                         name=name,
-                         metric_names=metric_names,
-                         id2label=id2label,
-                         label_synonyms=label_synonyms,
-                         cache_dir=cache_dir,
-                         evaluate_train=evaluate_train,
-                         two_labels=two_labels,
-                         split_point=split_point,
-                         verbose=verbose)
+    """
 
-    def _tokenize_and_align_labels(self,
-                                   examples: dict,
-                                   tokenizer,
-                                   label2id: dict):
-        '''Tokenise all texts and align the labels with them.
+    def __init__(
+        self,
+        name: str,
+        metric_names: Dict[str, str],
+        id2label: list,
+        label_synonyms: Optional[List[List[str]]] = None,
+        evaluate_train: bool = False,
+        cache_dir: str = ".benchmark_models",
+        two_labels: bool = False,
+        split_point: Optional[int] = None,
+        verbose: bool = False,
+    ):
+        self._metric = load_metric("seqeval")
+        super().__init__(
+            task="token-classification",
+            name=name,
+            metric_names=metric_names,
+            id2label=id2label,
+            label_synonyms=label_synonyms,
+            cache_dir=cache_dir,
+            evaluate_train=evaluate_train,
+            two_labels=two_labels,
+            split_point=split_point,
+            verbose=verbose,
+        )
+
+    def _tokenize_and_align_labels(self, examples: dict, tokenizer, label2id: dict):
+        """Tokenise all texts and align the labels with them.
 
         Args:
             examples (dict):
@@ -106,17 +107,17 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         Returns:
             dict:
                 A dictionary containing the tokenized data as well as labels.
-        '''
+        """
         tokenized_inputs = tokenizer(
-            examples['tokens'],
+            examples["tokens"],
             # We use this argument because the texts in our dataset are lists
             # of words (with a label for each word)
             is_split_into_words=True,
             truncation=True,
-            padding=True
+            padding=True,
         )
         all_labels = []
-        for i, labels in enumerate(examples['orig_labels']):
+        for i, labels in enumerate(examples["orig_labels"]):
             try:
                 word_ids = tokenized_inputs.word_ids(batch_index=i)
 
@@ -128,7 +129,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
             except ValueError:
 
                 # Get the list of words in the document
-                words = examples['tokens'][i]
+                words = examples["tokens"][i]
 
                 # Get the list of token IDs in the document
                 tok_ids = tokenized_inputs.input_ids[i]
@@ -137,7 +138,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 tokens = tokenizer.convert_ids_to_tokens(tok_ids)
 
                 # Remove prefixes from the tokens
-                prefixes_to_remove = ['▁', '##']
+                prefixes_to_remove = ["▁", "##"]
                 for tok_idx, tok in enumerate(tokens):
                     for prefix in prefixes_to_remove:
                         tok = tok.lstrip(prefix)
@@ -149,32 +150,41 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
 
                 # Get the alignment between the words and the tokens, on a
                 # character level
-                word_idxs = [word_idx for word_idx, word in enumerate(words)
-                             for _ in str(word)]
-                token_idxs = [tok_idx for tok_idx, tok in enumerate(tokens)
-                              for _ in str(tok) if tok is not None]
+                word_idxs = [
+                    word_idx for word_idx, word in enumerate(words) for _ in str(word)
+                ]
+                token_idxs = [
+                    tok_idx
+                    for tok_idx, tok in enumerate(tokens)
+                    for _ in str(tok)
+                    if tok is not None
+                ]
                 alignment = list(zip(word_idxs, token_idxs))
 
                 # Raise error if there are not as many characters in the words
                 # as in the tokens. This can be due to the use of a different
                 # prefix.
                 if len(word_idxs) != len(token_idxs):
-                    raise InvalidBenchmark('The tokens could not be aligned '
-                                           'with the words during manual '
-                                           'word-token alignment. It seems '
-                                           'that the tokenizer is neither of '
-                                           'the fast variant nor of a '
-                                           'SentencePiece/WordPiece variant.')
+                    raise InvalidBenchmark(
+                        "The tokens could not be aligned "
+                        "with the words during manual "
+                        "word-token alignment. It seems "
+                        "that the tokenizer is neither of "
+                        "the fast variant nor of a "
+                        "SentencePiece/WordPiece variant."
+                    )
 
                 # Get the aligned word IDs
                 word_ids = list()
                 for tok_idx, tok in enumerate(tokens):
-                    if tok is None or tok == '':
+                    if tok is None or tok == "":
                         word_ids.append(None)
                     else:
-                        word_idx = [word_idx
-                                    for word_idx, token_idx in alignment
-                                    if token_idx == tok_idx][0]
+                        word_idx = [
+                            word_idx
+                            for word_idx, token_idx in alignment
+                            if token_idx == tok_idx
+                        ][0]
                         word_ids.append(word_idx)
 
             previous_word_idx = None
@@ -197,14 +207,18 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                         try:
                             label_id1 = label2id[label[0]]
                         except KeyError:
-                            msg = (f'The label {label[0]} was not found '
-                                   f'in the model\'s config.')
+                            msg = (
+                                f"The label {label[0]} was not found "
+                                f"in the model's config."
+                            )
                             raise InvalidBenchmark(msg)
                         try:
                             label_id2 = label2id[label[1]]
                         except KeyError:
-                            msg = (f'The label {label[1]} was not found '
-                                   f'in the model\'s config.')
+                            msg = (
+                                f"The label {label[1]} was not found "
+                                f"in the model's config."
+                            )
                             raise InvalidBenchmark(msg)
                         label_id = [label_id1, label_id2]
 
@@ -212,8 +226,10 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                         try:
                             label_id = label2id[label]
                         except KeyError:
-                            msg = (f'The label {label} was not found '
-                                   f'in the model\'s config.')
+                            msg = (
+                                f"The label {label} was not found "
+                                f"in the model's config."
+                            )
                             raise InvalidBenchmark(msg)
                     label_ids.append(label_id)
 
@@ -227,14 +243,11 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                 previous_word_idx = word_idx
 
             all_labels.append(label_ids)
-        tokenized_inputs['labels'] = all_labels
+        tokenized_inputs["labels"] = all_labels
         return tokenized_inputs
 
-    def _preprocess_data(self,
-                         dataset: Dataset,
-                         framework: str,
-                         **kwargs) -> Dataset:
-        '''Preprocess a dataset by tokenizing and aligning the labels.
+    def _preprocess_data(self, dataset: Dataset, framework: str, **kwargs) -> Dataset:
+        """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
             dataset (HuggingFace dataset):
@@ -245,20 +258,20 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
 
         Returns:
             HuggingFace dataset: The preprocessed dataset.
-        '''
-        if framework == 'pytorch':
-            map_fn = partial(self._tokenize_and_align_labels,
-                             tokenizer=kwargs['tokenizer'],
-                             label2id=kwargs['config'].label2id)
+        """
+        if framework == "pytorch":
+            map_fn = partial(
+                self._tokenize_and_align_labels,
+                tokenizer=kwargs["tokenizer"],
+                label2id=kwargs["config"].label2id,
+            )
             tokenised_dataset = dataset.map(map_fn, batched=True)
             return tokenised_dataset
-        elif framework == 'spacy':
+        elif framework == "spacy":
             return dataset
 
-    def _load_data_collator(
-            self,
-            tokenizer: Optional[PreTrainedTokenizerBase] = None):
-        '''Load the data collator used to prepare samples during finetuning.
+    def _load_data_collator(self, tokenizer: Optional[PreTrainedTokenizerBase] = None):
+        """Load the data collator used to prepare samples during finetuning.
 
         Args:
             tokenizer (HuggingFace tokenizer or None, optional):
@@ -268,18 +281,17 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
 
         Returns:
             HuggingFace data collator: The data collator.
-        '''
+        """
         if self.two_labels:
             params = dict(label_pad_token_id=[-100, -100])
         else:
             params = dict(label_pad_token_id=-100)
         return DataCollatorForTokenClassification(tokenizer, **params)
 
-    def _get_spacy_predictions_and_labels(self,
-                                          model,
-                                          dataset: Dataset,
-                                          progress_bar: bool) -> tuple:
-        '''Get predictions from SpaCy model on dataset.
+    def _get_spacy_predictions_and_labels(
+        self, model, dataset: Dataset, progress_bar: bool
+    ) -> tuple:
+        """Get predictions from SpaCy model on dataset.
 
         Args:
             model (SpaCy model): The model.
@@ -289,21 +301,21 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
             A pair of arrays:
                 The first array contains the probability predictions and the
                 second array contains the true labels.
-        '''
+        """
         # Initialise progress bar
         if progress_bar:
-            itr = tqdm(dataset['doc'], desc='Evaluating model', leave=False)
+            itr = tqdm(dataset["doc"], desc="Evaluating model", leave=False)
         else:
-            itr = dataset['doc']
+            itr = dataset["doc"]
 
         processed = model.pipe(itr, batch_size=32)
         map_fn = self._extract_spacy_predictions
-        predictions = map(map_fn, zip(dataset['tokens'], processed))
+        predictions = map(map_fn, zip(dataset["tokens"], processed))
 
-        return list(predictions), dataset['orig_labels']
+        return list(predictions), dataset["orig_labels"]
 
     def _extract_spacy_predictions(self, tokens_processed: tuple) -> list:
-        '''Helper function that extracts the predictions from a SpaCy model.
+        """Helper function that extracts the predictions from a SpaCy model.
 
         Aside from extracting the predictions from the model, it also aligns
         the predictions with the gold tokens, in case the SpaCy tokeniser
@@ -318,7 +330,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
             list:
                 A list of predictions for each token, of the same length as the
                 gold tokens (first entry of `tokens_processed`).
-        '''
+        """
         tokens, processed = tokens_processed
 
         # Get the token labels
@@ -326,25 +338,27 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
 
         # Get the alignment between the SpaCy model's tokens and the gold
         # tokens
-        token_idxs = [tok_idx for tok_idx, tok in enumerate(tokens)
-                      for _ in str(tok)]
-        pred_token_idxs = [tok_idx for tok_idx, tok in enumerate(processed)
-                           for _ in str(tok)]
+        token_idxs = [tok_idx for tok_idx, tok in enumerate(tokens) for _ in str(tok)]
+        pred_token_idxs = [
+            tok_idx for tok_idx, tok in enumerate(processed) for _ in str(tok)
+        ]
         alignment = list(zip(token_idxs, pred_token_idxs))
 
         # Get the aligned predictions
         predictions = list()
         for tok_idx, _ in enumerate(tokens):
-            aligned_pred_token = [pred_token_idx
-                                  for token_idx, pred_token_idx in alignment
-                                  if token_idx == tok_idx][0]
+            aligned_pred_token = [
+                pred_token_idx
+                for token_idx, pred_token_idx in alignment
+                if token_idx == tok_idx
+            ][0]
             predictions.append(token_labels[aligned_pred_token])
 
         return predictions
 
     @abstractmethod
     def _get_spacy_token_labels(self, processed) -> list:
-        '''Function that extracts the desired predictions from a SpaCy Doc.
+        """Function that extracts the desired predictions from a SpaCy Doc.
 
         Args:
             processed (SpaCy Doc instance):
@@ -354,5 +368,5 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         Returns:
             list:
                 A list of labels, for each SpaCy token.
-        '''
+        """
         pass

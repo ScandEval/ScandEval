@@ -1,4 +1,4 @@
-'''POS evaluation of a language model on the Nynorsk part of the NDT dataset'''
+"""POS evaluation of a language model on the Nynorsk part of the NDT dataset"""
 
 import logging
 
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class NdtNNPosBenchmark(PosBenchmark):
-    '''Benchmark of language models on the Nynorsk POS part of the NDT dataset.
+    """Benchmark of language models on the Nynorsk POS part of the NDT dataset.
 
     Args:
         cache_dir (str, optional):
@@ -35,12 +35,17 @@ class NdtNNPosBenchmark(PosBenchmark):
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
         verbose (bool): Whether to print additional output.
-    '''
-    def __init__(self,
-                 cache_dir: str = '.benchmark_models',
-                 evaluate_train: bool = False,
-                 verbose: bool = False):
-        super().__init__(name='ndt-nn-pos',
-                         cache_dir=cache_dir,
-                         evaluate_train=evaluate_train,
-                         verbose=verbose)
+    """
+
+    def __init__(
+        self,
+        cache_dir: str = ".benchmark_models",
+        evaluate_train: bool = False,
+        verbose: bool = False,
+    ):
+        super().__init__(
+            name="ndt-nn-pos",
+            cache_dir=cache_dir,
+            evaluate_train=evaluate_train,
+            verbose=verbose,
+        )
