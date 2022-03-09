@@ -1,4 +1,4 @@
-'''NER evaluation of a language model on the SUC 3.0 dataset'''
+"""NER evaluation of a language model on the SUC 3.0 dataset"""
 
 import logging
 
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Suc3Benchmark(NerBenchmark):
-    '''Benchmark of language models on the NER part of the SUC 3.0 dataset.
+    """Benchmark of language models on the NER part of the SUC 3.0 dataset.
 
     Args:
         cache_dir (str, optional):
@@ -35,12 +35,17 @@ class Suc3Benchmark(NerBenchmark):
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
         verbose (bool): Whether to print additional output.
-    '''
-    def __init__(self,
-                 cache_dir: str = '.benchmark_models',
-                 evaluate_train: bool = False,
-                 verbose: bool = False):
-        super().__init__(name='suc3',
-                         cache_dir=cache_dir,
-                         evaluate_train=evaluate_train,
-                         verbose=verbose)
+    """
+
+    def __init__(
+        self,
+        cache_dir: str = ".benchmark_models",
+        evaluate_train: bool = False,
+        verbose: bool = False,
+    ):
+        super().__init__(
+            name="suc3",
+            cache_dir=cache_dir,
+            evaluate_train=evaluate_train,
+            verbose=verbose,
+        )

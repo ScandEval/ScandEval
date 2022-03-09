@@ -15,7 +15,7 @@ from .ndt_nn_pos import NdtNNPosBenchmark  # noqa
 from .ndt_nb_dep import NdtNBDepBenchmark  # noqa
 from .ndt_nn_dep import NdtNNDepBenchmark  # noqa
 from .dalaj import DalajBenchmark  # noqa
-from .absabank_imm import AbsabankImmBenchmark # noqa
+from .absabank_imm import AbsabankImmBenchmark  # noqa
 from .sdt_pos import SdtPosBenchmark  # noqa
 from .sdt_dep import SdtDepBenchmark  # noqa
 from .suc3 import Suc3Benchmark  # noqa

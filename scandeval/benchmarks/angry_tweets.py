@@ -1,4 +1,4 @@
-'''Sentiment evaluation of a language model on the AngryTweets dataset'''
+"""Sentiment evaluation of a language model on the AngryTweets dataset"""
 
 import logging
 
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class AngryTweetsBenchmark(TextClassificationBenchmark):
-    '''Benchmark of language models on the AngryTweets dataset.
+    """Benchmark of language models on the AngryTweets dataset.
 
     Args:
         cache_dir (str, optional):
@@ -35,20 +35,25 @@ class AngryTweetsBenchmark(TextClassificationBenchmark):
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
         verbose (bool): Whether to print additional output.
-    '''
-    def __init__(self,
-                 cache_dir: str = '.benchmark_models',
-                 evaluate_train: bool = False,
-                 verbose: bool = False):
-        id2label = ['negative', 'neutral', 'positive']
+    """
+
+    def __init__(
+        self,
+        cache_dir: str = ".benchmark_models",
+        evaluate_train: bool = False,
+        verbose: bool = False,
+    ):
+        id2label = ["negative", "neutral", "positive"]
         label_synonyms = [
-            ['LABEL_0', 'negativ', 'neikvætt', 'Negative', id2label[0]],
-            ['LABEL_1', 'nøytral', 'hlutlaus', 'Neutral', id2label[1]],
-            ['LABEL_2', 'positiv', 'jákvætt', 'Positive', id2label[2]]
+            ["LABEL_0", "negativ", "neikvætt", "Negative", id2label[0]],
+            ["LABEL_1", "nøytral", "hlutlaus", "Neutral", id2label[1]],
+            ["LABEL_2", "positiv", "jákvætt", "Positive", id2label[2]],
         ]
-        super().__init__(name='angry-tweets',
-                         id2label=id2label,
-                         label_synonyms=label_synonyms,
-                         cache_dir=cache_dir,
-                         evaluate_train=evaluate_train,
-                         verbose=verbose)
+        super().__init__(
+            name="angry-tweets",
+            id2label=id2label,
+            label_synonyms=label_synonyms,
+            cache_dir=cache_dir,
+            evaluate_train=evaluate_train,
+            verbose=verbose,
+        )

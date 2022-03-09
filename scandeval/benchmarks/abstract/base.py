@@ -1,19 +1,21 @@
-'''Abstract base class for evaluating models'''
+"""Abstract base class for evaluating models"""
 
 from abc import ABC, abstractmethod
 from datasets import Dataset
 from transformers.models.auto.auto_factory import _BaseAutoModelClass
 import transformers.utils.logging as tf_logging
-from transformers import (PreTrainedTokenizerBase,
-                          AutoTokenizer,
-                          AutoConfig,
-                          TrainingArguments,
-                          Trainer,
-                          PrinterCallback,
-                          EarlyStoppingCallback,
-                          RobertaForSequenceClassification,
-                          RobertaForTokenClassification,
-                          ProgressCallback)
+from transformers import (
+    PreTrainedTokenizerBase,
+    AutoTokenizer,
+    AutoConfig,
+    TrainingArguments,
+    Trainer,
+    PrinterCallback,
+    EarlyStoppingCallback,
+    RobertaForSequenceClassification,
+    RobertaForTokenClassification,
+    ProgressCallback,
+)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
 import requests
@@ -28,16 +30,21 @@ import logging
 import re
 import random
 
-from ...utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
-                      TwolabelTrainer, get_all_datasets,
-                      NeverLeaveProgressCallback)
+from ...utils import (
+    MODEL_CLASSES,
+    is_module_installed,
+    InvalidBenchmark,
+    TwolabelTrainer,
+    get_all_datasets,
+    NeverLeaveProgressCallback,
+)
 
 
 logger = logging.getLogger(__name__)
 
 
 class BaseBenchmark(ABC):
-    '''Abstract base class for finetuning and evaluating models.
+    """Abstract base class for finetuning and evaluating models.
 
     Args:
         name (str):
@@ -88,23 +95,28 @@ class BaseBenchmark(ABC):
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
         verbose (bool): Whether to print additional output.
-    '''
-    def __init__(self,
-                 name: str,
-                 task: str,
-                 metric_names: Dict[str, str],
-                 id2label: Optional[List[str]] = None,
-                 label_synonyms: Optional[List[List[str]]] = None,
-                 evaluate_train: bool = False,
-                 cache_dir: str = '.benchmark_models',
-                 two_labels: bool = False,
-                 split_point: Optional[int] = None,
-                 verbose: bool = False):
+    """
+
+    def __init__(
+        self,
+        name: str,
+        task: str,
+        metric_names: Dict[str, str],
+        id2label: Optional[List[str]] = None,
+        label_synonyms: Optional[List[List[str]]] = None,
+        evaluate_train: bool = False,
+        cache_dir: str = ".benchmark_models",
+        two_labels: bool = False,
+        split_point: Optional[int] = None,
+        verbose: bool = False,
+    ):
 
         self.short_name = name
-        self.name = [long_name
-                     for short_name, long_name, _, _ in get_all_datasets()
-                     if name == short_name][0]
+        self.name = [
+            long_name
+            for short_name, long_name, _, _ in get_all_datasets()
+            if name == short_name
+        ][0]
         self.task = task
         self.metric_names = metric_names
         self.id2label = id2label
@@ -125,10 +137,13 @@ class BaseBenchmark(ABC):
                 self.label_synonyms = [[label] for label in self.id2label]
 
             # Define the label2id conversion dictionary
-            self.label2id = {label: id for id, lbl in enumerate(id2label)
-                             for label_syns in self.label_synonyms
-                             for label in label_syns
-                             if lbl in label_syns}
+            self.label2id = {
+                label: id
+                for id, lbl in enumerate(id2label)
+                for label_syns in self.label_synonyms
+                for label in label_syns
+                if lbl in label_syns
+            }
 
         # If the id2label conversion list was not given, then set the number of
         # labels to zero and set the label2id conversion dict to None as well
@@ -143,19 +158,17 @@ class BaseBenchmark(ABC):
 
     @staticmethod
     def _get_model_task(task: Optional[str]) -> str:
-        '''Get the task of the model.
+        """Get the task of the model.
 
         Args:
             task (str or None): The task of the model.
 
         Returns:
             str: The task of the model.
-        '''
-        pretrained_tasks = ['fill-mask',
-                            'sentence-similarity',
-                            'feature-extraction']
+        """
+        pretrained_tasks = ["fill-mask", "sentence-similarity", "feature-extraction"]
         if task is None or task in pretrained_tasks:
-            return 'fill-mask'
+            return "fill-mask"
         else:
             return task
 
@@ -163,9 +176,10 @@ class BaseBenchmark(ABC):
         return MODEL_CLASSES[framework][self.task]
 
     @staticmethod
-    def _get_stats(metrics: Dict[str, List[Dict[str, float]]],
-                   metric_name: str) -> Dict[str, Tuple[float, float]]:
-        '''Helper function to compute the mean with confidence intervals.
+    def _get_stats(
+        metrics: Dict[str, List[Dict[str, float]]], metric_name: str
+    ) -> Dict[str, Tuple[float, float]]:
+        """Helper function to compute the mean with confidence intervals.
 
         Args:
             metrics (dict):
@@ -181,15 +195,14 @@ class BaseBenchmark(ABC):
                 Dictionary with keys among 'train' and 'test', with
                 corresponding values being a pair of floats, containing the
                 score and the radius of its 95% confidence interval.
-        '''
+        """
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+            warnings.simplefilter("ignore")
 
             results = dict()
 
-            if 'train' in metrics.keys():
-                train_scores = [dct[f'train_{metric_name}']
-                                for dct in metrics['train']]
+            if "train" in metrics.keys():
+                train_scores = [dct[f"train_{metric_name}"] for dct in metrics["train"]]
                 train_score = np.mean(train_scores)
 
                 if len(train_scores) > 1:
@@ -198,11 +211,10 @@ class BaseBenchmark(ABC):
                 else:
                     train_se = np.nan
 
-                results['train'] = (train_score, 1.96 * train_se)
+                results["train"] = (train_score, 1.96 * train_se)
 
-            if 'test' in metrics.keys():
-                test_scores = [dct[f'test_{metric_name}']
-                               for dct in metrics['test']]
+            if "test" in metrics.keys():
+                test_scores = [dct[f"test_{metric_name}"] for dct in metrics["test"]]
                 test_score = np.mean(test_scores)
 
                 if len(test_scores) > 1:
@@ -211,16 +223,18 @@ class BaseBenchmark(ABC):
                 else:
                     test_se = np.nan
 
-                results['test'] = (test_score, 1.96 * test_se)
+                results["test"] = (test_score, 1.96 * test_se)
 
             return results
 
-    def _load_model(self,
-                    model_id: str,
-                    revision: Optional[str] = 'main',
-                    framework: Optional[str] = None,
-                    task: Optional[str] = None) -> Dict[str, Any]:
-        '''Load the model.
+    def _load_model(
+        self,
+        model_id: str,
+        revision: Optional[str] = "main",
+        framework: Optional[str] = None,
+        task: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Load the model.
 
         Args:
             model_id (str):
@@ -246,81 +260,92 @@ class BaseBenchmark(ABC):
 
         Raises:
             RuntimeError: If the framework is not recognized.
-        '''
+        """
         # Get the name of a framework supported for the model_id
         if framework is None or task is None:
             model_metadata = self._fetch_model_metadata(model_id)
             if framework is None:
-                framework = model_metadata['framework']
+                framework = model_metadata["framework"]
             if task is None:
-                task = model_metadata['task']
+                task = model_metadata["task"]
 
         # Ensure that the framework is installed
         from_flax = False
         try:
-            if framework in ('pytorch', 'jax'):
+            if framework in ("pytorch", "jax"):
                 import torch
                 import torch.nn as nn
                 from torch.nn import Parameter
-                if framework == 'jax':
+
+                if framework == "jax":
                     from_flax = True
                     import jax  # noqa
-                    framework = 'pytorch'
-            elif framework == 'spacy':
+
+                    framework = "pytorch"
+            elif framework == "spacy":
                 import spacy
 
                 # Ignore warnings from SpaCy. This has to be called after the
                 # import, as the __init__.py file of SpaCy sets the warning
                 # levels of SpaCy warning W036
                 import warnings
-                warnings.filterwarnings('ignore', module='spacy*')
+
+                warnings.filterwarnings("ignore", module="spacy*")
 
         except ModuleNotFoundError:
-            msg = (f'The model {model_id} is built using the {framework} '
-                   f'framework which is not installed. Try installing the '
-                   f'ScandEval package as `pip install '
-                   f'scandeval[{framework}]`.')
+            msg = (
+                f"The model {model_id} is built using the {framework} "
+                f"framework which is not installed. Try installing the "
+                f"ScandEval package as `pip install "
+                f"scandeval[{framework}]`."
+            )
             raise ModuleNotFoundError(msg)
 
-        if framework == 'pytorch':
+        if framework == "pytorch":
 
-            if task == 'fill-mask':
-                params = dict(num_labels=self.num_labels,
-                              id2label=self.id2label,
-                              label2id=self.label2id)
+            if task == "fill-mask":
+                params = dict(
+                    num_labels=self.num_labels,
+                    id2label=self.id2label,
+                    label2id=self.label2id,
+                )
             else:
                 params = dict()
 
             try:
                 # If the model ID specifies a random model, then load that.
-                if model_id.startswith('random'):
-                    rnd_id = 'xlm-roberta-base'
-                    config = AutoConfig.from_pretrained(rnd_id,
-                                                        revision=revision,
-                                                        **params)
+                if model_id.startswith("random"):
+                    rnd_id = "xlm-roberta-base"
+                    config = AutoConfig.from_pretrained(
+                        rnd_id, revision=revision, **params
+                    )
 
-                    if model_id == 'random-roberta-sequence-clf':
+                    if model_id == "random-roberta-sequence-clf":
                         model_cls = RobertaForSequenceClassification
-                    elif model_id == 'random-roberta-token-clf':
+                    elif model_id == "random-roberta-token-clf":
                         model_cls = RobertaForTokenClassification
                     else:
-                        raise ValueError(f'A random model was chosen, '
-                                         f'"{model_id}", but it was not '
-                                         f'recognized.')
+                        raise ValueError(
+                            f"A random model was chosen, "
+                            f'"{model_id}", but it was not '
+                            f"recognized."
+                        )
 
                     model = model_cls(config)
 
                 # Otherwise load the pretrained model
                 else:
-                    config = AutoConfig.from_pretrained(model_id,
-                                                        revision=revision,
-                                                        **params)
+                    config = AutoConfig.from_pretrained(
+                        model_id, revision=revision, **params
+                    )
                     model_cls = self._get_model_class(framework=framework)
-                    model = model_cls.from_pretrained(model_id,
-                                                      revision=revision,
-                                                      config=config,
-                                                      cache_dir=self.cache_dir,
-                                                      from_flax=from_flax)
+                    model = model_cls.from_pretrained(
+                        model_id,
+                        revision=revision,
+                        config=config,
+                        cache_dir=self.cache_dir,
+                        from_flax=from_flax,
+                    )
 
                 # Get the `label2id` and `id2label` conversions from the model
                 # config
@@ -335,12 +360,15 @@ class BaseBenchmark(ABC):
                             model_id2label = dict(model.config.id2label)
                         else:
                             model_id2label = model.config.id2label
-                        model_id2label = [model_id2label[idx]
-                                          for idx in range(model_num_labels)]
+                        model_id2label = [
+                            model_id2label[idx] for idx in range(model_num_labels)
+                        ]
                     except IndexError:
-                        raise InvalidBenchmark('There is a gap in the '
-                                               'indexing dictionary of the '
-                                               'model.')
+                        raise InvalidBenchmark(
+                            "There is a gap in the "
+                            "indexing dictionary of the "
+                            "model."
+                        )
                 except AttributeError:
                     model_id2label = None
 
@@ -350,14 +378,14 @@ class BaseBenchmark(ABC):
                     model_id2label = [label for label in model_label2id.keys()]
                     model.config.id2label = model_id2label
                 if model_label2id is None and model_id2label is not None:
-                    model_label2id = {lbl: id
-                                      for id, lbl in enumerate(model_id2label)}
+                    model_label2id = {lbl: id for id, lbl in enumerate(model_id2label)}
                     model.config.label2id = model_label2id
 
                 # If the model does not have `label2id` or `id2label`
                 # conversions, then use the defaults
-                if (task == 'fill-mask' or
-                        (model_label2id is None and model_id2label is None)):
+                if task == "fill-mask" or (
+                    model_label2id is None and model_id2label is None
+                ):
                     model.config.label2id = self.label2id
                     model.config.id2label = self.id2label
 
@@ -371,9 +399,12 @@ class BaseBenchmark(ABC):
                     # Collect the dataset labels and model labels in the
                     # `model_id2label` conversion list
                     for label in self.id2label:
-                        syns = [syn for lst in self.label_synonyms
-                                for syn in lst
-                                if label in lst]
+                        syns = [
+                            syn
+                            for lst in self.label_synonyms
+                            for syn in lst
+                            if label in lst
+                        ]
                         if all([syn not in model_id2label for syn in syns]):
                             model_id2label.append(label)
 
@@ -381,9 +412,11 @@ class BaseBenchmark(ABC):
                     # duplicates modulo synonyms
                     for idx, label in enumerate(model_id2label):
                         try:
-                            canonical_syn = [syn_lst
-                                             for syn_lst in self.label_synonyms
-                                             if label in syn_lst][0][-1]
+                            canonical_syn = [
+                                syn_lst
+                                for syn_lst in self.label_synonyms
+                                if label in syn_lst
+                            ][0][-1]
                             model_id2label[idx] = canonical_syn
 
                         # IndexError appears when the label does not appear
@@ -395,18 +428,24 @@ class BaseBenchmark(ABC):
 
                     # Get the synonyms of all the labels, new ones included
                     new_synonyms = self.label_synonyms
-                    flat_old_synonyms = [syn for lst in self.label_synonyms
-                                         for syn in lst]
-                    new_synonyms += [[label] for label in model_id2label
-                                     if label not in flat_old_synonyms]
+                    flat_old_synonyms = [
+                        syn for lst in self.label_synonyms for syn in lst
+                    ]
+                    new_synonyms += [
+                        [label]
+                        for label in model_id2label
+                        if label not in flat_old_synonyms
+                    ]
 
                     # Add all the synonyms of the labels into the label2id
                     # conversion dictionary
-                    model_label2id = {label: id
-                                      for id, lbl in enumerate(model_id2label)
-                                      for label_syns in new_synonyms
-                                      for label in label_syns
-                                      if lbl in label_syns}
+                    model_label2id = {
+                        label: id
+                        for id, lbl in enumerate(model_id2label)
+                        for label_syns in new_synonyms
+                        for label in label_syns
+                        if lbl in label_syns
+                    }
 
                     # Get the old id2label conversion
                     if not isinstance(model.config.id2label, list):
@@ -425,22 +464,27 @@ class BaseBenchmark(ABC):
                     #       needs to be rewritten when we add other types of
                     #       tasks.
                     # NOTE: Only works for pytorch models at the moment
-                    if (len(model_id2label) > len(old_id2label)
-                            and framework == 'pytorch'):
+                    if (
+                        len(model_id2label) > len(old_id2label)
+                        and framework == "pytorch"
+                    ):
 
                         # Count the number of new labels to add to the model
-                        num_new_labels = (len(model_id2label) -
-                                          len(old_id2label))
+                        num_new_labels = len(model_id2label) - len(old_id2label)
 
                         # If *all* the new labels are new and aren't even
                         # synonyms of the model's labels, then raise an
                         # exception
                         if num_new_labels == self.num_labels:
-                            if len(set(flat_old_synonyms)
-                                   .intersection(old_id2label)) == 0:
-                                msg = ('The model has not been trained on '
-                                       'any of the labels in the dataset, or '
-                                       'synonyms thereof.')
+                            if (
+                                len(set(flat_old_synonyms).intersection(old_id2label))
+                                == 0
+                            ):
+                                msg = (
+                                    "The model has not been trained on "
+                                    "any of the labels in the dataset, or "
+                                    "synonyms thereof."
+                                )
                                 raise InvalidBenchmark(msg)
 
                         # Load the weights from the model's current
@@ -454,13 +498,12 @@ class BaseBenchmark(ABC):
                             clf_weight = model.classifier.weight.data
                         except AttributeError:
                             try:
-                                clf_weight = (model.classifier
-                                                   .out_proj
-                                                   .weight
-                                                   .data)
+                                clf_weight = model.classifier.out_proj.weight.data
                             except AttributeError:
-                                msg = ('Model does not seem to be a '
-                                       'classification model.')
+                                msg = (
+                                    "Model does not seem to be a "
+                                    "classification model."
+                                )
                                 raise InvalidBenchmark(msg)
 
                         # Create the new weights, which have zeros at all the
@@ -470,8 +513,7 @@ class BaseBenchmark(ABC):
                         new_clf_weight = Parameter(new_clf_weight)
 
                         # Create the new classification layer
-                        new_clf = nn.Linear(config.hidden_size,
-                                            len(model_id2label))
+                        new_clf = nn.Linear(config.hidden_size, len(model_id2label))
 
                         # Assign the new weights to the new classification
                         # layer, and replace the old classification layer with
@@ -489,30 +531,34 @@ class BaseBenchmark(ABC):
                     model.config.label2id = model_label2id
 
             except (OSError, ValueError):
-                raise InvalidBenchmark(f'The model {model_id} could not be '
-                                       f'loaded from the HuggingFace hub')
+                raise InvalidBenchmark(
+                    f"The model {model_id} could not be "
+                    f"loaded from the HuggingFace hub"
+                )
 
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
             # constructed.
-            if model_id.startswith('random'):
+            if model_id.startswith("random"):
                 params = dict(use_fast=True, add_prefix_space=True)
-                tokenizer = AutoTokenizer.from_pretrained(rnd_id,
-                                                          revision=revision,
-                                                          **params)
+                tokenizer = AutoTokenizer.from_pretrained(
+                    rnd_id, revision=revision, **params
+                )
             else:
-                prefix = 'Roberta' in type(model).__name__
+                prefix = "Roberta" in type(model).__name__
                 params = dict(use_fast=True, add_prefix_space=prefix)
-                tokenizer = AutoTokenizer.from_pretrained(model_id,
-                                                          revision=revision,
-                                                          **params)
+                tokenizer = AutoTokenizer.from_pretrained(
+                    model_id, revision=revision, **params
+                )
 
             # Set the maximal length of the tokenizer to the model's maximal
             # length. This is required for proper truncation
-            if (not hasattr(tokenizer, 'model_max_length') or
-                    tokenizer.model_max_length > 1_000):
+            if (
+                not hasattr(tokenizer, "model_max_length")
+                or tokenizer.model_max_length > 1_000
+            ):
 
-                if hasattr(tokenizer, 'max_model_input_sizes'):
+                if hasattr(tokenizer, "max_model_input_sizes"):
                     all_max_lengths = tokenizer.max_model_input_sizes.values()
                     min_max_length = min(list(all_max_lengths))
                     tokenizer.model_max_length = min_max_length
@@ -521,46 +567,45 @@ class BaseBenchmark(ABC):
 
             return dict(model=model, tokenizer=tokenizer)
 
-        elif framework == 'spacy':
-            local_model_id = model_id.split('/')[-1]
+        elif framework == "spacy":
+            local_model_id = model_id.split("/")[-1]
 
             # Download the model if it has not already been so
             if not is_module_installed(local_model_id):
-                url = (f'https://huggingface.co/{model_id}/resolve/main/'
-                       f'{local_model_id}-any-py3-none-any.whl')
-                logger.info('Model not installed. Downloading model')
-                subprocess.run(['pip3', 'install', url, '--quiet'])
-                logger.info('Finished downloading model. Resuming benchmark:')
+                url = (
+                    f"https://huggingface.co/{model_id}/resolve/main/"
+                    f"{local_model_id}-any-py3-none-any.whl"
+                )
+                logger.info("Model not installed. Downloading model")
+                subprocess.run(["pip3", "install", url, "--quiet"])
+                logger.info("Finished downloading model. Resuming benchmark:")
 
             # Load the model
             try:
                 model = spacy.load(local_model_id)
             except OSError:
-                raise InvalidBenchmark(f'The model {model_id} could not '
-                                       f'be installed from spaCy.')
+                raise InvalidBenchmark(
+                    f"The model {model_id} could not " f"be installed from spaCy."
+                )
 
             return dict(model=model)
 
         else:
-            raise RuntimeError(f'The framework "{framework}" is not '
-                               f'supported!')
+            raise RuntimeError(f'The framework "{framework}" is not ' f"supported!")
 
     @abstractmethod
     def _load_data(self) -> Tuple[Dataset, Dataset]:
-        '''Load the datasets.
+        """Load the datasets.
 
         Returns:
             A triple of HuggingFace datasets:
                 The train and test datasets.
-        '''
+        """
         pass
 
     @abstractmethod
-    def _preprocess_data(self,
-                         dataset: Dataset,
-                         framework: str,
-                         **kwargs) -> Dataset:
-        '''Preprocess a dataset by tokenizing and aligning the labels.
+    def _preprocess_data(self, dataset: Dataset, framework: str, **kwargs) -> Dataset:
+        """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
             dataset (HuggingFace dataset):
@@ -571,14 +616,12 @@ class BaseBenchmark(ABC):
 
         Returns:
             HuggingFace dataset: The preprocessed dataset.
-        '''
+        """
         pass
 
     @abstractmethod
-    def _load_data_collator(
-            self,
-            tokenizer: Optional[PreTrainedTokenizerBase] = None):
-        '''Load the data collator used to prepare samples during finetuning.
+    def _load_data_collator(self, tokenizer: Optional[PreTrainedTokenizerBase] = None):
+        """Load the data collator used to prepare samples during finetuning.
 
         Args:
             tokenizer (HuggingFace tokenizer or None, optional):
@@ -588,14 +631,14 @@ class BaseBenchmark(ABC):
 
         Returns:
             HuggingFace data collator: The data collator.
-        '''
+        """
         pass
 
     @abstractmethod
-    def _compute_metrics(self,
-                         predictions_and_labels: tuple,
-                         id2label: Optional[list] = None) -> Dict[str, float]:
-        '''Compute the metrics needed for evaluation.
+    def _compute_metrics(
+        self, predictions_and_labels: tuple, id2label: Optional[list] = None
+    ) -> Dict[str, float]:
+        """Compute the metrics needed for evaluation.
 
         Args:
             predictions_and_labels (pair of arrays):
@@ -608,14 +651,13 @@ class BaseBenchmark(ABC):
             dict:
                 A dictionary with the names of the metrics as keys and the
                 metric values as values.
-        '''
+        """
         pass
 
-    def _log_metrics(self,
-                     metrics: Dict[str, List[Dict[str, float]]],
-                     finetuned: bool,
-                     model_id: str) -> Dict[str, dict]:
-        '''Log the metrics.
+    def _log_metrics(
+        self, metrics: Dict[str, List[Dict[str, float]]], finetuned: bool, model_id: str
+    ) -> Dict[str, dict]:
+        """Log the metrics.
 
         Args:
             metrics (dict):
@@ -634,13 +676,14 @@ class BaseBenchmark(ABC):
                 'raw_metrics' being identical to `metrics` and 'total' being
                 a dictionary with the aggregated metrics (means and standard
                 errors).
-        '''
+        """
         # Initial logging message
         if finetuned:
-            msg = (f'Finished finetuning and evaluation of {model_id} on '
-                   f'{self.name}.')
+            msg = (
+                f"Finished finetuning and evaluation of {model_id} on " f"{self.name}."
+            )
         else:
-            msg = (f'Finished evaluation of {model_id} on {self.name}.')
+            msg = f"Finished evaluation of {model_id} on {self.name}."
         logger.info(msg)
 
         # Initialise the total dict
@@ -649,26 +692,25 @@ class BaseBenchmark(ABC):
         # Logging of the metric(s)
         for metric_key, metric_name in self.metric_names.items():
             scores = self._get_stats(metrics, metric_key)
-            test_score, test_se = scores['test']
+            test_score, test_se = scores["test"]
             test_score *= 100
             test_se *= 100
 
-            msg = (f'{metric_name}:\n'
-                   f'  - Test: {test_score:.2f} ± {test_se:.2f}')
+            msg = f"{metric_name}:\n" f"  - Test: {test_score:.2f} ± {test_se:.2f}"
 
-            if 'train' in scores.keys():
-                train_score, train_se = scores['train']
+            if "train" in scores.keys():
+                train_score, train_se = scores["train"]
                 train_score *= 100
                 train_se *= 100
-                msg += f'\n  - Train: {train_score:.2f} ± {train_se:.2f}'
+                msg += f"\n  - Train: {train_score:.2f} ± {train_se:.2f}"
 
                 # Store the aggregated train metrics
-                total_dict[f'train_{metric_key}'] = train_score
-                total_dict[f'train_{metric_key}_se'] = train_se
+                total_dict[f"train_{metric_key}"] = train_score
+                total_dict[f"train_{metric_key}_se"] = train_se
 
             # Store the aggregated test metrics
-            total_dict[f'test_{metric_key}'] = test_score
-            total_dict[f'test_{metric_key}_se'] = test_se
+            total_dict[f"test_{metric_key}"] = test_score
+            total_dict[f"test_{metric_key}_se"] = test_se
 
             # Log the scores
             logger.info(msg)
@@ -680,11 +722,10 @@ class BaseBenchmark(ABC):
         return extended_metrics
 
     @abstractmethod
-    def _get_spacy_predictions_and_labels(self,
-                                          model,
-                                          dataset: Dataset,
-                                          progress_bar: bool) -> tuple:
-        '''Get predictions from SpaCy model on dataset.
+    def _get_spacy_predictions_and_labels(
+        self, model, dataset: Dataset, progress_bar: bool
+    ) -> tuple:
+        """Get predictions from SpaCy model on dataset.
 
         Args:
             model (SpaCy model): The model.
@@ -694,11 +735,11 @@ class BaseBenchmark(ABC):
             A pair of arrays:
                 The first array contains the probability predictions and the
                 second array contains the true labels.
-        '''
+        """
         pass
 
     def _fetch_model_metadata(self, model_id: str) -> Dict[str, str]:
-        '''Fetches metdataof a model from the HuggingFace Hub.
+        """Fetches metdataof a model from the HuggingFace Hub.
 
         Args:
             model_id (str):
@@ -714,27 +755,29 @@ class BaseBenchmark(ABC):
 
         Raises:
             RuntimeError: If the extracted framework is not recognized.
-        '''
+        """
         # If the model ID specifies a random ID, then return a hardcoded
         # metadata dictionary
-        if model_id.startswith('random'):
-            return dict(task='fill-mask', framework='pytorch')
+        if model_id.startswith("random"):
+            return dict(task="fill-mask", framework="pytorch")
 
         # Parse all the anchor tags from the model website
-        model_id, *_ = model_id.split('@', 1)
-        url = 'https://www.huggingface.co/' + model_id
+        model_id, *_ = model_id.split("@", 1)
+        url = "https://www.huggingface.co/" + model_id
         html = requests.get(url).text
-        soup = BeautifulSoup(html, 'html.parser')
-        a_tags = soup.find_all('a')
-        a_tags_with_class = [a for a in a_tags if a.get('class') is not None]
+        soup = BeautifulSoup(html, "html.parser")
+        a_tags = soup.find_all("a")
+        a_tags_with_class = [a for a in a_tags if a.get("class") is not None]
 
         # Fetch the frameworks from the model website
-        frameworks = [re.sub(r'.*=', '', a['href'])
-                      for a in a_tags_with_class
-                      if 'tag-white' in a['class'] and 'library' in a['href']]
+        frameworks = [
+            re.sub(r".*=", "", a["href"])
+            for a in a_tags_with_class
+            if "tag-white" in a["class"] and "library" in a["href"]
+        ]
 
         # Set up the order of the frameworks
-        valid_frameworks = ['pytorch', 'spacy', 'jax']
+        valid_frameworks = ["pytorch", "spacy", "jax"]
 
         # Extract a single valid framework in which the model has been
         # implemented
@@ -743,26 +786,25 @@ class BaseBenchmark(ABC):
                 framework = valid_framework
                 break
         else:
-            msg = f'Cannot detect the framework of {model_id}!'
+            msg = f"Cannot detect the framework of {model_id}!"
             raise InvalidBenchmark(msg)
 
         # Fetch the model tasks from the model website
-        tasks = [re.sub(r'.*=', '', a['href'])
-                 for a in a_tags_with_class
-                 if 'tag-white' in a['class'] and 'pipeline_tag' in a['href']]
+        tasks = [
+            re.sub(r".*=", "", a["href"])
+            for a in a_tags_with_class
+            if "tag-white" in a["class"] and "pipeline_tag" in a["href"]
+        ]
 
         # Extract a single valid task on which the model has been trained. If
         # no task has been specified on the model card then assume that it is
         # 'fill-mask'
-        task = self._get_model_task(tasks[0]) if len(tasks) else 'fill-mask'
+        task = self._get_model_task(tasks[0]) if len(tasks) else "fill-mask"
 
         return dict(framework=framework, task=task)
 
-    def benchmark(self,
-                  model_id: str,
-                  progress_bar: bool = True
-                  ) -> Dict[str, dict]:
-        '''Benchmark a model.
+    def benchmark(self, model_id: str, progress_bar: bool = True) -> Dict[str, dict]:
+        """Benchmark a model.
 
         Args:
             model_id (str):
@@ -782,20 +824,18 @@ class BaseBenchmark(ABC):
 
         Raises:
             RuntimeError: If the extracted framework is not recognized.
-        '''
+        """
         model_metadata = self._fetch_model_metadata(model_id)
-        framework = model_metadata['framework']
-        task = model_metadata['task']
-        if '@' in model_id:
-            model_id, revision = model_id.split('@', 1)
+        framework = model_metadata["framework"]
+        task = model_metadata["task"]
+        if "@" in model_id:
+            model_id, revision = model_id.split("@", 1)
         else:
-            revision = 'main'
-        model_dict = self._load_model(model_id,
-                                      revision=revision,
-                                      **model_metadata)
+            revision = "main"
+        model_dict = self._load_model(model_id, revision=revision, **model_metadata)
 
         # Define variable that determines if the model should be finetuned
-        finetune = (task == 'fill-mask')
+        finetune = task == "fill-mask"
 
         # Load the dataset
         train, test = self._load_data()
@@ -809,52 +849,56 @@ class BaseBenchmark(ABC):
 
         # Remove empty examples from the datasets
         try:
-            train = train.filter(lambda x: len(x['tokens']) > 0)
-            test = test.filter(lambda x: len(x['tokens']) > 0)
+            train = train.filter(lambda x: len(x["tokens"]) > 0)
+            test = test.filter(lambda x: len(x["tokens"]) > 0)
         except KeyError:
             try:
-                train = train.filter(lambda x: len(x['doc']) > 0)
-                test = test.filter(lambda x: len(x['doc']) > 0)
+                train = train.filter(lambda x: len(x["doc"]) > 0)
+                test = test.filter(lambda x: len(x["doc"]) > 0)
             except KeyError:
                 pass
 
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
-        if framework in ('pytorch', 'jax'):
-            framework = 'pytorch'
+        if framework in ("pytorch", "jax"):
+            framework = "pytorch"
 
             # Set platform-dependent random seeds
             import torch
+
             torch.manual_seed(4242)
             torch.cuda.manual_seed_all(4242)
             torch.backends.cudnn.benchmark = False
 
             # Extract the model and tokenizer
-            model = model_dict['model']
-            tokenizer = model_dict['tokenizer']
+            model = model_dict["model"]
+            tokenizer = model_dict["tokenizer"]
 
             # Preprocess the datasets
             try:
-                params = dict(framework=framework,
-                              config=model.config,
-                              tokenizer=tokenizer)
+                params = dict(
+                    framework=framework, config=model.config, tokenizer=tokenizer
+                )
                 if finetune or self.evaluate_train:
                     train = self._preprocess_data(train, **params)
                 test = self._preprocess_data(test, **params)
             except ValueError:
-                raise InvalidBenchmark('Preprocessing of the dataset could '
-                                       'not be done.')
+                raise InvalidBenchmark(
+                    "Preprocessing of the dataset could " "not be done."
+                )
 
             # Get bootstrapped datasets
             tests = [test]
-            tests += [Dataset.from_dict(test[test_bidxs[idx]])
-                      for idx in range(test_bidxs.shape[0])]
+            tests += [
+                Dataset.from_dict(test[test_bidxs[idx]])
+                for idx in range(test_bidxs.shape[0])
+            ]
 
             # Set up progress bar
             if finetune:
                 if progress_bar:
-                    itr = tqdm(range(10), desc='Benchmarking')
+                    itr = tqdm(range(10), desc="Benchmarking")
                 else:
                     itr = range(10)
             else:
@@ -865,11 +909,11 @@ class BaseBenchmark(ABC):
 
             # Initialise training arguments
             training_args = TrainingArguments(
-                output_dir='.',
-                evaluation_strategy='epoch',
-                logging_strategy='epoch' if self.verbose else 'no',
-                save_strategy='epoch',
-                report_to='none',
+                output_dir=".",
+                evaluation_strategy="epoch",
+                logging_strategy="epoch" if self.verbose else "no",
+                save_strategy="epoch",
+                report_to="none",
                 save_total_limit=1,
                 per_device_train_batch_size=32,
                 per_device_eval_batch_size=32,
@@ -877,7 +921,7 @@ class BaseBenchmark(ABC):
                 num_train_epochs=1000,
                 warmup_steps=((len(train) * 0.9) // 32),
                 gradient_accumulation_steps=1,
-                load_best_model_at_end=True
+                load_best_model_at_end=True,
             )
 
             # Manually set `disable_tqdm` to `False` if `progress_bar` is
@@ -890,14 +934,13 @@ class BaseBenchmark(ABC):
                 while True:
                     try:
                         # Reinitialise a new model
-                        model = self._load_model(model_id,
-                                                 revision=revision,
-                                                 **model_metadata)['model']
+                        model = self._load_model(
+                            model_id, revision=revision, **model_metadata
+                        )["model"]
 
                         # Initialise compute_metrics function
                         compute_metrics = partial(
-                            self._compute_metrics,
-                            id2label=model.config.id2label
+                            self._compute_metrics, id2label=model.config.id2label
                         )
 
                         # Initialise early stopping callback
@@ -907,16 +950,18 @@ class BaseBenchmark(ABC):
 
                         # Initialise Trainer
                         split = train.train_test_split(0.1, seed=4242)
-                        trainer_args = dict(model=model,
-                                            args=training_args,
-                                            train_dataset=split['train'],
-                                            eval_dataset=split['test'],
-                                            tokenizer=tokenizer,
-                                            data_collator=data_collator,
-                                            compute_metrics=compute_metrics,
-                                            callbacks=[early_stopping])
+                        trainer_args = dict(
+                            model=model,
+                            args=training_args,
+                            train_dataset=split["train"],
+                            eval_dataset=split["test"],
+                            tokenizer=tokenizer,
+                            data_collator=data_collator,
+                            compute_metrics=compute_metrics,
+                            callbacks=[early_stopping],
+                        )
                         if self.two_labels:
-                            trainer_args['split_point'] = self.split_point
+                            trainer_args["split_point"] = self.split_point
                             trainer = TwolabelTrainer(**trainer_args)
                         else:
                             trainer = Trainer(**trainer_args)
@@ -947,25 +992,23 @@ class BaseBenchmark(ABC):
                         # Log training metrics and save the state
                         if self.evaluate_train:
                             train_metrics = trainer.evaluate(
-                                train,
-                                metric_key_prefix='train'
+                                train, metric_key_prefix="train"
                             )
-                            metrics['train'].append(train_metrics)
+                            metrics["train"].append(train_metrics)
 
                         # Set up a progress bar for the test datasets if we are
                         # not finetuning
                         if not finetune and progress_bar:
-                            test_itr = tqdm(tests, desc='Benchmarking')
+                            test_itr = tqdm(tests, desc="Benchmarking")
                         else:
                             test_itr = tests
 
                         # Log test metrics
                         for dataset in test_itr:
                             test_metrics = trainer.evaluate(
-                                dataset,
-                                metric_key_prefix='test'
+                                dataset, metric_key_prefix="test"
                             )
-                            metrics['test'].append(test_metrics)
+                            metrics["test"].append(test_metrics)
 
                         break
 
@@ -973,10 +1016,7 @@ class BaseBenchmark(ABC):
 
                         # We assume that all these CUDA errors are caused by
                         # insufficient GPU memory
-                        cuda_errs = [
-                            'CUDA out of memory',
-                            'CUDA error'
-                        ]
+                        cuda_errs = ["CUDA out of memory", "CUDA error"]
 
                         # If it is an unknown error, then simply report it
                         if all([err not in str(e) for err in cuda_errs]):
@@ -998,8 +1038,9 @@ class BaseBenchmark(ABC):
                         bs = training_args.per_device_train_batch_size
                         ga = training_args.gradient_accumulation_steps
                         if bs == 1:
-                            raise InvalidBenchmark('CUDA out of memory, even '
-                                                   'with a batch size of 1!')
+                            raise InvalidBenchmark(
+                                "CUDA out of memory, even " "with a batch size of 1!"
+                            )
                         training_args.per_device_train_batch_size = bs // 2
                         training_args.per_device_eval_batch_size = bs // 2
                         training_args.gradient_accumulation_steps = ga * 2
@@ -1015,9 +1056,9 @@ class BaseBenchmark(ABC):
                             pass
                         gc.collect()
 
-            metrics = self._log_metrics(metrics=metrics,
-                                        model_id=model_id,
-                                        finetuned=finetune)
+            metrics = self._log_metrics(
+                metrics=metrics, model_id=model_id, finetuned=finetune
+            )
 
             # Garbage collection, to avoid memory issues
             try:
@@ -1031,39 +1072,38 @@ class BaseBenchmark(ABC):
 
             return metrics
 
-        elif framework == 'spacy':
+        elif framework == "spacy":
             # Load the model
-            model = model_dict['model']
+            model = model_dict["model"]
 
             # Preprocess the test datasets
             test = self._preprocess_data(test, framework=framework)
             tests = [test]
-            tests += [Dataset.from_dict(test[test_bidxs[idx]])
-                      for idx in range(test_bidxs.shape[0])]
+            tests += [
+                Dataset.from_dict(test[test_bidxs[idx]])
+                for idx in range(test_bidxs.shape[0])
+            ]
 
             # Get the test predictions
             all_test_metrics = list()
-            for dataset in tqdm(tests, desc='Benchmarking'):
+            for dataset in tqdm(tests, desc="Benchmarking"):
                 preds_labels = self._get_spacy_predictions_and_labels(
-                    model=model,
-                    dataset=dataset,
-                    progress_bar=progress_bar
+                    model=model, dataset=dataset, progress_bar=progress_bar
                 )
 
                 # Check if the SpaCy model has been trained on the task at
                 # hand. If not, then skip this benchmark.
                 sample_preds = preds_labels[0][0]
-                pos_ner_test = (isinstance(sample_preds, list) and
-                                '' in sample_preds)
-                dep_test = (isinstance(sample_preds[0], list) and
-                            '' in sample_preds[0])
+                pos_ner_test = isinstance(sample_preds, list) and "" in sample_preds
+                dep_test = isinstance(sample_preds[0], list) and "" in sample_preds[0]
                 if pos_ner_test or dep_test:
-                    raise InvalidBenchmark('This SpaCy model have not been '
-                                           'trained on this task. Skipping.')
+                    raise InvalidBenchmark(
+                        "This SpaCy model have not been "
+                        "trained on this task. Skipping."
+                    )
 
                 test_metrics = self._compute_metrics(preds_labels)
-                test_metrics = {f'test_{key}': val
-                                for key, val in test_metrics.items()}
+                test_metrics = {f"test_{key}": val for key, val in test_metrics.items()}
                 all_test_metrics.append(test_metrics)
             metrics = dict(test=all_test_metrics)
 
@@ -1076,20 +1116,19 @@ class BaseBenchmark(ABC):
                 all_train_metrics = list()
                 for _ in range(10):
                     preds_labels = self._get_spacy_predictions_and_labels(
-                        model=model,
-                        dataset=train,
-                        progress_bar=progress_bar
+                        model=model, dataset=train, progress_bar=progress_bar
                     )
                     train_metrics = self._compute_metrics(preds_labels)
-                    train_metrics = {f'train_{key}': val
-                                     for key, val in train_metrics.items()}
+                    train_metrics = {
+                        f"train_{key}": val for key, val in train_metrics.items()
+                    }
 
                 all_train_metrics.append(train_metrics)
-                metrics['train'] = all_train_metrics
+                metrics["train"] = all_train_metrics
 
-            metrics = self._log_metrics(metrics=metrics,
-                                        model_id=model_id,
-                                        finetuned=False)
+            metrics = self._log_metrics(
+                metrics=metrics, model_id=model_id, finetuned=False
+            )
 
             # Garbage collection, to avoid memory issues
             try:
@@ -1104,8 +1143,7 @@ class BaseBenchmark(ABC):
             return metrics
 
         else:
-            raise RuntimeError(f'The framework "{framework}" is not '
-                               f'supported!')
+            raise RuntimeError(f'The framework "{framework}" is not ' f"supported!")
 
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)
