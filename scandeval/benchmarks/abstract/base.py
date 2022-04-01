@@ -896,9 +896,19 @@ class BaseBenchmark(ABC):
                 training_args.disable_tqdm = False
 
             metrics = defaultdict(list)
-            for _ in itr:
+            for idx in itr:
                 while True:
                     try:
+                        # Set random seeds to enforce reproducibility of the
+                        # randomly initialised weights
+                        random.seed(4242 + idx)
+                        np.random.seed(4242 + idx)
+                        rng = np.random.default_rng(4242 + idx)
+                        if framework in ('pytorch', 'jax'):
+                            import torch
+                            torch.manual_seed(4242 + idx)
+                            torch.cuda.manual_seed_all(4242 + idx)
+
                         # Reinitialise a new model
                         model = self._load_model(model_id,
                                                  revision=revision,
