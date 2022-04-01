@@ -799,6 +799,7 @@ class BaseBenchmark(ABC):
         # initialised weights
         random.seed(4242)
         np.random.seed(4242)
+        os.environ['PYTHONHASHSEED'] = '4242'
         rng = np.random.default_rng(4242)
         if framework in ('pytorch', 'jax'):
             import torch
@@ -904,7 +905,7 @@ class BaseBenchmark(ABC):
                         training_args.seed = 4242 + idx
                         random.seed(4242 + idx)
                         np.random.seed(4242 + idx)
-                        rng = np.random.default_rng(4242 + idx)
+                        os.environ['PYTHONHASHSEED'] = f'{4242 + idx}'
                         if framework in ('pytorch', 'jax'):
                             import torch
                             torch.manual_seed(4242 + idx)
