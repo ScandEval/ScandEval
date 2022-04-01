@@ -13,6 +13,12 @@ and this project adheres to
 - Now sets `seed` in `TrainingArguments` rather than setting it explicitly in
   PyTorch. This has the added bonus of ensuring that the `DataLoader`s used
   during training also uses this seed, ensuring better reproducibility.
+- Initialises model parameters with (fixed) different seeds during every
+  iteration, to ensure variability and reproducibility.
+- During finetuning, the i'th model will only be evaluated on the i'th
+  bootstrapped dataset. This ensures that there will always be 10 scores, no
+  matter if we're finetuning or purely evaluating, which means that the
+  confidence intervals will be more comparable.
 - Explicitly uses the PyTorch implementation of `AdamW` now, rather than the
   (deprecated) `transformers` implementation.
 
