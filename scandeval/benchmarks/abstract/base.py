@@ -901,6 +901,7 @@ class BaseBenchmark(ABC):
                     try:
                         # Set random seeds to enforce reproducibility of the
                         # randomly initialised weights
+                        training_args.seed = 4242 + idx
                         random.seed(4242 + idx)
                         np.random.seed(4242 + idx)
                         rng = np.random.default_rng(4242 + idx)
