@@ -11,6 +11,8 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Now sets `seed` in `TrainingArguments`.
+- Explicitly uses the PyTorch implementation of `AdamW` now, rather than the
+  (deprecated) `transformers` implementation.
 
 
 ## [v2.3.2] - 2022-02-11
