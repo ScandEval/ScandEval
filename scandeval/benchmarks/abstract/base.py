@@ -27,6 +27,7 @@ import gc
 import logging
 import re
 import random
+import os
 
 from ...utils import (MODEL_CLASSES, is_module_installed, InvalidBenchmark,
                       TwolabelTrainer, get_all_datasets,
@@ -824,11 +825,13 @@ class BaseBenchmark(ABC):
         if framework in ('pytorch', 'jax'):
             framework = 'pytorch'
 
-            # Set platform-dependent random seeds
+            # Enforce determinism
             import torch
-            torch.manual_seed(4242)
-            torch.cuda.manual_seed_all(4242)
+            os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+            os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':16:8'
             torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
+            torch.use_deterministic_algorithms(True)
 
             # Extract the model and tokenizer
             model = model_dict['model']
@@ -888,7 +891,7 @@ class BaseBenchmark(ABC):
                 training_args.disable_tqdm = False
 
             metrics = defaultdict(list)
-            for idx in itr:
+            for _ in itr:
                 while True:
                     try:
                         # Reinitialise a new model
@@ -906,9 +909,6 @@ class BaseBenchmark(ABC):
                         patience = 2 + 1000 // len(train)
                         params = dict(early_stopping_patience=patience)
                         early_stopping = EarlyStoppingCallback(**params)
-
-                        # Set seed
-                        training_args.seed = 4242 + idx
 
                         # Initialise Trainer
                         split = train.train_test_split(0.1, seed=4242)
