@@ -878,6 +878,7 @@ class BaseBenchmark(ABC):
                 warmup_steps=((len(train) * 0.9) // 32),
                 gradient_accumulation_steps=1,
                 load_best_model_at_end=True,
+                optim='adamw_torch',
                 seed=4242,
             )
 
