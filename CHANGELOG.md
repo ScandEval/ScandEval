@@ -10,7 +10,9 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
-- Now sets `seed` in `TrainingArguments`.
+- Now sets `seed` in `TrainingArguments` rather than setting it explicitly in
+  PyTorch. This has the added bonus of ensuring that the `DataLoader`s used
+  during training also uses this seed, ensuring better reproducibility.
 - Explicitly uses the PyTorch implementation of `AdamW` now, rather than the
   (deprecated) `transformers` implementation.
 
