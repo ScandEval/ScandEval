@@ -887,7 +887,7 @@ class BaseBenchmark(ABC):
                 training_args.disable_tqdm = False
 
             metrics = defaultdict(list)
-            for _ in itr:
+            for idx in itr:
                 while True:
                     try:
                         # Reinitialise a new model
@@ -905,6 +905,9 @@ class BaseBenchmark(ABC):
                         patience = 2 + 1000 // len(train)
                         params = dict(early_stopping_patience=patience)
                         early_stopping = EarlyStoppingCallback(**params)
+
+                        # Set seed
+                        training_args.seed = 4242 + idx
 
                         # Initialise Trainer
                         split = train.train_test_split(0.1, seed=4242)
