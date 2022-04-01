@@ -877,7 +877,8 @@ class BaseBenchmark(ABC):
                 num_train_epochs=1000,
                 warmup_steps=((len(train) * 0.9) // 32),
                 gradient_accumulation_steps=1,
-                load_best_model_at_end=True
+                load_best_model_at_end=True,
+                seed=4242,
             )
 
             # Manually set `disable_tqdm` to `False` if `progress_bar` is
