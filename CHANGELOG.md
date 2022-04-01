@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now sets `seed` in `TrainingArguments`.
+
+
 ## [v2.3.2] - 2022-02-11
 ### Fixed
 - Fixed a bug where a model's framework and pipeline tag were
