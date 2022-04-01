@@ -285,14 +285,6 @@ class BaseBenchmark(ABC):
 
         if framework == 'pytorch':
 
-            # Set random seeds to enforce reproducibility of the randomly
-            # initialised weights
-            import torch
-            random.seed(4242)
-            np.random.seed(4242)
-            torch.manual_seed(4242)
-            torch.cuda.manual_seed_all(4242)
-
             if task == 'fill-mask':
                 params = dict(num_labels=self.num_labels,
                               id2label=self.id2label,
@@ -792,13 +784,33 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the extracted framework is not recognized.
         '''
+        # Fetch the model metadata
         model_metadata = self._fetch_model_metadata(model_id)
         framework = model_metadata['framework']
         task = model_metadata['task']
+
+        # Extract the revision, if it is specified
         if '@' in model_id:
             model_id, revision = model_id.split('@', 1)
         else:
             revision = 'main'
+
+        # Set random seeds to enforce reproducibility of the randomly
+        # initialised weights
+        random.seed(4242)
+        np.random.seed(4242)
+        rng = np.random.default_rng(4242)
+        if framework in ('pytorch', 'jax'):
+            import torch
+            torch.manual_seed(4242)
+            torch.cuda.manual_seed_all(4242)
+            os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+            os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
+            torch.use_deterministic_algorithms(True)
+
+        # Load the model
         model_dict = self._load_model(model_id,
                                       revision=revision,
                                       **model_metadata)
@@ -808,13 +820,6 @@ class BaseBenchmark(ABC):
 
         # Load the dataset
         train, test = self._load_data()
-
-        # Set platform-independent random seeds
-        random.seed(4242)
-        np.random.seed(4242)
-
-        # Initialise random number generator
-        rng = np.random.default_rng(4242)
 
         # Remove empty examples from the datasets
         try:
@@ -832,14 +837,6 @@ class BaseBenchmark(ABC):
 
         if framework in ('pytorch', 'jax'):
             framework = 'pytorch'
-
-            # Enforce determinism
-            import torch
-            os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-            os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
-            torch.backends.cudnn.benchmark = False
-            torch.backends.cudnn.deterministic = True
-            torch.use_deterministic_algorithms(True)
 
             # Extract the model and tokenizer
             model = model_dict['model']
