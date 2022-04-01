@@ -828,7 +828,7 @@ class BaseBenchmark(ABC):
             # Enforce determinism
             import torch
             os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-            os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':16:8'
+            os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
             torch.backends.cudnn.benchmark = False
             torch.backends.cudnn.deterministic = True
             torch.use_deterministic_algorithms(True)
