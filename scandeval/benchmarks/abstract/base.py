@@ -285,6 +285,14 @@ class BaseBenchmark(ABC):
 
         if framework == 'pytorch':
 
+            # Set random seeds to enforce reproducibility of the randomly
+            # initialised weights
+            import torch
+            random.seed(4242)
+            np.random.seed(4242)
+            torch.manual_seed(4242)
+            torch.cuda.manual_seed_all(4242)
+
             if task == 'fill-mask':
                 params = dict(num_labels=self.num_labels,
                               id2label=self.id2label,
