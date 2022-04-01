@@ -974,10 +974,13 @@ class BaseBenchmark(ABC):
 
                         # Set up a progress bar for the test datasets if we are
                         # not finetuning
-                        if not finetune and progress_bar:
-                            test_itr = tqdm(tests, desc='Benchmarking')
+                        if not finetune:
+                            if progress_bar:
+                                test_itr = tqdm(tests, desc='Benchmarking')
+                            else:
+                                test_itr = tests
                         else:
-                            test_itr = tests
+                            test_itr = [tests[idx]]
 
                         # Log test metrics
                         for dataset in test_itr:
