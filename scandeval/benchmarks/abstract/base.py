@@ -515,8 +515,11 @@ class BaseBenchmark(ABC):
 
                 if hasattr(tokenizer, 'max_model_input_sizes'):
                     all_max_lengths = tokenizer.max_model_input_sizes.values()
-                    min_max_length = min(list(all_max_lengths))
-                    tokenizer.model_max_length = min_max_length
+                    if len(list(all_max_lengths)) > 0:
+                        min_max_length = min(list(all_max_lengths))
+                        tokenizer.model_max_length = min_max_length
+                    else:
+                        tokenizer.model_max_length = 512
                 else:
                     tokenizer.model_max_length = 512
 
