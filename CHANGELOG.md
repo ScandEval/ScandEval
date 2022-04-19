@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v3.0.0] - 2022-04-19
 ### Changed
 - During finetuning, the i'th model will only be evaluated on the i'th
   bootstrapped dataset. This ensures that there will always be 10 scores, no
