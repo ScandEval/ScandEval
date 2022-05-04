@@ -836,7 +836,8 @@ class BaseBenchmark(ABC):
                 pass
 
         # Shuffle the training dataset and truncate the training dataset to the
-        # first 1000 examples
+        # first 1000 examples, and the validation set to the following 300
+        # samples
         shuffled_train = train.shuffle(seed=4242)
         train = shuffled_train.select(range(1000))
         val = shuffled_train.select(range(1000, 1300))
