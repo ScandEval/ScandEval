@@ -894,7 +894,7 @@ class BaseBenchmark(ABC):
                 per_device_eval_batch_size=32,
                 learning_rate=2e-5,
                 num_train_epochs=1000,
-                warmup_steps=((len(train) * 0.9) // 32),
+                warmup_frac=0.1,
                 gradient_accumulation_steps=1,
                 load_best_model_at_end=True,
                 optim='adamw_torch',
