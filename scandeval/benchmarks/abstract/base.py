@@ -835,11 +835,13 @@ class BaseBenchmark(ABC):
             except KeyError:
                 pass
 
-        # Truncate the training dataset to the first 1000 examples
-        train = train.take(1000)
+        # Shuffle the training dataset and Truncate the training dataset to the first 1000 examples
+        shuffled_train = train.shuffle(seed=4242)
+        train = shuffled_train.take(1000)
+        val = shuffled_train.skip(1000).take(300)
 
         # Get bootstrap sample indices
-        test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
+        test_bidxs = rng.integers(0, len(test), size=(5, len(test)))
 
         if framework in ('pytorch', 'jax'):
             framework = 'pytorch'
@@ -861,16 +863,15 @@ class BaseBenchmark(ABC):
                                        'not be done.')
 
             # Get bootstrapped datasets
-            tests = [test]
-            tests += [Dataset.from_dict(test[test_bidxs[idx]])
-                      for idx in range(test_bidxs.shape[0])]
+            tests = [Dataset.from_dict(test[test_bidxs[idx]])
+                     for idx in range(test_bidxs.shape[0])]
 
             # Set up progress bar
             if finetune:
                 if progress_bar:
-                    itr = tqdm(range(10), desc='Benchmarking')
+                    itr = tqdm(range(5), desc='Benchmarking')
                 else:
-                    itr = range(10)
+                    itr = range(5)
             else:
                 itr = [0]
 
@@ -932,11 +933,11 @@ class BaseBenchmark(ABC):
                         early_stopping = EarlyStoppingCallback(**params)
 
                         # Initialise Trainer
-                        split = train.train_test_split(0.1, seed=4242)
+                        #split = train.train_test_split(0.1, seed=4242)
                         trainer_args = dict(model=model,
                                             args=training_args,
-                                            train_dataset=split['train'],
-                                            eval_dataset=split['test'],
+                                            train_dataset=train,#split['train'],
+                                            eval_dataset=val,#split['test'],
                                             tokenizer=tokenizer,
                                             data_collator=data_collator,
                                             compute_metrics=compute_metrics,
@@ -1066,9 +1067,8 @@ class BaseBenchmark(ABC):
 
             # Preprocess the test datasets
             test = self._preprocess_data(test, framework=framework)
-            tests = [test]
-            tests += [Dataset.from_dict(test[test_bidxs[idx]])
-                      for idx in range(test_bidxs.shape[0])]
+            tests = [Dataset.from_dict(test[test_bidxs[idx]])
+                     for idx in range(test_bidxs.shape[0])]
 
             # Get the test predictions
             all_test_metrics = list()
@@ -1102,20 +1102,21 @@ class BaseBenchmark(ABC):
                 train = self._preprocess_data(train, framework=framework)
 
                 # Get the train predictions
-                all_train_metrics = list()
-                for _ in range(10):
-                    preds_labels = self._get_spacy_predictions_and_labels(
-                        model=model,
-                        dataset=train,
-                        progress_bar=progress_bar
-                    )
-                    train_metrics = self._compute_metrics(preds_labels)
-                    train_metrics = {f'train_{key}': val
-                                     for key, val in train_metrics.items()}
+                preds_labels = self._get_spacy_predictions_and_labels(
+                    model=model,
+                    dataset=train,
+                    progress_bar=progress_bar
+                )
 
-                all_train_metrics.append(train_metrics)
-                metrics['train'] = all_train_metrics
+                # Compute the train metrics
+                train_metrics = self._compute_metrics(preds_labels)
+                train_metrics = {f'train_{key}': val
+                                 for key, val in train_metrics.items()}
 
+                # Store the train metrics
+                metrics['train'] = [train_metrics]
+
+            # Log the metrics
             metrics = self._log_metrics(metrics=metrics,
                                         model_id=model_id,
                                         finetuned=False)
