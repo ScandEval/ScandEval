@@ -835,10 +835,11 @@ class BaseBenchmark(ABC):
             except KeyError:
                 pass
 
-        # Shuffle the training dataset and Truncate the training dataset to the first 1000 examples
+        # Shuffle the training dataset and truncate the training dataset to the
+        # first 1000 examples
         shuffled_train = train.shuffle(seed=4242)
-        train = shuffled_train.take(1000)
-        val = shuffled_train.skip(1000).take(300)
+        train = shuffled_train.select(range(1000))
+        val = shuffled_train.select(range(1000, 1300))
 
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(5, len(test)))
