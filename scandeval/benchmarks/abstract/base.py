@@ -835,6 +835,9 @@ class BaseBenchmark(ABC):
             except KeyError:
                 pass
 
+        # Truncate the training dataset to the first 1000 examples
+        train = train.take(1000)
+
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(9, len(test)))
 
