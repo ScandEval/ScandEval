@@ -840,9 +840,7 @@ class BaseBenchmark(ABC):
         # samples
         shuffled_train = train.shuffle(seed=4242)
         train = shuffled_train.select(range(1000))
-        val = shuffled_train.select(range(1000, 1300))
-
-        breakpoint()
+        val = shuffled_train.select(range(1000, min(1300, len(shuffled_train))))
 
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(5, len(test)))
@@ -861,6 +859,7 @@ class BaseBenchmark(ABC):
                               tokenizer=tokenizer)
                 if finetune or self.evaluate_train:
                     train = self._preprocess_data(train, **params)
+                    val = self._preprocess_data(val, **params)
                 test = self._preprocess_data(test, **params)
             except ValueError:
                 raise InvalidBenchmark('Preprocessing of the dataset could '
