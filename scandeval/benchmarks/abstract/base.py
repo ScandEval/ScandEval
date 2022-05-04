@@ -842,6 +842,8 @@ class BaseBenchmark(ABC):
         train = shuffled_train.select(range(1000))
         val = shuffled_train.select(range(1000, 1300))
 
+        breakpoint()
+
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(5, len(test)))
 
