@@ -842,8 +842,11 @@ class BaseBenchmark(ABC):
         train = shuffled_train.select(range(1000))
         val = shuffled_train.select(range(1000, min(1300, len(shuffled_train))))
 
+        # Set variable with number of iterations
+        num_iter = 10
+
         # Get bootstrap sample indices
-        test_bidxs = rng.integers(0, len(test), size=(5, len(test)))
+        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
 
         if framework in ('pytorch', 'jax'):
             framework = 'pytorch'
@@ -872,9 +875,9 @@ class BaseBenchmark(ABC):
             # Set up progress bar
             if finetune:
                 if progress_bar:
-                    itr = tqdm(range(5), desc='Benchmarking')
+                    itr = tqdm(range(num_iter), desc='Benchmarking')
                 else:
-                    itr = range(5)
+                    itr = range(num_iter)
             else:
                 itr = [0]
 
