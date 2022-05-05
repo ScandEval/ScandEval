@@ -57,18 +57,19 @@ from .utils import get_all_datasets
               show_default=True,
               help='Whether extra input should be outputted during '
                    'benchmarking')
-@click.option('--train_size',
-              default=1024,
+@click.option('--train_size', '-s',
+              default=[1024],
               show_default=True,
+              multiple=True,
               help='The number of training samples to train on')
 def benchmark(model_id: Tuple[str],
               dataset: Tuple[str],
               language: Tuple[str],
+              train_size: Tuple[int],
               task: Tuple[str],
               evaluate_train: bool,
               no_progress_bar: bool,
-              verbose: bool = False,
-              train_size: int = 1024):
+              verbose: bool = False):
     '''Benchmark language models on Scandinavian language tasks.'''
     # Initialise the benchmarker class
     benchmarker = Benchmark(language=list(language),
@@ -77,7 +78,7 @@ def benchmark(model_id: Tuple[str],
                             save_results=True,
                             evaluate_train=evaluate_train,
                             verbose=verbose,
-                            train_size=train_size)
+                            train_size=list(train_size))
 
     # Perform the benchmark evaluation
     model_id = None if len(model_id) == 0 else list(model_id)

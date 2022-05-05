@@ -53,7 +53,7 @@ class Benchmark:
                  task: Union[str, List[str]] = 'all',
                  evaluate_train: bool = False,
                  verbose: bool = False,
-                 train_size: int = 1024):
+                 train_size: List[int] = [1024]):
 
         # Set parameters
         self.progress_bar = progress_bar
@@ -359,17 +359,19 @@ class Benchmark:
         # `benchmarks`
         for model_id in model_ids:
             for dataset, alias, cls in benchmarks:
-                logger.info(f'Benchmarking {model_id} on {alias}:')
-                try:
-                    params = dict(progress_bar=progress_bar,
-                                  train_size=self.train_size)
-                    results = cls(model_id, **params)
-                    self.benchmark_results[dataset][model_id] = results
-                    logger.debug(f'Results:\n{results}')
-                except InvalidBenchmark as e:
-                    logger.info(f'{model_id} could not be benchmarked '
-                                f'on {alias}. Skipping.')
-                    logger.debug(f'The error message was "{e}".')
+                for train_size in self.train_size:
+                    logger.info(f'Benchmarking {model_id} on {alias} with '
+                                f'{train_size} samples:')
+                    try:
+                        params = dict(progress_bar=progress_bar,
+                                      train_size=train_size)
+                        results = cls(model_id, **params)
+                        self.benchmark_results[dataset][model_id] = results
+                        logger.debug(f'Results:\n{results}')
+                    except InvalidBenchmark as e:
+                        logger.info(f'{model_id} could not be benchmarked '
+                                    f'on {alias}. Skipping.')
+                        logger.debug(f'The error message was "{e}".')
 
         # Save the benchmark results
         if save_results:
