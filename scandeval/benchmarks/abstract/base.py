@@ -13,6 +13,8 @@ from transformers import (PreTrainedTokenizerBase,
                           EarlyStoppingCallback,
                           RobertaForSequenceClassification,
                           RobertaForTokenClassification,
+                          ElectraForSequenceClassification,
+                          ElectraForTokenClassification,
                           ProgressCallback)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
@@ -304,6 +306,10 @@ class BaseBenchmark(ABC):
                         model_cls = RobertaForSequenceClassification
                     elif model_id == 'random-roberta-token-clf':
                         model_cls = RobertaForTokenClassification
+                    elif model_id == 'random-electra-sequence-clf':
+                        model_cls = ElectraForSequenceClassification
+                    elif model_id == 'random-electra-token-clf':
+                        model_cls = ElectraForTokenClassification
                     else:
                         raise ValueError(f'A random model was chosen, '
                                          f'"{model_id}", but it was not '
