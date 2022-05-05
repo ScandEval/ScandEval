@@ -61,6 +61,7 @@ from .utils import get_all_datasets
               default=[1024],
               show_default=True,
               multiple=True,
+              type=int,
               help='The number of training samples to train on')
 def benchmark(model_id: Tuple[str],
               dataset: Tuple[str],
