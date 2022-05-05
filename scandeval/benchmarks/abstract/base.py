@@ -838,7 +838,7 @@ class BaseBenchmark(ABC):
         # Shuffle the training dataset and truncate the training dataset to the
         # first 1000 examples, and the validation set to the following 300
         # samples
-        train_size = 8
+        train_size = 16
         shuffled_train = train.shuffle(seed=4242)
         train = shuffled_train.select(range(train_size))
         val = shuffled_train.select(range(8192, min(8492, len(shuffled_train))))
