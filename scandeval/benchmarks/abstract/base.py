@@ -297,24 +297,28 @@ class BaseBenchmark(ABC):
             try:
                 # If the model ID specifies a random model, then load that.
                 if model_id.startswith('random'):
-                    rnd_id = 'xlm-roberta-base'
-                    config = AutoConfig.from_pretrained(rnd_id,
-                                                        revision=revision,
-                                                        **params)
-
                     if model_id == 'random-roberta-sequence-clf':
+                        rnd_model = 'xlm-roberta-base'
                         model_cls = RobertaForSequenceClassification
                     elif model_id == 'random-roberta-token-clf':
+                        rnd_model = 'xlm-roberta-base'
                         model_cls = RobertaForTokenClassification
                     elif model_id == 'random-electra-sequence-clf':
+                        rnd_model = 'google/electra-small-discriminator'
                         model_cls = ElectraForSequenceClassification
                     elif model_id == 'random-electra-token-clf':
+                        rnd_model = 'google/electra-small-discriminator'
                         model_cls = ElectraForTokenClassification
                     else:
                         raise ValueError(f'A random model was chosen, '
                                          f'"{model_id}", but it was not '
                                          f'recognized.')
 
+                    config = AutoConfig.from_pretrained(
+                        rnd_model,
+                        revision=revision,
+                        **params
+                    )
                     model = model_cls(config)
 
                 # Otherwise load the pretrained model
