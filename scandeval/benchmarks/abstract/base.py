@@ -839,8 +839,8 @@ class BaseBenchmark(ABC):
         # first 1000 examples, and the validation set to the following 300
         # samples
         shuffled_train = train.shuffle(seed=4242)
-        train = shuffled_train.select(range(100))
-        val = shuffled_train.select(range(100, min(400, len(shuffled_train))))
+        train = shuffled_train.select(range(0))
+        val = shuffled_train.select(range(0, min(400, len(shuffled_train))))
 
         # Set variable with number of iterations
         num_iter = 10
