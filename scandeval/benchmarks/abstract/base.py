@@ -508,7 +508,7 @@ class BaseBenchmark(ABC):
             # constructed.
             if model_id.startswith('random'):
                 params = dict(use_fast=True, add_prefix_space=True)
-                tokenizer = AutoTokenizer.from_pretrained(rnd_id,
+                tokenizer = AutoTokenizer.from_pretrained(rnd_model,
                                                           revision=revision,
                                                           **params)
             else:
