@@ -357,9 +357,9 @@ class Benchmark:
 
         # Benchmark all the models in `model_ids` on all the datasets in
         # `benchmarks`
-        for model_id in model_ids:
-            for dataset, alias, cls in benchmarks:
-                for train_size in self.train_size:
+        for train_size in self.train_size:
+            for model_id in model_ids:
+                for dataset, alias, cls in benchmarks:
                     logger.info(f'Benchmarking {model_id} on {alias} with '
                                 f'{train_size} samples:')
                     try:
