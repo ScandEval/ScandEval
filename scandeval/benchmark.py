@@ -52,7 +52,8 @@ class Benchmark:
                                                     'nn', 'is', 'fo'],
                  task: Union[str, List[str]] = 'all',
                  evaluate_train: bool = False,
-                 verbose: bool = False):
+                 verbose: bool = False,
+                 train_size: int = 1024):
 
         # Set parameters
         self.progress_bar = progress_bar
@@ -61,6 +62,7 @@ class Benchmark:
         self.task = task
         self.evaluate_train = evaluate_train
         self.verbose = verbose
+        self.train_size = train_size
 
         # Initialise variable storing model lists, so we only have to fetch it
         # once
@@ -359,7 +361,8 @@ class Benchmark:
             for dataset, alias, cls in benchmarks:
                 logger.info(f'Benchmarking {model_id} on {alias}:')
                 try:
-                    params = dict(progress_bar=progress_bar)
+                    params = dict(progress_bar=progress_bar,
+                                  train_size=self.train_size)
                     results = cls(model_id, **params)
                     self.benchmark_results[dataset][model_id] = results
                     logger.debug(f'Results:\n{results}')
