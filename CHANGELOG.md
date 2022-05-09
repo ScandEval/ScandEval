@@ -16,7 +16,8 @@ and this project adheres to
   ensure that its still as easy to differentiate between the different models.
   It also has the benefit of increasing the importance of pretraining data,
   which is ultimately one of the core aspects that the ScandEval benchmark is
-  measuring.
+  measuring. This also means that the smaller datasets, TwitterSent, Europarl,
+  LCC and NorDial, have been removed from the benchmark.
 - Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the
   dataset is used to warm up the learning rate.
 
