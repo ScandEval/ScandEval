@@ -3,7 +3,7 @@
 from functools import wraps
 from typing import Callable
 import warnings
-import datasets.utils.logging as ds_logging
+from datasets.utils import disable_progress_bar
 import logging
 import pkg_resources
 import re
@@ -191,7 +191,7 @@ def block_terminal_output():
     logging.getLogger('absl').setLevel(logging.ERROR)
 
     # Disable the tokenizer progress bars
-    ds_logging.get_verbosity = lambda: ds_logging.CRITICAL
+    disable_progress_bar()
 
     # Disable most of the `transformers` logging
     tf_logging.set_verbosity_error()
