@@ -8,6 +8,29 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- In an attempt to make benchmarking faster, as well as to use fewer resources
+  while doing so, all training splits of datasets are now being truncated to
+  1,024 samples. This amount was chosen based on extensive experiments, to
+  ensure that its still as easy to differentiate between the different models.
+  It also has the benefit of increasing the importance of pretraining data,
+  which is ultimately one of the core aspects that the ScandEval benchmark is
+  measuring.
+- Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the
+  dataset is used to warm up the learning rate.
+
+### Added
+- New randomly initialised ELECTRA-small model available for benchmarking,
+  simply set `model_id` to either 'random-electra-sequence-clf or
+  'random-electra-token-clf'. The randomly initialised XLM-RoBERTa-base model
+  is still available by replacing 'electra' with 'roberta'.
+
+### Fixed
+- Now disables tokenizer progress bars properly, using the
+  `datasets.utils.disable_progress_bar` function.
+
+
 ## [v3.0.0] - 2022-04-19
 ### Changed
 - During finetuning, the i'th model will only be evaluated on the i'th
