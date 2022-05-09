@@ -191,7 +191,7 @@ def block_terminal_output():
     logging.getLogger('absl').setLevel(logging.ERROR)
 
     # Disable the tokenizer progress bars
-    ds_logging.get_verbosity = lambda: ds_logging.NOTSET
+    ds_logging.get_verbosity = lambda: ds_logging.CRITICAL
 
     # Disable most of the `transformers` logging
     tf_logging.set_verbosity_error()
