@@ -10,14 +10,14 @@ and this project adheres to
 
 ## [Unreleased]
 ### Changed
-- In an attempt to make benchmarking faster, as well as to use fewer resources
-  while doing so, all training splits of datasets are now being truncated to
-  1,024 samples. This amount was chosen based on extensive experiments, to
-  ensure that its still as easy to differentiate between the different models.
-  It also has the benefit of increasing the importance of pretraining data,
-  which is ultimately one of the core aspects that the ScandEval benchmark is
-  measuring. This also means that the smaller datasets, TwitterSent, Europarl,
-  LCC and NorDial, have been removed from the benchmark.
+- To make benchmarking faster and to use fewer resources while doing so, all
+  training splits of datasets are now being truncated to 1,024 samples. This
+  amount was chosen based on extensive experiments, to ensure that its still as
+  easy to differentiate between the different models. It also has the benefit
+  of increasing the importance of pretraining data, which is ultimately one of
+  the core aspects that the ScandEval benchmark is measuring. This also means
+  that the smaller datasets, TwitterSent, Europarl, LCC and NorDial, have been
+  removed from the benchmark.
 - Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the
   dataset is used to warm up the learning rate.
 
