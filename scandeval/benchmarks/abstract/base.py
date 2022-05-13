@@ -854,7 +854,8 @@ class BaseBenchmark(ABC):
                                'the training set!')
         shuffled_train = train.shuffle(seed=4242)
         train = shuffled_train.select(range(train_size))
-        val = shuffled_train.select(range(len(train) - 300, len(train)))
+        val = shuffled_train.select(range(len(shuffled_train) - 300,
+                                          len(shuffled_train)))
 
         # Set variable with number of iterations
         num_iter = 10
