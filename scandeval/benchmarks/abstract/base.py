@@ -849,9 +849,12 @@ class BaseBenchmark(ABC):
         # Shuffle the training dataset and truncate the training dataset to the
         # first 1000 examples, and the validation set to the following 300
         # samples
+        if train_size + 300 > len(train):
+            raise RuntimeError('300 + train_size cannot exceed the size of '
+                               'the training set!')
         shuffled_train = train.shuffle(seed=4242)
         train = shuffled_train.select(range(train_size))
-        val = shuffled_train.select(range(2048, min(2348, len(shuffled_train))))
+        val = shuffled_train.select(range(len(train) - 300, len(train)))
 
         # Set variable with number of iterations
         num_iter = 10
