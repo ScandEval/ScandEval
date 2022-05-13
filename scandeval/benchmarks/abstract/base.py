@@ -506,17 +506,12 @@ class BaseBenchmark(ABC):
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
             # constructed.
-            if model_id.startswith('random'):
-                params = dict(use_fast=True, add_prefix_space=True)
-                tokenizer = AutoTokenizer.from_pretrained(rnd_model,
-                                                          revision=revision,
-                                                          **params)
-            else:
-                prefix = 'Roberta' in type(model).__name__
-                params = dict(use_fast=True, add_prefix_space=prefix)
-                tokenizer = AutoTokenizer.from_pretrained(model_id,
-                                                          revision=revision,
-                                                          **params)
+            m_id = rnd_model if model_id.startswith('random') else model_id
+            prefix = 'Roberta' in type(model).__name__
+            params = dict(use_fast=True, add_prefix_space=prefix)
+            tokenizer = AutoTokenizer.from_pretrained(m_id,
+                                                      revision=revision,
+                                                      **params)
 
             # Set the maximal length of the tokenizer to the model's maximal
             # length. This is required for proper truncation
