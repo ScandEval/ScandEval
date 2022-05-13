@@ -30,6 +30,9 @@ and this project adheres to
 ### Fixed
 - Now disables tokenizer progress bars properly, using the
   `datasets.utils.disable_progress_bar` function.
+- Many of the datasets contained duplicate entries. These have now all been
+  fixed - the script used to do this can be found in the
+  `remove-duplicates.ipynb` notebook.
 
 
 ## [v3.0.0] - 2022-04-19
