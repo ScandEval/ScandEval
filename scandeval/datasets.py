@@ -66,7 +66,7 @@ def load_suc3() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/suc3/')
+                'dev/datasets/suc3/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -90,7 +90,7 @@ def load_norne_nb() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne_nb/')
+                'dev/datasets/norne_nb/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -114,7 +114,7 @@ def load_norne_nn() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne_nn/')
+                'dev/datasets/norne_nn/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -138,7 +138,7 @@ def load_nordial() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/nordial/')
+                'dev/datasets/nordial/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -158,7 +158,7 @@ def load_norec() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norec/')
+                'dev/datasets/norec/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -178,7 +178,7 @@ def load_norec_is() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norec_is/')
+                'dev/datasets/norec_is/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -198,7 +198,7 @@ def load_norec_fo() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norec_fo/')
+                'dev/datasets/norec_fo/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -218,7 +218,7 @@ def load_angry_tweets() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/angry_tweets/')
+                'dev/datasets/angry_tweets/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -238,7 +238,7 @@ def load_dane() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/dane/')
+                'dev/datasets/dane/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -262,7 +262,7 @@ def load_ndt_nb_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne_nb/')
+                'dev/datasets/norne_nb/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -286,7 +286,7 @@ def load_ndt_nn_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne_nn/')
+                'dev/datasets/norne_nn/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -310,7 +310,7 @@ def load_ndt_nb_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne_nb/')
+                'dev/datasets/norne_nb/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -334,7 +334,7 @@ def load_ndt_nn_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/norne_nn/')
+                'dev/datasets/norne_nn/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -358,7 +358,7 @@ def load_ddt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/dane/')
+                'dev/datasets/dane/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -382,7 +382,7 @@ def load_ddt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/dane/')
+                'dev/datasets/dane/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -406,7 +406,7 @@ def load_dkhate() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/dkhate/')
+                'dev/datasets/dkhate/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -426,7 +426,7 @@ def load_europarl() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/europarl/')
+                'dev/datasets/europarl/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -448,7 +448,7 @@ def load_lcc() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/lcc/')
+                'dev/datasets/lcc/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -468,7 +468,7 @@ def load_twitter_sent() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/twitter_sent/')
+                'dev/datasets/twitter_sent/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -488,7 +488,7 @@ def load_dalaj() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/dalaj/')
+                'dev/datasets/dalaj/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -508,7 +508,7 @@ def load_absabank_imm() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/absabank_imm/')
+                'dev/datasets/absabank_imm/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
@@ -528,7 +528,7 @@ def load_sdt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/sdt/')
+                'dev/datasets/sdt/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -552,7 +552,7 @@ def load_sdt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/sdt/')
+                'dev/datasets/sdt/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -576,7 +576,7 @@ def load_idt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/idt/')
+                'dev/datasets/idt/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -600,7 +600,7 @@ def load_idt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/idt/')
+                'dev/datasets/idt/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -648,7 +648,7 @@ def load_wikiann_fo() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/wikiann_fo/')
+                'dev/datasets/wikiann_fo/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -672,7 +672,7 @@ def load_fdt_pos() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/fdt/')
+                'dev/datasets/fdt/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
@@ -696,7 +696,7 @@ def load_fdt_dep() -> Tuple[pd.DataFrame, pd.DataFrame,
             contains the target vectors.
     '''
     base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
-                'main/datasets/fdt/')
+                'dev/datasets/fdt/')
     train_url = base_url + 'train.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url,
