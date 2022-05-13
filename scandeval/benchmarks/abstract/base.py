@@ -297,16 +297,16 @@ class BaseBenchmark(ABC):
             try:
                 # If the model ID specifies a random model, then load that.
                 if model_id.startswith('random'):
-                    if model_id == 'random-roberta-sequence-clf':
+                    if model_id == 'random-xlmr-base-sequence-clf':
                         rnd_model = 'xlm-roberta-base'
                         model_cls = RobertaForSequenceClassification
-                    elif model_id == 'random-roberta-token-clf':
+                    elif model_id == 'random-xlmr-base-token-clf':
                         rnd_model = 'xlm-roberta-base'
                         model_cls = RobertaForTokenClassification
-                    elif model_id == 'random-electra-sequence-clf':
+                    elif model_id == 'random-electra-small-sequence-clf':
                         rnd_model = 'google/electra-small-discriminator'
                         model_cls = ElectraForSequenceClassification
-                    elif model_id == 'random-electra-token-clf':
+                    elif model_id == 'random-electra-small-token-clf':
                         rnd_model = 'google/electra-small-discriminator'
                         model_cls = ElectraForTokenClassification
                     else:
