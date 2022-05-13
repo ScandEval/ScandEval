@@ -901,16 +901,19 @@ class BaseBenchmark(ABC):
             # Initialise training arguments
             training_args = TrainingArguments(
                 output_dir='.',
-                evaluation_strategy='epoch',
-                logging_strategy='epoch' if self.verbose else 'no',
-                save_strategy='epoch',
+                evaluation_strategy='steps',
+                logging_strategy='steps' if self.verbose else 'no',
+                save_strategy='steps',
+                eval_steps=100,
+                logging_steps=100,
+                save_steps=100,
+                max_steps=10_000,
                 report_to='none',
                 save_total_limit=1,
                 per_device_train_batch_size=32,
                 per_device_eval_batch_size=32,
                 learning_rate=2e-5,
-                num_train_epochs=1000,
-                warmup_ratio=0.1,
+                warmup_ratio=0.01,
                 gradient_accumulation_steps=1,
                 load_best_model_at_end=True,
                 optim='adamw_torch',
@@ -948,7 +951,7 @@ class BaseBenchmark(ABC):
                         )
 
                         # Initialise early stopping callback
-                        patience = 3  # 2 + 1000 // len(train)
+                        patience = 2  # 2 + 1000 // len(train)
                         params = dict(early_stopping_patience=patience)
                         early_stopping = EarlyStoppingCallback(**params)
 
