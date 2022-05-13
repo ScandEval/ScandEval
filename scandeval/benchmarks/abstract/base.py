@@ -956,7 +956,9 @@ class BaseBenchmark(ABC):
                         params = dict(early_stopping_patience=patience)
                         early_stopping = EarlyStoppingCallback(**params)
 
-                        logging.getLogger('transformers.trainer').setLevel(logging.ERROR)
+                        # Disable logging from trainer.py
+                        (logging.getLogger('transformers.trainer')
+                                .setLevel(logging.ERROR))
 
                         # Initialise Trainer
                         #split = train.train_test_split(0.1, seed=4242)
