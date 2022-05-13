@@ -975,6 +975,9 @@ class BaseBenchmark(ABC):
                         else:
                             trainer = Trainer(**trainer_args)
 
+                        # Set transformers logging back to error
+                        tf_logging.set_verbosity_error()
+
                         # Remove trainer logging
                         trainer.log = lambda _: None
 
