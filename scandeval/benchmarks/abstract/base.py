@@ -956,8 +956,7 @@ class BaseBenchmark(ABC):
                         params = dict(early_stopping_patience=patience)
                         early_stopping = EarlyStoppingCallback(**params)
 
-                        # Set transformers logging back to error
-                        tf_logging.set_verbosity_error()
+                        logging.getLogger('transformers.trainer').setLevel(logging.ERROR)
 
                         # Initialise Trainer
                         #split = train.train_test_split(0.1, seed=4242)
