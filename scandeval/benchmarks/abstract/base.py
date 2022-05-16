@@ -990,6 +990,9 @@ class BaseBenchmark(ABC):
                         if progress_bar:
                             trainer.add_callback(NeverLeaveProgressCallback)
 
+                        breakpoint()
+
+
                         # Finetune the model
                         if finetune:
                             trainer.train()
