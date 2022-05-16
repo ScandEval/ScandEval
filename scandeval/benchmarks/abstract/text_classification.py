@@ -75,10 +75,12 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                  two_labels: bool = False,
                  split_point: Optional[int] = None,
                  verbose: bool = False):
-        self._metric = load_metric('f1')
+        self._metric = load_metric('matthews_correlation')
         super().__init__(task='text-classification',
                          name=name,
-                         metric_names=dict(macro_f1='Macro-average F1-score'),
+                         metric_names=dict(
+                            mcc='Matthew\'s correlation coefficient'
+                         ),
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,
@@ -177,9 +179,8 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
         predictions, labels = predictions_and_labels
         predictions = predictions.argmax(axis=-1)
         results = self._metric.compute(predictions=predictions,
-                                       references=labels,
-                                       average='macro')
-        return dict(macro_f1=results['f1'])
+                                       references=labels)
+        return dict(mcc=results['matthews_correlation'])
 
     def _get_spacy_predictions_and_labels(self,
                                           model,
