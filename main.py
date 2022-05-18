@@ -1,5 +1,31 @@
 '''Dataset preprocessing scripts'''
 
+def process_scala():
+    from datasets import load_dataset
+    from pathlib import Path
+    import json
+    from tqdm.auto import tqdm
+    import pandas as pd
+
+    def export_as_jsonl(df: pd.DataFrame, output_path: Path):
+        for idx, row in tqdm(list(df.iterrows())):
+            data_dict = dict(text=row.text, label=row.label)
+            json_line = json.dumps(data_dict)
+            with output_path.open('a') as f:
+                f.write(json_line)
+                if idx < len(df) - 1:
+                    f.write('\n')
+
+    for language in ['da', 'nb', 'nn', 'sv', 'is', 'fo']:
+        dataset_dict = load_dataset(f'saattrupdan/scala-{language}')
+
+        for split in ['small_train', 'val', 'test']:
+            split_df = dataset_dict[split].to_pandas()
+            split = 'train' if split == 'small_train' else split
+            data_dir = Path('datasets') / f'scala-{language}'
+            data_dir.mkdir(exist_ok=True)
+            path = data_dir / f'{split}.jsonl'
+            export_as_jsonl(df=split_df, output_path=path)
 
 def process_mim_gold_ner():
     from pathlib import Path
@@ -1595,4 +1621,4 @@ def process_absabank_imm():
 
 
 if __name__ == '__main__':
-    process_twitter_sent_sentiment()
+    process_scala()

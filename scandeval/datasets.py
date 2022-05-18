@@ -54,6 +54,126 @@ def _get_dataset_from_url(url: str,
     return pd.DataFrame(docs), pd.DataFrame(labels)
 
 
+def load_scala_da() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the Danish part of the ScaLA dataset.
+
+    Returns:
+        tuple:
+            Four dataframes, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'dev/datasets/scala_da/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
+def load_scala_nb() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the Bokmål part of the ScaLA dataset.
+
+    Returns:
+        tuple:
+            Four dataframes, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'dev/datasets/scala_nb/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
+def load_scala_nn() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the Nynorsk part of the ScaLA dataset.
+
+    Returns:
+        tuple:
+            Four dataframes, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'dev/datasets/scala_nn/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
+def load_scala_sv() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the Swedish part of the ScaLA dataset.
+
+    Returns:
+        tuple:
+            Four dataframes, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'dev/datasets/scala_sv/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
+def load_scala_is() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the Icelandic part of the ScaLA dataset.
+
+    Returns:
+        tuple:
+            Four dataframes, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'dev/datasets/scala_is/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
+def load_scala_fo() -> Tuple[pd.DataFrame, pd.DataFrame,
+                             pd.DataFrame, pd.DataFrame]:
+    '''Load the Faroese part of the ScaLA dataset.
+
+    Returns:
+        tuple:
+            Four dataframes, `X_train`, `X_test`, `y_train` and `y_test`, where
+            `X_train` and `X_test` corresponds to the feature matrices for the
+            training and test split, respectively, and `y_train` and `y_test`
+            contains the target vectors.
+    '''
+    base_url = ('https://raw.githubusercontent.com/saattrupdan/ScandEval/'
+                'dev/datasets/scala_fo/')
+    train_url = base_url + 'train.jsonl'
+    test_url = base_url + 'test.jsonl'
+    X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
+    X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
+    return X_train, X_test, y_train, y_test
+
+
 def load_suc3() -> Tuple[pd.DataFrame, pd.DataFrame,
                          pd.DataFrame, pd.DataFrame]:
     '''Load the SUC 3.0 dataset.
