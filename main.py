@@ -22,7 +22,7 @@ def process_scala():
         for split in ['small_train', 'val', 'test']:
             split_df = dataset_dict[split].to_pandas()
             split = 'train' if split == 'small_train' else split
-            data_dir = Path('datasets') / f'scala-{language}'
+            data_dir = Path('datasets') / f'scala_{language}'
             data_dir.mkdir(exist_ok=True)
             path = data_dir / f'{split}.jsonl'
             export_as_jsonl(df=split_df, output_path=path)
