@@ -89,15 +89,15 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                          split_point=split_point,
                          verbose=verbose)
 
-    def _load_data(self) -> Tuple[Dataset, Dataset]:
-        X_train, X_test, y_train, y_test = load_dataset(self.short_name)
-        train_dict = dict(doc=X_train['text'],
-                          orig_label=y_train['label'])
-        test_dict = dict(doc=X_test['text'],
-                         orig_label=y_test['label'])
+    def _load_data(self) -> Tuple[Dataset, Dataset, Dataset]:
+        train, val, test = load_dataset(self.short_name)
+        train_dict = dict(doc=train['text'], orig_label=train['label'])
+        val_dict = dict(doc=val['text'], orig_label=val['label'])
+        test_dict = dict(doc=test['text'], orig_label=test['label'])
         train = Dataset.from_dict(train_dict)
+        val = Dataset.from_dict(val_dict)
         test = Dataset.from_dict(test_dict)
-        return train, test
+        return train, val, test
 
     def _load_data_collator(
             self,

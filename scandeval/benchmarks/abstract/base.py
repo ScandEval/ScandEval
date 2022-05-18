@@ -828,29 +828,32 @@ class BaseBenchmark(ABC):
         finetune = (task == 'fill-mask')
 
         # Load the dataset
-        train, test = self._load_data()
+        dataset_splits = self._load_data()
+        if len(dataset_splits) == 2:
+            train, test = dataset_splits
+
+            # Shuffle the training dataset and set the validation set to be the
+            # last 256 samples of the training dataset, and truncate the
+            # training dataset to `train_size`
+            shuffled_train = train.shuffle(seed=4242)
+            train = shuffled_train.select(range(train_size))
+            val = shuffled_train.select(range(len(shuffled_train) - 256,
+                                              len(shuffled_train)))
+        else:
+            train, val, test = dataset_splits
 
         # Remove empty examples from the datasets
         try:
             train = train.filter(lambda x: len(x['tokens']) > 0)
+            val = val.filter(lambda x: len(x['tokens']) > 0)
             test = test.filter(lambda x: len(x['tokens']) > 0)
         except KeyError:
             try:
                 train = train.filter(lambda x: len(x['doc']) > 0)
+                val = val.filter(lambda x: len(x['doc']) > 0)
                 test = test.filter(lambda x: len(x['doc']) > 0)
             except KeyError:
                 pass
-
-        # Shuffle the training dataset and truncate the training dataset to the
-        # first 1000 examples, and the validation set to the following 300
-        # samples
-        if train_size + 300 > len(train):
-            raise RuntimeError('300 + train_size cannot exceed the size of '
-                               'the training set!')
-        shuffled_train = train.shuffle(seed=4242)
-        train = shuffled_train.select(range(train_size))
-        val = shuffled_train.select(range(len(shuffled_train) - 256,
-                                          len(shuffled_train)))
 
         # Set variable with number of iterations
         num_iter = 10
