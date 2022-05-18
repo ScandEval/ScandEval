@@ -27,3 +27,9 @@ from .mim_gold_ner import MimGoldNerBenchmark  # noqa
 from .wikiann_fo import WikiannFoBenchmark  # noqa
 from .norec_is import NorecISBenchmark  # noqa
 from .norec_fo import NorecFOBenchmark  # noqa
+from .scala_da import ScalaDABenchmark  # noqa
+from .scala_nb import ScalaNBBenchmark  # noqa
+from .scala_nn import ScalaNNBenchmark  # noqa
+from .scala_sv import ScalaSVBenchmark  # noqa
+from .scala_is import ScalaISBenchmark  # noqa
+from .scala_fo import ScalaFOBenchmark  # noqa
