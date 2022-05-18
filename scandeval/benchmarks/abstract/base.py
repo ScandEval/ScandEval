@@ -950,7 +950,7 @@ class BaseBenchmark(ABC):
                         )
 
                         # Initialise early stopping callback
-                        patience = 2  # 2 + 1000 // len(train)
+                        patience = 5  # 2 + 1000 // len(train)
                         params = dict(early_stopping_patience=patience)
                         early_stopping = EarlyStoppingCallback(**params)
 
