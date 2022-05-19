@@ -1021,6 +1021,8 @@ class BaseBenchmark(ABC):
                                 dataset,
                                 metric_key_prefix='test'
                             )
+                            # TEMP
+                            print(test_metrics)
                             metrics['test'].append(test_metrics)
 
                         break
