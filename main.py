@@ -19,7 +19,7 @@ def process_scala():
     for language in ['da', 'nb', 'nn', 'sv', 'is', 'fo']:
         dataset_dict = load_dataset(f'saattrupdan/scala-{language}')
 
-        for split in ['small_train', 'val', 'test']:
+        for split in ['train', 'val', 'test']:
             split_df = dataset_dict[split].to_pandas()
             split = 'train' if split == 'small_train' else split
             data_dir = Path('datasets') / f'scala_{language}'
