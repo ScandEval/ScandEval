@@ -842,6 +842,9 @@ class BaseBenchmark(ABC):
         else:
             train, val, test = dataset_splits
 
+        # TEMP
+        print('Dataset sizes:', len(train), len(val), len(test))
+
         # Remove empty examples from the datasets
         try:
             train = train.filter(lambda x: len(x['tokens']) > 0)
