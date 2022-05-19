@@ -90,14 +90,22 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
                          verbose=verbose)
 
     def _load_data(self) -> Tuple[Dataset, Dataset, Dataset]:
-        train, val, test = load_dataset(self.short_name)
-        train_dict = dict(doc=train['text'], orig_label=train['label'])
-        val_dict = dict(doc=val['text'], orig_label=val['label'])
-        test_dict = dict(doc=test['text'], orig_label=test['label'])
-        train = Dataset.from_dict(train_dict)
-        val = Dataset.from_dict(val_dict)
-        test = Dataset.from_dict(test_dict)
-        return train, val, test
+        try:
+            train, val, test = load_dataset(self.short_name)
+            train_dict = dict(doc=train['text'], orig_label=train['label'])
+            val_dict = dict(doc=val['text'], orig_label=val['label'])
+            test_dict = dict(doc=test['text'], orig_label=test['label'])
+            train = Dataset.from_dict(train_dict)
+            val = Dataset.from_dict(val_dict)
+            test = Dataset.from_dict(test_dict)
+            return train, val, test
+        except ValueError:
+            train, test = load_dataset(self.short_name)
+            train_dict = dict(doc=train['text'], orig_label=train['label'])
+            test_dict = dict(doc=test['text'], orig_label=test['label'])
+            train = Dataset.from_dict(train_dict)
+            test = Dataset.from_dict(test_dict)
+            return train, test
 
     def _load_data_collator(
             self,
