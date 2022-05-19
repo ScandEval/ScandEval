@@ -955,8 +955,8 @@ class BaseBenchmark(ABC):
                         early_stopping = EarlyStoppingCallback(**params)
 
                         # Disable logging from trainer.py
-                        (logging.getLogger('transformers.trainer')
-                                .setLevel(logging.ERROR))
+                        #(logging.getLogger('transformers.trainer')
+                        #        .setLevel(logging.ERROR))
 
                         # Initialise Trainer
                         #split = train.train_test_split(0.1, seed=4242)
@@ -975,18 +975,18 @@ class BaseBenchmark(ABC):
                             trainer = Trainer(**trainer_args)
 
                         # Set transformers logging back to error
-                        tf_logging.set_verbosity_error()
+                        #tf_logging.set_verbosity_error()
 
                         # Remove trainer logging
-                        trainer.log = lambda _: None
+                        #trainer.log = lambda _: None
 
                         # Remove the callback which prints the metrics after
                         # each evaluation
-                        if not self.verbose:
-                            trainer.remove_callback(PrinterCallback)
+                        #if not self.verbose:
+                        #    trainer.remove_callback(PrinterCallback)
 
                         # Remove the progress bar callback
-                        trainer.remove_callback(ProgressCallback)
+                        #trainer.remove_callback(ProgressCallback)
 
                         # Add the custom progress callback if `progress_bar` is
                         # True
