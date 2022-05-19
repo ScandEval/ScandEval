@@ -11,7 +11,7 @@ def process_scala():
         for idx, row in tqdm(list(df.iterrows())):
             data_dict = dict(text=row.text, label=row.label)
             json_line = json.dumps(data_dict)
-            with output_path.open('a') as f:
+            with output_path.open('w') as f:
                 f.write(json_line)
                 if idx < len(df) - 1:
                     f.write('\n')
