@@ -1047,7 +1047,6 @@ class BaseBenchmark(ABC):
                             except UnboundLocalError:
                                 pass
                             gc.collect()
-                            raise e
                             raise InvalidBenchmark(str(e))
 
                         # If it is a CUDA memory error, then reduce batch size
