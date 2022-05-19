@@ -41,7 +41,12 @@ def _get_dataset_from_url(url: str,
                           ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     response = requests.get(url)
     records = response.text.split('\n')
-    breakpoint()
+    for record in records:
+        if record != '':
+            try:
+                json.loads(record.strip())
+            except:
+                breakpoint()
     data = [json.loads(record.strip()) for record in records if record != '']
 
     if isinstance(feature_key, str):
