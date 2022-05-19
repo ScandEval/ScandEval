@@ -100,9 +100,9 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
             test = Dataset.from_dict(test_dict)
             return train, val, test
         except ValueError:
-            train, test = load_dataset(self.short_name)
-            train_dict = dict(doc=train['text'], orig_label=train['label'])
-            test_dict = dict(doc=test['text'], orig_label=test['label'])
+            X_train, X_test, y_train, y_test = load_dataset(self.short_name)
+            train_dict = dict(doc=X_train['text'], orig_label=y_train['label'])
+            test_dict = dict(doc=X_test['text'], orig_label=y_test['label'])
             train = Dataset.from_dict(train_dict)
             test = Dataset.from_dict(test_dict)
             return train, test
