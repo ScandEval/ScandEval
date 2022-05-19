@@ -8,10 +8,11 @@ def process_scala():
     import pandas as pd
 
     def export_as_jsonl(df: pd.DataFrame, output_path: Path):
+        output_path.unlink(missing_ok=True)
         for idx, row in tqdm(list(df.iterrows())):
             data_dict = dict(text=row.text, label=row.label)
             json_line = json.dumps(data_dict)
-            with output_path.open('w') as f:
+            with output_path.open('a') as f:
                 f.write(json_line)
                 if idx < len(df) - 1:
                     f.write('\n')
