@@ -841,6 +841,8 @@ class BaseBenchmark(ABC):
                                               len(shuffled_train)))
         else:
             train, val, test = dataset_splits
+            shuffled_train = train.shuffle(seed=4242)
+            train = shuffled_train.select(range(train_size))
 
         # Remove empty examples from the datasets
         try:
