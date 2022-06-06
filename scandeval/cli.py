@@ -32,7 +32,7 @@ from .utils import get_all_datasets
               show_default=True,
               multiple=True,
               type=click.Choice(['da', 'sv', 'no', 'nb', 'nn', 'is', 'fo']),
-              help='The languages to benchmark. Only relevant if `model_id` '
+              help='The languages to benchmark. Only relevant if `model-id` '
                    'is not specified.')
 @click.option('--task', '-t',
               default=['all'],
@@ -42,7 +42,7 @@ from .utils import get_all_datasets
                                  'fill-mask',
                                  'token-classification',
                                  'text-classification']),
-              help='The tasks to benchmark. Only relevant if `model_id` '
+              help='The tasks to benchmark. Only relevant if `model-id` '
                    'is not specified.')
 @click.option('--evaluate-train',
               is_flag=True,
