@@ -8,7 +8,7 @@ from .utils import get_all_datasets
 
 
 @click.command()
-@click.option('--model_id', '-m',
+@click.option('--model-id', '-m',
               default=None,
               show_default=True,
               multiple=True,
@@ -16,7 +16,7 @@ from .utils import get_all_datasets
                    'benchmarked. If not specified then all models will be '
                    'benchmarked, filtered by `language` and `task`. '
                    'The specific model version to use can be added after '
-                   'the suffix "@": "model_id@v1.0.0". It can be a branch '
+                   'the suffix "@": "<model_id>@v1.0.0". It can be a branch '
                    'name, a tag name, or a commit id (currently only '
                    'supported for HuggingFace models, and it defaults to '
                    '"main" for latest).')
@@ -44,11 +44,11 @@ from .utils import get_all_datasets
                                  'text-classification']),
               help='The tasks to benchmark. Only relevant if `model_id` '
                    'is not specified.')
-@click.option('--evaluate_train',
+@click.option('--evaluate-train',
               is_flag=True,
               show_default=True,
               help='Whether the training set should be evaluated.')
-@click.option('--no_progress_bar', '-p',
+@click.option('--no-progress-bar', '-p',
               is_flag=True,
               show_default=True,
               help='Whether progress bars should be shown.')
@@ -57,7 +57,7 @@ from .utils import get_all_datasets
               show_default=True,
               help='Whether extra input should be outputted during '
                    'benchmarking')
-@click.option('--train_size', '-s',
+@click.option('--train-size', '-s',
               default=[1024],
               show_default=True,
               multiple=True,
@@ -72,6 +72,7 @@ def benchmark(model_id: Tuple[str],
               no_progress_bar: bool,
               verbose: bool = False):
     '''Benchmark language models on Scandinavian language tasks.'''
+
     # Initialise the benchmarker class
     benchmarker = Benchmark(language=list(language),
                             task='all' if 'all' in task else list(task),

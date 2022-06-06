@@ -24,10 +24,12 @@ and this project adheres to
   they were too small and mostly just caused noise.
 - Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the
   dataset is used to warm up the learning rate.
+- All CLI arguments now use hyphens (`-`) rather than underscores (`_`). For
+  instance, the `--model_id` argument has now been changed to `--model-id`.
 
 ### Added
 - New randomly initialised ELECTRA-small model available for benchmarking,
-  simply set `model_id` to either 'random-electra-sequence-clf or
+  simply set `model-id` to either 'random-electra-sequence-clf or
   'random-electra-token-clf'. The randomly initialised XLM-RoBERTa-base model
   is still available by replacing 'electra' with 'roberta'.
 
@@ -37,7 +39,7 @@ and this project adheres to
 - Many of the datasets contained duplicate entries. These have now all been
   fixed - the script used to do this can be found in the
   `remove-duplicates.ipynb` notebook.
-- The `--model_id` now works as intended, whereas previously one was forced to
+- The `--model-id` now works as intended, whereas previously one was forced to
   use the shortcut `-m`.
 
 
