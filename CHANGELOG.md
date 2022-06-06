@@ -37,6 +37,8 @@ and this project adheres to
 - Many of the datasets contained duplicate entries. These have now all been
   fixed - the script used to do this can be found in the
   `remove-duplicates.ipynb` notebook.
+- The `--model_id` now works as intended, whereas previously one was forced to
+  use the shortcut `-m`.
 
 
 ## [v3.0.0] - 2022-04-19

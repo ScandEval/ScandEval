@@ -8,7 +8,7 @@ from .utils import get_all_datasets
 
 
 @click.command()
-@click.option('model_id', '-m',
+@click.option('--model_id', '-m',
               default=None,
               show_default=True,
               multiple=True,
