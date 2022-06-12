@@ -518,16 +518,16 @@ class BaseBenchmark(ABC):
                     model.config.label2id = model_label2id
 
             except (OSError, ValueError):
-                msg = (f'The model {model_id} either does not exist on the Hugging Face '
-                       f'Hub, or it has no frameworks registered, or it is a private '
-                       f'model. If it *does* exist on the Hub and is a public model then '
-                       f'please ensure that it has a framework registered. If it is a '
-                       f'private model then enable the `--use-auth-token` flag and make '
-                       f'sure that you are logged in to the Hub via the '
-                       f'`huggingface-cli login` command.')
+                msg = (
+                    f'The model {model_id} either does not exist on the Hugging Face '
+                    'Hub, or it has no frameworks registered, or it is a private '
+                    'model. If it *does* exist on the Hub and is a public model then '
+                    'please ensure that it has a framework registered. If it is a '
+                    'private model then enable the `--use-auth-token` flag and make '
+                    'sure that you are logged in to the Hub via the '
+                    '`huggingface-cli login` command.'
+                )
                 raise InvalidBenchmark(msg)
-                raise InvalidBenchmark(f'The model {model_id} could not be '
-                                       f'loaded from the Hugging Face Hub')
 
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is
