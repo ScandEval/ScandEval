@@ -321,8 +321,6 @@ class Benchmark:
             self._update_benchmarks(evaluate_train=evaluate_train,
                                     verbose=verbose)
 
-        breakpoint()
-
         # Ensure that `language` is a list
         if language == 'all':
             languages = [None]
@@ -336,7 +334,8 @@ class Benchmark:
             model_languages = [None]
         elif isinstance(model_language, str):
             model_languages = [model_language]
-        elif model_language is None:
+        elif model_language is None or (isinstance(model_language, list) and
+                                        len(model_language) == 0):
             model_languages = languages
         else:
             model_languages = model_language
@@ -346,7 +345,8 @@ class Benchmark:
             dataset_languages = [None]
         elif isinstance(dataset_language, str):
             dataset_languages = [dataset_language]
-        elif dataset_language is None:
+        elif dataset_language is None or (isinstance(dataset_language, list) and
+                                          len(dataset_language) == 0):
             dataset_languages = languages
         else:
             dataset_languages = dataset_language
