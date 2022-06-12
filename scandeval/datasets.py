@@ -68,7 +68,7 @@ def load_scala_da() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     val_url = base_url + 'val.jsonl'
     test_url = base_url + 'test.jsonl'
     X_train, y_train = _get_dataset_from_url(train_url, 'text', 'label')
-    X_val, y_val= _get_dataset_from_url(val_url, 'text', 'label')
+    X_val, y_val = _get_dataset_from_url(val_url, 'text', 'label')
     X_test, y_test = _get_dataset_from_url(test_url, 'text', 'label')
     train = pd.concat([X_train, y_train], axis=1)
     val = pd.concat([X_val, y_val], axis=1)
