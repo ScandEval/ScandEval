@@ -1,4 +1,4 @@
-'''Fetches an updated list of all Scandinavian models on the HuggingFace Hub'''
+'''Fetches an updated list of all Scandinavian models on the Hugging Face Hub'''
 
 import requests
 from bs4 import BeautifulSoup
@@ -154,7 +154,7 @@ class Benchmark:
         else:
             if None not in tasks:
                 log_msg += f' for the tasks {tasks}'
-        log_msg += ' from the HuggingFace Hub.'
+        log_msg += ' from the Hugging Face Hub.'
         logger.info(log_msg)
 
         # Initialise the API
