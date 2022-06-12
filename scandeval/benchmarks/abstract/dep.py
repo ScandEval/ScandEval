@@ -26,6 +26,8 @@ class DepBenchmark(TokenClassificationBenchmark):
         evaluate_train (bool, optional):
             Whether the models should be evaluated on the training scores.
             Defaults to False.
+        use_auth_token (bool, optional):
+            Whether to use the authorization token. Defaults to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -43,6 +45,7 @@ class DepBenchmark(TokenClassificationBenchmark):
         cache_dir (str): Directory where models are cached.
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
+        use_auth_token (bool): Whether an authentication token should be used.
         verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
@@ -50,6 +53,7 @@ class DepBenchmark(TokenClassificationBenchmark):
                  language: str,
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
+                 use_auth_token: bool = False,
                  verbose: bool = False):
         id2label_head = [str(i) for i in range(512)]
         id2label_dep = ['acl', 'advcl', 'advmod', 'amod', 'appos', 'aux',
@@ -68,6 +72,7 @@ class DepBenchmark(TokenClassificationBenchmark):
                          two_labels=True,
                          split_point=len(id2label_head),
                          evaluate_train=evaluate_train,
+                         use_auth_token=use_auth_token,
                          verbose=verbose)
 
     def _load_data(self) -> Tuple[Dataset, Dataset]:

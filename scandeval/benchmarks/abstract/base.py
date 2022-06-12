@@ -76,6 +76,9 @@ class BaseBenchmark(ABC):
             label, and `id2label[split_point]` contains the labels for the
             second label. Only relevant if `two_labels` is True. Defaults to
             None.
+        use_auth_token (bool, optional):
+            Whether the benchmark should use an authentication token. Defaults
+            to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -93,6 +96,7 @@ class BaseBenchmark(ABC):
         cache_dir (str): Directory where models are cached.
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
+        use_auth_token (bool): Whether an authentication token should be used.
         verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
@@ -106,6 +110,7 @@ class BaseBenchmark(ABC):
                  cache_dir: str = '.benchmark_models',
                  two_labels: bool = False,
                  split_point: Optional[int] = None,
+                 use_auth_token: bool = False,
                  verbose: bool = False):
 
         self.short_name = name
@@ -121,6 +126,7 @@ class BaseBenchmark(ABC):
         self.cache_dir = cache_dir
         self.two_labels = two_labels
         self.split_point = split_point
+        self.use_auth_token = use_auth_token
         self.verbose = verbose
 
         if id2label is not None:
@@ -322,24 +328,28 @@ class BaseBenchmark(ABC):
                     config = AutoConfig.from_pretrained(
                         rnd_model,
                         revision=revision,
-                        use_auth_token=True,
+                        use_auth_token=self.use_auth_token,
                         **params
                     )
                     model = model_cls(config)
 
                 # Otherwise load the pretrained model
                 else:
-                    config = AutoConfig.from_pretrained(model_id,
-                                                        revision=revision,
-                                                        use_auth_token=True,
-                                                        **params)
+                    config = AutoConfig.from_pretrained(
+                        model_id,
+                        revision=revision,
+                        use_auth_token=self.use_auth_token,
+                        **params
+                    )
                     model_cls = self._get_model_class(framework=framework)
-                    model = model_cls.from_pretrained(model_id,
-                                                      revision=revision,
-                                                      use_auth_token=True,
-                                                      config=config,
-                                                      cache_dir=self.cache_dir,
-                                                      from_flax=from_flax)
+                    model = model_cls.from_pretrained(
+                        model_id,
+                        revision=revision,
+                        use_auth_token=self.use_auth_token,
+                        config=config,
+                        cache_dir=self.cache_dir,
+                        from_flax=from_flax
+                    )
 
                 # Get the `label2id` and `id2label` conversions from the model
                 # config
@@ -518,10 +528,12 @@ class BaseBenchmark(ABC):
             m_id = rnd_model if model_id.startswith('random') else model_id
             prefix = 'Roberta' in type(model).__name__
             params = dict(use_fast=True, add_prefix_space=prefix)
-            tokenizer = AutoTokenizer.from_pretrained(m_id,
-                                                      revision=revision,
-                                                      use_auth_token=True,
-                                                      **params)
+            tokenizer = AutoTokenizer.from_pretrained(
+                m_id,
+                revision=revision,
+                use_auth_token=self.use_auth_token,
+                **params
+            )
 
             # Set the maximal length of the tokenizer to the model's maximal
             # length. This is required for proper truncation

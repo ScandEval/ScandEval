@@ -46,6 +46,9 @@ class Benchmark:
             False.
         train_size (list of int, optional):
             The training sizes to consider. Defaults to [1024].
+        use_auth_token (bool, optional):
+            Whether the benchmark should use an authentication token. Defaults
+            to False.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
 
@@ -57,6 +60,7 @@ class Benchmark:
         evaluate_train (bool): Whether to evaluate the training set as well.
         verbose (bool): Whether to output additional output.
         train_size (list of int): The training sizes to use.
+        use_auth_token (bool): Whether an authentication token should be used.
         benchmark_results (dict): The benchmark results.
     '''
     def __init__(self,
@@ -69,6 +73,7 @@ class Benchmark:
                  evaluate_train: bool = False,
                  train_size: List[int] = [1024],
                  raise_error_on_invalid_model: bool = False,
+                 use_auth_token: bool = False,
                  verbose: bool = False):
 
         # If `language` contains 'no' then also include 'nb' and 'nn'. Conversely, if
@@ -86,6 +91,7 @@ class Benchmark:
         self.evaluate_train = evaluate_train
         self.train_size = train_size
         self.raise_error_on_invalid_model = raise_error_on_invalid_model
+        self.use_auth_token = use_auth_token
         self.verbose = verbose
 
         # Initialise variable storing model lists, so we only have to fetch it
@@ -103,6 +109,7 @@ class Benchmark:
         # Update the list of benchmarks
         logger.info('Updating the list of benchmark datasets')
         self._update_benchmarks(evaluate_train=evaluate_train,
+                                use_auth_token=use_auth_token,
                                 verbose=verbose)
 
     def _update_benchmarks(self, **params):
@@ -251,6 +258,7 @@ class Benchmark:
                   dataset_language: Optional[Union[str, List[str]]] = None,
                   task: Optional[Union[str, List[str]]] = None,
                   evaluate_train: Optional[bool] = None,
+                  use_auth_token: Optional[bool] = None,
                   verbose: Optional[bool] = None
                   ) -> Dict[str, Dict[str, dict]]:
         '''Benchmarks models on datasets.
@@ -292,6 +300,10 @@ class Benchmark:
                 Whether to evaluate the training set as well. If None then the
                 default value from the constructor will be used. Defaults to
                 None.
+            use_auth_token (bool, optional):
+                Whether the benchmark should use an authentication token. If
+                None then the default value from the constructor will be used.
+                Defaults to None.
             verbose (bool or None, optional):
                 Whether to output additional output. If None then the default
                 value from the constructor will be used. Defaults to None.
@@ -317,6 +329,8 @@ class Benchmark:
             task = self.task
         if evaluate_train is None:
             evaluate_train = self.evaluate_train
+        if use_auth_token is None:
+            use_auth_token = self.use_auth_token
         if verbose is None:
             verbose = self.verbose
 
@@ -426,7 +440,8 @@ class Benchmark:
                                 f'{train_size} samples:')
                     try:
                         params = dict(progress_bar=progress_bar,
-                                      train_size=train_size)
+                                      train_size=train_size,
+                                      use_auth_token=use_auth_token)
                         results = obj(model_id, **params)
                         self.benchmark_results[dataset][model_id] = results
                         logger.debug(f'Results:\n{results}')

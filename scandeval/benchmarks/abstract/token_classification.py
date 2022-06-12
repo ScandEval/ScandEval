@@ -51,6 +51,9 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
             label, and `id2label[split_point]` contains the labels for the
             second label. Only relevant if `two_labels` is True. Defaults to
             None.
+        use_auth_token (bool, optional):
+            Whether the benchmark should use an authentication token. Defaults
+            to False.
         verbose (bool, optional):
             Whether to print additional output during evaluation. Defaults to
             False.
@@ -68,6 +71,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         cache_dir (str): Directory where models are cached.
         two_labels (bool): Whether two labels should be predicted.
         split_point (int or None): Splitting point of `id2label` into labels.
+        use_auth_token (bool): Whether an authentication token should be used.
         verbose (bool): Whether to print additional output.
     '''
     def __init__(self,
@@ -80,6 +84,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                  cache_dir: str = '.benchmark_models',
                  two_labels: bool = False,
                  split_point: Optional[int] = None,
+                 use_auth_token: bool = False,
                  verbose: bool = False):
         self._metric = load_metric('seqeval')
         super().__init__(task='token-classification',
@@ -92,6 +97,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
                          evaluate_train=evaluate_train,
                          two_labels=two_labels,
                          split_point=split_point,
+                         use_auth_token=use_auth_token,
                          verbose=verbose)
 
     def _tokenize_and_align_labels(self,

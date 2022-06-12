@@ -78,6 +78,12 @@ from .utils import get_all_datasets
               multiple=True,
               type=int,
               help='The number of training samples to train on')
+@click.option('--use-auth-token',
+              is_flag=True,
+              show_default=True,
+              help='Whether an authentication token should be used, enabling '
+                   'evaluation of private models. Requires that you are logged in '
+                   'via the `huggingface-cli login` command.')
 @click.option('--verbose', '-v',
               is_flag=True,
               show_default=True,
@@ -93,6 +99,7 @@ def benchmark(model_id: Tuple[str],
               task: Tuple[str],
               evaluate_train: bool,
               no_progress_bar: bool,
+              use_auth_token: bool,
               verbose: bool = False):
     '''Benchmark language models on Scandinavian language tasks.'''
 
@@ -106,6 +113,7 @@ def benchmark(model_id: Tuple[str],
                             evaluate_train=evaluate_train,
                             raise_error_on_invalid_model=raise_error_on_invalid_model,
                             verbose=verbose,
+                            use_auth_token=use_auth_token,
                             train_size=list(train_size))
 
     # Perform the benchmark evaluation

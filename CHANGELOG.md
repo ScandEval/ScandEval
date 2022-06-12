@@ -38,6 +38,9 @@ and this project adheres to
   to specify the model/dataset languages to benchmark. The `--language` (`-l`) argument
   will now be used for both models and datasets, where the `--model-language` and
   `--dataset-language` will override `--language` for models/datasets if specified.
+- Added `--use-auth-token`, which is a flag that can be used when evaluating private
+  models on Hugging Face Hub. This requires that the user has logged in via the
+  `huggingface-cli login` command.
 
 ### Fixed
 - Now disables tokenizer progress bars properly, using the
