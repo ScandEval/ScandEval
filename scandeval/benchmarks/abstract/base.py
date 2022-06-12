@@ -763,10 +763,14 @@ class BaseBenchmark(ABC):
                       for a in a_tags_with_class
                       if 'tag-white' in a['class'] and 'library' in a['href']]
 
+        if len(frameworks) == 0:
+            msg = (f'The model {model_id} either does not exist on the Hugging Face '
+                   f'Hub or it has no frameworks registered. If it *does* exist on '
+                   f'the Hub then please ensure that it has a framework registered.')
+            raise InvalidBenchmark(msg)
+
         # Set up the order of the frameworks
         valid_frameworks = ['pytorch', 'spacy', 'jax']
-
-        breakpoint()
 
         # Extract a single valid framework in which the model has been
         # implemented
@@ -775,7 +779,9 @@ class BaseBenchmark(ABC):
                 framework = valid_framework
                 break
         else:
-            msg = f'Cannot detect the framework of {model_id}!'
+            msg = (f'The model {model_id} has frameworks {frameworks}, none of which '
+                   f'are compatible with ScandEval (valid frameworks are PyTorch, '
+                   f'SpaCy and JAX).')
             raise InvalidBenchmark(msg)
 
         # Fetch the model tasks from the model website
