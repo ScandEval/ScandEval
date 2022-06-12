@@ -1,7 +1,5 @@
 '''Fetches an updated list of all Scandinavian models on the Hugging Face Hub'''
 
-import requests
-from bs4 import BeautifulSoup
 from typing import List, Optional, Union, Dict
 from collections import defaultdict
 import logging
