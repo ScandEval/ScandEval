@@ -7,6 +7,7 @@ from collections import defaultdict
 import logging
 import json
 from pathlib import Path
+from huggingface_hub import ModelFilter, HfApi
 
 from .utils import InvalidBenchmark, get_all_datasets
 
@@ -124,45 +125,6 @@ class Benchmark:
         self._benchmarks = [(short_name, name, cls(**params))
                             for short_name, name, cls, _ in get_all_datasets()]
 
-    @staticmethod
-    def _get_model_ids(language: Optional[str] = None,
-                       task: Optional[str] = None) -> List[str]:
-        '''Retrieves all the model IDs in a given language with a given task.
-
-        Args:
-            language (str or None):
-                The language code of the language to consider. If None then the
-                models will not be filtered on language. Defaults to None.
-            task (str or None):
-                The task to consider. If None then the models will not be
-                filtered on task. Defaults to None.
-
-        Returns:
-            list of str: The model IDs of the relevant models.
-        '''
-        # Set GET request parameter values
-        params = dict()
-        if language is not None:
-            params['language'] = language
-        if task is not None:
-            params['pipeline_tag'] = task
-
-        # Fetch and parse the html from the HuggingFace Hub
-        url = 'https://huggingface.co/models'
-        html = requests.get(url, params=params).text
-        soup = BeautifulSoup(html, 'html.parser')
-
-        # Extract the model ids from the html
-        articles = soup.find_all('article')
-        model_ids = [header['title']
-                     for article in articles
-                     for header in article.find_all('header')
-                     if header.get('class') is not None and
-                     header.get('title') is not None and
-                     'items-center' in header['class']]
-
-        return model_ids
-
     def _get_model_lists(self,
                          languages: List[str],
                          tasks: List[str]) -> Dict[str, List[str]]:
@@ -195,27 +157,46 @@ class Benchmark:
         log_msg += ' from the HuggingFace Hub.'
         logger.info(log_msg)
 
+        # Initialise the API
+        api = HfApi()
+
         # Initialise model lists
         model_lists = defaultdict(list)
         for language in languages:
             for task in tasks:
-                model_ids = self._get_model_ids(language, task)
+
+                # Fetch the model list
+                models = api.list_models(
+                    filter=ModelFilter(language=language, task=task),
+                    use_auth_token=self.use_auth_token
+                )
+
+                # Extract the model IDs
+                model_ids = [model.id for model in models]
+
+                # Store the model IDs
                 model_lists['all'].extend(model_ids)
                 model_lists[language].extend(model_ids)
                 model_lists[task].extend(model_ids)
 
         # Add multilingual models manually
-        multi_models = ['xlm-roberta-base',
-                        'xlm-roberta-large',
+        multi_models = ['xlm-roberta-large',
+                        'Peltarion/xlm-roberta-longformer-base-4096',
+                        'microsoft/xlm-align-base',
+                        'microsoft/infoxlm-base',
+                        'microsoft/infoxlm-large',
                         'bert-base-multilingual-cased',
+                        'bert-base-multilingual-uncased',
                         'distilbert-base-multilingual-cased',
                         'cardiffnlp/twitter-xlm-roberta-base']
         model_lists['multilingual'] = multi_models
         model_lists['all'].extend(multi_models)
 
         # Add random models
-        random_models = ['random-roberta-sequence-clf',
-                         'random-roberta-token-clf']
+        random_models = ['random-xlmr-base-sequence-clf',
+                         'random-xlmr-base-token-clf',
+                         'random-electra-small-sequence-clf',
+                         'random-electra-small-token-clf']
         model_lists['all'].extend(random_models)
 
         # Add some multilingual Danish models manually that have not marked
@@ -231,8 +212,8 @@ class Benchmark:
             model_lists['all'].extend(multi_da_models)
 
         # Add some multilingual Norwegian models manually that have not marked
-        # 'no' as their language
-        if 'no' in languages:
+        # 'no', 'nb' or 'nn' as their language
+        if any(lang in languages for lang in ['no', 'nb', 'nn']):
             multi_no_models = ['Geotrend/bert-base-en-no-cased',
                                'Geotrend/bert-base-25lang-cased',
                                'Geotrend/bert-base-en-fr-de-no-da-cased',
