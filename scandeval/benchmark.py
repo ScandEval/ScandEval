@@ -440,8 +440,7 @@ class Benchmark:
                                 f'{train_size} samples:')
                     try:
                         params = dict(progress_bar=progress_bar,
-                                      train_size=train_size,
-                                      use_auth_token=use_auth_token)
+                                      train_size=train_size)
                         results = obj(model_id, **params)
                         self.benchmark_results[dataset][model_id] = results
                         logger.debug(f'Results:\n{results}')
