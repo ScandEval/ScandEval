@@ -340,7 +340,6 @@ class BaseBenchmark(ABC):
                         **params
                     )
                     model_cls = self._get_model_class(framework=framework)
-                    breakpoint()
                     model = model_cls.from_pretrained(
                         model_id,
                         revision=revision,
