@@ -362,6 +362,7 @@ class Benchmark:
 
             # If the model lists have not been fetched already, then do it
             if self._model_lists is None:
+                logger.info('Fetching list of models from the Hugging Face Hub')
                 self._model_lists = self._get_model_lists(languages=model_languages,
                                                           tasks=tasks)
             try:
