@@ -1085,6 +1085,8 @@ class BaseBenchmark(ABC):
                             gc.collect()
                             raise InvalidBenchmark(str(e))
 
+                        breakpoint()
+
                         # If it is a CUDA memory error, then reduce batch size
                         # and up gradient accumulation
                         bs = training_args.per_device_train_batch_size
@@ -1106,6 +1108,9 @@ class BaseBenchmark(ABC):
                         except UnboundLocalError:
                             pass
                         gc.collect()
+
+                        # Set transformers logging back to error
+                        tf_logging.set_verbosity_error()
 
             metrics = self._log_metrics(metrics=metrics,
                                         model_id=model_id,
