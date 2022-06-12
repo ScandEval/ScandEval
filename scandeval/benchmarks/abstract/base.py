@@ -48,38 +48,35 @@ class BaseBenchmark(ABC):
         task (str):
             The type of task to be benchmarked.
         metric_names (dict):
-            A dictionary with the variable names of the metrics used in the
-            dataset as keys, and a more human readable name of them as values.
+            A dictionary with the variable names of the metrics used in the dataset as
+            keys, and a more human readable name of them as values.
         id2label (list or None, optional):
-            A list of all the labels, which is used to convert indices to their
-            labels. This will only be used if the pretrained model does not
-            already have one. Defaults to None.
+            A list of all the labels, which is used to convert indices to their labels.
+            This will only be used if the pretrained model does not already have one.
+            Defaults to None.
         label_synonyms (list of lists of str or None, optional):
-            A list of synonyms for each label. Every entry in `label_synonyms`
-            is a list of synonyms, where one of the synonyms is contained in
-            `id2label`. If None then no synonyms will be used. Defaults to
-            None.
+            A list of synonyms for each label. Every entry in `label_synonyms` is a
+            list of synonyms, where one of the synonyms is contained in `id2label`. If
+            None then no synonyms will be used. Defaults to None.
         evaluate_train (bool, optional):
-            Whether the models should be evaluated on the training scores.
-            Defaults to False.
+            Whether the models should be evaluated on the training scores. Defaults to
+            False.
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
             '.benchmark_models'.
         two_labels (bool, optional):
-            Whether two labels should be predicted in the dataset.  If this is
-            True then `split_point` has to be set. Defaults to False.
+            Whether two labels should be predicted in the dataset.  If this is True
+            then `split_point` has to be set. Defaults to False.
         split_point (int or None, optional):
-            When there are two labels to be predicted, this is the index such
-            that `id2label[:split_point]` contains the labels for the first
-            label, and `id2label[split_point]` contains the labels for the
-            second label. Only relevant if `two_labels` is True. Defaults to
-            None.
+            When there are two labels to be predicted, this is the index such that
+            `id2label[:split_point]` contains the labels for the first label, and
+            `id2label[split_point]` contains the labels for the second label. Only
+            relevant if `two_labels` is True. Defaults to None.
         use_auth_token (bool, optional):
-            Whether the benchmark should use an authentication token. Defaults
-            to False.
-        verbose (bool, optional):
-            Whether to print additional output during evaluation. Defaults to
+            Whether the benchmark should use an authentication token. Defaults to
             False.
+        verbose (bool, optional):
+            Whether to print additional output during evaluation. Defaults to False.
 
     Parameters:
         name (str): The name of the dataset.
@@ -142,14 +139,14 @@ class BaseBenchmark(ABC):
                              for label in label_syns
                              if lbl in label_syns}
 
-        # If the id2label conversion list was not given, then set the number of
-        # labels to zero and set the label2id conversion dict to None as well
+        # If the id2label conversion list was not given, then set the number of labels
+        # to zero and set the label2id conversion dict to None as well
         else:
             self.num_labels = None
             self.label2id = None
 
-        # If verbose is set to True then enable transformers output, which is
-        # done by setting it to warning (the default)
+        # If verbose is set to True then enable transformers output, which is done by
+        # setting it to warning (the default)
         if verbose:
             tf_logging.set_verbosity_warning()
 
@@ -182,11 +179,11 @@ class BaseBenchmark(ABC):
         Args:
             metrics (dict):
                 Dictionary with the names of the metrics as keys, of the form
-                "<split>_<metric_name>", such as "val_f1", and values the
-                metric values.
+                "<split>_<metric_name>", such as "val_f1", and values the metric
+                values.
             metric_name (str):
-                The name of the metric. Is used to collect the correct metric
-                from `metrics`.
+                The name of the metric. Is used to collect the correct metric from
+                `metrics`.
 
         Returns:
             dict:
@@ -236,25 +233,24 @@ class BaseBenchmark(ABC):
 
         Args:
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer
-                model.
+                The full HuggingFace Hub path to the pretrained transformer model.
             revision (str or None, optional):
-                The specific model version to use. It can be a branch name,
-                a tag name, or a commit id. Currently only supported for
-                HuggingFace models. Defaults to 'main' for latest.
+                The specific model version to use. It can be a branch name, a tag name,
+                or a commit id. Currently only supported for HuggingFace models.
+                Defaults to 'main' for latest.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
-                'pytorch', 'jax', and 'spacy'. If None then this will be
-                inferred from `model_id`. Defaults to None.
+                'pytorch', 'jax', and 'spacy'. If None then this will be inferred from
+                `model_id`. Defaults to None.
             task (str or None, optional):
-                The task for which the model was trained on. If None then this
-                will be inferred from `model_id`. Defaults to None.
+                The task for which the model was trained on. If None then this will be
+                inferred from `model_id`. Defaults to None.
 
         Returns:
             dict:
-                A dictionary containing at least the key 'model', with the
-                value being the model. Can contain other objects related to the
-                model, such as its tokenizer.
+                A dictionary containing at least the key 'model', with the value being
+                the model. Can contain other objects related to the model, such as its
+                tokenizer.
 
         Raises:
             RuntimeError: If the framework is not recognized.
@@ -281,17 +277,16 @@ class BaseBenchmark(ABC):
             elif framework == 'spacy':
                 import spacy
 
-                # Ignore warnings from SpaCy. This has to be called after the
-                # import, as the __init__.py file of SpaCy sets the warning
-                # levels of SpaCy warning W036
+                # Ignore warnings from SpaCy. This has to be called after the import,
+                # as the __init__.py file of SpaCy sets the warning levels of SpaCy
+                # warning W036
                 import warnings
                 warnings.filterwarnings('ignore', module='spacy*')
 
         except ModuleNotFoundError:
-            msg = (f'The model {model_id} is built using the {framework} '
-                   f'framework which is not installed. Try installing the '
-                   f'ScandEval package as `pip install '
-                   f'scandeval[{framework}]`.')
+            msg = (f'The model {model_id} is built using the {framework} framework '
+                   'which is not installed. Try installing the ScandEval package as '
+                   '`pip install scandeval[{framework}]`.')
             raise ModuleNotFoundError(msg)
 
         if framework == 'pytorch':
@@ -319,9 +314,8 @@ class BaseBenchmark(ABC):
                         rnd_model = 'google/electra-small-discriminator'
                         model_cls = ElectraForTokenClassification
                     else:
-                        raise ValueError(f'A random model was chosen, '
-                                         f'"{model_id}", but it was not '
-                                         f'recognized.')
+                        raise ValueError(f'A random model was chosen, "{model_id}", '
+                                         'but it was not recognized.')
 
                     config = AutoConfig.from_pretrained(
                         rnd_model,
@@ -349,8 +343,7 @@ class BaseBenchmark(ABC):
                         from_flax=from_flax
                     )
 
-                # Get the `label2id` and `id2label` conversions from the model
-                # config
+                # Get the `label2id` and `id2label` conversions from the model config
                 try:
                     model_label2id = dict(model.config.label2id)
                 except AttributeError:
@@ -371,8 +364,8 @@ class BaseBenchmark(ABC):
                 except AttributeError:
                     model_id2label = None
 
-                # If one of `label2id` or `id2label` exists in the model
-                # config, then define the other one from it
+                # If one of `label2id` or `id2label` exists in the model config, then
+                # define the other one from it
                 if model_label2id is not None and model_id2label is None:
                     model_id2label = [label for label in model_label2id.keys()]
                     model.config.id2label = model_id2label
@@ -381,18 +374,17 @@ class BaseBenchmark(ABC):
                                       for id, lbl in enumerate(model_id2label)}
                     model.config.label2id = model_label2id
 
-                # If the model does not have `label2id` or `id2label`
-                # conversions, then use the defaults
+                # If the model does not have `label2id` or `id2label` conversions, then
+                # use the defaults
                 if (task == 'fill-mask' or
                         (model_label2id is None and model_id2label is None)):
                     model.config.label2id = self.label2id
                     model.config.id2label = self.id2label
 
-                # If the model *does* have conversions, then ensure that it can
-                # deal with all the labels in the default conversions. This
-                # ensures that we can smoothly deal with labels that the model
-                # have not been trained on (it will just always get those
-                # labels wrong)
+                # If the model *does* have conversions, then ensure that it can deal
+                # with all the labels in the default conversions. This ensures that we
+                # can smoothly deal with labels that the model have not been trained on
+                # (it will just always get those labels wrong)
                 else:
 
                     # Collect the dataset labels and model labels in the
@@ -404,8 +396,8 @@ class BaseBenchmark(ABC):
                         if all([syn not in model_id2label for syn in syns]):
                             model_id2label.append(label)
 
-                    # Ensure that the model_id2label does not contain
-                    # duplicates modulo synonyms
+                    # Ensure that the model_id2label does not contain duplicates modulo
+                    # synonyms
                     for idx, label in enumerate(model_id2label):
                         try:
                             canonical_syn = [syn_lst
@@ -413,10 +405,9 @@ class BaseBenchmark(ABC):
                                              if label in syn_lst][0][-1]
                             model_id2label[idx] = canonical_syn
 
-                        # IndexError appears when the label does not appear
-                        # within the label_synonyms (i.e. that we added it in
-                        # the previous step). In this case, we just skip the
-                        # label.
+                        # IndexError appears when the label does not appear within the
+                        # label_synonyms (i.e. that we added it in the previous step).
+                        # In this case, we just skip the label.
                         except IndexError:
                             continue
 
@@ -427,8 +418,8 @@ class BaseBenchmark(ABC):
                     new_synonyms += [[label] for label in model_id2label
                                      if label not in flat_old_synonyms]
 
-                    # Add all the synonyms of the labels into the label2id
-                    # conversion dictionary
+                    # Add all the synonyms of the labels into the label2id conversion
+                    # dictionary
                     model_label2id = {label: id
                                       for id, lbl in enumerate(model_id2label)
                                       for label_syns in new_synonyms
@@ -441,16 +432,14 @@ class BaseBenchmark(ABC):
                     else:
                         old_id2label = model.config.id2label
 
-                    # This changes the classification layer in the finetuned
-                    # model to be consistent with all the labels in the
-                    # dataset. If the model was previously finetuned on a
-                    # dataset which left out a label, say, then that label will
-                    # be inserted in the model architecture here, but without
-                    # the model ever predicting it. This will allow the model
-                    # to be benchmarked on such datasets, however.
-                    # NOTE: This only works on classification tasks. This code
-                    #       needs to be rewritten when we add other types of
-                    #       tasks.
+                    # This changes the classification layer in the finetuned model to
+                    # be consistent with all the labels in the dataset. If the model
+                    # was previously finetuned on a dataset which left out a label,
+                    # say, then that label will be inserted in the model architecture
+                    # here, but without the model ever predicting it. This will allow
+                    # the model to be benchmarked on such datasets, however.
+                    # NOTE: This only works on classification tasks. This code needs
+                    #       to be rewritten when we add other types of tasks.
                     # NOTE: Only works for pytorch models at the moment
                     if (len(model_id2label) > len(old_id2label)
                             and framework == 'pytorch'):
@@ -459,9 +448,8 @@ class BaseBenchmark(ABC):
                         num_new_labels = (len(model_id2label) -
                                           len(old_id2label))
 
-                        # If *all* the new labels are new and aren't even
-                        # synonyms of the model's labels, then raise an
-                        # exception
+                        # If *all* the new labels are new and aren't even synonyms of
+                        # the model's labels, then raise an exception
                         if num_new_labels == self.num_labels:
                             if len(set(flat_old_synonyms)
                                    .intersection(old_id2label)) == 0:
@@ -470,13 +458,11 @@ class BaseBenchmark(ABC):
                                        'synonyms thereof.')
                                 raise InvalidBenchmark(msg)
 
-                        # Load the weights from the model's current
-                        # classification layer. This handles both the token
-                        # classification case and the sequence classification
-                        # case.
+                        # Load the weights from the model's current classification
+                        # layer. This handles both the token classification case and
+                        # the sequence classification case.
                         # NOTE: This might need additional cases (or a general
-                        #       solution) when we start dealing with other
-                        #       tasks.
+                        #       solution) when we start dealing with other tasks.
                         try:
                             clf_weight = model.classifier.weight.data
                         except AttributeError:
@@ -490,8 +476,8 @@ class BaseBenchmark(ABC):
                                        'classification model.')
                                 raise InvalidBenchmark(msg)
 
-                        # Create the new weights, which have zeros at all the
-                        # new entries
+                        # Create the new weights, which have zeros at all the new
+                        # entries
                         zeros = torch.zeros(num_new_labels, config.hidden_size)
                         new_clf_weight = torch.cat((clf_weight, zeros), dim=0)
                         new_clf_weight = Parameter(new_clf_weight)
@@ -500,14 +486,13 @@ class BaseBenchmark(ABC):
                         new_clf = nn.Linear(config.hidden_size,
                                             len(model_id2label))
 
-                        # Assign the new weights to the new classification
-                        # layer, and replace the old classification layer with
-                        # this one
+                        # Assign the new weights to the new classification layer, and
+                        # replace the old classification layer with this one
                         new_clf.weight = new_clf_weight
                         model.classifier = new_clf
 
-                        # Update the number of labels the model thinks it has.
-                        # This is required to avoid exceptions when evaluating
+                        # Update the number of labels the model thinks it has. This is
+                        # required to avoid exceptions when evaluating
                         model.config.num_labels = len(model_id2label)
                         model.num_labels = len(model_id2label)
 
@@ -527,9 +512,8 @@ class BaseBenchmark(ABC):
                 )
                 raise InvalidBenchmark(msg)
 
-            # If the model is a subclass of a RoBERTa model then we have to add
-            # a prefix space to the tokens, by the way the model is
-            # constructed.
+            # If the model is a subclass of a RoBERTa model then we have to add a
+            # prefix space to the tokens, by the way the model is constructed.
             m_id = rnd_model if model_id.startswith('random') else model_id
             prefix = 'Roberta' in type(model).__name__
             params = dict(use_fast=True, add_prefix_space=prefix)
@@ -540,8 +524,8 @@ class BaseBenchmark(ABC):
                 **params
             )
 
-            # Set the maximal length of the tokenizer to the model's maximal
-            # length. This is required for proper truncation
+            # Set the maximal length of the tokenizer to the model's maximal length.
+            # This is required for proper truncation
             if (not hasattr(tokenizer, 'model_max_length') or
                     tokenizer.model_max_length > 1_000):
 
@@ -602,8 +586,8 @@ class BaseBenchmark(ABC):
             dataset (HuggingFace dataset):
                 The dataset to preprocess.
             kwargs:
-                Extra keyword arguments containing objects used in
-                preprocessing the dataset.
+                Extra keyword arguments containing objects used in preprocessing the
+                dataset.
 
         Returns:
             HuggingFace dataset: The preprocessed dataset.
@@ -618,9 +602,8 @@ class BaseBenchmark(ABC):
 
         Args:
             tokenizer (HuggingFace tokenizer or None, optional):
-                A pretrained tokenizer. Can be None if the tokenizer is not
-                used in the initialisation of the data collator. Defaults to
-                None.
+                A pretrained tokenizer. Can be None if the tokenizer is not used in the
+                initialisation of the data collator. Defaults to None.
 
         Returns:
             HuggingFace data collator: The data collator.
@@ -635,15 +618,15 @@ class BaseBenchmark(ABC):
 
         Args:
             predictions_and_labels (pair of arrays):
-                The first array contains the probability predictions and the
-                second array contains the true labels.
+                The first array contains the probability predictions and the second
+                array contains the true labels.
             id2label (list or None, optional):
                 Conversion of indices to labels. Defaults to None.
 
         Returns:
             dict:
-                A dictionary with the names of the metrics as keys and the
-                metric values as values.
+                A dictionary with the names of the metrics as keys and the metric
+                values as values.
         '''
         pass
 
@@ -655,28 +638,24 @@ class BaseBenchmark(ABC):
 
         Args:
             metrics (dict):
-                The metrics that are to be logged. This is a dict with keys
-                'train' and 'test', with values being lists of dictionaries
-                full of metrics.
+                The metrics that are to be logged. This is a dict with keys 'train' and
+                'test', with values being lists of dictionaries full of metrics.
             finetuned (bool):
                 Whether the model is finetuned or not.
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer
-                model.
+                The full HuggingFace Hub path to the pretrained transformer model.
 
         Returns:
             dict:
-                A dictionary with keys 'raw_metrics' and 'total', with
-                'raw_metrics' being identical to `metrics` and 'total' being
-                a dictionary with the aggregated metrics (means and standard
-                errors).
+                A dictionary with keys 'raw_metrics' and 'total', with 'raw_metrics'
+                being identical to `metrics` and 'total' being a dictionary with the
+                aggregated metrics (means and standard errors).
         '''
         # Initial logging message
         if finetuned:
-            msg = (f'Finished finetuning and evaluation of {model_id} on '
-                   f'{self.name}.')
+            msg = f'Finished finetuning and evaluation of {model_id} on {self.name}.'
         else:
-            msg = (f'Finished evaluation of {model_id} on {self.name}.')
+            msg = f'Finished evaluation of {model_id} on {self.name}.'
         logger.info(msg)
 
         # Initialise the total dict
@@ -728,8 +707,8 @@ class BaseBenchmark(ABC):
 
         Returns:
             A pair of arrays:
-                The first array contains the probability predictions and the
-                second array contains the true labels.
+                The first array contains the probability predictions and the second
+                array contains the true labels.
         '''
         pass
 
@@ -738,21 +717,20 @@ class BaseBenchmark(ABC):
 
         Args:
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer
-                model.
+                The full HuggingFace Hub path to the pretrained transformer model.
 
         Returns:
             dict:
-                The keys are names of metadata, with the values being the
-                strings that describe the value of that metadata. Keys involve
-                'framework' and 'task', where a framework could be 'pytorch'
-                and a task could be 'token-classification'.
+                The keys are names of metadata, with the values being the strings that
+                describe the value of that metadata. Keys involve 'framework' and
+                'task', where a framework could be 'pytorch' and a task could be
+                'token-classification'.
 
         Raises:
             RuntimeError: If the extracted framework is not recognized.
         '''
-        # If the model ID specifies a random ID, then return a hardcoded
-        # metadata dictionary
+        # If the model ID specifies a random ID, then return a hardcoded metadata
+        # dictionary
         if model_id.startswith('random'):
             return dict(task='fill-mask', framework='pytorch')
 
@@ -806,19 +784,19 @@ class BaseBenchmark(ABC):
 
         Args:
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer
-                model. The specific model version to use can be added after
-                the suffix '@': "model_id@v1.0.0". It can be a branch name,
-                a tag name, or a commit id (currently only supported for
-                HuggingFace models, and it defaults to 'main' for latest).
+                The full HuggingFace Hub path to the pretrained transformer model. The
+                specific model version to use can be added after the suffix '@':
+                "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id
+                (currently only supported for HuggingFace models, and it defaults to
+                'main' for latest).
             progress_bar (bool, optional):
                 Whether to show a progress bar or not. Defaults to True.
 
         Returns:
             dict:
-                The keys in the dict are 'raw_metrics' and 'total', with all
-                the raw metrics in the first dictionary and the aggregated
-                metrics in the second.
+                The keys in the dict are 'raw_metrics' and 'total', with all the raw
+                metrics in the first dictionary and the aggregated metrics in the
+                second.
 
         Raises:
             RuntimeError: If the extracted framework is not recognized.
@@ -834,8 +812,8 @@ class BaseBenchmark(ABC):
         else:
             revision = 'main'
 
-        # Set random seeds to enforce reproducibility of the randomly
-        # initialised weights
+        # Set random seeds to enforce reproducibility of the randomly initialised
+        # weights
         random.seed(4242)
         np.random.seed(4242)
         rng = np.random.default_rng(4242)
@@ -862,9 +840,9 @@ class BaseBenchmark(ABC):
         if len(dataset_splits) == 2:
             train, test = dataset_splits
 
-            # Shuffle the training dataset and set the validation set to be the
-            # last 256 samples of the training dataset, and truncate the
-            # training dataset to `train_size`
+            # Shuffle the training dataset and set the validation set to be the last
+            # 256 samples of the training dataset, and truncate the training dataset to
+            # `train_size`
             shuffled_train = train.shuffle(seed=4242)
             train = shuffled_train.select(range(train_size))
             val = shuffled_train.select(range(len(shuffled_train) - 256,
@@ -951,8 +929,7 @@ class BaseBenchmark(ABC):
                 seed=4242,
             )
 
-            # Manually set `disable_tqdm` to `False` if `progress_bar` is
-            # `True`
+            # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
             if progress_bar:
                 training_args.disable_tqdm = False
 
@@ -960,8 +937,8 @@ class BaseBenchmark(ABC):
             for idx in itr:
                 while True:
                     try:
-                        # Set random seeds to enforce reproducibility of the
-                        # randomly initialised weights
+                        # Set random seeds to enforce reproducibility of the randomly
+                        # initialised weights
                         training_args.seed = 4242 + idx
                         random.seed(4242 + idx)
                         np.random.seed(4242 + idx)
@@ -1012,16 +989,15 @@ class BaseBenchmark(ABC):
                         # Remove trainer logging
                         trainer.log = lambda _: None
 
-                        # Remove the callback which prints the metrics after
-                        # each evaluation
+                        # Remove the callback which prints the metrics after each
+                        # evaluation
                         if not self.verbose:
                             trainer.remove_callback(PrinterCallback)
 
                         # Remove the progress bar callback
                         trainer.remove_callback(ProgressCallback)
 
-                        # Add the custom progress callback if `progress_bar` is
-                        # True
+                        # Add the custom progress callback if `progress_bar` is True
                         if progress_bar:
                             trainer.add_callback(NeverLeaveProgressCallback)
 
@@ -1037,8 +1013,8 @@ class BaseBenchmark(ABC):
                             )
                             metrics['train'].append(train_metrics)
 
-                        # Set up a progress bar for the test datasets if we are
-                        # not finetuning
+                        # Set up a progress bar for the test datasets if we are not
+                        # finetuning
                         if not finetune:
                             if progress_bar:
                                 test_itr = tqdm(tests, desc='Benchmarking')
@@ -1082,8 +1058,8 @@ class BaseBenchmark(ABC):
                             gc.collect()
                             raise InvalidBenchmark(str(e))
 
-                        # If it is a CUDA memory error, then reduce batch size
-                        # and up gradient accumulation
+                        # If it is a CUDA memory error, then reduce batch size and up
+                        # gradient accumulation
                         bs = training_args.per_device_train_batch_size
                         ga = training_args.gradient_accumulation_steps
                         if bs == 1:
@@ -1138,8 +1114,8 @@ class BaseBenchmark(ABC):
                     progress_bar=progress_bar
                 )
 
-                # Check if the SpaCy model has been trained on the task at
-                # hand. If not, then skip this benchmark.
+                # Check if the SpaCy model has been trained on the task at hand. If
+                # not, then skip this benchmark.
                 sample_preds = preds_labels[0][0]
                 pos_ner_test = (isinstance(sample_preds, list) and
                                 '' in sample_preds)
