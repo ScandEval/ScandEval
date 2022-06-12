@@ -322,6 +322,7 @@ class BaseBenchmark(ABC):
                     config = AutoConfig.from_pretrained(
                         rnd_model,
                         revision=revision,
+                        use_auth_token=True,
                         **params
                     )
                     model = model_cls(config)
@@ -330,10 +331,12 @@ class BaseBenchmark(ABC):
                 else:
                     config = AutoConfig.from_pretrained(model_id,
                                                         revision=revision,
+                                                        use_auth_token=True,
                                                         **params)
                     model_cls = self._get_model_class(framework=framework)
                     model = model_cls.from_pretrained(model_id,
                                                       revision=revision,
+                                                      use_auth_token=True,
                                                       config=config,
                                                       cache_dir=self.cache_dir,
                                                       from_flax=from_flax)
@@ -516,6 +519,7 @@ class BaseBenchmark(ABC):
             params = dict(use_fast=True, add_prefix_space=prefix)
             tokenizer = AutoTokenizer.from_pretrained(m_id,
                                                       revision=revision,
+                                                      use_auth_token=True,
                                                       **params)
 
             # Set the maximal length of the tokenizer to the model's maximal
