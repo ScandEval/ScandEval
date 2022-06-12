@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from datasets import Dataset
 from transformers.models.auto.auto_factory import _BaseAutoModelClass
 import transformers.utils.logging as tf_logging
+from huggingface_hub import HfApi, ModelFilter, ModelSearchArguments
 from transformers import (PreTrainedTokenizerBase,
                           AutoTokenizer,
                           AutoConfig,
@@ -736,7 +737,7 @@ class BaseBenchmark(ABC):
         pass
 
     def _fetch_model_metadata(self, model_id: str) -> Dict[str, str]:
-        '''Fetches metdataof a model from the HuggingFace Hub.
+        '''Fetches metadata for a model from the HuggingFace Hub.
 
         Args:
             model_id (str):
@@ -758,46 +759,43 @@ class BaseBenchmark(ABC):
         if model_id.startswith('random'):
             return dict(task='fill-mask', framework='pytorch')
 
-        # Parse all the anchor tags from the model website
-        model_id, *_ = model_id.split('@', 1)
-        url = 'https://www.huggingface.co/' + model_id
-        html = requests.get(url).text
-        soup = BeautifulSoup(html, 'html.parser')
-        a_tags = soup.find_all('a')
-        a_tags_with_class = [a for a in a_tags if a.get('class') is not None]
+        # Define the API object
+        api = HfApi()
 
-        # Fetch the frameworks from the model website
-        frameworks = [re.sub(r'.*=', '', a['href'])
-                      for a in a_tags_with_class
-                      if 'tag-white' in a['class'] and 'library' in a['href']]
+        # Define the model filter
+        model_filter = ModelFilter(
+            author=model_id.split('/')[0],
+            model_name=model_id.split('/')[1]
+        )
 
-        if len(frameworks) == 0:
-            frameworks = ['pytorch']
+        # Fetch the model metadata
+        models = api.list_models(
+            filter=model_filter,
+            use_auth_token=self.use_auth_token
+        )
 
-        # Set up the order of the frameworks
-        valid_frameworks = ['pytorch', 'spacy', 'jax']
+        # Check that the model exists. If it does not then raise an error
+        if len(models) == 0:
+            raise InvalidBenchmark(f'Model {model_id} does not exist.')
 
-        # Extract a single valid framework in which the model has been
-        # implemented
-        for valid_framework in valid_frameworks:
-            if valid_framework in frameworks:
-                framework = valid_framework
-                break
-        else:
-            msg = (f'The model {model_id} has frameworks {frameworks}, none of which '
-                   f'are compatible with ScandEval (valid frameworks are PyTorch, '
-                   f'SpaCy and JAX).')
-            raise InvalidBenchmark(msg)
+        # Fetch the model tags
+        tags = models[0].tags
 
-        # Fetch the model tasks from the model website
-        tasks = [re.sub(r'.*=', '', a['href'])
-                 for a in a_tags_with_class
-                 if 'tag-white' in a['class'] and 'pipeline_tag' in a['href']]
+        # Extract the framework, which defaults to PyTorch
+        framework = 'pytorch'
+        if 'pytorch' in tags:
+            pass
+        elif 'jax' in tags:
+            framework = 'jax'
+        elif 'spacy' in tags:
+            framework = 'spacy'
+        elif 'tensorflow' in tags or 'keras' in tags:
+            raise InvalidBenchmark('TensorFlow/Keras models are not supported.')
 
-        # Extract a single valid task on which the model has been trained. If
-        # no task has been specified on the model card then assume that it is
-        # 'fill-mask'
-        task = self._get_model_task(tasks[0]) if len(tasks) else 'fill-mask'
+        # Extract the model task, which defaults to 'fill-mask'
+        task = models[0].pipeline_tag
+        if task is None:
+            task = 'fill-mask'
 
         return dict(framework=framework, task=task)
 
