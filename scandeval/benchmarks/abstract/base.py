@@ -762,15 +762,16 @@ class BaseBenchmark(ABC):
         # Define the API object
         api = HfApi()
 
-        # Define the model filter
-        model_filter = ModelFilter(
-            author=model_id.split('/')[0],
-            model_name=model_id.split('/')[1]
-        )
+        # Extract the author and model name from the model ID
+        if '/' in model_id:
+            author, model_name = model_id.split('/')
+        else:
+            author = None
+            model_name = model_id
 
         # Fetch the model metadata
         models = api.list_models(
-            filter=model_filter,
+            filter=ModelFilter(author=author, model_name=model_name),
             use_auth_token=self.use_auth_token
         )
 
