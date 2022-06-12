@@ -262,7 +262,6 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the framework is not recognized.
         '''
-        breakpoint()
         # Get the name of a framework supported for the model_id
         if framework is None or task is None:
             model_metadata = self._fetch_model_metadata(model_id)
@@ -344,6 +343,7 @@ class BaseBenchmark(ABC):
                         **params
                     )
                     model_cls = self._get_model_class(framework=framework)
+                    breakpoint()
                     model = model_cls.from_pretrained(
                         model_id,
                         revision=revision,
