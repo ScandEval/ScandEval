@@ -766,6 +766,8 @@ class BaseBenchmark(ABC):
         # Set up the order of the frameworks
         valid_frameworks = ['pytorch', 'spacy', 'jax']
 
+        breakpoint()
+
         # Extract a single valid framework in which the model has been
         # implemented
         for valid_framework in valid_frameworks:

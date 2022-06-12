@@ -450,7 +450,6 @@ class Benchmark:
                         # If the model ID is not valid then raise an error, if
                         # specified
                         model_err_msg = 'could not be loaded from the Hugging Face Hub'
-                        breakpoint()
                         if (self.raise_error_on_invalid_model and
                                 str(e).endswith(model_err_msg)):
                             raise e
