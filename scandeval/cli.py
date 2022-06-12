@@ -52,20 +52,25 @@ from .utils import get_all_datasets
               is_flag=True,
               show_default=True,
               help='Whether progress bars should be shown.')
-@click.option('--verbose', '-v',
+@click.option('--raise-error-on-invalid-model', '-r',
               is_flag=True,
               show_default=True,
-              help='Whether extra input should be outputted during '
-                   'benchmarking')
+              help='Whether to raise an error if a model is invalid.')
 @click.option('--train-size', '-s',
               default=[1024],
               show_default=True,
               multiple=True,
               type=int,
               help='The number of training samples to train on')
+@click.option('--verbose', '-v',
+              is_flag=True,
+              show_default=True,
+              help='Whether extra input should be outputted during '
+                   'benchmarking')
 def benchmark(model_id: Tuple[str],
               dataset: Tuple[str],
               language: Tuple[str],
+              raise_error_on_invalid_model: bool,
               train_size: Tuple[int],
               task: Tuple[str],
               evaluate_train: bool,
@@ -79,6 +84,7 @@ def benchmark(model_id: Tuple[str],
                             progress_bar=(not no_progress_bar),
                             save_results=True,
                             evaluate_train=evaluate_train,
+                            raise_error_on_invalid_model=raise_error_on_invalid_model,
                             verbose=verbose,
                             train_size=list(train_size))
 

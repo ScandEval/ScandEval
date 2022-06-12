@@ -501,7 +501,7 @@ class BaseBenchmark(ABC):
 
             except (OSError, ValueError):
                 raise InvalidBenchmark(f'The model {model_id} could not be '
-                                       f'loaded from the HuggingFace hub')
+                                       f'loaded from the Hugging Face Hub')
 
             # If the model is a subclass of a RoBERTa model then we have to add
             # a prefix space to the tokens, by the way the model is

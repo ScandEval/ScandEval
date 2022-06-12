@@ -33,6 +33,11 @@ class Benchmark:
             tasks should be considered. Defaults to 'all'.
         evaluate_train (bool, optional):
             Whether to evaluate the training set as well. Defaults to False.
+        raise_error_on_invalid_model (bool, optional):
+            Whether to raise an error if a model is invalid. Defaults to
+            False.
+        train_size (list of int, optional):
+            The training sizes to consider. Defaults to [1024].
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
 
@@ -43,6 +48,7 @@ class Benchmark:
         task (str or list of str): The tasks to consider in the list.
         evaluate_train (bool): Whether to evaluate the training set as well.
         verbose (bool): Whether to output additional output.
+        train_size (list of int): The training sizes to use.
         benchmark_results (dict): The benchmark results.
     '''
     def __init__(self,
@@ -52,8 +58,9 @@ class Benchmark:
                                                     'nn', 'is', 'fo'],
                  task: Union[str, List[str]] = 'all',
                  evaluate_train: bool = False,
-                 verbose: bool = False,
-                 train_size: List[int] = [1024]):
+                 train_size: List[int] = [1024],
+                 raise_error_on_invalid_model: bool = False,
+                 verbose: bool = False):
 
         # Set parameters
         self.progress_bar = progress_bar
@@ -61,8 +68,9 @@ class Benchmark:
         self.language = language
         self.task = task
         self.evaluate_train = evaluate_train
-        self.verbose = verbose
         self.train_size = train_size
+        self.raise_error_on_invalid_model = raise_error_on_invalid_model
+        self.verbose = verbose
 
         # Initialise variable storing model lists, so we only have to fetch it
         # once
@@ -368,10 +376,21 @@ class Benchmark:
                         results = cls(model_id, **params)
                         self.benchmark_results[dataset][model_id] = results
                         logger.debug(f'Results:\n{results}')
+
                     except InvalidBenchmark as e:
-                        logger.info(f'{model_id} could not be benchmarked '
-                                    f'on {alias}. Skipping.')
-                        logger.debug(f'The error message was "{e}".')
+
+                        # If the model ID is not valid then raise an error, if
+                        # specified
+                        model_err_msg = 'could not be loaded from the Hugging Face Hub'
+                        if (self.raise_error_on_invalid_model and
+                                str(e).endswith(model_err_msg)):
+                            raise e
+
+                        # Otherwise, log the error
+                        else:
+                            logger.info(f'{model_id} could not be benchmarked '
+                                        f'on {alias}. Skipping.')
+                            logger.debug(f'The error message was "{e}".')
 
         # Save the benchmark results
         if save_results:
