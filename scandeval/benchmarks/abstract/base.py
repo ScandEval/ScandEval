@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from datasets import Dataset
 from transformers.models.auto.auto_factory import _BaseAutoModelClass
 import transformers.utils.logging as tf_logging
-from huggingface_hub import HfApi, ModelFilter, ModelSearchArguments
+from huggingface_hub import HfApi, ModelFilter
 from transformers import (PreTrainedTokenizerBase,
                           AutoTokenizer,
                           AutoConfig,
@@ -19,8 +19,6 @@ from transformers import (PreTrainedTokenizerBase,
                           ProgressCallback)
 from typing import Dict, Optional, Tuple, List, Any
 import numpy as np
-import requests
-from bs4 import BeautifulSoup
 import subprocess
 from tqdm.auto import tqdm
 from collections import defaultdict
@@ -28,7 +26,6 @@ import warnings
 from functools import partial
 import gc
 import logging
-import re
 import random
 import os
 
