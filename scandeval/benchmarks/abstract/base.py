@@ -262,6 +262,7 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the framework is not recognized.
         '''
+        breakpoint()
         # Get the name of a framework supported for the model_id
         if framework is None or task is None:
             model_metadata = self._fetch_model_metadata(model_id)
@@ -853,7 +854,6 @@ class BaseBenchmark(ABC):
             torch.use_deterministic_algorithms(True)
 
         # Load the model
-        breakpoint()
         model_dict = self._load_model(model_id,
                                       revision=revision,
                                       **model_metadata)
