@@ -765,8 +765,12 @@ class BaseBenchmark(ABC):
 
         if len(frameworks) == 0:
             msg = (f'The model {model_id} either does not exist on the Hugging Face '
-                   f'Hub or it has no frameworks registered. If it *does* exist on '
-                   f'the Hub then please ensure that it has a framework registered.')
+                   f'Hub, or it has no frameworks registered, or it is a private '
+                   f'model. If it *does* exist on the Hub and is a public model then '
+                   f'please ensure that it has a framework registered. If it is a '
+                   f'private model then enable the `--use-auth-token` flag and make '
+                   f'sure that you are logged in to the Hub via the '
+                   f'`huggingface-cli login` command.')
             raise InvalidBenchmark(msg)
 
         # Set up the order of the frameworks
