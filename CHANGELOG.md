@@ -44,6 +44,9 @@ and this project adheres to
   `remove-duplicates.ipynb` notebook.
 - The `--model-id` now works as intended, whereas previously one was forced to
   use the shortcut `-m`.
+- Now correctly determines whether a NER dataset contains `MISC` tags. Previously this
+  required that both `B-MISC` and `I-MISC` tags were present in the dataset, where it
+  has now been changed to at least one of them.
 
 
 ## [v3.0.0] - 2022-04-19
