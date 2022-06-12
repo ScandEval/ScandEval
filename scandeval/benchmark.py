@@ -76,9 +76,11 @@ class Benchmark:
                  verbose: bool = False):
 
         # If `language` contains 'no' then also include 'nb' and 'nn'. Conversely, if
-        # both 'nb' and 'nn' are specified then only include 'no'.
-        if 'no' in language or ('nb' in language and 'nn' in language):
-            language = list(set(language) | {'nb', 'nn', 'no'})
+        # either 'nb' or 'nn' are specified then also include 'no'.
+        if 'no' in language:
+            language = list(set(language) | {'nb', 'nn'})
+        elif 'nb' in language or 'nn' in language:
+            language = list(set(language) | {'no'})
 
         # Set parameters
         self.progress_bar = progress_bar
