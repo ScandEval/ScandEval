@@ -10,28 +10,27 @@ and this project adheres to
 
 ## [Unreleased]
 ### Changed
-- Models are now evaluated every 30 training steps (corresponding to having
-  processed 960 training samples) rather than every epoch. This decreases
-  benchmarking time significantly, as early stopping kicks in earlier if the
-  model is not learning anything.
-- All training splits of datasets have been truncated to 1,024 samples. This
-  has multiple benefits:
+- Models are now evaluated every 30 training steps (corresponding to having processed
+  960 training samples) rather than every epoch. This decreases benchmarking time
+  significantly, as early stopping kicks in earlier if the model is not learning
+  anything.
+- All training splits of datasets have been truncated to 1,024 samples. This has
+  multiple benefits:
     - Faster benchmarking
     - More reliance on pretraining data
-    - Enables consistent comparisons between different languages on the same
-      task.
-- The datasets TwitterSent, Europarl, LCC and NorDial have been removed, as
-  they were too small and mostly just caused noise.
-- Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the
-  dataset is used to warm up the learning rate.
-- All CLI arguments now use hyphens (`-`) rather than underscores (`_`). For
-  instance, the `--model_id` argument has now been changed to `--model-id`.
+    - Enables consistent comparisons between different languages on the same task.
+- The datasets TwitterSent, Europarl, LCC and NorDial have been removed, as they were
+  too small and mostly just caused noise.
+- Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the dataset
+  is used to warm up the learning rate.
+- All CLI arguments now use hyphens (`-`) rather than underscores (`_`). For instance,
+  the `--model_id` argument has now been changed to `--model-id`.
 
 ### Added
-- New randomly initialised ELECTRA-small model available for benchmarking,
-  simply set `model-id` to either 'random-electra-sequence-clf or
-  'random-electra-token-clf'. The randomly initialised XLM-RoBERTa-base model
-  is still available by replacing 'electra' with 'roberta'.
+- New randomly initialised ELECTRA-small model available for benchmarking, simply set
+  `model-id` to either 'random-electra-sequence-clf or 'random-electra-token-clf'. The
+  randomly initialised XLM-RoBERTa-base model is still available by replacing 'electra'
+  with 'roberta'.
 - Added `--raise-error-on-invalid-model` (`-r`) flag which raises an exception if an
   invalid model is specified. By default this is off, meaning that it simply skips the
   model if it is invalid.
@@ -43,11 +42,10 @@ and this project adheres to
 ### Fixed
 - Now disables tokenizer progress bars properly, using the
   `datasets.utils.disable_progress_bar` function.
-- Many of the datasets contained duplicate entries. These have now all been
-  fixed - the script used to do this can be found in the
-  `remove-duplicates.ipynb` notebook.
-- The `--model-id` now works as intended, whereas previously one was forced to
-  use the shortcut `-m`.
+- Many of the datasets contained duplicate entries. These have now all been fixed - the
+  script used to do this can be found in the `remove-duplicates.ipynb` notebook.
+- The `--model-id` now works as intended, whereas previously one was forced to use the
+  shortcut `-m`.
 - Now correctly determines whether a NER dataset contains `MISC` tags. Previously this
   required that both `B-MISC` and `I-MISC` tags were present in the dataset, where it
   has now been changed to at least one of them.
