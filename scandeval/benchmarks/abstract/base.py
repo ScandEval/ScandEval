@@ -325,6 +325,8 @@ class BaseBenchmark(ABC):
                                          f'"{model_id}", but it was not '
                                          f'recognized.')
 
+                    breakpoint()
+
                     config = AutoConfig.from_pretrained(
                         rnd_model,
                         revision=revision,
