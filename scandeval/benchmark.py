@@ -321,6 +321,8 @@ class Benchmark:
             self._update_benchmarks(evaluate_train=evaluate_train,
                                     verbose=verbose)
 
+        breakpoint()
+
         # Ensure that `language` is a list
         if language == 'all':
             languages = [None]
