@@ -100,7 +100,7 @@ class NerBenchmark(TokenClassificationBenchmark):
         # are not present
         labels_in_train = set([tag for tag_list in y_train['ner_tags'].tolist()
                                for tag in tag_list])
-        self.has_misc_tags = ('B-MISC' in labels_in_train and
+        self.has_misc_tags = ('B-MISC' in labels_in_train or
                               'I-MISC' in labels_in_train)
 
         return train, test
