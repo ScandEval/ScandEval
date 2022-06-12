@@ -47,6 +47,7 @@ class NorecISBenchmark(TextClassificationBenchmark):
             ['LABEL_2', 'positiv', 'jákvætt', 'Positive', id2label[2]]
         ]
         super().__init__(name='norec-is',
+                         language='is',
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,

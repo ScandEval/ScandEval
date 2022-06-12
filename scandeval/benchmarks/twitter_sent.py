@@ -47,6 +47,7 @@ class TwitterSentBenchmark(TextClassificationBenchmark):
             ['LABEL_2', 'positiv', 'jákvætt', 'Positive', id2label[2]]
         ]
         super().__init__(name='twitter-sent',
+                         language='da',
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,

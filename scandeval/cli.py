@@ -28,12 +28,28 @@ from .utils import get_all_datasets
               help='The name of the benchmark dataset. If not specified then '
                    'all datasets will be benchmarked.')
 @click.option('--language', '-l',
-              default=['da', 'sv', 'no', 'nb', 'nn', 'is', 'fo'],
+              default=['da', 'sv', 'no'],
               show_default=True,
               multiple=True,
               type=click.Choice(['da', 'sv', 'no', 'nb', 'nn', 'is', 'fo']),
-              help='The languages to benchmark. Only relevant if `model-id` '
-                   'is not specified.')
+              help='The languages to benchmark, both for models and datasets. Only '
+                   'relevant if `model-id` and `dataset` have not both been specified.')
+@click.option('--model-language', '-ml',
+              default=None,
+              show_default=True,
+              multiple=True,
+              type=click.Choice(['da', 'sv', 'no', 'nb', 'nn', 'is', 'fo']),
+              help='The model languages to benchmark. Only relevant if `model-id` has '
+                   'not been specified. If specified then this will override '
+                   '`language` for models.')
+@click.option('--dataset-language', '-dl',
+              default=None,
+              show_default=True,
+              multiple=True,
+              type=click.Choice(['da', 'sv', 'no', 'nb', 'nn', 'is', 'fo']),
+              help='The dataset languages to benchmark. Only relevant if `dataset` has '
+                   'not been specified. If specified then this will override '
+                   '`language` for datasets.')
 @click.option('--task', '-t',
               default=['all'],
               show_default=True,
@@ -70,6 +86,8 @@ from .utils import get_all_datasets
 def benchmark(model_id: Tuple[str],
               dataset: Tuple[str],
               language: Tuple[str],
+              model_language: Tuple[str],
+              dataset_language: Tuple[str],
               raise_error_on_invalid_model: bool,
               train_size: Tuple[int],
               task: Tuple[str],
@@ -80,6 +98,8 @@ def benchmark(model_id: Tuple[str],
 
     # Initialise the benchmarker class
     benchmarker = Benchmark(language=list(language),
+                            model_language=list(model_language),
+                            dataset_language=list(dataset_language),
                             task='all' if 'all' in task else list(task),
                             progress_bar=(not no_progress_bar),
                             save_results=True,

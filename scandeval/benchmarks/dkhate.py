@@ -46,6 +46,7 @@ class DkHateBenchmark(TextClassificationBenchmark):
             ['LABEL_1', 'offensive', id2label[1]],
         ]
         super().__init__(name='dkhate',
+                         language='da',
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,

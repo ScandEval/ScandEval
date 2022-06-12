@@ -46,6 +46,7 @@ class DalajBenchmark(TextClassificationBenchmark):
             ['LABEL_1', id2label[1]],
         ]
         super().__init__(name='dalaj',
+                         language='sv',
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,

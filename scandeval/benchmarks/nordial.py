@@ -48,6 +48,7 @@ class NorDialBenchmark(TextClassificationBenchmark):
             ['LABEL_3', id2label[3]]
         ]
         super().__init__(name='nordial',
+                         language='no',
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,

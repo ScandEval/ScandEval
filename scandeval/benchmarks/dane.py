@@ -41,6 +41,7 @@ class DaneBenchmark(NerBenchmark):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         super().__init__(name='dane',
+                         language='da',
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)

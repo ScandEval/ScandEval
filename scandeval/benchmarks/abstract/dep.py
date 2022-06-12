@@ -18,6 +18,8 @@ class DepBenchmark(TokenClassificationBenchmark):
     Args:
         name (str):
             The name of the dataset.
+        language (str):
+            The language of the dataset.
         cache_dir (str, optional):
             Where the downloaded models will be stored. Defaults to
             '.benchmark_models'.
@@ -30,6 +32,7 @@ class DepBenchmark(TokenClassificationBenchmark):
 
     Attributes:
         name (str): The name of the dataset.
+        language (str): The language of the dataset.
         task (str): The type of task to be benchmarked.
         metric_names (dict): The names of the metrics.
         id2label (dict or None): A dictionary converting indices to labels.
@@ -44,6 +47,7 @@ class DepBenchmark(TokenClassificationBenchmark):
     '''
     def __init__(self,
                  name: str,
+                 language: str,
                  cache_dir: str = '.benchmark_models',
                  evaluate_train: bool = False,
                  verbose: bool = False):
@@ -57,6 +61,7 @@ class DepBenchmark(TokenClassificationBenchmark):
                         'reparandum', 'root', 'vocative', 'xcomp']
         id2label = id2label_head + id2label_dep
         super().__init__(name=name,
+                         language=language,
                          metric_names=dict(las='LAS', uas='UAS'),
                          id2label=id2label,
                          cache_dir=cache_dir,

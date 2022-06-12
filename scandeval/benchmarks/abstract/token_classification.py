@@ -22,6 +22,8 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
     Args:
         name (str):
             The name of the dataset.
+        language (str):
+            The language of the dataset.
         metric_names (dict):
             A dictionary with the variable names of the metrics used in the
             dataset as keys, and a more human readable name of them as values.
@@ -55,6 +57,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
 
     Attributes:
         name (str): The name of the dataset.
+        language (str): The language of the dataset.
         task (str): The type of task to be benchmarked.
         metric_names (dict): The names of the metrics.
         id2label (dict or None): A dictionary converting indices to labels.
@@ -69,6 +72,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
     '''
     def __init__(self,
                  name: str,
+                 language: str,
                  metric_names: Dict[str, str],
                  id2label: list,
                  label_synonyms: Optional[List[List[str]]] = None,
@@ -80,6 +84,7 @@ class TokenClassificationBenchmark(BaseBenchmark, ABC):
         self._metric = load_metric('seqeval')
         super().__init__(task='token-classification',
                          name=name,
+                         language=language,
                          metric_names=metric_names,
                          id2label=id2label,
                          label_synonyms=label_synonyms,

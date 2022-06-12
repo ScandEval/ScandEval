@@ -45,6 +45,8 @@ class BaseBenchmark(ABC):
     Args:
         name (str):
             The name of the dataset.
+        language (str):
+            The language of the dataset.
         task (str):
             The type of task to be benchmarked.
         metric_names (dict):
@@ -80,6 +82,7 @@ class BaseBenchmark(ABC):
 
     Parameters:
         name (str): The name of the dataset.
+        language (str): The language of the dataset.
         task (str): The type of task to be benchmarked.
         metric_names (dict): The names of the metrics.
         id2label (list or None): A list converting indices to labels.
@@ -94,6 +97,7 @@ class BaseBenchmark(ABC):
     '''
     def __init__(self,
                  name: str,
+                 language: str,
                  task: str,
                  metric_names: Dict[str, str],
                  id2label: Optional[List[str]] = None,
@@ -105,6 +109,7 @@ class BaseBenchmark(ABC):
                  verbose: bool = False):
 
         self.short_name = name
+        self.language = language
         self.name = [long_name
                      for short_name, long_name, _, _ in get_all_datasets()
                      if name == short_name][0]

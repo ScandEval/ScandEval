@@ -46,6 +46,7 @@ class ScalaNNBenchmark(TextClassificationBenchmark):
             ['LABEL_1', id2label[1]],
         ]
         super().__init__(name='scala-nn',
+                         language='nn',
                          id2label=id2label,
                          label_synonyms=label_synonyms,
                          cache_dir=cache_dir,

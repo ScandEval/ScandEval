@@ -24,10 +24,18 @@ class Benchmark:
             Whether to save the benchmark results to
             'scandeval_benchmark_results.json'. Defaults to False.
         language (str or list of str, optional):
-            The language codes of the languages to include in the list. Set
-            this to 'all' if all languages (also non-Scandinavian) should
-            be considered. Defaults to ['da', 'sv', 'no', 'nb', 'nn', 'is',
-            'fo'].
+            The language codes of the languages to include, both for models and
+            datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
+            'all' if all languages (also non-Scandinavian) should be considered.
+            Defaults to ['da', 'sv', 'no'].
+        model_language (str or list of str or None, optional):
+            The language codes of the languages to include for models. If specified
+            then this overrides the `language` parameter for model languages. Defaults
+            to None.
+        dataset_language (str or list of str or None, optional):
+            The language codes of the languages to include for datasets. If specified
+            then this overrides the `language` parameter for dataset languages. Defaults
+            to None.
         task (str or list of str, optional):
             The tasks to consider in the list. Set this to 'all' if all
             tasks should be considered. Defaults to 'all'.
@@ -54,18 +62,26 @@ class Benchmark:
     def __init__(self,
                  progress_bar: bool = True,
                  save_results: bool = False,
-                 language: Union[str, List[str]] = ['da', 'sv', 'no', 'nb',
-                                                    'nn', 'is', 'fo'],
+                 language: Union[str, List[str]] = ['da', 'sv', 'no'],
+                 model_language: Optional[Union[str, List[str]]] = None,
+                 dataset_language: Optional[Union[str, List[str]]] = None,
                  task: Union[str, List[str]] = 'all',
                  evaluate_train: bool = False,
                  train_size: List[int] = [1024],
                  raise_error_on_invalid_model: bool = False,
                  verbose: bool = False):
 
+        # If `language` contains 'no' then also include 'nb' and 'nn'. Conversely, if
+        # both 'nb' and 'nn' are specified then only include 'no'.
+        if 'no' in language or ('nb' in language and 'nn' in language):
+            language = list(set(language) | {'nb', 'nn', 'no'})
+
         # Set parameters
         self.progress_bar = progress_bar
         self.save_results = save_results
         self.language = language
+        self.model_language = model_language
+        self.dataset_language = dataset_language
         self.task = task
         self.evaluate_train = evaluate_train
         self.train_size = train_size
@@ -81,10 +97,7 @@ class Benchmark:
         self.benchmark_results = defaultdict(dict)
 
         # Set logging level based on verbosity
-        if verbose:
-            logging_level = logging.DEBUG
-        else:
-            logging_level = logging.INFO
+        logging_level = logging.DEBUG if verbose else logging.INFO
         logger.setLevel(logging_level)
 
         # Update the list of benchmarks
@@ -234,6 +247,8 @@ class Benchmark:
                   progress_bar: Optional[bool] = None,
                   save_results: Optional[bool] = None,
                   language: Optional[Union[str, List[str]]] = None,
+                  model_language: Optional[Union[str, List[str]]] = None,
+                  dataset_language: Optional[Union[str, List[str]]] = None,
                   task: Optional[Union[str, List[str]]] = None,
                   evaluate_train: Optional[bool] = None,
                   verbose: Optional[bool] = None
@@ -255,6 +270,16 @@ class Benchmark:
                 'scandeval_benchmark_results.json'. If None then the default
                 value from the constructor will be used. Defaults to None.
             language (str, list of str or None, optional):
+                The language codes of the languages to include in the list. Set
+                this to 'all' if all languages (also non-Scandinavian) should
+                be considered. If None then the default value from the
+                constructor will be used. Defaults to None.
+            model_language (str, list of str or None, optional):
+                The language codes of the languages to include in the list. Set
+                this to 'all' if all languages (also non-Scandinavian) should
+                be considered. If None then the default value from the
+                constructor will be used. Defaults to None.
+            dataset_language (str, list of str or None, optional):
                 The language codes of the languages to include in the list. Set
                 this to 'all' if all languages (also non-Scandinavian) should
                 be considered. If None then the default value from the
@@ -284,6 +309,10 @@ class Benchmark:
             save_results = self.save_results
         if language is None:
             language = self.language
+        if model_language is None:
+            model_language = self.model_language
+        if dataset_language is None:
+            dataset_language = self.dataset_language
         if task is None:
             task = self.task
         if evaluate_train is None:
@@ -305,6 +334,26 @@ class Benchmark:
         else:
             languages = language
 
+        # Ensure that `model_language` is a list
+        if model_language == 'all':
+            model_languages = [None]
+        elif isinstance(model_language, str):
+            model_languages = [model_language]
+        elif model_language is None:
+            model_languages = languages
+        else:
+            model_languages = model_language
+
+        # Ensure that `dataset_language` is a list
+        if dataset_language == 'all':
+            dataset_languages = [None]
+        elif isinstance(dataset_language, str):
+            dataset_languages = [dataset_language]
+        elif dataset_language is None:
+            dataset_languages = languages
+        else:
+            dataset_languages = dataset_language
+
         # Ensure that `task` is a list
         if task == 'all':
             tasks = [None]
@@ -318,11 +367,11 @@ class Benchmark:
 
             # If the model lists have not been fetched already, then do it
             if self._model_lists is None:
-                self._model_lists = self._get_model_lists(languages=languages,
+                self._model_lists = self._get_model_lists(languages=model_languages,
                                                           tasks=tasks)
             try:
                 model_ids = list()
-                for language in languages:
+                for language in model_languages:
                     model_ids.extend(self._model_lists[language])
                 for task in tasks:
                     model_ids.extend(self._model_lists[task])
@@ -332,10 +381,10 @@ class Benchmark:
             # present in the stored model lists, then fetch new model lists and
             # try again
             except KeyError:
-                self._model_lists = self._get_model_lists(languages=languages,
+                self._model_lists = self._get_model_lists(languages=model_languages,
                                                           tasks=tasks)
                 model_ids = list()
-                for language in languages:
+                for language in model_languages:
                     model_ids.extend(self._model_lists[language])
                 for task in tasks:
                     model_ids.extend(self._model_lists[task])
@@ -352,20 +401,25 @@ class Benchmark:
 
         # Define `datasets` variable, storing all the relevant datasets
         if dataset is None:
-            datasets = [d for d, _, _ in self._benchmarks]
+            datasets = [
+                d for d, _, obj in self._benchmarks
+                if obj.language in dataset_languages
+            ]
         elif isinstance(dataset, str):
             datasets = [dataset]
         else:
             datasets = dataset
 
         # Fetch the benchmark datasets, filtered by the `datasets` variable
-        benchmarks = [(dataset, alias, cls)
-                      for dataset, alias, cls in self._benchmarks
-                      if dataset in datasets]
+        benchmarks = [
+            (dataset, alias, obj)
+            for dataset, alias, obj in self._benchmarks
+            if dataset in datasets
+        ]
 
         # Benchmark all the models in `model_ids` on all the datasets in
         # `benchmarks`
-        for dataset, alias, cls in benchmarks:
+        for dataset, alias, obj in benchmarks:
             for train_size in self.train_size:
                 for model_id in model_ids:
                     logger.info(f'Benchmarking {model_id} on {alias} with '
@@ -373,7 +427,7 @@ class Benchmark:
                     try:
                         params = dict(progress_bar=progress_bar,
                                       train_size=train_size)
-                        results = cls(model_id, **params)
+                        results = obj(model_id, **params)
                         self.benchmark_results[dataset][model_id] = results
                         logger.debug(f'Results:\n{results}')
 

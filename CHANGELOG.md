@@ -35,6 +35,10 @@ and this project adheres to
 - Added `--raise-error-on-invalid-model` flag which raises an exception if an invalid
   model is specified. By default this is off, meaning that it simply skips the model if
   it is invalid.
+- Added `--model-language` and `--dataset-language`, which can be used to specify the
+  model/dataset languages to benchmark. The `--language` argument will now be used for
+  both models and datasets, where the `--model-language` and `--dataset-language` will
+  override `--language` for models/datasets if specified.
 
 ### Fixed
 - Now disables tokenizer progress bars properly, using the

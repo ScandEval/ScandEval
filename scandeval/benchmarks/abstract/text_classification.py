@@ -21,6 +21,8 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
     Args:
         name (str):
             The name of the dataset.
+        language (str):
+            The language of the dataset.
         metric_names (dict):
             A dictionary with the variable names of the metrics used in the
             dataset as keys, and a more human readable name of them as values.
@@ -54,6 +56,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
 
     Attributes:
         name (str): The name of the dataset.
+        language (str): The language of the dataset.
         task (str): The type of task to be benchmarked.
         metric_names (dict): The names of the metrics.
         id2label (dict or None): A dictionary converting indices to labels.
@@ -68,6 +71,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
     '''
     def __init__(self,
                  name: str,
+                 language: str,
                  id2label: list,
                  label_synonyms: Optional[List[List[str]]] = None,
                  evaluate_train: bool = False,
@@ -78,6 +82,7 @@ class TextClassificationBenchmark(BaseBenchmark, ABC):
         self._metric = load_metric('matthews_correlation')
         super().__init__(task='text-classification',
                          name=name,
+                         language=language,
                          metric_names=dict(
                             mcc='Matthew\'s correlation coefficient'
                          ),

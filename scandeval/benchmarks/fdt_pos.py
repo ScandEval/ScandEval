@@ -41,6 +41,7 @@ class FdtPosBenchmark(PosBenchmark):
                  evaluate_train: bool = False,
                  verbose: bool = False):
         super().__init__(name='fdt-pos',
+                         language='fo',
                          cache_dir=cache_dir,
                          evaluate_train=evaluate_train,
                          verbose=verbose)
