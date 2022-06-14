@@ -233,10 +233,10 @@ class BaseBenchmark(ABC):
 
         Args:
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer model.
+                The full Hugging Face Hub path to the pretrained transformer model.
             revision (str or None, optional):
                 The specific model version to use. It can be a branch name, a tag name,
-                or a commit id. Currently only supported for HuggingFace models.
+                or a commit id. Currently only supported for Hugging Face models.
                 Defaults to 'main' for latest.
             framework (str or None, optional):
                 The framework the model has been built in. Currently supports
@@ -570,7 +570,7 @@ class BaseBenchmark(ABC):
         '''Load the datasets.
 
         Returns:
-            A triple of HuggingFace datasets:
+            A triple of Hugging Face datasets:
                 The train and test datasets.
         '''
         pass
@@ -583,14 +583,14 @@ class BaseBenchmark(ABC):
         '''Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
-            dataset (HuggingFace dataset):
+            dataset (Hugging Face dataset):
                 The dataset to preprocess.
             kwargs:
                 Extra keyword arguments containing objects used in preprocessing the
                 dataset.
 
         Returns:
-            HuggingFace dataset: The preprocessed dataset.
+            Hugging Face dataset: The preprocessed dataset.
         '''
         pass
 
@@ -601,12 +601,12 @@ class BaseBenchmark(ABC):
         '''Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (HuggingFace tokenizer or None, optional):
+            tokenizer (Hugging Face tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
         Returns:
-            HuggingFace data collator: The data collator.
+            Hugging Face data collator: The data collator.
         '''
         pass
 
@@ -643,7 +643,7 @@ class BaseBenchmark(ABC):
             finetuned (bool):
                 Whether the model is finetuned or not.
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer model.
+                The full Hugging Face Hub path to the pretrained transformer model.
 
         Returns:
             dict:
@@ -703,7 +703,7 @@ class BaseBenchmark(ABC):
 
         Args:
             model (SpaCy model): The model.
-            dataset (HuggingFace dataset): The dataset.
+            dataset (Hugging Face dataset): The dataset.
 
         Returns:
             A pair of arrays:
@@ -713,11 +713,11 @@ class BaseBenchmark(ABC):
         pass
 
     def _fetch_model_metadata(self, model_id: str) -> Dict[str, str]:
-        '''Fetches metadata for a model from the HuggingFace Hub.
+        '''Fetches metadata for a model from the Hugging Face Hub.
 
         Args:
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer model.
+                The full Hugging Face Hub path to the pretrained transformer model.
 
         Returns:
             dict:
@@ -784,10 +784,10 @@ class BaseBenchmark(ABC):
 
         Args:
             model_id (str):
-                The full HuggingFace Hub path to the pretrained transformer model. The
+                The full Hugging Face Hub path to the pretrained transformer model. The
                 specific model version to use can be added after the suffix '@':
                 "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id
-                (currently only supported for HuggingFace models, and it defaults to
+                (currently only supported for Hugging Face models, and it defaults to
                 'main' for latest).
             progress_bar (bool, optional):
                 Whether to show a progress bar or not. Defaults to True.
@@ -802,6 +802,7 @@ class BaseBenchmark(ABC):
             RuntimeError: If the extracted framework is not recognized.
         '''
         # Fetch the model metadata
+        logger.debug('Fetching model metadata from the Hugging Face Hub')
         model_metadata = self._fetch_model_metadata(model_id)
         framework = model_metadata['framework']
         task = model_metadata['task']
@@ -814,6 +815,7 @@ class BaseBenchmark(ABC):
 
         # Set random seeds to enforce reproducibility of the randomly initialised
         # weights
+        logger.debug('Setting random seeds and ensuring determinacy')
         random.seed(4242)
         np.random.seed(4242)
         rng = np.random.default_rng(4242)
@@ -828,6 +830,7 @@ class BaseBenchmark(ABC):
             torch.use_deterministic_algorithms(True)
 
         # Load the model
+        logger.debug('Loading model')
         model_dict = self._load_model(model_id,
                                       revision=revision,
                                       **model_metadata)
@@ -836,6 +839,7 @@ class BaseBenchmark(ABC):
         finetune = (task == 'fill-mask')
 
         # Load the dataset
+        logger.debug('Loading dataset')
         dataset_splits = self._load_data()
         if len(dataset_splits) == 2:
             train, test = dataset_splits
