@@ -802,7 +802,7 @@ class BaseBenchmark(ABC):
             RuntimeError: If the extracted framework is not recognized.
         '''
         # Fetch the model metadata
-        logger.debug('Fetching model metadata from the Hugging Face Hub')
+        logger.info('Fetching model metadata from the Hugging Face Hub')
         model_metadata = self._fetch_model_metadata(model_id)
         framework = model_metadata['framework']
         task = model_metadata['task']
@@ -815,7 +815,7 @@ class BaseBenchmark(ABC):
 
         # Set random seeds to enforce reproducibility of the randomly initialised
         # weights
-        logger.debug('Setting random seeds and ensuring determinacy')
+        logger.info('Setting random seeds and ensuring determinacy')
         random.seed(4242)
         np.random.seed(4242)
         rng = np.random.default_rng(4242)
@@ -830,7 +830,7 @@ class BaseBenchmark(ABC):
             torch.use_deterministic_algorithms(True)
 
         # Load the model
-        logger.debug('Loading model')
+        logger.info('Loading model')
         model_dict = self._load_model(model_id,
                                       revision=revision,
                                       **model_metadata)
@@ -839,7 +839,7 @@ class BaseBenchmark(ABC):
         finetune = (task == 'fill-mask')
 
         # Load the dataset
-        logger.debug('Loading dataset')
+        logger.info('Loading dataset')
         dataset_splits = self._load_data()
         if len(dataset_splits) == 2:
             train, test = dataset_splits
