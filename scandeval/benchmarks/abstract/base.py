@@ -359,9 +359,8 @@ class BaseBenchmark(ABC):
                         model_id2label = [model_id2label[idx]
                                           for idx in range(model_num_labels)]
                     except IndexError:
-                        raise InvalidBenchmark('There is a gap in the '
-                                               'indexing dictionary of the '
-                                               'model.')
+                        raise InvalidBenchmark('There is a gap in the indexing '
+                                               'dictionary of the model.')
                 except AttributeError:
                     model_id2label = None
 
