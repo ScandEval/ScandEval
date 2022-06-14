@@ -255,7 +255,6 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the framework is not recognized.
         '''
-        logger.info('Loading model metadata')
         # Get the name of a framework supported for the model_id
         if framework is None or task is None:
             model_metadata = self._fetch_model_metadata(model_id)
@@ -328,17 +327,14 @@ class BaseBenchmark(ABC):
 
                 # Otherwise load the pretrained model
                 else:
-                    logger.info('Loading config')
                     config = AutoConfig.from_pretrained(
                         model_id,
                         revision=revision,
                         use_auth_token=self.use_auth_token,
                         **params
                     )
-                    logger.info('Loading model class')
                     model_cls = self._get_model_class(framework=framework)
 
-                    logger.info('Loading model')
                     model = model_cls.from_pretrained(
                         model_id,
                         revision=revision,
