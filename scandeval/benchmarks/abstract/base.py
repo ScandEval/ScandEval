@@ -255,7 +255,7 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the framework is not recognized.
         '''
-        logger.debug('Loading model metadata')
+        logger.info('Loading model metadata')
         # Get the name of a framework supported for the model_id
         if framework is None or task is None:
             model_metadata = self._fetch_model_metadata(model_id)
@@ -328,17 +328,17 @@ class BaseBenchmark(ABC):
 
                 # Otherwise load the pretrained model
                 else:
-                    logger.debug('Loading config')
+                    logger.info('Loading config')
                     config = AutoConfig.from_pretrained(
                         model_id,
                         revision=revision,
                         use_auth_token=self.use_auth_token,
                         **params
                     )
-                    logger.debug('Loading model class')
+                    logger.info('Loading model class')
                     model_cls = self._get_model_class(framework=framework)
 
-                    logger.debug('Loading model')
+                    logger.info('Loading model')
                     model = model_cls.from_pretrained(
                         model_id,
                         revision=revision,
@@ -884,7 +884,6 @@ class BaseBenchmark(ABC):
             tokenizer = model_dict['tokenizer']
 
             # Log the number of parameters in the model
-            logger.info(f'Calculating number of model parameters')
             num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
             logger.info(f'Number of model parameters: {num_params:,}')
 
