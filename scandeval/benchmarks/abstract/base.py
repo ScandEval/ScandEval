@@ -878,6 +878,10 @@ class BaseBenchmark(ABC):
             model = model_dict['model']
             tokenizer = model_dict['tokenizer']
 
+            # Log the number of parameters in the model
+            num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            logger.info(f'Number of model parameters: {num_params:,}')
+
             # Preprocess the datasets
             try:
                 params = dict(framework=framework,
