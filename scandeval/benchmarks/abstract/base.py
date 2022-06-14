@@ -255,6 +255,7 @@ class BaseBenchmark(ABC):
         Raises:
             RuntimeError: If the framework is not recognized.
         '''
+        logger.debug('Loading model metadata')
         # Get the name of a framework supported for the model_id
         if framework is None or task is None:
             model_metadata = self._fetch_model_metadata(model_id)
@@ -327,13 +328,17 @@ class BaseBenchmark(ABC):
 
                 # Otherwise load the pretrained model
                 else:
+                    logger.debug('Loading config')
                     config = AutoConfig.from_pretrained(
                         model_id,
                         revision=revision,
                         use_auth_token=self.use_auth_token,
                         **params
                     )
+                    logger.debug('Loading model class')
                     model_cls = self._get_model_class(framework=framework)
+
+                    logger.debug('Loading model')
                     model = model_cls.from_pretrained(
                         model_id,
                         revision=revision,
@@ -802,7 +807,6 @@ class BaseBenchmark(ABC):
             RuntimeError: If the extracted framework is not recognized.
         '''
         # Fetch the model metadata
-        logger.info('Fetching model metadata from the Hugging Face Hub')
         model_metadata = self._fetch_model_metadata(model_id)
         framework = model_metadata['framework']
         task = model_metadata['task']
@@ -815,7 +819,6 @@ class BaseBenchmark(ABC):
 
         # Set random seeds to enforce reproducibility of the randomly initialised
         # weights
-        logger.info('Setting random seeds and ensuring determinacy')
         random.seed(4242)
         np.random.seed(4242)
         rng = np.random.default_rng(4242)
@@ -830,7 +833,6 @@ class BaseBenchmark(ABC):
             torch.use_deterministic_algorithms(True)
 
         # Load the model
-        logger.info('Loading model')
         model_dict = self._load_model(model_id,
                                       revision=revision,
                                       **model_metadata)
@@ -839,7 +841,6 @@ class BaseBenchmark(ABC):
         finetune = (task == 'fill-mask')
 
         # Load the dataset
-        logger.info('Loading dataset')
         dataset_splits = self._load_data()
         if len(dataset_splits) == 2:
             train, test = dataset_splits
