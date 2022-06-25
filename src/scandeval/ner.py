@@ -40,7 +40,7 @@ class NERBenchmark(BenchmarkDataset):
                 dataset.
         """
         # Load the dataset
-        dataset_dict = self._load_data()
+        dataset_dict = super()._load_data()
 
         # Check what labels are present in the dataset, and store if MISC tags are not
         # present
