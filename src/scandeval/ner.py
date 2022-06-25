@@ -282,7 +282,7 @@ class NERBenchmark(BenchmarkDataset):
                 previous_word_idx = word_idx
 
             all_labels.append(label_ids)
-        tokenized_inputs["ner_tags"] = all_labels
+        tokenized_inputs["labels"] = all_labels
         return tokenized_inputs
 
     def _preprocess_data(self, dataset: Dataset, framework: str, **kwargs) -> Dataset:
