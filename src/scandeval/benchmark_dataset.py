@@ -215,7 +215,7 @@ class BenchmarkDataset(ABC):
                 val = self._preprocess_data(val, **params)
             test = self._preprocess_data(test, **params)
         except ValueError:
-            raise InvalidBenchmark("Preprocessing of the dataset could " "not be done.")
+            raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
 
         # Get bootstrapped datasets
         tests = [
