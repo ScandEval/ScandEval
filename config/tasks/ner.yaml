@@ -8,6 +8,7 @@ metrics:
     huggingface_id: f1
     long_name: Micro-average F1-score without MISC tags
 labels:
+  O: []
   B-LOC:
     - B-location
     - B-place
