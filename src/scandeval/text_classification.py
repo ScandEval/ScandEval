@@ -84,8 +84,8 @@ class TextClassificationBenchmark(BenchmarkDataset):
 
         elif framework == "spacy":
             raise InvalidBenchmark(
-                "Evaluation of text predictions "
-                "for SpaCy models is not yet implemented."
+                "Evaluation of text predictions for SpaCy models is not yet "
+                "implemented."
             )
 
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
@@ -93,9 +93,8 @@ class TextClassificationBenchmark(BenchmarkDataset):
             examples["label"] = [label2id[lbl] for lbl in examples["label"]]
         except KeyError:
             raise InvalidBenchmark(
-                f"One of the labels in the dataset, "
-                f'{examples["label"]}, does not occur '
-                f"in the label2id dictionary {label2id}."
+                f"One of the labels in the dataset, {examples['label']}, does not "
+                f"occur in the label2id dictionary {label2id}."
             )
         return examples
 
@@ -128,6 +127,6 @@ class TextClassificationBenchmark(BenchmarkDataset):
                 array contains the true labels.
         """
         raise InvalidBenchmark(
-            "Evaluation of text classification tasks "
-            "for SpaCy models is not yet implemented."
+            "Evaluation of text classification tasks for SpaCy models is not yet "
+            "implemented."
         )
