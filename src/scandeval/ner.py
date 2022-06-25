@@ -190,7 +190,7 @@ class NERBenchmark(BenchmarkDataset):
             padding=True,
         )
         all_labels = []
-        for i, labels in enumerate(examples["orig_labels"]):
+        for i, labels in enumerate(examples["ner_tags"]):
             try:
                 word_ids = tokenized_inputs.word_ids(batch_index=i)
 
@@ -282,7 +282,7 @@ class NERBenchmark(BenchmarkDataset):
                 previous_word_idx = word_idx
 
             all_labels.append(label_ids)
-        tokenized_inputs["labels"] = all_labels
+        tokenized_inputs["ner_tags"] = all_labels
         return tokenized_inputs
 
     def _preprocess_data(self, dataset: Dataset, framework: str, **kwargs) -> Dataset:
@@ -347,7 +347,7 @@ class NERBenchmark(BenchmarkDataset):
         map_fn = self._extract_spacy_predictions
         predictions = map(map_fn, zip(dataset["tokens"], processed))
 
-        return list(predictions), dataset["orig_labels"]
+        return list(predictions), dataset["ner_tags"]
 
     def _extract_spacy_predictions(self, tokens_processed: tuple) -> list:
         """Helper function that extracts the predictions from a SpaCy model.
