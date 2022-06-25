@@ -41,7 +41,7 @@ from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_config
 from .scores import log_scores
-from .utils import block_terminal_output, enforce_reproducibility, is_module_installed
+from .utils import enforce_reproducibility, is_module_installed
 
 logger = logging.getLogger(__name__)
 
