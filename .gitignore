@@ -1,13 +1,14 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
 
 # C extensions
 *.so
 
 # Distribution / packaging
 .Python
+env/
+.venv
 build/
 develop-eggs/
 dist/
@@ -19,13 +20,9 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -40,16 +37,12 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-.nox/
 .coverage
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
 *.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
 
 # Translations
 *.mo
@@ -57,16 +50,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -74,85 +57,40 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
+# DotEnv configuration
 .env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
+# Database
+*.db
+*.rdb
 
-# Rope project settings
-.ropeproject
+# Pycharm
+.idea
 
-# mkdocs documentation
-/site
+# VS Code
+.vscode/
 
-# mypy
+# Spyder
+.spyproject/
+
+# Jupyter NB Checkpoints
+.ipynb_checkpoints/
+
+# Mac OS-specific storage files
+.DS_Store
+
+# vim
+*.swp
+*.swo
+
+# Mypy cache
 .mypy_cache/
-.dmypy.json
-dmypy.json
 
-# Pyre type checker
-.pyre/
+# pytest cache
+.pytest_cache/
 
-# VIm
-**/*.swp
-**/*.swo
-.vim/
-
-# MacOS
-**/.DS_Store
+# Checkpoints
+checkpoint-*
 
 # Cache
-.benchmark_models
-
-# Raw datasets
-**/raw_train*
-**/raw_val*
-**/raw_test*
-
-# Raw images
-gfx/satw.png
-**/*.xcf
-
-# Bat files
-**/*.bat
-
-# Data files
-**/*.xml
-**/*.conllu
-**/*.bio
-**/*.csv
+.scandeval_cache/

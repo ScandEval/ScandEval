@@ -1,0 +1,6 @@
+name: scala-is
+pretty_name: the Icelandic part of ScaLA
+huggingface_id: ScandEval/scala-is
+languages:
+  - is
+task: la

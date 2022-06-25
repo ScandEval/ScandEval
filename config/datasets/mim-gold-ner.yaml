@@ -1,0 +1,6 @@
+name: mim-gold-ner
+pretty_name: MIM-GOLD-NER
+huggingface_id: ScandEval/mim-gold-ner-mini
+languages:
+  - is
+task: ner

@@ -1,0 +1,6 @@
+name: scala-da
+pretty_name: the Danish part of ScaLA
+huggingface_id: ScandEval/scala-da
+languages:
+  - da
+task: la

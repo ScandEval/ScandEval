@@ -1,0 +1,6 @@
+name: norne-nn
+pretty_name: the Nynorsk part of NorNE
+huggingface_id: ScandEval/norne-nn-mini
+languages:
+  - nn
+task: ner

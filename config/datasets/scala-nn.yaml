@@ -1,0 +1,6 @@
+name: scala-nn
+pretty_name: the Nynorsk part of ScaLA
+huggingface_id: ScandEval/scala-nn
+languages:
+  - nn
+task: la

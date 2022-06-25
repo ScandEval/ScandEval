@@ -1,0 +1,6 @@
+name: absabank-imm
+pretty_name: ABSABank-Imm
+huggingface_id: ScandEval/absabank-imm-mini
+languages:
+  - sv
+task: sent

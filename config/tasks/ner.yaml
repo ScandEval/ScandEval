@@ -1,0 +1,48 @@
+name: ner
+supertask: token-classification
+metrics:
+  micro_f1:
+    huggingface_id: f1
+    long_name: Micro-average F1-score
+  micro_f1_no_misc:
+    huggingface_id: f1
+    long_name: Micro-average F1-score without MISC tags
+labels:
+  B-LOC:
+    - B-location
+    - B-place
+    - B-GPE_LOC
+    - B-LOC/ORG
+    - B-LOCPRS
+    - B-LOCORG
+  I-LOC:
+    - I-location
+    - I-place
+    - I-GPE_LOC
+    - I-LOC/ORG
+    - I-LOCPRS
+    - I-LOCORG
+  B-ORG:
+    - B-organization
+    - B-inst
+    - B-GPE_ORG
+    - B-ORG/PRS
+    - B-OBJ/ORG
+    - B-ORGPRS
+    - B-OBJORG
+  I-ORG:
+    - I-organization
+    - I-inst
+    - I-GPE_ORG
+    - I-ORG/PRS
+    - I-OBJ/ORG
+    - I-ORGPRS
+    - I-OBJORG
+  B-PER:
+    - B-person
+  I-PER:
+    - I-person
+  B-MISC:
+    - B-miscellaneous
+  I-MISC:
+    - I-miscellaneous

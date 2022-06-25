@@ -1,0 +1,15 @@
+name: sent
+supertask: text-classification
+metrics:
+  mcc:
+    huggingface_id: matthews_correlation
+    long_name: Matthew's correlation coefficient
+labels:
+  negative:
+    - negativ
+    - LABEL_0
+  neutral:
+    - LABEL_1
+  positive:
+    - positiv
+    - LABEL_2

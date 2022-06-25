@@ -1,49 +1,38 @@
-include .env
-export $(shell sed 's/=.*//' .env)
+.PHONY: notebook docs
+.EXPORT_ALL_VARIABLES:
+export ENV_DIR=$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )"
 
-documentation:
-	sphinx-apidoc -o docs/source --force scandeval && \
-	rm docs/source/modules.rst || echo "Did not have to remove modules.rst"
-	make -C docs html
+activate:
+	@echo "Activating virtual environment..."
+	@poetry shell
+	@source "$(ENV_DIR)/bin/activate"
 
-release-major:
-	pytest -n 4 scandeval && \
-	make documentation && \
-	python bump_version.py --major && \
-	git pull origin main && \
-	git push && \
-	git checkout main && \
-	git merge dev && \
-	git push && \
-	git push --tags && \
-	git checkout dev && \
-	python setup.py sdist bdist_wheel && \
-	twine upload dist/*
+install:
+	@echo "Installing..."
+	@git init
+	@if [ "Type `gpg --list-keys` to see your key IDs" != "Type `gpg --list-keys` to see your key IDs" ]; then\
+		git config commit.gpgsign true;\
+		git config user.signingkey "Type `gpg --list-keys` to see your key IDs";\
+	fi
+	@git config user.email "saattrupdan@gmail.com"
+	@git config user.name "Dan Saattrup Nielsen"
+	@poetry install
+	@poetry run pre-commit install
 
-release-minor:
-	pytest -n 4 scandeval && \
-	make documentation && \
-	python bump_version.py --minor && \
-	git pull origin main && \
-	git push && \
-	git checkout main && \
-	git merge dev && \
-	git push && \
-	git push --tags && \
-	git checkout dev && \
-	python setup.py sdist bdist_wheel && \
-	twine upload dist/*
+remove-env:
+	@poetry env remove python3
+	@echo "Removed virtual environment."
 
-release-patch:
-	pytest -n 4 scandeval && \
-	make documentation && \
-	python bump_version.py --patch && \
-	git pull origin main && \
-	git push && \
-	git checkout main && \
-	git merge dev && \
-	git push && \
-	git push --tags && \
-	git checkout dev && \
-	python setup.py sdist bdist_wheel && \
-	twine upload dist/*
+view-docs:
+	@echo "Viewing API documentation..."
+	@pdoc src/{{cookiecutter.project_name}}
+
+docs:
+	@pdoc src -o docs
+	@echo "Saved documentation."
+
+clean:
+	@find . -type f -name "*.py[co]" -delete
+	@find . -type d -name "__pycache__" -delete
+	@rm -rf .pytest_cache
+	@echo "Cleaned repository."

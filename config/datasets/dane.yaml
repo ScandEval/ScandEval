@@ -1,0 +1,6 @@
+name: dane
+pretty_name: DaNE
+huggingface_id: ScandEval/dane-mini
+languages:
+  - da
+task: ner

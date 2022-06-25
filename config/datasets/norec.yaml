@@ -1,0 +1,7 @@
+name: norec
+pretty_name: NoReC
+huggingface_id: ScandEval/norec-mini
+languages:
+  - nb
+  - nn
+task: sent
