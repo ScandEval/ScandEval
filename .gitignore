@@ -94,3 +94,6 @@ checkpoint-*
 
 # Cache
 .scandeval_cache/
+
+# Result log
+scandeval_benchmark_results.json
