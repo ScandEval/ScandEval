@@ -281,9 +281,11 @@ class Benchmarker:
         try:
             model_ids: List[str] = list()
             for language in model_languages:
-                model_ids.extend(self._model_lists[language])  # type: ignore
+                if language is not None:
+                    model_ids.extend(self._model_lists[language])  # type: ignore
             for task in tasks:
-                model_ids.extend(self._model_lists[task])  # type: ignore
+                if task is not None:
+                    model_ids.extend(self._model_lists[task])  # type: ignore
             model_ids.extend(self._model_lists["multilingual"])  # type: ignore
 
         # If the model list corresponding to the language or task was not present
@@ -296,9 +298,11 @@ class Benchmarker:
             )
             model_ids = list()
             for language in model_languages:
-                model_ids.extend(self._model_lists[language])  # type: ignore
+                if language is not None:
+                    model_ids.extend(self._model_lists[language])  # type: ignore
             for task in tasks:
-                model_ids.extend(self._model_lists[task])  # type: ignore
+                if task is not None:
+                    model_ids.extend(self._model_lists[task])  # type: ignore
             model_ids.extend(self._model_lists["multilingual"])  # type: ignore
 
         # Remove duplicate model IDs
