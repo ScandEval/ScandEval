@@ -9,7 +9,7 @@ from .config import DatasetConfig
 
 
 def get_cwd():
-    return Path.cwd()
+    return Path("__file__").parent
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
