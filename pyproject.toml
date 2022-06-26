@@ -4,16 +4,13 @@ version = "4.0.0"
 description = "Evaluation of language models on mono- or multilingual Scandinavian language tasks."
 authors = ["Dan Saattrup Nielsen <saattrupdan@gmail.com>"]
 readme = "README.md"
+license = "MIT"
 homepage = "https://scandeval.github.io"
 repository = "https://github.com/saattrupdan/ScandEval"
-classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3"
-]
 include = [
-    "config/language_codes.yaml",
-    "config/datasets/*.yaml",
-    "config/tasks/*.yaml"
+    { path = "config/*.yaml", format = "wheel"},
+    { path = "config/datasets/*.yaml", format = "wheel"},
+    { path = "config/tasks/*.yaml", format = "wheel"}
 ]
 
 [tool.poetry.dependencies]
