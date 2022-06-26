@@ -310,7 +310,7 @@ class BenchmarkDataset(ABC):
             scores["test"].append(itr_scores["test"])
 
         all_scores = log_scores(
-            dataset_name=self.dataset_config.name,
+            dataset_name=self.dataset_config.pretty_name,
             metrics=self.dataset_config.metrics,
             scores=scores,
             model_id=model_config.model_id,
