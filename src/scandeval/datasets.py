@@ -4,14 +4,19 @@ from pathlib import Path
 from typing import Sequence
 
 import yaml
+from pkg_resources import resource_filename
 
 from .config import DatasetConfig
 
 
-def get_config_dir():
-    from pkg_resources import resource_filename
+def get_config_dir() -> Path:
+    """Get the path to the config directory.
 
-    return Path(resource_filename("scandeval", "")).parent / "config"
+    Returns:
+        Path:
+            The path to the config directory.
+    """
+    return Path(resource_filename("scandeval", "")).parent / "scandeval_config"
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
@@ -26,7 +31,7 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
             The dataset configuration.
     """
     # Get the path to the dataset configuration file
-    dataset_config_path = Path("config") / "datasets" / f"{dataset_name}.yaml"
+    dataset_config_path = get_config_dir() / "datasets" / f"{dataset_name}.yaml"
 
     # Load the YAML dataset configuration
     with dataset_config_path.open() as f:
@@ -37,7 +42,7 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
     task = dataset_config_dict["task"]
 
     # Load the task configuration
-    task_config_path = Path("config") / "tasks" / f"{task}.yaml"
+    task_config_path = get_config_dir() / "tasks" / f"{task}.yaml"
     with task_config_path.open() as f:
         task_config_dict = yaml.safe_load(f)
 
@@ -78,7 +83,7 @@ def get_all_dataset_configs() -> Sequence[DatasetConfig]:
         list:
             A list of all the datasets.
     """
-    datasets_config_dir = Path("config") / "datasets"
+    datasets_config_dir = get_config_dir() / "datasets"
     datasets = list()
     for dataset_config_path in datasets_config_dir.glob("*.yaml"):
         dataset_config = get_dataset_config(dataset_config_path.stem)

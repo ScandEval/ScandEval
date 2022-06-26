@@ -7,7 +7,7 @@ readme = "README.md"
 license = "MIT"
 homepage = "https://scandeval.github.io"
 repository = "https://github.com/saattrupdan/ScandEval"
-include = ["config/**/*.yaml"]
+include = ["scandeval_config/**/*.yaml"]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
