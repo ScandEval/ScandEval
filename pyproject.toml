@@ -8,9 +8,7 @@ license = "MIT"
 homepage = "https://scandeval.github.io"
 repository = "https://github.com/saattrupdan/ScandEval"
 include = [
-    { path = "config/*.yaml", format = "wheel"},
-    { path = "config/datasets/*.yaml", format = "wheel"},
-    { path = "config/tasks/*.yaml", format = "wheel"}
+    { path = "config", format = "wheel"},
 ]
 
 [tool.poetry.dependencies]
