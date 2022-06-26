@@ -8,11 +8,11 @@ import yaml
 from .config import DatasetConfig
 
 
-def get_cwd():
+def get_config_dir():
     from pkg_resources import resource_filename
 
-    filepath = resource_filename("scandeval", "config/language_codes.yaml")
-    return Path(filepath)
+    path = resource_filename("scandeval", "config")
+    return Path(path)
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
