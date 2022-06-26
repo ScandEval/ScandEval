@@ -11,8 +11,7 @@ from .config import DatasetConfig
 def get_config_dir():
     from pkg_resources import resource_filename
 
-    path = resource_filename("scandeval", "config")
-    return Path(path)
+    return Path(resource_filename("scandeval", "")).parent / "config"
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
