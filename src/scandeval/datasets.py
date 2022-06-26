@@ -8,6 +8,10 @@ import yaml
 from .config import DatasetConfig
 
 
+def get_cwd():
+    return Path.cwd()
+
+
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
     """Get the dataset configuration for a dataset.
 
