@@ -276,7 +276,6 @@ class Benchmarker:
             or any(lang not in self._model_lists for lang in model_languages)
             or any(task not in self._model_lists for task in tasks)
         ):
-            logger.info("Fetching list of models from the Hugging Face Hub")
             self._model_lists = get_model_lists(
                 languages=model_languages,
                 tasks=tasks,
