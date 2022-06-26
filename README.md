@@ -75,11 +75,11 @@ $ scandeval --help
 
 ### Benchmarking from a Script
 In a script, the syntax is similar to the command line interface. You simply initialise
-an object of the `Benchmark` class, and call this benchmark object with your favorite
+an object of the `Benchmarker` class, and call this benchmark object with your favorite
 models and/or datasets:
 ```python
->>> from scandeval import Benchmark
->>> benchmark = Benchmark()
+>>> from scandeval import Benchmarker
+>>> benchmark = Benchmarker()
 >>> benchmark('<model_id>')
 ```
 
