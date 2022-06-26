@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ScandEval"
-version = "3.0.0"
+version = "4.0.0"
 description = "Evaluation of language models on mono- or multilingual Scandinavian language tasks."
 authors = ["Dan Saattrup Nielsen <saattrupdan@gmail.com>"]
 readme = "README.md"
