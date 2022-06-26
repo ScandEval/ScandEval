@@ -7,7 +7,7 @@ readme = "README.md"
 license = "MIT"
 homepage = "https://scandeval.github.io"
 repository = "https://github.com/saattrupdan/ScandEval"
-packages = [{ include = "config" }]
+packages = [{ include = "scandeval" }, { include = "config" }]
 include = ["config/language_codes.yaml"]
 
 [tool.poetry.dependencies]
