@@ -16,7 +16,7 @@ def get_config_dir() -> Path:
         Path:
             The path to the config directory.
     """
-    return Path(resource_filename("scandeval", "configs"))
+    return Path(resource_filename(__name__, "configs"))
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
