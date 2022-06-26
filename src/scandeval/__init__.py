@@ -18,7 +18,7 @@ block_terminal_output()
 
 
 # Set up logging
-format = colored("%(asctime)s [%(levelname)s] <%(name)s>\n? ", "green") + colored(
+format = colored("%(asctime)s [%(levelname)s] <%(name)s>\n↳ ", "green") + colored(
     "%(message)s", "yellow"
 )
 logging.basicConfig(level=logging.INFO, format=format)
