@@ -12,7 +12,7 @@ def get_config_dir():
     from pkg_resources import resource_filename
 
     path = resource_filename("scandeval", "config")
-    return Path(path)
+    return path
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
