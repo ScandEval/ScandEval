@@ -271,39 +271,27 @@ class Benchmarker:
             list: Sequence of model IDs.
         """
         # If the model lists have not been fetched already, then do it
-        if self._model_lists is None:
+        if (
+            self._model_lists is None
+            or any(lang not in self._model_lists for lang in model_languages)
+            or any(task not in self._model_lists for task in tasks)
+        ):
             logger.info("Fetching list of models from the Hugging Face Hub")
             self._model_lists = get_model_lists(
                 languages=model_languages,
                 tasks=tasks,
                 use_auth_token=self.benchmark_config.use_auth_token,
             )
-        try:
-            model_ids: List[str] = list()
-            for language in model_languages:
-                if language is not None:
-                    model_ids.extend(self._model_lists[language])  # type: ignore
-            for task in tasks:
-                if task is not None:
-                    model_ids.extend(self._model_lists[task])  # type: ignore
-            model_ids.extend(self._model_lists["multilingual"])  # type: ignore
 
-        # If the model list corresponding to the language or task was not present
-        # in the stored model lists, then fetch new model lists and try again
-        except KeyError:
-            self._model_lists = get_model_lists(
-                languages=model_languages,
-                tasks=tasks,
-                use_auth_token=self.benchmark_config.use_auth_token,
-            )
-            model_ids = list()
-            for language in model_languages:
-                if language is not None:
-                    model_ids.extend(self._model_lists[language])  # type: ignore
-            for task in tasks:
-                if task is not None:
-                    model_ids.extend(self._model_lists[task])  # type: ignore
-            model_ids.extend(self._model_lists["multilingual"])  # type: ignore
+        # Extract all the model IDs from the model lists
+        model_ids: List[str] = list()
+        for language in model_languages:
+            if language is not None:
+                model_ids.extend(self._model_lists[language])  # type: ignore
+        for task in tasks:
+            if task is not None:
+                model_ids.extend(self._model_lists[task])  # type: ignore
+        model_ids.extend(self._model_lists["multilingual"])  # type: ignore
 
         # Remove duplicate model IDs
         model_ids = list(set(model_ids))
