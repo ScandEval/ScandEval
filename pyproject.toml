@@ -23,6 +23,11 @@ numpy = "^1.19.5"
 sentencepiece = "^0.1.96"
 protobuf = "^3.20.0"
 seqeval = "^1.2.2"
+spacy = { version = "^3.2.0", optional = true }
+spacy-transformers = { version = "^1.1.6", optional = true }
+jaxlib = { version = "^0.1.75", optional = true }
+jax = { version = "^0.2.26", optional = true }
+flax = { version = "^0.3.6", optional = true }
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -31,13 +36,9 @@ jupyterlab = "^3.4.2"
 black = {extras = ["jupyter"], version = "^22.3.0"}
 
 [tool.poetry.extras]
-jax = ['jaxlib>=0.1.75', 'jax>=0.2.26', 'flax>=0.3.6']
-spacy = ['spacy>=3.2.0', 'spacy-transformers>=1.1.6']
-all = ['jaxlib>=0.1.75',
-       'jax>=0.2.26',
-       'flax>=0.3.6',
-       'spacy>=3.2.0',
-       'spacy-transformers>=1.1.6']
+jax = ['jaxlib', 'jax', 'flax']
+spacy = ['spacy', 'spacy-transformers']
+all = ['jaxlib', 'jax', 'flax', 'spacy', 'spacy-transformers']
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"
