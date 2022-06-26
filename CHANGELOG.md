@@ -19,14 +19,17 @@ and this project adheres to
     - Faster benchmarking
     - More reliance on pretraining data
     - Enables consistent comparisons between different languages on the same task.
-- The datasets TwitterSent, Europarl, LCC and NorDial have been removed, as they were
-  too small and mostly just caused noise.
 - Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the dataset
   is used to warm up the learning rate.
 - All CLI arguments now use hyphens (`-`) rather than underscores (`_`). For instance,
   the `--model_id` argument has now been changed to `--model-id`.
+- Text classification datasets are now using Matthew's correlation coefficient as
+  metric, following the GLUE custom.
 
 ### Added
+- Added the datasets `scala-da`, `scala-sv`, `scala-nb`, `scala-nn`, `scala-is` and
+  `scala-fo`. These are all linguistic acceptability datasets, being a binary text
+  classification where a sentence has to be marked as grammatically correct or not.
 - New randomly initialised ELECTRA-small model available for benchmarking, simply set
   `model-id` to either 'random-electra-sequence-clf or 'random-electra-token-clf'. The
   randomly initialised XLM-RoBERTa-base model is still available by replacing 'electra'
@@ -41,6 +44,18 @@ and this project adheres to
 - Added `--use-auth-token`, which is a flag that can be used when evaluating private
   models on Hugging Face Hub. This requires that the user has logged in via the
   `huggingface-cli login` command.
+
+### Removed
+- Removed the Danish sentiment analysis datasets `twitter-sent`, `europarl` and `lcc`,
+  and is not using only the `angry-tweets` dataset for this task.
+- Removed datasets `dkhate`, `nordial` and `dalaj`, to ensure a larger amount of
+  benchmark uniformity across languages.
+- Removed all part-of-speech datasets from the benchmark, as there was too little
+  variance among the scores to differentiate models properly.
+- Removed all dependency parsing datasets from the benchmark, both to focus more on the
+  semantic tasks as that's closer to what is being used in practice, as well as to
+  reduce the benchmarking time, as these datasets took way longer to benchmark than the
+  others, due to the high number of labels.
 
 ### Fixed
 - Now disables tokenizer progress bars properly, using the
