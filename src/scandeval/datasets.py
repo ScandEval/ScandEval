@@ -9,7 +9,10 @@ from .config import DatasetConfig
 
 
 def get_cwd():
-    return Path("__file__").parent
+    from pkg_resources import resource_filename
+
+    filepath = resource_filename("scandeval", "config/language_codes.yaml")
+    return Path(filepath)
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
