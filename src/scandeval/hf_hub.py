@@ -2,13 +2,13 @@
 
 import logging
 from collections import defaultdict
-from pathlib import Path
 from typing import Dict, Optional, Sequence, Union
 
 import yaml
 from huggingface_hub import HfApi, ModelFilter
 
 from .config import BenchmarkConfig, ModelConfig
+from .datasets import get_config_dir
 from .exceptions import InvalidBenchmark
 
 logger = logging.getLogger(__name__)
@@ -83,7 +83,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
         task = "fill-mask"
 
     # Get list of all language codes
-    with Path("config/language_codes.yaml").open() as f:
+    with (get_config_dir() / "language_codes.yaml").open() as f:
         language_codes = yaml.safe_load(f)
 
     # Extract the model languages
