@@ -81,17 +81,10 @@ from .datasets import get_all_dataset_configs
 )
 @click.option(
     "--no-progress-bar",
-    "-p",
+    "-np",
     is_flag=True,
     show_default=True,
     help="Whether progress bars should be shown.",
-)
-@click.option(
-    "--no-save-results",
-    "-p",
-    is_flag=True,
-    show_default=True,
-    help="Whether results should not be stored to disk.",
 )
 @click.option(
     "--raise-error-on-invalid-model",
@@ -101,7 +94,22 @@ from .datasets import get_all_dataset_configs
     help="Whether to raise an error if a model is invalid.",
 )
 @click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    show_default=True,
+    help="Whether extra input should be outputted during benchmarking",
+)
+@click.option(
+    "--no-save-results",
+    "-ns",
+    is_flag=True,
+    show_default=True,
+    help="Whether results should not be stored to disk.",
+)
+@click.option(
     "--cache-dir",
+    "-c",
     default=".scandeval_cache",
     show_default=True,
     help="The directory where models are datasets are cached.",
@@ -113,13 +121,6 @@ from .datasets import get_all_dataset_configs
     help="""Whether an authentication token should be used, enabling evaluation of
             private models. Requires that you are logged in via the
             `huggingface-cli login` command.""",
-)
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    show_default=True,
-    help="Whether extra input should be outputted during benchmarking",
 )
 def benchmark(
     model_id: Tuple[str],
