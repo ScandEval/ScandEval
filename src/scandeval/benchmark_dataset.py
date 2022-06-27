@@ -599,6 +599,11 @@ class BenchmarkDataset(ABC):
             cache_dir=self.benchmark_config.cache_dir,
         )
 
+        # If `small_train` exists in the dictionary, then replace `train` with this
+        if "small_train" in dataset_dict.keys():
+            dataset_dict["train"] = dataset_dict["small_train"]
+            del dataset_dict["small_train"]
+
         # Return the dataset dictionary
         return dataset_dict
 
