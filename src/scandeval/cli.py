@@ -75,6 +75,7 @@ from .datasets import get_all_dataset_configs
 )
 @click.option(
     "--evaluate-train",
+    "-e",
     is_flag=True,
     show_default=True,
     help="Whether the training set should be evaluated.",
