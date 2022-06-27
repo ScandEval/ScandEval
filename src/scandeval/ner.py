@@ -126,6 +126,8 @@ class NERBenchmark(BenchmarkDataset):
             predictions=predictions_no_misc, references=labels_no_misc
         )
 
+        breakpoint()
+
         return dict(
             micro_f1=results["overall_f1"],
             micro_f1_no_misc=results_no_misc["overall_f1"],
