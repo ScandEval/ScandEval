@@ -86,6 +86,13 @@ class Benchmarker:
         else:
             languages = language
 
+        # If `languages` contains 'no' then also include 'nb' and 'nn'. Conversely, if
+        # either 'nb' or 'nn' are specified then also include 'no'.
+        if "no" in languages:
+            languages = list(set(languages) | {"nb", "nn"})
+        elif "nb" in languages or "nn" in languages:
+            languages = list(set(languages) | {"no"})
+
         # Create the list `model_languages`
         model_languages: Sequence[Optional[str]]
         if model_language == "all":
@@ -112,13 +119,6 @@ class Benchmarker:
             tasks = [task]
         else:
             tasks = task
-
-        # If `languages` contains 'no' then also include 'nb' and 'nn'. Conversely, if
-        # either 'nb' or 'nn' are specified then also include 'no'.
-        if "no" in languages:
-            languages = list(set(languages) | {"nb", "nn"})
-        elif "nb" in languages or "nn" in languages:
-            languages = list(set(languages) | {"no"})
 
         # Build benchmark config and store it
         self.benchmark_config = BenchmarkConfig(
