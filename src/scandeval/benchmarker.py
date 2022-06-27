@@ -183,6 +183,7 @@ class Benchmarker:
             model_ids = model_id
 
         # Get all the relevant dataset configurations
+        breakpoint()
         if dataset is None:
             dataset_configs = [
                 cfg
@@ -203,7 +204,6 @@ class Benchmarker:
 
         # Benchmark all the models in `model_ids` on all the datasets in
         # `benchmarks`
-        print([cfg.name for cfg in get_all_dataset_configs()])
         for dataset_config in dataset_configs:
             for m_id in model_ids:
                 self._benchmark_single(
