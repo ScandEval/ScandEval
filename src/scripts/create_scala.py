@@ -53,6 +53,9 @@ def main():
             # `tokens`, `doc` and `pos_tags`
             df = pd.concat(pos_dataset.values(), ignore_index=True)
 
+            # Drop the duplicates
+            df = df.drop_duplicates().reset_index(drop=True)
+
             # Remove samples with five or fewer tokens
             df = df[df.tokens.map(lambda lst: len(lst) > 5)]
 
