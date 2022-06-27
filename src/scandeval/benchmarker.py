@@ -192,6 +192,7 @@ class Benchmarker:
                     for lang in cfg.languages
                 )
             ]
+            print([cfg.name for cfg in dataset_configs])
         elif isinstance(dataset, str):
             dataset_configs = [
                 cfg for cfg in get_all_dataset_configs() if cfg.name == dataset
