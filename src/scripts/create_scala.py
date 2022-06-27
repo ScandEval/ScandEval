@@ -43,16 +43,6 @@ def main():
     with tqdm(pos_datasets.items(), desc="Creating ScaLA datasets") as pbar:
         for lang, fn in pbar:
 
-            # Create dataset ID
-            dataset_id = f"ScandEval/scala-{lang}"
-
-            # Remove the dataset from Hugging Face Hub if it already exists
-            try:
-                api = HfApi()
-                api.delete_repo(dataset_id, repo_type="dataset")
-            except HTTPError:
-                pass
-
             # Update the progress bar description
             pbar.set_description(f"Creating ScaLA datasets - {lang}")
 
@@ -118,6 +108,16 @@ def main():
                 test=test,
                 full_train=full_train,
             )
+
+            # Create dataset ID
+            dataset_id = f"ScandEval/scala-{lang}"
+
+            # Remove the dataset from Hugging Face Hub if it already exists
+            try:
+                api = HfApi()
+                api.delete_repo(dataset_id, repo_type="dataset")
+            except HTTPError:
+                pass
 
             # Push the dataset to the Hugging Face Hub
             dataset.push_to_hub(dataset_id)
