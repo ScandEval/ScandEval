@@ -80,11 +80,11 @@ def main():
             test_size = 1024
             while test_size >= 128:
                 try:
-                    val_df = df.sample(n=128)
+                    val_df = df.sample(n=128, random_state=4242)
                     df_filtered = df[~df.index.isin(val_df.index)]
-                    test_df = df_filtered.sample(n=test_size)
+                    test_df = df_filtered.sample(n=test_size, random_state=4242)
                     full_train_df = df_filtered[~df_filtered.index.isin(test_df.index)]
-                    train_df = full_train_df.sample(n=512)
+                    train_df = full_train_df.sample(n=512, random_state=4242)
                     break
                 except ValueError:
                     test_size //= 2
@@ -384,7 +384,7 @@ def prepare_df(df: pd.DataFrame, split: str) -> Dataset:
     )
 
     # Shuffle the dataframe
-    df = df.sample(frac=1.0).reset_index(drop=True)
+    df = df.sample(frac=1.0, random_state=4242).reset_index(drop=True)
 
     # Convert the dataframe to a Hugging Face Dataset and return it
     return Dataset.from_pandas(df, split=split)
