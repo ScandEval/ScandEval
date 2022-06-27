@@ -7,6 +7,7 @@ from typing import List, Tuple, Union
 
 import pandas as pd
 from datasets import Dataset, DatasetDict
+from huggingface_hub import HfApi
 from load_ud_pos import (
     load_ddt_pos,
     load_fdt_pos,
@@ -16,6 +17,7 @@ from load_ud_pos import (
     load_sdt_pos,
 )
 from pandas.core.common import SettingWithCopyWarning
+from requests.exceptions import HTTPError
 from tqdm.auto import tqdm
 
 from scandeval.utils import block_terminal_output
@@ -40,6 +42,16 @@ def main():
     # Set up the progress bar and iterate over the languages
     with tqdm(pos_datasets.items(), desc="Creating ScaLA datasets") as pbar:
         for lang, fn in pbar:
+
+            # Create dataset ID
+            dataset_id = f"ScandEval/scala-{lang}"
+
+            # Remove the dataset from Hugging Face Hub if it already exists
+            try:
+                api = HfApi()
+                api.delete_repo(dataset_id, repo_type="dataset")
+            except HTTPError:
+                pass
 
             # Update the progress bar description
             pbar.set_description(f"Creating ScaLA datasets - {lang}")
@@ -108,7 +120,7 @@ def main():
             )
 
             # Push the dataset to the Hugging Face Hub
-            dataset.push_to_hub(f"ScandEval/scala-{lang}")
+            dataset.push_to_hub(dataset_id)
 
 
 def join_tokens(tokens: List[str]) -> str:
