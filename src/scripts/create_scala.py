@@ -76,16 +76,21 @@ def main():
             # for all the splits, we keep halving the test size until we have enough
             # samples.
             test_size = 1024
-            while True:
+            while test_size >= 128:
                 try:
                     val_df = df.sample(n=128)
                     df_filtered = df[~df.index.isin(val_df.index)]
-                    test_df = df_filtered.sample(n=1024)
+                    test_df = df_filtered.sample(n=test_size)
                     full_train_df = df_filtered[~df_filtered.index.isin(test_df.index)]
                     train_df = full_train_df.sample(n=512)
                     break
                 except ValueError:
                     test_size //= 2
+            else:
+                raise ValueError(
+                    f"Not enough samples to create the splits. Found {len(df):,} "
+                    f"samples, but need at least 768."
+                )
 
             # Add the corrupted data and turn the dataframes into Hugging Face Dataset
             # objects
