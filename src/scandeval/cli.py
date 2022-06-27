@@ -1,6 +1,6 @@
 """Command-line interface for benchmarking."""
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import click
 
@@ -15,12 +15,12 @@ from .datasets import get_all_dataset_configs
     default=None,
     show_default=True,
     multiple=True,
-    help="""The HuggingFace model ID of the model(s) to be benchmarked. If
-            not specified then all models will be benchmarked, filtered by `language`
-            and `task`. The specific model version to use can be added after the
-            suffix "@": "<model_id>@v1.0.0". It can be a branch name, a tag name, or
-            a commit id (currently only supported for HuggingFace models, and it
-            defaults to "main" for latest).""",
+    help="""The HuggingFace model ID of the model(s) to be benchmarked. If not
+            specified then all models will be benchmarked, filtered by `language` and
+            `task`. The specific model version to use can be added after the suffix
+            "@": "<model_id>@v1.0.0". It can be a branch name, a tag name, or a commit
+            id (currently only supported for HuggingFace models, and it defaults to
+            "main" for latest).""",
 )
 @click.option(
     "--dataset",
@@ -29,8 +29,8 @@ from .datasets import get_all_dataset_configs
     show_default=True,
     multiple=True,
     type=click.Choice([config.name for config in get_all_dataset_configs()]),
-    help="""The name of the benchmark dataset. If not specified then all
-            datasets will be benchmarked.""",
+    help="""The name of the benchmark dataset. If not specified then all datasets will
+            be benchmarked.""",
 )
 @click.option(
     "--language",
@@ -126,8 +126,8 @@ def benchmark(
     model_id: Tuple[str],
     dataset: Tuple[str],
     language: Tuple[str],
-    model_language: Tuple[str],
-    dataset_language: Tuple[str],
+    model_language: Optional[Tuple[str]],
+    dataset_language: Optional[Tuple[str]],
     raise_error_on_invalid_model: bool,
     task: Tuple[str],
     evaluate_train: bool,
@@ -139,12 +139,24 @@ def benchmark(
 ):
     """Benchmark language models on Scandinavian language tasks."""
 
+    # Set up variables
+    languages = list(language)
+    if model_language is not None:
+        model_languages = list(model_language)
+    else:
+        model_languages = languages
+    if dataset_language is not None:
+        dataset_languages = list(dataset_language)
+    else:
+        dataset_languages = languages
+    tasks = "all" if "all" in task else list(task)
+
     # Initialise the benchmarker class
     benchmarker = Benchmarker(
-        language=list(language),
-        model_language=list(model_language),
-        dataset_language=list(dataset_language),
-        task="all" if "all" in task else list(task),
+        language=languages,
+        model_language=model_languages,
+        dataset_language=dataset_languages,
+        task=tasks,
         progress_bar=(not no_progress_bar),
         save_results=(not no_save_results),
         evaluate_train=evaluate_train,

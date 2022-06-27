@@ -183,7 +183,6 @@ class Benchmarker:
             model_ids = model_id
 
         # Get all the relevant dataset configurations
-        breakpoint()
         if dataset is None:
             dataset_configs = [
                 cfg
