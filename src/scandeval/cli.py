@@ -1,6 +1,6 @@
 """Command-line interface for benchmarking."""
 
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import click
 
@@ -127,8 +127,8 @@ def benchmark(
     model_id: Tuple[str],
     dataset: Tuple[str],
     language: Tuple[str],
-    model_language: Optional[Tuple[str]],
-    dataset_language: Optional[Tuple[str]],
+    model_language: Tuple[str],
+    dataset_language: Tuple[str],
     raise_error_on_invalid_model: bool,
     task: Tuple[str],
     evaluate_train: bool,
@@ -141,15 +141,17 @@ def benchmark(
     """Benchmark language models on Scandinavian language tasks."""
 
     # Set up variables
-    languages = list(language)
-    if model_language is not None:
+    languages: List[str] = list(language)
+    model_languages: Optional[List[str]]
+    dataset_languages: Optional[List[str]]
+    if len(model_language) > 0:
         model_languages = list(model_language)
     else:
-        model_languages = languages
-    if dataset_language is not None:
+        model_languages = None
+    if len(dataset_language) > 0:
         dataset_languages = list(dataset_language)
     else:
-        dataset_languages = languages
+        dataset_languages = None
     tasks = "all" if "all" in task else list(task)
 
     # Initialise the benchmarker class

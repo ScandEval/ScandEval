@@ -86,8 +86,6 @@ class Benchmarker:
         else:
             languages = language
 
-        breakpoint()
-
         # If `languages` contains 'no' then also include 'nb' and 'nn'. Conversely, if
         # either 'nb' or 'nn' are specified then also include 'no'.
         if "no" in languages:
