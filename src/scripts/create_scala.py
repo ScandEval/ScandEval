@@ -1,0 +1,377 @@
+"""Script that creates the ScaLA datasets and uploads them to the HF Hub."""
+
+import random
+import re
+import warnings
+from typing import List, Tuple, Union
+
+import pandas as pd
+from datasets import Dataset, DatasetDict
+from load_ud_pos import (
+    load_ddt_pos,
+    load_fdt_pos,
+    load_idt_pos,
+    load_ndt_nb_pos,
+    load_ndt_nn_pos,
+    load_sdt_pos,
+)
+from pandas.core.common import SettingWithCopyWarning
+from tqdm.auto import tqdm
+
+from scandeval.utils import block_terminal_output
+
+
+def main():
+    """Create the ScaLA datasets and upload them to the HF Hub."""
+
+    # Block terminal output
+    block_terminal_output()
+
+    # Load and set up the POS datasets
+    pos_datasets = {
+        "da": load_ddt_pos,
+        "nb": load_ndt_nb_pos,
+        "nn": load_ndt_nn_pos,
+        "sv": load_sdt_pos,
+        "is": load_idt_pos,
+        "fo": load_fdt_pos,
+    }
+
+    # Set up the progress bar and iterate over the languages
+    with tqdm(pos_datasets.items(), desc="Creating ScaLA datasets") as pbar:
+        for lang, fn in pbar:
+
+            # Update the progress bar description
+            pbar.set_description(f"Creating ScaLA datasets - {lang}")
+
+            # Load the POS dataset
+            pos_dataset = fn()
+
+            # Merge the DDT POS dataframes to a single dataframe, with columns `ids`,
+            # `tokens`, `doc` and `pos_tags`
+            df = pd.concat(pos_dataset.values(), ignore_index=True)
+
+            # Remove samples with five or fewer tokens
+            df = df[df.tokens.map(lambda lst: len(lst) > 5)]
+
+            # Remove samples with five or fewer distinct POS tags
+            df = df[df.pos_tags.map(lambda lst: len(set(lst)) > 5)]
+
+            # Remove samples with an odd number of quotes
+            df = df[df.doc.map(lambda doc: doc.count('"') % 2 == 0)]
+
+            # Remove samples which starts with punctuation
+            df = df[df.pos_tags.map(lambda lst: lst[0] not in ["PUNCT", "SYM"])]
+
+            # Remove samples containing more than one '=' character, as this is used to
+            # indicate a tag
+            df = df[df.doc.map(lambda doc: doc.count("=") <= 1)]
+
+            # Remove samples containing 'SLUTORD', as this is used to indicate a tag
+            df = df[~df.doc.str.contains("SLUTORD")]
+
+            # Create a training, validation, test and small training set. Note that we
+            # will corrupt the data, so this is only half the size of the final
+            # datasets. In the case where the dataframe does not contain enough samples
+            # for all the splits, we keep halving the test size until we have enough
+            # samples.
+            test_size = 1024
+            while True:
+                try:
+                    val_df = df.sample(n=128)
+                    df_filtered = df[~df.index.isin(val_df.index)]
+                    test_df = df_filtered.sample(n=1024)
+                    full_train_df = df_filtered[~df_filtered.index.isin(test_df.index)]
+                    train_df = full_train_df.sample(n=512)
+                    break
+                except ValueError:
+                    test_size //= 2
+
+            # Add the corrupted data and turn the dataframes into Hugging Face Dataset
+            # objects
+            train = prepare_df(train_df, split="train")
+            val = prepare_df(val_df, split="val")
+            test = prepare_df(test_df, split="test")
+            full_train = prepare_df(full_train_df, split="train")
+
+            # Collect datasets in a dataset dictionary
+            dataset = DatasetDict(
+                train=train,
+                val=val,
+                test=test,
+                full_train=full_train,
+            )
+
+            # Push the dataset to the Hugging Face Hub
+            dataset.push_to_hub(f"ScandEval/scala-{lang}")
+
+
+def join_tokens(tokens: List[str]) -> str:
+    """Joins a list of tokens into a string.
+
+    Args:
+        tokens (list of str):
+            The list of tokens to join.
+
+    Returns:
+        str: The joined string.
+    """
+    # Form document
+    doc = " ".join(tokens)
+
+    # Remove whitespace around punctuation
+    doc = (
+        doc.replace(" .", ".")
+        .replace(" ,", ",")
+        .replace(" ;", ";")
+        .replace(" :", ":")
+        .replace("( ", "(")
+        .replace(" )", ")")
+        .replace("[ ", "[")
+        .replace(" ]", "]")
+        .replace("{ ", "{")
+        .replace(" }", "}")
+        .replace(" ?", "?")
+        .replace(" !", "!")
+    )
+
+    # Remove whitespace around quotes
+    if doc.count('"') % 2 == 0:
+        doc = re.sub('" ([^"]*) "', '"\\1"', doc)
+
+    # Return the document
+    return doc
+
+
+def delete(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
+    """Delete a random token from a list of tokens.
+
+    The POS tags are used to prevent deletion of a token which does not make the
+    resulting sentence grammatically incorrect, such as removing an adjective or an
+    adverb.
+
+    Args:
+        tokens (list of str):
+            The list of tokens to delete from.
+        pos_tags (list of str):
+            The list of POS tags for the tokens.
+
+    Returns:
+        str or None:
+            The deleted token, or None if no token could be deleted.
+    """
+    # Copy the token list
+    new_tokens = tokens.copy()
+
+    # Get candidate indices to remove. We do not remove adjectives,
+    # adverbs, punctuation, determiners or numbers, as the resulting sentence
+    # will probably still be grammatically correct. Further, we do not
+    # remove nouns or proper nouns if they have another noun or proper
+    # noun as neighbour, as that usually does not make the sentence
+    # incorrect either.
+    indices = [
+        idx
+        for idx, pos_tag in enumerate(pos_tags)
+        if pos_tag not in ["ADJ", "ADV", "PUNCT", "SYM", "DET", "NUM"]
+        and (
+            pos_tag not in ["NOUN", "PROPN"]
+            or (
+                (idx == 0 or pos_tags[idx - 1] not in ["NOUN", "PROPN"])
+                and (
+                    idx == len(new_tokens) - 1
+                    or pos_tags[idx + 1] not in ["NOUN", "PROPN"]
+                )
+            )
+        )
+    ]
+
+    # If there are no candidates then return None
+    if len(indices) == 0:
+        return None
+
+    # Get the random index
+    rnd_idx = random.choice(indices)
+
+    # Delete the token at the index
+    new_tokens.pop(rnd_idx)
+
+    # Join up the new tokens and return the string
+    return join_tokens(new_tokens)
+
+
+def flip_neighbours(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
+    """Flip a pair of neighbouring tokens.
+
+    The POS tags are used to prevent flipping of tokens which does not make the
+    resulting sentence grammatically incorrect, such as flipping two adjectives.
+
+    Args:
+        tokens (list of str):
+            The list of tokens to flip.
+        pos_tags (list of str):
+            The list of POS tags for the tokens.
+
+    Returns:
+        str or None:
+            The flipped string, or None if no flip was possible.
+    """
+    # Copy the token list
+    new_tokens = tokens.copy()
+
+    # Collect all indices that are proper words, and which
+    # has a neighbour which is also a proper word as well as having
+    # a different POS tag
+    indices = [
+        idx for idx, pos_tag in enumerate(pos_tags) if pos_tag not in ["PUNCT", "SYM"]
+    ]
+    indices = [
+        idx
+        for idx in indices
+        if (idx + 1 in indices and pos_tags[idx] != pos_tags[idx + 1])
+        or (idx - 1 in indices and pos_tags[idx] != pos_tags[idx - 1])
+    ]
+
+    # If there are fewer than two relevant tokens then return None
+    if len(indices) < 2:
+        return None
+
+    # Get the first random index
+    rnd_fst_idx = random.choice(indices)
+
+    # Get the second (neighbouring) index
+    if rnd_fst_idx == 0:
+        rnd_snd_idx = rnd_fst_idx + 1
+    elif rnd_fst_idx == len(tokens) - 1:
+        rnd_snd_idx = rnd_fst_idx - 1
+    elif (
+        pos_tags[rnd_fst_idx + 1] in ["PUNCT", "SYM"]
+        or pos_tags[rnd_fst_idx] == pos_tags[rnd_fst_idx + 1]
+        or {pos_tags[rnd_fst_idx], pos_tags[rnd_fst_idx + 1]} == {"PRON", "AUX"}
+    ):
+        rnd_snd_idx = rnd_fst_idx - 1
+    elif (
+        pos_tags[rnd_fst_idx - 1] in ["PUNCT", "SYM"]
+        or pos_tags[rnd_fst_idx] == pos_tags[rnd_fst_idx - 1]
+        or {pos_tags[rnd_fst_idx], pos_tags[rnd_fst_idx + 1]} == {"PRON", "AUX"}
+    ):
+        rnd_snd_idx = rnd_fst_idx + 1
+    elif random.random() > 0.5:
+        rnd_snd_idx = rnd_fst_idx - 1
+    else:
+        rnd_snd_idx = rnd_fst_idx + 1
+
+    # Flip the two indices
+    new_tokens[rnd_fst_idx] = tokens[rnd_snd_idx]
+    new_tokens[rnd_snd_idx] = tokens[rnd_fst_idx]
+
+    # If we flipped the first character, then ensure that the new first character
+    # is title-cased and the second character is of lower case. We only do this if
+    # they are not upper cased, however.
+    if rnd_fst_idx == 0 or rnd_snd_idx == 0:
+        if new_tokens[0] != new_tokens[0].upper():
+            new_tokens[0] = new_tokens[0].title()
+        if new_tokens[1] != new_tokens[1].upper():
+            new_tokens[1] = new_tokens[1].lower()
+
+    # Join up the new tokens and return the string
+    return join_tokens(new_tokens)
+
+
+def corrupt(
+    tokens: List[str], pos_tags: List[str], num_corruptions: int = 1
+) -> List[Tuple[str, str]]:
+    """Corrupt a list of tokens.
+
+    This randomly either flips two neighbouring tokens or deletes a random token.
+
+    Args:
+        tokens (list of str):
+            The list of tokens to corrupt.
+        pos_tags (list of str):
+            The list of POS tags for the tokens.
+        num_corruptions (int, optional):
+            The number of corruptions to perform. Defaults to 1.
+
+    Returns:
+        list of tuples of str:
+            The list of (corrupted_string, corruption_type)
+    """
+    # Define the list of corruptions
+    corruptions: List[Tuple[str, str]] = list()
+
+    # Continue until we have achieved the desired number of corruptions
+    while len(corruptions) < num_corruptions:
+
+        # Choose which corruption to perform, at random
+        corruption_fn = random.choice([flip_neighbours, delete])
+
+        # Corrupt the tokens
+        corruption = corruption_fn(tokens, pos_tags)
+
+        # If the corruption succeeded, and that we haven't already performed the same
+        # corruption, then add the corruption to the list of corruptions
+        if corruption not in corruptions and corruption is not None:
+            corruptions.append((corruption, corruption_fn.__name__))
+
+    # Return the list of corruptions
+    return corruptions
+
+
+def prepare_df(df: pd.DataFrame, split: str) -> Dataset:
+    """Prepare a dataframe by adding an equal number of corruptions to it.
+
+    Args:
+        df (Pandas DataFrame):
+            The dataframe to prepare.
+        split (str):
+            The split to prepare the dataframe for.
+
+    Returns:
+        Dataset:
+            The prepared dataset.
+    """
+    # Reset the index of the dataframe
+    df.reset_index(drop=True, inplace=True)
+
+    # Get the corrupted strings
+    corrupted_list = [
+        corrupt(tokens=tokens, pos_tags=pos_tags, num_corruptions=1)[0]
+        for tokens, pos_tags in zip(df.tokens, df.pos_tags)
+    ]
+
+    # Add the corrupted strings to the dataframe
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=SettingWithCopyWarning)
+        df["corrupted"] = [tup[0] for tup in corrupted_list]
+        df["corruption_type"] = [tup[1] for tup in corrupted_list]
+
+    # Restructure the dataframe to have columns `text`, `corruption_type` and `label`,
+    # with one sample per row
+    df = pd.concat(
+        [
+            pd.DataFrame(
+                dict(
+                    text=df.tokens.map(join_tokens).tolist(),
+                    corruption_type=[None for _ in range(len(df))],
+                    label=["correct" for _ in range(len(df))],
+                )
+            ),
+            pd.DataFrame(
+                dict(
+                    text=df.corrupted.explode().tolist(),
+                    corruption_type=df.corruption_type.explode().tolist(),
+                    label=["incorrect" for _ in range(len(df))],
+                )
+            ),
+        ]
+    )
+
+    # Shuffle the dataframe
+    df = df.sample(frac=1.0).reset_index(drop=True)
+
+    # Convert the dataframe to a Hugging Face Dataset and return it
+    return Dataset.from_pandas(df, split=split)
+
+
+if __name__ == "__main__":
+    main()

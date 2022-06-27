@@ -122,8 +122,6 @@ class BenchmarkDataset(ABC):
         val = dataset_dict["val"]
         test = dataset_dict["test"]
 
-        breakpoint()
-
         # Remove empty examples from the datasets
         try:
             train = train.filter(lambda x: len(x["tokens"]) > 0)
