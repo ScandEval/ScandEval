@@ -31,17 +31,17 @@ class NERBenchmark(BenchmarkDataset):
             The configuration of the benchmark.
     """
 
-    def _load_data(self) -> DatasetDict:
-        """Load the datasets.
+    def _process_data(self, dataset_dict: DatasetDict) -> DatasetDict:
+        """Process the data.
+
+        Args:
+            dataset_dict (DatasetDict):
+                The dataset dictionary.
 
         Returns:
             DatasetDict:
-                A dictionary containing the 'train', 'val' and 'test' splits of the
-                dataset.
+                The processed dataset dictionary.
         """
-        # Load the dataset
-        dataset_dict = super()._load_data()
-
         # Check what labels are present in the dataset, and store if MISC tags are not
         # present
         labels_in_train = set(
@@ -125,9 +125,6 @@ class NERBenchmark(BenchmarkDataset):
         results_no_misc = self._metrics["micro_f1_no_misc"].compute(
             predictions=predictions_no_misc, references=labels_no_misc
         )
-
-        print("Micro F1:", results["overall_f1"])
-        print("Micro F1 without MISC:", results_no_misc["overall_f1"])
 
         return dict(
             micro_f1=results["overall_f1"],

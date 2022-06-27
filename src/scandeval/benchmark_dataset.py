@@ -111,8 +111,13 @@ class BenchmarkDataset(ABC):
         # Load the model
         model_dict = self._load_model(model_config=model_config)
 
-        # Load the dataset
+        # Load the dataset dictinoary
         dataset_dict = self._load_data()
+
+        # Process the datasets
+        dataset_dict = self._process_data(dataset_dict)
+
+        # Extract the dataset splits
         train = dataset_dict["train"]
         val = dataset_dict["val"]
         test = dataset_dict["test"]
@@ -595,6 +600,19 @@ class BenchmarkDataset(ABC):
         )
 
         # Return the dataset dictionary
+        return dataset_dict
+
+    def _process_data(self, dataset_dict: DatasetDict) -> DatasetDict:
+        """Process the data.
+
+        Args:
+            dataset_dict (DatasetDict):
+                The dataset dictionary.
+
+        Returns:
+            DatasetDict:
+                The processed dataset dictionary.
+        """
         return dataset_dict
 
     def _load_model(self, model_config: ModelConfig) -> Dict[str, Any]:
