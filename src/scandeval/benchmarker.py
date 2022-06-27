@@ -35,8 +35,8 @@ class Benchmarker:
             to None.
         dataset_language (str or list of str or None, optional):
             The language codes of the languages to include for datasets. If specified
-            then this overrides the `language` parameter for dataset languages. Defaults
-            to None.
+            then this overrides the `language` parameter for dataset languages.
+            Defaults to None.
         task (str or list of str, optional):
             The tasks to consider in the list. Set this to 'all' if all
             tasks should be considered. Defaults to 'all'.
@@ -67,9 +67,9 @@ class Benchmarker:
         self,
         progress_bar: bool = True,
         save_results: bool = False,
-        language: Union[str, Sequence] = ["da", "sv", "no"],
-        model_language: Optional[Union[str, Sequence]] = None,
-        dataset_language: Optional[Union[str, Sequence]] = None,
+        language: Union[str, Sequence[str]] = ["da", "sv", "no"],
+        model_language: Optional[Union[str, Sequence[str]]] = None,
+        dataset_language: Optional[Union[str, Sequence[str]]] = None,
         task: Union[str, Sequence] = "all",
         evaluate_train: bool = False,
         raise_error_on_invalid_model: bool = False,
@@ -95,21 +95,25 @@ class Benchmarker:
 
         # Create the list `model_languages`
         model_languages: Sequence[Optional[str]]
-        if model_language == "all":
+        if model_language is None:
+            model_languages = languages
+        elif model_language == "all":
             model_languages = [None]
         elif isinstance(model_language, str):
             model_languages = [model_language]
         else:
-            model_languages = languages
+            model_languages = model_language
 
         # Create the list `dataset_languages`
         dataset_languages: Sequence[Optional[str]]
-        if dataset_language == "all":
+        if dataset_language is None:
+            dataset_languages = languages
+        elif dataset_language == "all":
             dataset_languages = [None]
         elif isinstance(dataset_language, str):
             dataset_languages = [dataset_language]
         else:
-            dataset_languages = languages
+            dataset_languages = dataset_language
 
         # Create the list `tasks`
         tasks: Sequence[Optional[str]]
