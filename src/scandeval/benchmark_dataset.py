@@ -39,6 +39,7 @@ from transformers import (
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
+from .hacky_training_args import TrainingArgumentsWithMPSSupport
 from .hf_hub import get_model_config
 from .scores import log_scores
 from .utils import enforce_reproducibility, is_module_installed
@@ -241,14 +242,14 @@ class BenchmarkDataset(ABC):
         data_collator = self._load_data_collator(tokenizer)
 
         # Initialise training arguments
-        training_args = TrainingArguments(
+        training_args = TrainingArgumentsWithMPSSupport(
             output_dir=".",
             evaluation_strategy="steps",
             logging_strategy="steps" if self.benchmark_config.verbose else "no",
             save_strategy="steps",
-            eval_steps=30,
-            logging_steps=30,
-            save_steps=30,
+            eval_steps=300,
+            logging_steps=300,
+            save_steps=300,
             max_steps=10_000,
             report_to="none",
             save_total_limit=1,
