@@ -27,7 +27,6 @@ sentencepiece = ">=0.1.96,<1.0.0"
 protobuf = "^3.20.0"
 seqeval = "^1.2.2"
 pandas = "^1.4.0"
-isort = "^5.10.1"
 
 [tool.poetry.dev-dependencies]
 pdoc3 = ">=0.10.0,<1.0.0"
@@ -38,6 +37,7 @@ black = {extras = ["jupyter"], version = "^22.3.0"}
 ipywidgets = "^7.7.1"
 requests = "^2.28.0"
 lxml = "^4.9.0"
+isort = "^5.10.1"
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"
