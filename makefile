@@ -1,21 +1,43 @@
+# This ensures that we can call `make <target>` even if `<target>` exists as a file or
+# directory.
 .PHONY: notebook docs
-.EXPORT_ALL_VARIABLES:
-export ENV_DIR=$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )"
 
-activate:
-	@echo "Activating virtual environment..."
-	@poetry shell
-	@source "$(ENV_DIR)/bin/activate"
+# Exports all variables defined in the makefile available to scripts
+.EXPORT_ALL_VARIABLES:
+
+install-poetry:
+	@echo "Installing poetry..."
+	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+
+uninstall-poetry:
+	@echo "Uninstalling poetry..."
+	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
 
 install:
 	@echo "Installing..."
-	@git init
-	@if [ "Type `gpg --list-keys` to see your key IDs" != "Type `gpg --list-keys` to see your key IDs" ]; then\
-		git config commit.gpgsign true;\
-		git config user.signingkey "Type `gpg --list-keys` to see your key IDs";\
+	@if [ "$(shell which poetry)" = "" ]; then \
+		make install-poetry; \
 	fi
-	@git config user.email "saattrupdan@gmail.com"
-	@git config user.name "Dan Saattrup Nielsen"
+	@if [ "$(shell which gpg)" = "" ]; then \
+		echo "GPG not installed, so an error will occur. Install GPG on MacOS with "\
+			 "`brew install gnupg` or on Ubuntu with `apt install gnupg` and run "\
+			 "`make install` again."; \
+	fi
+	@poetry env use python3
+	@poetry run python3 -m src.scripts.fix_dot_env_file
+	@git init
+	@. .env; \
+		git config --local user.name "$${GIT_NAME}"; \
+		git config --local user.email "$${GIT_EMAIL}"
+	@. .env; \
+		if [ "$${GPG_KEY_ID}" = "" ]; then \
+			echo "No GPG key ID specified. Skipping GPG signing."; \
+			git config --local commit.gpgsign false; \
+		else \
+			echo "Signing with GPG key ID $${GPG_KEY_ID}..."; \
+			git config --local commit.gpgsign true; \
+			git config --local user.signingkey "$${GPG_KEY_ID}"; \
+		fi
 	@poetry install
 	@poetry run pre-commit install
 
@@ -23,13 +45,13 @@ remove-env:
 	@poetry env remove python3
 	@echo "Removed virtual environment."
 
+docs:
+	@poetry run pdoc --html src/scandeval -o docs --force
+	@echo "Saved documentation."
+
 view-docs:
 	@echo "Viewing API documentation..."
-	@pdoc src/{{cookiecutter.project_name}}
-
-docs:
-	@pdoc src -o docs
-	@echo "Saved documentation."
+	@open docs/scandeval/index.html
 
 clean:
 	@find . -type f -name "*.py[co]" -delete
