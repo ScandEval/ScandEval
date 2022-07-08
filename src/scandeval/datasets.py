@@ -37,8 +37,8 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
     with dataset_config_path.open() as f:
         dataset_config_dict = yaml.safe_load(f)
 
-    # Extract the task from the dataset configuration and remove it from the
-    # dataset configuration as well
+    # Extract the task from the dataset configuration and remove it from the dataset
+    # configuration as well
     task = dataset_config_dict["task"]
 
     # Load the task configuration

@@ -512,14 +512,14 @@ class BenchmarkDataset(ABC):
                 dataset=dataset,
             )
 
-            # Check if the SpaCy model has been trained on the task at hand. If
+            # Check if the spaCy model has been trained on the task at hand. If
             # not, then skip this benchmark.
             sample_preds = preds_labels[0][0]
             pos_ner_test = isinstance(sample_preds, list) and "" in sample_preds
             dep_test = isinstance(sample_preds[0], list) and "" in sample_preds[0]
             if pos_ner_test or dep_test:
                 raise InvalidBenchmark(
-                    "This SpaCy model have not been " "trained on this task. Skipping."
+                    "This spaCy model have not been " "trained on this task. Skipping."
                 )
 
             test_scores = self._compute_metrics(preds_labels)
@@ -625,8 +625,8 @@ class BenchmarkDataset(ABC):
             elif model_config.framework == "spacy":
                 import spacy
 
-                # Ignore warnings from SpaCy. This has to be called after the import,
-                # as the __init__.py file of SpaCy sets the warning levels of SpaCy
+                # Ignore warnings from spaCy. This has to be called after the import,
+                # as the __init__.py file of spaCy sets the warning levels of spaCy
                 # warning W036
                 warnings.filterwarnings("ignore", module="spacy*")
 
@@ -748,8 +748,8 @@ class BenchmarkDataset(ABC):
         # dataset
         self._adjust_label_ids(model=model, model_config=model_config)
 
-        # If the model is a subclass of a RoBERTa model then we have to add a
-        # prefix space to the tokens, by the way the model is constructed.
+        # If the model is a subclass of a RoBERTa model then we have to add a prefix
+        # space to the tokens, by the way the model is constructed.
         if model_config.model_id.startswith("random"):
             m_id = rnd_model
         else:
@@ -783,7 +783,7 @@ class BenchmarkDataset(ABC):
         return dict(model=model, tokenizer=tokenizer)
 
     def _load_spacy_model(self, model_config: ModelConfig) -> Dict[str, Any]:
-        """Load a Spacy model.
+        """Load a spaCy model.
 
         Args:
 
@@ -795,9 +795,8 @@ class BenchmarkDataset(ABC):
         """
         import spacy
 
-        # Ignore warnings from SpaCy. This has to be called after the import,
-        # as the __init__.py file of SpaCy sets the warning levels of SpaCy
-        # warning W036
+        # Ignore warnings from spaCy. This has to be called after the import, as the
+        # __init__.py file of spaCy sets the warning levels of spaCy warning W036
         warnings.filterwarnings("ignore", module="spacy*")
 
         local_model_id = model_config.model_id.split("/")[-1]
@@ -1007,11 +1006,10 @@ class BenchmarkDataset(ABC):
                 )
                 raise InvalidBenchmark(msg)
 
-        # Load the weights from the model's current classification layer.
-        # This handles both the token classification case and the sequence
-        # classification case.
-        # NOTE: This might need additional cases (or a general solution)
-        #       when we start dealing with other tasks.
+        # Load the weights from the model's current classification layer. This handles
+        # both the token classification case and the sequence classification case.
+        # NOTE: This might need additional cases (or a general solution) when we start
+        #       dealing with other tasks.
         try:
             clf_weight = model.classifier.weight.data
         except AttributeError:
@@ -1021,8 +1019,7 @@ class BenchmarkDataset(ABC):
                 msg = "Model does not seem to be a classification model."
                 raise InvalidBenchmark(msg)
 
-        # Create the new weights, which have zeros at all the new
-        # entries
+        # Create the new weights, which have zeros at all the new entries
         zeros = torch.zeros(num_new_labels, model.config.hidden_size)
         new_clf_weight = torch.cat((clf_weight, zeros), dim=0)
         new_clf_weight = Parameter(new_clf_weight)
@@ -1030,13 +1027,13 @@ class BenchmarkDataset(ABC):
         # Create the new classification layer
         new_clf = nn.Linear(model.config.hidden_size, len(model_id2label))
 
-        # Assign the new weights to the new classification layer, and
-        # replace the old classification layer with this one
+        # Assign the new weights to the new classification layer, and replace the old
+        # classification layer with this one
         new_clf.weight = new_clf_weight
         model.classifier = new_clf
 
-        # Update the number of labels the model thinks it has. This is
-        # required to avoid exceptions when evaluating
+        # Update the number of labels the model thinks it has. This is required to
+        # avoid exceptions when evaluating
         model.config.num_labels = len(model_id2label)
         model.num_labels = len(model_id2label)
 
@@ -1068,7 +1065,8 @@ class BenchmarkDataset(ABC):
                 initialisation of the data collator. Defaults to None.
 
         Returns:
-            Hugging Face data collator: The data collator.
+            Hugging Face data collator:
+                The data collator.
         """
         pass
 
@@ -1094,11 +1092,13 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _get_spacy_predictions_and_labels(self, model, dataset: Dataset) -> tuple:
-        """Get predictions from SpaCy model on dataset.
+        """Get predictions from spaCy model on dataset.
 
         Args:
-            model (SpaCy model): The model.
-            dataset (Hugging Face dataset): The dataset.
+            model (spaCy model):
+                The model.
+            dataset (Hugging Face dataset):
+                The dataset.
 
         Returns:
             A pair of arrays:

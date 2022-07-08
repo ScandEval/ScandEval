@@ -202,8 +202,8 @@ def get_model_lists(
     ]
     model_lists["all"].extend(random_models)
 
-    # Add some multilingual Danish models manually that have not marked
-    # 'da' as their language
+    # Add some multilingual Danish models manually that have not marked 'da' as their
+    # language
     if "da" in languages:
         multi_da_models = [
             "Geotrend/bert-base-en-da-cased",
@@ -216,8 +216,8 @@ def get_model_lists(
         model_lists["da"].extend(multi_da_models)
         model_lists["all"].extend(multi_da_models)
 
-    # Add some multilingual Norwegian models manually that have not marked
-    # 'no', 'nb' or 'nn' as their language
+    # Add some multilingual Norwegian models manually that have not marked 'no', 'nb'
+    # or 'nn' as their language
     if any(lang in languages for lang in ["no", "nb", "nn"]):
         multi_no_models = [
             "Geotrend/bert-base-en-no-cased",

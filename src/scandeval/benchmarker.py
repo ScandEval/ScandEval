@@ -38,8 +38,8 @@ class Benchmarker:
             then this overrides the `language` parameter for dataset languages.
             Defaults to None.
         task (str or list of str, optional):
-            The tasks to consider in the list. Set this to 'all' if all
-            tasks should be considered. Defaults to 'all'.
+            The tasks to consider in the list. Set this to 'all' if all tasks should be
+            considered. Defaults to 'all'.
         evaluate_train (bool, optional):
             Whether to evaluate the training set as well. Defaults to False.
         raise_error_on_invalid_model (bool, optional):
@@ -47,8 +47,8 @@ class Benchmarker:
         cache_dir (str, optional):
             Directory to store cached models. Defaults to '.scandeval_cache'.
         use_auth_token (bool, optional):
-            Whether the benchmark should use an authentication token. Defaults
-            to False.
+            Whether the benchmark should use an authentication token. Defaults to
+            False.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
 
@@ -162,17 +162,17 @@ class Benchmarker:
 
         Args:
             model_id (str, list of str or None, optional):
-                The model ID(s) of the models to benchmark. If None then all
-                relevant model IDs will be benchmarked. Defaults to None.
+                The model ID(s) of the models to benchmark. If None then all relevant
+                model IDs will be benchmarked. Defaults to None.
             dataset (str, list of str or None, optional):
-                The datasets to benchmark on. If None then all datasets will
-                be benchmarked. Defaults to None.
+                The datasets to benchmark on. If None then all datasets will be
+                benchmarked. Defaults to None.
 
         Returns:
             dict:
-                A nested dictionary of the benchmark results. The keys are the
-                names of the datasets, with values being new dictionaries
-                having the model IDs as keys.
+                A nested dictionary of the benchmark results. The keys are the names of
+                the datasets, with values being new dictionaries having the model IDs
+                as keys.
         """
         # If `model_id` is not specified, then fetch all the relevant model IDs
         model_ids: Sequence[str]
@@ -205,8 +205,7 @@ class Benchmarker:
                 cfg for cfg in get_all_dataset_configs() if cfg.name in dataset
             ]
 
-        # Benchmark all the models in `model_ids` on all the datasets in
-        # `benchmarks`
+        # Benchmark all the models in `model_ids` on all the datasets in `benchmarks`
         for dataset_config in dataset_configs:
             for m_id in model_ids:
                 self._benchmark_single(
@@ -244,8 +243,7 @@ class Benchmarker:
 
         except InvalidBenchmark as e:
 
-            # If the model ID is not valid then raise an error, if
-            # specified
+            # If the model ID is not valid then raise an error, if specified
             model_err_msg = "does not exist on the Hugging Face Hub"
             if (
                 self.benchmark_config.raise_error_on_invalid_model
