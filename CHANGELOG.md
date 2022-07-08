@@ -31,9 +31,7 @@ and this project adheres to
   `huggingface-cli login` command.
 - Added scripts used to create all the datasets used in ScandEval, to ensure full
   transparency.
-- Added caching for various functions, which reduces benchmarking time. This can be
-  disabled using the `--no-cache` flag in the CLI, or setting `no_cache=True` in the
-  `Benchmarker` class.
+- Added caching for various functions, which reduces benchmarking time.
 
 ### Changed
 - Models are now evaluated every 30 training steps (corresponding to having processed
