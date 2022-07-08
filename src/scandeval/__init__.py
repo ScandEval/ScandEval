@@ -18,10 +18,10 @@ block_terminal_output()
 
 
 # Set up logging
-format = colored("%(asctime)s [%(levelname)s] <%(name)s>\n↳ ", "green") + colored(
+fmt = colored("%(asctime)s [%(levelname)s] <%(name)s>\n↳ ", "green") + colored(
     "%(message)s", "yellow"
 )
-logging.basicConfig(level=logging.INFO, format=format)
+logging.basicConfig(level=logging.INFO, format=fmt)
 
 
 # Disable parallelisation when tokenizing, as that can lead to errors
