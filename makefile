@@ -61,3 +61,16 @@ clean:
 
 test:
 	@scandeval -m Maltehb/aelaectra-danish-electra-small-cased -d dane
+
+tree:
+	@tree -a \
+		-I .git \
+		-I .mypy_cache . \
+		-I .scandeval_cache \
+		-I .env \
+		-I .venv \
+		-I poetry.lock \
+		-I .ipynb_checkpoints \
+		-I dist \
+		-I scandeval_benchmark_results.json \
+		-I .gitkeep
