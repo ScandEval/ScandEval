@@ -58,3 +58,6 @@ clean:
 	@find . -type d -name "__pycache__" -delete
 	@rm -rf .pytest_cache
 	@echo "Cleaned repository."
+
+test:
+	@scandeval -m Maltehb/aelaectra-danish-electra-small-cased -d dane
