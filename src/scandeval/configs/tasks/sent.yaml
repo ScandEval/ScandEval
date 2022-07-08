@@ -6,10 +6,13 @@ metrics:
     long_name: Matthew's correlation coefficient
 labels:
   NEGATIVE:
+    - NEG
     - NEGATIV
     - LABEL_0
   NEUTRAL:
+    - NEU
     - LABEL_1
   POSITIVE:
+    - POS
     - POSITIV
     - LABEL_2
