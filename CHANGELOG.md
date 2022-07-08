@@ -9,24 +9,9 @@ and this project adheres to
 
 
 ## [Unreleased]
-### Changed
-- Models are now evaluated every 30 training steps (corresponding to having processed
-  960 training samples) rather than every epoch. This decreases benchmarking time
-  significantly, as early stopping kicks in earlier if the model is not learning
-  anything.
-- All training splits of datasets have been truncated to 1,024 samples. This has
-  multiple benefits:
-    - Faster benchmarking
-    - More reliance on pretraining data
-    - Enables consistent comparisons between different languages on the same task.
-- Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the dataset
-  is used to warm up the learning rate.
-- All CLI arguments now use hyphens (`-`) rather than underscores (`_`). For instance,
-  the `--model_id` argument has now been changed to `--model-id`.
-- Text classification datasets are now using Matthew's correlation coefficient as
-  metric, following the GLUE custom.
-
 ### Added
+- Compatibility with Apple Silicon. If no CUDA GPU is available then MPS GPUs will
+  automatically be used, if available.
 - Added the datasets `scala-da`, `scala-sv`, `scala-nb`, `scala-nn`, `scala-is` and
   `scala-fo`. These are all linguistic acceptability datasets, being a binary text
   classification where a sentence has to be marked as grammatically correct or not.
@@ -44,10 +29,39 @@ and this project adheres to
 - Added `--use-auth-token`, which is a flag that can be used when evaluating private
   models on Hugging Face Hub. This requires that the user has logged in via the
   `huggingface-cli login` command.
+- Added scripts used to create all the datasets used in ScandEval, to ensure full
+  transparency.
+- Added caching for various functions, which reduces benchmarking time. This can be
+  disabled using the `--no-cache` flag in the CLI, or setting `no_cache=True` in the
+  `Benchmarker` class.
+
+### Changed
+- Models are now evaluated every 30 training steps (corresponding to having processed
+  960 training samples) rather than every epoch. This decreases benchmarking time
+  significantly, as early stopping kicks in earlier if the model is not learning
+  anything.
+- All training splits of datasets have been truncated to 1,024 samples. This has
+  multiple benefits:
+    - Faster benchmarking
+    - More reliance on pretraining data
+    - Enables consistent comparisons between different languages on the same task.
+- Now uses `warmup_ratio` rather than `warmup_steps`, to ensure that 10% of the dataset
+  is used to warm up the learning rate.
+- All CLI arguments now use hyphens (`-`) rather than underscores (`_`). For instance,
+  the `--model_id` argument has now been changed to `--model-id`.
+- Text classification datasets are now using Matthew's correlation coefficient as
+  metric, following the GLUE custom.
+- Now requires PyTorch 1.12.0 or newer, to ensure compatibility with Apple Silicon.
+- Renamed the `Benchmark` class to `Benchmarker`.
 
 ### Removed
+- Removed support for evaluating finetuned models, as the package was primarily used to
+  benchmark pretrained models anyway, and the change in datasets means that many
+  finetuned models would have been trained on (part of) the test sets, resulting in
+  artificially large scores. For evaluation of finetuned models, please check out the
+  `AIAI` Python package instead.
 - Removed support for Python 3.7, as this was incompatible with support for Apple
-  Silicon
+  Silicon.
 - Removed the Danish sentiment analysis datasets `twitter-sent`, `europarl` and `lcc`,
   and is not using only the `angry-tweets` dataset for this task.
 - Removed datasets `dkhate`, `nordial` and `dalaj`, to ensure a larger amount of
@@ -58,13 +72,15 @@ and this project adheres to
   semantic tasks as that's closer to what is being used in practice, as well as to
   reduce the benchmarking time, as these datasets took way longer to benchmark than the
   others, due to the high number of labels.
+- Removed the `load_dataset` function, as all datasets can now be found on the Hugging
+  Face Hub and can thus be loaded using the `datasets` package. All the datasets can be
+  found at `https://huggingface.com/ScandEval`.
 
 ### Fixed
 - Now disables tokenizer progress bars properly, using the
   `datasets.utils.disable_progress_bar` function.
-- Many of the datasets contained duplicate entries. These have now all been fixed - the
-  script used to do this can be found in the `remove-duplicates.ipynb` notebook.
-- The `--model-id` now works as intended, whereas previously one was forced to use the
+- Many of the datasets contained duplicate entries. These have now all been fixed.
+- The `--model-id` now works as intended, where previously one was forced to use the
   shortcut `-m`.
 - Now correctly determines whether a NER dataset contains `MISC` tags. Previously this
   required that both `B-MISC` and `I-MISC` tags were present in the dataset, where it
