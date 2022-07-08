@@ -1,4 +1,4 @@
-"""Variant of TrainingArguments which supports Apple MPS GPU."""
+"""Extension of Hugging Face TrainingArguments which supports Apple MPS GPU."""
 
 import os
 
