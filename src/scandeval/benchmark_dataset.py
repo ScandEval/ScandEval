@@ -261,7 +261,7 @@ class BenchmarkDataset(ABC):
             load_best_model_at_end=True,
             optim="adamw_torch",
             seed=4242,
-            bf16=True,  # TODO: Test this
+            bf16=torch.cuda.is_available() or not torch.backends.mps.is_available(),
         )
 
         # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
@@ -719,8 +719,8 @@ class BenchmarkDataset(ABC):
                     model_cls = AutoModelForQuestionAnswering
                 else:
                     raise ValueError(
-                        f"The supertask `{self.dataset_config.supertask}` was "
-                        "not recognised."
+                        f"The supertask `{self.dataset_config.supertask}` was not "
+                        "recognised."
                     )
 
                 model = model_cls.from_pretrained(
