@@ -44,9 +44,9 @@ class NERBenchmark(BenchmarkDataset):
         """
         # Check what labels are present in the dataset, and store if MISC tags are not
         # present
-        labels_in_train = set(
-            [tag for tag_list in dataset_dict["train"]["ner_tags"] for tag in tag_list]
-        )
+        labels_in_train = {
+            tag for tag_list in dataset_dict["train"]["ner_tags"] for tag in tag_list
+        }
         self.has_misc_tags = "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
 
         # Return the dataset dictionary
