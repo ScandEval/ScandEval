@@ -56,9 +56,9 @@ class TrainingArgumentsWithMPSSupport(TrainingArguments):
                     and int(os.environ.get("CCL_WORKER_COUNT", 0)) < 1
                 ):
                     raise ValueError(
-                        "CPU distributed training backend is ccl. but CCL_WORKER_COUNT "
-                        " is not correctly set. Please use like 'export "
-                        "CCL_WORKER_COUNT = 1' to set."
+                        "CPU distributed training backend is ccl. but "
+                        "CCL_WORKER_COUNT is not correctly set. Please use like "
+                        "'export CCL_WORKER_COUNT = 1' to set."
                     )
 
                 # Try to get launch configuration from environment variables set by MPI
@@ -107,7 +107,8 @@ class TrainingArgumentsWithMPSSupport(TrainingArguments):
             device = xm.xla_device()
             self._n_gpu = 0
 
-        # Otherwise, we check if Sagemaker is available, and use that if that's the case
+        # Otherwise, we check if Sagemaker is available, and use that if that's the
+        # case
         elif is_sagemaker_mp_enabled():
             import smdistributed.modelparallel.torch as smp
 
