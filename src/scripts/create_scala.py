@@ -1,4 +1,4 @@
-"""Script that creates the ScaLA datasets and uploads them to the HF Hub."""
+"""Create the ScaLA datasets and upload them to the HF Hub."""
 
 import random
 import re

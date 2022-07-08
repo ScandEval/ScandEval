@@ -1,4 +1,4 @@
-"""Create NorNE-mini NER datasets and upload them to the HF Hub."""
+"""Create the NorNE-mini NER datasets and upload them to the HF Hub."""
 
 import re
 from collections import defaultdict
