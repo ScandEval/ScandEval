@@ -29,7 +29,7 @@ def main():
     # Block terminal output
     block_terminal_output()
 
-    # Load and set up the POS datasets
+    # Set up the POS dataset loaders
     pos_datasets = {
         "da": load_ddt_pos,
         "nb": load_ndt_nb_pos,
@@ -183,12 +183,11 @@ def delete(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
     # Copy the token list
     new_tokens = tokens.copy()
 
-    # Get candidate indices to remove. We do not remove adjectives,
-    # adverbs, punctuation, determiners or numbers, as the resulting sentence
-    # will probably still be grammatically correct. Further, we do not
-    # remove nouns or proper nouns if they have another noun or proper
-    # noun as neighbour, as that usually does not make the sentence
-    # incorrect either.
+    # Get candidate indices to remove. We do not remove adjectives, adverbs,
+    # punctuation, determiners or numbers, as the resulting sentence will probably
+    # still be grammatically correct. Further, we do not remove nouns or proper nouns
+    # if they have another noun or proper noun as neighbour, as that usually does not
+    # make the sentence incorrect either.
     indices = [
         idx
         for idx, pos_tag in enumerate(pos_tags)
@@ -238,9 +237,8 @@ def flip_neighbours(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
     # Copy the token list
     new_tokens = tokens.copy()
 
-    # Collect all indices that are proper words, and which
-    # has a neighbour which is also a proper word as well as having
-    # a different POS tag
+    # Collect all indices that are proper words, and which has a neighbour which is
+    # also a proper word as well as having a different POS tag
     indices = [
         idx for idx, pos_tag in enumerate(pos_tags) if pos_tag not in ["PUNCT", "SYM"]
     ]
@@ -284,9 +282,9 @@ def flip_neighbours(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
     new_tokens[rnd_fst_idx] = tokens[rnd_snd_idx]
     new_tokens[rnd_snd_idx] = tokens[rnd_fst_idx]
 
-    # If we flipped the first character, then ensure that the new first character
-    # is title-cased and the second character is of lower case. We only do this if
-    # they are not upper cased, however.
+    # If we flipped the first character, then ensure that the new first character is
+    # title-cased and the second character is of lower case. We only do this if they
+    # are not upper cased, however.
     if rnd_fst_idx == 0 or rnd_snd_idx == 0:
         if new_tokens[0] != new_tokens[0].upper():
             new_tokens[0] = new_tokens[0].title()
