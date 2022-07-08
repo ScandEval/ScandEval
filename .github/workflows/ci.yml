@@ -15,44 +15,36 @@ jobs:
       - uses: jpetrucciani/black-check@master
 
   pytest:
-    runs-on: ${{ matrix.os }}
     strategy:
         matrix:
             os: [macos-latest, windows-latest, ubuntu-latest]
-            python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+            python-version: ['3.7', '3.8', '3.9', '3.10']
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
+      - uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry
-        uses: dschep/install-poetry-action@v1.2
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.1.10
 
       - name: Cache Poetry virtualenv
         uses: actions/cache@v1
         id: cache
         with:
           path: ~/.virtualenvs
-          key: poetry-${{ hashFiles('**/poetry.lock') }}
+          key: poetry-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            poetry-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Set Poetry config
-        run: |
-          poetry config settings.virtualenvs.in-project false
-          poetry config settings.virtualenvs.path ~/.virtualenvs
+            poetry-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install Dependencies
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
-
-      - name: Code Quality
-        run: poetry run black . --check
 
       - name: Test with pytest
         run: poetry run pytest

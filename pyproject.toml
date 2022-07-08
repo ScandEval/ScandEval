@@ -14,7 +14,7 @@ repository = "https://github.com/saattrupdan/ScandEval"
 include = ["src/scandeval/configs/**/*.yaml"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.7,<3.11"
 tqdm = "^4.62.3"
 huggingface-hub = "^0.7.0"
 transformers = "4.20.1"
