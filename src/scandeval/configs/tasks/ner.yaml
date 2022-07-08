@@ -10,40 +10,40 @@ metrics:
 labels:
   O: []
   B-LOC:
-    - B-location
-    - B-place
+    - B-LOCATION
+    - B-PLACE
     - B-GPE_LOC
     - B-LOC/ORG
     - B-LOCPRS
     - B-LOCORG
   I-LOC:
-    - I-location
-    - I-place
+    - I-LOCATION
+    - I-PLACE
     - I-GPE_LOC
     - I-LOC/ORG
     - I-LOCPRS
     - I-LOCORG
   B-ORG:
-    - B-organization
-    - B-inst
+    - B-ORGANIZATION
+    - B-INST
     - B-GPE_ORG
     - B-ORG/PRS
     - B-OBJ/ORG
     - B-ORGPRS
     - B-OBJORG
   I-ORG:
-    - I-organization
-    - I-inst
+    - I-ORGANIZATION
+    - I-INST
     - I-GPE_ORG
     - I-ORG/PRS
     - I-OBJ/ORG
     - I-ORGPRS
     - I-OBJORG
   B-PER:
-    - B-person
+    - B-PERSON
   I-PER:
-    - I-person
+    - I-PERSON
   B-MISC:
-    - B-miscellaneous
+    - B-MISCELLANEOUS
   I-MISC:
-    - I-miscellaneous
+    - I-MISCELLANEOUS

@@ -90,11 +90,11 @@ class TextClassificationBenchmark(BenchmarkDataset):
 
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
         try:
-            examples["label"] = [label2id[lbl] for lbl in examples["label"]]
+            examples["label"] = [label2id[lbl.upper()] for lbl in examples["label"]]
         except KeyError:
             raise InvalidBenchmark(
-                f"One of the labels in the dataset, {examples['label']}, does not "
-                f"occur in the label2id dictionary {label2id}."
+                f"One of the labels in the dataset, {examples['label'].upper()}, does "
+                f"not occur in the label2id dictionary {label2id}."
             )
         return examples
 

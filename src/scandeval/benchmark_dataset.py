@@ -854,7 +854,7 @@ class BenchmarkDataset(ABC):
                 else:
                     model_id2label = model.config.id2label
                 model_id2label = [
-                    model_id2label[idx] for idx in range(model_num_labels)
+                    model_id2label[idx].upper() for idx in range(model_num_labels)
                 ]
             except IndexError:
                 raise InvalidBenchmark(
@@ -863,38 +863,38 @@ class BenchmarkDataset(ABC):
         except AttributeError:
             model_id2label = None
 
-        # If one of `label2id` or `id2label` exists in the model config, then
-        # define the other one from it
+        # If one of `label2id` or `id2label` exists in the model config, then define
+        # the other one from it
         if model_label2id is not None and model_id2label is None:
-            model_id2label = {idx: lbl for lbl, idx in model_label2id.items()}
+            model_id2label = {idx: lbl.upper() for lbl, idx in model_label2id.items()}
             model_id2label = [model_id2label[idx] for idx in range(len(model_id2label))]
             model.config.id2label = model_id2label
         if model_label2id is None and model_id2label is not None:
-            model_label2id = {lbl: id for id, lbl in enumerate(model_id2label)}
+            model_label2id = {lbl.upper(): id for id, lbl in enumerate(model_id2label)}
             model.config.label2id = model_label2id
 
-        # If the model does not have `label2id` or `id2label` conversions, then
-        # use the defaults
+        # If the model does not have `label2id` or `id2label` conversions, then use the
+        # defaults
         if model_config.task == "fill-mask" or (
             model_label2id is None or model_id2label is None
         ):
             model.config.label2id = self.dataset_config.label2id
             model.config.id2label = self.dataset_config.id2label
 
-        # If the model *does* have conversions, then ensure that it can deal with
-        # all the labels in the default conversions. This ensures that we can
-        # smoothly deal with labels that the model have not been trained on (it
-        # will just always get those labels wrong)
+        # If the model *does* have conversions, then ensure that it can deal with all
+        # the labels in the default conversions. This ensures that we can smoothly deal
+        # with labels that the model have not been trained on (it will just always get
+        # those labels wrong)
         else:
 
-            # Collect the dataset labels and model labels in the
-            # `model_id2label` conversion list
+            # Collect the dataset labels and model labels in the `model_id2label`
+            # conversion list
             for label in self.dataset_config.id2label:
                 syns = [
                     syn
                     for lst in self.dataset_config.label_synonyms
                     for syn in lst
-                    if label in lst
+                    if label.upper() in lst
                 ]
                 if all([syn not in model_id2label for syn in syns]):
                     model_id2label.append(label)
@@ -906,13 +906,13 @@ class BenchmarkDataset(ABC):
                     canonical_syn = [
                         syn_lst
                         for syn_lst in self.dataset_config.label_synonyms
-                        if label in syn_lst
+                        if label.upper() in syn_lst
                     ][0][-1]
                     model_id2label[idx] = canonical_syn
 
                 # IndexError appears when the label does not appear within the
-                # label_synonyms (i.e. that we added it in the previous step).
-                # In this case, we just skip the label.
+                # label_synonyms (i.e. that we added it in the previous step). In this
+                # case, we just skip the label.
                 except IndexError:
                     continue
 
@@ -922,27 +922,26 @@ class BenchmarkDataset(ABC):
                 syn for lst in self.dataset_config.label_synonyms for syn in lst
             ]
             new_synonyms += [
-                [label] for label in model_id2label if label not in flat_old_synonyms
+                [label.upper()]
+                for label in model_id2label
+                if label.upper() not in flat_old_synonyms
             ]
 
             # Add all the synonyms of the labels into the label2id conversion
             # dictionary
             model_label2id = {
-                label: id
+                label.upper(): id
                 for id, lbl in enumerate(model_id2label)
                 for label_syns in new_synonyms
                 for label in label_syns
-                if lbl in label_syns
+                if lbl.upper() in label_syns
             }
 
             # Get the old id2label conversion
-            if isinstance(model.config.id2label, dict):
-                old_id2label = [
-                    model.config.id2label[idx]
-                    for idx in range(len(model.config.id2label))
-                ]
-            else:
-                old_id2label = model.config.id2label
+            old_id2label = [
+                model.config.id2label[idx].upper()
+                for idx in range(len(model.config.id2label))
+            ]
 
             # Alter the model's classification layer to match the dataset if the
             # model is missing labels

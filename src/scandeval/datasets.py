@@ -64,7 +64,7 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
 
     # Add the `label2id` attribute
     dataset_config_dict["label2id"] = {
-        lbl: idx
+        lbl.upper(): idx
         for idx, synset in enumerate(dataset_config_dict["label_synonyms"])
         for lbl in synset
     }

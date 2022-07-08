@@ -5,7 +5,7 @@ metrics:
     huggingface_id: matthews_correlation
     long_name: Matthew's correlation coefficient
 labels:
-  incorrect:
+  INCORRECT:
     - LABEL_0
-  correct:
+  CORRECT:
     - LABEL_1

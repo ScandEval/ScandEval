@@ -159,7 +159,7 @@ class NERBenchmark(BenchmarkDataset):
                 ent = f"{token.ent_iob_}-{token.ent_type_}"
 
                 # Convert the tag to the its canonical synonym
-                alt_idx = self.dataset_config.label2id[f"{token.ent_iob_}-MISC"]
+                alt_idx = self.dataset_config.label2id[f"{token.ent_iob_}-MISC".upper()]
                 return self.dataset_config.id2label[
                     self.dataset_config.label2id.get(ent, alt_idx)
                 ]
@@ -269,7 +269,7 @@ class NERBenchmark(BenchmarkDataset):
                 elif word_idx != previous_word_idx:
                     label = labels[word_idx]
                     try:
-                        label_id = label2id[label]
+                        label_id = label2id[label.upper()]
                     except KeyError:
                         msg = f"The label {label} was not found in the model's config."
                         raise InvalidBenchmark(msg)

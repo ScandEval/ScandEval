@@ -5,11 +5,11 @@ metrics:
     huggingface_id: matthews_correlation
     long_name: Matthew's correlation coefficient
 labels:
-  negative:
-    - negativ
+  NEGATIVE:
+    - NEGATIV
     - LABEL_0
-  neutral:
+  NEUTRAL:
     - LABEL_1
-  positive:
-    - positiv
+  POSITIVE:
+    - POSITIV
     - LABEL_2
