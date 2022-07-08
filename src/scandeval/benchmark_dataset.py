@@ -65,7 +65,7 @@ class BenchmarkDataset(ABC):
     def __init__(
         self, dataset_config: DatasetConfig, benchmark_config: BenchmarkConfig
     ):
-        """Initialize the dataset.
+        """Initialise the dataset.
 
         Args:
             dataset_config (DatasetConfig):
@@ -80,6 +80,7 @@ class BenchmarkDataset(ABC):
             for metric_name, metric_dct in dataset_config.metrics.items()
         }
 
+    # TODO: Cache this
     def benchmark(self, model_id: str) -> Dict[str, dict]:
         """Benchmark a model.
 
@@ -561,6 +562,7 @@ class BenchmarkDataset(ABC):
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)
 
+    # TODO: Cache this
     def _load_data(self) -> DatasetDict:
         """Load the datasets.
 
@@ -595,6 +597,7 @@ class BenchmarkDataset(ABC):
         """
         return dataset_dict
 
+    # TODO: Cache this
     def _load_model(self, model_config: ModelConfig) -> Dict[str, Any]:
         """Load the model.
 

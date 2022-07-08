@@ -14,7 +14,7 @@ from .exceptions import InvalidBenchmark
 logger = logging.getLogger(__name__)
 
 
-# TODO: Add caches for this
+# TODO: Cache this
 def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelConfig:
     """Fetches configuratino for a model from the Hugging Face Hub.
 
@@ -109,7 +109,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
     return model_config
 
 
-# TODO: Add caches for this
+# TODO: Cache this
 def get_model_lists(
     languages: Sequence[Optional[str]],
     tasks: Sequence[Optional[str]],
