@@ -67,13 +67,15 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
         # Fetch the model metadata
         models = api.list_models(
-            filter=ModelFilter(author=author, model_name=f"{model_name}@{revision}"),
+            filter=ModelFilter(author=author, model_name=model_name),
             use_auth_token=benchmark_config.use_auth_token,
         )
 
         # Check that the model exists. If it does not then raise an error
         if len(models) == 0:
-            raise InvalidBenchmark(f"Model {model_id} does not exist.")
+            raise InvalidBenchmark(
+                f"The model {model_id} does not exist on the Hugging Face Hub."
+            )
 
         # Fetch the model tags
         tags = models[0].tags
