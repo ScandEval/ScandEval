@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/saattrupdan/ScandEval/main/gfx/scandeval.png" width="517" height="217">
 
-### Evaluation of language models on mono- or multilingual Scandinavian language tasks.
+### Evaluation of pretrained language models on mono- or multilingual Scandinavian language tasks.
 
 ______________________________________________________________________
 [![LastCommit](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/commits/main)
@@ -16,26 +16,13 @@ ______________________________________________________________________
 ## Installation
 To install the package simply write the following command in your favorite terminal:
 ```shell
-$ pip install scandeval[all]
-```
-
-This will install all the model frameworks currently supported (`pytorch`, `spacy`, and
-`jax`). If you know you only need one of these, you can install a slimmer package like
-so:
-```shell
-$ pip install scandeval[pytorch]
-```
-
-Lastly, if you are not interesting in benchmarking models, but just want to use the
-package to download datasets, then the following command will do the trick:
-```shell
 $ pip install scandeval
 ```
 
 ## Quickstart
 ### Benchmarking from the Command Line
-The easiest way to benchmark models is via the command line interface. After having
-installed the package, you can benchmark your favorite model like so:
+The easiest way to benchmark pretrained models is via the command line interface. After
+having installed the package, you can benchmark your favorite model like so:
 ```shell
 $ scandeval --model_id <model_id>
 ```
@@ -98,21 +85,6 @@ See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a more
 in-depth description.
 
 
-### Downloading Datasets
-If you are just interested in downloading a dataset rather than benchmarking, this can
-be done as follows:
-```python
->>> from scandeval import load_dataset
->>> X_train, X_test, y_train, y_test = load_dataset('angry-tweets')
-```
-
-Here `X_train` and `X_test` will be Pandas dataframes containing the relevant texts,
-and `y_train` and `y_test` will be Pandas dataframes containing the associated labels.
-
-See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a list of all
-the datasets that can be loaded.
-
-
 ## Documentation
 The full documentation can be found on
 [ReadTheDocs](https://scandeval.readthedocs.io/en/latest).
@@ -121,11 +93,11 @@ The full documentation can be found on
 ## Citing ScandEval
 If you want to cite the framework then feel free to use this:
 ```bibtex
-@article{nielsen2021scandeval,
+@article{nielsen2022scandeval,
   title={ScandEval: Evaluation of language models on mono- or multilingual Scandinavian language tasks.},
   author={Nielsen, Dan Saattrup},
   journal={GitHub. Note: https://github.com/saattrupdan/ScandEval},
-  year={2021}
+  year={2022}
 }
 ```
 
@@ -137,20 +109,74 @@ World](https://satwcomic.com/) team. Go check them out!
 ## Project structure
 ```bash
 .
-├── config
-│   └── datasets.yaml               # Configurations for all datasets
-├── docs                            # Documentation for the project
-├── .flake8                         # Configuration for the linting tool flake8
+├── .flake8
+├── .github
+│   └── workflows
+│       └── ci.yml
 ├── .gitignore
+├── .pre-commit-config.yaml
+├── CHANGELOG.md
+├── README.md
+├── docs
 ├── makefile
-├── notebooks                       # Jupyter notebooks
-├── .pre-commit-config.yaml         # Configurations for pre-commit hook
-├── pyproject.toml                  # Project setup
-├── README.md                       # Description of the project
-├── src                             # All source code
-│   └── ScandEval
-│      ├── __init__.py
-│      └── demo.py                  # Demo module
-└── tests                           # Unit tests
+├── notebooks
+│   └── scandeval-truncation.ipynb
+├── poetry.toml
+├── pyproject.toml
+├── src
+│   ├── scandeval
+│   │   ├── __init__.py
+│   │   ├── benchmark_dataset.py
+│   │   ├── benchmarker.py
+│   │   ├── callbacks.py
+│   │   ├── cli.py
+│   │   ├── config.py
+│   │   ├── configs
+│   │   │   ├── datasets
+│   │   │   │   ├── absabank-imm.yaml
+│   │   │   │   ├── angry-tweets.yaml
+│   │   │   │   ├── dane.yaml
+│   │   │   │   ├── mim-gold-ner.yaml
+│   │   │   │   ├── norec.yaml
+│   │   │   │   ├── norne-nb.yaml
+│   │   │   │   ├── norne-nn.yaml
+│   │   │   │   ├── scala-da.yaml
+│   │   │   │   ├── scala-fo.yaml
+│   │   │   │   ├── scala-is.yaml
+│   │   │   │   ├── scala-nb.yaml
+│   │   │   │   ├── scala-nn.yaml
+│   │   │   │   ├── scala-sv.yaml
+│   │   │   │   ├── suc3.yaml
+│   │   │   │   └── wikiann-fo.yaml
+│   │   │   ├── language_codes.yaml
+│   │   │   └── tasks
+│   │   │       ├── la.yaml
+│   │   │       ├── ner.yaml
+│   │   │       ├── qa.yaml
+│   │   │       └── sent.yaml
+│   │   ├── dataset_factory.py
+│   │   ├── datasets.py
+│   │   ├── exceptions.py
+│   │   ├── hf_hub.py
+│   │   ├── ner.py
+│   │   ├── qa.py
+│   │   ├── scores.py
+│   │   ├── text_classification.py
+│   │   ├── training_args_with_mps_support.py
+│   │   └── utils.py
+│   └── scripts
+│       ├── create_absabank_imm.py
+│       ├── create_angry_tweets.py
+│       ├── create_dane.py
+│       ├── create_mim_gold_ner.py
+│       ├── create_norec.py
+│       ├── create_norne.py
+│       ├── create_scala.py
+│       ├── create_scandiqa.py
+│       ├── create_suc3.py
+│       ├── create_wikiann_fo.py
+│       ├── fix_dot_env_file.py
+│       └── load_ud_pos.py
+└── tests
     └── __init__.py
 ```
