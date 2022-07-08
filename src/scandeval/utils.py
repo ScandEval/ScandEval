@@ -1,16 +1,42 @@
 """Utility functions to be used in other scripts."""
 
+import gc
 import logging
 import os
 import random
 import re
 import warnings
+from typing import Sequence
 
 import numpy as np
 import pkg_resources
 import torch
 import transformers.utils.logging as tf_logging
 from datasets.utils import disable_progress_bar
+
+
+def clear_memory(vars_to_remove: Sequence):
+    """Clears the memory of unused items.
+
+    Args:
+        vars_to_remove (sequence):
+            Variables that needs to be removed from memory. Defaults to an empty list.
+    """
+    # Remove all the variables in the `vars_to_remove` list, as well as the list itself
+    for var in vars_to_remove:
+        try:
+            del var
+        except UnboundLocalError:
+            pass
+    del vars_to_remove
+
+    # Clear the Python cache
+    gc.collect()
+
+    # Empty the CUDA cache
+    # TODO: Also empty MPS cache
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
 
 def enforce_reproducibility(framework: str, seed: int = 4242):

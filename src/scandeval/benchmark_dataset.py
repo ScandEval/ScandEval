@@ -1,6 +1,5 @@
 """Abstract benchmarking dataset class."""
 
-import gc
 import logging
 import random
 import subprocess
@@ -42,7 +41,7 @@ from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_config
 from .scores import log_scores
 from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
-from .utils import enforce_reproducibility, is_module_installed
+from .utils import clear_memory, enforce_reproducibility, is_module_installed
 
 logger = logging.getLogger(__name__)
 
@@ -261,6 +260,7 @@ class BenchmarkDataset(ABC):
             load_best_model_at_end=True,
             optim="adamw_torch",
             seed=4242,
+            bf16=True,  # TODO: Test this
         )
 
         # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
@@ -281,6 +281,10 @@ class BenchmarkDataset(ABC):
                     training_args=training_args,
                 )
 
+                # TEMP: Print scores for the iteration
+                print(f"Scores for iteration {idx}:")
+                print(itr_scores)
+
                 # If the iteration was successful then break the loop
                 if isinstance(itr_scores, dict):
                     break
@@ -293,6 +297,7 @@ class BenchmarkDataset(ABC):
 
                     # We assume that all these CUDA errors are caused by
                     # insufficient GPU memory
+                    # TODO: Handle MPS out of memory as well
                     cuda_errs = ["CUDA out of memory", "CUDA error"]
 
                     # If it is an unknown error, then simply report it
@@ -305,7 +310,7 @@ class BenchmarkDataset(ABC):
                     ga = training_args.gradient_accumulation_steps
                     if bs == 1:
                         raise InvalidBenchmark(
-                            "CUDA out of memory, even " "with a batch size of 1!"
+                            "CUDA out of memory, even with a batch size of 1!"
                         )
                     training_args.per_device_train_batch_size = bs // 2
                     training_args.per_device_eval_batch_size = bs // 2
@@ -324,15 +329,7 @@ class BenchmarkDataset(ABC):
         )
 
         # Garbage collection, to avoid memory issues
-        try:
-            del model
-        except UnboundLocalError:
-            pass
-        try:
-            del model_dict
-        except UnboundLocalError:
-            pass
-        gc.collect()
+        clear_memory([model, model_dict])
 
         return all_scores
 
@@ -459,18 +456,7 @@ class BenchmarkDataset(ABC):
             return scores
 
         except (RuntimeError, ValueError, IndexError) as e:
-
-            # Garbage collection, to avoid memory issues
-            try:
-                del model
-            except UnboundLocalError:
-                pass
-            try:
-                del model_dict
-            except UnboundLocalError:
-                pass
-            gc.collect()
-
+            clear_memory([model, model_dict])
             return e
 
     def _benchmark_spacy(
@@ -568,15 +554,7 @@ class BenchmarkDataset(ABC):
         )
 
         # Garbage collection, to avoid memory issues
-        try:
-            del model
-        except UnboundLocalError:
-            pass
-        try:
-            del model_dict
-        except UnboundLocalError:
-            pass
-        gc.collect()
+        clear_memory([model, model_dict])
 
         return all_scores
 
