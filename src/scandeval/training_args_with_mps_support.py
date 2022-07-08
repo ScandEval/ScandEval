@@ -159,6 +159,8 @@ class TrainingArgumentsWithMPSSupport(TrainingArguments):
             else:
                 device_name = "cpu"
                 self._n_gpu = 0
+
+            # Set the device to the device name
             device = torch.device(device_name)
 
         # Otherwise, we are using distributed training, and we set the device to be
