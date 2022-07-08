@@ -6,6 +6,7 @@ from typing import Dict, Optional, Sequence, Union
 
 import yaml
 from huggingface_hub import HfApi, ModelFilter
+from requests.exceptions import ConnectionError, RequestException
 
 from .config import BenchmarkConfig, ModelConfig
 from .datasets import get_config_dir
@@ -43,67 +44,75 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
         )
         return model_config
 
-    # Define the API object
-    api = HfApi()
+    # Extract the revision from the model ID, if it is specified
+    if "@" in model_id:
+        model_id_without_revision, revision = model_id.split("@", 1)
+    else:
+        model_id_without_revision = model_id
+        revision = "main"
 
     # Extract the author and model name from the model ID
     author: Optional[str]
-    if "/" in model_id:
-        author, model_name = model_id.split("/")
+    if "/" in model_id_without_revision:
+        author, model_name = model_id_without_revision.split("/")
     else:
         author = None
-        model_name = model_id
+        model_name = model_id_without_revision
 
-    # Fetch the model metadata
-    models = api.list_models(
-        filter=ModelFilter(author=author, model_name=model_name),
-        use_auth_token=benchmark_config.use_auth_token,
-    )
+    # Attempt to fetch model data from the Hugging Face Hub
+    try:
 
-    # Check that the model exists. If it does not then raise an error
-    if len(models) == 0:
-        raise InvalidBenchmark(f"Model {model_id} does not exist.")
+        # Define the API object
+        api = HfApi()
 
-    # Fetch the model tags
-    tags = models[0].tags
+        # Fetch the model metadata
+        models = api.list_models(
+            filter=ModelFilter(author=author, model_name=f"{model_name}@{revision}"),
+            use_auth_token=benchmark_config.use_auth_token,
+        )
 
-    # Extract the framework, which defaults to PyTorch
-    framework = "pytorch"
-    if "pytorch" in tags:
-        pass
-    elif "jax" in tags:
-        framework = "jax"
-    elif "spacy" in tags:
-        framework = "spacy"
-    elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
-        raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
+        # Check that the model exists. If it does not then raise an error
+        if len(models) == 0:
+            raise InvalidBenchmark(f"Model {model_id} does not exist.")
 
-    # Extract the model task, which defaults to 'fill-mask'
-    task = models[0].pipeline_tag
-    if task is None or task in ["sentence-similarity", "feature-extraction"]:
-        task = "fill-mask"
+        # Fetch the model tags
+        tags = models[0].tags
 
-    # Get list of all language codes
-    with (get_config_dir() / "language_codes.yaml").open() as f:
-        language_codes = yaml.safe_load(f)
+        # Extract the framework, which defaults to PyTorch
+        framework = "pytorch"
+        if "pytorch" in tags:
+            pass
+        elif "jax" in tags:
+            framework = "jax"
+        elif "spacy" in tags:
+            framework = "spacy"
+        elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
+            raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
 
-    # Extract the model languages
-    languages = [tag for tag in tags if tag in language_codes]
+        # Extract the model task, which defaults to 'fill-mask'
+        task = models[0].pipeline_tag
+        if task is None or task in ["sentence-similarity", "feature-extraction"]:
+            task = "fill-mask"
 
-    # Extract the revision, if it is specified
-    if "@" in model_id:
-        model_id, revision = model_id.split("@", 1)
-    else:
-        revision = "main"
+        # Get list of all language codes
+        with (get_config_dir() / "language_codes.yaml").open() as f:
+            language_codes = yaml.safe_load(f)
 
-    # Construct the model config
-    model_config = ModelConfig(
-        model_id=model_id,
-        framework=framework,
-        task=task,
-        languages=languages,
-        revision=revision,
-    )
+        # Construct the model config
+        model_config = ModelConfig(
+            model_id=model_id_without_revision,
+            framework=framework,
+            task=task,
+            languages=[tag for tag in tags if tag in language_codes],
+            revision=revision,
+        )
+
+    # If fetching from the Hugging Face Hub failed then throw a reasonable exception
+    except RequestException:
+        raise ConnectionError(
+            "Connection to the Hugging Face Hub failed. Check your internet "
+            "connection and if https://huggingface.co is down."
+        )
 
     # Return the model config
     return model_config
