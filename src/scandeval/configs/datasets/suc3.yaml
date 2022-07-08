@@ -1,5 +1,5 @@
 name: suc3
-pretty_name: SUC 3.0
+pretty_name: the truncated version of SUC 3.0
 huggingface_id: ScandEval/suc3-mini
 languages:
   - sv

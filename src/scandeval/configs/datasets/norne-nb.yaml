@@ -1,5 +1,5 @@
 name: norne-nb
-pretty_name: the Bokmål part of NorNE
+pretty_name: the truncated version of the Bokmål part of NorNE
 huggingface_id: ScandEval/norne-nb-mini
 languages:
   - nb

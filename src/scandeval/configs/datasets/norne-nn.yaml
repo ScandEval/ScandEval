@@ -1,5 +1,5 @@
 name: norne-nn
-pretty_name: the Nynorsk part of NorNE
+pretty_name: the truncated version of the Nynorsk part of NorNE
 huggingface_id: ScandEval/norne-nn-mini
 languages:
   - nn
