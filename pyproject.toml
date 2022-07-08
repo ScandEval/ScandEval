@@ -44,13 +44,15 @@ scandeval = "scandeval.cli:benchmark"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = ['--flake8',
-           '--verbose',
-           '--durations=10',
-           '--color=yes',
-           '-s',
-           '-vv',
-           '--doctest-modules']
+addopts = [
+    '--flake8',
+    '--verbose',
+    '--durations=10',
+    '--color=yes',
+    '-s',
+    '-vv',
+    '--doctest-modules'
+]
 xfail_strict = true
 filterwarnings = ["error"]
 log_cli_level = "info"
