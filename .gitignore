@@ -97,3 +97,6 @@ checkpoint-*
 
 # Result log
 scandeval_benchmark_results.json
+
+# Documentation
+docs/scandeval/
