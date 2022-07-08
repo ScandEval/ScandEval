@@ -39,9 +39,9 @@ from transformers import (
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
-from .hacky_training_args import TrainingArgumentsWithMPSSupport
 from .hf_hub import get_model_config
 from .scores import log_scores
+from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
 from .utils import enforce_reproducibility, is_module_installed
 
 logger = logging.getLogger(__name__)
