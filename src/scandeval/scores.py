@@ -9,57 +9,6 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def aggregate_scores(
-    scores: Dict[str, Sequence[Dict[str, float]]], metric_name: str
-) -> Dict[str, Tuple[float, float]]:
-    """Helper function to compute the mean with confidence intervals.
-
-    Args:
-        scores (dict):
-            Dictionary with the names of the metrics as keys, of the form
-            "<split>_<metric_name>", such as "val_f1", and values the metric values.
-        metric_name (str):
-            The name of the metric, which is used to collect the correct metric from
-            `scores`.
-
-    Returns:
-        dict:
-            Dictionary with keys among 'train' and 'test', with corresponding values
-            being a pair of floats, containing the score and the radius of its 95%
-            confidence interval.
-    """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-
-        results = dict()
-
-        if "train" in scores.keys():
-            train_scores = [dct[f"train_{metric_name}"] for dct in scores["train"]]
-            train_score = np.mean(train_scores)
-
-            if len(train_scores) > 1:
-                sample_std = np.std(train_scores, ddof=1)
-                train_se = sample_std / np.sqrt(len(train_scores))
-            else:
-                train_se = np.nan
-
-            results["train"] = (train_score, 1.96 * train_se)
-
-        if "test" in scores.keys():
-            test_scores = [dct[f"test_{metric_name}"] for dct in scores["test"]]
-            test_score = np.mean(test_scores)
-
-            if len(test_scores) > 1:
-                sample_std = np.std(test_scores, ddof=1)
-                test_se = sample_std / np.sqrt(len(test_scores))
-            else:
-                test_se = np.nan
-
-            results["test"] = (test_score, 1.96 * test_se)
-
-        return results
-
-
 def log_scores(
     dataset_name: str,
     metrics: dict,
@@ -73,8 +22,8 @@ def log_scores(
         dataset_name (str):
             Name of the dataset.
         metrics (dict):
-            Sequence of metric names to log, with the short metric names as keys and the
-            metric configuration as values.
+            Sequence of metric names to log, with the short metric names as keys and
+            the metric configuration as values.
         scores(dict):
             The scores that are to be logged. This is a dict with keys 'train' and
             'test', with values being lists of dictionaries full of scores.
@@ -130,3 +79,54 @@ def log_scores(
 
     # Return the extended scores
     return all_scores
+
+
+def aggregate_scores(
+    scores: Dict[str, Sequence[Dict[str, float]]], metric_name: str
+) -> Dict[str, Tuple[float, float]]:
+    """Helper function to compute the mean with confidence intervals.
+
+    Args:
+        scores (dict):
+            Dictionary with the names of the metrics as keys, of the form
+            "<split>_<metric_name>", such as "val_f1", and values the metric values.
+        metric_name (str):
+            The name of the metric, which is used to collect the correct metric from
+            `scores`.
+
+    Returns:
+        dict:
+            Dictionary with keys among 'train' and 'test', with corresponding values
+            being a pair of floats, containing the score and the radius of its 95%
+            confidence interval.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+
+        results = dict()
+
+        if "train" in scores.keys():
+            train_scores = [dct[f"train_{metric_name}"] for dct in scores["train"]]
+            train_score = np.mean(train_scores)
+
+            if len(train_scores) > 1:
+                sample_std = np.std(train_scores, ddof=1)
+                train_se = sample_std / np.sqrt(len(train_scores))
+            else:
+                train_se = np.nan
+
+            results["train"] = (train_score, 1.96 * train_se)
+
+        if "test" in scores.keys():
+            test_scores = [dct[f"test_{metric_name}"] for dct in scores["test"]]
+            test_score = np.mean(test_scores)
+
+            if len(test_scores) > 1:
+                sample_std = np.std(test_scores, ddof=1)
+                test_se = sample_std / np.sqrt(len(test_scores))
+            else:
+                test_se = np.nan
+
+            results["test"] = (test_score, 1.96 * test_se)
+
+        return results
