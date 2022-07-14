@@ -814,8 +814,7 @@ class BenchmarkDataset(ABC):
             model = spacy.load(local_model_id)
         except OSError:
             raise InvalidBenchmark(
-                f"The model {model_config.model_id} could not be installed "
-                "from spaCy."
+                f"The model {model_config.model_id} could not be installed from spaCy."
             )
         return dict(model=model)
 
@@ -1001,8 +1000,8 @@ class BenchmarkDataset(ABC):
         if num_new_labels == self.dataset_config.num_labels:
             if len(set(flat_old_synonyms).intersection(old_id2label)) == 0:
                 msg = (
-                    "The model has not been trained on any of the labels "
-                    "in the dataset, or synonyms thereof."
+                    "The model has not been trained on any of the labels in the "
+                    "dataset, or synonyms thereof."
                 )
                 raise InvalidBenchmark(msg)
 
