@@ -4,15 +4,15 @@
 
 import logging
 import os
-from importlib import metadata
 
+import pkg_resources
 from termcolor import colored
 
 from .benchmarker import Benchmarker  # noqa
 from .utils import block_terminal_output
 
 # Fetches the version of the package as defined in pyproject.toml
-__version__ = metadata.version(__package__)  # noqa
+__version__ = pkg_resources.get_distribution("scandeval").version
 
 
 # Block unwanted terminal outputs
