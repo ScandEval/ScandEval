@@ -61,7 +61,7 @@ and this project adheres to
 - Removed support for Python 3.7, as this was incompatible with support for Apple
   Silicon.
 - Removed the Danish sentiment analysis datasets `twitter-sent`, `europarl` and `lcc`,
-  and is not using only the `angry-tweets` dataset for this task.
+  and instead using only the `angry-tweets` dataset for this task.
 - Removed datasets `dkhate`, `nordial` and `dalaj`, to ensure a larger amount of
   benchmark uniformity across languages.
 - Removed all part-of-speech datasets from the benchmark, as there was too little
