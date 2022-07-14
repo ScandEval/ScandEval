@@ -1100,7 +1100,6 @@ class BenchmarkDataset(ABC):
         """
         pass
 
-    @abstractmethod
     def _compute_metrics(
         self, predictions_and_labels: tuple, id2label: Optional[list] = None
     ) -> Dict[str, float]:
@@ -1118,7 +1117,20 @@ class BenchmarkDataset(ABC):
                 A dictionary with the names of the metrics as keys and the metric
                 values as values.
         """
-        pass
+        predictions, labels = predictions_and_labels
+        predictions = predictions.argmax(axis=-1)
+        results = dict()
+        for cfg in self.dataset_config.task.metrics:
+            metric = self._metrics[cfg.name]
+            score_dict = metric.compute(
+                predictions=predictions,
+                references=labels,
+                **cfg.compute_kwargs,
+            )
+            if score_dict is not None:
+                scores = score_dict[cfg.results_key]
+                results[cfg.name] = scores
+        return results
 
     @abstractmethod
     def _get_spacy_predictions_and_labels(self, model, dataset: Dataset) -> tuple:

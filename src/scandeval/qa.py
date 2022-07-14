@@ -28,25 +28,6 @@ class QABenchmark(BenchmarkDataset):
             The configuration of the benchmark.
     """
 
-    def _compute_metrics(
-        self, predictions_and_labels: tuple, id2label: Optional[list] = None
-    ) -> Dict[str, float]:
-        """Compute the metrics needed for evaluation.
-
-        Args:
-            predictions_and_labels (pair of arrays):
-                The first array contains the probability predictions and the second
-                array contains the true labels.
-            id2label (list or None, optional):
-                Conversion of indices to labels. Defaults to None.
-
-        Returns:
-            dict:
-                A dictionary with the names of the metrics as keys and the metric
-                values as values.
-        """
-        raise NotImplementedError
-
     def _preprocess_data(self, dataset: Dataset, framework: str, **kwargs) -> Dataset:
         """Preprocess a dataset by tokenizing and aligning the labels.
 
@@ -91,6 +72,5 @@ class QABenchmark(BenchmarkDataset):
                 array contains the true labels.
         """
         raise InvalidBenchmark(
-            "Evaluation of question-answering tasks "
-            "for SpaCy models is not yet implemented."
+            "Evaluation of question-answering tasks for SpaCy models is not possible."
         )

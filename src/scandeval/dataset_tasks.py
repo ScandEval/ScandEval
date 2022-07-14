@@ -23,6 +23,14 @@ LA = DatasetTask(
             name="mcc",
             pretty_name="Matthew's Correlation Coefficient",
             huggingface_id="matthews_correlation",
+            results_key="matthews_correlation",
+        ),
+        MetricConfig(
+            name="macro_f1",
+            pretty_name="Macro-average F1-score",
+            huggingface_id="f1",
+            results_key="f1",
+            compute_kwargs=dict(average="macro"),
         ),
     ],
     labels=[
@@ -46,11 +54,13 @@ NER = DatasetTask(
             name="micro_f1",
             pretty_name="Micro-average F1-score",
             huggingface_id="seqeval",
+            results_key="overall_f1",
         ),
         MetricConfig(
             name="micro_f1_no_misc",
             pretty_name="Micro-average F1-score without MISC tags",
             huggingface_id="seqeval",
+            results_key="overall_f1",
         ),
     ],
     labels=[
@@ -188,11 +198,13 @@ QA = DatasetTask(
             name="em",
             pretty_name="Exact Match",
             huggingface_id="exact_match",
+            results_key="exact_match",
         ),
         MetricConfig(
             name="f1",
-            pretty_name="F1-score",
+            pretty_name="F1-score of the positive class",
             huggingface_id="f1",
+            results_key="f1",
         ),
     ],
     labels=[],
@@ -207,6 +219,14 @@ SENT = DatasetTask(
             name="mcc",
             pretty_name="Matthew's Correlation Coefficient",
             huggingface_id="matthews_correlation",
+            results_key="matthews_correlation",
+        ),
+        MetricConfig(
+            name="macro_f1",
+            pretty_name="Macro-average F1-score",
+            huggingface_id="f1",
+            results_key="f1",
+            compute_kwargs=dict(average="macro"),
         ),
     ],
     labels=[

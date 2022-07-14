@@ -1,7 +1,7 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 
 @dataclass
@@ -16,11 +16,19 @@ class MetricConfig:
             for logging.
         huggingface_id (str):
             The Hugging Face ID of the metric.
+        results_key (str):
+            The name of the key used to extract the metric scores from the results
+            dictionary.
+        compute_kwargs (dict, optional):
+            Keyword arguments to pass to the metric's compute function. Defaults to
+            an empty dictionary.
     """
 
     name: str
     pretty_name: str
     huggingface_id: str
+    results_key: str
+    compute_kwargs: Dict[str, Any] = dict()
 
 
 @dataclass
