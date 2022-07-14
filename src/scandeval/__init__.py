@@ -1,4 +1,6 @@
-"""Evaluation of language models on mono- or multilingual Scandinavian language tasks."""
+"""
+.. include:: ../../README.md
+"""
 
 import logging
 import os
