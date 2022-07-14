@@ -77,10 +77,10 @@ tree:
 		-I docs
 
 publish:
-	@echo "Preparing to publish to PyPI. Have you ensured to change the package version in pyproject.toml? (y/n)"
-	@read answer
 	@. .env; \
-		if [ "${answer}" = "y" ]; then \
+		printf "Preparing to publish to PyPI. Have you ensured to change the package version in pyproject.toml? [y/n] : "; \
+		read -r answer; \
+		if [ "$${answer}" = "y" ]; then \
 			if [ "$${PYPI_API_TOKEN}" = "" ]; then \
 				echo "No PyPI API token specified in the `.env` file, so cannot publish."; \
 			else \
