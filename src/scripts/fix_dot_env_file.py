@@ -10,6 +10,8 @@ DESIRED_ENVIRONMENT_VARIABLES = dict(
     "'s/.*\/([^ ]+).*/\\1/'` to see your key ID:\n> ",  # noqa
     GIT_NAME="Enter your full name, to be shown in Git commits:\n> ",
     GIT_EMAIL="Enter your email, as registered on your Github account:\n> ",
+    PYPI_API_TOKEN="Enter your PyPI API token, or leave empty if you do not want "
+    "to use it:\n> ",
 )
 
 
