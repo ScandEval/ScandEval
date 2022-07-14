@@ -44,7 +44,6 @@ scandeval = "scandeval.cli:benchmark"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
-    '--flake8',
     '--verbose',
     '--durations=10',
     '--color=yes',
