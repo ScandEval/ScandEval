@@ -1,6 +1,6 @@
 """Configuration classes used throughout the project."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
 
 
@@ -28,7 +28,7 @@ class MetricConfig:
     pretty_name: str
     huggingface_id: str
     results_key: str
-    compute_kwargs: Dict[str, Any] = dict()
+    compute_kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
