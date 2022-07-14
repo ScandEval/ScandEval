@@ -138,7 +138,7 @@ class NERBenchmark(BenchmarkDataset):
         Args:
             model (SpaCy model):
                 The model.
-            dataset (HuggingFace dataset):
+            dataset (Hugging Face dataset):
                 The dataset.
 
         Returns:
@@ -173,7 +173,7 @@ class NERBenchmark(BenchmarkDataset):
         Args:
             examples (dict):
                 The examples to be tokenised.
-            tokenizer (HuggingFace tokenizer):
+            tokenizer (Hugging Face tokenizer):
                 A pretrained tokenizer.
             label2id (dict):
                 A dictionary that converts NER tags to IDs.
@@ -198,7 +198,7 @@ class NERBenchmark(BenchmarkDataset):
             # This happens if the tokenizer is not of the fast variant, in which case
             # the `word_ids` method is not available, so we have to extract this
             # manually. It's slower, but it works, and it should only occur rarely,
-            # when the HuggingFace team has not implemented a fast variant of the
+            # when the Hugging Face team has not implemented a fast variant of the
             # tokenizer yet.
             except ValueError:
 
@@ -290,14 +290,14 @@ class NERBenchmark(BenchmarkDataset):
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
-            dataset (HuggingFace dataset):
+            dataset (Hugging Face dataset):
                 The dataset to preprocess.
             kwargs:
                 Extra keyword arguments containing objects used in preprocessing the
                 dataset.
 
         Returns:
-            HuggingFace dataset: The preprocessed dataset.
+            Hugging Face dataset: The preprocessed dataset.
         """
         if framework == "pytorch":
             map_fn = partial(
@@ -314,12 +314,12 @@ class NERBenchmark(BenchmarkDataset):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (HuggingFace tokenizer or None, optional):
+            tokenizer (Hugging Face tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
         Returns:
-            HuggingFace data collator:
+            Hugging Face data collator:
                 The data collator.
         """
         return DataCollatorForTokenClassification(tokenizer, label_pad_token_id=-100)
@@ -330,7 +330,7 @@ class NERBenchmark(BenchmarkDataset):
         Args:
             model (SpaCy model):
                 The model.
-            dataset (HuggingFace dataset):
+            dataset (Hugging Face dataset):
                 The dataset.
 
         Returns:

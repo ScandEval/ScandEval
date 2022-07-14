@@ -51,14 +51,14 @@ class QABenchmark(BenchmarkDataset):
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
-            dataset (HuggingFace dataset):
+            dataset (Hugging Face dataset):
                 The dataset to preprocess.
             kwargs:
                 Extra keyword arguments containing objects used in preprocessing the
                 dataset.
 
         Returns:
-            HuggingFace dataset: The preprocessed dataset.
+            Hugging Face dataset: The preprocessed dataset.
         """
         raise NotImplementedError
 
@@ -66,12 +66,12 @@ class QABenchmark(BenchmarkDataset):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (HuggingFace tokenizer or None, optional):
+            tokenizer (Hugging Face tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
         Returns:
-            HuggingFace data collator:
+            Hugging Face data collator:
                 The data collator.
         """
         return DefaultDataCollator(tokenizer)
@@ -82,7 +82,7 @@ class QABenchmark(BenchmarkDataset):
         Args:
             model (SpaCy model):
                 The model.
-            dataset (HuggingFace dataset):
+            dataset (Hugging Face dataset):
                 The dataset.
 
         Returns:
