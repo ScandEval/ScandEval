@@ -113,6 +113,8 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── .pre-commit-config.yaml
 ├── CHANGELOG.md
 ├── README.md
+├── gfx
+│   └── scandeval.png
 ├── makefile
 ├── notebooks
 │   └── scandeval-truncation.ipynb
