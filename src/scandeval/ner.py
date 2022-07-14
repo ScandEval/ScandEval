@@ -1,6 +1,7 @@
 """NER tagging benchmark dataset."""
 
 import logging
+from copy import deepcopy
 from functools import partial
 from typing import Dict, Optional, Sequence
 
@@ -105,14 +106,14 @@ class NERBenchmark(BenchmarkDataset):
                         predictions[i][j] = "O"
 
         # Remove MISC labels from predictions
-        predictions_no_misc = predictions.copy()
+        predictions_no_misc = deepcopy(predictions)
         for i, prediction_list in enumerate(predictions_no_misc):
             for j, ner_tag in enumerate(prediction_list):
                 if ner_tag[-4:] == "MISC":
                     predictions_no_misc[i][j] = "O"
 
         # Remove MISC labels from labels
-        labels_no_misc = labels.copy()
+        labels_no_misc = deepcopy(labels)
         for i, label_list in enumerate(labels_no_misc):
             for j, ner_tag in enumerate(label_list):
                 if ner_tag[-4:] == "MISC":
