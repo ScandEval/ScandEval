@@ -25,9 +25,9 @@ and this project adheres to
   `scala-fo`. These are all linguistic acceptability datasets, being a binary text
   classification where a sentence has to be marked as grammatically correct or not.
 - New randomly initialised ELECTRA-small model available for benchmarking, simply set
-  `model-id` to either 'random-electra-sequence-clf or 'random-electra-token-clf'. The
-  randomly initialised XLM-RoBERTa-base model is still available by replacing 'electra'
-  with 'roberta'.
+  `model-id` to either 'random-electra-small-sequence-clf or
+  'random-electra-small-token-clf'. The randomly initialised XLM-RoBERTa-base model is
+  still available by replacing 'electra-small' with 'xlmr-base'.
 - Added `--raise-error-on-invalid-model` (`-r`) flag which raises an exception if an
   invalid model is specified. By default this is off, meaning that it simply skips the
   model if it is invalid.
