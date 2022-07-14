@@ -90,7 +90,7 @@ bump-patch:
 
 publish:
 	@. .env; \
-		printf "Preparing to publish to PyPI. Have you ensured to change the package version with `make bump-X-version` for `X` being `major`, `minor` or `patch`? [y/n] : "; \
+		printf "Preparing to publish to PyPI. Have you ensured to change the package version with `make bump-X` for `X` being `major`, `minor` or `patch`? [y/n] : "; \
 		read -r answer; \
 		if [ "$${answer}" = "y" ]; then \
 			if [ "$${PYPI_API_TOKEN}" = "" ]; then \
