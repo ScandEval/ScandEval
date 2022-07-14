@@ -82,7 +82,7 @@ This would benchmark all Nynorsk models on Nynorsk datasets:
 
 ## Documentation
 
-See the full documentation [here](https://saattrupdan.github.io/ScandEval/).
+See the full documentation [here](https://saattrupdan.github.io/ScandEval/scandeval.html).
 
 
 ## Citing ScandEval
