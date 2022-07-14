@@ -9,7 +9,7 @@ and this project adheres to
 
 
 ## [v4.0.0] - 2022-07-14
-### Added
+### Added
 - Compatibility with Apple Silicon. If no CUDA GPU is available then MPS GPUs will
   automatically be used, if available.
 - Added the datasets `scala-da`, `scala-sv`, `scala-nb`, `scala-nn`, `scala-is` and
@@ -52,7 +52,7 @@ and this project adheres to
 - Now requires PyTorch 1.12.0 or newer, to ensure compatibility with Apple Silicon.
 - Renamed the `Benchmark` class to `Benchmarker`.
 
-### Removed
+### Removed
 - Removed support for evaluating finetuned models, as the package was primarily used to
   benchmark pretrained models anyway, and the change in datasets means that many
   finetuned models would have been trained on (part of) the test sets, resulting in
@@ -86,7 +86,7 @@ and this project adheres to
 
 
 ## [v3.0.0] - 2022-04-19
-### Changed
+### Changed
 - During finetuning, the i'th model will only be evaluated on the i'th
   bootstrapped dataset. This ensures that there will always be 10 scores, no
   matter if we're finetuning or purely evaluating, which means that the
@@ -126,7 +126,7 @@ and this project adheres to
 
 
 ## [v2.2.0] - 2022-01-18
-### Added
+### Added
 - Added more label synonyms for the DKHate dataset.
 
 
@@ -154,7 +154,7 @@ and this project adheres to
 
 
 ## [v1.5.7] - 2021-12-10
-### Fixed
+### Fixed
 - Now catching _all_ `CUDA error` exceptions and treating them as running out
   of memory. No harm done if this is not the case, however, as the script will
   simply decrease the batch size until it reaches 1, and if CUDA errors persist
@@ -162,7 +162,7 @@ and this project adheres to
 
 
 ## [v1.5.6] - 2021-12-10
-### Fixed
+### Fixed
 - When benchmarking a token classification dataset with a model whose tokenizer
   does not have a fast variant yet, this raised an error as the `word_ids`
   method of `BatchEncoding` objects only works when the tokenizer is fast. In
@@ -204,7 +204,7 @@ and this project adheres to
 
 
 ## [v1.5.0] - 2021-11-26
-### Changed
+### Changed
 - Added progress bar description when evaluating models without finetuning them
   first.
 - Lowered the package requirements to the earliest possible versions.
@@ -230,12 +230,12 @@ and this project adheres to
 
 
 ## [v1.3.7] - 2021-11-25
-### Fixed
+### Fixed
 - Removed `transformers` logging during evaluation as well.
 
 
 ## [v1.3.6] - 2021-11-25
-### Changed
+### Changed
 - Now only updating the list of benchmarks in the `Benchmark` during
   initialisation, and also logs it. This should make subsequent calls to the
   `benchmark` method faster.
@@ -270,19 +270,19 @@ and this project adheres to
 
 
 ## [v1.3.2] - 2021-11-11
-### Fixed
+### Fixed
 - Added the NER label synonyms `GPE_LOC=LOC`, `GPE_ORG=ORG`, `LOC/ORG=LOC`,
   `ORG/PRS=ORG`, `OBJ/ORG=ORG`, as Norwegian and Swedish models tend to use
   these.
 
 
 ## [v1.3.1] - 2021-11-11
-### Fixed
+### Fixed
 - Fixed a bug in label synonyms when benchmarking a finetuned spaCy for NER.
 
 
 ## [v1.3.0] - 2021-11-11
-### Added
+### Added
 - Added label synonyms for NER benchmarking, which will enforce a more fair
   comparison of finetuned NER models, if the models have been trained on
   datasets with different labelling (e.g., `Person` instead of `PER`).
@@ -295,7 +295,7 @@ and this project adheres to
 
 
 ## [v1.2.0] - 2021-10-15
-### Added
+### Added
 - Added the Icelandic NER dataset MIM-GOLD-NER. This can now be loaded as
   `mim-gold-ner` in the `Benchmark` class and through the CLI.
 
@@ -315,7 +315,7 @@ and this project adheres to
 
 
 ## [v1.1.1] - 2021-09-27
-### Fixed
+### Fixed
 - Reduce validation batch size if CUDA runs out of memory, rather than only
   reducing training batch size.
 
@@ -342,13 +342,13 @@ and this project adheres to
 
 
 ## [v1.0.2] - 2021-09-09
-### Fixed
+### Fixed
 - Replaced abbreviations with spaces, such as "o s v" in the SDT corpus, with
   their proper version "o.s.v.".
 
 
 ## [v1.0.1] - 2021-09-09
-### Fixed
+### Fixed
 - The URLs for the `wikiann-is` and `wikiann-fo` were wrong and have been
   corrected.
 
@@ -439,7 +439,7 @@ and this project adheres to
 
 
 ## [v0.14.0] - 2021-08-31
-### Added
+### Added
 - Added the Bokmål and Nynorsk parts of the NorNE dataset, for named entity
   recognition. They can be loaded with the `norne-nb` and `norne-nn` names.
 - There is now a `load_dataset` function, which can load any dataset, using the
@@ -456,7 +456,7 @@ and this project adheres to
 
 
 ## [v0.13.0] - 2021-08-30
-### Added
+### Added
 - Added the Norwegian Review Corpus (NoReC), a sentiment classification dataset
   in Norwegian.
 - Added the Bokmål/Nynorsk part of the Norwegian Dialect dataset (NorDial), a
@@ -516,7 +516,7 @@ and this project adheres to
 
 
 ## [v0.11.0] - 2021-08-23
-### Added
+### Added
 - The subjective/objective part of the `TwitterSent` and `Europarl2` datasets
   have now been added as binary classification tasks, called `TwitterSubj` and
   `EuroparlSubj`, respectively. These can now be benchmarked with the
@@ -533,7 +533,7 @@ and this project adheres to
 
 
 ## [v0.10.0] - 2021-08-20
-### Fixed
+### Fixed
 - Properly filters by languages now via the `language` argument in the CLI and
   the `Benchmark` class. As HuggingFace Hub does not have a keyword for
   language, a search for language also means that any other non-language tag
@@ -547,7 +547,7 @@ and this project adheres to
 - Now handles the case where a non-classification model, such as a seq-to-seq
   model, are being benchmarked on a classification dataset.
 
-### Added
+### Added
 - All the benchmark classes and `Benchmark` now has a `benchmark` method, which
   does the same as the `__call__` method. This is primarily so that it shows up
   in the Sphinx documentation.
@@ -559,7 +559,7 @@ and this project adheres to
 
 
 ## [v0.9.0] - 2021-08-19
-### Added
+### Added
 - Added the separate `nb` (Norwegian Bokmål) and `nn` (Norwegian Nynorsk)
   language tags, on top of the general `no` (Norwegian).
 - Added more multilingual models.
@@ -622,7 +622,7 @@ and this project adheres to
   the case for finetuned NER models not having been trained on MISC tags, if
   they are being evaluated on the DaNE dataset.
 
-### Fixed
+### Fixed
 - Fixed bug when evaluating SpaCy models.
 - Only removing objects at memory cleanup if they exist at all.
 
@@ -656,7 +656,7 @@ and this project adheres to
 
 
 ## [v0.5.0] - 2021-08-12
-### Added
+### Added
 - It is possible to only evaluate on the test sets, to save some time. This can
   be done in the `Benchmark` class using the `evaluate_train` argument, and in
   the CLI with the `--evaluate_train` flag.
@@ -689,7 +689,7 @@ and this project adheres to
 
 
 ## [v0.4.1] - 2021-08-12
-### Fixed
+### Fixed
 - Now catching the error when the model's config does not align with the model
   class. When using the CLI or `Benchmark`, these will be skipped.
 
