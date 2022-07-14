@@ -76,9 +76,21 @@ tree:
 		-I .gitkeep \
 		-I docs
 
+bump-major-version:
+	@poetry run python -m src.scripts.bump_version --major
+	@echo "Bumped major version."
+
+bump-minor-version:
+	@poetry run python -m src.scripts.bump_version --minor
+	@echo "Bumped minor version."
+
+bump-patch-version:
+	@poetry run python -m src.scripts.bump_version --patch
+	@echo "Bumped patch version."
+
 publish:
 	@. .env; \
-		printf "Preparing to publish to PyPI. Have you ensured to change the package version in pyproject.toml? [y/n] : "; \
+		printf "Preparing to publish to PyPI. Have you ensured to change the package version with `make bump-X-version` for `X` being `major`, `minor` or `patch`? [y/n] : "; \
 		read -r answer; \
 		if [ "$${answer}" = "y" ]; then \
 			if [ "$${PYPI_API_TOKEN}" = "" ]; then \

@@ -1,0 +1,110 @@
+"""Scripts related to updating of version."""
+
+import datetime as dt
+import re
+import subprocess
+from pathlib import Path
+from typing import Tuple
+
+import pkg_resources
+
+
+def bump_major():
+    """Add one to the major version."""
+    major, _, _ = get_current_version()
+    set_new_version(major + 1, 0, 0)
+
+
+def bump_minor():
+    """Add one to the minor version."""
+    major, minor, _ = get_current_version()
+    set_new_version(major, minor + 1, 0)
+
+
+def bump_patch():
+    """Add one to the patch version."""
+    major, minor, patch = get_current_version()
+    set_new_version(major, minor, patch + 1)
+
+
+def set_new_version(major: int, minor: int, patch: int):
+    """Sets a new version.
+
+    Args:
+        major (int):
+            The major version. This only changes when the code stops being backwards
+            compatible.
+        minor (int):
+            The minor version. This changes when a backwards compatible change
+            happened.
+        patch (init):
+            The patch version. This changes when the only new changes are bug fixes.
+    """
+    version = f"{major}.{minor}.{patch}"
+
+    # Get current changelog and ensure that it has an [Unreleased] entry
+    changelog_path = Path("CHANGELOG.md")
+    changelog = changelog_path.read_text()
+    if "[Unreleased]" not in changelog:
+        raise RuntimeError("No [Unreleased] entry in CHANGELOG.md.")
+
+    # Add version to CHANGELOG
+    today = dt.date.today().strftime("%Y-%m-%d")
+    new_changelog = re.sub(r"\[Unreleased\].*", f"[v{version}] - {today}", changelog)
+    changelog_path.write_text(new_changelog)
+
+    # Add to version control
+    subprocess.run(["git", "add", "CHANGELOG.md"])
+    subprocess.run(["git", "commit", "-m", f"feat: v{version}"])
+    subprocess.run(["git", "tag", f"v{version}"])
+
+
+def get_current_version() -> Tuple[int, int, int]:
+    """Fetch the current version of the package.
+
+    Returns:
+        triple of ints:
+            The current version, separated into major, minor and patch versions.
+    """
+    version_str = pkg_resources.get_distribution("scandeval").version
+    major, minor, patch = map(int, version_str.split("."))
+    return major, minor, patch
+
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--major",
+        const=True,
+        nargs="?",
+        default=False,
+        help="Bump the major version by one.",
+    )
+    parser.add_argument(
+        "--minor",
+        const=True,
+        nargs="?",
+        default=False,
+        help="Bump the minor version by one.",
+    )
+    parser.add_argument(
+        "--patch",
+        const=True,
+        nargs="?",
+        default=False,
+        help="Bump the patch version by one.",
+    )
+    args = parser.parse_args()
+
+    if args.major + args.minor + args.patch != 1:
+        raise RuntimeError(
+            "Exactly one of --major, --minor and --patch must be selected."
+        )
+    elif args.major:
+        bump_major()
+    elif args.minor:
+        bump_minor()
+    elif args.patch:
+        bump_patch()
