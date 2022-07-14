@@ -294,10 +294,6 @@ class BenchmarkDataset(ABC):
                     training_args=training_args,
                 )
 
-                # TEMP: Print scores for the iteration
-                print(f"Scores for iteration {idx}:")
-                print(itr_scores)
-
                 # If the iteration was successful then break the loop
                 if isinstance(itr_scores, dict):
                     break
