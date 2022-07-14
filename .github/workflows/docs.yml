@@ -50,8 +50,10 @@ jobs:
       - name: Build documentation
         run: poetry run pdoc --docformat google src/scandeval -o docs
 
-      - name: Upload documentation
+      - name: Compress documentation
         run: tar --directory docs/ -hcf artifact.tar .
+
+      - name: Upload documentation
         uses: actions/upload-artifact@v3
         with:
           name: github-pages
