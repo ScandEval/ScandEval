@@ -57,7 +57,7 @@ and this project adheres to
   benchmark pretrained models anyway, and the change in datasets means that many
   finetuned models would have been trained on (part of) the test sets, resulting in
   artificially large scores. For evaluation of finetuned models, please check out the
-  `AIAI` Python package instead.
+  `AIAI` Python package instead (under development).
 - Removed support for Python 3.7, as this was incompatible with support for Apple
   Silicon.
 - Removed the Danish sentiment analysis datasets `twitter-sent`, `europarl` and `lcc`,
