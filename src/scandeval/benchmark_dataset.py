@@ -534,7 +534,7 @@ class BenchmarkDataset(ABC):
             dep_test = isinstance(sample_preds[0], list) and "" in sample_preds[0]
             if pos_ner_test or dep_test:
                 raise InvalidBenchmark(
-                    "This spaCy model have not been " "trained on this task. Skipping."
+                    "This spaCy model have not been trained on this task. Skipping."
                 )
 
             test_scores = self._compute_metrics(preds_labels)
