@@ -79,13 +79,10 @@ This would benchmark all Nynorsk models on Nynorsk datasets:
 >>> benchmark(language='nn')
 ```
 
-See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a more
-in-depth description.
-
 
 ## Documentation
 
-See the full documentation [https://saattrupdan.github.io/ScandEval/](here).
+See the full documentation [here](https://saattrupdan.github.io/ScandEval/).
 
 
 ## Citing ScandEval
