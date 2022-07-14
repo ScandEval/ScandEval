@@ -112,6 +112,15 @@ World](https://satwcomic.com/) team. Go check them out!
 │       └── docs.yml
 ├── .gitignore
 ├── .pre-commit-config.yaml
+├── .pytest_cache
+│   ├── .gitignore
+│   ├── CACHEDIR.TAG
+│   ├── README.md
+│   └── v
+│       └── cache
+│           ├── lastfailed
+│           ├── nodeids
+│           └── stepwise
 ├── CHANGELOG.md
 ├── README.md
 ├── gfx
@@ -155,5 +164,22 @@ World](https://satwcomic.com/) team. Go check them out!
 │       ├── fix_dot_env_file.py
 │       └── load_ud_pos.py
 └── tests
-    └── __init__.py
+    ├── __init__.py
+    ├── test_benchmark_dataset.py
+    ├── test_benchmarker.py
+    ├── test_callbacks.py
+    ├── test_cli.py
+    ├── test_config.py
+    ├── test_dataset_configs.py
+    ├── test_dataset_factory.py
+    ├── test_dataset_tasks.py
+    ├── test_exceptions.py
+    ├── test_hf_hub.py
+    ├── test_languages.py
+    ├── test_ner.py
+    ├── test_qa.py
+    ├── test_scores.py
+    ├── test_text_classification.py
+    ├── test_training_args_with_mps_support.py
+    └── test_utils.py
 ```
