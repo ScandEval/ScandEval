@@ -42,6 +42,17 @@ def set_new_version(major: int, minor: int, patch: int):
     """
     version = f"{major}.{minor}.{patch}"
 
+    # Update the version in the `pyproject.toml` file
+    pyproject_path = Path("pyproject.toml")
+    pyproject = pyproject_path.read_text()
+    pyproject = re.sub(
+        r'version = "[^"]+"',
+        f'version = "{version}"',
+        pyproject,
+        count=1,
+    )
+    pyproject_path.write_text(pyproject)
+
     # Get current changelog and ensure that it has an [Unreleased] entry
     changelog_path = Path("CHANGELOG.md")
     changelog = changelog_path.read_text()
