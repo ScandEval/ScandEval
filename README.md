@@ -6,9 +6,9 @@
 
 ______________________________________________________________________
 [![LastCommit](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/commits/main)
-[![ReadTheDocs](https://readthedocs.org/projects/scandeval/badge/?version=latest)](https://scandeval.readthedocs.io/en/latest/?badge=latest)
 [![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://badge.fury.io/py/scandeval)
 [![License](https://img.shields.io/github/license/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/scandeval)](https://pypi.org/project/scandeval/)
 
 
 ## Installation
@@ -81,6 +81,10 @@ This would benchmark all Nynorsk models on Nynorsk datasets:
 
 See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a more
 in-depth description.
+
+
+## Documentation
+See the full documentation [https://saattrupdan.github.io/ScandEval/](here).
 
 
 ## Citing ScandEval
