@@ -60,7 +60,7 @@ clean:
 	@echo "Cleaned repository."
 
 test:
-	@scandeval -m Maltehb/aelaectra-danish-electra-small-cased -d dane
+	@scandeval -m Maltehb/aelaectra-danish-electra-small-cased -d scala-da
 
 tree:
 	@tree -a \
