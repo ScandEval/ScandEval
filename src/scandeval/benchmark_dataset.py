@@ -807,7 +807,7 @@ class BenchmarkDataset(ABC):
                 f"https://huggingface.co/{model_config.model_id}/resolve/main/"
                 f"{local_model_id}-any-py3-none-any.whl"
             )
-            subprocess.run(["pip3", "install", url, "--quiet"])
+            subprocess.run(["pip3", "install", url])
 
         # Load the model
         try:
