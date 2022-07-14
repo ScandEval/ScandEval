@@ -77,7 +77,7 @@ tree:
 		-I docs
 
 publish:
-	@echo "Preparing to publish to PyPI. Have you ensured to change the package version in `pyproject.toml`? (y/n)"
+	@echo "Preparing to publish to PyPI. Have you ensured to change the package version in pyproject.toml? (y/n)"
 	@read answer
 	@. .env; \
 		if [ "${answer}" = "y" ]; then \
