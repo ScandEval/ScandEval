@@ -202,6 +202,19 @@ class BenchmarkDataset(ABC):
         # Define variable that determines if the model should be finetuned
         finetune = model_config.task == "fill-mask"
 
+        # Deprecation warning if we are not finetuning
+        if not finetune:
+            msg = (
+                "Note that support for evaluation of all finetuned models is being "
+                "phased out in ScandEval. This is because many of these models have "
+                "been trained on part of the ScandEval test sets and the evaluation "
+                "scores will thus be artificially large. "
+                "To do this properly you can check out our new package `aiai`, which "
+                "focuses on evaluation of finetuned models, among other things - "
+                "note that this is currently under development, however."
+            )
+            warnings.warn(msg, category=DeprecationWarning)
+
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
 
@@ -634,10 +647,18 @@ class BenchmarkDataset(ABC):
 
         except ModuleNotFoundError:
             msg = (
-                f"The model {model_config.model_id} is built using the "
-                f"{model_config.framework} framework which is not installed. Try "
-                f"installing the ScandEval package as `pip install "
-                f"scandeval[{model_config.framework}]`."
+                f"The model {model_config.model_id} is built using the spaCy "
+                "framework which is not installed. ScandEval is phasing out support "
+                "for this framework and will instead focus on evaluating pretrained "
+                "language models. You can still evaluate this spaCy model on the "
+                "task if you install spaCy first (`pip install spacy`), but keep in "
+                "mind that the results will be artificially large, as the spaCy "
+                "models have been trained on part of the ScandEval test sets (which "
+                "is exactly the reason why we are phasing out support for evaluating "
+                "finetuned models in general. To do this properly you can check out "
+                "our new package `aiai`, which focuses on evaluation of finetuned "
+                "models, among other things - note that this is currently under "
+                "development, however."
             )
             raise ModuleNotFoundError(msg)
 
@@ -645,6 +666,16 @@ class BenchmarkDataset(ABC):
             return self._load_pytorch_model(model_config, from_flax=from_flax)
 
         elif model_config.framework == "spacy":
+            msg = (
+                "Note that support for spaCy models (and generally evaluation of all "
+                "finetuned models) is being phased out in ScandEval. This is because "
+                "the spaCy models have been trained on part of the ScandEval test "
+                "sets and the evaluation scores will thus be artificially large. "
+                "To do this properly you can check out our new package `aiai`, which "
+                "focuses on evaluation of finetuned models, among other things - "
+                "note that this is currently under development, however."
+            )
+            warnings.warn(msg, category=DeprecationWarning)
             return self._load_spacy_model(model_config)
 
         else:
