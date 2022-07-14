@@ -74,7 +74,8 @@ tree:
 		-I dist \
 		-I scandeval_benchmark_results.json \
 		-I .gitkeep \
-		-I docs
+		-I docs \
+		-I .pytest_cache
 
 bump-major:
 	@poetry run python -m src.scripts.versioning --major
