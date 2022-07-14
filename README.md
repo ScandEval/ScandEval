@@ -9,6 +9,7 @@ ______________________________________________________________________
 [![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://badge.fury.io/py/scandeval)
 [![License](https://img.shields.io/github/license/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/pypi/dm/scandeval)](https://pypi.org/project/scandeval/)
+[![Documentation](https://img.shields.io/badge/docs-passing-green)](https://saattrupdan.github.io/ScandEval/scandeval.html)
 
 
 ## Installation
