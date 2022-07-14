@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [v4.0.1] - 2022-07-14
+### Fixed
+- Removed temporary printing of scores for each iteration.
+
+
 ## [v4.0.0] - 2022-07-14
 ### Added
 - Compatibility with Apple Silicon. If no CUDA GPU is available then MPS GPUs will
