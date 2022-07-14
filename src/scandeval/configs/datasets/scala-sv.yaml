@@ -1,6 +1,0 @@
-name: scala-sv
-pretty_name: the Swedish part of ScaLA
-huggingface_id: ScandEval/scala-sv
-languages:
-  - sv
-task: la

@@ -1,6 +1,0 @@
-name: angry-tweets
-pretty_name: the truncated version of AngryTweets
-huggingface_id: ScandEval/angry-tweets-mini
-languages:
-  - da
-task: sent

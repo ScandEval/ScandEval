@@ -1,6 +1,0 @@
-name: scala-fo
-pretty_name: the Faroese part of ScaLA
-huggingface_id: ScandEval/scala-fo
-languages:
-  - fo
-task: la

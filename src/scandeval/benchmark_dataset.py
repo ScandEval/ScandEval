@@ -76,8 +76,8 @@ class BenchmarkDataset(ABC):
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self._metrics = {
-            metric_name: load_metric(metric_dct["huggingface_id"])
-            for metric_name, metric_dct in dataset_config.metrics.items()
+            metric_cfg.name: load_metric(metric_cfg.huggingface_id)
+            for metric_cfg in dataset_config.task.metrics
         }
 
     # TODO: Cache this
@@ -139,7 +139,7 @@ class BenchmarkDataset(ABC):
         # Set variable with number of iterations
         num_iter = 10
 
-        if model_config.framework in ("pytorch", "jax"):
+        if model_config.framework in {"pytorch", "jax"}:
             return self._benchmark_pytorch_jax(
                 model_dict=model_dict,
                 model_config=model_config,
@@ -243,7 +243,7 @@ class BenchmarkDataset(ABC):
 
         # Initialise training arguments
         training_args = TrainingArgumentsWithMPSSupport(
-            output_dir=".",
+            output_dir=self.benchmark_config.cache_dir,
             evaluation_strategy="steps",
             logging_strategy="steps" if self.benchmark_config.verbose else "no",
             save_strategy="steps",
@@ -317,13 +317,15 @@ class BenchmarkDataset(ABC):
                     training_args.per_device_eval_batch_size = bs // 2
                     training_args.gradient_accumulation_steps = ga * 2
 
+                    print("New batch size:", bs // 2)
+
             if "train" in itr_scores:
                 scores["train"].append(itr_scores["train"])
             scores["test"].append(itr_scores["test"])
 
         all_scores = log_scores(
             dataset_name=self.dataset_config.pretty_name,
-            metrics=self.dataset_config.metrics,
+            metric_configs=self.dataset_config.task.metrics,
             scores=scores,
             model_id=model_config.model_id,
             finetuned=finetune,
@@ -548,7 +550,7 @@ class BenchmarkDataset(ABC):
         # Log the scores
         all_scores = log_scores(
             dataset_name=self.dataset_config.name,
-            metrics=self.dataset_config.metrics,
+            metric_configs=self.dataset_config.task.metrics,
             scores=scores,
             model_id=model_config.model_id,
             finetuned=False,
@@ -711,17 +713,15 @@ class BenchmarkDataset(ABC):
                     **params,
                 )
 
-                if self.dataset_config.supertask == "token-classification":
+                supertask = self.dataset_config.task.supertask
+                if supertask == "token-classification":
                     model_cls = AutoModelForTokenClassification
-                elif self.dataset_config.supertask == "text-classification":
+                elif supertask == "text-classification":
                     model_cls = AutoModelForSequenceClassification
-                elif self.dataset_config.supertask == "question-answering":
+                elif supertask == "question-answering":
                     model_cls = AutoModelForQuestionAnswering
                 else:
-                    raise ValueError(
-                        f"The supertask `{self.dataset_config.supertask}` was not "
-                        "recognised."
-                    )
+                    raise ValueError(f"The supertask `{supertask}` was not recognised.")
 
                 model = model_cls.from_pretrained(
                     model_config.model_id,

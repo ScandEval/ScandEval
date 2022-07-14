@@ -1,7 +1,77 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass
-from typing import Dict, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
+
+
+@dataclass
+class MetricConfig:
+    """Configuration for a metric.
+
+    Attributes:
+        name (str):
+            The name of the metric.
+        pretty_name (str):
+            A longer prettier name for the metric, which allows cases and spaces. Used
+            for logging.
+        huggingface_id (str):
+            The Hugging Face ID of the metric.
+    """
+
+    name: str
+    pretty_name: str
+    huggingface_id: str
+
+
+@dataclass
+class Label:
+    """A label in a dataset task.
+
+    Attributes:
+        name (str):
+            The name of the label.
+        synonyms (list of str):
+            The synonyms of the label.
+    """
+
+    name: str
+    synonyms: List[str]
+
+
+@dataclass
+class DatasetTask:
+    """A dataset task.
+
+    Attributes:
+        name (str):
+            The name of the task.
+        supertask (str):
+            The supertask of the task, describing the overall type of task.
+        metrics (sequence of MetricConfig objects):
+            The metrics used to evaluate the task.
+        labels (sequence of Label objects):
+            The labels used in the task.
+    """
+
+    name: str
+    supertask: str
+    metrics: Sequence[MetricConfig]
+    labels: Sequence[Label]
+
+
+@dataclass
+class Language:
+    """A benchmarkable language.
+
+    Attributes:
+        code (str):
+            The ISO 639-1 language code of the language.
+        name (str):
+            The name of the language.
+    """
+
+    code: str
+    name: str
 
 
 @dataclass
@@ -9,19 +79,15 @@ class BenchmarkConfig:
     """General benchmarking configuration, across datasets and models.
 
     Attributes:
-        languages (list of str):
-            The language codes of the languages to include, both for models and
-            datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
-            'all' if all languages (also non-Scandinavian) should be considered.
-        model_languages (list of str or None):
-            The language codes of the languages to include for models. If not None
-            then this overrides the `language` parameter for model languages.
-        dataset_languages (list of str or None):
-            The language codes of the languages to include for datasets. If not None
-            then this overrides the `language` parameter for dataset languages.
-        tasks (list of str):
-            The tasks to consider in the list. If 'all' then all tasks will be
-            considered.
+        model_languages (sequence of Language objects):
+            The languages of the models to benchmark.
+        dataset_languages (sequence of Language objects):
+            The languages of the datasets in the benchmark.
+        model_tasks (None or sequence of str):
+            The tasks of the models to benchmark. If None then models will not be
+            filtered according to their language.
+        dataset_tasks (sequence of DatasetTask):
+            The tasks to benchmark.
         raise_error_on_invalid_model (bool):
             Whether to raise an error if a model is invalid.
         cache_dir (str):
@@ -39,10 +105,10 @@ class BenchmarkConfig:
             Whether to print verbose output.
     """
 
-    languages: Sequence[Optional[str]]
-    model_languages: Sequence[Optional[str]]
-    dataset_languages: Sequence[Optional[str]]
-    tasks: Sequence[Optional[str]]
+    model_languages: Sequence[Language]
+    dataset_languages: Sequence[Language]
+    model_tasks: Optional[Sequence[str]]
+    dataset_tasks: Sequence[DatasetTask]
     raise_error_on_invalid_model: bool
     cache_dir: str
     evaluate_train: bool
@@ -64,35 +130,45 @@ class DatasetConfig:
             for logging.
         huggingface_id (str):
             The Hugging Face ID of the dataset.
-        task (str):
+        task (DatasetTask):
             The task of the dataset.
-        supertask (str):
-            The supertask of the dataset.
-        languages (list of str):
+        languages (sequence of Language objects):
             The ISO 639-1 language codes of the entries in the dataset.
+        id2label (list of str):
+            The mapping from ID to label.
+        label2id (dict of str to int):
+            The mapping from label to ID. This includes all label synonyms as well.
         num_labels (int):
             The number of labels in the dataset.
-        id2label (list of str):
-            The mapping from IDs to labels.
-        label2id (dict)
-            The mapping from labels to IDs.
         label_synonyms (list of list of str):
-            The synonyms of labels.
-        metrics (dict):
-            A mapping from metric keys to their configuration.
+            The synonyms of all the labels, including the main label.
     """
 
     name: str
     pretty_name: str
     huggingface_id: str
-    task: str
-    supertask: str
-    languages: Sequence[str]
-    num_labels: int
-    id2label: Sequence[str]
-    label2id: Dict[str, int]
-    label_synonyms: Sequence[Sequence[str]]
-    metrics: Dict[str, Dict[str, str]]
+    task: DatasetTask
+    languages: Sequence[Language]
+
+    @property
+    def id2label(self) -> List[str]:
+        return [label.name for label in self.task.labels]
+
+    @property
+    def label2id(self) -> Dict[str, int]:
+        return {
+            syn: idx
+            for idx, label in enumerate(self.task.labels)
+            for syn in [label.name] + label.synonyms
+        }
+
+    @property
+    def num_labels(self) -> int:
+        return len(self.task.labels)
+
+    @property
+    def label_synonyms(self) -> List[List[str]]:
+        return [[label.name] + label.synonyms for label in self.task.labels]
 
 
 @dataclass
@@ -102,18 +178,18 @@ class ModelConfig:
     Attributes:
         model_id (str):
             The ID of the model.
+        revision (str):
+            The revision of the model.
         framework (str):
             The framework of the model.
         task (str):
-            The task of the model.
-        languages (list of str):
-            The ISO 639-1 language codes of the model.
-        revision (str):
-            The revision of the model.
+            The task that the model was trained on.
+        languages (sequence of Language objects):
+            The languages of the model.
     """
 
     model_id: str
+    revision: str
     framework: str
     task: str
-    languages: Sequence[str]
-    revision: str
+    languages: Sequence[Language]

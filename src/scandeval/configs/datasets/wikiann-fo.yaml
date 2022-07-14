@@ -1,6 +1,0 @@
-name: wikiann-fo
-pretty_name: the truncated version of the Faroese part of WikiANN
-huggingface_id: ScandEval/wikiann-fo-mini
-languages:
-  - fo
-task: ner

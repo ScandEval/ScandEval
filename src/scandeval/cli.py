@@ -1,11 +1,13 @@
 """Command-line interface for benchmarking."""
 
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import click
 
 from .benchmarker import Benchmarker
-from .datasets import get_all_dataset_configs
+from .dataset_configs import get_all_dataset_configs
+from .dataset_tasks import get_all_dataset_tasks
+from .languages import get_all_languages
 
 
 @click.command()
@@ -16,11 +18,11 @@ from .datasets import get_all_dataset_configs
     show_default=True,
     multiple=True,
     help="""The HuggingFace model ID of the model(s) to be benchmarked. If not
-            specified then all models will be benchmarked, filtered by `language` and
-            `task`. The specific model version to use can be added after the suffix
-            "@": "<model_id>@v1.0.0". It can be a branch name, a tag name, or a commit
-            id (currently only supported for HuggingFace models, and it defaults to
-            "main" for latest).""",
+            specified then all models will be benchmarked, filtered by `model_language`
+            and `model_task`. The specific model version to use can be added after the
+            suffix "@": "<model_id>@v1.0.0". It can be a branch name, a tag name, or a
+            commit id (currently only supported for HuggingFace models, and it defaults
+            to "main" for latest).""",
 )
 @click.option(
     "--dataset",
@@ -28,9 +30,9 @@ from .datasets import get_all_dataset_configs
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice([config.name for config in get_all_dataset_configs()]),
+    type=click.Choice(list(get_all_dataset_configs().keys())),
     help="""The name of the benchmark dataset. If not specified then all datasets will
-            be benchmarked.""",
+            be benchmarked, filtered by `dataset_language` and `dataset_task`.""",
 )
 @click.option(
     "--language",
@@ -38,7 +40,8 @@ from .datasets import get_all_dataset_configs
     default=["da", "sv", "no"],
     show_default=True,
     multiple=True,
-    type=click.Choice(["da", "sv", "no", "nb", "nn", "is", "fo"]),
+    metavar="ISO 639-1 LANGUAGE CODE",
+    type=click.Choice(["all"] + list(get_all_languages().keys())),
     help="""The languages to benchmark, both for models and datasets. Only relevant if
             `model-id` and `dataset` have not both been specified.""",
 )
@@ -48,9 +51,11 @@ from .datasets import get_all_dataset_configs
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(["da", "sv", "no", "nb", "nn", "is", "fo"]),
+    metavar="ISO 639-1 LANGUAGE CODE",
+    type=click.Choice(["all"] + list(get_all_languages().keys())),
     help="""The model languages to benchmark. Only relevant if `model-id` has not been
-            specified. If specified then this will override `language` for models.""",
+            specified. If "all" then models will not be filtered according to their
+            language. If not specified then this will use the `language` value.""",
 )
 @click.option(
     "--dataset-language",
@@ -58,20 +63,30 @@ from .datasets import get_all_dataset_configs
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(["da", "sv", "no", "nb", "nn", "is", "fo"]),
+    metavar="ISO 639-1 LANGUAGE CODE",
+    type=click.Choice(["all"] + list(get_all_languages().keys())),
     help="""The dataset languages to benchmark. Only relevant if `dataset` has not been
-            specified. If specified then this will override `language` for datasets.""",
+            specified. If "all" then datasets will not be filtered according to their
+            language. If not specified then this will use the `language` value.""",
 )
 @click.option(
-    "--task",
-    "-t",
-    default=["all"],
+    "--model-task",
+    "-mt",
+    default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(
-        ["all", "fill-mask", "token-classification", "text-classification"]
-    ),
-    help="The tasks to benchmark. Only relevant if `model-id` " "is not specified.",
+    type=str,
+    help="""The model tasks to consider. If not specified then models will not be
+            filtered according to the task they were trained on.""",
+)
+@click.option(
+    "--dataset-task",
+    "-dt",
+    default=None,
+    show_default=True,
+    multiple=True,
+    type=click.Choice(list(get_all_dataset_tasks().keys())),
+    help="The dataset tasks to consider.",
 )
 @click.option(
     "--evaluate-train",
@@ -130,7 +145,8 @@ def benchmark(
     model_language: Tuple[str],
     dataset_language: Tuple[str],
     raise_error_on_invalid_model: bool,
-    task: Tuple[str],
+    model_task: Tuple[str],
+    dataset_task: Tuple[str],
     evaluate_train: bool,
     no_progress_bar: bool,
     no_save_results: bool,
@@ -140,26 +156,22 @@ def benchmark(
 ):
     """Benchmark language models on Scandinavian language tasks."""
 
-    # Set up variables
+    # Set up language variables
+    model_ids = None if len(model_id) == 0 else list(model_id)
+    datasets = None if len(dataset) == 0 else list(dataset)
     languages: List[str] = list(language)
-    model_languages: Optional[List[str]]
-    dataset_languages: Optional[List[str]]
-    if len(model_language) > 0:
-        model_languages = list(model_language)
-    else:
-        model_languages = None
-    if len(dataset_language) > 0:
-        dataset_languages = list(dataset_language)
-    else:
-        dataset_languages = None
-    tasks = "all" if "all" in task else list(task)
+    model_languages = None if len(model_language) == 0 else list(model_language)
+    dataset_languages = None if len(dataset_language) == 0 else list(dataset_language)
+    model_tasks = None if len(model_task) == 0 else list(model_task)
+    dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
 
     # Initialise the benchmarker class
     benchmarker = Benchmarker(
         language=languages,
         model_language=model_languages,
         dataset_language=dataset_languages,
-        task=tasks,
+        model_task=model_tasks,
+        dataset_task=dataset_tasks,
         progress_bar=(not no_progress_bar),
         save_results=(not no_save_results),
         evaluate_train=evaluate_train,
@@ -170,6 +182,4 @@ def benchmark(
     )
 
     # Perform the benchmark evaluation
-    model_id_list = None if len(model_id) == 0 else list(model_id)
-    dataset_list = None if len(dataset) == 0 else list(dataset)
-    benchmarker(model_id=model_id_list, dataset=dataset_list)
+    benchmarker(model_id=model_ids, dataset=datasets)

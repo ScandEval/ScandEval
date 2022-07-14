@@ -1,6 +1,0 @@
-name: scala-nb
-pretty_name: the Bokmål part of ScaLA
-huggingface_id: ScandEval/scala-nb
-languages:
-  - nb
-task: la

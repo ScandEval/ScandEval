@@ -6,12 +6,14 @@ from typing import Dict, Sequence, Tuple
 
 import numpy as np
 
+from .config import MetricConfig
+
 logger = logging.getLogger(__name__)
 
 
 def log_scores(
     dataset_name: str,
-    metrics: dict,
+    metric_configs: Sequence[MetricConfig],
     scores: dict,
     finetuned: bool,
     model_id: str,
@@ -21,10 +23,9 @@ def log_scores(
     Args:
         dataset_name (str):
             Name of the dataset.
-        metrics (dict):
-            Sequence of metric names to log, with the short metric names as keys and
-            the metric configuration as values.
-        scores(dict):
+        metric_configs (sequence of MetricConfig objects):
+            Sequence of metrics to log.
+        scores (dict):
             The scores that are to be logged. This is a dict with keys 'train' and
             'test', with values being lists of dictionaries full of scores.
         finetuned (bool):
@@ -49,13 +50,13 @@ def log_scores(
     total_dict = dict()
 
     # Logging of the aggregated scores
-    for metric_key, metric_dct in metrics.items():
-        agg_scores = aggregate_scores(scores=scores, metric_name=metric_key)
+    for metric_cfg in metric_configs:
+        agg_scores = aggregate_scores(scores=scores, metric_config=metric_cfg)
         test_score, test_se = agg_scores["test"]
         test_score *= 100
         test_se *= 100
 
-        msg = f"{metric_dct['long_name']}:\n  - Test: {test_score:.2f} ± {test_se:.2f}"
+        msg = f"{metric_cfg.pretty_name}:\n  - Test: {test_score:.2f} ± {test_se:.2f}"
 
         if "train" in agg_scores.keys():
             train_score, train_se = agg_scores["train"]
@@ -64,12 +65,12 @@ def log_scores(
             msg += f"\n  - Train: {train_score:.2f} ± {train_se:.2f}"
 
             # Store the aggregated train scores
-            total_dict[f"train_{metric_key}"] = train_score
-            total_dict[f"train_{metric_key}_se"] = train_se
+            total_dict[f"train_{metric_cfg.name}"] = train_score
+            total_dict[f"train_{metric_cfg.name}_se"] = train_se
 
         # Store the aggregated test scores
-        total_dict[f"test_{metric_key}"] = test_score
-        total_dict[f"test_{metric_key}_se"] = test_se
+        total_dict[f"test_{metric_cfg.name}"] = test_score
+        total_dict[f"test_{metric_cfg.name}_se"] = test_se
 
         # Log the scores
         logger.info(msg)
@@ -82,7 +83,7 @@ def log_scores(
 
 
 def aggregate_scores(
-    scores: Dict[str, Sequence[Dict[str, float]]], metric_name: str
+    scores: Dict[str, Sequence[Dict[str, float]]], metric_config: MetricConfig
 ) -> Dict[str, Tuple[float, float]]:
     """Helper function to compute the mean with confidence intervals.
 
@@ -90,9 +91,9 @@ def aggregate_scores(
         scores (dict):
             Dictionary with the names of the metrics as keys, of the form
             "<split>_<metric_name>", such as "val_f1", and values the metric values.
-        metric_name (str):
-            The name of the metric, which is used to collect the correct metric from
-            `scores`.
+        metric_config (MetricConfig):
+            The configuration of the metric, which is used to collect the correct
+            metric from `scores`.
 
     Returns:
         dict:
@@ -106,7 +107,9 @@ def aggregate_scores(
         results = dict()
 
         if "train" in scores.keys():
-            train_scores = [dct[f"train_{metric_name}"] for dct in scores["train"]]
+            train_scores = [
+                dct[f"train_{metric_config.name}"] for dct in scores["train"]
+            ]
             train_score = np.mean(train_scores)
 
             if len(train_scores) > 1:
@@ -118,7 +121,7 @@ def aggregate_scores(
             results["train"] = (train_score, 1.96 * train_se)
 
         if "test" in scores.keys():
-            test_scores = [dct[f"test_{metric_name}"] for dct in scores["test"]]
+            test_scores = [dct[f"test_{metric_config.name}"] for dct in scores["test"]]
             test_score = np.mean(test_scores)
 
             if len(test_scores) > 1:

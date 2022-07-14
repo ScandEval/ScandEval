@@ -1,7 +1,0 @@
-name: norec
-pretty_name: the truncated version of NoReC
-huggingface_id: ScandEval/norec-mini
-languages:
-  - nb
-  - nn
-task: sent

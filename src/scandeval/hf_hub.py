@@ -4,13 +4,12 @@ import logging
 from collections import defaultdict
 from typing import Dict, Optional, Sequence, Union
 
-import yaml
 from huggingface_hub import HfApi, ModelFilter
 from requests.exceptions import ConnectionError, RequestException
 
-from .config import BenchmarkConfig, ModelConfig
-from .datasets import get_config_dir
+from .config import BenchmarkConfig, Language, ModelConfig
 from .exceptions import InvalidBenchmark
+from .languages import get_all_languages
 
 logger = logging.getLogger(__name__)
 
@@ -92,19 +91,21 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
 
         # Extract the model task, which defaults to 'fill-mask'
-        task = models[0].pipeline_tag
-        if task is None or task in ["sentence-similarity", "feature-extraction"]:
-            task = "fill-mask"
+        model_task = models[0].pipeline_tag
+        if model_task is None or model_task in [
+            "sentence-similarity",
+            "feature-extraction",
+        ]:
+            model_task = "fill-mask"
 
         # Get list of all language codes
-        with (get_config_dir() / "language_codes.yaml").open() as f:
-            language_codes = yaml.safe_load(f)
+        language_codes = list(get_all_languages().keys())
 
         # Construct the model config
         model_config = ModelConfig(
             model_id=model_id_without_revision,
             framework=framework,
-            task=task,
+            task=model_task,
             languages=[tag for tag in tags if tag in language_codes],
             revision=revision,
         )
@@ -122,19 +123,18 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
 # TODO: Cache this
 def get_model_lists(
-    languages: Sequence[Optional[str]],
-    tasks: Sequence[Optional[str]],
+    languages: Sequence[Language],
+    tasks: Optional[Sequence[str]],
     use_auth_token: bool,
 ) -> Union[Dict[str, Sequence[str]], None]:
     """Fetches up-to-date model lists.
 
     Args:
-        languages (list of either str or None):
+        languages (sequence of Language objects):
             The language codes of the language to consider. If None is present in the
             list then the models will not be filtered on language.
-        tasks (list of either str or None):
-            The task to consider. If None is present in the list then the models will
-            not be filtered on task.
+        tasks (None or list of str):
+            The task to consider. If None then the models will not be filtered on task.
         use_auth_token (bool):
             Whether to use an authentication token to fetch the model lists.
 
@@ -144,25 +144,44 @@ def get_model_lists(
             including 'multilingual', all tasks, as well as 'all'. The values are lists
             of model IDs.
     """
-    # Log fetching message
-    log_msg = "Fetching list of models"
-    if None not in languages:
-        log_msg += f" for the languages {languages}"
-        if None not in tasks:
-            log_msg += f" and tasks {tasks}"
+    # Get list of all language codes
+    all_languages = list(get_all_languages().keys())
+
+    # Form string of languages
+    if len(languages) == 1:
+        language_string = f"the language {languages[0].name}"
     else:
-        if None not in tasks:
-            log_msg += f" for the tasks {tasks}"
-    log_msg += " from the Hugging Face Hub."
-    logger.info(log_msg)
+        languages = sorted(languages, key=lambda x: x.name)
+        if {lang.code for lang in languages} == set(all_languages):
+            language_string = "all languages"
+        else:
+            language_string = (
+                f"the languages {', '.join(l.name for l in languages[:-1])} "
+                f"and {languages[-1].name}"
+            )
+
+    # Form string of tasks
+    if tasks is None:
+        task_string = "all model tasks"
+    elif len(tasks) == 1:
+        task_string = f"the model task {tasks[0]}"
+    else:
+        tasks = sorted(tasks)
+        task_string = f"the model tasks {', '.join(tasks[:-1])} and {tasks[-1]}"
+
+    # Log fetching message
+    logger.info(
+        f"Fetching list of models for {language_string} and {task_string} from the "
+        "Hugging Face Hub."
+    )
 
     # Initialise the API
     api = HfApi()
 
     # Initialise model lists
     model_lists = defaultdict(list)
-    for language in languages:
-        for task in tasks:
+    for language in [lang.code for lang in languages]:
+        for task in tasks or [None]:  # type: ignore
 
             # Fetch the model list
             models = api.list_models(
