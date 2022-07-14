@@ -109,12 +109,34 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── .flake8
 ├── .github
 │   └── workflows
-│       └── ci.yml
+│       ├── ci.yml
+│       └── docs.yml
 ├── .gitignore
 ├── .pre-commit-config.yaml
 ├── CHANGELOG.md
 ├── README.md
 ├── docs
+│   ├── index.html
+│   ├── scandeval
+│   │   ├── benchmark_dataset.html
+│   │   ├── benchmarker.html
+│   │   ├── callbacks.html
+│   │   ├── cli.html
+│   │   ├── config.html
+│   │   ├── dataset_configs.html
+│   │   ├── dataset_factory.html
+│   │   ├── dataset_tasks.html
+│   │   ├── exceptions.html
+│   │   ├── hf_hub.html
+│   │   ├── languages.html
+│   │   ├── ner.html
+│   │   ├── qa.html
+│   │   ├── scores.html
+│   │   ├── text_classification.html
+│   │   ├── training_args_with_mps_support.html
+│   │   └── utils.html
+│   ├── scandeval.html
+│   └── search.json
 ├── makefile
 ├── notebooks
 │   └── scandeval-truncation.ipynb
@@ -128,33 +150,12 @@ World](https://satwcomic.com/) team. Go check them out!
 │   │   ├── callbacks.py
 │   │   ├── cli.py
 │   │   ├── config.py
-│   │   ├── configs
-│   │   │   ├── datasets
-│   │   │   │   ├── absabank-imm.yaml
-│   │   │   │   ├── angry-tweets.yaml
-│   │   │   │   ├── dane.yaml
-│   │   │   │   ├── mim-gold-ner.yaml
-│   │   │   │   ├── norec.yaml
-│   │   │   │   ├── norne-nb.yaml
-│   │   │   │   ├── norne-nn.yaml
-│   │   │   │   ├── scala-da.yaml
-│   │   │   │   ├── scala-fo.yaml
-│   │   │   │   ├── scala-is.yaml
-│   │   │   │   ├── scala-nb.yaml
-│   │   │   │   ├── scala-nn.yaml
-│   │   │   │   ├── scala-sv.yaml
-│   │   │   │   ├── suc3.yaml
-│   │   │   │   └── wikiann-fo.yaml
-│   │   │   ├── language_codes.yaml
-│   │   │   └── tasks
-│   │   │       ├── la.yaml
-│   │   │       ├── ner.yaml
-│   │   │       ├── qa.yaml
-│   │   │       └── sent.yaml
+│   │   ├── dataset_configs.py
 │   │   ├── dataset_factory.py
-│   │   ├── datasets.py
+│   │   ├── dataset_tasks.py
 │   │   ├── exceptions.py
 │   │   ├── hf_hub.py
+│   │   ├── languages.py
 │   │   ├── ner.py
 │   │   ├── qa.py
 │   │   ├── scores.py
