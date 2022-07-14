@@ -17,15 +17,15 @@ class DatasetFactory:
         self.benchmark_config = benchmark_config
 
     def build_dataset(self, dataset: Union[str, DatasetConfig]) -> BenchmarkDataset:
-        """Build a dataset from a configuration.
+        """Build a dataset from a configuration or a name.
 
         Args:
-            dataset_name (str or DatasetConfig):
+            dataset (str or DatasetConfig):
                 The name of the dataset, or the dataset configuration.
 
         Returns:
             BenchmarkDataset:
-                The dataset.
+                The benchmark dataset.
         """
         # Get the dataset configuration
         if isinstance(dataset, str):
