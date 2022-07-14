@@ -46,7 +46,7 @@ remove-env:
 	@echo "Removed virtual environment."
 
 docs:
-	@poetry run pdoc --docformat google src/scandeval -o docs
+	@poetry run pdoc --docformat google -o docs --logo "https://raw.githubusercontent.com/saattrupdan/ScandEval/main/gfx/scandeval.png" src/scandeval
 	@echo "Saved documentation."
 
 view-docs:
