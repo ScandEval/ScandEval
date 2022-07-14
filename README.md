@@ -83,7 +83,8 @@ See the [documentation](https://scandeval.readthedocs.io/en/latest/) for a more
 in-depth description.
 
 
-## Documentation
+## Documentation
+
 See the full documentation [https://saattrupdan.github.io/ScandEval/](here).
 
 
