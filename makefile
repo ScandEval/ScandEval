@@ -46,12 +46,12 @@ remove-env:
 	@echo "Removed virtual environment."
 
 docs:
-	@poetry run pdoc --html src/scandeval -o docs --force
+	@poetry run pdoc --docformat google src/scandeval -o docs
 	@echo "Saved documentation."
 
 view-docs:
 	@echo "Viewing API documentation..."
-	@open docs/scandeval/index.html
+	@open docs/scandeval.html
 
 clean:
 	@find . -type f -name "*.py[co]" -delete
