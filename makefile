@@ -73,4 +73,5 @@ tree:
 		-I .ipynb_checkpoints \
 		-I dist \
 		-I scandeval_benchmark_results.json \
-		-I .gitkeep
+		-I .gitkeep \
+		-I docs

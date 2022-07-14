@@ -115,28 +115,6 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── .pre-commit-config.yaml
 ├── CHANGELOG.md
 ├── README.md
-├── docs
-│   ├── index.html
-│   ├── scandeval
-│   │   ├── benchmark_dataset.html
-│   │   ├── benchmarker.html
-│   │   ├── callbacks.html
-│   │   ├── cli.html
-│   │   ├── config.html
-│   │   ├── dataset_configs.html
-│   │   ├── dataset_factory.html
-│   │   ├── dataset_tasks.html
-│   │   ├── exceptions.html
-│   │   ├── hf_hub.html
-│   │   ├── languages.html
-│   │   ├── ner.html
-│   │   ├── qa.html
-│   │   ├── scores.html
-│   │   ├── text_classification.html
-│   │   ├── training_args_with_mps_support.html
-│   │   └── utils.html
-│   ├── scandeval.html
-│   └── search.json
 ├── makefile
 ├── notebooks
 │   └── scandeval-truncation.ipynb
