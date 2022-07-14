@@ -84,7 +84,6 @@ publish:
 			if [ "$${PYPI_API_TOKEN}" = "" ]; then \
 				echo "No PyPI API token specified in the `.env` file, so cannot publish."; \
 			else \
-				make docs; \
 				echo "Publishing to PyPI..."; \
 				poetry publish --build --username "__token__" --password "$${PYPI_API_TOKEN}"; \
 				echo "Published!"; \
