@@ -76,16 +76,16 @@ tree:
 		-I .gitkeep \
 		-I docs
 
-bump-major-version:
-	@poetry run python -m src.scripts.bump_version --major
+bump-major:
+	@poetry run python -m src.scripts.versioning --major
 	@echo "Bumped major version."
 
-bump-minor-version:
-	@poetry run python -m src.scripts.bump_version --minor
+bump-minor:
+	@poetry run python -m src.scripts.versioning --minor
 	@echo "Bumped minor version."
 
-bump-patch-version:
-	@poetry run python -m src.scripts.bump_version --patch
+bump-patch:
+	@poetry run python -m src.scripts.versioning --patch
 	@echo "Bumped patch version."
 
 publish:
