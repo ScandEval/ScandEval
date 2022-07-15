@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # TODO: Cache this
 def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelConfig:
-    """Fetches configuratino for a model from the Hugging Face Hub.
+    """Fetches configuration for a model from the Hugging Face Hub.
 
     Args:
         model_id (str):
