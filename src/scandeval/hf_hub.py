@@ -71,6 +71,11 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             use_auth_token=benchmark_config.use_auth_token,
         )
 
+        # Filter the models to only keep the one with the specified model ID
+        models = [
+            model for model in models if model.modelId == model_id_without_revision
+        ]
+
         # Check that the model exists. If it does not then raise an error
         if len(models) == 0:
             raise InvalidBenchmark(
@@ -100,14 +105,15 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             model_task = "fill-mask"
 
         # Get list of all language codes
-        language_codes = list(get_all_languages().keys())
+        language_mapping = get_all_languages()
+        language_codes = list(language_mapping.keys())
 
         # Construct the model config
         model_config = ModelConfig(
-            model_id=model_id_without_revision,
+            model_id=models[0].modelId,
             framework=framework,
             task=model_task,
-            languages=[tag for tag in tags if tag in language_codes],
+            languages=[language_mapping[tag] for tag in tags if tag in language_codes],
             revision=revision,
         )
 
@@ -196,6 +202,15 @@ def get_model_lists(
                 filter=ModelFilter(language=language, task=task),
                 use_auth_token=use_auth_token,
             )
+
+            # Filter the models to only keep the ones with the specified language and
+            # task
+            models = [
+                model
+                for model in models
+                if language in model.tags
+                and (task is None or model.pipeline_tag == task)
+            ]
 
             # Extract the model IDs
             model_ids = [model.id for model in models]
