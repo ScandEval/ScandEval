@@ -154,7 +154,7 @@ def benchmark(
     use_auth_token: bool,
     verbose: bool = False,
 ):
-    """Benchmark language models on Scandinavian language tasks."""
+    """Benchmark pretrained language models on Scandinavian language tasks."""
 
     # Set up language variables
     model_ids = None if len(model_id) == 0 else list(model_id)
