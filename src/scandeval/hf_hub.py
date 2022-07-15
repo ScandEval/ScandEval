@@ -4,11 +4,12 @@ import logging
 from collections import defaultdict
 from typing import Dict, Optional, Sequence, Union
 
+import requests
 from huggingface_hub import HfApi, ModelFilter
 from requests.exceptions import ConnectionError, RequestException
 
 from .config import BenchmarkConfig, Language, ModelConfig
-from .exceptions import InvalidBenchmark
+from .exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
 from .languages import get_all_languages
 
 logger = logging.getLogger(__name__)
@@ -112,10 +113,17 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
     # If fetching from the Hugging Face Hub failed then throw a reasonable exception
     except RequestException:
-        raise ConnectionError(
-            "Connection to the Hugging Face Hub failed. Check your internet "
-            "connection and if https://huggingface.co is down."
-        )
+
+        # Check if it is because the internet is down, by pinging Google
+        try:
+            requests.get("https://www.google.com")
+
+            # If no errors were raised then Hugging Face Hub is down
+            raise HuggingFaceHubDown()
+
+        # Otherwise, if pinging Google also failed, then the internet is down
+        except RequestException:
+            raise NoInternetConnection()
 
     # Return the model config
     return model_config
