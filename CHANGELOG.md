@@ -9,7 +9,15 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Fixed
+- Now garbage collects properly, where previously (from v4 onwards) the `model` and
+  `model_dict` were not removed from memory after each run, potentially causing a
+  memory leak.
 
+### Added
+- Added the `HuggingFaceHubDown` and `NoInternetConnection` exceptions, to give more
+  information to the user when benchmarking fails.
+- Added unit tests.
 
 
 ## [v4.0.1] - 2022-07-14
