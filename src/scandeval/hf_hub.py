@@ -6,7 +6,7 @@ from typing import Dict, Optional, Sequence, Union
 
 import requests
 from huggingface_hub import HfApi, ModelFilter
-from requests.exceptions import ConnectionError, RequestException
+from requests.exceptions import RequestException
 
 from .config import BenchmarkConfig, Language, ModelConfig
 from .exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
