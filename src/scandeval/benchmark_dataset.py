@@ -340,7 +340,15 @@ class BenchmarkDataset(ABC):
         )
 
         # Garbage collection, to avoid memory issues
-        clear_memory([model, model_dict])
+        try:
+            del model
+        except UnboundLocalError:
+            pass
+        try:
+            del model_dict
+        except UnboundLocalError:
+            pass
+        clear_memory()
 
         return all_scores
 
@@ -467,7 +475,15 @@ class BenchmarkDataset(ABC):
             return scores
 
         except (RuntimeError, ValueError, IndexError) as e:
-            clear_memory([model, model_dict])
+            try:
+                del model
+            except UnboundLocalError:
+                pass
+            try:
+                del model_dict
+            except UnboundLocalError:
+                pass
+            clear_memory()
             return e
 
     def _benchmark_spacy(
@@ -565,7 +581,15 @@ class BenchmarkDataset(ABC):
         )
 
         # Garbage collection, to avoid memory issues
-        clear_memory([model, model_dict])
+        try:
+            del model
+        except UnboundLocalError:
+            pass
+        try:
+            del model_dict
+        except UnboundLocalError:
+            pass
+        clear_memory()
 
         return all_scores
 

@@ -6,7 +6,6 @@ import os
 import random
 import re
 import warnings
-from typing import Sequence
 
 import numpy as np
 import pkg_resources
@@ -15,20 +14,8 @@ import transformers.utils.logging as tf_logging
 from datasets.utils import disable_progress_bar
 
 
-def clear_memory(vars_to_remove: Sequence):
-    """Clears the memory of unused items.
-
-    Args:
-        vars_to_remove (sequence):
-            Variables that needs to be removed from memory. Defaults to an empty list.
-    """
-    # Remove all the variables in the `vars_to_remove` list, as well as the list itself
-    for var in vars_to_remove:
-        try:
-            del var
-        except UnboundLocalError:
-            pass
-    del vars_to_remove
+def clear_memory():
+    """Clears the memory of unused items."""
 
     # Clear the Python cache
     gc.collect()
