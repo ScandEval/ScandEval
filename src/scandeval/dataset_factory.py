@@ -5,6 +5,7 @@ from typing import Type, Union
 from .benchmark_dataset import BenchmarkDataset
 from .config import BenchmarkConfig, DatasetConfig
 from .dataset_configs import get_dataset_config
+from .dataset_tasks import NER, QA
 from .ner import NERBenchmark
 from .qa import QABenchmark
 from .text_classification import TextClassificationBenchmark
@@ -37,9 +38,9 @@ class DatasetFactory:
         benchmark_cls: Type[BenchmarkDataset]
         if dataset_config.task.supertask == "text-classification":
             benchmark_cls = TextClassificationBenchmark
-        elif dataset_config.task.name == "ner":
+        elif dataset_config.task == NER:
             benchmark_cls = NERBenchmark
-        elif dataset_config.task.name == "qa":
+        elif dataset_config.task == QA:
             benchmark_cls = QABenchmark
         else:
             raise ValueError(f"Unknown dataset task: {dataset_config.task}")
