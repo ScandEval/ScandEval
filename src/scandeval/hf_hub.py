@@ -2,7 +2,8 @@
 
 import logging
 from collections import defaultdict
-from typing import Dict, Optional, Sequence, Union
+from copy import deepcopy
+from typing import Dict, List, Optional, Sequence
 
 import requests
 from huggingface_hub import HfApi, ModelFilter
@@ -10,7 +11,7 @@ from requests.exceptions import RequestException
 
 from .config import BenchmarkConfig, Language, ModelConfig
 from .exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
-from .languages import get_all_languages
+from .languages import DA, NB, NN, NO, SV, get_all_languages
 
 logger = logging.getLogger(__name__)
 
@@ -137,17 +138,17 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
 # TODO: Cache this
 def get_model_lists(
-    languages: Sequence[Language],
+    languages: Optional[Sequence[Language]],
     tasks: Optional[Sequence[str]],
     use_auth_token: bool,
-) -> Union[Dict[str, Sequence[str]], None]:
+) -> Dict[str, Sequence[str]]:
     """Fetches up-to-date model lists.
 
     Args:
-        languages (sequence of Language objects):
-            The language codes of the language to consider. If None is present in the
-            list then the models will not be filtered on language.
-        tasks (None or list of str):
+        languages (None or sequence of Language objects):
+            The language codes of the language to consider. If None then the models
+            will not be filtered on language.
+        tasks (None or sequence of str):
             The task to consider. If None then the models will not be filtered on task.
         use_auth_token (bool):
             Whether to use an authentication token to fetch the model lists.
@@ -158,20 +159,25 @@ def get_model_lists(
             including 'multilingual', all tasks, as well as 'all'. The values are lists
             of model IDs.
     """
-    # Get list of all language codes
-    all_languages = list(get_all_languages().keys())
+    # Get list of all languages
+    all_languages = list(get_all_languages().values())
+
+    # If no languages are specified, then include all languages
+    language_list = all_languages if languages is None else languages
 
     # Form string of languages
-    if len(languages) == 1:
-        language_string = f"the language {languages[0].name}"
+    if len(language_list) == 1:
+        language_string = f"the language {language_list[0].name}"
     else:
-        languages = sorted(languages, key=lambda x: x.name)
-        if {lang.code for lang in languages} == set(all_languages):
+        language_list = sorted(language_list, key=lambda x: x.name)
+        if {lang.code for lang in language_list} == {
+            lang.code for lang in all_languages
+        }:
             language_string = "all languages"
         else:
             language_string = (
-                f"the languages {', '.join(l.name for l in languages[:-1])} "
-                f"and {languages[-1].name}"
+                f"the languages {', '.join(l.name for l in language_list[:-1])} "
+                f"and {language_list[-1].name}"
             )
 
     # Form string of tasks
@@ -194,7 +200,15 @@ def get_model_lists(
 
     # Initialise model lists
     model_lists = defaultdict(list)
-    for language in [lang.code for lang in languages]:
+
+    # Do not iterate over all the languages if we are not filtering on language
+    language_itr: Sequence[Optional[Language]]
+    if {lang.code for lang in language_list} == {lang.code for lang in all_languages}:
+        language_itr = [None]
+    else:
+        language_itr = deepcopy(language_list)
+
+    for language in language_itr:
         for task in tasks or [None]:  # type: ignore
 
             # Fetch the model list
@@ -208,7 +222,7 @@ def get_model_lists(
             models = [
                 model
                 for model in models
-                if language in model.tags
+                if (language is None or language.code in model.tags)
                 and (task is None or model.pipeline_tag == task)
             ]
 
@@ -218,7 +232,7 @@ def get_model_lists(
             # Store the model IDs
             model_lists["all"].extend(model_ids)
             if language is not None:
-                model_lists[language].extend(model_ids)
+                model_lists[language.code].extend(model_ids)
             if task is not None:
                 model_lists[task].extend(model_ids)
 
@@ -244,12 +258,13 @@ def get_model_lists(
         "random-electra-small-sequence-clf",
         "random-electra-small-token-clf",
     ]
+    model_lists["random"].extend(random_models)
     model_lists["all"].extend(random_models)
 
     # Add some multilingual Danish models manually that have not marked 'da' as their
     # language
-    if "da" in languages:
-        multi_da_models = [
+    if DA in language_itr:
+        multi_da_models: List[str] = [
             "Geotrend/bert-base-en-da-cased",
             "Geotrend/bert-base-25lang-cased",
             "Geotrend/bert-base-en-fr-de-no-da-cased",
@@ -260,10 +275,17 @@ def get_model_lists(
         model_lists["da"].extend(multi_da_models)
         model_lists["all"].extend(multi_da_models)
 
+    # Add some multilingual Swedish models manually that have not marked 'sv' as their
+    # language
+    if SV in language_itr:
+        multi_sv_models: List[str] = []
+        model_lists["sv"].extend(multi_sv_models)
+        model_lists["all"].extend(multi_sv_models)
+
     # Add some multilingual Norwegian models manually that have not marked 'no', 'nb'
     # or 'nn' as their language
-    if any(lang in languages for lang in ["no", "nb", "nn"]):
-        multi_no_models = [
+    if any(lang in language_itr for lang in [NO, NB, NN]):
+        multi_no_models: List[str] = [
             "Geotrend/bert-base-en-no-cased",
             "Geotrend/bert-base-25lang-cased",
             "Geotrend/bert-base-en-fr-de-no-da-cased",
