@@ -24,7 +24,7 @@ class TrainingArgumentsWithMPSSupport(TrainingArguments):
         # Set the type of `local_rank`
         self.local_rank: int
 
-        # If no CUDA has been requested then use the CPU
+        # If no CUDA has been requested then skip it
         if self.no_cuda:
 
             # Set the device to the CPU
