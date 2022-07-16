@@ -60,7 +60,8 @@ clean:
 	@echo "Cleaned repository."
 
 test:
-	@scandeval -m Maltehb/aelaectra-danish-electra-small-cased -d scala-da
+	@pytest --cov=src/scandeval -n 8 tests/
+	@readme-cov
 
 tree:
 	@tree -a \
