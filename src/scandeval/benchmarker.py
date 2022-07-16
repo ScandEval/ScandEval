@@ -31,18 +31,18 @@ class Benchmarker:
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
             'all' if all languages (also non-Scandinavian) should be considered.
             Defaults to ['da', 'sv', 'no'].
-        model_language (None, str or list of str, optional):
+        model_language (None, str or sequence of str, optional):
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages. Defaults
             to None.
-        dataset_language (None, str or list of str, optional):
+        dataset_language (None, str or sequence of str, optional):
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
             Defaults to None.
-        model_task (str or list of str, optional):
+        model_task (str or sequence of str, optional):
             The tasks to include for models. If "all" then models will not be filtered
             based on the task they were trained on. Defaults to "all".
-        dataset_task (str or list of str, optional):
+        dataset_task (str or sequence of str, optional):
             The tasks to include for dataset. If "all" then datasets will not be
             filtered based on their task. Defaults to "all".
         evaluate_train (bool, optional):
