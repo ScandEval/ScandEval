@@ -6,7 +6,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Union
 
-from .config import BenchmarkConfig, DatasetConfig, Language
+from .benchmark_config_factory import BenchmarkConfigFactory
+from .config import BenchmarkConfig, DatasetConfig, DatasetTask, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .dataset_tasks import get_all_dataset_tasks
@@ -84,79 +85,13 @@ class Benchmarker:
         use_auth_token: bool = False,
         verbose: bool = False,
     ):
-        # Create a dictionary that maps languages to their associated language objects
-        language_mapping = get_all_languages()
-
-        # Create the list `languages`
-        if "all" in language:
-            languages = list(language_mapping.keys())
-        elif isinstance(language, str):
-            languages = [language]
-        else:
-            languages = language
-
-        # If `languages` contains 'no' then also include 'nb' and 'nn'. Conversely, if
-        # either 'nb' or 'nn' are specified then also include 'no'.
-        if "no" in languages:
-            languages = list(set(languages) | {"nb", "nn"})
-        elif "nb" in languages or "nn" in languages:
-            languages = list(set(languages) | {"no"})
-
-        # Create the list `model_languages`
-        model_languages_str: Sequence[str]
-        if model_language is None:
-            model_languages_str = languages
-        elif isinstance(model_language, str):
-            model_languages_str = [model_language]
-        else:
-            model_languages_str = model_language
-
-        # Convert the model languages to language objects
-        if "all" in model_languages_str:
-            model_languages = list(language_mapping.values())
-        else:
-            model_languages = [
-                language_mapping[language] for language in model_languages_str
-            ]
-
-        # Create the list `dataset_languages_str`
-        dataset_languages_str: Sequence[str]
-        if dataset_language is None:
-            dataset_languages_str = languages
-        elif isinstance(dataset_language, str):
-            dataset_languages_str = [dataset_language]
-        else:
-            dataset_languages_str = dataset_language
-
-        # Convert the dataset languages to language objects
-        if "all" in dataset_languages_str:
-            dataset_languages = list(language_mapping.values())
-        else:
-            dataset_languages = [
-                language_mapping[language] for language in dataset_languages_str
-            ]
-
-        # Create the list of model tasks
-        model_tasks = [model_task] if isinstance(model_task, str) else model_task
-
-        # Create a dictionary that maps benchmark tasks to their associated benchmark
-        # task objects
-        dataset_task_mapping = get_all_dataset_tasks()
-
-        # Create the list of dataset tasks
-        if dataset_task is None:
-            dataset_tasks = list(dataset_task_mapping.values())
-        elif isinstance(dataset_task, str):
-            dataset_tasks = [dataset_task_mapping[dataset_task]]
-        else:
-            dataset_tasks = [dataset_task_mapping[task] for task in dataset_task]
-
-        # Build benchmark config and store it
-        self.benchmark_config = BenchmarkConfig(
-            model_languages=model_languages,
-            dataset_languages=dataset_languages,
-            model_tasks=model_tasks,
-            dataset_tasks=dataset_tasks,
+        # Build benchmark configuration
+        self.benchmark_config = BenchmarkConfigFactory().build_benchmark_config(
+            language=language,
+            model_language=model_language,
+            dataset_language=dataset_language,
+            model_task=model_task,
+            dataset_task=dataset_task,
             raise_error_on_invalid_model=raise_error_on_invalid_model,
             cache_dir=cache_dir,
             evaluate_train=evaluate_train,
@@ -201,6 +136,43 @@ class Benchmarker:
                 the datasets, with values being new dictionaries having the model IDs
                 as keys.
         """
+        # Prepare the model IDs
+        model_ids = self._prepare_model_ids(model_id)
+
+        # Get all the relevant dataset configurations
+        dataset_configs = self._prepare_dataset_configs(dataset)
+
+        # Benchmark all the models in `model_ids` on all the datasets in `benchmarks`
+        for dataset_config in dataset_configs:
+            for m_id in model_ids:
+                self._benchmark_single(
+                    dataset_config=dataset_config,
+                    model_id=m_id,
+                )
+
+        # Save the benchmark results
+        if self.benchmark_config.save_results:
+            output_path = Path.cwd() / "scandeval_benchmark_results.json"
+            with output_path.open("w") as f:
+                json.dump(self.benchmark_results, f)
+
+        return self.benchmark_results
+
+    def _prepare_model_ids(
+        self,
+        model_id: Optional[Union[Sequence[str], str]],
+    ) -> Sequence[str]:
+        """Prepare the model ID(s) to be benchmarked.
+
+        Args:
+            model_id (str, list of str or None):
+                The model ID(s) of the models to benchmark. If None then all model IDs
+                will be retrieved.
+
+        Returns:
+            sequence of str:
+                The prepared list of model IDs.
+        """
         # If `model_id` is not specified, then fetch all the relevant model IDs
         model_ids: Sequence[str]
         if model_id is None:
@@ -213,7 +185,23 @@ class Benchmarker:
         else:
             model_ids = model_id
 
-        # Get all the relevant dataset configurations
+        return model_ids
+
+    def _prepare_dataset_configs(
+        self,
+        dataset: Optional[Union[Sequence[str], str]],
+    ) -> Sequence[DatasetConfig]:
+        """Prepare the dataset configuration(s) to be benchmarked.
+
+        Args:
+            dataset (str, list of str or None, optional):
+                The datasets to benchmark on. If None then all datasets will be
+                benchmarked. Defaults to None.
+
+        Returns:
+            sequence of str:
+                The prepared list of model IDs.
+        """
         if dataset is None:
             dataset_configs = [
                 cfg
@@ -232,21 +220,7 @@ class Benchmarker:
                 cfg for cfg in get_all_dataset_configs().values() if cfg.name in dataset
             ]
 
-        # Benchmark all the models in `model_ids` on all the datasets in `benchmarks`
-        for dataset_config in dataset_configs:
-            for m_id in model_ids:
-                self._benchmark_single(
-                    dataset_config=dataset_config,
-                    model_id=m_id,
-                )
-
-        # Save the benchmark results
-        if self.benchmark_config.save_results:
-            output_path = Path.cwd() / "scandeval_benchmark_results.json"
-            with output_path.open("w") as f:
-                json.dump(self.benchmark_results, f)
-
-        return self.benchmark_results
+        return dataset_configs
 
     def _benchmark_single(
         self,
