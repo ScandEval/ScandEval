@@ -77,7 +77,7 @@ class Benchmarker:
         model_language: Optional[Union[str, Sequence[str]]] = None,
         dataset_language: Optional[Union[str, Sequence[str]]] = None,
         model_task: Optional[Union[str, Sequence[str]]] = None,
-        dataset_task: Optional[Union[str, Sequence]] = None,
+        dataset_task: Optional[Union[str, Sequence[str]]] = None,
         evaluate_train: bool = False,
         raise_error_on_invalid_model: bool = False,
         cache_dir: str = ".scandeval_cache",
