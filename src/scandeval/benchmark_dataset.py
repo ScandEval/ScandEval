@@ -7,7 +7,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import partial
-from typing import Any, Dict, Optional, Sequence, Union
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import torch
@@ -213,9 +213,6 @@ class BenchmarkDataset(ABC):
                 "note that this is currently under development, however."
             )
 
-        # Get bootstrap sample indices
-        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
-
         # Extract the model and tokenizer
         model = model_dict["model"]
         tokenizer = model_dict["tokenizer"]
@@ -233,6 +230,13 @@ class BenchmarkDataset(ABC):
             test = self._preprocess_data(test, **params)
         except ValueError:
             raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
+
+        # If we are testing then truncate the test set
+        if self.benchmark_config.testing:
+            test = test.select(range(128))
+
+        # Get bootstrap sample indices
+        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
 
         # Get bootstrapped datasets
         tests = [
@@ -261,10 +265,10 @@ class BenchmarkDataset(ABC):
             eval_steps=30,
             logging_steps=30,
             save_steps=30,
-            max_steps=10_000 if not self.benchmark_config.testing else 1,
+            max_steps=10_000 if not self.benchmark_config.testing else 2,
             report_to="none",
             save_total_limit=1,
-            per_device_train_batch_size=32,
+            per_device_train_batch_size=32 if not self.benchmark_config.testing else 1,
             per_device_eval_batch_size=32,
             learning_rate=2e-5,
             warmup_ratio=0.01,
@@ -273,6 +277,7 @@ class BenchmarkDataset(ABC):
             optim="adamw_torch",
             seed=4242,
             bf16=torch.cuda.is_available() or not torch.backends.mps.is_available(),
+            no_cuda=self.benchmark_config.testing,
         )
 
         # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
@@ -300,31 +305,13 @@ class BenchmarkDataset(ABC):
                 # Otherwise we encountered an error, so we have to deal with it and try
                 # again
                 else:
-                    # Rename `itr_scores` to `e` to make it more readable
-                    e = itr_scores
+                    bs, ga = self._handle_error(
+                        e=itr_scores, training_args=training_args
+                    )
 
-                    # We assume that all these CUDA errors are caused by
-                    # insufficient GPU memory
-                    # TODO: Handle MPS out of memory as well
-                    cuda_errs = ["CUDA out of memory", "CUDA error"]
-
-                    # If it is an unknown error, then simply report it
-                    if all([err not in str(e) for err in cuda_errs]):
-                        raise InvalidBenchmark(str(e))
-
-                    # If it is a CUDA memory error, then reduce batch size and up
-                    # gradient accumulation
-                    bs = training_args.per_device_train_batch_size
-                    ga = training_args.gradient_accumulation_steps
-                    if bs == 1:
-                        raise InvalidBenchmark(
-                            "CUDA out of memory, even with a batch size of 1!"
-                        )
                     training_args.per_device_train_batch_size = bs // 2
                     training_args.per_device_eval_batch_size = bs // 2
                     training_args.gradient_accumulation_steps = ga * 2
-
-                    print("New batch size:", bs // 2)
 
             if "train" in itr_scores:
                 scores["train"].append(itr_scores["train"])
@@ -350,6 +337,38 @@ class BenchmarkDataset(ABC):
         clear_memory()
 
         return all_scores
+
+    def _handle_error(
+        self, e: Exception, training_args: TrainingArguments
+    ) -> Tuple[int, int]:
+        """Handle an error that occurred during the benchmarking process.
+
+        Args:
+            e (Exception):
+                The exception that was raised.
+            training_args (TrainingArguments):
+                The training arguments that were used.
+
+        Returns:
+            pair of int:
+                The batch size and gradient accumulation steps to use.
+        """
+        # We assume that all these CUDA errors are caused by
+        # insufficient GPU memory
+        # TODO: Handle MPS out of memory as well
+        cuda_errs = ["CUDA out of memory", "CUDA error"]
+
+        # If it is an unknown error, then simply report it
+        if all([err not in str(e) for err in cuda_errs]):
+            raise InvalidBenchmark(str(e))
+
+        # If it is a CUDA memory error, then reduce batch size and up
+        # gradient accumulation
+        bs = training_args.per_device_train_batch_size
+        ga = training_args.gradient_accumulation_steps
+        if bs == 1:
+            raise InvalidBenchmark("CUDA out of memory, even with a batch size of 1!")
+        return bs // 2, ga * 2
 
     def _benchmark_pytorch_jax_single_iteration(
         self,
