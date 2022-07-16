@@ -136,7 +136,7 @@ class BenchmarkDataset(ABC):
                 pass
 
         # Set variable with number of iterations
-        num_iter = 10
+        num_iter = 10 if not self.benchmark_config.testing else 2
 
         if model_config.framework in {"pytorch", "jax"}:
             return self._benchmark_pytorch_jax(
