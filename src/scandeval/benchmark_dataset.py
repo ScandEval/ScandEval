@@ -88,9 +88,7 @@ class BenchmarkDataset(ABC):
             model_id (str):
                 The full Hugging Face Hub path to the pretrained transformer model. The
                 specific model version to use can be added after the suffix '@':
-                "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id
-                (currently only supported for Hugging Face models, and it defaults to
-                'main' for latest).
+                "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id.
 
         Returns:
             dict:
@@ -98,7 +96,8 @@ class BenchmarkDataset(ABC):
                 the first dictionary and the aggregated scores in the second.
 
         Raises:
-            RuntimeError: If the extracted framework is not recognized.
+            RuntimeError:
+                If the extracted framework is not recognized.
         """
         # Fetch the model config
         model_config = get_model_config(
@@ -708,6 +707,10 @@ class BenchmarkDataset(ABC):
         """Load a PyTorch model.
 
         Args:
+            model_config (ModelConfig):
+                The configuration of the model.
+            from_flax (bool):
+                Whether the model is a Flax model.
 
         Returns:
             dict:
@@ -834,6 +837,8 @@ class BenchmarkDataset(ABC):
         """Load a spaCy model.
 
         Args:
+            model_config (ModelConfig):
+                The configuration of the model.
 
         Returns:
             dict:
