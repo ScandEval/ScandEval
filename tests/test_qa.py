@@ -19,9 +19,9 @@ def benchmark_config():
         cache_dir=".scandeval_cache",
         evaluate_train=True,
         use_auth_token=False,
-        progress_bar=True,
+        progress_bar=False,
         save_results=False,
-        verbose=True,
+        verbose=False,
         testing=True,
     )
 
