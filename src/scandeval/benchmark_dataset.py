@@ -261,7 +261,7 @@ class BenchmarkDataset(ABC):
             eval_steps=30,
             logging_steps=30,
             save_steps=30,
-            max_steps=10_000,
+            max_steps=10_000 if not self.benchmark_config.testing else 1,
             report_to="none",
             save_total_limit=1,
             per_device_train_batch_size=32,

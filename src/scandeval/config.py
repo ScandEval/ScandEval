@@ -111,6 +111,8 @@ class BenchmarkConfig:
             'scandeval_benchmark_results.json'.
         verbose (bool):
             Whether to print verbose output.
+        testing (bool, optional):
+            Whether a unit test is being run. Defaults to False.
     """
 
     model_languages: Sequence[Language]
@@ -124,6 +126,7 @@ class BenchmarkConfig:
     progress_bar: bool
     save_results: bool
     verbose: bool
+    testing: bool = False
 
 
 @dataclass
