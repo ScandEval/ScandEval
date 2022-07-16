@@ -305,7 +305,9 @@ class NERBenchmark(BenchmarkDataset):
                 tokenizer=kwargs["tokenizer"],
                 label2id=kwargs["config"].label2id,
             )
-            tokenised_dataset = dataset.map(map_fn, batched=True)
+            tokenised_dataset = dataset.map(
+                map_fn, batched=True, load_from_cache_file=False
+            )
             return tokenised_dataset
         elif framework == "spacy":
             return dataset

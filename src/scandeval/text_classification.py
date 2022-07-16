@@ -47,15 +47,16 @@ class TextClassificationBenchmark(BenchmarkDataset):
             tokenizer = kwargs["tokenizer"]
 
             def tokenise(examples: dict) -> dict:
-                doc = examples["text"]
-                return tokenizer(doc, truncation=True, padding=True)
+                return tokenizer(examples["text"], truncation=True, padding=True)
 
-            tokenised = dataset.map(tokenise, batched=True)
+            tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
 
             numericalise = partial(
                 self._create_numerical_labels, label2id=kwargs["config"].label2id
             )
-            preprocessed = tokenised.map(numericalise, batched=True)
+            preprocessed = tokenised.map(
+                numericalise, batched=True, load_from_cache_file=False
+            )
 
             return preprocessed.remove_columns(["text"])
 
