@@ -37,6 +37,9 @@ ipywidgets = "^7.7.1"
 requests = "^2.28.0"
 lxml = "^4.9.0"
 isort = "^5.10.1"
+pytest-xdist = "^2.5.0"
+pytest-cov = "^3.0.0"
+readme-coverage-badger = "^0.1.2"
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"
