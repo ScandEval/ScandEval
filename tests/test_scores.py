@@ -57,7 +57,7 @@ class TestAggregateScores:
         assert agg_scores == dict(train=(mean, se))
 
     def test_only_test_scores(self, scores, metric_config):
-        # Remove the test scores from the scores
+        # Remove the train scores from the scores
         scores_only_test = deepcopy(scores)
         scores_only_test.pop("train")
 
@@ -94,6 +94,13 @@ class TestAggregateScores:
         assert agg_scores == dict(
             train=(train_mean, train_se), test=(test_mean, test_se)
         )
+
+    def test_no_scores(self, scores, metric_config):
+        empty_scores = deepcopy(scores)
+        empty_scores.pop("train")
+        empty_scores.pop("test")
+        agg_scores = aggregate_scores(scores=empty_scores, metric_config=metric_config)
+        assert agg_scores == dict()
 
 
 class TestLogScores:
