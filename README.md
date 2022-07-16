@@ -5,11 +5,11 @@
 ### Evaluation of pretrained language models on mono- or multilingual Scandinavian language tasks.
 
 ______________________________________________________________________
+[![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://pypi.org/project/scandeval/)
 [![Documentation](https://img.shields.io/badge/docs-passing-green)](https://saattrupdan.github.io/ScandEval/scandeval.html)
 [![License](https://img.shields.io/github/license/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/commits/main)
-[![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://pypi.org/project/scandeval/)
-[![Downloads](https://img.shields.io/pypi/dm/scandeval)](https://pypi.org/project/scandeval/)
+![Code Coverage](https://img.shields.io/badge/Coverage-38%25-red.svg)]
 
 
 ## Installation
