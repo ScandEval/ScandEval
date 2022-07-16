@@ -50,7 +50,7 @@ class TestAngryTweets:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -64,7 +64,7 @@ class TestAbsabankImm:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -78,7 +78,7 @@ class TestNorec:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -92,7 +92,7 @@ class TestScalaDA:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -106,7 +106,7 @@ class TestScalaSV:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -120,7 +120,7 @@ class TestScalaNB:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -134,7 +134,7 @@ class TestScalaNN:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -148,7 +148,7 @@ class TestScalaIS:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -162,7 +162,7 @@ class TestScalaFO:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )

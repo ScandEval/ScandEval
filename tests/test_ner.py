@@ -47,7 +47,7 @@ class TestDane:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -61,7 +61,7 @@ class TestSuc3:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -75,7 +75,7 @@ class TestNorneNB:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -89,7 +89,7 @@ class TestNorneNN:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -103,7 +103,7 @@ class TestMimGoldNer:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
@@ -117,7 +117,7 @@ class TestWikiAnnFo:
             benchmark_config=benchmark_config,
         )
 
-    def test_scores_are_correct(self, benchmark):
+    def test_scores_are_correct(self, benchmark, model_id):
         assert benchmark.benchmark(model_id) == dict(
             test=[{"test_micro_f1": 0.5, "test_micro_f1_no_misc": 0.5}]
         )
