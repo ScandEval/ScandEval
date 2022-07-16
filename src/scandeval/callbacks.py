@@ -10,7 +10,7 @@ class NeverLeaveProgressCallback(ProgressCallback):
     """Progress callback which never leaves the progress bar"""
 
     def __init__(self, *args, testing: bool = False, **kwargs):
-        super.__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.testing = testing
 
     def on_train_begin(self, args, state, control, **kwargs):
