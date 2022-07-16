@@ -12,7 +12,16 @@ from .text_classification import TextClassificationBenchmark
 
 
 class DatasetFactory:
-    """Factory which produces datasets from a configuration."""
+    """Factory which produces datasets from a configuration.
+
+    Args:
+        benchmark_config (BenchmarkConfig):
+            The benchmark configuration to be used in all datasets constructed.
+
+    Attributes:
+        benchmark_config (BenchmarkConfig):
+            The benchmark configuration to be used in all datasets constructed.
+    """
 
     def __init__(self, benchmark_config: BenchmarkConfig):
         self.benchmark_config = benchmark_config
