@@ -52,7 +52,9 @@ addopts = [
     '--color=yes',
     '-s',
     '-vv',
-    '--doctest-modules'
+    '--doctest-modules',
+    '--cov src/scandeval',
+    '-n 8',
 ]
 xfail_strict = true
 filterwarnings = ["error"]
