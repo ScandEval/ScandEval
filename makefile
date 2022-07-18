@@ -60,8 +60,7 @@ clean:
 	@echo "Cleaned repository."
 
 test:
-	@pytest --cov=src/scandeval -n 8 tests/
-	@readme-cov
+	@pytest && readme-cov
 
 tree:
 	@tree -a \
