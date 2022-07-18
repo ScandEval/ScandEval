@@ -53,7 +53,7 @@ addopts = [
     '-s',
     '-vv',
     '--doctest-modules',
-    '--cov src/scandeval',
+    '--cov=src/scandeval',
     '-n 8',
 ]
 xfail_strict = true
