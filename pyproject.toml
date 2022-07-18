@@ -59,7 +59,7 @@ addopts = [
 xfail_strict = true
 filterwarnings = ["error"]
 log_cli_level = "info"
-testpaths = ["tests"]
+testpaths = ["tests", "src/scandeval"]
 
 [tool.black]
 line-length = 88
