@@ -6,8 +6,6 @@ import subprocess
 from pathlib import Path
 from typing import Tuple
 
-import pkg_resources
-
 
 def bump_major():
     """Add one to the major version."""
@@ -42,17 +40,6 @@ def set_new_version(major: int, minor: int, patch: int):
     """
     version = f"{major}.{minor}.{patch}"
 
-    # Update the version in the `pyproject.toml` file
-    pyproject_path = Path("pyproject.toml")
-    pyproject = pyproject_path.read_text()
-    pyproject = re.sub(
-        r'version = "[^"]+"',
-        f'version = "{version}"',
-        pyproject,
-        count=1,
-    )
-    pyproject_path.write_text(pyproject)
-
     # Get current changelog and ensure that it has an [Unreleased] entry
     changelog_path = Path("CHANGELOG.md")
     changelog = changelog_path.read_text()
@@ -64,10 +51,24 @@ def set_new_version(major: int, minor: int, patch: int):
     new_changelog = re.sub(r"\[Unreleased\].*", f"[v{version}] - {today}", changelog)
     changelog_path.write_text(new_changelog)
 
+    # Update the version in the `pyproject.toml` file
+    pyproject_path = Path("pyproject.toml")
+    pyproject = pyproject_path.read_text()
+    pyproject = re.sub(
+        r'version = "[^"]+"',
+        f'version = "{version}"',
+        pyproject,
+        count=1,
+    )
+    pyproject_path.write_text(pyproject)
+
     # Add to version control
     subprocess.run(["git", "add", "CHANGELOG.md"])
+    subprocess.run(["git", "add", "pyproject.toml"])
     subprocess.run(["git", "commit", "-m", f"feat: v{version}"])
     subprocess.run(["git", "tag", f"v{version}"])
+    subprocess.run(["git", "push"])
+    subprocess.run(["git", "push", "--tags"])
 
 
 def get_current_version() -> Tuple[int, int, int]:
@@ -77,9 +78,21 @@ def get_current_version() -> Tuple[int, int, int]:
         triple of ints:
             The current version, separated into major, minor and patch versions.
     """
-    version_str = pkg_resources.get_distribution("scandeval").version
-    major, minor, patch = map(int, version_str.split("."))
-    return major, minor, patch
+    # Get all the version candidates from pyproject.toml
+    version_candidates = re.search(
+        r'(?<=version = ")[^"]+(?=")', Path("pyproject.toml").read_text()
+    )
+
+    # If no version candidates were found, raise an error
+    if version_candidates is None:
+        raise RuntimeError("No version found in pyproject.toml.")
+
+    # Otherwise, extract the version, split it into major, minor and patch parts and
+    # return these
+    else:
+        version_str = version_candidates.group(0)
+        major, minor, patch = map(int, version_str.split("."))
+        return major, minor, patch
 
 
 if __name__ == "__main__":
