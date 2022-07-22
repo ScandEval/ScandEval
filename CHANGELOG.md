@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v4.0.2] - 2022-07-22
 ### Fixed
 - Now garbage collects properly, where previously (from v4 onwards) the `model` and
   `model_dict` were not removed from memory after each run, potentially causing a
