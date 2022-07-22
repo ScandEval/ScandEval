@@ -276,7 +276,6 @@ class BenchmarkDataset(ABC):
             load_best_model_at_end=True,
             optim="adamw_torch",
             seed=4242,
-            bf16=torch.cuda.is_available() or not torch.backends.mps.is_available(),
             no_cuda=self.benchmark_config.testing,
         )
 
