@@ -15,6 +15,9 @@ and this project adheres to
   `--auth-token` argument. If an authentication is provided in this way in the CLI,
   then there is no need to add the `--use-auth-token` flag.
 
+### Fixed
+- Removed `bf16` precision, as it only works for some GPUs.
+
 
 ## [v4.0.2] - 2022-07-22
 ### Fixed
