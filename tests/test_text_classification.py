@@ -80,19 +80,19 @@ class TestTextClassificationScores:
     def test_mean_mcc_is_correct(self, scores, correct_scores):
         min_score = correct_scores[0] * 0.9
         max_score = correct_scores[0] * 1.1
-        assert min_score < round(scores["test_mcc"], 1) < max_score
+        assert min_score <= round(scores["test_mcc"], 1) <= max_score
 
     def test_mean_macro_f1_is_correct(self, scores, correct_scores):
         min_score = correct_scores[1] * 0.9
         max_score = correct_scores[1] * 1.1
-        assert min_score < round(scores["test_macro_f1"], 1) < max_score
+        assert min_score <= round(scores["test_macro_f1"], 1) <= max_score
 
     def test_se_mcc_is_correct(self, scores, correct_scores):
         min_score = correct_scores[2] * 0.9
         max_score = correct_scores[2] * 1.1
-        assert min_score < round(scores["test_mcc_se"], 1) < max_score
+        assert min_score <= round(scores["test_mcc_se"], 1) <= max_score
 
     def test_se_macro_f1_is_correct(self, scores, correct_scores):
         min_score = correct_scores[3] * 0.9
         max_score = correct_scores[3] * 1.1
-        assert min_score < round(scores["test_macro_f1_se"], 1) < max_score
+        assert min_score <= round(scores["test_macro_f1_se"], 1) <= max_score
