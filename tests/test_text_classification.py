@@ -45,15 +45,15 @@ def model_id():
 @pytest.mark.parametrize(
     argnames=["dataset", "correct_scores"],
     argvalues=[
-        (ANGRY_TWEETS_CONFIG, (-8.46, 18.21, 16.58, 5.78)),
-        (ABSABANK_IMM_CONFIG, (0.00, 12.89, 0.00, 4.64)),
-        (NOREC_CONFIG, (1.52, 23.70, 2.98, 8.70)),
-        (SCALA_DA_CONFIG, (8.46, 36.72, 16.58, 5.96)),
-        (SCALA_SV_CONFIG, (0.00, 32.96, 0.00, 7.20)),
-        (SCALA_NB_CONFIG, (-7.21, 32.47, 14.13, 3.99)),
-        (SCALA_NN_CONFIG, (-10.95, 34.81, 21.46, 3.58)),
-        (SCALA_IS_CONFIG, (0.00, 34.43, 0.00, 4.93)),
-        (SCALA_FO_CONFIG, (0.00, 31.72, 0.00, 1.78)),
+        (ANGRY_TWEETS_CONFIG, (-8.5, 18.2, 16.6, 5.8)),
+        (ABSABANK_IMM_CONFIG, (0.0, 12.9, 0.0, 4.6)),
+        (NOREC_CONFIG, (1.5, 23.7, 3.0, 8.7)),
+        (SCALA_DA_CONFIG, (8.5, 36.7, 16.6, 6.0)),
+        (SCALA_SV_CONFIG, (0.0, 33.0, 0.0, 7.0)),
+        (SCALA_NB_CONFIG, (-7.2, 32.5, 14.1, 4.0)),
+        (SCALA_NN_CONFIG, (-11.0, 34.8, 21.5, 3.6)),
+        (SCALA_IS_CONFIG, (0.0, 34.4, 0.0, 4.9)),
+        (SCALA_FO_CONFIG, (0.0, 31.7, 0.0, 1.8)),
     ],
     ids=[
         "absabank-imm",
@@ -78,13 +78,21 @@ class TestTextClassificationScores:
         yield benchmark.benchmark(model_id)["total"]
 
     def test_mean_mcc_is_correct(self, scores, correct_scores):
-        assert round(scores["test_mcc"], 2) == correct_scores[0]
+        min_score = correct_scores[0] * 0.9
+        max_score = correct_scores[0] * 1.1
+        assert min_score < round(scores["test_mcc"], 1) < max_score
 
     def test_mean_macro_f1_is_correct(self, scores, correct_scores):
-        assert round(scores["test_macro_f1"], 2) == correct_scores[1]
+        min_score = correct_scores[1] * 0.9
+        max_score = correct_scores[1] * 1.1
+        assert min_score < round(scores["test_macro_f1"], 1) < max_score
 
     def test_se_mcc_is_correct(self, scores, correct_scores):
-        assert round(scores["test_mcc_se"], 2) == correct_scores[2]
+        min_score = correct_scores[2] * 0.9
+        max_score = correct_scores[2] * 1.1
+        assert min_score < round(scores["test_mcc_se"], 1) < max_score
 
     def test_se_macro_f1_is_correct(self, scores, correct_scores):
-        assert round(scores["test_macro_f1_se"], 2) == correct_scores[3]
+        min_score = correct_scores[3] * 0.9
+        max_score = correct_scores[3] * 1.1
+        assert min_score < round(scores["test_macro_f1_se"], 1) < max_score
