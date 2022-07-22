@@ -27,6 +27,7 @@ def test_cli_param_names(params):
         "verbose",
         "no_save_results",
         "cache_dir",
+        "auth_token",
         "use_auth_token",
         "help",
     }
@@ -46,5 +47,6 @@ def test_cli_param_types(params):
     assert params["verbose"] == BOOL
     assert params["no_save_results"] == BOOL
     assert params["cache_dir"] == STRING
+    assert params["auth_token"] == STRING
     assert params["use_auth_token"] == BOOL
     assert params["help"] == BOOL
