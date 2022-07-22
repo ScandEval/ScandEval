@@ -76,19 +76,19 @@ class TestNerScores:
     def test_mean_micro_f1_is_correct(self, scores, correct_scores):
         min_score = correct_scores[0] * 0.9
         max_score = correct_scores[0] * 1.1
-        assert min_score < round(scores["test_micro_f1"], 1) < max_score
+        assert min_score <= round(scores["test_micro_f1"], 1) <= max_score
 
     def test_mean_micro_f1_no_misc_is_correct(self, scores, correct_scores):
         min_score = correct_scores[1] * 0.9
         max_score = correct_scores[1] * 1.1
-        assert min_score < round(scores["test_micro_f1_no_misc"], 1) < max_score
+        assert min_score <= round(scores["test_micro_f1_no_misc"], 1) <= max_score
 
     def test_se_micro_f1_is_correct(self, scores, correct_scores):
         min_score = correct_scores[2] * 0.9
         max_score = correct_scores[2] * 1.1
-        assert min_score < round(scores["test_micro_f1_se"], 1) < max_score
+        assert min_score <= round(scores["test_micro_f1_se"], 1) <= max_score
 
     def test_se_micro_f1_no_misc_is_correct(self, scores, correct_scores):
         min_score = correct_scores[3] * 0.9
         max_score = correct_scores[3] * 1.1
-        assert min_score < round(scores["test_micro_f1_no_misc_se"], 1) < max_score
+        assert min_score <= round(scores["test_micro_f1_no_misc_se"], 1) <= max_score
