@@ -7,15 +7,6 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-### Changed
-- You can now specify your Hugging Face authentication token in the `use_auth_token`
-  argument of `Benchmarker` rather than manually logging in with `huggingface-cli
-  login`. In the CLI an authentication token can also be applied directly using the new
-  `--auth-token` argument. If an authentication is provided in this way in the CLI,
-  then there is no need to add the `--use-auth-token` flag.
-
-
 ## [v4.0.2] - 2022-07-22
 ### Fixed
 - Now garbage collects properly, where previously (from v4 onwards) the `model` and
