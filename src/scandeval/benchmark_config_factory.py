@@ -20,7 +20,7 @@ class BenchmarkConfigFactory:
         raise_error_on_invalid_model: bool,
         cache_dir: str,
         evaluate_train: bool,
-        use_auth_token: bool,
+        use_auth_token: Union[bool, str],
         progress_bar: bool,
         save_results: bool,
         verbose: bool,
@@ -51,8 +51,11 @@ class BenchmarkConfigFactory:
                 Directory to store cached models.
             evaluate_train (bool, optional):
                 Whether to evaluate the training set as well.
-            use_auth_token (bool, optional):
-                Whether the benchmark should use an authentication token.
+            use_auth_token (bool or str, optional):
+                The authentication token for the Hugging Face Hub. If a boolean value is
+                specified then the token will be fetched from the Hugging Face CLI, where
+                the user has logged in through `huggingface-cli login`. If a string is
+                specified then it will be used as the token. Defaults to False.
             progress_bar (bool, optional):
                 Whether progress bars should be shown.
             save_results (bool, optional):

@@ -1,6 +1,6 @@
 """Command-line interface for benchmarking."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import click
 
@@ -131,6 +131,14 @@ from .languages import get_all_languages
     help="The directory where models are datasets are cached.",
 )
 @click.option(
+    "--auth-token",
+    type=str,
+    default="",
+    show_default=True,
+    help="""The authentication token for the Hugging Face Hub. If specified then the
+    `--use-auth-token` flag will be set to True.""",
+)
+@click.option(
     "--use-auth-token",
     is_flag=True,
     show_default=True,
@@ -152,6 +160,7 @@ def benchmark(
     no_save_results: bool,
     cache_dir: str,
     use_auth_token: bool,
+    auth_token: str,
     verbose: bool = False,
 ):
     """Benchmark pretrained language models on Scandinavian language tasks."""
@@ -164,6 +173,7 @@ def benchmark(
     dataset_languages = None if len(dataset_language) == 0 else list(dataset_language)
     model_tasks = None if len(model_task) == 0 else list(model_task)
     dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
+    auth: Union[str, bool] = auth_token if auth_token != "" else use_auth_token
 
     # Initialise the benchmarker class
     benchmarker = Benchmarker(
@@ -177,7 +187,7 @@ def benchmark(
         evaluate_train=evaluate_train,
         raise_error_on_invalid_model=raise_error_on_invalid_model,
         verbose=verbose,
-        use_auth_token=use_auth_token,
+        use_auth_token=auth,
         cache_dir=cache_dir,
     )
 

@@ -3,7 +3,7 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Union
 
 import requests
 from huggingface_hub import HfApi, ModelFilter
@@ -140,7 +140,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 def get_model_lists(
     languages: Optional[Sequence[Language]],
     tasks: Optional[Sequence[str]],
-    use_auth_token: bool,
+    use_auth_token: Union[bool, str],
 ) -> Dict[str, Sequence[str]]:
     """Fetches up-to-date model lists.
 
@@ -150,8 +150,11 @@ def get_model_lists(
             will not be filtered on language.
         tasks (None or sequence of str):
             The task to consider. If None then the models will not be filtered on task.
-        use_auth_token (bool):
-            Whether to use an authentication token to fetch the model lists.
+        use_auth_token (bool or str):
+            The authentication token for the Hugging Face Hub. If a boolean value is
+            specified then the token will be fetched from the Hugging Face CLI, where
+            the user has logged in through `huggingface-cli login`. If a string is
+            specified then it will be used as the token. Defaults to False.
 
     Returns:
         dict:

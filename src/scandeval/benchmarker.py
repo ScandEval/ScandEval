@@ -7,13 +7,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Union
 
 from .benchmark_config_factory import BenchmarkConfigFactory
-from .config import BenchmarkConfig, DatasetConfig, DatasetTask, Language
+from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
-from .dataset_tasks import get_all_dataset_tasks
 from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_lists
-from .languages import get_all_languages
 
 logger = logging.getLogger(__name__)
 
@@ -52,9 +50,11 @@ class Benchmarker:
             Whether to raise an error if a model is invalid. Defaults to False.
         cache_dir (str, optional):
             Directory to store cached models. Defaults to '.scandeval_cache'.
-        use_auth_token (bool, optional):
-            Whether the benchmark should use an authentication token. Defaults to
-            False.
+        use_auth_token (bool or str, optional):
+            The authentication token for the Hugging Face Hub. If a boolean value is
+            specified then the token will be fetched from the Hugging Face CLI, where
+            the user has logged in through `huggingface-cli login`. If a string is
+            specified then it will be used as the token. Defaults to False.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
 
@@ -66,7 +66,7 @@ class Benchmarker:
         dataset_task (str or list of str): The dataset tasks to include.
         evaluate_train (bool): Whether to evaluate the training set as well.
         verbose (bool): Whether to output additional output.
-        use_auth_token (bool): Whether an authentication token should be used.
+        use_auth_token (str or bool): The authentication token for the Hugging Face Hub.
         benchmark_results (dict): The benchmark results.
     """
 
@@ -82,7 +82,7 @@ class Benchmarker:
         evaluate_train: bool = False,
         raise_error_on_invalid_model: bool = False,
         cache_dir: str = ".scandeval_cache",
-        use_auth_token: bool = False,
+        use_auth_token: Union[bool, str] = False,
         verbose: bool = False,
     ):
         # Build benchmark configuration

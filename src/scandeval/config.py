@@ -1,7 +1,7 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 
 @dataclass
@@ -102,8 +102,11 @@ class BenchmarkConfig:
             Directory to store cached models and datasets.
         evaluate_train (bool):
             Whether to evaluate on the training set.
-        use_auth_token (bool):
-            Whether to use an authentication token.
+        use_auth_token (bool or str):
+            The authentication token for the Hugging Face Hub. If a boolean value is
+            specified then the token will be fetched from the Hugging Face CLI, where
+            the user has logged in through `huggingface-cli login`. If a string is
+            specified then it will be used as the token. Defaults to False.
         progress_bar (bool):
             Whether to show a progress bar.
         save_results (bool):
@@ -122,7 +125,7 @@ class BenchmarkConfig:
     raise_error_on_invalid_model: bool
     cache_dir: str
     evaluate_train: bool
-    use_auth_token: bool
+    use_auth_token: Union[bool, str]
     progress_bar: bool
     save_results: bool
     verbose: bool
