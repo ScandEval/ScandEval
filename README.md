@@ -108,8 +108,8 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── .flake8
 ├── .github
 │   └── workflows
-│       ├── ci.yml
-│       └── docs.yml
+│       ├── ci.yaml
+│       └── docs.yaml
 ├── .gitignore
 ├── .pre-commit-config.yaml
 ├── CHANGELOG.md
@@ -124,6 +124,7 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── src
 │   ├── scandeval
 │   │   ├── __init__.py
+│   │   ├── benchmark_config_factory.py
 │   │   ├── benchmark_dataset.py
 │   │   ├── benchmarker.py
 │   │   ├── callbacks.py
@@ -157,7 +158,7 @@ World](https://satwcomic.com/) team. Go check them out!
 │       └── versioning.py
 └── tests
     ├── __init__.py
-    ├── test_benchmark_dataset.py
+    ├── test_benchmark_config_factory.py
     ├── test_benchmarker.py
     ├── test_callbacks.py
     ├── test_cli.py

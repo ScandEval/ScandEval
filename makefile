@@ -75,6 +75,7 @@ tree:
 		-I scandeval_benchmark_results.json \
 		-I .gitkeep \
 		-I docs \
+		-I .coverage* \
 		-I .pytest_cache
 
 bump-major:
