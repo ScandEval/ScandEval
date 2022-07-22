@@ -45,12 +45,12 @@ def model_id():
 @pytest.mark.parametrize(
     argnames=["dataset", "correct_scores"],
     argvalues=[
-        (DANE_CONFIG, (1.6, 0.7, 1.8, 1.4)),
-        (SUC3_CONFIG, (0.3, 0.6, 0.7, 1.2)),
-        (NORNE_NB_CONFIG, (0.8, 0.8, 1.6, 1.6)),
-        (NORNE_NN_CONFIG, (0.6, 0.5, 1.2, 1.0)),
-        (MIM_GOLD_NER_CONFIG, (0.9, 1.0, 0.4, 1.3)),
-        (WIKIANN_FO_CONFIG, (0.8, 0.8, 0.3, 0.3)),
+        (DANE_CONFIG, (1.6, 0.7)),
+        (SUC3_CONFIG, (0.3, 0.6)),
+        (NORNE_NB_CONFIG, (0.8, 0.8)),
+        (NORNE_NN_CONFIG, (0.6, 0.5)),
+        (MIM_GOLD_NER_CONFIG, (0.9, 1.0)),
+        (WIKIANN_FO_CONFIG, (0.8, 0.8)),
     ],
     ids=[
         "dane",
@@ -73,22 +73,12 @@ class TestNerScores:
             )
             yield benchmark.benchmark(model_id)["total"]
 
-    def test_mean_micro_f1_is_correct(self, scores, correct_scores):
-        min_score = correct_scores[0] * 0.9
-        max_score = correct_scores[0] * 1.1
-        assert min_score <= round(scores["test_micro_f1"], 1) <= max_score
+    def test_micro_f1_is_correct(self, scores, correct_scores):
+        min_score = scores["test_micro_f1"] - scores["test_micro_f1_se"]
+        max_score = scores["test_micro_f1"] + scores["test_micro_f1_se"]
+        assert min_score <= correct_scores[0] <= max_score
 
-    def test_mean_micro_f1_no_misc_is_correct(self, scores, correct_scores):
-        min_score = correct_scores[1] * 0.9
-        max_score = correct_scores[1] * 1.1
-        assert min_score <= round(scores["test_micro_f1_no_misc"], 1) <= max_score
-
-    def test_se_micro_f1_is_correct(self, scores, correct_scores):
-        min_score = correct_scores[2] * 0.9
-        max_score = correct_scores[2] * 1.1
-        assert min_score <= round(scores["test_micro_f1_se"], 1) <= max_score
-
-    def test_se_micro_f1_no_misc_is_correct(self, scores, correct_scores):
-        min_score = correct_scores[3] * 0.9
-        max_score = correct_scores[3] * 1.1
-        assert min_score <= round(scores["test_micro_f1_no_misc_se"], 1) <= max_score
+    def test_micro_f1_no_misc_is_correct(self, scores, correct_scores):
+        min_score = scores["test_micro_f1_no_misc"] - scores["test_micro_f1_no_misc_se"]
+        max_score = scores["test_micro_f1_no_misc"] + scores["test_micro_f1_no_misc_se"]
+        assert min_score <= correct_scores[1] <= max_score
