@@ -6,6 +6,7 @@ import logging
 import os
 
 import pkg_resources
+from dotenv import load_dotenv
 from termcolor import colored
 
 from .benchmarker import Benchmarker  # noqa
@@ -17,6 +18,10 @@ __version__ = pkg_resources.get_distribution("scandeval").version
 
 # Block unwanted terminal outputs
 block_terminal_output()
+
+
+# Loads environment variables
+load_dotenv()
 
 
 # Set up logging
