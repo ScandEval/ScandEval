@@ -26,6 +26,7 @@ sentencepiece = ">=0.1.96,<1.0.0"
 protobuf = "^3.20.0"
 seqeval = "^1.2.2"
 pandas = "^1.4.0"
+python-dotenv = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^7.1.1"
