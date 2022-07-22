@@ -1,5 +1,7 @@
 """Unit tests for the `hf_hub` module."""
 
+import os
+
 import pytest
 
 from src.scandeval.config import BenchmarkConfig, ModelConfig
@@ -20,7 +22,7 @@ class TestGetModelConfig:
             raise_error_on_invalid_model=False,
             cache_dir=".",
             evaluate_train=False,
-            use_auth_token=True,
+            use_auth_token=os.environ["HUGGINGFACE_HUB_TOKEN"],
             progress_bar=True,
             save_results=True,
             verbose=True,
