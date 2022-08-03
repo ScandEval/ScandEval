@@ -11,6 +11,7 @@ include .env
 install-poetry:
 	@echo "Installing poetry..."
 	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+	@$(eval include ${HOME}/.poetry/env)
 
 uninstall-poetry:
 	@echo "Uninstalling poetry..."
@@ -19,16 +20,19 @@ uninstall-poetry:
 install:
 	@echo "Installing..."
 	@if [ "$(shell which poetry)" = "" ]; then \
-		make install-poetry; \
+		$(MAKE) install-poetry; \
 	fi
 	@if [ "$(shell which gpg)" = "" ]; then \
 		echo "GPG not installed, so an error will occur. Install GPG on MacOS with "\
 			 "`brew install gnupg` or on Ubuntu with `apt install gnupg` and run "\
 			 "`make install` again."; \
 	fi
+	@$(MAKE) setup-poetry
+	@$(MAKE) setup-git
+
+setup-poetry:
 	@poetry env use python3
 	@poetry run python3 -m src.scripts.fix_dot_env_file
-	@$(MAKE) setup-git
 	@poetry install
 	@poetry run pre-commit install
 
@@ -45,10 +49,6 @@ setup-git:
 		git config --local commit.gpgsign true; \
 		git config --local user.signingkey ${GPG_KEY_ID}; \
 	fi
-
-remove-env:
-	@poetry env remove python3
-	@echo "Removed virtual environment."
 
 docs:
 	@poetry run pdoc --docformat google -o docs --logo "https://raw.githubusercontent.com/saattrupdan/ScandEval/main/gfx/scandeval.png" src/scandeval
