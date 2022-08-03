@@ -5,6 +5,9 @@
 # Exports all variables defined in the makefile available to scripts
 .EXPORT_ALL_VARIABLES:
 
+# Includes environment variables from the .env file
+include .env
+
 install-poetry:
 	@echo "Installing poetry..."
 	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
@@ -25,21 +28,23 @@ install:
 	fi
 	@poetry env use python3
 	@poetry run python3 -m src.scripts.fix_dot_env_file
-	@git init
-	@. .env; \
-		git config --local user.name "$${GIT_NAME}"; \
-		git config --local user.email "$${GIT_EMAIL}"
-	@. .env; \
-		if [ "$${GPG_KEY_ID}" = "" ]; then \
-			echo "No GPG key ID specified. Skipping GPG signing."; \
-			git config --local commit.gpgsign false; \
-		else \
-			echo "Signing with GPG key ID $${GPG_KEY_ID}..."; \
-			git config --local commit.gpgsign true; \
-			git config --local user.signingkey "$${GPG_KEY_ID}"; \
-		fi
+	@$(MAKE) setup-git
 	@poetry install
 	@poetry run pre-commit install
+
+setup-git:
+	@git init
+	@git config --local user.name ${GIT_NAME}
+	@git config --local user.email ${GIT_EMAIL}
+	@if [ ${GPG_KEY_ID} = "" ]; then \
+		echo "No GPG key ID specified. Skipping GPG signing."; \
+		git config --local commit.gpgsign false; \
+	else \
+		echo "Signing with GPG key ID ${GPG_KEY_ID}..."; \
+		echo 'If you get the "failed to sign the data" error when committing, try running `export GPG_TTY=$$(tty)`.'; \
+		git config --local commit.gpgsign true; \
+		git config --local user.signingkey ${GPG_KEY_ID}; \
+	fi
 
 remove-env:
 	@poetry env remove python3
@@ -91,8 +96,8 @@ bump-patch:
 	@echo "Bumped patch version."
 
 publish:
-	@. .env; \
-		printf "Preparing to publish to PyPI. Have you ensured to change the package version with 'make bump-X' for 'X' being 'major', 'minor' or 'patch'? [y/n] : "; \
+	@$(eval include .env)
+	@printf "Preparing to publish to PyPI. Have you ensured to change the package version with 'make bump-X' for 'X' being 'major', 'minor' or 'patch'? [y/n] : "; \
 		read -r answer; \
 		if [ "$${answer}" = "y" ]; then \
 			if [ "$${PYPI_API_TOKEN}" = "" ]; then \
