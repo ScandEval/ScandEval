@@ -3,7 +3,7 @@
 import pytest
 from click.types import BOOL, STRING, Choice
 
-from src.scandeval.cli import benchmark
+from scandeval.cli import benchmark
 
 
 @pytest.fixture(scope="module")

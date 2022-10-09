@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.scandeval.config import DatasetConfig
-from src.scandeval.dataset_configs import get_all_dataset_configs, get_dataset_config
+from scandeval.config import DatasetConfig
+from scandeval.dataset_configs import get_all_dataset_configs, get_dataset_config
 
 
 class TestGetAllDatasetConfigs:

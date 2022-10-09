@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.scandeval.exceptions import (
+from scandeval.exceptions import (
     HuggingFaceHubDown,
     InvalidBenchmark,
     NoInternetConnection,

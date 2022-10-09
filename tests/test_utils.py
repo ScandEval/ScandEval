@@ -1,6 +1,6 @@
 """Unit tests for the `utils` module."""
 
-from src.scandeval.utils import (
+from scandeval.utils import (
     block_terminal_output,
     clear_memory,
     enforce_reproducibility,

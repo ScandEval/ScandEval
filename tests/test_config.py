@@ -2,11 +2,10 @@
 
 import pytest
 
-from src.scandeval.config import (
+from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,
     DatasetTask,
-    Label,
     Language,
     MetricConfig,
     ModelConfig,
@@ -21,11 +20,6 @@ def metric_config():
         huggingface_id="metric_id",
         results_key="metric_key",
     )
-
-
-@pytest.fixture(scope="module")
-def label():
-    yield Label(name="label_name", synonyms=["synonym1", "synonym2"])
 
 
 @pytest.fixture(scope="class")
@@ -55,15 +49,6 @@ class TestMetricConfig:
 
     def test_default_value_of_compute_kwargs(self, metric_config):
         assert metric_config.compute_kwargs == dict()
-
-
-class TestLabel:
-    def test_label_is_object(self, label):
-        assert isinstance(label, Label)
-
-    def test_attributes_correspond_to_arguments(self, label):
-        assert label.name == "label_name"
-        assert label.synonyms == ["synonym1", "synonym2"]
 
 
 class TestDatasetTask:

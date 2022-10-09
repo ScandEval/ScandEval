@@ -2,10 +2,10 @@
 
 import pytest
 
-from src.scandeval.config import BenchmarkConfig
-from src.scandeval.dataset_tasks import QA
-from src.scandeval.languages import DA, FO, IS, NO, SV
-from src.scandeval.qa import QABenchmark
+from scandeval.config import BenchmarkConfig
+from scandeval.dataset_tasks import QA
+from scandeval.languages import DA, FO, IS, NO, SV
+from scandeval.question_answering import QuestionAnswering
 
 
 @pytest.fixture(scope="module")
@@ -13,7 +13,6 @@ def benchmark_config():
     yield BenchmarkConfig(
         model_languages=[DA, SV, NO, IS, FO],
         dataset_languages=[DA, SV, NO, IS, FO],
-        model_tasks=None,
         dataset_tasks=[QA],
         raise_error_on_invalid_model=False,
         cache_dir=".scandeval_cache",

@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.scandeval.config import DatasetTask
-from src.scandeval.dataset_tasks import get_all_dataset_tasks
+from scandeval.config import DatasetTask
+from scandeval.dataset_tasks import get_all_dataset_tasks
 
 
 class TestGetAllDatasetTasks:
