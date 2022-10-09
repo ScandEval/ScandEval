@@ -14,7 +14,7 @@ from .protocols import DataCollator, Tokenizer
 logger = logging.getLogger(__name__)
 
 
-class SequenceClassificationBenchmark(BenchmarkDataset):
+class SequenceClassification(BenchmarkDataset):
     """Sequence classification benchmark dataset.
 
     Args:

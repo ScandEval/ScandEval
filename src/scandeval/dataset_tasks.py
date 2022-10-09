@@ -91,7 +91,7 @@ QA = DatasetTask(
 
 SENT = DatasetTask(
     name="sent",
-    supertask="text-classification",
+    supertask="sequence-classification",
     metrics=[
         MetricConfig(
             name="mcc",

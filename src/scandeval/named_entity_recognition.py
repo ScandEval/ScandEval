@@ -17,7 +17,7 @@ from .protocols import Tokenizer
 logger = logging.getLogger(__name__)
 
 
-class NERBenchmark(BenchmarkDataset):
+class NamedEntityRecognition(BenchmarkDataset):
     """Named entity recognition benchmark dataset.
 
     Args:

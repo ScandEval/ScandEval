@@ -1,14 +1,11 @@
 """Factory which produces datasets from a configuration."""
 
-from typing import Type, Union
+from typing import Optional, Type, Union
 
 from .benchmark_dataset import BenchmarkDataset
 from .config import BenchmarkConfig, DatasetConfig
 from .dataset_configs import get_dataset_config
-from .dataset_tasks import NER, QA
-from .ner import NERBenchmark
-from .qa import QABenchmark
-from .text_classification import TextClassificationBenchmark
+from .utils import get_class_by_name
 
 
 class DatasetFactory:
@@ -23,7 +20,7 @@ class DatasetFactory:
             The benchmark configuration to be used in all datasets constructed.
     """
 
-    def __init__(self, benchmark_config: BenchmarkConfig):
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         self.benchmark_config = benchmark_config
 
     def build_dataset(self, dataset: Union[str, DatasetConfig]) -> BenchmarkDataset:
@@ -44,14 +41,10 @@ class DatasetFactory:
             dataset_config = dataset
 
         # Get the benchmark class based on the task
-        benchmark_cls: Type[BenchmarkDataset]
-        if dataset_config.task.supertask == "text-classification":
-            benchmark_cls = TextClassificationBenchmark
-        elif dataset_config.task == NER:
-            benchmark_cls = NERBenchmark
-        elif dataset_config.task == QA:
-            benchmark_cls = QABenchmark
-        else:
+        benchmark_cls: Optional[Type[BenchmarkDataset]] = get_class_by_name(
+            [dataset_config.name, dataset_config.task.supertask]
+        )
+        if not benchmark_cls:
             raise ValueError(f"Unknown dataset task: {dataset_config.task}")
 
         # Create the dataset

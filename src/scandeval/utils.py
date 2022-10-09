@@ -147,7 +147,7 @@ def get_class_by_name(
         # Import the module
         try:
             if not module_name:
-                module_name = f"aiai_eval.{name_snake}"
+                module_name = f"scandeval.{name_snake}"
             module = importlib.import_module(module_name)
         except ModuleNotFoundError:
             module_name = None
@@ -155,7 +155,7 @@ def get_class_by_name(
 
         # Get the class from the module
         try:
-            class_ = getattr(module, name_pascal)
+            class_: Type = getattr(module, name_pascal)
         except AttributeError:
             module_name = None
             continue

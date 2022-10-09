@@ -7,12 +7,11 @@ from datasets import Dataset
 from transformers import DefaultDataCollator, PreTrainedTokenizerBase
 
 from .benchmark_dataset import BenchmarkDataset
-from .exceptions import InvalidBenchmark
 
 logger = logging.getLogger(__name__)
 
 
-class QABenchmark(BenchmarkDataset):
+class QuestionAnswering(BenchmarkDataset):
     """Question-answering benchmark dataset.
 
     Args:
