@@ -6,13 +6,14 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Union
 
-from .benchmark_config_factory import BenchmarkConfigFactory
+from .benchmark_config_factory import build_benchmark_config
 from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_lists
 
+# Create logger
 logger = logging.getLogger(__name__)
 
 
@@ -38,9 +39,6 @@ class Benchmarker:
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
             Defaults to None.
-        model_task (str or sequence of str, optional):
-            The tasks to include for models. If "all" then models will not be filtered
-            based on the task they were trained on. Defaults to "all".
         dataset_task (str or sequence of str, optional):
             The tasks to include for dataset. If "all" then datasets will not be
             filtered based on their task. Defaults to "all".
@@ -62,7 +60,6 @@ class Benchmarker:
         progress_bar (bool): Whether progress bars should be shown.
         save_results (bool): Whether to save the benchmark results.
         language (str or list of str): The languages to include in the list.
-        model_task (str or list of str): The model tasks to include.
         dataset_task (str or list of str): The dataset tasks to include.
         evaluate_train (bool): Whether to evaluate the training set as well.
         verbose (bool): Whether to output additional output.
@@ -77,20 +74,18 @@ class Benchmarker:
         language: Union[str, List[str]] = ["da", "sv", "no"],
         model_language: Optional[Union[str, Sequence[str]]] = None,
         dataset_language: Optional[Union[str, Sequence[str]]] = None,
-        model_task: Optional[Union[str, Sequence[str]]] = None,
         dataset_task: Optional[Union[str, Sequence[str]]] = None,
         evaluate_train: bool = False,
         raise_error_on_invalid_model: bool = False,
         cache_dir: str = ".scandeval_cache",
         use_auth_token: Union[bool, str] = False,
         verbose: bool = False,
-    ):
+    ) -> None:
         # Build benchmark configuration
-        self.benchmark_config = BenchmarkConfigFactory().build_benchmark_config(
+        self.benchmark_config = build_benchmark_config(
             language=language,
             model_language=model_language,
             dataset_language=dataset_language,
-            model_task=model_task,
             dataset_task=dataset_task,
             raise_error_on_invalid_model=raise_error_on_invalid_model,
             cache_dir=cache_dir,
@@ -178,7 +173,6 @@ class Benchmarker:
         if model_id is None:
             model_ids = self._get_fresh_model_ids(
                 languages=self.benchmark_config.model_languages,
-                tasks=self.benchmark_config.model_tasks,
             )
         elif isinstance(model_id, str):
             model_ids = [model_id]
@@ -226,7 +220,7 @@ class Benchmarker:
         self,
         dataset_config: DatasetConfig,
         model_id: str,
-    ):
+    ) -> None:
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -260,42 +254,32 @@ class Benchmarker:
                 )
                 logger.debug(f'The error message was "{e}".')
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> Dict[str, Dict[str, dict]]:
         return self.benchmark(*args, **kwargs)
 
     def _get_fresh_model_ids(
         self,
         languages: Sequence[Language],
-        tasks: Optional[Sequence[str]],
-    ) -> list:
+    ) -> List[str]:
         """Get list of model IDs from the Hugging Face Hub.
 
         Args:
             languages (sequence of Language objects):
                 The languages of the models to fetch.
-            tasks (None or sequence of str):
-                The tasks of the models to fetch. If None then the models will not be
-                filtered on tasks.
 
         Returns:
-            list:
+            list of str:
                 List of model IDs.
         """
         # Specify boolean variables determining whether the input variables are new
         new_languages = self._model_lists is not None and any(
             lang.code not in self._model_lists for lang in languages
         )
-        new_tasks = (
-            self._model_lists is not None
-            and tasks is not None
-            and any(task not in self._model_lists for task in tasks)
-        )
 
         # If the model lists have not been fetched already, then do it
-        if self._model_lists is None or new_languages or new_tasks:
+        if self._model_lists is None or new_languages:
             self._model_lists = get_model_lists(
                 languages=languages,
-                tasks=tasks,
                 use_auth_token=self.benchmark_config.use_auth_token,
             )
 
@@ -303,9 +287,6 @@ class Benchmarker:
         model_ids: List[str] = list()
         for language in languages:
             model_ids.extend(self._model_lists[language.code])  # type: ignore
-        if tasks is not None:
-            for task in tasks:
-                model_ids.extend(self._model_lists[task])  # type: ignore
         model_ids.extend(self._model_lists["multilingual"])  # type: ignore
 
         # Remove duplicate model IDs

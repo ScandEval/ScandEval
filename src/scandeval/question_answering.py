@@ -1,7 +1,7 @@
 """Question-answering benchmark dataset."""
 
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
 from datasets import Dataset
 from transformers import DefaultDataCollator, PreTrainedTokenizerBase
@@ -28,7 +28,7 @@ class QABenchmark(BenchmarkDataset):
             The configuration of the benchmark.
     """
 
-    def _preprocess_data(self, dataset: Dataset, framework: str, **kwargs) -> Dataset:
+    def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
@@ -56,21 +56,3 @@ class QABenchmark(BenchmarkDataset):
                 The data collator.
         """
         return DefaultDataCollator(tokenizer)
-
-    def _get_spacy_predictions_and_labels(self, model, dataset: Dataset) -> tuple:
-        """Get predictions from SpaCy model on dataset.
-
-        Args:
-            model (SpaCy model):
-                The model.
-            dataset (Hugging Face dataset):
-                The dataset.
-
-        Returns:
-            A pair of arrays:
-                The first array contains the probability predictions and the second
-                array contains the true labels.
-        """
-        raise InvalidBenchmark(
-            "Evaluation of question-answering tasks for SpaCy models is not possible."
-        )

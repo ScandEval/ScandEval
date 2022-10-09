@@ -9,6 +9,8 @@ import requests
 from huggingface_hub import HfApi, ModelFilter
 from requests.exceptions import RequestException
 
+from scandeval.utils import internet_connection_available
+
 from .config import BenchmarkConfig, Language, ModelConfig
 from .exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
 from .languages import DA, NB, NN, NO, SV, get_all_languages
@@ -31,7 +33,8 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             The model configuration.
 
     Raises:
-        RuntimeError: If the extracted framework is not recognized.
+        RuntimeError:
+            If the extracted framework is not recognized.
     """
     # If the model ID specifies a random ID, then return a hardcoded metadata
     # dictionary
@@ -40,7 +43,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             model_id=model_id,
             framework="pytorch",
             task="fill-mask",
-            languages=[],
+            languages=list(),
             revision="main",
         )
         return model_config
@@ -93,16 +96,13 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
         elif "jax" in tags:
             framework = "jax"
         elif "spacy" in tags:
-            framework = "spacy"
+            raise InvalidBenchmark("SpaCy models are not supported.")
         elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
             raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
 
         # Extract the model task, which defaults to 'fill-mask'
-        model_task = models[0].pipeline_tag
-        if model_task is None or model_task in [
-            "sentence-similarity",
-            "feature-extraction",
-        ]:
+        model_task: Optional[str] = models[0].pipeline_tag
+        if model_task is None:
             model_task = "fill-mask"
 
         # Get list of all language codes
@@ -120,16 +120,9 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
     # If fetching from the Hugging Face Hub failed then throw a reasonable exception
     except RequestException:
-
-        # Check if it is because the internet is down, by pinging Google
-        try:
-            requests.get("https://www.google.com")
-
-            # If no errors were raised then Hugging Face Hub is down
+        if internet_connection_available():
             raise HuggingFaceHubDown()
-
-        # Otherwise, if pinging Google also failed, then the internet is down
-        except RequestException:
+        else:
             raise NoInternetConnection()
 
     # Return the model config
@@ -139,7 +132,6 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 # TODO: Cache this
 def get_model_lists(
     languages: Optional[Sequence[Language]],
-    tasks: Optional[Sequence[str]],
     use_auth_token: Union[bool, str],
 ) -> Dict[str, Sequence[str]]:
     """Fetches up-to-date model lists.
@@ -148,8 +140,6 @@ def get_model_lists(
         languages (None or sequence of Language objects):
             The language codes of the language to consider. If None then the models
             will not be filtered on language.
-        tasks (None or sequence of str):
-            The task to consider. If None then the models will not be filtered on task.
         use_auth_token (bool or str):
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
@@ -159,7 +149,7 @@ def get_model_lists(
     Returns:
         dict:
             The keys are filterings of the list, which includes all language codes,
-            including 'multilingual', all tasks, as well as 'all'. The values are lists
+            including 'multilingual', as well as 'all'. The values are lists
             of model IDs.
     """
     # Get list of all languages
@@ -183,19 +173,9 @@ def get_model_lists(
                 f"and {language_list[-1].name}"
             )
 
-    # Form string of tasks
-    if tasks is None:
-        task_string = "all model tasks"
-    elif len(tasks) == 1:
-        task_string = f"the model task {tasks[0]}"
-    else:
-        tasks = sorted(tasks)
-        task_string = f"the model tasks {', '.join(tasks[:-1])} and {tasks[-1]}"
-
     # Log fetching message
     logger.info(
-        f"Fetching list of models for {language_string} and {task_string} from the "
-        "Hugging Face Hub."
+        f"Fetching list of models for {language_string} from the Hugging Face Hub."
     )
 
     # Initialise the API
@@ -212,32 +192,27 @@ def get_model_lists(
         language_itr = deepcopy(language_list)
 
     for language in language_itr:
-        for task in tasks or [None]:  # type: ignore
 
-            # Fetch the model list
-            models = api.list_models(
-                filter=ModelFilter(language=language, task=task),
-                use_auth_token=use_auth_token,
-            )
+        # Fetch the model list
+        models = api.list_models(
+            filter=ModelFilter(language=language),
+            use_auth_token=use_auth_token,
+        )
 
-            # Filter the models to only keep the ones with the specified language and
-            # task
-            models = [
-                model
-                for model in models
-                if (language is None or language.code in model.tags)
-                and (task is None or model.pipeline_tag == task)
-            ]
+        # Filter the models to only keep the ones with the specified language
+        models = [
+            model
+            for model in models
+            if (language is None or language.code in model.tags)
+        ]
 
-            # Extract the model IDs
-            model_ids = [model.id for model in models]
+        # Extract the model IDs
+        model_ids = [model.id for model in models]
 
-            # Store the model IDs
-            model_lists["all"].extend(model_ids)
-            if language is not None:
-                model_lists[language.code].extend(model_ids)
-            if task is not None:
-                model_lists[task].extend(model_ids)
+        # Store the model IDs
+        model_lists["all"].extend(model_ids)
+        if language is not None:
+            model_lists[language.code].extend(model_ids)
 
     # Add multilingual models manually
     multi_models = [

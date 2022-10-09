@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .config import DatasetTask, Label, MetricConfig
+from .config import DatasetTask, MetricConfig
 
 
 def get_all_dataset_tasks() -> Dict[str, DatasetTask]:
@@ -33,16 +33,7 @@ LA = DatasetTask(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=[
-        Label(
-            name="INCORRECT",
-            synonyms=["LABEL_0"],
-        ),
-        Label(
-            name="CORRECT",
-            synonyms=["LABEL_1"],
-        ),
-    ],
+    labels=["INCORRECT", "CORRECT"],
 )
 
 
@@ -64,128 +55,15 @@ NER = DatasetTask(
         ),
     ],
     labels=[
-        Label(
-            name="O",
-            synonyms=[],
-        ),
-        Label(
-            name="B-LOC",
-            synonyms=[
-                "B-LOCATION",
-                "B-PLACE",
-                "B-GPELOC",
-                "B-GPE_LOC",
-                "B-GPE/LOC",
-                "B-LOCGPE",
-                "B-LOC_GPE",
-                "B-LOC/GPE",
-                "B-LOCORG",
-                "B-LOC_ORG",
-                "B-LOC/ORG",
-                "B-ORGLOC",
-                "B-ORG_LOC",
-                "B-ORG/LOC",
-                "B-LOCPRS",
-                "B-LOC_PRS",
-                "B-LOC/PRS",
-                "B-PRSLOC",
-                "B-PRS_LOC",
-                "B-PRS/LOC",
-            ],
-        ),
-        Label(
-            name="I-LOC",
-            synonyms=[
-                "I-LOCATION",
-                "I-PLACE",
-                "I-GPELOC",
-                "I-GPE_LOC",
-                "I-GPE/LOC",
-                "I-LOCGPE",
-                "I-LOC_GPE",
-                "I-LOC/GPE",
-                "I-LOCORG",
-                "I-LOC_ORG",
-                "I-LOC/ORG",
-                "I-ORGLOC",
-                "I-ORG_LOC",
-                "I-ORG/LOC",
-                "I-LOCPRS",
-                "I-LOC_PRS",
-                "I-LOC/PRS",
-                "I-PRSLOC",
-                "I-PRS_LOC",
-                "I-PRS/LOC",
-            ],
-        ),
-        Label(
-            name="B-ORG",
-            synonyms=[
-                "B-ORGANIZATION",
-                "B-ORGANISATION",
-                "B-INST",
-                "B-GPEORG",
-                "B-GPE_ORG",
-                "B-GPE/ORG",
-                "B-ORGGPE",
-                "B-ORG_GPE",
-                "B-ORG/GPE",
-                "B-ORGPRS",
-                "B-ORG_PRS",
-                "B-ORG/PRS",
-                "B-PRSORG",
-                "B-PRS_ORG",
-                "B-PRS/ORG",
-                "B-OBJORG",
-                "B-OBJ_ORG",
-                "B-OBJ/ORG",
-                "B-ORGOBJ",
-                "B-ORG_OBJ",
-                "B-ORG/OBJ",
-            ],
-        ),
-        Label(
-            name="I-ORG",
-            synonyms=[
-                "I-ORGANIZATION",
-                "I-ORGANISATION",
-                "I-INST",
-                "I-GPEORG",
-                "I-GPE_ORG",
-                "I-GPE/ORG",
-                "I-ORGGPE",
-                "I-ORG_GPE",
-                "I-ORG/GPE",
-                "I-ORGPRS",
-                "I-ORG_PRS",
-                "I-ORG/PRS",
-                "I-PRSORG",
-                "I-PRS_ORG",
-                "I-PRS/ORG",
-                "I-OBJORG",
-                "I-OBJ_ORG",
-                "I-OBJ/ORG",
-                "I-ORGOBJ",
-                "I-ORG_OBJ",
-                "I-ORG/OBJ",
-            ],
-        ),
-        Label(
-            name="B-PER",
-            synonyms=["B-PERSON"],
-        ),
-        Label(
-            name="I-PER",
-            synonyms=["I-PERSON"],
-        ),
-        Label(
-            name="B-MISC",
-            synonyms=["B-MISCELLANEOUS"],
-        ),
-        Label(
-            name="I-MISC",
-            synonyms=["I-MISCELLANEOUS"],
-        ),
+        "O",
+        "B-LOC",
+        "I-LOC",
+        "B-ORG",
+        "I-ORG",
+        "B-PER",
+        "I-PER",
+        "B-MISC",
+        "I-MISC",
     ],
 )
 
@@ -207,7 +85,7 @@ QA = DatasetTask(
             results_key="f1",
         ),
     ],
-    labels=[],
+    labels=["START_POSITIONS", "END_POSITIONS"],
 )
 
 
@@ -229,18 +107,5 @@ SENT = DatasetTask(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=[
-        Label(
-            name="NEGATIVE",
-            synonyms=["NEG", "NEGATIV", "LABEL_0"],
-        ),
-        Label(
-            name="NEUTRAL",
-            synonyms=["NEU", "LABEL_1"],
-        ),
-        Label(
-            name="POSITIVE",
-            synonyms=["POS", "POSITIV", "LABEL_2"],
-        ),
-    ],
+    labels=["NEGATIVE", "NEUTRAL", "POSITIVE"],
 )

@@ -15,7 +15,6 @@ def log_scores(
     dataset_name: str,
     metric_configs: Sequence[MetricConfig],
     scores: dict,
-    finetuned: bool,
     model_id: str,
 ) -> dict:
     """Log the scores.
@@ -28,8 +27,6 @@ def log_scores(
         scores (dict):
             The scores that are to be logged. This is a dict with keys 'train' and
             'test', with values being lists of dictionaries full of scores.
-        finetuned (bool):
-            Whether the model is finetuned or not.
         model_id (str):
             The full Hugging Face Hub path to the pretrained transformer model.
 
@@ -40,10 +37,7 @@ def log_scores(
             scores (means and standard errors).
     """
     # Initial logging message
-    if finetuned:
-        msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
-    else:
-        msg = f"Finished evaluation of {model_id} on {dataset_name}."
+    msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
     logger.info(msg)
 
     # Initialise the total dict
