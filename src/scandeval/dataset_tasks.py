@@ -16,8 +16,8 @@ def get_all_dataset_tasks() -> Dict[str, DatasetTask]:
 
 
 LA = DatasetTask(
-    name="la",
-    supertask="text-classification",
+    name="linguistic-acceptability",
+    supertask="sequence-classification",
     metrics=[
         MetricConfig(
             name="mcc",
@@ -38,7 +38,7 @@ LA = DatasetTask(
 
 
 NER = DatasetTask(
-    name="ner",
+    name="named-entity-recognition",
     supertask="token-classification",
     metrics=[
         MetricConfig(
@@ -90,7 +90,7 @@ QA = DatasetTask(
 
 
 SENT = DatasetTask(
-    name="sent",
+    name="sentiment-classification",
     supertask="sequence-classification",
     metrics=[
         MetricConfig(
