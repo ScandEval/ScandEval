@@ -1,7 +1,7 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Sequence, Union
 
 
 @dataclass

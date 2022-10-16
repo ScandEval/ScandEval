@@ -10,25 +10,26 @@ from typing import Dict, Optional, Sequence, Tuple, Union
 import numpy as np
 import torch
 import transformers.utils.logging as tf_logging
-from datasets import Dataset, DatasetDict, load_dataset, load_metric
+from datasets.arrow_dataset import Dataset
+from datasets.dataset_dict import DatasetDict
+from datasets.load import load_dataset, load_metric
 from numpy._typing import NDArray
 from tqdm.auto import tqdm
-from transformers import (
+from transformers.trainer import Trainer
+from transformers.trainer_callback import (
     EarlyStoppingCallback,
     PrinterCallback,
     ProgressCallback,
-    Trainer,
-    TrainingArguments,
 )
 from transformers.trainer_utils import IntervalStrategy
-from transformers.training_args import OptimizerNames
+from transformers.training_args import OptimizerNames, TrainingArguments
 
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_config
 from .model_loading import load_model
-from .protocols import DataCollator, Model, Tokenizer
+from .protocols import DataCollator, Tokenizer
 from .scores import log_scores
 from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
 from .utils import clear_memory, enforce_reproducibility, handle_error

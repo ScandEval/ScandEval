@@ -3,8 +3,9 @@
 import logging
 from typing import Optional
 
-from datasets import Dataset
-from transformers import DefaultDataCollator, PreTrainedTokenizerBase
+from datasets.arrow_dataset import Dataset
+from transformers.data.data_collator import DefaultDataCollator
+from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
 from .benchmark_dataset import BenchmarkDataset
 

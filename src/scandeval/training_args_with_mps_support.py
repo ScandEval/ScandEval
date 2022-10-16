@@ -4,11 +4,10 @@ import os
 
 import torch
 import torch.distributed as dist
-from transformers import TrainingArguments
 from transformers.deepspeed import is_deepspeed_available
-from transformers.training_args import get_int_from_env
-from transformers.utils import (
-    cached_property,
+from transformers.training_args import TrainingArguments, get_int_from_env
+from transformers.utils.generic import cached_property
+from transformers.utils.import_utils import (
     is_sagemaker_dp_enabled,
     is_sagemaker_mp_enabled,
     is_torch_tpu_available,
