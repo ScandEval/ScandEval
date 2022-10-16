@@ -3,17 +3,19 @@
 import logging
 from copy import deepcopy
 from functools import partial
-from typing import Dict, Optional, Sequence, Set
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
+from numpy._typing import NDArray
 from transformers.data.data_collator import DataCollatorForTokenClassification
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
-from .protocols import Tokenizer
+from .protocols import TokenizedOutputs, Tokenizer
 
+# Set up logger
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +57,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         return dataset_dict
 
     def _compute_metrics(
-        self, predictions_and_labels: tuple, id2label: Optional[Sequence[str]] = None
+        self,
+        predictions_and_labels: Tuple[NDArray, NDArray],
+        id2label: Optional[Sequence[str]] = None,
     ) -> Dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -75,7 +79,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         predictions, labels = predictions_and_labels
 
         if id2label is not None:
-            raw_predictions = np.argmax(predictions, axis=-1)
+            raw_predictions: NDArray = np.argmax(predictions, axis=-1)
 
             # Remove ignored index (special tokens)
             predictions = [
@@ -128,12 +132,20 @@ class NamedEntityRecognition(BenchmarkDataset):
             predictions=predictions_no_misc, references=labels_no_misc
         )
 
+        # Raise error if the metrics are invalid
+        if results is None or results_no_misc is None:
+            raise InvalidBenchmark(
+                "The predictions and labels are not of the same length."
+            )
+
         return dict(
             micro_f1=results["overall_f1"],
             micro_f1_no_misc=results_no_misc["overall_f1"],
         )
 
-    def _tokenize_and_align_labels(self, examples: dict, tokenizer, label2id: dict):
+    def _tokenize_and_align_labels(
+        self, examples: dict, tokenizer: Tokenizer, label2id: Dict[str, int]
+    ) -> TokenizedOutputs:
         """Tokenise all texts and align the labels with them.
 
         Args:
@@ -145,34 +157,39 @@ class NamedEntityRecognition(BenchmarkDataset):
                 A dictionary that converts NER tags to IDs.
 
         Returns:
-            dict:
+            TokenizedOutputs:
                 A dictionary containing the tokenized data as well as labels.
         """
+        # Tokenize the texts. We use the `is_split_into_words` argument here because
+        # the texts in our dataset are lists of words (with a label for each word)
         tokenized_inputs = tokenizer(
             examples["tokens"],
-            # We use this argument because the texts in our dataset are lists of words
-            # (with a label for each word)
             is_split_into_words=True,
             truncation=True,
             padding=True,
         )
-        all_labels = []
+
+        # Extract a mapping between all the tokens and their corresponding word. If the
+        # tokenizer is of a "fast" variant then this can be accessed through the
+        # `word_ids` method. Otherwise, we have to extract it manually.
+        all_labels: List[List[int]] = list()
+        labels: List[str]
+        word_ids: List[Optional[int]]
         for i, labels in enumerate(examples["ner_tags"]):
+
+            # Try to get the word IDs from the tokenizer
             try:
                 word_ids = tokenized_inputs.word_ids(batch_index=i)
 
-            # This happens if the tokenizer is not of the fast variant, in which case
-            # the `word_ids` method is not available, so we have to extract this
-            # manually. It's slower, but it works, and it should only occur rarely,
-            # when the Hugging Face team has not implemented a fast variant of the
-            # tokenizer yet.
+            # If the tokenizer is not of a "fast" variant, we have to extract the word
+            # IDs manually
             except ValueError:
 
                 # Get the list of words in the document
-                words = examples["tokens"][i]
+                words: List[str] = examples["tokens"][i]
 
                 # Get the list of token IDs in the document
-                tok_ids = tokenized_inputs.input_ids[i]
+                tok_ids: List[int] = tokenized_inputs.input_ids[i]
 
                 # Decode the token IDs
                 tokens = tokenizer.convert_ids_to_tokens(tok_ids)
@@ -180,8 +197,9 @@ class NamedEntityRecognition(BenchmarkDataset):
                 # Remove prefixes from the tokens
                 prefixes_to_remove = ["▁", "##"]
                 for tok_idx, tok in enumerate(tokens):
-                    for prefix in prefixes_to_remove:
-                        tok = tok.lstrip(prefix)
+                    if tok:
+                        for prefix in prefixes_to_remove:
+                            tok = tok.lstrip(prefix)
                     tokens[tok_idx] = tok
 
                 # Replace special tokens with `None`
@@ -223,18 +241,18 @@ class NamedEntityRecognition(BenchmarkDataset):
                         ][0]
                         word_ids.append(word_idx)
 
-            previous_word_idx = None
-            label_ids = []
-            for word_idx in word_ids:
+            previous_word_idx: Optional[int] = None
+            label_ids: List[int] = list()
+            for word_id in word_ids:
 
                 # Special tokens have a word id that is None. We set the label to -100
                 # so they are automatically ignored in the loss function
-                if word_idx is None:
+                if word_id is None:
                     label_ids.append(-100)
 
                 # We set the label for the first token of each word
-                elif word_idx != previous_word_idx:
-                    label = labels[word_idx]
+                elif word_id != previous_word_idx:
+                    label = labels[word_id]
                     try:
                         label_id = label2id[label.upper()]
                     except KeyError:
@@ -246,7 +264,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 else:
                     label_ids.append(-100)
 
-                previous_word_idx = word_idx
+                previous_word_idx = word_id
 
             all_labels.append(label_ids)
         tokenized_inputs["labels"] = all_labels
