@@ -7,6 +7,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
 ### Changed
 - You can now specify your Hugging Face authentication token in the `use_auth_token`
@@ -17,6 +18,13 @@ and this project adheres to
 
 ### Fixed
 - Removed `bf16` precision, as it only works for some GPUs.
+
+### Removed
+- Removed support for evaluating finetuned models, as the package was primarily used to
+  benchmark pretrained models anyway, and the change in datasets means that many
+  finetuned models would have been trained on (part of) the test sets, resulting in
+  artificially large scores. For evaluation of finetuned models, please check out the
+  `aiai_eval` Python package instead.
 
 
 ## [v4.0.2] - 2022-07-22
@@ -79,12 +87,14 @@ and this project adheres to
 - Now requires PyTorch 1.12.0 or newer, to ensure compatibility with Apple Silicon.
 - Renamed the `Benchmark` class to `Benchmarker`.
 
-### Removed
-- Removed support for evaluating finetuned models, as the package was primarily used to
+### Deprecated
+- Deprecated support for evaluating finetuned models, as the package was primarily used to
   benchmark pretrained models anyway, and the change in datasets means that many
   finetuned models would have been trained on (part of) the test sets, resulting in
   artificially large scores. For evaluation of finetuned models, please check out the
-  `AIAI` Python package instead (under development).
+  `aiai_eval` Python package instead (under development).
+
+### Removed
 - Removed support for Python 3.7, as this was incompatible with support for Apple
   Silicon.
 - Removed the Danish sentiment analysis datasets `twitter-sent`, `europarl` and `lcc`,
