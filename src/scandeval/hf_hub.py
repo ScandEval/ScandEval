@@ -192,9 +192,16 @@ def get_model_lists(
 
     for language in language_itr:
 
+        # Extract the language code
+        language_str: Optional[str]
+        if language is not None:
+            language_str = language.code
+        else:
+            language_str = None
+
         # Fetch the model list
         models = api.list_models(
-            filter=ModelFilter(language=language),
+            filter=ModelFilter(language=language_str),
             use_auth_token=use_auth_token,
         )
 
