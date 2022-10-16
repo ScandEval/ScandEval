@@ -30,7 +30,7 @@ class TestGetModelConfig:
             raise_error_on_invalid_model=False,
             cache_dir=".",
             evaluate_train=False,
-            use_auth_token=os.environ.get("HUGGINGFACE_HUB_TOKEN", True),
+            use_auth_token=auth,
             progress_bar=True,
             save_results=True,
             verbose=True,
