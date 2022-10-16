@@ -11,6 +11,7 @@ import numpy as np
 import torch
 import transformers.utils.logging as tf_logging
 from datasets import Dataset, DatasetDict, load_dataset, load_metric
+from numpy._typing import NDArray
 from tqdm.auto import tqdm
 from transformers import (
     EarlyStoppingCallback,
@@ -111,87 +112,15 @@ class BenchmarkDataset(ABC):
             cache_dir=self.benchmark_config.cache_dir,
         )
 
-        # Load the dataset dictinoary
-        dataset_dict = self._load_data()
-
-        # Process the datasets
-        dataset_dict = self._process_data(dataset_dict)
-
-        # Extract the dataset splits
-        train = dataset_dict["train"]
-        val = dataset_dict["val"]
-        test = dataset_dict["test"]
-
-        # Remove empty examples from the datasets
-        if "tokens" in train.features:
-            train = train.filter(lambda x: len(x["tokens"]) > 0)
-            val = val.filter(lambda x: len(x["tokens"]) > 0)
-            test = test.filter(lambda x: len(x["tokens"]) > 0)
-        elif "doc" in train.features:
-            train = train.filter(lambda x: len(x["doc"]) > 0)
-            val = val.filter(lambda x: len(x["doc"]) > 0)
-            test = test.filter(lambda x: len(x["doc"]) > 0)
-
-        # Set variable with number of iterations
-        num_iter = 10 if not self.benchmark_config.testing else 2
-
-        if model_config.framework in {"pytorch", "jax"}:
-            return self._benchmark_pytorch_jax(
-                tokenizer=tokenizer,
-                model=model,
-                model_config=model_config,
-                train=train,
-                val=val,
-                test=test,
-                rng=rng,
-                num_iter=num_iter,
-            )
-
-        else:
-            raise RuntimeError(
-                f'The framework "{model_config.framework}" is not supported!'
-            )
-
-    def _benchmark_pytorch_jax(
-        self,
-        tokenizer: Tokenizer,
-        model: Model,
-        model_config: ModelConfig,
-        train: Dataset,
-        val: Dataset,
-        test: Dataset,
-        rng: np.random.Generator,
-        num_iter: int,
-    ) -> Dict[str, dict]:
-        """Benchmark a PyTorch or JAX model.
-
-        Args:
-            tokenizer (Tokenizer):
-                The tokenizer to use.
-            model (Model):
-                The model to benchmark.
-            model_config (ModelConfig):
-                The model configuration.
-            train (Dataset):
-                The training dataset.
-            val (Dataset):
-                The validation dataset.
-            test (Dataset):
-                The test dataset.
-            rng (np.random.Generator):
-                The random number generator, used to generate bootstrapped versions of
-                the test dataset.
-            num_iter (int):
-                The number of bootstrapped samples of the test dataset to use.
-
-        Returns:
-            dict:
-                The keys in the dict are 'raw' and 'total', with all the raw scores in
-                the first dictionary and the aggregated scores in the second.
-        """
         # Log the number of parameters in the model
         num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         logger.info(f"Number of model parameters: {num_params:,}")
+
+        # Load the data collator
+        data_collator = self._load_data_collator(tokenizer)
+
+        # Load the data
+        train, val, test = self._load_data()
 
         # Preprocess the datasets
         try:
@@ -202,9 +131,8 @@ class BenchmarkDataset(ABC):
         except ValueError:
             raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
 
-        # If we are testing then truncate the test set
-        if self.benchmark_config.testing:
-            test = test.select(range(128))
+        # Set variable with number of iterations
+        num_iter = 10 if not self.benchmark_config.testing else 2
 
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
@@ -215,6 +143,9 @@ class BenchmarkDataset(ABC):
             for idx in range(test_bidxs.shape[0])
         ]
 
+        # Get the training arguments
+        training_args = self._get_training_args()
+
         # Set up progress bar
         itr = tqdm(
             iterable=range(num_iter),
@@ -222,46 +153,10 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
-        # Load the data collator
-        data_collator = self._load_data_collator(tokenizer)
-
-        # Set the logging strategy
-        if self.benchmark_config.verbose:
-            logging_strategy = IntervalStrategy.STEPS
-        else:
-            logging_strategy = IntervalStrategy.NO
-
-        # Initialise training arguments
-        training_args = TrainingArgumentsWithMPSSupport(
-            output_dir=self.benchmark_config.cache_dir,
-            evaluation_strategy=IntervalStrategy.STEPS,
-            logging_strategy=logging_strategy,
-            save_strategy=IntervalStrategy.STEPS,
-            eval_steps=30,
-            logging_steps=30,
-            save_steps=30,
-            max_steps=10_000 if not self.benchmark_config.testing else 2,
-            report_to=None,
-            save_total_limit=1,
-            per_device_train_batch_size=32 if not self.benchmark_config.testing else 1,
-            per_device_eval_batch_size=32,
-            learning_rate=2e-5,
-            warmup_ratio=0.01,
-            gradient_accumulation_steps=1,
-            load_best_model_at_end=True,
-            optim=OptimizerNames.ADAMW_TORCH,
-            seed=4242,
-            no_cuda=self.benchmark_config.testing,
-        )
-
-        # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
-        if self.benchmark_config.progress_bar:
-            training_args.disable_tqdm = False
-
         scores = defaultdict(list)
         for idx in itr:
             while True:
-                itr_scores = self._benchmark_pytorch_jax_single_iteration(
+                itr_scores = self._benchmark_single_iteration(
                     idx=idx,
                     model_config=model_config,
                     train=train,
@@ -308,7 +203,89 @@ class BenchmarkDataset(ABC):
 
         return all_scores
 
-    def _benchmark_pytorch_jax_single_iteration(
+    def _get_training_args(self) -> TrainingArguments:
+
+        # Set the logging strategy
+        if self.benchmark_config.verbose:
+            logging_strategy = IntervalStrategy.STEPS
+        else:
+            logging_strategy = IntervalStrategy.NO
+
+        # Initialise training arguments
+        training_args = TrainingArgumentsWithMPSSupport(
+            output_dir=self.benchmark_config.cache_dir,
+            evaluation_strategy=IntervalStrategy.STEPS,
+            logging_strategy=logging_strategy,
+            save_strategy=IntervalStrategy.STEPS,
+            eval_steps=30,
+            logging_steps=30,
+            save_steps=30,
+            max_steps=10_000 if not self.benchmark_config.testing else 2,
+            report_to=None,
+            save_total_limit=1,
+            per_device_train_batch_size=32 if not self.benchmark_config.testing else 1,
+            per_device_eval_batch_size=32,
+            learning_rate=2e-5,
+            warmup_ratio=0.01,
+            gradient_accumulation_steps=1,
+            load_best_model_at_end=True,
+            optim=OptimizerNames.ADAMW_TORCH,
+            seed=4242,
+            no_cuda=self.benchmark_config.testing,
+        )
+
+        # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
+        if self.benchmark_config.progress_bar:
+            training_args.disable_tqdm = False
+
+        return training_args
+
+    def _load_data(self):
+
+        # Download dataset from the HF Hub
+        dataset_dict = load_dataset(
+            path=self.dataset_config.huggingface_id,
+            use_auth_token=self.benchmark_config.use_auth_token,
+            cache_dir=self.benchmark_config.cache_dir,
+        )
+
+        # If the dataset turns out not to be a DatasetDict, then we raise an error
+        if not isinstance(dataset_dict, DatasetDict):
+            raise ValueError(
+                f"Expected `dataset_dict` to be a `DatasetDict`, but got "
+                f"{type(dataset_dict)}."
+            )
+
+        # Remove all other keys than 'train', 'val' and 'test'
+        dataset_dict = DatasetDict(
+            {key: dataset_dict[key] for key in ["train", "val", "test"]}
+        )
+
+        # Process the datasets
+        dataset_dict = self._process_data(dataset_dict)
+
+        # Extract the dataset splits
+        train = dataset_dict["train"]
+        val = dataset_dict["val"]
+        test = dataset_dict["test"]
+
+        # Remove empty examples from the datasets
+        if "tokens" in train.features:
+            train = train.filter(lambda x: len(x["tokens"]) > 0)
+            val = val.filter(lambda x: len(x["tokens"]) > 0)
+            test = test.filter(lambda x: len(x["tokens"]) > 0)
+        elif "doc" in train.features:
+            train = train.filter(lambda x: len(x["doc"]) > 0)
+            val = val.filter(lambda x: len(x["doc"]) > 0)
+            test = test.filter(lambda x: len(x["doc"]) > 0)
+
+        # If we are testing then truncate the test set
+        if self.benchmark_config.testing:
+            test = test.select(range(128))
+
+        return train, val, test
+
+    def _benchmark_single_iteration(
         self,
         idx: int,
         model_config: ModelConfig,
@@ -318,7 +295,7 @@ class BenchmarkDataset(ABC):
         data_collator: DataCollator,
         training_args: TrainingArguments,
     ) -> Union[dict, Exception]:
-        """Run a single iteration of a PyTorch/JAX benchmark.
+        """Run a single iteration of a benchmark.
 
         Args:
             idx (int):
@@ -392,8 +369,9 @@ class BenchmarkDataset(ABC):
             # Set transformers logging back to error
             tf_logging.set_verbosity_error()
 
-            # Remove trainer logging
-            trainer.log = lambda logs: None
+            # Remove trainer logging if not in verbose mode
+            if not self.benchmark_config.verbose:
+                trainer.log = lambda logs: None
 
             # Remove the callback which prints the scores after each
             # evaluation
@@ -443,28 +421,6 @@ class BenchmarkDataset(ABC):
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)
 
-    # TODO: Cache this
-    def _load_data(self) -> DatasetDict:
-        """Load the datasets.
-
-        Returns:
-            DatasetDict:
-                A dictionary containing the 'train', 'val' and 'test' splits of the
-                dataset.
-        """
-        # Download dataset from the HF Hub
-        dataset_dict = load_dataset(
-            path=self.dataset_config.huggingface_id,
-            use_auth_token=self.benchmark_config.use_auth_token,
-            cache_dir=self.benchmark_config.cache_dir,
-        )
-
-        # Remove all other keys than 'train', 'val' and 'test'
-        dataset_dict = {key: dataset_dict[key] for key in ["train", "val", "test"]}
-
-        # Return the dataset dictionary
-        return dataset_dict
-
     def _process_data(self, dataset_dict: DatasetDict) -> DatasetDict:
         """Process the data.
 
@@ -512,7 +468,9 @@ class BenchmarkDataset(ABC):
         pass
 
     def _compute_metrics(
-        self, predictions_and_labels: tuple, id2label: Optional[list] = None
+        self,
+        predictions_and_labels: Tuple[NDArray, NDArray],
+        id2label: Optional[Sequence[str]] = None,
     ) -> Dict[str, float]:
         """Compute the metrics needed for evaluation.
 
