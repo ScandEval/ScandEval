@@ -15,11 +15,25 @@ class Config(Protocol):
         ...
 
 
+class TokenizedOutputs(Protocol):
+    input_ids: List[List[int]]
+
+    def word_ids(self, *args, **kwargs) -> List[Union[int, None]]:
+        ...
+
+    def __setitem__(self, *args, **kwargs) -> None:
+        ...
+
+
 class Tokenizer(Protocol):
     model_max_length: int
     max_model_input_sizes: Dict[str, int]
+    special_tokens_map: Dict[str, str]
 
-    def __call__(self, *args, **kwargs) -> Dict:
+    def __call__(self, *args, **kwargs) -> TokenizedOutputs:
+        ...
+
+    def convert_ids_to_tokens(self, *args, **kwargs) -> List[Union[str, None]]:
         ...
 
 
