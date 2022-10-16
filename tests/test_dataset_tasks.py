@@ -19,4 +19,4 @@ class TestGetAllDatasetTasks:
             assert isinstance(dataset_task, DatasetTask)
 
     def test_get_ner_dataset_task(self, dataset_tasks):
-        assert "ner" in dataset_tasks
+        assert "named-entity-recognition" in dataset_tasks

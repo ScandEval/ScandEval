@@ -19,13 +19,12 @@ def test_cli_param_names(params):
         "language",
         "model_language",
         "dataset_language",
-        "model_task",
         "dataset_task",
         "evaluate_train",
-        "no_progress_bar",
+        "progress_bar",
         "raise_error_on_invalid_model",
         "verbose",
-        "no_save_results",
+        "save_results",
         "cache_dir",
         "auth_token",
         "use_auth_token",
@@ -39,13 +38,12 @@ def test_cli_param_types(params):
     assert isinstance(params["language"], Choice)
     assert isinstance(params["model_language"], Choice)
     assert isinstance(params["dataset_language"], Choice)
-    assert params["model_task"] == STRING
     assert isinstance(params["dataset_task"], Choice)
     assert params["evaluate_train"] == BOOL
-    assert params["no_progress_bar"] == BOOL
+    assert params["progress_bar"] == BOOL
     assert params["raise_error_on_invalid_model"] == BOOL
     assert params["verbose"] == BOOL
-    assert params["no_save_results"] == BOOL
+    assert params["save_results"] == BOOL
     assert params["cache_dir"] == STRING
     assert params["auth_token"] == STRING
     assert params["use_auth_token"] == BOOL

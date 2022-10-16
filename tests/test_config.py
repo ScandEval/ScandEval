@@ -23,12 +23,12 @@ def metric_config():
 
 
 @pytest.fixture(scope="class")
-def dataset_task(metric_config, label):
+def dataset_task(metric_config):
     yield DatasetTask(
         name="dataset_task_name",
         supertask="supertask_name",
         metrics=[metric_config],
-        labels=[label],
+        labels=["label"],
     )
 
 
@@ -55,13 +55,11 @@ class TestDatasetTask:
     def test_dataset_task_is_object(self, dataset_task):
         assert isinstance(dataset_task, DatasetTask)
 
-    def test_attributes_correspond_to_arguments(
-        self, dataset_task, metric_config, label
-    ):
+    def test_attributes_correspond_to_arguments(self, dataset_task, metric_config):
         assert dataset_task.name == "dataset_task_name"
         assert dataset_task.supertask == "supertask_name"
         assert dataset_task.metrics == [metric_config]
-        assert dataset_task.labels == [label]
+        assert dataset_task.labels == ["label"]
 
 
 class TestLanguage:
@@ -79,7 +77,6 @@ class TestBenchmarkConfig:
         yield BenchmarkConfig(
             model_languages=[language],
             dataset_languages=[language],
-            model_tasks=None,
             dataset_tasks=[dataset_task],
             raise_error_on_invalid_model=True,
             cache_dir="cache_dir",
@@ -98,7 +95,6 @@ class TestBenchmarkConfig:
     ):
         assert benchmark_config.model_languages == [language]
         assert benchmark_config.dataset_languages == [language]
-        assert benchmark_config.model_tasks is None
         assert benchmark_config.dataset_tasks == [dataset_task]
         assert benchmark_config.raise_error_on_invalid_model is True
         assert benchmark_config.cache_dir == "cache_dir"
@@ -132,27 +128,14 @@ class TestDatasetConfig:
         assert dataset_config.task == dataset_task
         assert dataset_config.languages == [language]
 
-    def test_id2label(self, dataset_config, label):
-        assert dataset_config.id2label == [label.name]
+    def test_id2label(self, dataset_config):
+        assert dataset_config.id2label == ["label"]
 
-    def test_label2id(self, dataset_config, label):
-        assert dataset_config.label2id == {
-            label.name: 0,
-            label.synonyms[0]: 0,
-            label.synonyms[1]: 0,
-        }
+    def test_label2id(self, dataset_config):
+        assert dataset_config.label2id == dict(label=0)
 
     def test_num_labels(self, dataset_config):
         assert dataset_config.num_labels == 1
-
-    def test_label_synonyms(self, dataset_config, label):
-        assert dataset_config.label_synonyms == [
-            [
-                label.name,
-                label.synonyms[0],
-                label.synonyms[1],
-            ]
-        ]
 
 
 class TestModelConfig:

@@ -110,7 +110,6 @@ class TestLogScores:
             dataset_name="dataset",
             metric_configs=[metric_config],
             scores=scores,
-            finetuned=True,
             model_id="model_id",
         )
 

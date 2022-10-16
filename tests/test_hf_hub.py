@@ -14,6 +14,15 @@ from scandeval.languages import DA, EN
 class TestGetModelConfig:
     @pytest.fixture(scope="class")
     def benchmark_config(self):
+
+        # Get the authentication token to the Hugging Face Hub
+        auth = os.environ.get("HUGGINGFACE_HUB_TOKEN", True)
+
+        # Ensure that the token does not contain quotes or whitespace
+        if isinstance(auth, str):
+            auth = auth.strip(" \"'")
+
+        # Build and yield the benchmark configuration
         yield BenchmarkConfig(
             model_languages=[DA],
             dataset_languages=[DA],
@@ -21,7 +30,7 @@ class TestGetModelConfig:
             raise_error_on_invalid_model=False,
             cache_dir=".",
             evaluate_train=False,
-            use_auth_token=os.environ["HUGGINGFACE_HUB_TOKEN"],
+            use_auth_token=os.environ.get("HUGGINGFACE_HUB_TOKEN", True),
             progress_bar=True,
             save_results=True,
             verbose=True,
