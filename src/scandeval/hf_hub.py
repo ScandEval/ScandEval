@@ -5,7 +5,6 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, List, Optional, Sequence, Union
 
-import requests
 from huggingface_hub import HfApi, ModelFilter
 from requests.exceptions import RequestException
 
