@@ -42,7 +42,11 @@ class DatasetFactory:
 
         # Get the benchmark class based on the task
         benchmark_cls: Optional[Type[BenchmarkDataset]] = get_class_by_name(
-            [dataset_config.name, dataset_config.task.supertask]
+            [
+                dataset_config.name,
+                dataset_config.task.name,
+                dataset_config.task.supertask,
+            ]
         )
         if not benchmark_cls:
             raise ValueError(f"Unknown dataset task: {dataset_config.task}")
