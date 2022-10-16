@@ -1,6 +1,7 @@
 """Functions related to fetching data from the Hugging Face Hub."""
 
 import logging
+import re
 from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, List, Optional, Sequence, Union
@@ -8,11 +9,10 @@ from typing import Dict, List, Optional, Sequence, Union
 from huggingface_hub import HfApi, ModelFilter
 from requests.exceptions import RequestException
 
-from scandeval.utils import internet_connection_available
-
 from .config import BenchmarkConfig, Language, ModelConfig
 from .exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
 from .languages import DA, NB, NN, NO, SV, get_all_languages
+from .utils import internet_connection_available
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
     try:
 
         # Define the API object
-        api = HfApi()
+        api: HfApi = HfApi()
 
         # Fetch the model metadata
         models = api.list_models(
@@ -178,7 +178,7 @@ def get_model_lists(
     )
 
     # Initialise the API
-    api = HfApi()
+    api: HfApi = HfApi()
 
     # Initialise model lists
     model_lists = defaultdict(list)
@@ -210,6 +210,15 @@ def get_model_lists(
             model
             for model in models
             if (language is None or language.code in model.tags)
+        ]
+
+        # Only keep the models which are not finetuned
+        models = [
+            model
+            for model in models
+            if model.pipeline_tag is None
+            or model.pipeline_tag
+            in {"fill-mask", "sentence-similarity", "feature-extraction"}
         ]
 
         # Extract the model IDs
@@ -283,5 +292,17 @@ def get_model_lists(
     # Remove duplicates from the lists
     for lang, model_list in model_lists.items():
         model_lists[lang] = list(set(model_list))
+
+    # Remove banned models
+    BANNED_MODELS = [
+        r"TransQuest/siamesetransquest-da.*",
+        r"M-CLIP/.*",
+    ]
+    for lang, model_list in model_lists.items():
+        model_lists[lang] = [
+            model
+            for model in model_list
+            if not any(re.search(regex, model) is not None for regex in BANNED_MODELS)
+        ]
 
     return dict(model_lists)
