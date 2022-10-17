@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Dict, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 def log_scores(
     dataset_name: str,
     metric_configs: Sequence[MetricConfig],
-    scores: dict,
+    scores: Dict[str, List[Dict[str, float]]],
     model_id: str,
-) -> dict:
+) -> Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]:
     """Log the scores.
 
     Args:
@@ -41,7 +41,7 @@ def log_scores(
     logger.info(msg)
 
     # Initialise the total dict
-    total_dict = dict()
+    total_dict: Dict[str, float] = dict()
 
     # Logging of the aggregated scores
     for metric_cfg in metric_configs:
@@ -70,6 +70,7 @@ def log_scores(
         logger.info(msg)
 
     # Define a dict with both the raw scores and the aggregated scores
+    all_scores: Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]
     all_scores = dict(raw=scores, total=total_dict)
 
     # Return the extended scores
@@ -77,7 +78,7 @@ def log_scores(
 
 
 def aggregate_scores(
-    scores: Dict[str, Sequence[Dict[str, float]]], metric_config: MetricConfig
+    scores: Dict[str, List[Dict[str, float]]], metric_config: MetricConfig
 ) -> Dict[str, Tuple[float, float]]:
     """Helper function to compute the mean with confidence intervals.
 

@@ -5,7 +5,7 @@ import random
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import partial
-from typing import Dict, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import torch
@@ -73,7 +73,10 @@ class BenchmarkDataset(ABC):
         }
 
     # TODO: Cache this
-    def benchmark(self, model_id: str) -> Dict[str, dict]:
+    def benchmark(
+        self,
+        model_id: str,
+    ) -> Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]:
         """Benchmark a model.
 
         Args:
@@ -154,7 +157,7 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
-        scores = defaultdict(list)
+        scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
         for idx in itr:
             while True:
                 itr_scores = self._benchmark_single_iteration(
@@ -295,7 +298,7 @@ class BenchmarkDataset(ABC):
         tests: Sequence[Dataset],
         data_collator: DataCollator,
         training_args: TrainingArguments,
-    ) -> Union[dict, Exception]:
+    ) -> Union[Dict[str, Dict[str, float]], Exception]:
         """Run a single iteration of a benchmark.
 
         Args:
@@ -320,7 +323,7 @@ class BenchmarkDataset(ABC):
                 `train` and `test`. If an exception is raised, then the exception is
                 returned.
         """
-        scores = dict()
+        scores: Dict[str, Dict[str, float]] = dict()
         try:
             # Set random seeds to enforce reproducibility of the randomly
             # initialised weights
