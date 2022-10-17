@@ -473,13 +473,13 @@ class BenchmarkDataset(ABC):
 
     def _compute_metrics(
         self,
-        predictions_and_labels: Tuple[NDArray, NDArray],
+        probabilities_and_labels: Tuple[NDArray[np.float_], NDArray[np.int_]],
         id2label: Optional[Sequence[str]] = None,
     ) -> Dict[str, float]:
         """Compute the metrics needed for evaluation.
 
         Args:
-            predictions_and_labels (pair of arrays):
+            probabilities_and_labels (pair of arrays):
                 The first array contains the probability predictions and the second
                 array contains the true labels.
             id2label (list or None, optional):
@@ -490,12 +490,12 @@ class BenchmarkDataset(ABC):
                 A dictionary with the names of the metrics as keys and the metric
                 values as values.
         """
-        predictions, labels = predictions_and_labels
-        predictions = predictions.argmax(axis=-1)
-        results = dict()
+        probabilities, labels = probabilities_and_labels
+        predictions: NDArray[np.int_] = probabilities.argmax(axis=-1)
+        results: Dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
-            score_dict = metric.compute(
+            score_dict: Union[None, Dict[str, float]] = metric.compute(
                 predictions=predictions,
                 references=labels,
                 **cfg.compute_kwargs,
