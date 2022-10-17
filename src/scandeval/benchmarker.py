@@ -137,19 +137,21 @@ class Benchmarker:
         # Get all the relevant dataset configurations
         dataset_configs = self._prepare_dataset_configs(dataset)
 
-        # Benchmark all the models in `model_ids` on all the datasets in `benchmarks`
+        # Iterate over all the datasets and models
         for dataset_config in dataset_configs:
             for m_id in model_ids:
+
+                # Benchmark a single model on a single dataset
                 self._benchmark_single(
                     dataset_config=dataset_config,
                     model_id=m_id,
                 )
 
-        # Save the benchmark results
-        if self.benchmark_config.save_results:
-            output_path = Path.cwd() / "scandeval_benchmark_results.json"
-            with output_path.open("w") as f:
-                json.dump(self.benchmark_results, f)
+                # Save the benchmark results
+                if self.benchmark_config.save_results:
+                    output_path = Path.cwd() / "scandeval_benchmark_results.json"
+                    with output_path.open("w") as f:
+                        json.dump(self.benchmark_results, f)
 
         return self.benchmark_results
 
@@ -231,8 +233,8 @@ class Benchmarker:
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
         try:
-            dataset_obj = self.dataset_factory.build_dataset(dataset_config)
-            results = dataset_obj(model_id)
+            dataset = self.dataset_factory.build_dataset(dataset_config)
+            results = dataset(model_id)
             self.benchmark_results[dataset_config.name][model_id] = results
             logger.debug(f"Results:\n{results}")
 
