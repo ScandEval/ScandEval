@@ -60,5 +60,5 @@ class Model(Protocol):
 
 
 class DataCollator(Protocol):
-    def __call__(self, *args, **kwargs) -> Dict:
+    def __call__(self, *args) -> Dict:
         ...

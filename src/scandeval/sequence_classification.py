@@ -9,7 +9,7 @@ from transformers.data.data_collator import DataCollatorWithPadding
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
-from .protocols import DataCollator, Tokenizer
+from .protocols import DataCollator, TokenizedOutputs, Tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class SequenceClassification(BenchmarkDataset):
         """
         tokenizer: Tokenizer = kwargs["tokenizer"]
 
-        def tokenise(examples: dict) -> dict:
+        def tokenise(examples: dict) -> TokenizedOutputs:
             return tokenizer(examples["text"], truncation=True, padding=True)
 
         tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)

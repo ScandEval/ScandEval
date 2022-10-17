@@ -86,7 +86,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             )
 
         # Fetch the model tags
-        tags = models[0].tags
+        tags: Sequence[str] = models[0].tags
 
         # Extract the framework, which defaults to PyTorch
         framework = "pytorch"
