@@ -29,6 +29,9 @@ and this project adheres to
 - Removed `bf16` precision, as it only works for some GPUs. Now enables `fp16` for
   GPUs, but disables it if a TPU is available, as TPUs don't support it.
 - Should output less `transformers` logging now.
+- Models were previously loaded in twice in the beginning of a benchmark. They are now
+  only loaded in once (but re-loaded during each of the 10 iterations to ensure that we
+  are starting from the same point).
 
 ### Removed
 - Removed support for evaluating finetuned models, as the package was primarily used to
