@@ -360,7 +360,7 @@ class BenchmarkDataset(ABC):
             early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
 
             # Disable logging from trainer.py
-            (logging.getLogger("transformers.trainer").setLevel(logging.ERROR))
+            logging.getLogger("transformers.trainer").setLevel(logging.ERROR)
 
             # Initialise Trainer
             trainer_args = dict(
