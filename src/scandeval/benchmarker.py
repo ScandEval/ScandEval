@@ -112,7 +112,9 @@ class Benchmarker:
 
         # Initialise variable storing all benchmark results, which will be updated as
         # more models are benchmarked
-        self.benchmark_results: List[Dict[str, Union[str, SCORE_DICT]]] = list()
+        self.benchmark_results: List[
+            Dict[str, Union[str, List[str], SCORE_DICT]]
+        ] = list()
 
         # Set logging level based on verbosity
         logging_level = logging.DEBUG if verbose else logging.INFO
@@ -128,7 +130,7 @@ class Benchmarker:
         self,
         model_id: Optional[Union[Sequence[str], str]] = None,
         dataset: Optional[Union[Sequence[str], str]] = None,
-    ) -> List[Dict[str, Union[str, SCORE_DICT]]]:
+    ) -> List[Dict[str, Union[str, List[str], SCORE_DICT]]]:
         """Benchmarks models on datasets.
 
         Args:
@@ -142,7 +144,7 @@ class Benchmarker:
         Returns:
             list of dict:
                 The benchmark results, where each result is a dictionary with the
-                keys 'model_id', 'dataset' and 'scores'.
+                keys 'model_id', 'dataset', 'task', 'languages' and 'scores'.
         """
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
@@ -262,7 +264,7 @@ class Benchmarker:
         self,
         dataset_config: DatasetConfig,
         model_id: str,
-    ) -> Dict[str, Union[str, SCORE_DICT]]:
+    ) -> Dict[str, Union[str, List[str], SCORE_DICT]]:
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -277,6 +279,8 @@ class Benchmarker:
             results = dataset(model_id)
             record = dict(
                 dataset=dataset_config.name,
+                task=dataset_config.task.name,
+                languages=[language.code for language in dataset_config.languages],
                 model=model_id,
                 results=results,
             )
@@ -302,7 +306,9 @@ class Benchmarker:
                 logger.debug(f'The error message was "{e}".')
                 return dict(error=str(e))
 
-    def __call__(self, *args, **kwargs) -> List[Dict[str, Union[str, SCORE_DICT]]]:
+    def __call__(
+        self, *args, **kwargs
+    ) -> List[Dict[str, Union[str, List[str], SCORE_DICT]]]:
         return self.benchmark(*args, **kwargs)
 
     def _get_fresh_model_ids(
