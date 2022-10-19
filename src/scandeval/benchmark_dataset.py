@@ -2,6 +2,7 @@
 
 import logging
 import random
+import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import partial
@@ -398,7 +399,9 @@ class BenchmarkDataset(ABC):
                 trainer.add_callback(NeverLeaveProgressCallback)
 
             # Finetune the model
-            trainer.train()
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                trainer.train()
 
             # Log training scores and save the state
             if self.benchmark_config.evaluate_train:
