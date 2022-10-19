@@ -189,9 +189,9 @@ class BenchmarkDataset(ABC):
                         gradient_accumulation_steps=ga,
                     )
 
-                    training_args.per_device_train_batch_size = bs // 2
-                    training_args.per_device_eval_batch_size = bs // 2
-                    training_args.gradient_accumulation_steps = ga * 2
+                    training_args.per_device_train_batch_size = bs
+                    training_args.per_device_eval_batch_size = bs
+                    training_args.gradient_accumulation_steps = ga
 
             if "train" in itr_scores:
                 scores["train"].append(itr_scores["train"])
