@@ -199,8 +199,14 @@ class BenchmarkDataset(ABC):
                     training_args.gradient_accumulation_steps = ga
 
                     # Clear memory, to avoid memory issues
-                    del model
-                    del tokenizer
+                    try:
+                        del model
+                    except UnboundLocalError:
+                        pass
+                    try:
+                        del tokenizer
+                    except UnboundLocalError:
+                        pass
                     clear_memory()
                     model_already_initialized = False
 
