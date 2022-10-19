@@ -233,11 +233,6 @@ class BenchmarkDataset(ABC):
             model_id=model_config.model_id,
         )
 
-        # Garbage collection, to avoid memory issues
-        del model
-        del tokenizer
-        clear_memory()
-
         return all_scores
 
     def _get_training_args(self) -> TrainingArguments:
