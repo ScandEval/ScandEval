@@ -6,7 +6,7 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, List, Optional, Sequence, Union
 
-from huggingface_hub import HfApi, ModelFilter, ModelInfo
+from huggingface_hub.hf_api import HfApi, ModelFilter, ModelInfo
 from requests.exceptions import RequestException
 
 from .config import BenchmarkConfig, Language, ModelConfig
