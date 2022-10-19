@@ -140,13 +140,12 @@ def load_model(
 
     except (OSError, ValueError):
         msg = (
-            f"The model {model_id} either does not exist on the "
-            "Hugging Face Hub, or it has no frameworks registered, or it is a "
-            "private model. If it *does* exist on the Hub and is a public "
-            "model then please ensure that it has a framework registered. If "
-            "it is a private model then enable the `--use-auth-token` flag "
-            "and make sure that you are logged in to the Hub via the "
-            "`huggingface-cli login` command."
+            f"The model {model_id} either does not exist on the Hugging Face Hub, or "
+            "it has no frameworks registered, or it is a private model. If it *does* "
+            "exist on the Hub and is a public model then please ensure that it has a "
+            "framework registered. If it is a private model then enable the "
+            "`--use-auth-token` flag and make sure that you are logged in to the Hub "
+            "via the `huggingface-cli login` command."
         )
         raise InvalidBenchmark(msg)
 
