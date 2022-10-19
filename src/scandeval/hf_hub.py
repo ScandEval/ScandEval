@@ -6,7 +6,7 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, List, Optional, Sequence, Union
 
-from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub import HfApi, ModelFilter, ModelInfo
 from requests.exceptions import RequestException
 
 from .config import BenchmarkConfig, Language, ModelConfig
@@ -200,7 +200,7 @@ def get_model_lists(
             language_str = None
 
         # Fetch the model list
-        models = api.list_models(
+        models: List[ModelInfo] = api.list_models(
             filter=ModelFilter(language=language_str),
             use_auth_token=use_auth_token,
         )
@@ -222,7 +222,10 @@ def get_model_lists(
         ]
 
         # Extract the model IDs
-        model_ids = [model.id for model in models]
+        model_ids: List[str] = [model.id for model in models]
+
+        # Remove models that are too large, and thus needs to be specified manually
+        model_ids = [model_id for model_id in model_ids if not model_id.endswith("xl")]
 
         # Store the model IDs
         model_lists["all"].extend(model_ids)
