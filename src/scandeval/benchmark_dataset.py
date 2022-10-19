@@ -161,6 +161,11 @@ class BenchmarkDataset(ABC):
 
         scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
         for idx in itr:
+
+            # Set variable that tracks whether we need to initialize new models in the
+            # `_benchmark_single_iteration` call
+            model_already_initialized = idx == 0
+
             while True:
                 itr_scores = self._benchmark_single_iteration(
                     idx=idx,
@@ -170,8 +175,8 @@ class BenchmarkDataset(ABC):
                     tests=tests,
                     data_collator=data_collator,
                     training_args=training_args,
-                    tokenizer=tokenizer if idx == 0 else None,
-                    model=model if idx == 0 else None,
+                    tokenizer=tokenizer if model_already_initialized else None,
+                    model=model if model_already_initialized else None,
                 )
 
                 # If the iteration was successful then break the loop
@@ -192,6 +197,12 @@ class BenchmarkDataset(ABC):
                     training_args.per_device_train_batch_size = bs
                     training_args.per_device_eval_batch_size = bs
                     training_args.gradient_accumulation_steps = ga
+
+                    # Clear memory, to avoid memory issues
+                    del model
+                    del tokenizer
+                    clear_memory()
+                    model_already_initialized = False
 
             if "train" in itr_scores:
                 scores["train"].append(itr_scores["train"])
