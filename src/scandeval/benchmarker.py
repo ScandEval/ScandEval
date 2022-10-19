@@ -2,7 +2,6 @@
 
 import json
 import logging
-from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Union
 
@@ -17,6 +16,10 @@ from .hf_hub import get_model_lists
 logger = logging.getLogger(__name__)
 
 
+# Define types to make type hints more readable
+SCORE_DICT = Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]
+
+
 class Benchmarker:
     """Benchmarking all the Scandinavian language models.
 
@@ -25,7 +28,7 @@ class Benchmarker:
             Whether progress bars should be shown. Defaults to True.
         save_results (bool, optional):
             Whether to save the benchmark results to
-            'scandeval_benchmark_results.json'. Defaults to False.
+            'scandeval_benchmark_results.jsonl'. Defaults to False.
         language (str or list of str, optional):
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
@@ -53,6 +56,10 @@ class Benchmarker:
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token. Defaults to False.
+        ignore_duplicates (bool, optional):
+            Whether to skip evaluation of models which have already been evaluated,
+            with scores lying in the 'scandeval_benchmark_results.jsonl' file. Defaults
+            to True.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
 
@@ -79,6 +86,7 @@ class Benchmarker:
         raise_error_on_invalid_model: bool = False,
         cache_dir: str = ".scandeval_cache",
         use_auth_token: Union[bool, str] = False,
+        ignore_duplicates: bool = True,
         verbose: bool = False,
     ) -> None:
         # Build benchmark configuration
@@ -96,12 +104,15 @@ class Benchmarker:
             verbose=verbose,
         )
 
+        # Set attributes from arguments
+        self.ignore_duplicates = ignore_duplicates
+
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: Union[Dict[str, Sequence[str]], None] = None
 
-        # Initialise variable storing all benchmark results, which will be
-        # updated as more models are benchmarked
-        self.benchmark_results: Dict[str, dict] = defaultdict(dict)
+        # Initialise variable storing all benchmark results, which will be updated as
+        # more models are benchmarked
+        self.benchmark_results: List[Dict[str, Union[str, SCORE_DICT]]] = list()
 
         # Set logging level based on verbosity
         logging_level = logging.DEBUG if verbose else logging.INFO
@@ -110,11 +121,14 @@ class Benchmarker:
         # Initialise a dataset factory
         self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
 
+        # Set up the results path
+        self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
+
     def benchmark(
         self,
         model_id: Optional[Union[Sequence[str], str]] = None,
         dataset: Optional[Union[Sequence[str], str]] = None,
-    ) -> Dict[str, Dict[str, dict]]:
+    ) -> List[Dict[str, Union[str, SCORE_DICT]]]:
         """Benchmarks models on datasets.
 
         Args:
@@ -126,10 +140,9 @@ class Benchmarker:
                 benchmarked. Defaults to None.
 
         Returns:
-            dict:
-                A nested dictionary of the benchmark results. The keys are the names of
-                the datasets, with values being new dictionaries having the model IDs
-                as keys.
+            list of dict:
+                The benchmark results, where each result is a dictionary with the
+                keys 'model_id', 'dataset' and 'scores'.
         """
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
@@ -141,19 +154,46 @@ class Benchmarker:
         for dataset_config in dataset_configs:
             for m_id in model_ids:
 
+                # Skip if we have already evaluated this model on this dataset and
+                # ignore_duplicates is True
+                if self.ignore_duplicates and self._has_been_evaluated(
+                    model_id=m_id, dataset=dataset_config.name
+                ):
+                    continue
+
                 # Benchmark a single model on a single dataset
-                self._benchmark_single(
+                record = self._benchmark_single(
                     dataset_config=dataset_config,
                     model_id=m_id,
                 )
 
+                # Add the record to the benchmark results
+                self.benchmark_results.append(record)
+
                 # Save the benchmark results
                 if self.benchmark_config.save_results:
-                    output_path = Path.cwd() / "scandeval_benchmark_results.json"
-                    with output_path.open("w") as f:
-                        json.dump(self.benchmark_results, f)
+                    with self.results_path.open("a") as f:
+                        f.write(json.dumps(record))
 
         return self.benchmark_results
+
+    def _has_been_evaluated(self, model_id: str, dataset: str) -> bool:
+        """Checks whether a model has already been evaluated on a dataset.
+
+        Args:
+            model_id (str):
+                The model ID.
+            dataset (str):
+                The dataset.
+
+        Returns:
+            bool:
+                Whether the model has already been evaluated on the dataset.
+        """
+        for record in self.benchmark_results:
+            if record["model_id"] == model_id and record["dataset"] == dataset:
+                return True
+        return False
 
     def _prepare_model_ids(
         self,
@@ -222,7 +262,7 @@ class Benchmarker:
         self,
         dataset_config: DatasetConfig,
         model_id: str,
-    ) -> None:
+    ) -> Dict[str, Union[str, SCORE_DICT]]:
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -235,8 +275,13 @@ class Benchmarker:
         try:
             dataset = self.dataset_factory.build_dataset(dataset_config)
             results = dataset(model_id)
-            self.benchmark_results[dataset_config.name][model_id] = results
+            record = dict(
+                dataset=dataset_config.name,
+                model=model_id,
+                results=results,
+            )
             logger.debug(f"Results:\n{results}")
+            return record
 
         except InvalidBenchmark as e:
 
@@ -255,8 +300,9 @@ class Benchmarker:
                     f"{dataset_config.pretty_name}. Skipping."
                 )
                 logger.debug(f'The error message was "{e}".')
+                return dict(error=str(e))
 
-    def __call__(self, *args, **kwargs) -> Dict[str, Dict[str, dict]]:
+    def __call__(self, *args, **kwargs) -> List[Dict[str, Union[str, SCORE_DICT]]]:
         return self.benchmark(*args, **kwargs)
 
     def _get_fresh_model_ids(

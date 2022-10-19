@@ -133,6 +133,13 @@ from .languages import get_all_languages
     private models. Requires that you are logged in via the `huggingface-cli login`
     command.""",
 )
+@click.option(
+    "--ignore-duplicates/--no-ignore-duplicates",
+    default=True,
+    show_default=True,
+    help="""Whether to skip evaluation of models which have already been evaluated,
+    with scores lying in the 'scandeval_benchmark_results.jsonl' file.""",
+)
 def benchmark(
     model_id: Tuple[str],
     dataset: Tuple[str],
@@ -147,6 +154,7 @@ def benchmark(
     cache_dir: str,
     use_auth_token: bool,
     auth_token: str,
+    ignore_duplicates: bool,
     verbose: bool = False,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
@@ -172,6 +180,7 @@ def benchmark(
         raise_error_on_invalid_model=raise_error_on_invalid_model,
         verbose=verbose,
         use_auth_token=auth,
+        ignore_duplicates=ignore_duplicates,
         cache_dir=cache_dir,
     )
 

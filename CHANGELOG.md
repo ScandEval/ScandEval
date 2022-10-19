@@ -10,6 +10,11 @@ and this project adheres to
 
 ## [Unreleased]
 ### Changed
+- Evaluation results are now saved in a JSONL file instead of a JSON file, and results
+  are appended onto the file after every evaluation. A new argument,
+  `ignore_duplicates` (or `--ignore-duplicates/--no-ignore-duplicates` in the CLI)
+  further ignores an evaluation if it has previously been evaluated. This argument
+  defaults to True.
 - You can now specify your Hugging Face authentication token in the `use_auth_token`
   argument of `Benchmarker` rather than manually logging in with `huggingface-cli
   login`. In the CLI an authentication token can also be applied directly using the new
