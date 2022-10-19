@@ -23,6 +23,7 @@ from transformers.trainer_callback import (
 )
 from transformers.trainer_utils import IntervalStrategy
 from transformers.training_args import OptimizerNames, TrainingArguments
+from transformers.utils.import_utils import is_torch_tpu_available
 
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
@@ -215,6 +216,9 @@ class BenchmarkDataset(ABC):
         else:
             logging_strategy = IntervalStrategy.NO
 
+        # Use 16-bit floating point numbers if CUDA is available and TPU is not
+        fp16 = torch.cuda.is_available() and not is_torch_tpu_available()
+
         # Initialise training arguments
         training_args = TrainingArgumentsWithMPSSupport(
             output_dir=self.benchmark_config.cache_dir,
@@ -236,6 +240,7 @@ class BenchmarkDataset(ABC):
             optim=OptimizerNames.ADAMW_TORCH,
             seed=4242,
             no_cuda=self.benchmark_config.testing,
+            fp16=fp16,
         )
 
         # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`

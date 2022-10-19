@@ -22,7 +22,8 @@ and this project adheres to
   then there is no need to add the `--use-auth-token` flag.
 
 ### Fixed
-- Removed `bf16` precision, as it only works for some GPUs.
+- Removed `bf16` precision, as it only works for some GPUs. Now enables `fp16` for
+  GPUs, but disables it if a TPU is available, as TPUs don't support it.
 
 ### Removed
 - Removed support for evaluating finetuned models, as the package was primarily used to
