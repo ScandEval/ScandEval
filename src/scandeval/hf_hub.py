@@ -225,7 +225,12 @@ def get_model_lists(
         model_ids: List[str] = [model.id for model in models]
 
         # Remove models that are too large, and thus needs to be specified manually
-        model_ids = [model_id for model_id in model_ids if not model_id.endswith("xl")]
+        large_regex = re.compile(r"(-|_)x+l(arge)?")
+        model_ids = [
+            model_id
+            for model_id in model_ids
+            if re.search(large_regex, model_id) is None
+        ]
 
         # Store the model IDs
         model_lists["all"].extend(model_ids)
