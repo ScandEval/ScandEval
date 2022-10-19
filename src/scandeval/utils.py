@@ -109,8 +109,8 @@ def block_terminal_output():
     disable_progress_bar()
 
     # Disable most of the `transformers` logging
-    tf_logging._default_log_level = logging.ERROR
-    tf_logging.set_verbosity_error()
+    tf_logging._default_log_level = logging.CRITICAL
+    tf_logging.set_verbosity(logging.CRITICAL)
 
 
 def get_class_by_name(

@@ -340,7 +340,7 @@ class BenchmarkDataset(ABC):
                 returned.
         """
         # Set transformers logging back to error
-        tf_logging.set_verbosity_error()
+        tf_logging.set_verbosity(logging.CRITICAL)
 
         scores: Dict[str, Dict[str, float]] = dict()
         try:
@@ -375,7 +375,7 @@ class BenchmarkDataset(ABC):
             early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
 
             # Disable logging from trainer.py
-            logging.getLogger("transformers.trainer").setLevel(logging.ERROR)
+            logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
 
             # Initialise Trainer
             trainer_args = dict(
@@ -391,7 +391,7 @@ class BenchmarkDataset(ABC):
             trainer = Trainer(**trainer_args)
 
             # Set transformers logging back to error
-            tf_logging.set_verbosity_error()
+            tf_logging.set_verbosity(logging.CRITICAL)
 
             # Remove trainer logging if not in verbose mode
             if not self.benchmark_config.verbose:
