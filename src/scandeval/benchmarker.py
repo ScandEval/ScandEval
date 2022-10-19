@@ -144,7 +144,7 @@ class Benchmarker:
         Returns:
             list of dict:
                 The benchmark results, where each result is a dictionary with the
-                keys 'model_id', 'dataset', 'task', 'languages' and 'scores'.
+                keys 'model_id', 'dataset', 'task', 'dataset_languages' and 'scores'.
         """
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
@@ -168,6 +168,10 @@ class Benchmarker:
                     dataset_config=dataset_config,
                     model_id=m_id,
                 )
+
+                # If the benchmark was unsuccessful then skip
+                if "error" in record:
+                    continue
 
                 # Add the record to the benchmark results
                 self.benchmark_results.append(record)
@@ -272,6 +276,13 @@ class Benchmarker:
                 The dataset configuration to use.
             model_id (str):
                 The model ID to use.
+
+        Returns:
+            dict:
+                The benchmark results, being a dictionary with the keys 'model_id',
+                'dataset', 'task', 'languages' and 'scores'. If an error occured then
+                the dictionary will only contain the key 'error', with the associated
+                value being the error message.
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
         try:
@@ -280,7 +291,9 @@ class Benchmarker:
             record = dict(
                 dataset=dataset_config.name,
                 task=dataset_config.task.name,
-                languages=[language.code for language in dataset_config.languages],
+                dataset_languages=[
+                    language.code for language in dataset_config.languages
+                ],
                 model=model_id,
                 results=results,
             )
@@ -297,7 +310,7 @@ class Benchmarker:
             ):
                 raise e
 
-            # Otherwise, log the error
+            # Otherwise, log the error and return it
             else:
                 logger.info(
                     f"{model_id} could not be benchmarked on "
