@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Tuple, Type, Union
 
+import transformers.utils.logging as tf_logging
 from transformers.models.auto.configuration_auto import AutoConfig
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.electra.modeling_electra import (
@@ -65,6 +66,9 @@ def load_model(
             If the framework is not recognized.
     """
     config: Config
+
+    # Set transformers logging back to error
+    tf_logging.set_verbosity_error()
 
     try:
         # If the model ID specifies a random model, then load that.
