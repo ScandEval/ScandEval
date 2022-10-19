@@ -13,9 +13,9 @@ import numpy as np
 import pkg_resources
 import requests
 import torch
-import transformers.utils.logging as tf_logging
 from datasets.utils import disable_progress_bar
 from requests.exceptions import RequestException
+from transformers import logging as tf_logging
 
 from .exceptions import InvalidBenchmark
 

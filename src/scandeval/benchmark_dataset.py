@@ -10,12 +10,12 @@ from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import torch
-import transformers.utils.logging as tf_logging
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset, load_metric
 from numpy._typing import NDArray
 from tqdm.auto import tqdm
+from transformers import logging as tf_logging
 from transformers.trainer import Trainer
 from transformers.trainer_callback import (
     EarlyStoppingCallback,

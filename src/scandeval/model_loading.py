@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Tuple, Type, Union
 
-import transformers.utils.logging as tf_logging
+from transformers import logging as tf_logging
 from transformers.models.auto.configuration_auto import AutoConfig
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.electra.modeling_electra import (
@@ -102,7 +102,6 @@ def load_model(
 
         # Otherwise load the pretrained model
         else:
-            breakpoint()
             config = AutoConfig.from_pretrained(
                 model_id,
                 revision=revision,
