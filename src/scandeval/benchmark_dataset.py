@@ -250,7 +250,6 @@ class BenchmarkDataset(ABC):
 
         # Use 16-bit floating point numbers if CUDA is available and TPU is not
         fp16 = torch.cuda.is_available() and not is_torch_tpu_available()
-        breakpoint()
 
         # Initialise training arguments
         training_args = TrainingArgumentsWithMPSSupport(
