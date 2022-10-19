@@ -166,6 +166,18 @@ class BenchmarkDataset(ABC):
             # `_benchmark_single_iteration` call
             model_already_initialized = idx == 0
 
+            # Clear memory after first iteration
+            if not model_already_initialized:
+                try:
+                    del model
+                except UnboundLocalError:
+                    pass
+                try:
+                    del tokenizer
+                except UnboundLocalError:
+                    pass
+                clear_memory()
+
             while True:
                 itr_scores = self._benchmark_single_iteration(
                     idx=idx,
