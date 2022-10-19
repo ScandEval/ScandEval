@@ -79,7 +79,7 @@ from .languages import get_all_languages
 )
 @click.option(
     "--evaluate-train/--no-evaluate-train",
-    default=True,
+    default=False,
     show_default=True,
     help="Whether to evaluate the model on the training set.",
 )
