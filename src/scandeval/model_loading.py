@@ -91,6 +91,7 @@ def load_model(
                     "recognized."
                 )
 
+            breakpoint()
             config = AutoConfig.from_pretrained(
                 model_id,
                 use_auth_token=use_auth_token,
