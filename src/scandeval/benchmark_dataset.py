@@ -328,6 +328,9 @@ class BenchmarkDataset(ABC):
                 `train` and `test`. If an exception is raised, then the exception is
                 returned.
         """
+        # Set transformers logging back to error
+        tf_logging.set_verbosity_error()
+
         scores: Dict[str, Dict[str, float]] = dict()
         try:
             # Set random seeds to enforce reproducibility of the randomly
