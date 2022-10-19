@@ -91,7 +91,6 @@ def load_model(
                     "recognized."
                 )
 
-            breakpoint()
             config = AutoConfig.from_pretrained(
                 model_id,
                 use_auth_token=use_auth_token,
@@ -103,6 +102,7 @@ def load_model(
 
         # Otherwise load the pretrained model
         else:
+            breakpoint()
             config = AutoConfig.from_pretrained(
                 model_id,
                 revision=revision,
