@@ -69,7 +69,7 @@ NER = DatasetTask(
 
 
 QA = DatasetTask(
-    name="qa",
+    name="question-answering",
     supertask="question-answering",
     metrics=[
         MetricConfig(
