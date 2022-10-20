@@ -116,7 +116,9 @@ class Benchmarker:
         self.benchmark_results: List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]
         if self.results_path.exists():
             with self.results_path.open() as f:
-                self.benchmark_results = [json.loads(line) for line in f if line]
+                self.benchmark_results = [
+                    json.loads(line) for line in f if line.strip()
+                ]
         else:
             self.benchmark_results = list()
 
