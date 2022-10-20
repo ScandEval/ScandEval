@@ -161,14 +161,14 @@ class Benchmarker:
         for m_id in model_ids:
             for dataset_config in dataset_configs:
 
-                # Skip if we have already evaluated this model on this dataset and
-                # ignore_duplicates is True
-                if self.ignore_duplicates and self._has_been_evaluated(
+                # Skip if we have already benchmarked this model on this dataset and
+                # `ignore_duplicates` is set
+                if self.ignore_duplicates and self._has_been_benchmarked(
                     model_id=m_id, dataset=dataset_config.name
                 ):
                     logger.info(
-                        f"Skipping {m_id!r} on {dataset_config.name!r}, as it has "
-                        "already been evaluated."
+                        f"Skipping benchmarking {m_id} on {dataset_config.pretty_name},"
+                        "as it has already been benchmarked."
                     )
                     continue
 
@@ -198,8 +198,8 @@ class Benchmarker:
 
         return self.benchmark_results
 
-    def _has_been_evaluated(self, model_id: str, dataset: str) -> bool:
-        """Checks whether a model has already been evaluated on a dataset.
+    def _has_been_benchmarked(self, model_id: str, dataset: str) -> bool:
+        """Checks whether a model has already been benchmarked on a dataset.
 
         Args:
             model_id (str):
