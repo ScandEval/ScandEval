@@ -197,7 +197,7 @@ class Benchmarker:
                 Whether the model has already been evaluated on the dataset.
         """
         for record in self.benchmark_results:
-            if record["model_id"] == model_id and record["dataset"] == dataset:
+            if record["model"] == model_id and record["dataset"] == dataset:
                 return True
         return False
 
