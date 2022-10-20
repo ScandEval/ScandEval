@@ -90,7 +90,8 @@ class BenchmarkDataset(ABC):
             model_id (str):
                 The full Hugging Face Hub path to the pretrained transformer model. The
                 specific model version to use can be added after the suffix '@':
-                "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id.
+                "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id,
+                and defaults to the latest version if not specified.
 
         Returns:
             pair of dict and int:
