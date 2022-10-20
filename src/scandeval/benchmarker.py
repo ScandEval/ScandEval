@@ -158,6 +158,7 @@ class Benchmarker:
 
                 # Skip if we have already evaluated this model on this dataset and
                 # ignore_duplicates is True
+                breakpoint()
                 if self.ignore_duplicates and self._has_been_evaluated(
                     model_id=m_id, dataset=dataset_config.name
                 ):
