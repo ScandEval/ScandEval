@@ -155,9 +155,9 @@ class Benchmarker:
         # Get all the relevant dataset configurations
         dataset_configs = self._prepare_dataset_configs(dataset)
 
-        # Iterate over all the datasets and models
-        for dataset_config in dataset_configs:
-            for m_id in model_ids:
+        # Iterate over all the models and datasets
+        for m_id in model_ids:
+            for dataset_config in dataset_configs:
 
                 # Skip if we have already evaluated this model on this dataset and
                 # ignore_duplicates is True
