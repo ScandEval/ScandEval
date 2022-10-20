@@ -249,7 +249,7 @@ def get_model_lists(
         "microsoft/xlm-align-base",
         "Peltarion/xlm-roberta-longformer-base-4096",
         "sentence-transformers/distilbert-multilingual-nli-stsb-quora-ranking",
-        "sentence-transformers/distiluse-base-multilingual-cased"
+        "sentence-transformers/distiluse-base-multilingual-cased",
         "sentence-transformers/distiluse-base-multilingual-cased-v1",
         "sentence-transformers/distiluse-base-multilingual-cased-v2",
         "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
