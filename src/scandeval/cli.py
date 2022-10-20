@@ -20,8 +20,8 @@ from .languages import get_all_languages
     help="""The Hugging Face model ID of the model(s) to be benchmarked. If not
     specified then all models will be benchmarked, filtered by `model_language` and
     `model_task`. The specific model version to use can be added after the suffix "@":
-    "<model_id>@v1.0.0". It can be a branch name, a tag name, or a commit id (currently
-    only supported for Hugging Face models, and it defaults to "main" for latest).""",
+    "<model_id>@v1.0.0". It can be a branch name, a tag name, or a commit id, and
+    defaults to the latest version if not specified.""",
 )
 @click.option(
     "--dataset",
