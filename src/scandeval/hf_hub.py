@@ -239,15 +239,19 @@ def get_model_lists(
 
     # Add multilingual models manually
     multi_models = [
-        "xlm-roberta-large",
-        "Peltarion/xlm-roberta-longformer-base-4096",
-        "microsoft/xlm-align-base",
-        "microsoft/infoxlm-base",
-        "microsoft/infoxlm-large",
         "bert-base-multilingual-cased",
         "bert-base-multilingual-uncased",
-        "distilbert-base-multilingual-cased",
         "cardiffnlp/twitter-xlm-roberta-base",
+        "distilbert-base-multilingual-cased",
+        "microsoft/infoxlm-base",
+        "microsoft/infoxlm-large",
+        "microsoft/mdeberta-v3-base",
+        "microsoft/xlm-align-base",
+        "Peltarion/xlm-roberta-longformer-base-4096",
+        "studio-ousia/mluke-base",
+        "studio-ousia/mluke-large",
+        "xlm-roberta-base",
+        "xlm-roberta-large",
     ]
     model_lists["multilingual"] = multi_models
     model_lists["all"].extend(multi_models)
