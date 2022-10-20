@@ -110,11 +110,18 @@ class Benchmarker:
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: Union[Dict[str, Sequence[str]], None] = None
 
-        # Initialise variable storing all benchmark results, which will be updated as
-        # more models are benchmarked
-        self.benchmark_results: List[
-            Dict[str, Union[str, List[str], SCORE_DICT]]
-        ] = list()
+        # Set up the results path
+        self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
+
+        # Set up the benchmark results variable, which will be populated with the
+        # contents of the results file if it exists. If not, then it will be an empty
+        # list
+        self.benchmark_results: List[Dict[str, Union[str, List[str], SCORE_DICT]]]
+        if self.results_path.exists():
+            with self.results_path.open() as f:
+                self.benchmark_results = [json.loads(line) for line in f]
+        else:
+            self.benchmark_results = list()
 
         # Set logging level based on verbosity
         logging_level = logging.DEBUG if verbose else logging.INFO
@@ -122,9 +129,6 @@ class Benchmarker:
 
         # Initialise a dataset factory
         self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
-
-        # Set up the results path
-        self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
 
     def benchmark(
         self,
