@@ -42,7 +42,8 @@ from .languages import get_all_languages
     metavar="ISO 639-1 LANGUAGE CODE",
     type=click.Choice(["all"] + list(get_all_languages().keys())),
     help="""The languages to benchmark, both for models and datasets. Only relevant if
-    `model-id` and `dataset` have not both been specified.""",
+    `model-id` and `dataset` have not both been specified. If "all" then all models
+    will be benchmarked on all datasets.""",
 )
 @click.option(
     "--model-language",
@@ -53,8 +54,8 @@ from .languages import get_all_languages
     metavar="ISO 639-1 LANGUAGE CODE",
     type=click.Choice(["all"] + list(get_all_languages().keys())),
     help="""The model languages to benchmark. Only relevant if `model-id` has not been
-    specified. If "all" then models will not be filtered according to their language.
-    If not specified then this will use the `language` value.""",
+    specified. If "all" then all models will be benchmarked. If not specified then this
+    will use the `language` value.""",
 )
 @click.option(
     "--dataset-language",
@@ -65,8 +66,8 @@ from .languages import get_all_languages
     metavar="ISO 639-1 LANGUAGE CODE",
     type=click.Choice(["all"] + list(get_all_languages().keys())),
     help="""The dataset languages to benchmark. Only relevant if `dataset` has not been
-    specified. If "all" then datasets will not be filtered according to their language.
-    If not specified then this will use the `language` value.""",
+    specified. If "all" then the models will be benchmarked on all datasets. If not
+    specified then this will use the `language` value.""",
 )
 @click.option(
     "--dataset-task",
