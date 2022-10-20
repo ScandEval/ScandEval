@@ -368,11 +368,16 @@ class Benchmarker:
                 use_auth_token=self.benchmark_config.use_auth_token,
             )
 
-        # Extract all the model IDs from the model lists
+        # Extract all the model IDs from the model lists, for the chosen languages
         model_ids: List[str] = list()
         for language in languages:
-            model_ids.extend(self._model_lists[language.code])  # type: ignore
-        model_ids.extend(self._model_lists["multilingual"])  # type: ignore
+            model_ids.extend(self._model_lists[language.code])
+
+        # Add the multilingual models
+        model_ids.extend(self._model_lists["multilingual"])
+
+        # Add the randomly initialised models
+        model_ids.extend(self._model_lists["random"])
 
         # Remove duplicate model IDs
         model_ids = list(set(model_ids))
