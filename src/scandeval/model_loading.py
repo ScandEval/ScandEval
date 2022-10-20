@@ -1,5 +1,6 @@
 """Functions related to the loading of models."""
 
+import warnings
 from typing import Dict, List, Tuple, Type, Union
 
 from numpy import block
@@ -150,13 +151,15 @@ def load_model(
     # If the model is a subclass of a RoBERTa model then we have to add a prefix
     # space to the tokens, by the way the model is constructed.
     prefix = "Roberta" in type(model).__name__
-    tokenizer: Tokenizer = AutoTokenizer.from_pretrained(
-        model_id,
-        revision=revision,
-        use_auth_token=use_auth_token,
-        use_fast=True,
-        add_prefix_space=prefix,
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        tokenizer: Tokenizer = AutoTokenizer.from_pretrained(
+            model_id,
+            revision=revision,
+            use_auth_token=use_auth_token,
+            use_fast=True,
+            add_prefix_space=prefix,
+        )
 
     # Set the maximal length of the tokenizer to the model's maximal length. This is
     # required for proper truncation
