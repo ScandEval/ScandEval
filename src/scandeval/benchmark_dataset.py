@@ -33,7 +33,12 @@ from .model_loading import load_model
 from .protocols import DataCollator, Model, Tokenizer
 from .scores import log_scores
 from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
-from .utils import clear_memory, enforce_reproducibility, handle_error
+from .utils import (
+    block_terminal_output,
+    clear_memory,
+    enforce_reproducibility,
+    handle_error,
+)
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -410,6 +415,10 @@ class BenchmarkDataset(ABC):
             # Remove trainer logging if not in verbose mode
             if not self.benchmark_config.verbose:
                 trainer.log = lambda logs: None
+
+            # Re-block terminal output, as it gets unblocked by the `transformers`
+            # package before training
+            block_terminal_output()
 
             # Remove the callback which prints the scores after each
             # evaluation
