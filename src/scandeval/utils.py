@@ -111,6 +111,7 @@ def block_terminal_output():
     # Disable most of the `transformers` logging
     tf_logging._default_log_level = logging.CRITICAL
     tf_logging.set_verbosity(logging.CRITICAL)
+    logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
 
 
 def get_class_by_name(

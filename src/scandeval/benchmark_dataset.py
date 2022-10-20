@@ -15,7 +15,6 @@ from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset, load_metric
 from numpy._typing import NDArray
 from tqdm.auto import tqdm
-from transformers import logging as tf_logging
 from transformers.trainer import Trainer
 from transformers.trainer_callback import (
     EarlyStoppingCallback,
@@ -34,7 +33,12 @@ from .model_loading import load_model
 from .protocols import DataCollator, Model, Tokenizer
 from .scores import log_scores
 from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
-from .utils import clear_memory, enforce_reproducibility, handle_error
+from .utils import (
+    block_terminal_output,
+    clear_memory,
+    enforce_reproducibility,
+    handle_error,
+)
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -363,8 +367,7 @@ class BenchmarkDataset(ABC):
                 `train` and `test`. If an exception is raised, then the exception is
                 returned.
         """
-        # Set transformers logging back to error
-        tf_logging.set_verbosity(logging.CRITICAL)
+        block_terminal_output()
 
         scores: Dict[str, Dict[str, float]] = dict()
         try:
@@ -398,9 +401,6 @@ class BenchmarkDataset(ABC):
             # Initialise early stopping callback
             early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
 
-            # Disable logging from trainer.py
-            logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
-
             # Initialise Trainer
             trainer_args = dict(
                 model=model,
@@ -413,9 +413,6 @@ class BenchmarkDataset(ABC):
                 callbacks=[early_stopping],
             )
             trainer = Trainer(**trainer_args)
-
-            # Set transformers logging back to error
-            tf_logging.set_verbosity(logging.CRITICAL)
 
             # Remove trainer logging if not in verbose mode
             if not self.benchmark_config.verbose:

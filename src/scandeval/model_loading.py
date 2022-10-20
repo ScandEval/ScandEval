@@ -1,9 +1,7 @@
 """Functions related to the loading of models."""
 
-import logging
 from typing import Dict, List, Tuple, Type, Union
 
-from transformers import logging as tf_logging
 from transformers.models.auto.configuration_auto import AutoConfig
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.electra.modeling_electra import (
@@ -67,9 +65,6 @@ def load_model(
             If the framework is not recognized.
     """
     config: Config
-
-    # Set transformers logging back to error
-    tf_logging.set_verbosity(logging.CRITICAL)
 
     try:
         # If the model ID specifies a random model, then load that.
