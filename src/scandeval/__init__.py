@@ -33,3 +33,7 @@ logging.basicConfig(level=logging.INFO, format=fmt)
 
 # Disable parallelisation when tokenizing, as that can lead to errors
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+
+# Enable MPS fallback
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
