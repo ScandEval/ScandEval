@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Tuple, Type, Union
 
+from numpy import block
 from transformers.models.auto.configuration_auto import AutoConfig
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.electra.modeling_electra import (
@@ -15,7 +16,7 @@ from transformers.models.roberta.modeling_roberta import (
 
 from .exceptions import InvalidBenchmark
 from .protocols import Config, Model, Tokenizer
-from .utils import get_class_by_name
+from .utils import block_terminal_output, get_class_by_name
 
 
 # TODO: Cache this
@@ -65,6 +66,7 @@ def load_model(
             If the framework is not recognized.
     """
     config: Config
+    block_terminal_output()
 
     try:
         # If the model ID specifies a random model, then load that.
