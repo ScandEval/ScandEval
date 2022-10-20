@@ -25,6 +25,8 @@ from transformers.trainer_utils import IntervalStrategy
 from transformers.training_args import OptimizerNames, TrainingArguments
 from transformers.utils.import_utils import is_torch_tpu_available
 
+from scandeval.types import SCORE_DICT
+
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
@@ -78,11 +80,10 @@ class BenchmarkDataset(ABC):
             for metric_cfg in dataset_config.task.metrics
         }
 
-    # TODO: Cache this
     def benchmark(
         self,
         model_id: str,
-    ) -> Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]:
+    ) -> Tuple[SCORE_DICT, int]:
         """Benchmark a model.
 
         Args:
@@ -92,9 +93,12 @@ class BenchmarkDataset(ABC):
                 "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id.
 
         Returns:
-            dict:
-                The keys in the dict are 'raw' and 'total', with all the raw scores in
-                the first dictionary and the aggregated scores in the second.
+            pair of dict and int:
+                A pair (score_dict, num_params), where the latter is the number of
+                trainable parameters in the model, and the former is the dictionary
+                containing the scores. The keys in the dict are 'raw' and 'total', with
+                all the raw scores in the first dictionary and the aggregated scores in
+                the second.
 
         Raises:
             RuntimeError:
@@ -237,7 +241,7 @@ class BenchmarkDataset(ABC):
             model_id=model_config.model_id,
         )
 
-        return all_scores
+        return all_scores, num_params
 
     def _get_training_args(self) -> TrainingArguments:
 

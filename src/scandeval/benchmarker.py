@@ -11,13 +11,10 @@ from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_lists
+from .types import SCORE_DICT
 
 # Create logger
 logger = logging.getLogger(__name__)
-
-
-# Define types to make type hints more readable
-SCORE_DICT = Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]
 
 
 class Benchmarker:
@@ -116,7 +113,7 @@ class Benchmarker:
         # Set up the benchmark results variable, which will be populated with the
         # contents of the results file if it exists. If not, then it will be an empty
         # list
-        self.benchmark_results: List[Dict[str, Union[str, List[str], SCORE_DICT]]]
+        self.benchmark_results: List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]
         if self.results_path.exists():
             with self.results_path.open() as f:
                 self.benchmark_results = [json.loads(line) for line in f if line]
@@ -134,7 +131,7 @@ class Benchmarker:
         self,
         model_id: Optional[Union[Sequence[str], str]] = None,
         dataset: Optional[Union[Sequence[str], str]] = None,
-    ) -> List[Dict[str, Union[str, List[str], SCORE_DICT]]]:
+    ) -> List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]:
         """Benchmarks models on datasets.
 
         Args:
@@ -147,8 +144,10 @@ class Benchmarker:
 
         Returns:
             list of dict:
-                The benchmark results, where each result is a dictionary with the
-                keys 'model_id', 'dataset', 'task', 'dataset_languages' and 'scores'.
+                The benchmark results, where each result is a dictionary with the keys
+                'dataset', 'task', 'dataset_languages', 'model', 'num_model_parameters'
+                and 'scores'. If an error occured then the dictionary will only contain
+                the key 'error', with the associated value being the error message.
         """
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
@@ -282,7 +281,7 @@ class Benchmarker:
         self,
         dataset_config: DatasetConfig,
         model_id: str,
-    ) -> Dict[str, Union[str, List[str], SCORE_DICT]]:
+    ) -> Dict[str, Union[str, int, List[str], SCORE_DICT]]:
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -293,15 +292,15 @@ class Benchmarker:
 
         Returns:
             dict:
-                The benchmark results, being a dictionary with the keys 'model_id',
-                'dataset', 'task', 'languages' and 'scores'. If an error occured then
-                the dictionary will only contain the key 'error', with the associated
-                value being the error message.
+                The benchmark results, being a dictionary with the keys 'dataset',
+                'task', 'dataset_languages', 'model', 'num_model_parameters' and
+                'scores'. If an error occured then the dictionary will only contain the
+                key 'error', with the associated value being the error message.
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
         try:
             dataset = self.dataset_factory.build_dataset(dataset_config)
-            results = dataset(model_id)
+            results, num_params = dataset(model_id)
             record = dict(
                 dataset=dataset_config.name,
                 task=dataset_config.task.name,
@@ -309,6 +308,7 @@ class Benchmarker:
                     language.code for language in dataset_config.languages
                 ],
                 model=model_id,
+                num_model_parameters=num_params,
                 results=results,
             )
             logger.debug(f"Results:\n{results}")
@@ -339,7 +339,7 @@ class Benchmarker:
 
     def __call__(
         self, *args, **kwargs
-    ) -> List[Dict[str, Union[str, List[str], SCORE_DICT]]]:
+    ) -> List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]:
         return self.benchmark(*args, **kwargs)
 
     def _get_fresh_model_ids(
