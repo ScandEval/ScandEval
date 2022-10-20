@@ -159,23 +159,27 @@ def get_model_lists(
 
     # Form string of languages
     if len(language_list) == 1:
-        language_string = f"the language {language_list[0].name}"
+        language_string = language_list[0].name
     else:
         language_list = sorted(language_list, key=lambda x: x.name)
         if {lang.code for lang in language_list} == {
             lang.code for lang in all_languages
         }:
-            language_string = "all languages"
+            language_string = "all"
         else:
+
+            # Remove generic 'Norwegian' from the list of languages if both 'Bokmål'
+            # and 'Nynorsk' already exist in the list
+            if all([lang in language_list for lang in [NO, NB, NN]]):
+                language_list = [lang for lang in language_list if lang != NO]
+
             language_string = (
-                f"the languages {', '.join(l.name for l in language_list[:-1])} "
-                f"and {language_list[-1].name}"
+                f"{', '.join(l.name for l in language_list[:-1])} and "
+                f"{language_list[-1].name}"
             )
 
     # Log fetching message
-    logger.info(
-        f"Fetching list of models for {language_string} from the Hugging Face Hub."
-    )
+    logger.info(f"Fetching list of {language_string} models from the Hugging Face Hub.")
 
     # Initialise the API
     api: HfApi = HfApi()
