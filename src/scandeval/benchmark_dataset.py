@@ -33,12 +33,7 @@ from .model_loading import load_model
 from .protocols import DataCollator, Model, Tokenizer
 from .scores import log_scores
 from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
-from .utils import (
-    block_terminal_output,
-    clear_memory,
-    enforce_reproducibility,
-    handle_error,
-)
+from .utils import clear_memory, enforce_reproducibility, handle_error
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -367,8 +362,6 @@ class BenchmarkDataset(ABC):
                 `train` and `test`. If an exception is raised, then the exception is
                 returned.
         """
-        block_terminal_output()
-
         scores: Dict[str, Dict[str, float]] = dict()
         try:
             # Set random seeds to enforce reproducibility of the randomly
