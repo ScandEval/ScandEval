@@ -165,6 +165,10 @@ class Benchmarker:
                 if self.ignore_duplicates and self._has_been_evaluated(
                     model_id=m_id, dataset=dataset_config.name
                 ):
+                    logger.info(
+                        f"Skipping {m_id!r} on {dataset_config.name!r}, as it has "
+                        "already been evaluated."
+                    )
                     continue
 
                 # Benchmark a single model on a single dataset
@@ -175,6 +179,12 @@ class Benchmarker:
 
                 # If the benchmark was unsuccessful then skip
                 if "error" in record:
+                    error_msg = record["error"]
+                    logger.info(
+                        f"{model_id} could not be benchmarked on "
+                        f"{dataset_config.pretty_name}. Skipping."
+                    )
+                    logger.debug(f'The error message was "{error_msg}".')
                     continue
 
                 # Add the record to the benchmark results
@@ -323,13 +333,8 @@ class Benchmarker:
                     "environment variable to `1` and try again."
                 )
 
-            # Otherwise, log the error and return it
+            # Otherwise, return the error message
             else:
-                logger.info(
-                    f"{model_id} could not be benchmarked on "
-                    f"{dataset_config.pretty_name}. Skipping."
-                )
-                logger.debug(f'The error message was "{e}".')
                 return dict(error=str(e))
 
     def __call__(
