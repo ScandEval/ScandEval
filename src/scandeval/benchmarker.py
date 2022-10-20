@@ -192,7 +192,7 @@ class Benchmarker:
                 # Save the benchmark results
                 if self.benchmark_config.save_results:
                     with self.results_path.open("a") as f:
-                        f.write("\n" + json.dumps(record, indent=4))
+                        f.write("\n" + json.dumps(record))
 
         return self.benchmark_results
 
