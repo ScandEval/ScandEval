@@ -234,18 +234,31 @@ class Benchmarker:
             sequence of str:
                 The prepared list of model IDs.
         """
-        # If `model_id` is not specified, then fetch all the relevant model IDs
         model_ids: Sequence[str]
+
+        # If `model_id` is not specified, then fetch all the relevant model IDs
         if model_id is None:
             model_ids = self._get_model_ids(
                 languages=self.benchmark_config.model_languages,
             )
+
+        # Otherwise, if `model_id` is a string, ensure that it is a list
         elif isinstance(model_id, str):
             model_ids = [model_id]
+
+        # Otherwise `model_id` is already a list, so we do nothing
         else:
             model_ids = model_id
 
-        return model_ids
+        # Reorder the `model_ids` list to include the ones present in the benchmark
+        # results first
+        benchmarked_model_ids = [record["model"] for record in self.benchmark_results]
+        model_ids_sorted = [m_id for m_id in model_ids if m_id in benchmarked_model_ids]
+        model_ids_sorted += [
+            m_id for m_id in model_ids if m_id not in benchmarked_model_ids
+        ]
+
+        return model_ids_sorted
 
     def _prepare_dataset_configs(
         self,
