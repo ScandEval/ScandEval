@@ -169,7 +169,7 @@ class Benchmarker:
                 if self.ignore_duplicates and self._has_been_benchmarked(
                     model_id=m_id, dataset=dataset_config.name
                 ):
-                    logger.info(
+                    logger.debug(
                         f"Skipping benchmarking {m_id} on {dataset_config.pretty_name},"
                         " as it has already been benchmarked."
                     )
