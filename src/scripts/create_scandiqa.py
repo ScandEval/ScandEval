@@ -93,17 +93,17 @@ def main() -> None:
         )
 
         # Create dataset ID
-        dataset_id = f"ScandEval/scandiqa-{language}-mini"
+        mini_dataset_id = f"ScandEval/scandiqa-{language}-mini"
 
         # Remove the dataset from Hugging Face Hub if it already exists
         try:
             api: HfApi = HfApi()
-            api.delete_repo(dataset_id, repo_type="dataset")
+            api.delete_repo(mini_dataset_id, repo_type="dataset")
         except HTTPError:
             pass
 
         # Push the dataset to the Hugging Face Hub
-        dataset.push_to_hub(dataset_id)
+        dataset.push_to_hub(mini_dataset_id, private=True)
 
 
 if __name__ == "__main__":
