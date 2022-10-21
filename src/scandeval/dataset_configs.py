@@ -3,7 +3,7 @@
 from typing import Dict
 
 from .config import DatasetConfig
-from .dataset_tasks import LA, NER, SENT
+from .dataset_tasks import LA, NER, QA, SENT
 from .languages import DA, FO, IS, NB, NN, SV
 
 
@@ -178,3 +178,30 @@ SCALA_FO_CONFIG = DatasetConfig(
     task=LA,
     languages=[FO],
 )
+
+
+# SCANDIQA_DA_CONFIG = DatasetConfig(
+#     name="scandiqa-da",
+#     pretty_name="The Danish part of ScandiQA",
+#     huggingface_id="ScandEval/scandiqa-da-mini",
+#     task=QA,
+#     languages=[DA],
+# )
+#
+#
+# SCANDIQA_NO_CONFIG = DatasetConfig(
+#     name="scandiqa-no",
+#     pretty_name="The Norwegian part of ScandiQA",
+#     huggingface_id="ScandEval/scandiqa-no-mini",
+#     task=QA,
+#     languages=[NB, NN],
+# )
+#
+#
+# SCANDIQA_SV_CONFIG = DatasetConfig(
+#     name="scandiqa-sv",
+#     pretty_name="The Swedish part of ScandiQA",
+#     huggingface_id="ScandEval/scandiqa-sv-mini",
+#     task=QA,
+#     languages=[SV],
+# )
