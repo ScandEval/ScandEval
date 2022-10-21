@@ -185,7 +185,7 @@ class Benchmarker:
                 if "error" in record:
                     error_msg = record["error"]
                     logger.info(
-                        f"{model_id} could not be benchmarked on "
+                        f"{m_id} could not be benchmarked on "
                         f"{dataset_config.pretty_name}. Skipping."
                     )
                     logger.debug(f'The error message was "{error_msg}".')
