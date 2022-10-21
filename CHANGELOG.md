@@ -24,6 +24,11 @@ and this project adheres to
   login`. In the CLI an authentication token can also be applied directly using the new
   `--auth-token` argument. If an authentication is provided in this way in the CLI,
   then there is no need to add the `--use-auth-token` flag.
+- The "random" models have now been renamed to "fresh", to emphasise that they are not
+  random, but instead randomly initialized.
+- The fresh models are now task independent, meaning that `fresh-xlmr-base` will now
+  adapt to the task at hand, rather than having to benchmark, e.g.,
+  `fresh-xlmr-base-sequence-clf` and `fresh-xlmr-base-token-clf` separately.
 
 ### Fixed
 - Removed `bf16` precision, as it only works for some GPUs. Now enables `fp16` for
@@ -32,6 +37,8 @@ and this project adheres to
 - Models were previously loaded in twice in the beginning of a benchmark. They are now
   only loaded in once (but re-loaded during each of the 10 iterations to ensure that we
   are starting from the same point).
+- Changed the model architecture of the `fresh-xlmr-base` from `Roberta` to
+  `XLMRoberta`.
 
 ### Removed
 - Removed support for evaluating finetuned models, as the package was primarily used to
