@@ -1,7 +1,6 @@
 """Abstract benchmarking dataset class."""
 
 import logging
-import random
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -374,13 +373,9 @@ class BenchmarkDataset(ABC):
         """
         scores: Dict[str, Dict[str, float]] = dict()
         try:
-            # Set random seeds to enforce reproducibility of the randomly
-            # initialised weights
-            training_args.seed = 4242 + idx
-            random.seed(4242 + idx)
-            np.random.seed(4242 + idx)
-            torch.manual_seed(4242 + idx)
-            torch.cuda.manual_seed_all(4242 + idx)
+            # Set random seeds to enforce reproducibility of the randomly initialised
+            # weights
+            enforce_reproducibility(framework=model_config.framework)
 
             # Reinitialise a new model
             if tokenizer is None or model is None:
