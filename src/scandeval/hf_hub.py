@@ -35,9 +35,9 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
         RuntimeError:
             If the extracted framework is not recognized.
     """
-    # If the model ID specifies a random ID, then return a hardcoded metadata
+    # If the model ID specifies a fresh ID, then return a hardcoded metadata
     # dictionary
-    if model_id.startswith("random"):
+    if model_id.startswith("fresh"):
         model_config = ModelConfig(
             model_id=model_id,
             framework="pytorch",
@@ -270,15 +270,10 @@ def get_model_lists(
     model_lists["multilingual"] = multi_models
     model_lists["all"].extend(multi_models)
 
-    # Add random models
-    random_models = [
-        "random-xlmr-base-sequence-clf",
-        "random-xlmr-base-token-clf",
-        "random-electra-small-sequence-clf",
-        "random-electra-small-token-clf",
-    ]
-    model_lists["random"].extend(random_models)
-    model_lists["all"].extend(random_models)
+    # Add fresh models
+    fresh_models = ["fresh-xlmr-base", "fresh-electra-small"]
+    model_lists["fresh"].extend(fresh_models)
+    model_lists["all"].extend(fresh_models)
 
     # Add some multilingual Danish models manually that have not marked 'da' as their
     # language

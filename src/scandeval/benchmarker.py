@@ -237,7 +237,7 @@ class Benchmarker:
         # If `model_id` is not specified, then fetch all the relevant model IDs
         model_ids: Sequence[str]
         if model_id is None:
-            model_ids = self._get_fresh_model_ids(
+            model_ids = self._get_model_ids(
                 languages=self.benchmark_config.model_languages,
             )
         elif isinstance(model_id, str):
@@ -347,7 +347,7 @@ class Benchmarker:
     ) -> List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]:
         return self.benchmark(*args, **kwargs)
 
-    def _get_fresh_model_ids(
+    def _get_model_ids(
         self,
         languages: Sequence[Language],
     ) -> List[str]:
@@ -381,8 +381,8 @@ class Benchmarker:
         # Add the multilingual models
         model_ids.extend(self._model_lists["multilingual"])
 
-        # Add the randomly initialised models
-        model_ids.extend(self._model_lists["random"])
+        # Add the fresh models
+        model_ids.extend(self._model_lists["fresh"])
 
         # Remove duplicate model IDs
         model_ids = list(set(model_ids))

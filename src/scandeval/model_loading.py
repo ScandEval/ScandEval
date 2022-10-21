@@ -3,16 +3,17 @@
 import warnings
 from typing import Dict, List, Tuple, Type, Union
 
-from numpy import block
 from transformers.models.auto.configuration_auto import AutoConfig
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.electra.modeling_electra import (
+    ElectraForQuestionAnswering,
     ElectraForSequenceClassification,
     ElectraForTokenClassification,
 )
-from transformers.models.roberta.modeling_roberta import (
-    RobertaForSequenceClassification,
-    RobertaForTokenClassification,
+from transformers.models.xlm_roberta.modeling_xlm_roberta import (
+    XLMRobertaForQuestionAnswering,
+    XLMRobertaForSequenceClassification,
+    XLMRobertaForTokenClassification,
 )
 
 from .exceptions import InvalidBenchmark
@@ -70,23 +71,38 @@ def load_model(
     block_terminal_output()
 
     try:
-        # If the model ID specifies a random model, then load that.
-        if model_id.startswith("random"):
-            if model_id == "random-xlmr-base-sequence-clf":
+        # If the model ID specifies a fresh model, then load that.
+        if model_id.startswith("fresh"):
+
+            if model_id == "fresh-xlmr-base":
                 model_id = "xlm-roberta-base"
-                model_cls = RobertaForSequenceClassification
-            elif model_id == "random-xlmr-base-token-clf":
-                model_id = "xlm-roberta-base"
-                model_cls = RobertaForTokenClassification
-            elif model_id == "random-electra-small-sequence-clf":
+                if supertask == "sequence-classification":
+                    model_cls = XLMRobertaForSequenceClassification
+                elif supertask == "token-classification":
+                    model_cls = XLMRobertaForTokenClassification
+                elif supertask == "question-answering":
+                    model_cls = XLMRobertaForQuestionAnswering
+                else:
+                    raise InvalidBenchmark(
+                        f"Supertask {supertask} is not supported for model {model_id}"
+                    )
+
+            elif model_id == "fresh-electra-small":
                 model_id = "google/electra-small-discriminator"
-                model_cls = ElectraForSequenceClassification
-            elif model_id == "random-electra-small-token-clf":
-                model_id = "google/electra-small-discriminator"
-                model_cls = ElectraForTokenClassification
+                if supertask == "sequence-classification":
+                    model_cls = ElectraForSequenceClassification
+                elif supertask == "token-classification":
+                    model_cls = ElectraForTokenClassification
+                elif supertask == "question-answering":
+                    model_cls = ElectraForQuestionAnswering
+                else:
+                    raise InvalidBenchmark(
+                        f"Supertask {supertask} is not supported for model {model_id}"
+                    )
+
             else:
                 raise ValueError(
-                    f"A random model was chosen, `{model_id}`, but it was not "
+                    f"A fresh model was chosen, `{model_id}`, but it was not "
                     "recognized."
                 )
 
