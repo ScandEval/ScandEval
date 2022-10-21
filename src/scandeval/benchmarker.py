@@ -171,7 +171,7 @@ class Benchmarker:
                 ):
                     logger.info(
                         f"Skipping benchmarking {m_id} on {dataset_config.pretty_name},"
-                        "as it has already been benchmarked."
+                        " as it has already been benchmarked."
                     )
                     continue
 
