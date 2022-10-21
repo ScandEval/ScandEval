@@ -400,7 +400,7 @@ class BenchmarkDataset(ABC):
             early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
 
             # Initialise Trainer
-            trainer_args = dict(
+            trainer = Trainer(
                 model=model,
                 args=training_args,
                 train_dataset=train,
@@ -410,7 +410,6 @@ class BenchmarkDataset(ABC):
                 compute_metrics=compute_metrics,
                 callbacks=[early_stopping],
             )
-            trainer = Trainer(**trainer_args)
 
             # Remove trainer logging if not in verbose mode
             if not self.benchmark_config.verbose:
