@@ -1,7 +1,7 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Sequence, Union
+from typing import Any, Callable, Dict, List, Sequence, Union
 
 
 @dataclass
@@ -22,6 +22,9 @@ class MetricConfig:
         compute_kwargs (dict, optional):
             Keyword arguments to pass to the metric's compute function. Defaults to
             an empty dictionary.
+        postprocessing_fn (callable, optional):
+            A function to apply to the metric scores after they are computed, taking
+            the score to a string representation. Defaults to x -> f"{100 * x:.2f}%".
     """
 
     name: str
@@ -29,6 +32,9 @@ class MetricConfig:
     huggingface_id: str
     results_key: str
     compute_kwargs: Dict[str, Any] = field(default_factory=dict)
+    postprocessing_fn: Callable[[float], str] = field(
+        default_factory=lambda: lambda x: f"{100 * x:.2f}%"
+    )
 
 
 @dataclass
