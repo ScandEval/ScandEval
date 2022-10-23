@@ -131,10 +131,7 @@ class BenchmarkDataset(ABC):
 
         # Store the number of parameters in the model, the maximum sequence length and
         # the size of the model's vocabulary
-        num_trainable_params = sum(
-            p.numel() for p in model.parameters() if p.requires_grad
-        )
-        num_params = sum(p.numel() for p in model.parameters())
+        num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         max_seq_length = tokenizer.model_max_length
         if hasattr(model.config, "vocab_size"):
             vocab_size = model.config.vocab_size
@@ -152,9 +149,8 @@ class BenchmarkDataset(ABC):
 
         # Log the metadata
         logger.info(
-            f"The model has {num_params:,} parameters, {num_trainable_params:,} of "
-            f"which are trainable, a maximum sequence length of {max_seq_length:,} "
-            f"and a vocabulary size of {vocab_size:,}."
+            f"The model has {num_params:,} parameters, a vocabulary size of "
+            f"{vocab_size:,} and a maximum sequence length of {max_seq_length:,}."
         )
 
         # Load the data collator
