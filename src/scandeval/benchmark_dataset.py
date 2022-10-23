@@ -136,7 +136,11 @@ class BenchmarkDataset(ABC):
         )
         num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         max_seq_length = tokenizer.model_max_length
-        vocab_size = model.config.vocab_size or None
+        try:
+            vocab_size = model.config.vocab_size
+        except AttributeError:
+            breakpoint()
+            vocab_size = -1
         logger.info(
             f"The model has {num_params:,} parameters, {num_trainable_params:,} of "
             f"which are trainable, a maximum sequence length of {max_seq_length:,} "
