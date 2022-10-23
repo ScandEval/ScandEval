@@ -13,7 +13,6 @@ import torch
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
-from numpy._typing import NDArray
 from tqdm.auto import tqdm
 from transformers.trainer import Trainer
 from transformers.trainer_callback import (
@@ -26,8 +25,6 @@ from transformers.trainer_utils import IntervalStrategy
 from transformers.training_args import OptimizerNames, TrainingArguments
 from transformers.utils.import_utils import is_torch_tpu_available
 
-from scandeval.types import SCORE_DICT
-
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
@@ -36,6 +33,7 @@ from .model_loading import load_model
 from .protocols import DataCollator, Model, Tokenizer
 from .scores import log_scores
 from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
+from .types import SCORE_DICT
 from .utils import (
     block_terminal_output,
     clear_memory,
@@ -160,15 +158,6 @@ class BenchmarkDataset(ABC):
         # Load the data
         train, val, test = self._load_data()
 
-        # Preprocess the datasets
-        try:
-            params = dict(framework="pytorch", config=model.config, tokenizer=tokenizer)
-            train = self._preprocess_data(train, split="train", **params)
-            val = self._preprocess_data(val, split="val", **params)
-            test = self._preprocess_data(test, split="test", **params)
-        except ValueError:
-            raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
-
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 2
 
@@ -180,6 +169,17 @@ class BenchmarkDataset(ABC):
             Dataset.from_dict(test[test_bidxs[idx]])
             for idx in range(test_bidxs.shape[0])
         ]
+
+        # Preprocess the datasets
+        try:
+            params = dict(framework="pytorch", config=model.config, tokenizer=tokenizer)
+            prepared_train = self._preprocess_data(train, split="train", **params)
+            prepared_val = self._preprocess_data(val, split="val", **params)
+            prepared_tests = [
+                self._preprocess_data(ds, split="test", **params) for ds in tests
+            ]
+        except ValueError:
+            raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
 
         # Get the training arguments
         training_args = self._get_training_args()
@@ -215,8 +215,10 @@ class BenchmarkDataset(ABC):
                     idx=idx,
                     model_config=model_config,
                     train=train,
-                    val=val,
+                    prepared_train=prepared_train,
+                    prepared_val=prepared_val,
                     tests=tests,
+                    prepared_tests=prepared_tests,
                     data_collator=data_collator,
                     training_args=training_args,
                     tokenizer=tokenizer if model_already_initialized else None,
@@ -267,7 +269,7 @@ class BenchmarkDataset(ABC):
 
         return all_scores, metadata_dict
 
-    def _get_training_args(self) -> TrainingArguments:
+    def _get_training_args(self) -> TrainingArgumentsWithMPSSupport:
 
         # Set the logging strategy
         if self.benchmark_config.verbose:
@@ -358,8 +360,10 @@ class BenchmarkDataset(ABC):
         idx: int,
         model_config: ModelConfig,
         train: Dataset,
-        val: Dataset,
+        prepared_train: Dataset,
+        prepared_val: Dataset,
         tests: Sequence[Dataset],
+        prepared_tests: Sequence[Dataset],
         data_collator: DataCollator,
         training_args: TrainingArguments,
         tokenizer: Optional[Tokenizer] = None,
@@ -373,11 +377,15 @@ class BenchmarkDataset(ABC):
             model_config (ModelConfig):
                 The model configuration.
             train (Dataset):
-                The training dataset.
-            val (Dataset):
-                The validation dataset.
+                The original training dataset.
+            prepared_train (Dataset):
+                The prepared training dataset.
+            prepared_val (Dataset):
+                The prepared validation dataset.
             tests (list of Dataset):
-                The test datasets.
+                The original test datasets.
+            prepared_tests (list of Dataset):
+                The prepared test datasets.
             data_collator (DataCollator):
                 The data collator.
             training_args (TrainingArguments):
@@ -427,8 +435,8 @@ class BenchmarkDataset(ABC):
             trainer = self._get_trainer(
                 model=model,
                 args=training_args,
-                train_dataset=train,
-                eval_dataset=val,
+                train_dataset=prepared_train,
+                eval_dataset=prepared_val,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 compute_metrics=compute_metrics,
@@ -443,8 +451,7 @@ class BenchmarkDataset(ABC):
             # package before training
             block_terminal_output()
 
-            # Remove the callback which prints the scores after each
-            # evaluation
+            # Remove the callback which prints the scores after each evaluation
             if not self.benchmark_config.verbose:
                 trainer.remove_callback(PrinterCallback)
 
@@ -462,17 +469,22 @@ class BenchmarkDataset(ABC):
 
             # Log training scores and save the state
             if self.benchmark_config.evaluate_train:
-                train_scores = trainer.evaluate(train, metric_key_prefix="train")
+                train_scores = self._evaluate_dataset(
+                    dataset=train,
+                    prepared_dataset=prepared_train,
+                    metric_key_prefix="train",
+                    trainer=trainer,
+                )
                 scores["train"] = train_scores
 
-            # Set up a progress bar for the test datasets if we are not
-            # finetuning
-            test_itr = [tests[idx]]
-
             # Log test scores
-            for dataset in test_itr:
-                test_scores = trainer.evaluate(dataset, metric_key_prefix="test")
-                scores["test"] = test_scores
+            test_scores = self._evaluate_dataset(
+                dataset=tests[idx],
+                prepared_dataset=prepared_tests[idx],
+                metric_key_prefix="test",
+                trainer=trainer,
+            )
+            scores["test"] = test_scores
 
             # Return the scores
             return scores
@@ -538,6 +550,33 @@ class BenchmarkDataset(ABC):
             callbacks=callbacks,
         )
 
+    def _evaluate_dataset(
+        self,
+        trainer: Trainer,
+        dataset: Dataset,
+        prepared_dataset: Dataset,
+        metric_key_prefix: str,
+    ) -> Dict[str, float]:
+        """Evaluate a dataset.
+
+        Args:
+            trainer (Trainer):
+                The trainer.
+            dataset (Dataset):
+                The original dataset.
+            prepared_dataset (Dataset):
+                The prepared dataset.
+            metric_key_prefix (str):
+                The prefix to use for the metric keys.
+
+        Returns:
+            dict:
+                The scores.
+        """
+        return trainer.evaluate(
+            eval_dataset=prepared_dataset, metric_key_prefix=metric_key_prefix
+        )
+
     def _process_data(self, dataset_dict: DatasetDict) -> DatasetDict:
         """Process the data.
 
@@ -587,15 +626,15 @@ class BenchmarkDataset(ABC):
 
     def _compute_metrics(
         self,
-        probabilities_and_labels: Tuple[NDArray[np.float_], NDArray[np.int_]],
+        model_outputs_and_labels: Tuple[Sequence, Sequence],
         id2label: Optional[Sequence[str]] = None,
     ) -> Dict[str, float]:
         """Compute the metrics needed for evaluation.
 
         Args:
-            probabilities_and_labels (pair of arrays):
-                The first array contains the probability predictions and the second
-                array contains the true labels.
+            model_outputs_and_labels (pair of sequences):
+                The first sequence contains the model outputs and the second sequence
+                contains the true labels.
             id2label (list or None, optional):
                 Conversion of indices to labels. Defaults to None.
 
@@ -604,8 +643,14 @@ class BenchmarkDataset(ABC):
                 A dictionary with the names of the metrics as keys and the metric
                 values as values.
         """
-        probabilities, labels = probabilities_and_labels
-        predictions: NDArray[np.int_] = probabilities.argmax(axis=-1)
+        model_outputs, labels = model_outputs_and_labels
+
+        model_output_dtype = np.asarray(model_outputs).dtype
+        if model_output_dtype in [np.float16, np.float32, np.float64]:
+            predictions = np.asarray(model_outputs).argmax(axis=-1)
+        else:
+            predictions = model_outputs
+
         results: Dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]

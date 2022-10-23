@@ -1,22 +1,18 @@
 """Question answering Trainer subclass."""
 
 from collections import defaultdict
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 from datasets.arrow_dataset import Dataset
 from transformers.trainer import Trainer
-from transformers.trainer_utils import EvalLoopOutput, PredictionOutput
 
 
 class QuestionAnsweringTrainer(Trainer):
     """Trainer subclass for question answering tasks."""
 
-    def __init__(
-        self, *args, prepared_eval_dataset: Optional[Dataset] = None, **kwargs
-    ) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.prepared_eval_dataset = prepared_eval_dataset
 
         # Extract the class token index from the tokenizer
         if self.tokenizer.cls_token_id is None:
@@ -27,19 +23,16 @@ class QuestionAnsweringTrainer(Trainer):
         else:
             self.cls_token_id: int = self.tokenizer.cls_token_id
 
+        # Set the label names
+        self.label_names = ["start_positions", "end_positions"]
+
     def evaluate(
         self,
         eval_dataset: Optional[Dataset] = None,
-        prepared_eval_dataset: Optional[Dataset] = None,
+        orig_eval_dataset: Optional[Dataset] = None,
         ignore_keys: Optional[List[str]] = None,
         metric_key_prefix: str = "eval",
     ):
-        # Use the stored datasets if they are not supplied
-        if eval_dataset is None:
-            eval_dataset = self.eval_dataset
-        if prepared_eval_dataset is None:
-            prepared_eval_dataset = self.prepared_eval_dataset
-
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
 
         # Temporarily disable metric computation, we will do it in the loop here.
@@ -56,102 +49,44 @@ class QuestionAnsweringTrainer(Trainer):
                 description="Evaluation",
                 prediction_loss_only=True if compute_metrics is None else None,
                 ignore_keys=ignore_keys,
+                metric_key_prefix=metric_key_prefix,
             )
         finally:
             self.compute_metrics = compute_metrics
 
-        if self.compute_metrics is not None and self.args.should_save:
-            # Only the main node write the results by default
-            eval_preds = postprocess_predictions(
+        if orig_eval_dataset is not None:
+            preds_and_labels = postprocess_predictions_and_labels(
                 predictions=output.predictions,
-                dataset=eval_dataset,
-                prepared_dataset=prepared_eval_dataset,
+                dataset=orig_eval_dataset,
+                prepared_dataset=eval_dataset,
                 cls_token_index=self.cls_token_id,
             )
-            metrics = self.compute_metrics(eval_preds)
+            output.metrics.update(self.compute_metrics(preds_and_labels))
 
             # Prefix all keys with metric_key_prefix + '_'
-            for key in list(metrics.keys()):
+            for key in list(output.metrics.keys()):
                 if not key.startswith(f"{metric_key_prefix}_"):
-                    metrics[f"{metric_key_prefix}_{key}"] = metrics.pop(key)
-        else:
-            metrics = {}
+                    output.metrics[f"{metric_key_prefix}_{key}"] = output.metrics.pop(
+                        key
+                    )
 
         # Only the main node log the results by default
         if self.args.should_log:
-            self.log(metrics)
-
-        # TEMP
-        breakpoint()
+            self.log(output.metrics)
 
         self.control = self.callback_handler.on_evaluate(
-            self.args, self.state, self.control, metrics  # type: ignore[has-type]
+            self.args, self.state, self.control, output.metrics  # type: ignore[has-type]
         )
-        return metrics
-
-    def predict(
-        self,
-        predict_dataset: Dataset,
-        prepared_predict_dataset: Dataset,
-        ignore_keys: Optional[List[str]] = None,
-        metric_key_prefix: str = "test",
-    ) -> Union[PredictionOutput, EvalLoopOutput]:
-        predict_dataloader = self.get_test_dataloader(predict_dataset)
-
-        # Temporarily disable metric computation, we will do it in the loop here.
-        compute_metrics = self.compute_metrics  # type: ignore[has-type]
-        self.compute_metrics = None
-        eval_loop = (
-            self.prediction_loop
-            if self.args.use_legacy_prediction_loop
-            else self.evaluation_loop
-        )
-        try:
-            output = eval_loop(
-                predict_dataloader,
-                description="Prediction",
-                prediction_loss_only=True if compute_metrics is None else None,
-                ignore_keys=ignore_keys,
-            )
-        finally:
-            self.compute_metrics = compute_metrics
-
-        if self.compute_metrics is None:
-            return output
-
-        predictions = postprocess_predictions(
-            predictions=output.predictions,
-            dataset=predict_dataset,
-            prepared_dataset=prepared_predict_dataset,
-            cls_token_index=self.cls_token_id,
-        )
-        metrics = self.compute_metrics(predictions)
-
-        # Prefix all keys with metric_key_prefix + '_'
-        for key in list(metrics.keys()):
-            if not key.startswith(f"{metric_key_prefix}_"):
-                metrics[f"{metric_key_prefix}_{key}"] = metrics.pop(key)
-
-        # Get the reference answers
-        references = [
-            dict(id=ex["id"], answers=ex["answers"]) for ex in predict_dataset
-        ]
-
-        # Return the metrics, predictions and references
-        return PredictionOutput(
-            predictions=predictions,
-            label_ids=references,
-            metrics=metrics,
-        )
+        return output.metrics
 
 
-def postprocess_predictions(
+def postprocess_predictions_and_labels(
     predictions: Sequence,
     dataset: Dataset,
     prepared_dataset: Dataset,
     cls_token_index: int,
-) -> List[dict]:
-    """Postprocess the predictions, to allow easier metric computation.
+) -> Tuple[List[dict], List[dict]]:
+    """Postprocess the predictions and labels, to allow easier metric computation.
 
     Args:
         predictions (Sequence):
@@ -164,12 +99,12 @@ def postprocess_predictions(
             The index of the CLS token.
 
     Returns:
-        list of dicts:
-            The postprocessed predictions.
+        pair of list of dicts:
+            The postprocessed predictions and labels.
     """
     # Extract the logits from the predictions
-    all_start_logits = np.asarray(predictions)[:, :, 0]
-    all_end_logits = np.asarray(predictions)[:, :, 1]
+    all_start_logits = predictions[0]
+    all_end_logits = predictions[1]
 
     # Build a map from an example to its corresponding features, being the blocks of
     # text from the context that we're feeding into the model. An example can have
@@ -183,6 +118,7 @@ def postprocess_predictions(
 
     # Loop over all the examples
     predictions = list()
+    labels = list()
     for example_index, example in enumerate(dataset):
 
         # Extract the best valid answer associated with the current example
@@ -201,7 +137,7 @@ def postprocess_predictions(
         # Create the final prediction dictionary, to be added to the list of
         # predictions
         prediction = dict(
-            id=example["id"],
+            id=str(example["id"]),
             prediction_text=best_answer,
             no_answer_probability=0.0,
         )
@@ -209,7 +145,20 @@ def postprocess_predictions(
         # Add the answer to the list of predictions
         predictions.append(prediction)
 
-    return predictions
+        # Create the associated reference dictionary, to be added to the list of
+        # references
+        label = dict(
+            id=str(example["id"]),
+            answers=dict(
+                text=example["answers"]["text"],
+                answer_start=example["answers"]["answer_start"],
+            ),
+        )
+
+        # Add the answer and label to the list of predictions and labels, respectively
+        labels.append(label)
+
+    return predictions, labels
 
 
 def find_best_answer(

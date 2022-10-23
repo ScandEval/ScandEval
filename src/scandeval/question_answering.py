@@ -7,6 +7,7 @@ from typing import Callable, List, Optional
 from datasets.arrow_dataset import Dataset
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.tokenization_utils_base import BatchEncoding
+from transformers.trainer import Trainer
 from transformers.trainer_callback import TrainerCallback
 from transformers.training_args import TrainingArguments
 
@@ -51,14 +52,14 @@ class QuestionAnswering(BenchmarkDataset):
         tokenizer: Tokenizer = kwargs.pop("tokenizer")
 
         # Store the original validation dataset for later use
-        if split == "val":
-            self.orig_eval_dataset = dataset
+        if split == "test":
+            self.orig_test_dataset = dataset
 
         # Choose the preprocessing function depending on the dataset split
-        if split == "train":
-            preprocess_fn = partial(prepare_train_examples, tokenizer=tokenizer)
-        else:
+        if split == "test":
             preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
+        else:
+            preprocess_fn = partial(prepare_train_examples, tokenizer=tokenizer)
 
         # Preprocess the data and return it
         preprocessed = dataset.map(
@@ -88,17 +89,29 @@ class QuestionAnswering(BenchmarkDataset):
         data_collator: DataCollator,
         compute_metrics: Callable,
         callbacks: List[TrainerCallback],
-    ) -> QuestionAnsweringTrainer:
+    ) -> Trainer:
         return QuestionAnsweringTrainer(
             model=model,
             args=args,
             train_dataset=train_dataset,
-            eval_dataset=self.orig_eval_dataset,
-            prepared_eval_dataset=eval_dataset,
+            eval_dataset=eval_dataset,
             tokenizer=tokenizer,
             data_collator=data_collator,
             compute_metrics=compute_metrics,
             callbacks=callbacks,
+        )
+
+    def _evaluate_dataset(
+        self,
+        trainer: QuestionAnsweringTrainer,
+        dataset: Dataset,
+        prepared_dataset: Dataset,
+        metric_key_prefix: str,
+    ):
+        return trainer.evaluate(
+            orig_eval_dataset=dataset,
+            eval_dataset=prepared_dataset,
+            metric_key_prefix=metric_key_prefix,
         )
 
     def _load_data_collator(self, tokenizer: Optional[Tokenizer] = None):
