@@ -535,7 +535,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
-        """Preprocess a dataset by tokenizing and aligning the labels.
+        """Preprocess a dataset.
 
         Args:
             dataset (Hugging Face dataset):
@@ -545,7 +545,8 @@ class BenchmarkDataset(ABC):
                 dataset.
 
         Returns:
-            Hugging Face dataset: The preprocessed dataset.
+            Hugging Face dataset:
+                The preprocessed dataset.
         """
         pass
 
