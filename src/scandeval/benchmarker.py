@@ -318,17 +318,16 @@ class Benchmarker:
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
         try:
             dataset = self.dataset_factory.build_dataset(dataset_config)
-            results, num_params, max_seq_length = dataset(model_id)
-            record = dict(
+            results, metadata_dict = dataset(model_id)
+            record: Dict[str, Union[str, int, List[str], SCORE_DICT]] = dict(
                 dataset=dataset_config.name,
                 task=dataset_config.task.name,
                 dataset_languages=[
                     language.code for language in dataset_config.languages
                 ],
                 model=model_id,
-                num_model_parameters=num_params,
-                max_seq_length=max_seq_length,
                 results=results,
+                **metadata_dict,
             )
             logger.debug(f"Results:\n{results}")
             return record
