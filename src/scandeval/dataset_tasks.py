@@ -75,13 +75,13 @@ QA = DatasetTask(
         MetricConfig(
             name="em",
             pretty_name="Exact Match",
-            huggingface_id="exact_match",
-            results_key="exact_match",
+            huggingface_id="squad_v2",
+            results_key="exact",
         ),
         MetricConfig(
             name="f1",
             pretty_name="F1-score of the positive class",
-            huggingface_id="f1",
+            huggingface_id="squad_v2",
             results_key="f1",
         ),
     ],
