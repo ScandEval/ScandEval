@@ -7,11 +7,12 @@ from collections import defaultdict
 from functools import partial
 from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
+import evaluate
 import numpy as np
 import torch
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
-from datasets.load import load_dataset, load_metric
+from datasets.load import load_dataset
 from numpy._typing import NDArray
 from tqdm.auto import tqdm
 from transformers.trainer import Trainer
@@ -76,7 +77,7 @@ class BenchmarkDataset(ABC):
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self._metrics = {
-            metric_cfg.name: load_metric(metric_cfg.huggingface_id)
+            metric_cfg.name: evaluate.load(metric_cfg.huggingface_id)
             for metric_cfg in dataset_config.task.metrics
         }
 
