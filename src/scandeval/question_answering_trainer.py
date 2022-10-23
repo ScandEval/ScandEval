@@ -1,9 +1,10 @@
-"""Trainer subclass for question answering tasks."""
+"""Question answering Trainer subclass."""
 
-from typing import List, Optional, Union
+from collections import defaultdict
+from typing import List, Optional, Sequence, Tuple, Union
 
+import numpy as np
 from datasets.arrow_dataset import Dataset
-from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
 from transformers.trainer_utils import EvalLoopOutput, PredictionOutput
 
@@ -11,21 +12,35 @@ from transformers.trainer_utils import EvalLoopOutput, PredictionOutput
 class QuestionAnsweringTrainer(Trainer):
     """Trainer subclass for question answering tasks."""
 
-    def __init__(self, *args, eval_examples=None, post_process_function=None, **kwargs):
+    def __init__(
+        self, *args, prepared_eval_dataset: Optional[Dataset] = None, **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
-        self.eval_examples = eval_examples
-        self.post_process_function = post_process_function
+        self.prepared_eval_dataset = prepared_eval_dataset
+
+        # Extract the class token index from the tokenizer
+        if self.tokenizer.cls_token_id is None:
+            raise ValueError(
+                "The tokenizer does not have a cls_token_id attribute, which is "
+                "needed for postprocessing."
+            )
+        else:
+            self.cls_token_id: int = self.tokenizer.cls_token_id
 
     def evaluate(
         self,
-        eval_dataset=None,
-        eval_examples=None,
-        ignore_keys=None,
+        eval_dataset: Optional[Dataset] = None,
+        prepared_eval_dataset: Optional[Dataset] = None,
+        ignore_keys: Optional[List[str]] = None,
         metric_key_prefix: str = "eval",
     ):
-        eval_dataset = self.eval_dataset if eval_dataset is None else eval_dataset
+        # Use the stored datasets if they are not supplied
+        if eval_dataset is None:
+            eval_dataset = self.eval_dataset
+        if prepared_eval_dataset is None:
+            prepared_eval_dataset = self.prepared_eval_dataset
+
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
-        eval_examples = self.eval_examples if eval_examples is None else eval_examples
 
         # Temporarily disable metric computation, we will do it in the loop here.
         compute_metrics = self.compute_metrics  # type: ignore[has-type]
@@ -45,14 +60,13 @@ class QuestionAnsweringTrainer(Trainer):
         finally:
             self.compute_metrics = compute_metrics
 
-        if (
-            self.post_process_function is not None
-            and self.compute_metrics is not None
-            and self.args.should_save
-        ):
+        if self.compute_metrics is not None and self.args.should_save:
             # Only the main node write the results by default
-            eval_preds = self.post_process_function(
-                eval_examples, eval_dataset, output.predictions
+            eval_preds = postprocess_predictions(
+                predictions=output.predictions,
+                dataset=eval_dataset,
+                prepared_dataset=prepared_eval_dataset,
+                cls_token_index=self.cls_token_id,
             )
             metrics = self.compute_metrics(eval_preds)
 
@@ -67,6 +81,9 @@ class QuestionAnsweringTrainer(Trainer):
         if self.args.should_log:
             self.log(metrics)
 
+        # TEMP
+        breakpoint()
+
         self.control = self.callback_handler.on_evaluate(
             self.args, self.state, self.control, metrics  # type: ignore[has-type]
         )
@@ -75,7 +92,7 @@ class QuestionAnsweringTrainer(Trainer):
     def predict(
         self,
         predict_dataset: Dataset,
-        predict_examples: BatchEncoding,
+        prepared_predict_dataset: Dataset,
         ignore_keys: Optional[List[str]] = None,
         metric_key_prefix: str = "test",
     ) -> Union[PredictionOutput, EvalLoopOutput]:
@@ -99,11 +116,14 @@ class QuestionAnsweringTrainer(Trainer):
         finally:
             self.compute_metrics = compute_metrics
 
-        if self.post_process_function is None or self.compute_metrics is None:
+        if self.compute_metrics is None:
             return output
 
-        predictions = self.post_process_function(
-            predict_examples, predict_dataset, output.predictions, "predict"
+        predictions = postprocess_predictions(
+            predictions=output.predictions,
+            dataset=predict_dataset,
+            prepared_dataset=prepared_predict_dataset,
+            cls_token_index=self.cls_token_id,
         )
         metrics = self.compute_metrics(predictions)
 
@@ -112,8 +132,236 @@ class QuestionAnsweringTrainer(Trainer):
             if not key.startswith(f"{metric_key_prefix}_"):
                 metrics[f"{metric_key_prefix}_{key}"] = metrics.pop(key)
 
+        # Get the reference answers
+        references = [
+            dict(id=ex["id"], answers=ex["answers"]) for ex in predict_dataset
+        ]
+
+        # Return the metrics, predictions and references
         return PredictionOutput(
-            predictions=predictions.predictions,
-            label_ids=predictions.label_ids,
+            predictions=predictions,
+            label_ids=references,
             metrics=metrics,
         )
+
+
+def postprocess_predictions(
+    predictions: Sequence,
+    dataset: Dataset,
+    prepared_dataset: Dataset,
+    cls_token_index: int,
+) -> List[dict]:
+    """Postprocess the predictions, to allow easier metric computation.
+
+    Args:
+        predictions (Sequence):
+            The predictions to postprocess.
+        dataset (Dataset):
+            The dataset containing the examples.
+        prepared_dataset (Dataset):
+            The dataset containing the prepared examples.
+        cls_token_index (int):
+            The index of the CLS token.
+
+    Returns:
+        list of dicts:
+            The postprocessed predictions.
+    """
+    # Extract the logits from the predictions
+    all_start_logits = np.asarray(predictions)[:, :, 0]
+    all_end_logits = np.asarray(predictions)[:, :, 1]
+
+    # Build a map from an example to its corresponding features, being the blocks of
+    # text from the context that we're feeding into the model. An example can have
+    # multiple features/blocks if it has a long context.
+    id_to_index = {k: i for i, k in enumerate(dataset["id"])}
+    features_per_example = defaultdict(list)
+    for i, feature in enumerate(prepared_dataset):
+        id = feature["id"]
+        example_index = id_to_index[id]
+        features_per_example[example_index].append(i)
+
+    # Loop over all the examples
+    predictions = list()
+    for example_index, example in enumerate(dataset):
+
+        # Extract the best valid answer associated with the current example
+        best_answer = find_best_answer(
+            all_start_logits=all_start_logits,
+            all_end_logits=all_end_logits,
+            prepared_dataset=prepared_dataset,
+            feature_indices=features_per_example[example_index],
+            context=example["context"],
+            max_answer_length=30,
+            num_best_logits=20,
+            min_null_score=0.0,
+            cls_token_index=cls_token_index,
+        )
+
+        # Create the final prediction dictionary, to be added to the list of
+        # predictions
+        prediction = dict(
+            id=example["id"],
+            prediction_text=best_answer,
+            no_answer_probability=0.0,
+        )
+
+        # Add the answer to the list of predictions
+        predictions.append(prediction)
+
+    return predictions
+
+
+def find_best_answer(
+    all_start_logits: np.ndarray,
+    all_end_logits: np.ndarray,
+    prepared_dataset: Dataset,
+    feature_indices: List[int],
+    context: str,
+    max_answer_length: int,
+    num_best_logits: int,
+    min_null_score: float,
+    cls_token_index: int,
+) -> str:
+    """Find the best answer for a given example.
+
+    Args:
+        all_start_logits (NumPy array):
+            The start logits for all the features.
+        all_end_logits (NumPy array):
+            The end logits for all the features.
+        prepared_dataset (Dataset):
+            The dataset containing the prepared examples.
+        feature_indices (list of int):
+            The indices of the features associated with the current example.
+        context (str):
+            The context of the example.
+        max_answer_length (int):
+            The maximum length of the answer.
+        num_best_logits (int):
+            The number of best logits to consider.
+        min_null_score (float):
+            The minimum score an answer can have.
+        cls_token_index (int):
+            The index of the CLS token.
+
+    Returns:
+        str:
+            The best answer for the example.
+    """
+    # Loop through all the features associated to the current example
+    valid_answers = list()
+    for feature_index in feature_indices:
+
+        # Get the features associated with the current example
+        features = prepared_dataset[feature_index]
+
+        # Get the predictions of the model for this feature
+        start_logits = all_start_logits[feature_index]
+        end_logits = all_end_logits[feature_index]
+
+        # Update minimum null prediction
+        cls_index = features["input_ids"].index(cls_token_index)
+        feature_null_score = (start_logits[cls_index] + end_logits[cls_index]).item()
+        if min_null_score < feature_null_score:
+            min_null_score = feature_null_score
+
+        # Find the valid answers for the feature
+        valid_answers_for_feature = find_valid_answers(
+            start_logits=start_logits,
+            end_logits=end_logits,
+            offset_mapping=features["offset_mapping"],
+            context=context,
+            max_answer_length=max_answer_length,
+            num_best_logits=num_best_logits,
+            min_null_score=min_null_score,
+        )
+        valid_answers.extend(valid_answers_for_feature)
+
+    # In the very rare edge case we have not a single non-null prediction, we create a
+    # fake prediction to avoid failure
+    if not valid_answers:
+        return ""
+
+    # Otherwise, we select the answer with the largest score as the best answer, and
+    # return it
+    best_answer_dict = sorted(valid_answers, key=lambda x: x["score"], reverse=True)[0]
+    return best_answer_dict["text"]
+
+
+def find_valid_answers(
+    start_logits: np.ndarray,
+    end_logits: np.ndarray,
+    offset_mapping: List[Tuple[int, int]],
+    context: str,
+    max_answer_length: int,
+    num_best_logits: int,
+    min_null_score: float,
+) -> List[dict]:
+    """Find the valid answers from the start and end indexes.
+
+    Args:
+        start_logits (NumPy array):
+            The logits for the start of the answer.
+        end_logits (NumPy array):
+            The logits for the end of the answer.
+        offset_mapping (list of pairs of int):
+            The offset mapping, being a list of pairs of integers for each token index,
+            containing the start and end character index in the original context.
+        max_answer_length (int):
+            The maximum length of the answer.
+        num_best_logits (int):
+            The number of best logits to consider. Note that this function will run in
+            O(`num_best_logits` ^ 2) time.
+        min_null_score (float):
+            The minimum score an answer can have.
+
+    Returns:
+        list of dicts:
+            A list of the valid answers, each being a dictionary with keys "text" and
+            "score", the score being the sum of the start and end logits.
+    """
+    # Fetch the top-k predictions for the start- and end token indices
+    start_indexes = np.argsort(start_logits)[-1 : -num_best_logits - 1 : -1].tolist()
+    end_indexes = np.argsort(end_logits)[-1 : -num_best_logits - 1 : -1].tolist()
+
+    # We loop over all combinations of starting and ending indexes for valid answers
+    valid_answers = list()
+    for start_index in start_indexes:
+        for end_index in end_indexes:
+
+            # If the starting or ending index is out-of-scope, meaning that they are
+            # either out of bounds or correspond to part of the input_ids that are not
+            # in the context, then we skip this index
+            if (
+                start_index >= len(offset_mapping)
+                or end_index >= len(offset_mapping)
+                or tuple(offset_mapping[start_index]) == (-1, -1)
+                or tuple(offset_mapping[end_index]) == (-1, -1)
+            ):
+                continue
+
+            # Do not consider answers with a length that is either negative or greater
+            # than the context length
+            max_val = max_answer_length + start_index - 1
+            if end_index < start_index or end_index > max_val:
+                continue
+
+            # If we got to this point then the answer is valid, so we store the
+            # corresponding start- and end character indices in the original context,
+            # and from these extract the answer
+            start_char = offset_mapping[start_index][0]
+            end_char = offset_mapping[end_index][1]
+            text = context[start_char:end_char]
+
+            # Compute the score of the answer, being the sum of the start and end
+            # logits. Intuitively, this indicates how likely the answer is to be
+            # correct, and allows us to pick the best valid answer.
+            score = start_logits[start_index] + end_logits[end_index]
+
+            # Add the answer to the list of valid answers, if the score is greater
+            # than the minimum null score
+            if score > min_null_score:
+                valid_answers.append(dict(score=score, text=text))
+
+    return valid_answers
