@@ -131,12 +131,16 @@ class BenchmarkDataset(ABC):
 
         # Log the number of parameters in the model, the maximum sequence length and
         # the size of the model's vocabulary
+        num_trainable_params = sum(
+            p.numel() for p in model.parameters() if p.requires_grad
+        )
         num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         max_seq_length = tokenizer.model_max_length
         vocab_size = model.config.vocab_size
         logger.info(
-            f"The model has {num_params:,} trainable parameters, a maximum sequence "
-            f"length of {max_seq_length:,} and a vocabulary size of {vocab_size:,}."
+            f"The model has {num_params:,} parameters, {num_trainable_params:,} of "
+            f"which are trainable, a maximum sequence length of {max_seq_length:,} "
+            f"and a vocabulary size of {vocab_size:,}."
         )
 
         # Store the metadata in a dictionary
