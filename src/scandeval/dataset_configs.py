@@ -137,7 +137,7 @@ SCALA_SV_CONFIG = DatasetConfig(
 
 SCALA_DA_CONFIG = DatasetConfig(
     name="scala-da",
-    pretty_name="The Danish part of ScaLA",
+    pretty_name="the Danish part of ScaLA",
     huggingface_id="ScandEval/scala-da",
     task=LA,
     languages=[DA],
@@ -146,7 +146,7 @@ SCALA_DA_CONFIG = DatasetConfig(
 
 SCALA_NB_CONFIG = DatasetConfig(
     name="scala-nb",
-    pretty_name="The Bokmål part of ScaLA",
+    pretty_name="the Bokmål part of ScaLA",
     huggingface_id="ScandEval/scala-nb",
     task=LA,
     languages=[NB],
@@ -155,7 +155,7 @@ SCALA_NB_CONFIG = DatasetConfig(
 
 SCALA_NN_CONFIG = DatasetConfig(
     name="scala-nn",
-    pretty_name="The Nynorsk part of ScaLA",
+    pretty_name="the Nynorsk part of ScaLA",
     huggingface_id="ScandEval/scala-nn",
     task=LA,
     languages=[NN],
@@ -164,7 +164,7 @@ SCALA_NN_CONFIG = DatasetConfig(
 
 SCALA_IS_CONFIG = DatasetConfig(
     name="scala-is",
-    pretty_name="The Icelandic part of ScaLA",
+    pretty_name="the Icelandic part of ScaLA",
     huggingface_id="ScandEval/scala-is",
     task=LA,
     languages=[IS],
@@ -173,35 +173,35 @@ SCALA_IS_CONFIG = DatasetConfig(
 
 SCALA_FO_CONFIG = DatasetConfig(
     name="scala-fo",
-    pretty_name="The Faroese part of ScaLA",
+    pretty_name="the Faroese part of ScaLA",
     huggingface_id="ScandEval/scala-fo",
     task=LA,
     languages=[FO],
 )
 
 
-# SCANDIQA_DA_CONFIG = DatasetConfig(
-#     name="scandiqa-da",
-#     pretty_name="The Danish part of ScandiQA",
-#     huggingface_id="ScandEval/scandiqa-da-mini",
-#     task=QA,
-#     languages=[DA],
-# )
-#
-#
-# SCANDIQA_NO_CONFIG = DatasetConfig(
-#     name="scandiqa-no",
-#     pretty_name="The Norwegian part of ScandiQA",
-#     huggingface_id="ScandEval/scandiqa-no-mini",
-#     task=QA,
-#     languages=[NB, NN],
-# )
-#
-#
-# SCANDIQA_SV_CONFIG = DatasetConfig(
-#     name="scandiqa-sv",
-#     pretty_name="The Swedish part of ScandiQA",
-#     huggingface_id="ScandEval/scandiqa-sv-mini",
-#     task=QA,
-#     languages=[SV],
-# )
+SCANDIQA_DA_CONFIG = DatasetConfig(
+    name="scandiqa-da",
+    pretty_name="the Danish part of the truncated version of ScandiQA",
+    huggingface_id="ScandEval/scandiqa-da-mini",
+    task=QA,
+    languages=[DA],
+)
+
+
+SCANDIQA_NO_CONFIG = DatasetConfig(
+    name="scandiqa-no",
+    pretty_name="the Norwegian part of truncated version of ScandiQA",
+    huggingface_id="ScandEval/scandiqa-no-mini",
+    task=QA,
+    languages=[NB, NN],
+)
+
+
+SCANDIQA_SV_CONFIG = DatasetConfig(
+    name="scandiqa-sv",
+    pretty_name="the Swedish part of the truncated version of ScandiQA",
+    huggingface_id="ScandEval/scandiqa-sv-mini",
+    task=QA,
+    languages=[SV],
+)
