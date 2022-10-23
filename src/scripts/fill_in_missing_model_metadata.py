@@ -9,6 +9,7 @@ from tqdm.auto import tqdm
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.model_loading import load_model
 from scandeval.types import SCORE_DICT
+from scandeval.utils import clear_memory
 
 
 def main() -> None:
@@ -91,6 +92,11 @@ def main() -> None:
                         max_sequence_length=record["max_sequence_length"],
                         vocab_size=record["vocab_size"],
                     )
+
+                    # Clear the tokenizer and model from memory
+                    del tokenizer
+                    del model
+                    clear_memory()
 
             # Store the record
             new_records.append(record)
