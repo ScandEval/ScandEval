@@ -34,6 +34,10 @@ def main() -> None:
     with Path("scandeval_benchmark_results.jsonl").open() as f:
         for line in tqdm(f.readlines(), desc="Adding metadata to records"):
 
+            # Skip line if it is empty
+            if line.strip() == "":
+                continue
+
             # Load the record
             record = json.loads(line)
 
