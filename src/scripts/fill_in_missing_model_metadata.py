@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Dict, List, Union
 
+from tqdm.auto import tqdm
+
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.model_loading import load_model
 from scandeval.types import SCORE_DICT
@@ -27,7 +29,7 @@ def main() -> None:
 
     # Iterate over the records and build new list of records with all metadata
     with Path("scandeval_benchmark_results.jsonl").open() as f:
-        for line in f:
+        for line in tqdm(f.readlines(), desc="Adding metadata to records"):
 
             # Load the record
             record = json.loads(line)
