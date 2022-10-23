@@ -40,7 +40,7 @@ def main() -> None:
 
                 # Load the tokenizer and model
                 tokenizer, model = load_model(
-                    model_id=record["model_id"],
+                    model_id=record["model"],
                     revision="main",
                     supertask=dataset_config.task.supertask,
                     num_labels=dataset_config.num_labels,
