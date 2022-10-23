@@ -5,7 +5,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import partial
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import torch
@@ -19,6 +19,7 @@ from transformers.trainer_callback import (
     EarlyStoppingCallback,
     PrinterCallback,
     ProgressCallback,
+    TrainerCallback,
 )
 from transformers.trainer_utils import IntervalStrategy
 from transformers.training_args import OptimizerNames, TrainingArguments
@@ -404,8 +405,8 @@ class BenchmarkDataset(ABC):
             # Initialise early stopping callback
             early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
 
-            # Initialise Trainer
-            trainer = Trainer(
+            # Initialise trainer
+            trainer = self._get_trainer(
                 model=model,
                 args=training_args,
                 train_dataset=train,
@@ -473,6 +474,52 @@ class BenchmarkDataset(ABC):
 
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)
+
+    def _get_trainer(
+        self,
+        model: Model,
+        args: TrainingArguments,
+        train_dataset: Dataset,
+        eval_dataset: Dataset,
+        tokenizer: Tokenizer,
+        data_collator: DataCollator,
+        compute_metrics: Callable,
+        callbacks: List[TrainerCallback],
+    ) -> Trainer:
+        """Get a Trainer object.
+
+        Args:
+            model (Model):
+                The model to finetune.
+            args (TrainingArguments):
+                The training arguments.
+            train_dataset (Dataset):
+                The training dataset.
+            eval_dataset (Dataset):
+                The evaluation dataset.
+            tokenizer (Tokenizer):
+                The tokenizer.
+            data_collator (DataCollator):
+                The data collator.
+            compute_metrics (Callable):
+                The function used to compute the metrics.
+            callbacks (list of TrainerCallback):
+                The callbacks to use.
+
+        Returns:
+            Trainer:
+                The Trainer object.
+        """
+        return Trainer(
+            model=model,
+            args=args,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            tokenizer=tokenizer,
+            data_collator=data_collator,
+            compute_metrics=compute_metrics,
+            callbacks=callbacks,
+        )
 
     def _process_data(self, dataset_dict: DatasetDict) -> DatasetDict:
         """Process the data.
