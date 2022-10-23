@@ -82,7 +82,7 @@ class BenchmarkDataset(ABC):
     def benchmark(
         self,
         model_id: str,
-    ) -> Tuple[SCORE_DICT, int]:
+    ) -> Tuple[SCORE_DICT, int, int]:
         """Benchmark a model.
 
         Args:
@@ -93,12 +93,13 @@ class BenchmarkDataset(ABC):
                 and defaults to the latest version if not specified.
 
         Returns:
-            pair of dict and int:
-                A pair (score_dict, num_params), where the latter is the number of
-                trainable parameters in the model, and the former is the dictionary
-                containing the scores. The keys in the dict are 'raw' and 'total', with
-                all the raw scores in the first dictionary and the aggregated scores in
-                the second.
+            tuple of dict, int and int:
+                A triple (score_dict, num_params, max_seq_length), with `score_dict`
+                being a dictionary containing the scores, `num_params` being the number
+                of trainable parameters of the model, and `max_seq_length` being the
+                maximum sequence length of the model. The keys in `score_dict` are
+                'raw' and 'total', with all the raw scores in the first dictionary and
+                the aggregated scores in the second.
 
         Raises:
             RuntimeError:
@@ -129,6 +130,10 @@ class BenchmarkDataset(ABC):
         # Log the number of parameters in the model
         num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         logger.info(f"Number of model parameters: {num_params:,}")
+
+        # Log the maximum sequence length
+        max_seq_length = tokenizer.model_max_length
+        logger.info(f"Maximum sequence length: {max_seq_length:,}")
 
         # Load the data collator
         data_collator = self._load_data_collator(tokenizer)
@@ -241,7 +246,7 @@ class BenchmarkDataset(ABC):
             model_id=model_config.model_id,
         )
 
-        return all_scores, num_params
+        return all_scores, num_params, max_seq_length
 
     def _get_training_args(self) -> TrainingArguments:
 
