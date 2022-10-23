@@ -175,9 +175,6 @@ class BenchmarkDataset(ABC):
             params = dict(framework="pytorch", config=model.config, tokenizer=tokenizer)
             prepared_train = self._preprocess_data(train, split="train", **params)
             prepared_val = self._preprocess_data(val, split="val", **params)
-            prepared_tests = [
-                self._preprocess_data(ds, split="test", **params) for ds in tests
-            ]
         except ValueError:
             raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
 
@@ -211,14 +208,19 @@ class BenchmarkDataset(ABC):
                 clear_memory()
 
             while True:
+
+                # Prepare the bootstrapped test dataset
+                test = tests[idx]
+                prepared_test = self._preprocess_data(test, split="test", **params)
+
                 itr_scores = self._benchmark_single_iteration(
                     idx=idx,
                     model_config=model_config,
                     train=train,
                     prepared_train=prepared_train,
                     prepared_val=prepared_val,
-                    tests=tests,
-                    prepared_tests=prepared_tests,
+                    test=test,
+                    prepared_test=prepared_test,
                     data_collator=data_collator,
                     training_args=training_args,
                     tokenizer=tokenizer if model_already_initialized else None,
@@ -362,8 +364,8 @@ class BenchmarkDataset(ABC):
         train: Dataset,
         prepared_train: Dataset,
         prepared_val: Dataset,
-        tests: Sequence[Dataset],
-        prepared_tests: Sequence[Dataset],
+        test: Dataset,
+        prepared_test: Dataset,
         data_collator: DataCollator,
         training_args: TrainingArguments,
         tokenizer: Optional[Tokenizer] = None,
@@ -382,10 +384,10 @@ class BenchmarkDataset(ABC):
                 The prepared training dataset.
             prepared_val (Dataset):
                 The prepared validation dataset.
-            tests (list of Dataset):
-                The original test datasets.
-            prepared_tests (list of Dataset):
-                The prepared test datasets.
+            test (Dataset):
+                The original test dataset.
+            prepared_test (Dataset):
+                The prepared test dataset.
             data_collator (DataCollator):
                 The data collator.
             training_args (TrainingArguments):
@@ -479,8 +481,8 @@ class BenchmarkDataset(ABC):
 
             # Log test scores
             test_scores = self._evaluate_dataset(
-                dataset=tests[idx],
-                prepared_dataset=prepared_tests[idx],
+                dataset=test,
+                prepared_dataset=prepared_test,
                 metric_key_prefix="test",
                 trainer=trainer,
             )
