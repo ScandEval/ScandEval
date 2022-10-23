@@ -144,9 +144,9 @@ class BenchmarkDataset(ABC):
         # Preprocess the datasets
         try:
             params = dict(framework="pytorch", config=model.config, tokenizer=tokenizer)
-            train = self._preprocess_data(train, **params)
-            val = self._preprocess_data(val, **params)
-            test = self._preprocess_data(test, **params)
+            train = self._preprocess_data(train, split="train", **params)
+            val = self._preprocess_data(val, split="val", **params)
+            test = self._preprocess_data(test, split="test", **params)
         except ValueError:
             raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
 
