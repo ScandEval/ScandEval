@@ -18,7 +18,7 @@ def main() -> None:
     # Define list of desired metadata
     metadata = [
         "num_model_parameters",
-        "vocab_size",
+        "vocabulary_size",
         "max_sequence_length",
     ]
 
