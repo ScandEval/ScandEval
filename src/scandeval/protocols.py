@@ -1,6 +1,6 @@
 """Protocols used in the project."""
 
-from typing import Dict, Iterator, List, Protocol, Tuple, Union
+from typing import Any, Dict, Iterator, List, Protocol, Tuple, Union
 
 from torch import FloatTensor, Tensor
 from torch.nn.parameter import Parameter
@@ -17,8 +17,18 @@ class Config(Protocol):
 
 class TokenizedOutputs(Protocol):
     input_ids: List[List[int]]
+    offset_mapping: List[List[Tuple[int, int]]]
+    start_positions: List[int]
+    end_positions: List[int]
+    id: List[int]
 
     def word_ids(self, *args, **kwargs) -> List[Union[int, None]]:
+        ...
+
+    def sequence_ids(self, *args, **kwargs) -> List[Union[int, None]]:
+        ...
+
+    def pop(self, *args, **kwargs) -> Any:
         ...
 
     def __setitem__(self, *args, **kwargs) -> None:
@@ -29,6 +39,7 @@ class Tokenizer(Protocol):
     model_max_length: int
     max_model_input_sizes: Dict[str, int]
     special_tokens_map: Dict[str, str]
+    cls_token_id: int
 
     def __call__(self, *args, **kwargs) -> TokenizedOutputs:
         ...
