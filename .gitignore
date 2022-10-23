@@ -96,7 +96,7 @@ checkpoint-*
 .scandeval_cache/
 
 # Result log
-scandeval_benchmark_results.json
+scandeval_benchmark_results.jsonl
 
 # Documentation
 docs/scandeval/
