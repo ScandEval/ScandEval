@@ -27,6 +27,9 @@ def main() -> None:
     # Create empty list which will contain the modified records
     new_records: List[Dict[str, Union[str, int, List[str], SCORE_DICT]]] = list()
 
+    # Create cache for the metadata, to avoid loading in a model too many times
+    cache: Dict[str, Dict[str, int]] = dict()
+
     # Iterate over the records and build new list of records with all metadata
     with Path("scandeval_benchmark_results.jsonl").open() as f:
         for line in tqdm(f.readlines(), desc="Adding metadata to records"):
@@ -40,30 +43,44 @@ def main() -> None:
             # Check if the record has missing metadata
             if any([key not in record for key in metadata]):
 
-                # Load the tokenizer and model
-                tokenizer, model = load_model(
-                    model_id=record["model"],
-                    revision="main",
-                    supertask=dataset_config.task.supertask,
-                    num_labels=dataset_config.num_labels,
-                    id2label=dataset_config.id2label,
-                    label2id=dataset_config.label2id,
-                    from_flax=False,
-                    use_auth_token=True,
-                    cache_dir=".scandeval_cache",
-                )
+                # Load metadata from cache if possible
+                if record["model_id"] in cache:
+                    cached_metadata = cache[record["model_id"]]
+                    for key, val in cached_metadata.items():
+                        record[key] = val
 
-                # Add the metadata to the record
-                record["num_model_parameters"] = sum(
-                    p.numel() for p in model.parameters() if p.requires_grad
-                )
-                record["max_sequence_length"] = tokenizer.model_max_length
-                if hasattr(model.config, "vocab_size"):
-                    record["vocab_size"] = model.config.vocab_size
-                elif hasattr(tokenizer, "vocab_size"):
-                    record["vocab_size"] = tokenizer.vocab_size
+                # Otherwise, load the tokenizer and model and extract the metadata
                 else:
-                    record["vocab_size"] = -1
+                    tokenizer, model = load_model(
+                        model_id=record["model"],
+                        revision="main",
+                        supertask=dataset_config.task.supertask,
+                        num_labels=dataset_config.num_labels,
+                        id2label=dataset_config.id2label,
+                        label2id=dataset_config.label2id,
+                        from_flax=False,
+                        use_auth_token=True,
+                        cache_dir=".scandeval_cache",
+                    )
+
+                    # Add the metadata to the record
+                    record["num_model_parameters"] = sum(
+                        p.numel() for p in model.parameters() if p.requires_grad
+                    )
+                    record["max_sequence_length"] = tokenizer.model_max_length
+                    if hasattr(model.config, "vocab_size"):
+                        record["vocab_size"] = model.config.vocab_size
+                    elif hasattr(tokenizer, "vocab_size"):
+                        record["vocab_size"] = tokenizer.vocab_size
+                    else:
+                        record["vocab_size"] = -1
+
+                    # Add the metadata to the cache
+                    cache[record["model"]] = dict(
+                        num_model_parameters=record["num_model_parameters"],
+                        max_sequence_length=record["max_sequence_length"],
+                        vocab_size=record["vocab_size"],
+                    )
 
             # Store the record
             new_records.append(record)
