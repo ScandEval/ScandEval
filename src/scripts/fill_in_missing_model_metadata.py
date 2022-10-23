@@ -44,8 +44,8 @@ def main() -> None:
             if any([key not in record for key in metadata]):
 
                 # Load metadata from cache if possible
-                if record["model_id"] in cache:
-                    cached_metadata = cache[record["model_id"]]
+                if record["model"] in cache:
+                    cached_metadata = cache[record["model"]]
                     for key, val in cached_metadata.items():
                         record[key] = val
 
