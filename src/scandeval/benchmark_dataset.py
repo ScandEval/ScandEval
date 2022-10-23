@@ -134,7 +134,7 @@ class BenchmarkDataset(ABC):
         num_trainable_params = sum(
             p.numel() for p in model.parameters() if p.requires_grad
         )
-        num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        num_params = sum(p.numel() for p in model.parameters())
         max_seq_length = tokenizer.model_max_length
         if hasattr(model.config, "vocab_size"):
             vocab_size = model.config.vocab_size
