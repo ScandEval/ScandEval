@@ -15,6 +15,9 @@ and this project adheres to
   argument defaults to True.
 - Now stores the task and the dataset languages to the evaluation file with each
   evaluation.
+- Now stores model metadata to the `scandeval_benchmark_results` file. Currently, this
+  includes the number of trainable model parameters, the size of the model's vocabulary
+  and the model's maximum sequence length.
 
 ### Changed
 - Evaluation results are now saved in a JSONL file instead of a JSON file, and results
