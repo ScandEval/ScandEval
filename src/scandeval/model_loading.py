@@ -1,5 +1,6 @@
 """Functions related to the loading of models."""
 
+
 import warnings
 from typing import Dict, List, Tuple, Type, Union
 
@@ -21,7 +22,6 @@ from .protocols import Config, Model, Tokenizer
 from .utils import block_terminal_output, get_class_by_name
 
 
-# TODO: Cache this
 def load_model(
     model_id: str,
     revision: str,
