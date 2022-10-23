@@ -32,7 +32,10 @@ def main() -> None:
 
     # Iterate over the records and build new list of records with all metadata
     with Path("scandeval_benchmark_results.jsonl").open() as f:
-        for line in tqdm(f.readlines(), desc="Adding metadata to records"):
+        lines = f.readlines()
+
+    with tqdm(lines, desc="Adding metadata to records") as pbar:
+        for line in pbar:
 
             # Skip line if it is empty
             if line.strip() == "":
@@ -40,6 +43,9 @@ def main() -> None:
 
             # Load the record
             record = json.loads(line)
+
+            # Update pbar description
+            pbar.set_description(f"Adding metadata to records ({record['model']})")
 
             # Get the associated dataset configuration
             dataset_config = dataset_configs[record["dataset"]]
