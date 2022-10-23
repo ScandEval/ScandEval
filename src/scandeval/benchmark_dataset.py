@@ -454,7 +454,6 @@ class BenchmarkDataset(ABC):
             # Log test scores
             for dataset in test_itr:
                 test_scores = trainer.evaluate(dataset, metric_key_prefix="test")
-
                 scores["test"] = test_scores
 
             # Return the scores
