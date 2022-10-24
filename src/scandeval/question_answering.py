@@ -12,6 +12,7 @@ from transformers.trainer_callback import TrainerCallback
 from transformers.training_args import TrainingArguments
 
 from .benchmark_dataset import BenchmarkDataset
+from .exceptions import InvalidBenchmark
 from .protocols import DataCollator, Model, TokenizedOutputs, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
 
@@ -62,11 +63,14 @@ class QuestionAnswering(BenchmarkDataset):
             preprocess_fn = partial(prepare_train_examples, tokenizer=tokenizer)
 
         # Preprocess the data and return it
-        preprocessed = dataset.map(
-            preprocess_fn,
-            batched=True,
-            remove_columns=dataset.column_names,
-        )
+        try:
+            preprocessed = dataset.map(
+                preprocess_fn,
+                batched=True,
+                remove_columns=dataset.column_names,
+            )
+        except NotImplementedError as e:
+            raise InvalidBenchmark(str(e))
 
         # The Trainer hides the columns that are not used by the model (here `id` and
         # `offset_mapping` which we will need for our post-processing), so we set them
