@@ -431,7 +431,7 @@ class BenchmarkDataset(ABC):
             )
 
             # Initialise early stopping callback
-            early_stopping = EarlyStoppingCallback(early_stopping_patience=20)
+            early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
 
             # Initialise trainer
             trainer = self._get_trainer(
