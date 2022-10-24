@@ -214,7 +214,6 @@ class BenchmarkDataset(ABC):
                 prepared_test = self._preprocess_data(test, split="test", **params)
 
                 itr_scores = self._benchmark_single_iteration(
-                    idx=idx,
                     model_config=model_config,
                     train=train,
                     prepared_train=prepared_train,
@@ -359,7 +358,6 @@ class BenchmarkDataset(ABC):
 
     def _benchmark_single_iteration(
         self,
-        idx: int,
         model_config: ModelConfig,
         train: Dataset,
         prepared_train: Dataset,
@@ -374,8 +372,6 @@ class BenchmarkDataset(ABC):
         """Run a single iteration of a benchmark.
 
         Args:
-            idx (int):
-                The index of the current iteration.
             model_config (ModelConfig):
                 The model configuration.
             train (Dataset):
