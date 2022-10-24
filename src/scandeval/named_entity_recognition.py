@@ -199,7 +199,8 @@ class NamedEntityRecognition(BenchmarkDataset):
                 for tok_idx, tok in enumerate(tokens):
                     if tok:
                         for prefix in prefixes_to_remove:
-                            tok = tok.lstrip(prefix)
+                            if tok.startswith(prefix):
+                                tokens[tok_idx] = tok[len(prefix) :]
                     tokens[tok_idx] = tok
 
                 # Get list of special tokens. Some tokenizers do not record these
