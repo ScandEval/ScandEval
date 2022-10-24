@@ -202,8 +202,17 @@ class NamedEntityRecognition(BenchmarkDataset):
                             tok = tok.lstrip(prefix)
                     tokens[tok_idx] = tok
 
+                # Get list of special tokens. Some tokenizers do not record these
+                # properly, which is why we convert the values to their indices and
+                # then back to strings
+                sp_toks = [
+                    tokenizer.convert_ids_to_tokens(
+                        tokenizer.convert_tokens_to_ids(sp_tok)
+                    )
+                    for sp_tok in tokenizer.special_tokens_map.values()
+                ]
+
                 # Replace special tokens with `None`
-                sp_toks = tokenizer.special_tokens_map.values()
                 tokens = [None if tok in sp_toks else tok for tok in tokens]
 
                 # Get the alignment between the words and the tokens, on a character

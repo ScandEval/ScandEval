@@ -49,6 +49,9 @@ class Tokenizer(Protocol):
     def convert_ids_to_tokens(self, *args, **kwargs) -> List[Union[str, None]]:
         ...
 
+    def convert_tokens_to_ids(self, *args, **kwargs) -> List[Union[int, None]]:
+        ...
+
 
 class ModelOutput(Protocol):
     logits: FloatTensor
