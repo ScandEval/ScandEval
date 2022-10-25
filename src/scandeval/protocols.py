@@ -41,7 +41,11 @@ class Tokenizer(Protocol):
     max_model_input_sizes: Dict[str, int]
     special_tokens_map: Dict[str, str]
     cls_token_id: int
+    bos_token_id: int
     vocab_size: int
+
+    def encode(self, *args, **kwargs) -> List[int]:
+        ...
 
     def __call__(self, *args, **kwargs) -> TokenizedOutputs:
         ...

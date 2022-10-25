@@ -52,10 +52,6 @@ class QuestionAnswering(BenchmarkDataset):
         split: str = kwargs.pop("split")
         tokenizer: Tokenizer = kwargs.pop("tokenizer")
 
-        # Store the original validation dataset for later use
-        if split == "test":
-            self.orig_test_dataset = dataset
-
         # Choose the preprocessing function depending on the dataset split
         if split == "test":
             preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
@@ -190,7 +186,10 @@ def prepare_train_examples(
 
         # We will label impossible answers with the index of the CLS token
         input_ids = tokenized_examples.input_ids[i]
-        cls_index = input_ids.index(tokenizer.cls_token_id)
+        try:
+            cls_index = input_ids.index(tokenizer.cls_token_id)
+        except ValueError:
+            cls_index = input_ids.index(tokenizer.bos_token_id)
 
         # Grab the sequence corresponding to that example (to know what is the context
         # and what is the question).

@@ -15,13 +15,22 @@ class QuestionAnsweringTrainer(Trainer):
         super().__init__(*args, **kwargs)
 
         # Extract the class token index from the tokenizer
-        if self.tokenizer.cls_token_id is None:
-            raise ValueError(
-                "The tokenizer does not have a cls_token_id attribute, which is "
-                "needed for postprocessing."
-            )
+        sample_tokens = self.tokenizer.encode("Hello world")
+        if (
+            hasattr(self.tokenizer, "cls_token_id")
+            and self.tokenizer.cls_token_id in sample_tokens
+        ):
+            self.cls_token_id = self.tokenizer.cls_token_id
+        elif (
+            hasattr(self.tokenizer, "bos_token_id")
+            and self.tokenizer.bos_token_id in sample_tokens
+        ):
+            self.cls_token_id = self.tokenizer.bos_token_id
         else:
-            self.cls_token_id: int = self.tokenizer.cls_token_id
+            raise ValueError(
+                "The tokenizer does not seem to have a CLS token (neither `cls_token` "
+                "nor `bos_token`), which is needed for postprocessing."
+            )
 
         # Set the label names
         self.label_names = ["start_positions", "end_positions"]
