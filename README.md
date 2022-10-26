@@ -23,7 +23,7 @@ $ pip install scandeval
 The easiest way to benchmark pretrained models is via the command line interface. After
 having installed the package, you can benchmark your favorite model like so:
 ```
-$ scandeval --model_id <model_id>
+$ scandeval --model-id <model-id>
 ```
 
 Here `model_id` is the HuggingFace model ID, which can be found on the [HuggingFace
@@ -32,7 +32,7 @@ the datasets eligible. If you want to benchmark on a specific dataset, this can 
 via the `--dataset` flag. This will for instance evaluate the model on the
 `AngryTweets` dataset:
 ```
-$ scandeval --model_id <model_id> --dataset angry-tweets
+$ scandeval --model-id <model-id> --dataset angry-tweets
 ```
 
 We can also separate by language. To benchmark all Danish models on all Danish
@@ -44,12 +44,12 @@ $ scandeval --language da
 Multiple models, datasets and/or languages can be specified by just attaching multiple
 arguments. Here is an example with two models:
 ```
-$ scandeval --model_id <model_id1> --model_id <model_id2> --dataset angry-tweets
+$ scandeval --model-id <model-id1> --model-id <model-id2> --dataset angry-tweets
 ```
 
 The specific model version to use can also be added after the suffix '@':
 ```
-$ scandeval --model_id <model_id>@<commit>
+$ scandeval --model-id <model-id>@<commit>
 ```
 
 It can be a branch name, a tag name, or a commit id. It defaults to 'main' for latest.
@@ -66,7 +66,7 @@ models and/or datasets:
 ```
 >>> from scandeval import Benchmarker
 >>> benchmark = Benchmarker()
->>> benchmark('<model_id>')
+>>> benchmark('<model-id>')
 ```
 
 To benchmark on a specific dataset, you simply specify the second argument, shown here
