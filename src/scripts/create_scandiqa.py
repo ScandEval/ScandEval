@@ -33,22 +33,15 @@ def main() -> None:
         # Ensure that `df` is indeed a Pandas DataFrame
         assert isinstance(df, pd.DataFrame)
 
-        # Extract information on which examples contain an answer, as we want to
-        # stratify our splits based on this
+        # Extract information on which examples contain an answer
         has_answer: pd.Series = df.answers.map(lambda dct: dct["text"][0] != "")
 
-        # Split the dataframe into the samples having answers and the samples not
-        # having answers
+        # Only work with the questions having answers in the context
         df_with_answer: pd.DataFrame = df.loc[has_answer]
-        df_without_answer: pd.DataFrame = df.loc[~has_answer]
 
         # Create validation split
         val_size = 256
-        val_df_with_answer = df_with_answer.sample(n=val_size // 2, random_state=4242)
-        val_df_without_answer = df_without_answer.sample(
-            n=val_size // 2, random_state=4242
-        )
-        val_df = pd.concat([val_df_with_answer, val_df_without_answer])
+        val_df = df_with_answer.sample(n=val_size, random_state=4242)
         val_df = val_df.reset_index(drop=True)
 
         # Create test split
@@ -56,33 +49,15 @@ def main() -> None:
         df_with_answer_filtered: pd.DataFrame = df_with_answer.loc[
             ~df_with_answer.index.isin(val_df.index)
         ]
-        df_without_answer_filtered: pd.DataFrame = df_without_answer.loc[
-            ~df_without_answer.index.isin(val_df.index)
-        ]
-        test_df_with_answer = df_with_answer_filtered.sample(
-            n=test_size // 2, random_state=4242
-        )
-        test_df_without_answer = df_without_answer_filtered.sample(
-            n=test_size // 2, random_state=4242
-        )
-        test_df = pd.concat([test_df_with_answer, test_df_without_answer])
+        test_df = df_with_answer_filtered.sample(n=test_size, random_state=4242)
         test_df = test_df.reset_index(drop=True)
 
         # Create train split
         train_size = 1024
         full_train_df_with_answer = df_with_answer_filtered.loc[
-            ~df_with_answer_filtered.index.isin(test_df_with_answer.index)
+            ~df_with_answer_filtered.index.isin(test_df.index)
         ]
-        full_train_df_without_answer = df_without_answer_filtered.loc[
-            ~df_without_answer_filtered.index.isin(test_df_without_answer.index)
-        ]
-        train_df_with_answer = full_train_df_with_answer.sample(
-            n=train_size // 2, random_state=4242
-        )
-        train_df_without_answer = full_train_df_without_answer.sample(
-            n=train_size // 2, random_state=4242
-        )
-        train_df = pd.concat([train_df_with_answer, train_df_without_answer])
+        train_df = full_train_df_with_answer.sample(n=train_size, random_state=4242)
         train_df = train_df.reset_index(drop=True)
 
         # Collect datasets in a dataset dictionary
