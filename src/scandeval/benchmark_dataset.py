@@ -32,7 +32,6 @@ from .hf_hub import get_model_config
 from .model_loading import load_model
 from .protocols import DataCollator, Model, Tokenizer
 from .scores import log_scores
-from .training_args_with_mps_support import TrainingArgumentsWithMPSSupport
 from .types import SCORE_DICT
 from .utils import (
     block_terminal_output,
@@ -270,7 +269,7 @@ class BenchmarkDataset(ABC):
 
         return all_scores, metadata_dict
 
-    def _get_training_args(self) -> TrainingArgumentsWithMPSSupport:
+    def _get_training_args(self) -> TrainingArguments:
 
         # Set the logging strategy
         if self.benchmark_config.verbose:
@@ -281,29 +280,39 @@ class BenchmarkDataset(ABC):
         # Use 16-bit floating point numbers if CUDA is available and TPU is not
         fp16 = torch.cuda.is_available() and not is_torch_tpu_available()
 
-        # Initialise training arguments
-        training_args = TrainingArgumentsWithMPSSupport(
-            output_dir=self.benchmark_config.cache_dir,
-            evaluation_strategy=IntervalStrategy.STEPS,
-            logging_strategy=logging_strategy,
-            save_strategy=IntervalStrategy.STEPS,
-            eval_steps=30,
-            logging_steps=30,
-            save_steps=30,
-            max_steps=10_000 if not self.benchmark_config.testing else 2,
-            report_to=None,
-            save_total_limit=1,
-            per_device_train_batch_size=32 if not self.benchmark_config.testing else 1,
-            per_device_eval_batch_size=32,
-            learning_rate=2e-5,
-            warmup_ratio=0.01,
-            gradient_accumulation_steps=1,
-            load_best_model_at_end=True,
-            optim=OptimizerNames.ADAMW_TORCH,
-            seed=4242,
-            no_cuda=self.benchmark_config.testing,
-            fp16=fp16,
+        # Set variable on whether to use MPS device
+        use_mps_device = (
+            torch.backends.mps.is_available() and not self.benchmark_config.testing
         )
+
+        # Initialise training arguments
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            training_args = TrainingArguments(
+                output_dir=self.benchmark_config.cache_dir,
+                evaluation_strategy=IntervalStrategy.STEPS,
+                logging_strategy=logging_strategy,
+                save_strategy=IntervalStrategy.STEPS,
+                eval_steps=30,
+                logging_steps=30,
+                save_steps=30,
+                max_steps=10_000 if not self.benchmark_config.testing else 2,
+                report_to=None,
+                save_total_limit=1,
+                per_device_train_batch_size=32
+                if not self.benchmark_config.testing
+                else 1,
+                per_device_eval_batch_size=32,
+                learning_rate=2e-5,
+                warmup_ratio=0.01,
+                gradient_accumulation_steps=1,
+                load_best_model_at_end=True,
+                optim=OptimizerNames.ADAMW_TORCH,
+                seed=4242,
+                no_cuda=self.benchmark_config.testing,
+                use_mps_device=use_mps_device,
+                fp16=fp16,
+            )
 
         # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
         if self.benchmark_config.progress_bar:
