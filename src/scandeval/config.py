@@ -24,7 +24,7 @@ class MetricConfig:
             an empty dictionary.
         postprocessing_fn (callable, optional):
             A function to apply to the metric scores after they are computed, taking
-            the score to a string representation. Defaults to x -> f"{100 * x:.2f}%".
+            the score to a string representation. Defaults to x -> 100 * x.
     """
 
     name: str
@@ -32,8 +32,8 @@ class MetricConfig:
     huggingface_id: str
     results_key: str
     compute_kwargs: Dict[str, Any] = field(default_factory=dict)
-    postprocessing_fn: Callable[[float], str] = field(
-        default_factory=lambda: lambda x: f"{100 * x:.2f}%"
+    postprocessing_fn: Callable[[float], float] = field(
+        default_factory=lambda: lambda raw_score: 100 * raw_score
     )
 
 
