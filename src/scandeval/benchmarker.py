@@ -283,6 +283,7 @@ class Benchmarker:
                     lang in self.benchmark_config.dataset_languages
                     for lang in cfg.languages
                 )
+                and cfg.task in self.benchmark_config.dataset_tasks
             ]
         elif isinstance(dataset, str):
             dataset_configs = [

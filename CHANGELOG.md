@@ -42,6 +42,7 @@ and this project adheres to
   are starting from the same point).
 - Changed the model architecture of the `fresh-xlmr-base` from `Roberta` to
   `XLMRoberta`.
+- The `--dataset-task` is now correctly filtering the datasets benchmarked.
 
 ### Removed
 - Removed support for evaluating finetuned models, as the package was primarily used to
