@@ -51,6 +51,12 @@ def main() -> None:
             # Get the associated dataset configuration
             dataset_config = dataset_configs[record["dataset"]]
 
+            # Check if scores are of the wrong scale
+            total_scores: Dict[str, float] = record["results"]["total"]
+            if all([score < 1 for score in total_scores.values()]):
+                for key, score in total_scores.items():
+                    record["results"]["total"][key] = score * 100
+
             # Check if the record has missing metadata
             if any([key not in record for key in metadata]):
 
