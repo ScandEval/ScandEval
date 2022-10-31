@@ -43,6 +43,8 @@ and this project adheres to
 - Changed the model architecture of the `fresh-xlmr-base` from `Roberta` to
   `XLMRoberta`.
 - The `--dataset-task` is now correctly filtering the datasets benchmarked.
+- Some tokenizers are not adding special tokens, despite them having registered them.
+  These are now manually added, to ensure a proper evaluation of the models.
 
 ### Removed
 - Removed support for evaluating finetuned models, as the package was primarily used to
