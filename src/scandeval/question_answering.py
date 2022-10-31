@@ -4,12 +4,15 @@ import logging
 from functools import partial
 from typing import Callable, List, Optional
 
+import numpy as np
 from datasets.arrow_dataset import Dataset
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
 from transformers.trainer_callback import TrainerCallback
 from transformers.training_args import TrainingArguments
+
+from scandeval.utils import get_special_token_metadata
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
@@ -143,11 +146,25 @@ def prepare_train_examples(
         TokenizedOutputs:
             The prepared examples.
     """
-
     # Some of the questions have lots of whitespace on the left, which is not useful
     # and will make the truncation of the context fail (the tokenized question will
     # take a lots of space). So we remove that left whitespace
     examples["question"] = [q.lstrip() for q in examples["question"]]
+
+    # Extract special token metadata from the tokenizer
+    special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
+    has_cls_token = special_token_metadata["has_cls_token"]
+    has_sep_token = special_token_metadata["has_sep_token"]
+    cls_token_id = special_token_metadata["cls_token_id"]
+    cls_token = special_token_metadata["cls_token"]
+    sep_token = special_token_metadata["sep_token"]
+
+    # If the tokenizer is not adding special tokens, then we add them manually
+    if not has_cls_token and not has_sep_token:
+        examples["question"] = [
+            f"{cls_token}{q}{sep_token}" for q in examples["question"]
+        ]
+        examples["context"] = [f"{c}{sep_token}" for c in examples["context"]]
 
     # Compute the stride, being a quarter of the context length
     stride = tokenizer.model_max_length // 4
@@ -178,22 +195,30 @@ def prepare_train_examples(
     # end_positions.
     offset_mapping = tokenized_examples.pop("offset_mapping")
 
-    # Let's label those examples!
-    tokenized_examples["start_positions"] = []
-    tokenized_examples["end_positions"] = []
+    # Initialise the start- and end positions of the answers
+    tokenized_examples["start_positions"] = list()
+    tokenized_examples["end_positions"] = list()
 
     for i, offsets in enumerate(offset_mapping):
 
-        # We will label impossible answers with the index of the CLS token
+        # Get the input IDs for the current example
         input_ids = tokenized_examples.input_ids[i]
-        try:
-            cls_index = input_ids.index(tokenizer.cls_token_id)
-        except ValueError:
-            cls_index = input_ids.index(tokenizer.bos_token_id)
+
+        # We will label impossible answers with the index of the CLS token
+        cls_index = input_ids.index(cls_token_id)
 
         # Grab the sequence corresponding to that example (to know what is the context
         # and what is the question).
         sequence_ids = tokenized_examples.sequence_ids(i)
+
+        # Manually ensure that the special tokens are set to None in `sequence_ids`
+        for special_token in tokenizer.special_tokens_map.keys():
+            special_token_id = getattr(tokenizer, f"{special_token}_id")
+            if special_token_id is not None:
+                sequence_ids = [
+                    None if token_id == special_token_id else seq_id
+                    for token_id, seq_id in zip(input_ids, sequence_ids)
+                ]
 
         # One example can give several spans, this is the index of the example
         # containing this span of text.

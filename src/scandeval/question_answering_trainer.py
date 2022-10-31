@@ -7,6 +7,8 @@ import numpy as np
 from datasets.arrow_dataset import Dataset
 from transformers.trainer import Trainer
 
+from scandeval.utils import get_special_token_metadata
+
 
 class QuestionAnsweringTrainer(Trainer):
     """Trainer subclass for question answering tasks."""
@@ -14,23 +16,9 @@ class QuestionAnsweringTrainer(Trainer):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-        # Extract the class token index from the tokenizer
-        sample_tokens = self.tokenizer.encode("Hello world")
-        if (
-            hasattr(self.tokenizer, "cls_token_id")
-            and self.tokenizer.cls_token_id in sample_tokens
-        ):
-            self.cls_token_id = self.tokenizer.cls_token_id
-        elif (
-            hasattr(self.tokenizer, "bos_token_id")
-            and self.tokenizer.bos_token_id in sample_tokens
-        ):
-            self.cls_token_id = self.tokenizer.bos_token_id
-        else:
-            raise ValueError(
-                "The tokenizer does not seem to have a CLS token (neither `cls_token` "
-                "nor `bos_token`), which is needed for postprocessing."
-            )
+        # Get the CLS token id for the tokenizer
+        special_token_metadata = get_special_token_metadata(self.tokenizer)
+        self.cls_token_id = special_token_metadata["cls_token_id"]
 
         # Set the label names
         self.label_names = ["start_positions", "end_positions"]
