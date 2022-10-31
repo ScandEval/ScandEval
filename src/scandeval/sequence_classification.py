@@ -7,6 +7,8 @@ from typing import Optional
 from datasets.arrow_dataset import Dataset
 from transformers.data.data_collator import DataCollatorWithPadding
 
+from scandeval.utils import get_special_token_metadata
+
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .protocols import DataCollator, TokenizedOutputs, Tokenizer
@@ -46,7 +48,21 @@ class SequenceClassification(BenchmarkDataset):
         """
         tokenizer: Tokenizer = kwargs["tokenizer"]
 
+        # Extract special token metadata from the tokenizer
+        special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
+        has_cls_token = special_token_metadata["has_cls_token"]
+        has_sep_token = special_token_metadata["has_sep_token"]
+        cls_token = special_token_metadata["cls_token"]
+        sep_token = special_token_metadata["sep_token"]
+
         def tokenise(examples: dict) -> TokenizedOutputs:
+
+            # If the tokenizer is not adding special tokens, then we add them manually
+            if not has_cls_token and not has_sep_token:
+                examples["text"] = [
+                    f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
+                ]
+
             return tokenizer(examples["text"], truncation=True, padding=True)
 
         tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
