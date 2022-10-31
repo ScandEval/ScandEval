@@ -277,10 +277,6 @@ class BenchmarkDataset(ABC):
         else:
             logging_strategy = IntervalStrategy.NO
 
-        # Use 16-bit floating point numbers if CUDA is available and TPU is not
-        fp16 = torch.cuda.is_available() and not is_torch_tpu_available()
-        fp16 = False
-
         # Set variable on whether to use MPS device
         use_mps_device = (
             torch.backends.mps.is_available() and not self.benchmark_config.testing
@@ -313,7 +309,7 @@ class BenchmarkDataset(ABC):
                 seed=4242,
                 no_cuda=self.benchmark_config.testing,
                 use_mps_device=use_mps_device,
-                fp16=fp16,
+                fp16=False,
             )
 
         # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`

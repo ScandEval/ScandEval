@@ -34,8 +34,7 @@ and this project adheres to
   `fresh-xlmr-base-sequence-clf` and `fresh-xlmr-base-token-clf` separately.
 
 ### Fixed
-- Removed `bf16` precision, as it only works for some GPUs. Now enables `fp16` for
-  GPUs, but disables it if a TPU is available, as TPUs don't support it.
+- Removed `bf16` precision, as it only works for some GPUs.
 - Should output less `transformers` logging now.
 - Models were previously loaded in twice in the beginning of a benchmark. They are now
   only loaded in once (but re-loaded during each of the 10 iterations to ensure that we
