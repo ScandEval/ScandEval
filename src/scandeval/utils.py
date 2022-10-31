@@ -17,6 +17,8 @@ from datasets.utils import disable_progress_bar
 from requests.exceptions import RequestException
 from transformers import logging as tf_logging
 
+from scandeval.protocols import Tokenizer
+
 from .exceptions import InvalidBenchmark
 
 
@@ -228,3 +230,49 @@ def internet_connection_available() -> bool:
         return True
     except RequestException:
         return False
+
+
+def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
+    """Get the special token metadata for a tokenizer.
+
+    Args:
+        tokenizer (Tokenizer):
+            The tokenizer.
+
+    Returns:
+        dict:
+            The special token metadata.
+    """
+    # Create some test input IDs, to check if the tokenizer is adding special tokens
+    test_input_ids = tokenizer("Test").input_ids
+
+    # Extract the CLS token IDs from the tokenizer, if it's using them
+    has_cls_token = True
+    if tokenizer.cls_token_id in test_input_ids:
+        cls_token_id = tokenizer.cls_token_id
+        cls_token = tokenizer.cls_token
+    elif tokenizer.bos_token_id in test_input_ids:
+        cls_token_id = tokenizer.bos_token_id
+        cls_token = tokenizer.bos_token
+    else:
+        cls_token_id = tokenizer.cls_token_id
+        cls_token = tokenizer.cls_token
+        has_cls_token = False
+
+    # Extract the SEP token IDs from the tokenizer, if it's using them
+    has_sep_token = True
+    if tokenizer.sep_token_id in test_input_ids:
+        sep_token = tokenizer.sep_token
+    elif tokenizer.eos_token_id in test_input_ids:
+        sep_token = tokenizer.eos_token
+    else:
+        sep_token = tokenizer.sep_token
+        has_sep_token = False
+
+    return dict(
+        cls_token_id=cls_token_id,
+        cls_token=cls_token,
+        sep_token=sep_token,
+        has_cls_token=has_cls_token,
+        has_sep_token=has_sep_token,
+    )

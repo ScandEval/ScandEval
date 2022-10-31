@@ -40,8 +40,14 @@ class Tokenizer(Protocol):
     model_max_length: int
     max_model_input_sizes: Dict[str, int]
     special_tokens_map: Dict[str, str]
+    cls_token: str
+    bos_token: str
+    sep_token: str
+    eos_token: str
     cls_token_id: int
     bos_token_id: int
+    sep_token_id: int
+    eos_token_id: int
     vocab_size: int
 
     def encode(self, *args, **kwargs) -> List[int]:
