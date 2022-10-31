@@ -292,6 +292,20 @@ def prepare_test_examples(
     # take a lots of space). So we remove that left whitespace
     examples["question"] = [q.lstrip() for q in examples["question"]]
 
+    # Extract special token metadata from the tokenizer
+    special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
+    has_cls_token = special_token_metadata["has_cls_token"]
+    has_sep_token = special_token_metadata["has_sep_token"]
+    cls_token = special_token_metadata["cls_token"]
+    sep_token = special_token_metadata["sep_token"]
+
+    # If the tokenizer is not adding special tokens, then we add them manually
+    if not has_cls_token and not has_sep_token:
+        examples["question"] = [
+            f"{cls_token}{q}{sep_token}" for q in examples["question"]
+        ]
+        examples["context"] = [f"{c}{sep_token}" for c in examples["context"]]
+
     # Compute the stride, being a quarter of the context length
     stride = tokenizer.model_max_length // 4
     max_length = tokenizer.model_max_length - stride
