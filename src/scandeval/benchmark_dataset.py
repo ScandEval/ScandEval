@@ -116,7 +116,7 @@ class BenchmarkDataset(ABC):
 
         # Load the model
         tokenizer, model = load_model(
-            model_id=model_id,
+            model_id=model_config.model_id,
             revision=model_config.revision,
             supertask=self.dataset_config.task.supertask,
             num_labels=self.dataset_config.num_labels,
