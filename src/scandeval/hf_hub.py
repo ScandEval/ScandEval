@@ -17,7 +17,6 @@ from .utils import internet_connection_available
 logger = logging.getLogger(__name__)
 
 
-# TODO: Cache this
 def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelConfig:
     """Fetches configuration for a model from the Hugging Face Hub.
 
