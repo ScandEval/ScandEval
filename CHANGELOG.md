@@ -12,7 +12,7 @@ and this project adheres to
 ### Added
 - A new argument, `ignore_duplicates` (or `--ignore-duplicates/--no-ignore-duplicates`
   in the CLI) further ignores an evaluation if it has previously been evaluated. This
-  argument defaults to True.
+  argument defaults to `True`.
 - Now stores the task and the dataset languages to the evaluation file with each
   evaluation.
 - Now stores model metadata to the `scandeval_benchmark_results` file. Currently, this
@@ -34,6 +34,7 @@ and this project adheres to
   `fresh-xlmr-base-sequence-clf` and `fresh-xlmr-base-token-clf` separately.
 
 ### Fixed
+- ScandEval now works on TPUs.
 - Removed `bf16` precision, as it only works for some GPUs.
 - Should output less `transformers` logging now.
 - Models were previously loaded in twice in the beginning of a benchmark. They are now
