@@ -10,6 +10,9 @@ class Config(Protocol):
     id2label: List[str]
     label2id: Dict[str, int]
     vocab_size: int
+    model_type: str
+    pooler_hidden_size: int
+    hidden_size: int
 
     @classmethod
     def from_pretrained(cls, *args, **kwargs) -> "Config":

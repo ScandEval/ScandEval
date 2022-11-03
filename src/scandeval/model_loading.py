@@ -177,6 +177,11 @@ def load_model(
             add_prefix_space=prefix,
         )
 
+    # If the model is a DeBERTaV2 model then we ensure that `pooler_hidden_size` is the
+    # same size as `hidden_size`
+    if config.model_type == "deberta-v2":
+        model.config.pooler_hidden_size = model.config.hidden_size
+
     # Set the maximal length of the tokenizer to the model's maximal length. This is
     # required for proper truncation
     if not hasattr(tokenizer, "model_max_length") or tokenizer.model_max_length > 1_000:
