@@ -53,7 +53,7 @@ def enforce_reproducibility(framework: str, seed: int = 4242):
         os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
-        torch.use_deterministic_algorithms(mode=True, warn_only=True)
+        torch.use_deterministic_algorithms(True)
     return rng
 
 
