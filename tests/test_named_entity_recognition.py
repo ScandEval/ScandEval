@@ -8,22 +8,20 @@ from sklearn.exceptions import UndefinedMetricWarning
 from scandeval.config import BenchmarkConfig
 from scandeval.dataset_configs import (
     DANE_CONFIG,
-    MIM_GOLD_NER_CONFIG,
     NORNE_NB_CONFIG,
     NORNE_NN_CONFIG,
     SUC3_CONFIG,
-    WIKIANN_FO_CONFIG,
 )
 from scandeval.dataset_tasks import NER
-from scandeval.languages import DA, FO, IS, NO, SV
+from scandeval.languages import DA, NO, SV
 from scandeval.named_entity_recognition import NamedEntityRecognition
 
 
 @pytest.fixture(scope="module")
 def benchmark_config():
     yield BenchmarkConfig(
-        model_languages=[DA, SV, NO, IS, FO],
-        dataset_languages=[DA, SV, NO, IS, FO],
+        model_languages=[DA, SV, NO],
+        dataset_languages=[DA, SV, NO],
         dataset_tasks=[NER],
         raise_error_on_invalid_model=False,
         cache_dir=".scandeval_cache",
@@ -44,20 +42,16 @@ def model_id():
 @pytest.mark.parametrize(
     argnames=["dataset", "correct_scores"],
     argvalues=[
-        (DANE_CONFIG, (1.6, 0.7)),
-        (SUC3_CONFIG, (0.3, 0.6)),
-        (NORNE_NB_CONFIG, (0.8, 0.8)),
-        (NORNE_NN_CONFIG, (0.6, 0.5)),
-        (MIM_GOLD_NER_CONFIG, (0.9, 1.0)),
-        (WIKIANN_FO_CONFIG, (0.8, 0.8)),
+        (DANE_CONFIG, (1.14, 0.0)),
+        (SUC3_CONFIG, (0.00, 0.00)),
+        (NORNE_NB_CONFIG, (0.20, 0.26)),
+        (NORNE_NN_CONFIG, (0.00, 0.00)),
     ],
     ids=[
         "dane",
         "suc3",
         "norne_nb",
         "norne_nn",
-        "mim_gold_ner",
-        "wikiann_fo",
     ],
     scope="class",
 )
@@ -70,7 +64,7 @@ class TestNerScores:
                 dataset_config=dataset,
                 benchmark_config=benchmark_config,
             )
-            yield benchmark.benchmark(model_id)["total"]
+            yield benchmark.benchmark(model_id)[0]["total"]
 
     def test_micro_f1_is_correct(self, scores, correct_scores):
         min_score = scores["test_micro_f1"] - scores["test_micro_f1_se"]

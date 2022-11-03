@@ -28,6 +28,7 @@ def test_cli_param_names(params):
         "cache_dir",
         "auth_token",
         "use_auth_token",
+        "ignore_duplicates",
         "help",
     }
 
@@ -47,4 +48,5 @@ def test_cli_param_types(params):
     assert params["cache_dir"] == STRING
     assert params["auth_token"] == STRING
     assert params["use_auth_token"] == BOOL
+    assert params["ignore_duplicates"] == BOOL
     assert params["help"] == BOOL
