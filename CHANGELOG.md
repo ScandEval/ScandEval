@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v5.0.0] - 2022-11-03
 ### Added
 - A new argument, `ignore_duplicates` (or `--ignore-duplicates/--no-ignore-duplicates`
   in the CLI) further ignores an evaluation if it has previously been evaluated. This
