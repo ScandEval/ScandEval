@@ -25,6 +25,8 @@ class NeverLeaveProgressCallback(ProgressCallback):
         self.current_step = 0
 
     def on_prediction_step(self, args, state, control, eval_dataloader=None, **kwargs):
+        if eval_dataloader is None:
+            return
         correct_dtype = isinstance(eval_dataloader.dataset, Sized)
         if state.is_local_process_zero and correct_dtype:
             if self.prediction_bar is None:

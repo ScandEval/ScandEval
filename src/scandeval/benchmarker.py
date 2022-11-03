@@ -2,17 +2,18 @@
 
 import json
 import logging
-from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Union
 
-from .benchmark_config_factory import BenchmarkConfigFactory
+from .benchmark_config_factory import build_benchmark_config
 from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_lists
+from .types import SCORE_DICT
 
+# Create logger
 logger = logging.getLogger(__name__)
 
 
@@ -24,7 +25,7 @@ class Benchmarker:
             Whether progress bars should be shown. Defaults to True.
         save_results (bool, optional):
             Whether to save the benchmark results to
-            'scandeval_benchmark_results.json'. Defaults to False.
+            'scandeval_benchmark_results.jsonl'. Defaults to False.
         language (str or list of str, optional):
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
@@ -38,9 +39,6 @@ class Benchmarker:
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
             Defaults to None.
-        model_task (str or sequence of str, optional):
-            The tasks to include for models. If "all" then models will not be filtered
-            based on the task they were trained on. Defaults to "all".
         dataset_task (str or sequence of str, optional):
             The tasks to include for dataset. If "all" then datasets will not be
             filtered based on their task. Defaults to "all".
@@ -55,6 +53,10 @@ class Benchmarker:
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token. Defaults to False.
+        ignore_duplicates (bool, optional):
+            Whether to skip evaluation of models which have already been evaluated,
+            with scores lying in the 'scandeval_benchmark_results.jsonl' file. Defaults
+            to True.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
 
@@ -62,7 +64,6 @@ class Benchmarker:
         progress_bar (bool): Whether progress bars should be shown.
         save_results (bool): Whether to save the benchmark results.
         language (str or list of str): The languages to include in the list.
-        model_task (str or list of str): The model tasks to include.
         dataset_task (str or list of str): The dataset tasks to include.
         evaluate_train (bool): Whether to evaluate the training set as well.
         verbose (bool): Whether to output additional output.
@@ -77,20 +78,19 @@ class Benchmarker:
         language: Union[str, List[str]] = ["da", "sv", "no"],
         model_language: Optional[Union[str, Sequence[str]]] = None,
         dataset_language: Optional[Union[str, Sequence[str]]] = None,
-        model_task: Optional[Union[str, Sequence[str]]] = None,
         dataset_task: Optional[Union[str, Sequence[str]]] = None,
         evaluate_train: bool = False,
         raise_error_on_invalid_model: bool = False,
         cache_dir: str = ".scandeval_cache",
         use_auth_token: Union[bool, str] = False,
+        ignore_duplicates: bool = True,
         verbose: bool = False,
-    ):
+    ) -> None:
         # Build benchmark configuration
-        self.benchmark_config = BenchmarkConfigFactory().build_benchmark_config(
+        self.benchmark_config = build_benchmark_config(
             language=language,
             model_language=model_language,
             dataset_language=dataset_language,
-            model_task=model_task,
             dataset_task=dataset_task,
             raise_error_on_invalid_model=raise_error_on_invalid_model,
             cache_dir=cache_dir,
@@ -101,12 +101,26 @@ class Benchmarker:
             verbose=verbose,
         )
 
+        # Set attributes from arguments
+        self.ignore_duplicates = ignore_duplicates
+
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: Union[Dict[str, Sequence[str]], None] = None
 
-        # Initialise variable storing all benchmark results, which will be
-        # updated as more models are benchmarked
-        self.benchmark_results: Dict[str, dict] = defaultdict(dict)
+        # Set up the results path
+        self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
+
+        # Set up the benchmark results variable, which will be populated with the
+        # contents of the results file if it exists. If not, then it will be an empty
+        # list
+        self.benchmark_results: List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]
+        if self.results_path.exists():
+            with self.results_path.open() as f:
+                self.benchmark_results = [
+                    json.loads(line) for line in f if line.strip()
+                ]
+        else:
+            self.benchmark_results = list()
 
         # Set logging level based on verbosity
         logging_level = logging.DEBUG if verbose else logging.INFO
@@ -119,22 +133,26 @@ class Benchmarker:
         self,
         model_id: Optional[Union[Sequence[str], str]] = None,
         dataset: Optional[Union[Sequence[str], str]] = None,
-    ) -> Dict[str, Dict[str, dict]]:
+    ) -> List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]:
         """Benchmarks models on datasets.
 
         Args:
             model_id (str, list of str or None, optional):
-                The model ID(s) of the models to benchmark. If None then all relevant
-                model IDs will be benchmarked. Defaults to None.
+                The full Hugging Face Hub path(s) to the pretrained transformer model.
+                The specific model version to use can be added after the suffix '@':
+                "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id,
+                and defaults to the latest version if not specified. If None then all
+                relevant model IDs will be benchmarked. Defaults to None.
             dataset (str, list of str or None, optional):
                 The datasets to benchmark on. If None then all datasets will be
                 benchmarked. Defaults to None.
 
         Returns:
-            dict:
-                A nested dictionary of the benchmark results. The keys are the names of
-                the datasets, with values being new dictionaries having the model IDs
-                as keys.
+            list of dict:
+                The benchmark results, where each result is a dictionary with the keys
+                'dataset', 'task', 'dataset_languages', 'model', 'num_model_parameters'
+                and 'scores'. If an error occured then the dictionary will only contain
+                the key 'error', with the associated value being the error message.
         """
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
@@ -142,21 +160,64 @@ class Benchmarker:
         # Get all the relevant dataset configurations
         dataset_configs = self._prepare_dataset_configs(dataset)
 
-        # Benchmark all the models in `model_ids` on all the datasets in `benchmarks`
-        for dataset_config in dataset_configs:
-            for m_id in model_ids:
-                self._benchmark_single(
+        # Iterate over all the models and datasets
+        for m_id in model_ids:
+            for dataset_config in dataset_configs:
+
+                # Skip if we have already benchmarked this model on this dataset and
+                # `ignore_duplicates` is set
+                if self.ignore_duplicates and self._has_been_benchmarked(
+                    model_id=m_id, dataset=dataset_config.name
+                ):
+                    logger.debug(
+                        f"Skipping benchmarking {m_id} on {dataset_config.pretty_name},"
+                        " as it has already been benchmarked."
+                    )
+                    continue
+
+                # Benchmark a single model on a single dataset
+                record = self._benchmark_single(
                     dataset_config=dataset_config,
                     model_id=m_id,
                 )
 
-        # Save the benchmark results
-        if self.benchmark_config.save_results:
-            output_path = Path.cwd() / "scandeval_benchmark_results.json"
-            with output_path.open("w") as f:
-                json.dump(self.benchmark_results, f)
+                # If the benchmark was unsuccessful then skip
+                if "error" in record:
+                    error_msg = record["error"]
+                    logger.info(
+                        f"{m_id} could not be benchmarked on "
+                        f"{dataset_config.pretty_name}. Skipping."
+                    )
+                    logger.debug(f'The error message was "{error_msg}".')
+                    continue
+
+                # Add the record to the benchmark results
+                self.benchmark_results.append(record)
+
+                # Save the benchmark results
+                if self.benchmark_config.save_results:
+                    with self.results_path.open("a") as f:
+                        f.write("\n" + json.dumps(record))
 
         return self.benchmark_results
+
+    def _has_been_benchmarked(self, model_id: str, dataset: str) -> bool:
+        """Checks whether a model has already been benchmarked on a dataset.
+
+        Args:
+            model_id (str):
+                The model ID.
+            dataset (str):
+                The dataset.
+
+        Returns:
+            bool:
+                Whether the model has already been evaluated on the dataset.
+        """
+        for record in self.benchmark_results:
+            if record["model"] == model_id and record["dataset"] == dataset:
+                return True
+        return False
 
     def _prepare_model_ids(
         self,
@@ -173,19 +234,31 @@ class Benchmarker:
             sequence of str:
                 The prepared list of model IDs.
         """
-        # If `model_id` is not specified, then fetch all the relevant model IDs
         model_ids: Sequence[str]
+
+        # If `model_id` is not specified, then fetch all the relevant model IDs
         if model_id is None:
-            model_ids = self._get_fresh_model_ids(
+            model_ids = self._get_model_ids(
                 languages=self.benchmark_config.model_languages,
-                tasks=self.benchmark_config.model_tasks,
             )
+
+        # Otherwise, if `model_id` is a string, ensure that it is a list
         elif isinstance(model_id, str):
             model_ids = [model_id]
+
+        # Otherwise `model_id` is already a list, so we do nothing
         else:
             model_ids = model_id
 
-        return model_ids
+        # Reorder the `model_ids` list to include the ones present in the benchmark
+        # results first
+        benchmarked_model_ids = [record["model"] for record in self.benchmark_results]
+        model_ids_sorted = [m_id for m_id in model_ids if m_id in benchmarked_model_ids]
+        model_ids_sorted += [
+            m_id for m_id in model_ids if m_id not in benchmarked_model_ids
+        ]
+
+        return model_ids_sorted
 
     def _prepare_dataset_configs(
         self,
@@ -210,6 +283,7 @@ class Benchmarker:
                     lang in self.benchmark_config.dataset_languages
                     for lang in cfg.languages
                 )
+                and cfg.task in self.benchmark_config.dataset_tasks
             ]
         elif isinstance(dataset, str):
             dataset_configs = [
@@ -226,7 +300,7 @@ class Benchmarker:
         self,
         dataset_config: DatasetConfig,
         model_id: str,
-    ):
+    ) -> Dict[str, Union[str, int, List[str], SCORE_DICT]]:
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -234,13 +308,30 @@ class Benchmarker:
                 The dataset configuration to use.
             model_id (str):
                 The model ID to use.
+
+        Returns:
+            dict:
+                The benchmark results, being a dictionary with the keys 'dataset',
+                'task', 'dataset_languages', 'model', 'num_model_parameters' and
+                'scores'. If an error occured then the dictionary will only contain the
+                key 'error', with the associated value being the error message.
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
         try:
-            dataset_obj = self.dataset_factory.build_dataset(dataset_config)
-            results = dataset_obj(model_id)
-            self.benchmark_results[dataset_config.name][model_id] = results
+            dataset = self.dataset_factory.build_dataset(dataset_config)
+            results, metadata_dict = dataset(model_id)
+            record: Dict[str, Union[str, int, List[str], SCORE_DICT]] = dict(
+                dataset=dataset_config.name,
+                task=dataset_config.task.name,
+                dataset_languages=[
+                    language.code for language in dataset_config.languages
+                ],
+                model=model_id,
+                results=results,
+                **metadata_dict,
+            )
             logger.debug(f"Results:\n{results}")
+            return record
 
         except InvalidBenchmark as e:
 
@@ -252,61 +343,60 @@ class Benchmarker:
             ):
                 raise e
 
-            # Otherwise, log the error
-            else:
-                logger.info(
-                    f"{model_id} could not be benchmarked on "
-                    f"{dataset_config.pretty_name}. Skipping."
+            # Otherwise, if the error is due to the MPS fallback not being enabled,
+            # then raise an error asking the user to enable it
+            elif "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
+                raise RuntimeError(
+                    "The benchmark failed because the environment variable "
+                    "`PYTORCH_ENABLE_MPS_FALLBACK` is not set. Please set this "
+                    "environment variable to `1` and try again."
                 )
-                logger.debug(f'The error message was "{e}".')
 
-    def __call__(self, *args, **kwargs):
+            # Otherwise, return the error message
+            else:
+                return dict(error=str(e))
+
+    def __call__(
+        self, *args, **kwargs
+    ) -> List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]:
         return self.benchmark(*args, **kwargs)
 
-    def _get_fresh_model_ids(
+    def _get_model_ids(
         self,
         languages: Sequence[Language],
-        tasks: Optional[Sequence[str]],
-    ) -> list:
+    ) -> List[str]:
         """Get list of model IDs from the Hugging Face Hub.
 
         Args:
             languages (sequence of Language objects):
                 The languages of the models to fetch.
-            tasks (None or sequence of str):
-                The tasks of the models to fetch. If None then the models will not be
-                filtered on tasks.
 
         Returns:
-            list:
+            list of str:
                 List of model IDs.
         """
         # Specify boolean variables determining whether the input variables are new
         new_languages = self._model_lists is not None and any(
             lang.code not in self._model_lists for lang in languages
         )
-        new_tasks = (
-            self._model_lists is not None
-            and tasks is not None
-            and any(task not in self._model_lists for task in tasks)
-        )
 
         # If the model lists have not been fetched already, then do it
-        if self._model_lists is None or new_languages or new_tasks:
+        if self._model_lists is None or new_languages:
             self._model_lists = get_model_lists(
                 languages=languages,
-                tasks=tasks,
                 use_auth_token=self.benchmark_config.use_auth_token,
             )
 
-        # Extract all the model IDs from the model lists
+        # Extract all the model IDs from the model lists, for the chosen languages
         model_ids: List[str] = list()
         for language in languages:
-            model_ids.extend(self._model_lists[language.code])  # type: ignore
-        if tasks is not None:
-            for task in tasks:
-                model_ids.extend(self._model_lists[task])  # type: ignore
-        model_ids.extend(self._model_lists["multilingual"])  # type: ignore
+            model_ids.extend(self._model_lists[language.code])
+
+        # Add the multilingual models
+        model_ids.extend(self._model_lists["multilingual"])
+
+        # Add the fresh models
+        model_ids.extend(self._model_lists["fresh"])
 
         # Remove duplicate model IDs
         model_ids = list(set(model_ids))

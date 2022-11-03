@@ -1,7 +1,7 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Callable, Dict, List, Sequence, Union
 
 
 @dataclass
@@ -22,6 +22,9 @@ class MetricConfig:
         compute_kwargs (dict, optional):
             Keyword arguments to pass to the metric's compute function. Defaults to
             an empty dictionary.
+        postprocessing_fn (callable, optional):
+            A function to apply to the metric scores after they are computed, taking
+            the score to a string representation. Defaults to x -> 100 * x.
     """
 
     name: str
@@ -29,21 +32,9 @@ class MetricConfig:
     huggingface_id: str
     results_key: str
     compute_kwargs: Dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class Label:
-    """A label in a dataset task.
-
-    Attributes:
-        name (str):
-            The name of the label.
-        synonyms (list of str):
-            The synonyms of the label.
-    """
-
-    name: str
-    synonyms: List[str]
+    postprocessing_fn: Callable[[float], float] = field(
+        default_factory=lambda: lambda raw_score: 100 * raw_score
+    )
 
 
 @dataclass
@@ -57,14 +48,14 @@ class DatasetTask:
             The supertask of the task, describing the overall type of task.
         metrics (sequence of MetricConfig objects):
             The metrics used to evaluate the task.
-        labels (sequence of Label objects):
+        labels (sequence of str):
             The labels used in the task.
     """
 
     name: str
     supertask: str
     metrics: Sequence[MetricConfig]
-    labels: Sequence[Label]
+    labels: Sequence[str]
 
 
 @dataclass
@@ -91,9 +82,6 @@ class BenchmarkConfig:
             The languages of the models to benchmark.
         dataset_languages (sequence of Language objects):
             The languages of the datasets in the benchmark.
-        model_tasks (None or sequence of str):
-            The tasks of the models to benchmark. If None then models will not be
-            filtered according to their language.
         dataset_tasks (sequence of DatasetTask):
             The tasks to benchmark.
         raise_error_on_invalid_model (bool):
@@ -120,7 +108,6 @@ class BenchmarkConfig:
 
     model_languages: Sequence[Language]
     dataset_languages: Sequence[Language]
-    model_tasks: Optional[Sequence[str]]
     dataset_tasks: Sequence[DatasetTask]
     raise_error_on_invalid_model: bool
     cache_dir: str
@@ -151,11 +138,9 @@ class DatasetConfig:
         id2label (list of str):
             The mapping from ID to label.
         label2id (dict of str to int):
-            The mapping from label to ID. This includes all label synonyms as well.
+            The mapping from label to ID.
         num_labels (int):
             The number of labels in the dataset.
-        label_synonyms (list of list of str):
-            The synonyms of all the labels, including the main label.
     """
 
     name: str
@@ -166,23 +151,15 @@ class DatasetConfig:
 
     @property
     def id2label(self) -> List[str]:
-        return [label.name for label in self.task.labels]
+        return [label for label in self.task.labels]
 
     @property
     def label2id(self) -> Dict[str, int]:
-        return {
-            syn: idx
-            for idx, label in enumerate(self.task.labels)
-            for syn in [label.name] + label.synonyms
-        }
+        return {label: i for i, label in enumerate(self.task.labels)}
 
     @property
     def num_labels(self) -> int:
         return len(self.task.labels)
-
-    @property
-    def label_synonyms(self) -> List[List[str]]:
-        return [[label.name] + label.synonyms for label in self.task.labels]
 
 
 @dataclass

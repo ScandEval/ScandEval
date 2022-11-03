@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.scandeval.config import BenchmarkConfig
-from src.scandeval.dataset_configs import (
+from scandeval.config import BenchmarkConfig
+from scandeval.dataset_configs import (
     ABSABANK_IMM_CONFIG,
     ANGRY_TWEETS_CONFIG,
     NOREC_CONFIG,
@@ -14,9 +14,9 @@ from src.scandeval.dataset_configs import (
     SCALA_NN_CONFIG,
     SCALA_SV_CONFIG,
 )
-from src.scandeval.dataset_tasks import LA, SENT
-from src.scandeval.languages import DA, FO, IS, NO, SV
-from src.scandeval.text_classification import TextClassificationBenchmark
+from scandeval.dataset_tasks import LA, SENT
+from scandeval.languages import DA, FO, IS, NO, SV
+from scandeval.sequence_classification import SequenceClassification
 
 
 @pytest.fixture(scope="module")
@@ -24,7 +24,6 @@ def benchmark_config():
     yield BenchmarkConfig(
         model_languages=[DA, SV, NO, IS, FO],
         dataset_languages=[DA, SV, NO, IS, FO],
-        model_tasks=None,
         dataset_tasks=[LA, SENT],
         raise_error_on_invalid_model=False,
         cache_dir=".scandeval_cache",
@@ -71,7 +70,7 @@ def model_id():
 class TestTextClassificationScores:
     @pytest.fixture(scope="class")
     def scores(self, benchmark_config, model_id, dataset):
-        benchmark = TextClassificationBenchmark(
+        benchmark = SequenceClassification(
             dataset_config=dataset,
             benchmark_config=benchmark_config,
         )

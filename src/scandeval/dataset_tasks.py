@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .config import DatasetTask, Label, MetricConfig
+from .config import DatasetTask, MetricConfig
 
 
 def get_all_dataset_tasks() -> Dict[str, DatasetTask]:
@@ -16,8 +16,8 @@ def get_all_dataset_tasks() -> Dict[str, DatasetTask]:
 
 
 LA = DatasetTask(
-    name="la",
-    supertask="text-classification",
+    name="linguistic-acceptability",
+    supertask="sequence-classification",
     metrics=[
         MetricConfig(
             name="mcc",
@@ -33,21 +33,12 @@ LA = DatasetTask(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=[
-        Label(
-            name="INCORRECT",
-            synonyms=["LABEL_0"],
-        ),
-        Label(
-            name="CORRECT",
-            synonyms=["LABEL_1"],
-        ),
-    ],
+    labels=["INCORRECT", "CORRECT"],
 )
 
 
 NER = DatasetTask(
-    name="ner",
+    name="named-entity-recognition",
     supertask="token-classification",
     metrics=[
         MetricConfig(
@@ -64,156 +55,45 @@ NER = DatasetTask(
         ),
     ],
     labels=[
-        Label(
-            name="O",
-            synonyms=[],
-        ),
-        Label(
-            name="B-LOC",
-            synonyms=[
-                "B-LOCATION",
-                "B-PLACE",
-                "B-GPELOC",
-                "B-GPE_LOC",
-                "B-GPE/LOC",
-                "B-LOCGPE",
-                "B-LOC_GPE",
-                "B-LOC/GPE",
-                "B-LOCORG",
-                "B-LOC_ORG",
-                "B-LOC/ORG",
-                "B-ORGLOC",
-                "B-ORG_LOC",
-                "B-ORG/LOC",
-                "B-LOCPRS",
-                "B-LOC_PRS",
-                "B-LOC/PRS",
-                "B-PRSLOC",
-                "B-PRS_LOC",
-                "B-PRS/LOC",
-            ],
-        ),
-        Label(
-            name="I-LOC",
-            synonyms=[
-                "I-LOCATION",
-                "I-PLACE",
-                "I-GPELOC",
-                "I-GPE_LOC",
-                "I-GPE/LOC",
-                "I-LOCGPE",
-                "I-LOC_GPE",
-                "I-LOC/GPE",
-                "I-LOCORG",
-                "I-LOC_ORG",
-                "I-LOC/ORG",
-                "I-ORGLOC",
-                "I-ORG_LOC",
-                "I-ORG/LOC",
-                "I-LOCPRS",
-                "I-LOC_PRS",
-                "I-LOC/PRS",
-                "I-PRSLOC",
-                "I-PRS_LOC",
-                "I-PRS/LOC",
-            ],
-        ),
-        Label(
-            name="B-ORG",
-            synonyms=[
-                "B-ORGANIZATION",
-                "B-ORGANISATION",
-                "B-INST",
-                "B-GPEORG",
-                "B-GPE_ORG",
-                "B-GPE/ORG",
-                "B-ORGGPE",
-                "B-ORG_GPE",
-                "B-ORG/GPE",
-                "B-ORGPRS",
-                "B-ORG_PRS",
-                "B-ORG/PRS",
-                "B-PRSORG",
-                "B-PRS_ORG",
-                "B-PRS/ORG",
-                "B-OBJORG",
-                "B-OBJ_ORG",
-                "B-OBJ/ORG",
-                "B-ORGOBJ",
-                "B-ORG_OBJ",
-                "B-ORG/OBJ",
-            ],
-        ),
-        Label(
-            name="I-ORG",
-            synonyms=[
-                "I-ORGANIZATION",
-                "I-ORGANISATION",
-                "I-INST",
-                "I-GPEORG",
-                "I-GPE_ORG",
-                "I-GPE/ORG",
-                "I-ORGGPE",
-                "I-ORG_GPE",
-                "I-ORG/GPE",
-                "I-ORGPRS",
-                "I-ORG_PRS",
-                "I-ORG/PRS",
-                "I-PRSORG",
-                "I-PRS_ORG",
-                "I-PRS/ORG",
-                "I-OBJORG",
-                "I-OBJ_ORG",
-                "I-OBJ/ORG",
-                "I-ORGOBJ",
-                "I-ORG_OBJ",
-                "I-ORG/OBJ",
-            ],
-        ),
-        Label(
-            name="B-PER",
-            synonyms=["B-PERSON"],
-        ),
-        Label(
-            name="I-PER",
-            synonyms=["I-PERSON"],
-        ),
-        Label(
-            name="B-MISC",
-            synonyms=["B-MISCELLANEOUS"],
-        ),
-        Label(
-            name="I-MISC",
-            synonyms=["I-MISCELLANEOUS"],
-        ),
+        "O",
+        "B-LOC",
+        "I-LOC",
+        "B-ORG",
+        "I-ORG",
+        "B-PER",
+        "I-PER",
+        "B-MISC",
+        "I-MISC",
     ],
 )
 
 
 QA = DatasetTask(
-    name="qa",
+    name="question-answering",
     supertask="question-answering",
     metrics=[
         MetricConfig(
             name="em",
             pretty_name="Exact Match",
-            huggingface_id="exact_match",
-            results_key="exact_match",
+            huggingface_id="squad_v2",
+            results_key="exact",
+            postprocessing_fn=lambda raw_score: raw_score,
         ),
         MetricConfig(
             name="f1",
-            pretty_name="F1-score of the positive class",
-            huggingface_id="f1",
+            pretty_name="F1-score",
+            huggingface_id="squad_v2",
             results_key="f1",
+            postprocessing_fn=lambda raw_score: raw_score,
         ),
     ],
-    labels=[],
+    labels=["START_POSITIONS", "END_POSITIONS"],
 )
 
 
 SENT = DatasetTask(
-    name="sent",
-    supertask="text-classification",
+    name="sentiment-classification",
+    supertask="sequence-classification",
     metrics=[
         MetricConfig(
             name="mcc",
@@ -229,18 +109,5 @@ SENT = DatasetTask(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=[
-        Label(
-            name="NEGATIVE",
-            synonyms=["NEG", "NEGATIV", "LABEL_0"],
-        ),
-        Label(
-            name="NEUTRAL",
-            synonyms=["NEU", "LABEL_1"],
-        ),
-        Label(
-            name="POSITIVE",
-            synonyms=["POS", "POSITIV", "LABEL_2"],
-        ),
-    ],
+    labels=["NEGATIVE", "NEUTRAL", "POSITIVE"],
 )

@@ -5,8 +5,8 @@ import warnings
 import pytest
 from sklearn.exceptions import UndefinedMetricWarning
 
-from src.scandeval.config import BenchmarkConfig
-from src.scandeval.dataset_configs import (
+from scandeval.config import BenchmarkConfig
+from scandeval.dataset_configs import (
     DANE_CONFIG,
     MIM_GOLD_NER_CONFIG,
     NORNE_NB_CONFIG,
@@ -14,9 +14,9 @@ from src.scandeval.dataset_configs import (
     SUC3_CONFIG,
     WIKIANN_FO_CONFIG,
 )
-from src.scandeval.dataset_tasks import NER
-from src.scandeval.languages import DA, FO, IS, NO, SV
-from src.scandeval.ner import NERBenchmark
+from scandeval.dataset_tasks import NER
+from scandeval.languages import DA, FO, IS, NO, SV
+from scandeval.named_entity_recognition import NamedEntityRecognition
 
 
 @pytest.fixture(scope="module")
@@ -24,7 +24,6 @@ def benchmark_config():
     yield BenchmarkConfig(
         model_languages=[DA, SV, NO, IS, FO],
         dataset_languages=[DA, SV, NO, IS, FO],
-        model_tasks=None,
         dataset_tasks=[NER],
         raise_error_on_invalid_model=False,
         cache_dir=".scandeval_cache",
@@ -67,7 +66,7 @@ class TestNerScores:
     def scores(self, benchmark_config, model_id, dataset):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UndefinedMetricWarning)
-            benchmark = NERBenchmark(
+            benchmark = NamedEntityRecognition(
                 dataset_config=dataset,
                 benchmark_config=benchmark_config,
             )

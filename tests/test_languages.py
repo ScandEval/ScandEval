@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.scandeval.config import Language
-from src.scandeval.languages import get_all_languages
+from scandeval.config import Language
+from scandeval.languages import get_all_languages
 
 
 class TestGetAllLanguages:

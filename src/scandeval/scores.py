@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Dict, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -14,10 +14,9 @@ logger = logging.getLogger(__name__)
 def log_scores(
     dataset_name: str,
     metric_configs: Sequence[MetricConfig],
-    scores: dict,
-    finetuned: bool,
+    scores: Dict[str, List[Dict[str, float]]],
     model_id: str,
-) -> dict:
+) -> Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]:
     """Log the scores.
 
     Args:
@@ -28,8 +27,6 @@ def log_scores(
         scores (dict):
             The scores that are to be logged. This is a dict with keys 'train' and
             'test', with values being lists of dictionaries full of scores.
-        finetuned (bool):
-            Whether the model is finetuned or not.
         model_id (str):
             The full Hugging Face Hub path to the pretrained transformer model.
 
@@ -40,29 +37,25 @@ def log_scores(
             scores (means and standard errors).
     """
     # Initial logging message
-    if finetuned:
-        msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
-    else:
-        msg = f"Finished evaluation of {model_id} on {dataset_name}."
+    msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
     logger.info(msg)
 
     # Initialise the total dict
-    total_dict = dict()
+    total_dict: Dict[str, float] = dict()
 
     # Logging of the aggregated scores
     for metric_cfg in metric_configs:
         agg_scores = aggregate_scores(scores=scores, metric_config=metric_cfg)
         test_score, test_se = agg_scores["test"]
-        test_score *= 100
-        test_se *= 100
-
-        msg = f"{metric_cfg.pretty_name}:\n  - Test: {test_score:.2f} ± {test_se:.2f}"
+        test_score = metric_cfg.postprocessing_fn(test_score)
+        test_se = metric_cfg.postprocessing_fn(test_se)
+        msg = f"{metric_cfg.pretty_name}:\n  - Test: {test_score:.2f}% ± {test_se:.2f}%"
 
         if "train" in agg_scores.keys():
             train_score, train_se = agg_scores["train"]
-            train_score *= 100
-            train_se *= 100
-            msg += f"\n  - Train: {train_score:.2f} ± {train_se:.2f}"
+            train_score = metric_cfg.postprocessing_fn(train_score)
+            train_se = metric_cfg.postprocessing_fn(train_se)
+            msg += f"\n  - Train: {train_score:.2f}% ± {train_se:.2f}%"
 
             # Store the aggregated train scores
             total_dict[f"train_{metric_cfg.name}"] = train_score
@@ -76,6 +69,7 @@ def log_scores(
         logger.info(msg)
 
     # Define a dict with both the raw scores and the aggregated scores
+    all_scores: Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]
     all_scores = dict(raw=scores, total=total_dict)
 
     # Return the extended scores
@@ -83,7 +77,7 @@ def log_scores(
 
 
 def aggregate_scores(
-    scores: Dict[str, Sequence[Dict[str, float]]], metric_config: MetricConfig
+    scores: Dict[str, List[Dict[str, float]]], metric_config: MetricConfig
 ) -> Dict[str, Tuple[float, float]]:
     """Helper function to compute the mean with confidence intervals.
 

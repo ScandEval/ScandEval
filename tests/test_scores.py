@@ -5,8 +5,8 @@ from copy import deepcopy
 import numpy as np
 import pytest
 
-from src.scandeval.config import MetricConfig
-from src.scandeval.scores import aggregate_scores, log_scores
+from scandeval.config import MetricConfig
+from scandeval.scores import aggregate_scores, log_scores
 
 
 @pytest.fixture(scope="module")
@@ -110,7 +110,6 @@ class TestLogScores:
             dataset_name="dataset",
             metric_configs=[metric_config],
             scores=scores,
-            finetuned=True,
             model_id="model_id",
         )
 

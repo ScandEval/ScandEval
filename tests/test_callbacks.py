@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from src.scandeval.callbacks import NeverLeaveProgressCallback
+from scandeval.callbacks import NeverLeaveProgressCallback
 
 
 @dataclass

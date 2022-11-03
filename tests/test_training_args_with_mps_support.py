@@ -2,7 +2,7 @@
 
 import torch
 
-from src.scandeval.training_args_with_mps_support import TrainingArgumentsWithMPSSupport
+from scandeval.training_args_with_mps_support import TrainingArgumentsWithMPSSupport
 
 
 def test_cuda_has_priority():

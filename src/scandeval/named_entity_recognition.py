@@ -1,23 +1,26 @@
-"""NER tagging benchmark dataset."""
+"""Named entity recognition benchmark dataset."""
 
 import logging
 from copy import deepcopy
 from functools import partial
-from typing import Dict, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 import numpy as np
-from datasets import Dataset, DatasetDict
-from tqdm.auto import tqdm
-from transformers import DataCollatorForTokenClassification, PreTrainedTokenizerBase
+from datasets.arrow_dataset import Dataset
+from datasets.dataset_dict import DatasetDict
+from numpy._typing import NDArray
+from transformers.data.data_collator import DataCollatorForTokenClassification
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
+from .protocols import TokenizedOutputs, Tokenizer
 
+# Set up logger
 logger = logging.getLogger(__name__)
 
 
-class NERBenchmark(BenchmarkDataset):
-    """NER tagging benchmark.
+class NamedEntityRecognition(BenchmarkDataset):
+    """Named entity recognition benchmark dataset.
 
     Args:
         dataset_config (DatasetConfig):
@@ -45,7 +48,7 @@ class NERBenchmark(BenchmarkDataset):
         """
         # Check what labels are present in the dataset, and store if MISC tags are not
         # present
-        labels_in_train = {
+        labels_in_train: Set[str] = {
             tag for tag_list in dataset_dict["train"]["ner_tags"] for tag in tag_list
         }
         self.has_misc_tags = "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
@@ -54,7 +57,9 @@ class NERBenchmark(BenchmarkDataset):
         return dataset_dict
 
     def _compute_metrics(
-        self, predictions_and_labels: tuple, id2label: Optional[Sequence[str]] = None
+        self,
+        predictions_and_labels: Tuple[NDArray, NDArray],
+        id2label: Optional[Sequence[str]] = None,
     ) -> Dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -74,7 +79,7 @@ class NERBenchmark(BenchmarkDataset):
         predictions, labels = predictions_and_labels
 
         if id2label is not None:
-            raw_predictions = np.argmax(predictions, axis=-1)
+            raw_predictions: NDArray = np.argmax(predictions, axis=-1)
 
             # Remove ignored index (special tokens)
             predictions = [
@@ -127,47 +132,20 @@ class NERBenchmark(BenchmarkDataset):
             predictions=predictions_no_misc, references=labels_no_misc
         )
 
+        # Raise error if the metrics are invalid
+        if results is None or results_no_misc is None:
+            raise InvalidBenchmark(
+                "The predictions and labels are not of the same length."
+            )
+
         return dict(
             micro_f1=results["overall_f1"],
             micro_f1_no_misc=results_no_misc["overall_f1"],
         )
 
-    def _get_spacy_token_labels(self, processed) -> Sequence[str]:
-        """Get predictions from SpaCy model on dataset.
-
-        Args:
-            model (SpaCy model):
-                The model.
-            dataset (Hugging Face dataset):
-                The dataset.
-
-        Returns:
-            A list of strings:
-                The predicted NER labels.
-        """
-
-        def get_ent(token) -> str:
-            """Helper function that extracts the entity from a SpaCy token"""
-
-            # Deal with the O tag separately, as it is the only tag not of the form
-            # B-tag or I-tag
-            if token.ent_iob_ == "O":
-                return "O"
-
-            # In general return a tag of the form B-tag or I-tag
-            else:
-                # Extract tag from spaCy token
-                ent = f"{token.ent_iob_}-{token.ent_type_}"
-
-                # Convert the tag to the its canonical synonym
-                alt_idx = self.dataset_config.label2id[f"{token.ent_iob_}-MISC".upper()]
-                return self.dataset_config.id2label[
-                    self.dataset_config.label2id.get(ent, alt_idx)
-                ]
-
-        return [get_ent(token) for token in processed]
-
-    def _tokenize_and_align_labels(self, examples: dict, tokenizer, label2id: dict):
+    def _tokenize_and_align_labels(
+        self, examples: dict, tokenizer: Tokenizer, label2id: Dict[str, int]
+    ) -> TokenizedOutputs:
         """Tokenise all texts and align the labels with them.
 
         Args:
@@ -179,34 +157,39 @@ class NERBenchmark(BenchmarkDataset):
                 A dictionary that converts NER tags to IDs.
 
         Returns:
-            dict:
+            TokenizedOutputs:
                 A dictionary containing the tokenized data as well as labels.
         """
+        # Tokenize the texts. We use the `is_split_into_words` argument here because
+        # the texts in our dataset are lists of words (with a label for each word)
         tokenized_inputs = tokenizer(
             examples["tokens"],
-            # We use this argument because the texts in our dataset are lists of words
-            # (with a label for each word)
             is_split_into_words=True,
             truncation=True,
             padding=True,
         )
-        all_labels = []
+
+        # Extract a mapping between all the tokens and their corresponding word. If the
+        # tokenizer is of a "fast" variant then this can be accessed through the
+        # `word_ids` method. Otherwise, we have to extract it manually.
+        all_labels: List[List[int]] = list()
+        labels: List[str]
+        word_ids: List[Optional[int]]
         for i, labels in enumerate(examples["ner_tags"]):
+
+            # Try to get the word IDs from the tokenizer
             try:
                 word_ids = tokenized_inputs.word_ids(batch_index=i)
 
-            # This happens if the tokenizer is not of the fast variant, in which case
-            # the `word_ids` method is not available, so we have to extract this
-            # manually. It's slower, but it works, and it should only occur rarely,
-            # when the Hugging Face team has not implemented a fast variant of the
-            # tokenizer yet.
+            # If the tokenizer is not of a "fast" variant, we have to extract the word
+            # IDs manually
             except ValueError:
 
                 # Get the list of words in the document
-                words = examples["tokens"][i]
+                words: List[str] = examples["tokens"][i]
 
                 # Get the list of token IDs in the document
-                tok_ids = tokenized_inputs.input_ids[i]
+                tok_ids: List[int] = tokenized_inputs.input_ids[i]
 
                 # Decode the token IDs
                 tokens = tokenizer.convert_ids_to_tokens(tok_ids)
@@ -214,12 +197,23 @@ class NERBenchmark(BenchmarkDataset):
                 # Remove prefixes from the tokens
                 prefixes_to_remove = ["▁", "##"]
                 for tok_idx, tok in enumerate(tokens):
-                    for prefix in prefixes_to_remove:
-                        tok = tok.lstrip(prefix)
+                    if tok:
+                        for prefix in prefixes_to_remove:
+                            if tok.startswith(prefix):
+                                tokens[tok_idx] = tok[len(prefix) :]
                     tokens[tok_idx] = tok
 
+                # Get list of special tokens. Some tokenizers do not record these
+                # properly, which is why we convert the values to their indices and
+                # then back to strings
+                sp_toks = [
+                    tokenizer.convert_ids_to_tokens(
+                        tokenizer.convert_tokens_to_ids(sp_tok)
+                    )
+                    for sp_tok in tokenizer.special_tokens_map.values()
+                ]
+
                 # Replace special tokens with `None`
-                sp_toks = tokenizer.special_tokens_map.values()
                 tokens = [None if tok in sp_toks else tok for tok in tokens]
 
                 # Get the alignment between the words and the tokens, on a character
@@ -257,18 +251,18 @@ class NERBenchmark(BenchmarkDataset):
                         ][0]
                         word_ids.append(word_idx)
 
-            previous_word_idx = None
-            label_ids = []
-            for word_idx in word_ids:
+            previous_word_idx: Optional[int] = None
+            label_ids: List[int] = list()
+            for word_id in word_ids:
 
                 # Special tokens have a word id that is None. We set the label to -100
                 # so they are automatically ignored in the loss function
-                if word_idx is None:
+                if word_id is None:
                     label_ids.append(-100)
 
                 # We set the label for the first token of each word
-                elif word_idx != previous_word_idx:
-                    label = labels[word_idx]
+                elif word_id != previous_word_idx:
+                    label = labels[word_id]
                     try:
                         label_id = label2id[label.upper()]
                     except KeyError:
@@ -280,13 +274,13 @@ class NERBenchmark(BenchmarkDataset):
                 else:
                     label_ids.append(-100)
 
-                previous_word_idx = word_idx
+                previous_word_idx = word_id
 
             all_labels.append(label_ids)
         tokenized_inputs["labels"] = all_labels
         return tokenized_inputs
 
-    def _preprocess_data(self, dataset: Dataset, framework: str, **kwargs) -> Dataset:
+    def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
@@ -299,24 +293,21 @@ class NERBenchmark(BenchmarkDataset):
         Returns:
             Hugging Face dataset: The preprocessed dataset.
         """
-        if framework == "pytorch":
-            map_fn = partial(
-                self._tokenize_and_align_labels,
-                tokenizer=kwargs["tokenizer"],
-                label2id=kwargs["config"].label2id,
-            )
-            tokenised_dataset = dataset.map(
-                map_fn, batched=True, load_from_cache_file=False
-            )
-            return tokenised_dataset
-        elif framework == "spacy":
-            return dataset
+        map_fn = partial(
+            self._tokenize_and_align_labels,
+            tokenizer=kwargs["tokenizer"],
+            label2id=kwargs["config"].label2id,
+        )
+        tokenised_dataset: Dataset = dataset.map(
+            map_fn, batched=True, load_from_cache_file=False
+        )
+        return tokenised_dataset
 
-    def _load_data_collator(self, tokenizer: Optional[PreTrainedTokenizerBase] = None):
+    def _load_data_collator(self, tokenizer: Optional[Tokenizer] = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Hugging Face tokenizer or None, optional):
+            tokenizer (Tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
@@ -325,70 +316,3 @@ class NERBenchmark(BenchmarkDataset):
                 The data collator.
         """
         return DataCollatorForTokenClassification(tokenizer, label_pad_token_id=-100)
-
-    def _get_spacy_predictions_and_labels(self, model, dataset: Dataset) -> tuple:
-        """Get predictions from SpaCy model on dataset.
-
-        Args:
-            model (SpaCy model):
-                The model.
-            dataset (Hugging Face dataset):
-                The dataset.
-
-        Returns:
-            A pair of arrays:
-                The first array contains the probability predictions and the second
-                array contains the true labels.
-        """
-        # Initialise progress bar
-        if self.benchmark_config.progress_bar:
-            itr = tqdm(dataset["doc"], desc="Evaluating model", leave=False)
-        else:
-            itr = dataset["doc"]
-
-        processed = model.pipe(itr, batch_size=32)
-        map_fn = self._extract_spacy_predictions
-        predictions = map(map_fn, zip(dataset["tokens"], processed))
-
-        return list(predictions), dataset["ner_tags"]
-
-    def _extract_spacy_predictions(self, tokens_processed: tuple) -> list:
-        """Helper function that extracts the predictions from a SpaCy model.
-
-        Aside from extracting the predictions from the model, it also aligns the
-        predictions with the gold tokens, in case the SpaCy tokeniser tokenises the
-        text different from those.
-
-        Args:
-            tokens_processed (tuple):
-                A pair of the labels, being a list of strings, and the SpaCy processed
-                document, being a Spacy `Doc` instance.
-
-        Returns:
-            list:
-                A list of predictions for each token, of the same length as the gold
-                tokens (first entry of `tokens_processed`).
-        """
-        tokens, processed = tokens_processed
-
-        # Get the token labels
-        token_labels = self._get_spacy_token_labels(processed)
-
-        # Get the alignment between the SpaCy model's tokens and the gold tokens
-        token_idxs = [tok_idx for tok_idx, tok in enumerate(tokens) for _ in str(tok)]
-        pred_token_idxs = [
-            tok_idx for tok_idx, tok in enumerate(processed) for _ in str(tok)
-        ]
-        alignment = list(zip(token_idxs, pred_token_idxs))
-
-        # Get the aligned predictions
-        predictions = list()
-        for tok_idx, _ in enumerate(tokens):
-            aligned_pred_token = [
-                pred_token_idx
-                for token_idx, pred_token_idx in alignment
-                if token_idx == tok_idx
-            ][0]
-            predictions.append(token_labels[aligned_pred_token])
-
-        return predictions

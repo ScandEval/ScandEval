@@ -2,8 +2,8 @@
 
 import pytest
 
-from src.scandeval.config import DatasetTask
-from src.scandeval.dataset_tasks import get_all_dataset_tasks
+from scandeval.config import DatasetTask
+from scandeval.dataset_tasks import get_all_dataset_tasks
 
 
 class TestGetAllDatasetTasks:
@@ -19,4 +19,4 @@ class TestGetAllDatasetTasks:
             assert isinstance(dataset_task, DatasetTask)
 
     def test_get_ner_dataset_task(self, dataset_tasks):
-        assert "ner" in dataset_tasks
+        assert "named-entity-recognition" in dataset_tasks

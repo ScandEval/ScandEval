@@ -4,25 +4,33 @@ import os
 
 import pytest
 
-from src.scandeval.config import BenchmarkConfig, ModelConfig
-from src.scandeval.dataset_tasks import SENT
-from src.scandeval.exceptions import InvalidBenchmark
-from src.scandeval.hf_hub import get_model_config, get_model_lists
-from src.scandeval.languages import DA, EN
+from scandeval.config import BenchmarkConfig, ModelConfig
+from scandeval.dataset_tasks import SENT
+from scandeval.exceptions import InvalidBenchmark
+from scandeval.hf_hub import get_model_config, get_model_lists
+from scandeval.languages import DA, EN
 
 
 class TestGetModelConfig:
     @pytest.fixture(scope="class")
     def benchmark_config(self):
+
+        # Get the authentication token to the Hugging Face Hub
+        auth = os.environ.get("HUGGINGFACE_HUB_TOKEN", True)
+
+        # Ensure that the token does not contain quotes or whitespace
+        if isinstance(auth, str):
+            auth = auth.strip(" \"'")
+
+        # Build and yield the benchmark configuration
         yield BenchmarkConfig(
             model_languages=[DA],
             dataset_languages=[DA],
-            model_tasks="fill-mask",
             dataset_tasks=[SENT],
             raise_error_on_invalid_model=False,
             cache_dir=".",
             evaluate_train=False,
-            use_auth_token=os.environ["HUGGINGFACE_HUB_TOKEN"],
+            use_auth_token=auth,
             progress_bar=True,
             save_results=True,
             verbose=True,
@@ -64,38 +72,10 @@ class TestGetModelConfig:
 class TestGetModelListsLanguages:
     @pytest.fixture(scope="class")
     def model_dict(self):
-        yield get_model_lists(languages=[DA], tasks=None, use_auth_token=False)
+        yield get_model_lists(languages=[DA], use_auth_token=False)
 
     def test_dict_contains_correct_keys(self, model_dict):
         assert set(model_dict.keys()) == {"da", "all", "multilingual", "random"}
-
-    def test_dict_has_non_trivial_values(self, model_dict):
-        for val in model_dict.values():
-            assert len(val) > 0
-
-    def test_dict_has_no_duplicates(self, model_dict):
-        for val in model_dict.values():
-            assert len(set(val)) == len(val)
-
-    def test_all_is_the_same_as_the_rest(self, model_dict):
-        summed = sum(len(val) for key, val in model_dict.items() if key != "all")
-        assert len(model_dict["all"]) == summed
-
-
-class TestGetModelListsTasks:
-    @pytest.fixture(scope="class")
-    def model_dict(self):
-        yield get_model_lists(
-            languages=None, tasks=["zero-shot-classification"], use_auth_token=False
-        )
-
-    def test_dict_contains_correct_keys(self, model_dict):
-        assert set(model_dict.keys()) == {
-            "zero-shot-classification",
-            "all",
-            "multilingual",
-            "random",
-        }
 
     def test_dict_has_non_trivial_values(self, model_dict):
         for val in model_dict.values():

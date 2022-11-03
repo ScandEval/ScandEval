@@ -15,6 +15,7 @@ def main():
     """Create the DaNE-mini NER dataset and uploads it to the HF Hub."""
 
     # Define download URLs
+    # TODO: This is the wrong URL; use the alexandra URL instead
     base_url = (
         "https://github.com/UniversalDependencies/UD_Danish-DDT/raw/master/"
         "da_ddt-ud-{}.conllu"

@@ -5,103 +5,122 @@
 # Exports all variables defined in the makefile available to scripts
 .EXPORT_ALL_VARIABLES:
 
+# Create .env file if it does not already exist
+ifeq (,$(wildcard .env))
+	$(shell touch .env)
+endif
+
+# Includes environment variables from the .env file
+include .env
+
+# Set gRPC environment variables, which prevents some errors with the `grpcio` package
+export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
+
 install-poetry:
 	@echo "Installing poetry..."
-	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+	@pipx install poetry==1.2.0
+	@$(eval include ${HOME}/.poetry/env)
 
 uninstall-poetry:
 	@echo "Uninstalling poetry..."
-	@curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
+	@pipx uninstall poetry
 
 install:
 	@echo "Installing..."
 	@if [ "$(shell which poetry)" = "" ]; then \
-		make install-poetry; \
+		$(MAKE) install-poetry; \
 	fi
 	@if [ "$(shell which gpg)" = "" ]; then \
 		echo "GPG not installed, so an error will occur. Install GPG on MacOS with "\
 			 "`brew install gnupg` or on Ubuntu with `apt install gnupg` and run "\
 			 "`make install` again."; \
 	fi
-	@poetry env use python3
+	@$(MAKE) setup-poetry
+	@$(MAKE) setup-environment-variables
+	@$(MAKE) setup-git
+
+setup-poetry:
+	@poetry env use python3 && poetry install
+
+setup-environment-variables:
 	@poetry run python3 -m src.scripts.fix_dot_env_file
+
+setup-git:
 	@git init
-	@. .env; \
-		git config --local user.name "$${GIT_NAME}"; \
-		git config --local user.email "$${GIT_EMAIL}"
-	@. .env; \
-		if [ "$${GPG_KEY_ID}" = "" ]; then \
-			echo "No GPG key ID specified. Skipping GPG signing."; \
-			git config --local commit.gpgsign false; \
-		else \
-			echo "Signing with GPG key ID $${GPG_KEY_ID}..."; \
-			git config --local commit.gpgsign true; \
-			git config --local user.signingkey "$${GPG_KEY_ID}"; \
-		fi
-	@poetry install
+	@git config --local user.name ${GIT_NAME}
+	@git config --local user.email ${GIT_EMAIL}
+	@if [ ${GPG_KEY_ID} = "" ]; then \
+		echo "No GPG key ID specified. Skipping GPG signing."; \
+		git config --local commit.gpgsign false; \
+	else \
+		echo "Signing with GPG key ID ${GPG_KEY_ID}..."; \
+		echo 'If you get the "failed to sign the data" error when committing, try running `export GPG_TTY=$$(tty)`.'; \
+		git config --local commit.gpgsign true; \
+		git config --local user.signingkey ${GPG_KEY_ID}; \
+	fi
 	@poetry run pre-commit install
 
-remove-env:
-	@poetry env remove python3
-	@echo "Removed virtual environment."
-
 docs:
-	@poetry run pdoc --docformat google -o docs --logo "https://raw.githubusercontent.com/saattrupdan/ScandEval/main/gfx/scandeval.png" src/scandeval
+	@poetry run pdoc --docformat google src/scandeval -o docs
 	@echo "Saved documentation."
 
 view-docs:
 	@echo "Viewing API documentation..."
-	@open docs/scandeval.html
-
-clean:
-	@find . -type f -name "*.py[co]" -delete
-	@find . -type d -name "__pycache__" -delete
-	@rm -rf .pytest_cache
-	@echo "Cleaned repository."
-
-test:
-	@pytest && readme-cov
-
-tree:
-	@tree -a \
-		-I .git \
-		-I .mypy_cache . \
-		-I .scandeval_cache \
-		-I .env \
-		-I .venv \
-		-I poetry.lock \
-		-I .ipynb_checkpoints \
-		-I dist \
-		-I scandeval_benchmark_results.json \
-		-I .gitkeep \
-		-I docs \
-		-I .coverage* \
-		-I .pytest_cache
+	@uname=$$(uname); \
+		case $${uname} in \
+			(*Linux*) openCmd='xdg-open'; ;; \
+			(*Darwin*) openCmd='open'; ;; \
+			(*CYGWIN*) openCmd='cygstart'; ;; \
+			(*) echo 'Error: Unsupported platform: $${uname}'; exit 2; ;; \
+		esac; \
+		"$${openCmd}" docs/scandeval.html
 
 bump-major:
 	@poetry run python -m src.scripts.versioning --major
-	@echo "Bumped major version."
+	@echo "Bumped major version!"
 
 bump-minor:
 	@poetry run python -m src.scripts.versioning --minor
-	@echo "Bumped minor version."
+	@echo "Bumped minor version!"
 
 bump-patch:
 	@poetry run python -m src.scripts.versioning --patch
-	@echo "Bumped patch version."
+	@echo "Bumped patch version!"
 
 publish:
-	@. .env; \
-		printf "Preparing to publish to PyPI. Have you ensured to change the package version with 'make bump-X' for 'X' being 'major', 'minor' or 'patch'? [y/n] : "; \
-		read -r answer; \
-		if [ "$${answer}" = "y" ]; then \
-			if [ "$${PYPI_API_TOKEN}" = "" ]; then \
-				echo "No PyPI API token specified in the '.env' file, so cannot publish."; \
-			else \
-				echo "Publishing to PyPI..."; \
-				poetry publish --build --username "__token__" --password "$${PYPI_API_TOKEN}"; \
-				echo "Published!"; \
-			fi \
-		else \
-			echo "Publishing aborted."; \
-		fi
+	@if [ ${PYPI_API_TOKEN} = "" ]; then \
+		echo "No PyPI API token specified in the '.env' file, so cannot publish."; \
+	else \
+		echo "Publishing to PyPI..."; \
+		poetry publish --build --username "__token__" --password ${PYPI_API_TOKEN}; \
+	fi
+	@echo "Published!"
+
+publish-major: bump-major publish
+
+publish-minor: bump-minor publish
+
+publish-patch: bump-patch publish
+
+test:
+	@poetry run pytest && readme-cov
+
+tree:
+	@tree -a \
+		-I ".git" \
+		-I ".mypy_cache" \
+		-I ".scandeval_cache" \
+		-I ".env" \
+		-I ".venv" \
+		-I "poetry.lock" \
+		-I ".ipynb_checkpoints" \
+		-I "dist" \
+		-I "scandeval_benchmark_results.jsonl" \
+		-I ".gitkeep" \
+		-I "docs" \
+		-I ".coverage*" \
+		-I ".DS_Store" \
+		-I ".pytest_cache" \
+		-I "__pycache__" \
+		.

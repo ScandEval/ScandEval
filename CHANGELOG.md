@@ -7,6 +7,53 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## [Unreleased]
+### Added
+- A new argument, `ignore_duplicates` (or `--ignore-duplicates/--no-ignore-duplicates`
+  in the CLI) further ignores an evaluation if it has previously been evaluated. This
+  argument defaults to `True`.
+- Now stores the task and the dataset languages to the evaluation file with each
+  evaluation.
+- Now stores model metadata to the `scandeval_benchmark_results` file. Currently, this
+  includes the number of trainable model parameters, the size of the model's vocabulary
+  and the model's maximum sequence length.
+
+### Changed
+- Evaluation results are now saved in a JSONL file instead of a JSON file, and results
+  are appended onto the file after every evaluation.
+- You can now specify your Hugging Face authentication token in the `use_auth_token`
+  argument of `Benchmarker` rather than manually logging in with `huggingface-cli
+  login`. In the CLI an authentication token can also be applied directly using the new
+  `--auth-token` argument. If an authentication is provided in this way in the CLI,
+  then there is no need to add the `--use-auth-token` flag.
+- The "random" models have now been renamed to "fresh", to emphasise that they are not
+  random, but instead randomly initialized.
+- The fresh models are now task independent, meaning that `fresh-xlmr-base` will now
+  adapt to the task at hand, rather than having to benchmark, e.g.,
+  `fresh-xlmr-base-sequence-clf` and `fresh-xlmr-base-token-clf` separately.
+
+### Fixed
+- ScandEval now works on TPUs.
+- Removed `bf16` precision, as it only works for some GPUs.
+- Should output less `transformers` logging now.
+- Models were previously loaded in twice in the beginning of a benchmark. They are now
+  only loaded in once (but re-loaded during each of the 10 iterations to ensure that we
+  are starting from the same point).
+- Changed the model architecture of the `fresh-xlmr-base` from `Roberta` to
+  `XLMRoberta`.
+- The `--dataset-task` is now correctly filtering the datasets benchmarked.
+- Some tokenizers are not adding special tokens, despite them having registered them.
+  These are now manually added, to ensure a proper evaluation of the models.
+
+### Removed
+- Removed support for evaluating finetuned models, as the package was primarily used to
+  benchmark pretrained models anyway, and the change in datasets means that many
+  finetuned models would have been trained on (part of) the test sets, resulting in
+  artificially large scores. For evaluation of finetuned models, please check out the
+  `aiai_eval` Python package instead.
+
+
 ## [v4.0.2] - 2022-07-22
 ### Fixed
 - Now garbage collects properly, where previously (from v4 onwards) the `model` and
@@ -67,12 +114,14 @@ and this project adheres to
 - Now requires PyTorch 1.12.0 or newer, to ensure compatibility with Apple Silicon.
 - Renamed the `Benchmark` class to `Benchmarker`.
 
-### Removed
-- Removed support for evaluating finetuned models, as the package was primarily used to
+### Deprecated
+- Deprecated support for evaluating finetuned models, as the package was primarily used to
   benchmark pretrained models anyway, and the change in datasets means that many
   finetuned models would have been trained on (part of) the test sets, resulting in
   artificially large scores. For evaluation of finetuned models, please check out the
-  `AIAI` Python package instead (under development).
+  `aiai_eval` Python package instead (under development).
+
+### Removed
 - Removed support for Python 3.7, as this was incompatible with support for Apple
   Silicon.
 - Removed the Danish sentiment analysis datasets `twitter-sent`, `europarl` and `lcc`,

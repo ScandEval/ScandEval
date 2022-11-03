@@ -1,22 +1,22 @@
 """Functions related to fetching data from the Hugging Face Hub."""
 
 import logging
+import re
 from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, List, Optional, Sequence, Union
 
-import requests
-from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub.hf_api import HfApi, ModelFilter, ModelInfo
 from requests.exceptions import RequestException
 
 from .config import BenchmarkConfig, Language, ModelConfig
 from .exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
 from .languages import DA, NB, NN, NO, SV, get_all_languages
+from .utils import internet_connection_available
 
 logger = logging.getLogger(__name__)
 
 
-# TODO: Cache this
 def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelConfig:
     """Fetches configuration for a model from the Hugging Face Hub.
 
@@ -31,16 +31,17 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             The model configuration.
 
     Raises:
-        RuntimeError: If the extracted framework is not recognized.
+        RuntimeError:
+            If the extracted framework is not recognized.
     """
-    # If the model ID specifies a random ID, then return a hardcoded metadata
+    # If the model ID specifies a fresh ID, then return a hardcoded metadata
     # dictionary
-    if model_id.startswith("random"):
+    if model_id.startswith("fresh"):
         model_config = ModelConfig(
             model_id=model_id,
             framework="pytorch",
             task="fill-mask",
-            languages=[],
+            languages=list(),
             revision="main",
         )
         return model_config
@@ -64,7 +65,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
     try:
 
         # Define the API object
-        api = HfApi()
+        api: HfApi = HfApi()
 
         # Fetch the model metadata
         models = api.list_models(
@@ -84,7 +85,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             )
 
         # Fetch the model tags
-        tags = models[0].tags
+        tags: Sequence[str] = models[0].tags
 
         # Extract the framework, which defaults to PyTorch
         framework = "pytorch"
@@ -93,16 +94,13 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
         elif "jax" in tags:
             framework = "jax"
         elif "spacy" in tags:
-            framework = "spacy"
+            raise InvalidBenchmark("SpaCy models are not supported.")
         elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
             raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
 
         # Extract the model task, which defaults to 'fill-mask'
-        model_task = models[0].pipeline_tag
-        if model_task is None or model_task in [
-            "sentence-similarity",
-            "feature-extraction",
-        ]:
+        model_task: Optional[str] = models[0].pipeline_tag
+        if model_task is None:
             model_task = "fill-mask"
 
         # Get list of all language codes
@@ -120,16 +118,9 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
     # If fetching from the Hugging Face Hub failed then throw a reasonable exception
     except RequestException:
-
-        # Check if it is because the internet is down, by pinging Google
-        try:
-            requests.get("https://www.google.com")
-
-            # If no errors were raised then Hugging Face Hub is down
+        if internet_connection_available():
             raise HuggingFaceHubDown()
-
-        # Otherwise, if pinging Google also failed, then the internet is down
-        except RequestException:
+        else:
             raise NoInternetConnection()
 
     # Return the model config
@@ -139,7 +130,6 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 # TODO: Cache this
 def get_model_lists(
     languages: Optional[Sequence[Language]],
-    tasks: Optional[Sequence[str]],
     use_auth_token: Union[bool, str],
 ) -> Dict[str, Sequence[str]]:
     """Fetches up-to-date model lists.
@@ -148,8 +138,6 @@ def get_model_lists(
         languages (None or sequence of Language objects):
             The language codes of the language to consider. If None then the models
             will not be filtered on language.
-        tasks (None or sequence of str):
-            The task to consider. If None then the models will not be filtered on task.
         use_auth_token (bool or str):
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
@@ -159,7 +147,7 @@ def get_model_lists(
     Returns:
         dict:
             The keys are filterings of the list, which includes all language codes,
-            including 'multilingual', all tasks, as well as 'all'. The values are lists
+            including 'multilingual', as well as 'all'. The values are lists
             of model IDs.
     """
     # Get list of all languages
@@ -170,36 +158,30 @@ def get_model_lists(
 
     # Form string of languages
     if len(language_list) == 1:
-        language_string = f"the language {language_list[0].name}"
+        language_string = language_list[0].name
     else:
         language_list = sorted(language_list, key=lambda x: x.name)
         if {lang.code for lang in language_list} == {
             lang.code for lang in all_languages
         }:
-            language_string = "all languages"
+            language_string = "all"
         else:
+
+            # Remove generic 'Norwegian' from the list of languages if both 'Bokmål'
+            # and 'Nynorsk' already exist in the list
+            if all([lang in language_list for lang in [NO, NB, NN]]):
+                language_list = [lang for lang in language_list if lang != NO]
+
             language_string = (
-                f"the languages {', '.join(l.name for l in language_list[:-1])} "
-                f"and {language_list[-1].name}"
+                f"{', '.join(l.name for l in language_list[:-1])} and "
+                f"{language_list[-1].name}"
             )
 
-    # Form string of tasks
-    if tasks is None:
-        task_string = "all model tasks"
-    elif len(tasks) == 1:
-        task_string = f"the model task {tasks[0]}"
-    else:
-        tasks = sorted(tasks)
-        task_string = f"the model tasks {', '.join(tasks[:-1])} and {tasks[-1]}"
-
     # Log fetching message
-    logger.info(
-        f"Fetching list of models for {language_string} and {task_string} from the "
-        "Hugging Face Hub."
-    )
+    logger.info(f"Fetching list of {language_string} models from the Hugging Face Hub.")
 
     # Initialise the API
-    api = HfApi()
+    api: HfApi = HfApi()
 
     # Initialise model lists
     model_lists = defaultdict(list)
@@ -212,57 +194,85 @@ def get_model_lists(
         language_itr = deepcopy(language_list)
 
     for language in language_itr:
-        for task in tasks or [None]:  # type: ignore
 
-            # Fetch the model list
-            models = api.list_models(
-                filter=ModelFilter(language=language, task=task),
-                use_auth_token=use_auth_token,
-            )
+        # Extract the language code
+        language_str: Optional[str]
+        if language is not None:
+            language_str = language.code
+        else:
+            language_str = None
 
-            # Filter the models to only keep the ones with the specified language and
-            # task
-            models = [
-                model
-                for model in models
-                if (language is None or language.code in model.tags)
-                and (task is None or model.pipeline_tag == task)
-            ]
+        # Fetch the model list
+        models: List[ModelInfo] = api.list_models(
+            filter=ModelFilter(language=language_str),
+            use_auth_token=use_auth_token,
+        )
 
-            # Extract the model IDs
-            model_ids = [model.id for model in models]
+        # Filter the models to only keep the ones with the specified language
+        models = [
+            model
+            for model in models
+            if (language is None or language.code in model.tags)
+        ]
 
-            # Store the model IDs
-            model_lists["all"].extend(model_ids)
-            if language is not None:
-                model_lists[language.code].extend(model_ids)
-            if task is not None:
-                model_lists[task].extend(model_ids)
+        # Only keep the models which are not finetuned
+        models = [
+            model
+            for model in models
+            if model.pipeline_tag is None
+            or model.pipeline_tag
+            in {"fill-mask", "sentence-similarity", "feature-extraction"}
+        ]
+
+        # Extract the model IDs
+        model_ids: List[str] = [model.modelId for model in models if model.modelId]
+
+        # Remove models that are too large, and thus needs to be specified manually
+        large_regex = re.compile(r"(-|_)x+l(arge)?")
+        model_ids = [
+            model_id
+            for model_id in model_ids
+            if re.search(large_regex, model_id) is None
+        ]
+
+        # Store the model IDs
+        model_lists["all"].extend(model_ids)
+        if language is not None:
+            model_lists[language.code].extend(model_ids)
 
     # Add multilingual models manually
     multi_models = [
-        "xlm-roberta-large",
-        "Peltarion/xlm-roberta-longformer-base-4096",
-        "microsoft/xlm-align-base",
-        "microsoft/infoxlm-base",
-        "microsoft/infoxlm-large",
         "bert-base-multilingual-cased",
         "bert-base-multilingual-uncased",
-        "distilbert-base-multilingual-cased",
         "cardiffnlp/twitter-xlm-roberta-base",
+        "distilbert-base-multilingual-cased",
+        "microsoft/infoxlm-base",
+        "microsoft/infoxlm-large",
+        "microsoft/mdeberta-v3-base",
+        "microsoft/xlm-align-base",
+        "Peltarion/xlm-roberta-longformer-base-4096",
+        "sentence-transformers/distilbert-multilingual-nli-stsb-quora-ranking",
+        "sentence-transformers/distiluse-base-multilingual-cased",
+        "sentence-transformers/distiluse-base-multilingual-cased-v1",
+        "sentence-transformers/distiluse-base-multilingual-cased-v2",
+        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
+        "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+        "sentence-transformers/quora-distilbert-multilingual",
+        "sentence-transformers/stsb-xlm-r-multilingual",
+        "sentence-transformers/use-cmlm-multilingual",
+        "studio-ousia/mluke-base",
+        "studio-ousia/mluke-large",
+        "xlm-roberta-base",
+        "xlm-roberta-large",
     ]
     model_lists["multilingual"] = multi_models
     model_lists["all"].extend(multi_models)
 
-    # Add random models
-    random_models = [
-        "random-xlmr-base-sequence-clf",
-        "random-xlmr-base-token-clf",
-        "random-electra-small-sequence-clf",
-        "random-electra-small-token-clf",
-    ]
-    model_lists["random"].extend(random_models)
-    model_lists["all"].extend(random_models)
+    # Add fresh models
+    fresh_models = ["fresh-xlmr-base", "fresh-electra-small"]
+    model_lists["fresh"].extend(fresh_models)
+    model_lists["all"].extend(fresh_models)
 
     # Add some multilingual Danish models manually that have not marked 'da' as their
     # language
@@ -302,5 +312,17 @@ def get_model_lists(
     # Remove duplicates from the lists
     for lang, model_list in model_lists.items():
         model_lists[lang] = list(set(model_list))
+
+    # Remove banned models
+    BANNED_MODELS = [
+        r"TransQuest/siamesetransquest-da.*",
+        r"M-CLIP/.*",
+    ]
+    for lang, model_list in model_lists.items():
+        model_lists[lang] = [
+            model
+            for model in model_list
+            if not any(re.search(regex, model) is not None for regex in BANNED_MODELS)
+        ]
 
     return dict(model_lists)
