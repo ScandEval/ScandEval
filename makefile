@@ -108,16 +108,19 @@ test:
 
 tree:
 	@tree -a \
-		-I .git \
-		-I .mypy_cache . \
-		-I .scandeval_cache \
-		-I .env \
-		-I .venv \
-		-I poetry.lock \
-		-I .ipynb_checkpoints \
-		-I dist \
-		-I scandeval_benchmark_results.json \
-		-I .gitkeep \
-		-I docs \
-		-I .coverage* \
-		-I .pytest_cache
+		-I ".git" \
+		-I ".mypy_cache" \
+		-I ".scandeval_cache" \
+		-I ".env" \
+		-I ".venv" \
+		-I "poetry.lock" \
+		-I ".ipynb_checkpoints" \
+		-I "dist" \
+		-I "scandeval_benchmark_results.jsonl" \
+		-I ".gitkeep" \
+		-I "docs" \
+		-I ".coverage*" \
+		-I ".DS_Store" \
+		-I ".pytest_cache" \
+		-I "__pycache__" \
+		.
