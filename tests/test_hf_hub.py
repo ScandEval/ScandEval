@@ -58,11 +58,11 @@ class TestGetModelConfig:
                 model_id="invalid-model-id", benchmark_config=benchmark_config
             )
 
-    def test_random_model_id(self, benchmark_config):
+    def test_fresh_model_id(self, benchmark_config):
         model_config = get_model_config(
-            model_id="random-model-id", benchmark_config=benchmark_config
+            model_id="fresh-model-id", benchmark_config=benchmark_config
         )
-        assert model_config.model_id == "random-model-id"
+        assert model_config.model_id == "fresh-model-id"
         assert model_config.revision == "main"
         assert model_config.framework == "pytorch"
         assert model_config.task == "fill-mask"
@@ -75,7 +75,7 @@ class TestGetModelListsLanguages:
         yield get_model_lists(languages=[DA], use_auth_token=False)
 
     def test_dict_contains_correct_keys(self, model_dict):
-        assert set(model_dict.keys()) == {"da", "all", "multilingual", "random"}
+        assert set(model_dict.keys()) == {"da", "all", "multilingual", "fresh"}
 
     def test_dict_has_non_trivial_values(self, model_dict):
         for val in model_dict.values():
@@ -86,5 +86,10 @@ class TestGetModelListsLanguages:
             assert len(set(val)) == len(val)
 
     def test_all_is_the_same_as_the_rest(self, model_dict):
-        summed = sum(len(val) for key, val in model_dict.items() if key != "all")
-        assert len(model_dict["all"]) == summed
+        all_model_ids = {
+            model_id
+            for key, model_list in model_dict.items()
+            for model_id in model_list
+            if key != "all"
+        }
+        assert len(model_dict["all"]) == len(all_model_ids)
