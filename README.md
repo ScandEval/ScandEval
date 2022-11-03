@@ -136,11 +136,14 @@ World](https://satwcomic.com/) team. Go check them out!
 │   │   ├── exceptions.py
 │   │   ├── hf_hub.py
 │   │   ├── languages.py
-│   │   ├── ner.py
-│   │   ├── qa.py
+│   │   ├── model_loading.py
+│   │   ├── named_entity_recognition.py
+│   │   ├── protocols.py
+│   │   ├── question_answering.py
+│   │   ├── question_answering_trainer.py
 │   │   ├── scores.py
-│   │   ├── text_classification.py
-│   │   ├── training_args_with_mps_support.py
+│   │   ├── sequence_classification.py
+│   │   ├── types.py
 │   │   └── utils.py
 │   └── scripts
 │       ├── create_absabank_imm.py
@@ -153,12 +156,15 @@ World](https://satwcomic.com/) team. Go check them out!
 │       ├── create_scandiqa.py
 │       ├── create_suc3.py
 │       ├── create_wikiann_fo.py
+│       ├── fill_in_missing_model_metadata.py
 │       ├── fix_dot_env_file.py
 │       ├── load_ud_pos.py
 │       └── versioning.py
 └── tests
     ├── __init__.py
+    ├── conftest.py
     ├── test_benchmark_config_factory.py
+    ├── test_benchmark_dataset.py
     ├── test_benchmarker.py
     ├── test_callbacks.py
     ├── test_cli.py
@@ -169,10 +175,11 @@ World](https://satwcomic.com/) team. Go check them out!
     ├── test_exceptions.py
     ├── test_hf_hub.py
     ├── test_languages.py
-    ├── test_ner.py
-    ├── test_qa.py
+    ├── test_model_loading.py
+    ├── test_named_entity_recognition.py
+    ├── test_protocols.py
     ├── test_scores.py
-    ├── test_text_classification.py
+    ├── test_sequence_classification.py
     ├── test_training_args_with_mps_support.py
     └── test_utils.py
 ```
