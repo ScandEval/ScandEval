@@ -449,23 +449,23 @@ class BenchmarkDataset(ABC):
             )
 
             # Remove trainer logging if not in verbose mode
-            if not self.benchmark_config.verbose:
-                trainer.log = lambda logs: None
+            # if not self.benchmark_config.verbose:
+            #     trainer.log = lambda logs: None
 
             # Re-block terminal output, as it gets unblocked by the `transformers`
             # package before training
-            block_terminal_output()
+            # block_terminal_output()
 
             # Remove the callback which prints the scores after each evaluation
-            if not self.benchmark_config.verbose:
-                trainer.remove_callback(PrinterCallback)
+            # if not self.benchmark_config.verbose:
+            #     trainer.remove_callback(PrinterCallback)
 
-            # Remove the progress bar callback
-            trainer.remove_callback(ProgressCallback)
+            # # Remove the progress bar callback
+            # trainer.remove_callback(ProgressCallback)
 
-            # Add the custom progress callback if `progress_bar` is True
-            if self.benchmark_config.progress_bar:
-                trainer.add_callback(NeverLeaveProgressCallback)
+            # # Add the custom progress callback if `progress_bar` is True
+            # if self.benchmark_config.progress_bar:
+            #     trainer.add_callback(NeverLeaveProgressCallback)
 
             # Finetune the model
             with warnings.catch_warnings():
