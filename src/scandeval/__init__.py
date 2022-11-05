@@ -17,7 +17,7 @@ __version__ = pkg_resources.get_distribution("scandeval").version
 
 
 # Block unwanted terminal outputs
-block_terminal_output()
+# block_terminal_output()
 
 
 # Loads environment variables
