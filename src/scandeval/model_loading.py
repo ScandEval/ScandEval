@@ -68,7 +68,7 @@ def load_model(
             If the framework is not recognized.
     """
     config: Config
-    # block_terminal_output()
+    block_terminal_output()
 
     try:
         # If the model ID specifies a fresh model, then load that.
