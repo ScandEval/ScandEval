@@ -45,10 +45,10 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
     return dataset_configs[dataset_name]
 
 
-ABSABANK_IMM_CONFIG = DatasetConfig(
-    name="absabank-imm",
-    pretty_name="the truncated version of ABSABank-Imm",
-    huggingface_id="ScandEval/absabank-imm-mini",
+SWEREC_CONFIG = DatasetConfig(
+    name="swerec",
+    pretty_name="the truncated version of SweReC",
+    huggingface_id="ScandEval/swerec-mini",
     task=SENT,
     languages=[SV],
 )
