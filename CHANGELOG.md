@@ -9,6 +9,20 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- Added new Swedish sentiment classification dataset, SweReC, which is not
+  aspect-based, contrary to the previous ABSAbank-Imm dataset. This dataset is a
+  three-way classification task into the classical `positive`, `neutral` and `negative`
+  classes, thereby establishing uniformity between the sentiment classification
+  datasets in the different languages. The dataset comes from reviews from both
+  se.trustpilot.com and reco.se, and has been created by Kristoffer Svensson as part of
+  his Bachelor thesis "Sentiment Analysis With Convolutional Neural Networks:
+  Classifying sentiment in Swedish reviews".
+
+### Removed
+- As SweReC is a drop-in replacement for ABSAbank-Imm, the latter has been removed from
+  the ScandEval benchmark.
+
 ### Fixed
 - Now deals with an issue with DeBERTaV2 models where `pooler_hidden_size` has been set
   to a value different to `hidden_size` in its configuration, which made it impossible
