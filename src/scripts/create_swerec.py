@@ -28,6 +28,12 @@ def main() -> None:
     df = pd.read_csv(csv_file, sep=",", usecols=["text", "rating"])
     df.columns = ["text", "label"]
 
+    # Strip trailing whitespace
+    df.text = df.text.str.strip()
+
+    # Capitalize the first letter of each sentence
+    df.text = df.text.str.capitalize()
+
     # Remove duplicates
     df = df.drop_duplicates().reset_index(drop=True)
 
