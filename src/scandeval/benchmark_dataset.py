@@ -74,7 +74,9 @@ class BenchmarkDataset(ABC):
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self._metrics = {
-            metric_cfg.name: evaluate.load(metric_cfg.huggingface_id)
+            metric_cfg.name: evaluate.load(
+                metric_cfg.huggingface_id, cache_dir=self.benchmark_config.cache_dir
+            )
             for metric_cfg in dataset_config.task.metrics
         }
 

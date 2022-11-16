@@ -28,8 +28,8 @@ and this project adheres to
   to a value different to `hidden_size` in its configuration, which made it impossible
   to do sequence classification with the model. The former is now forced to be the same
   as the latter, fixing the issue.
-- Now ensures that tokenizers and model configurations are cached to the ScandEval
-  cache, rather than the default Hugging Face cache.
+- Now ensures that tokenizers, model configurations and metrics are cached to the
+  ScandEval cache, rather than the default Hugging Face cache.
 
 
 ## [v5.0.0] - 2022-11-03
