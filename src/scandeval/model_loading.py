@@ -112,6 +112,7 @@ def load_model(
                 num_labels=num_labels,
                 id2label=id2label,
                 label2id=label2id,
+                cache_dir=cache_dir,
             )
             model = model_cls(config)
 
@@ -124,6 +125,7 @@ def load_model(
                 num_labels=num_labels,
                 id2label=id2label,
                 label2id=label2id,
+                cache_dir=cache_dir,
             )
 
             # Get the model class associated with the supertask
@@ -180,6 +182,7 @@ def load_model(
             use_auth_token=use_auth_token,
             use_fast=True,
             add_prefix_space=prefix,
+            cache_dir=cache_dir,
         )
 
     # Set the maximal length of the tokenizer to the model's maximal length. This is
