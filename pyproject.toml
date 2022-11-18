@@ -28,6 +28,7 @@ seqeval = "^1.2.2"
 pandas = "^1.4.0"
 python-dotenv = "^0.20.0"
 evaluate = "^0.3.0"
+sacremoses = "^0.0.53"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^7.1.1"

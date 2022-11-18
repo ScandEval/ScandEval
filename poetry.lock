@@ -768,6 +768,21 @@ urllib3 = ">=1.25.10"
 tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=4.6)", "pytest-cov", "pytest-localserver", "types-mock", "types-requests"]
 
 [[package]]
+name = "sacremoses"
+version = "0.0.53"
+description = "SacreMoses"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = "*"
+joblib = "*"
+regex = "*"
+six = "*"
+tqdm = "*"
+
+[[package]]
 name = "scikit-learn"
 version = "1.1.3"
 description = "A set of python modules for machine learning and data mining"
@@ -1050,7 +1065,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "39eb9020b70f0524503fe1bf569ae8d476ad750fd11d67131fb347acd8b1e841"
+content-hash = "2707938bad4f992abbd49e115cc74feec86b9e8e8f3758fa294d3fa0b5ed9fe8"
 
 [metadata.files]
 aiohttp = [
@@ -1882,6 +1897,9 @@ requests = [
 responses = [
     {file = "responses-0.18.0-py3-none-any.whl", hash = "sha256:15c63ad16de13ee8e7182d99c9334f64fd81f1ee79f90748d527c28f7ca9dd51"},
     {file = "responses-0.18.0.tar.gz", hash = "sha256:380cad4c1c1dc942e5e8a8eaae0b4d4edf708f4f010db8b7bcfafad1fcd254ff"},
+]
+sacremoses = [
+    {file = "sacremoses-0.0.53.tar.gz", hash = "sha256:43715868766c643b35de4b8046cce236bfe59a7fa88b25eaf6ddf02bacf53a7a"},
 ]
 scikit-learn = [
     {file = "scikit-learn-1.1.3.tar.gz", hash = "sha256:bef51978a51ec19977700fe7b86aecea49c825884f3811756b74a3b152bb4e35"},
