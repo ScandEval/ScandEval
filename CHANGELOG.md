@@ -31,6 +31,11 @@ and this project adheres to
   as the latter, fixing the issue.
 - Now ensures that tokenizers, model configurations and metrics are cached to the
   ScandEval cache, rather than the default Hugging Face cache.
+- Previously, if a model's context length was greater than 1,000 it would be reduced to
+  512, since an unset context length results in a very large `model_max_length` value
+  of the tokenizer. This conflicted with longformer-style models whose context length
+  _actually_ was greater than 1,000, so now this upper bound has been increased to
+  10,000.
 
 
 ## [v5.0.0] - 2022-11-03
