@@ -18,6 +18,7 @@ and this project adheres to
   se.trustpilot.com and reco.se, and has been created by Kristoffer Svensson as part of
   his Bachelor thesis "Sentiment Analysis With Convolutional Neural Networks:
   Classifying sentiment in Swedish reviews".
+- Added historic BERT models from `dbmdz` as part of the default multilingual list.
 
 ### Removed
 - As SweReC is a drop-in replacement for ABSAbank-Imm, the latter has been removed from
