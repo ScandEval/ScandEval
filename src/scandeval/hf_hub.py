@@ -265,6 +265,10 @@ def get_model_lists(
         "studio-ousia/mluke-large",
         "xlm-roberta-base",
         "xlm-roberta-large",
+        "dbmdz/bert-tiny-historic-multilingual-cased",
+        "dbmdz/bert-mini-historic-multilingual-cased",
+        "dbmdz/bert-base-historic-multilingual-cased",
+        "dbmdz/bert-medium-historic-multilingual-cased",
     ]
     model_lists["multilingual"] = multi_models
     model_lists["all"].extend(multi_models)
