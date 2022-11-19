@@ -250,7 +250,6 @@ def get_model_lists(
         "microsoft/infoxlm-large",
         "microsoft/mdeberta-v3-base",
         "microsoft/xlm-align-base",
-        "Peltarion/xlm-roberta-longformer-base-4096",
         "sentence-transformers/distilbert-multilingual-nli-stsb-quora-ranking",
         "sentence-transformers/distiluse-base-multilingual-cased",
         "sentence-transformers/distiluse-base-multilingual-cased-v1",
