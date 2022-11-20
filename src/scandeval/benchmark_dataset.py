@@ -247,6 +247,8 @@ class BenchmarkDataset(ABC):
                         gradient_accumulation_steps=ga,
                     )
 
+                    print(bs, ga)
+
                     training_args.per_device_train_batch_size = bs
                     training_args.per_device_eval_batch_size = bs
                     training_args.gradient_accumulation_steps = ga
