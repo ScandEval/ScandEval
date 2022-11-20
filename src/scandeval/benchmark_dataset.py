@@ -473,7 +473,13 @@ class BenchmarkDataset(ABC):
             if self.benchmark_config.progress_bar:
                 trainer.add_callback(NeverLeaveProgressCallback)
 
-            breakpoint()
+            # TEMP: Get the dataloader
+            dataloader = trainer.get_train_dataloader()
+            for batch in dataloader:
+                batch = {k: v.to("mps") for k, v in batch.items()}
+                print(batch)
+                breakpoint()
+                break
 
             # Finetune the model
             with warnings.catch_warnings():
