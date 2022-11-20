@@ -128,56 +128,14 @@ class BenchmarkDataset(ABC):
             cache_dir=self.benchmark_config.cache_dir,
         )
 
-        # Store the number of parameters in the model, the maximum sequence length and
-        # the size of the model's vocabulary
-        num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        max_seq_length = tokenizer.model_max_length
-        if hasattr(model.config, "vocab_size"):
-            vocab_size = model.config.vocab_size
-        elif hasattr(tokenizer, "vocab_size"):
-            vocab_size = tokenizer.vocab_size
-        else:
-            vocab_size = -1
-
-        # Store the metadata in a dictionary
-        metadata_dict = dict(
-            num_model_parameters=num_params,
-            max_sequence_length=max_seq_length,
-            vocabulary_size=vocab_size,
-        )
-
-        # Log the metadata
-        logger.info(
-            f"The model has {num_params:,} parameters, a vocabulary size of "
-            f"{vocab_size:,} and a maximum sequence length of {max_seq_length:,}."
-        )
+        # Get the metadata
+        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
         # Load the data collator
         data_collator = self._load_data_collator(tokenizer)
 
-        # Load the data
-        train, val, test = self._load_data()
-
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 2
-
-        # Get bootstrap sample indices
-        train_bidxs = rng.integers(0, len(train), size=(num_iter, len(train)))
-        val_bidxs = rng.integers(0, len(val), size=(num_iter, len(val)))
-        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
-
-        # Get bootstrapped datasets
-        trains = [train.select(train_bidxs[idx]) for idx in range(train_bidxs.shape[0])]
-        vals = [val.select(val_bidxs[idx]) for idx in range(val_bidxs.shape[0])]
-        tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
-
-        # Set up the preprocessing parameters
-        preprocess_params = dict(
-            framework="pytorch", config=model.config, tokenizer=tokenizer
-        )
-
-        # Get the training arguments
-        training_args = self._get_training_args()
 
         # Set up progress bar
         itr = tqdm(
@@ -185,6 +143,32 @@ class BenchmarkDataset(ABC):
             desc="Benchmarking",
             disable=not self.benchmark_config.progress_bar,
         )
+
+        # Load the data
+        train, val, test = self._load_data()
+
+        # Get bootstrap sample indices
+        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
+
+        # Get bootstrapped datasets
+        tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
+
+        # Set up the preprocessing parameters
+        preprocess_params = dict(
+            framework="pytorch", config=model.config, tokenizer=tokenizer
+        )
+
+        # Prepare the train and validation datasets
+        try:
+            prepared_train = self._preprocess_data(
+                train, split="train", **preprocess_params
+            )
+            prepared_val = self._preprocess_data(val, split="val", **preprocess_params)
+        except ValueError:
+            raise InvalidBenchmark(
+                "Preprocessing of the training and validation datasets could not be "
+                "done."
+            )
 
         scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
         for idx in itr:
@@ -208,27 +192,23 @@ class BenchmarkDataset(ABC):
             while True:
 
                 # Get the boostrapped dataset for this iteration
-                train = trains[idx]
-                val = vals[idx]
                 test = tests[idx]
 
-                # Prepare the datasets
+                # Prepare the test dataset
                 try:
-                    prepared_train = self._preprocess_data(
-                        train, split="train", **preprocess_params
-                    )
-                    prepared_val = self._preprocess_data(
-                        val, split="val", **preprocess_params
-                    )
                     prepared_test = self._preprocess_data(
                         test, split="test", **preprocess_params
                     )
                 except ValueError:
                     raise InvalidBenchmark(
-                        "Preprocessing of the dataset could not be done."
+                        "Preprocessing of the test dataset could not be done."
                     )
 
+                # Get the training arguments
+                training_args = self._get_training_args(iteration_idx=idx)
+
                 itr_scores = self._benchmark_single_iteration(
+                    iteration_idx=idx,
                     model_config=model_config,
                     train=train,
                     prepared_train=prepared_train,
@@ -285,7 +265,35 @@ class BenchmarkDataset(ABC):
 
         return all_scores, metadata_dict
 
-    def _get_training_args(self) -> TrainingArguments:
+    def _get_metadata(self, model: Model, tokenizer: Tokenizer) -> Dict[str, int]:
+
+        # Store the number of parameters in the model, the maximum sequence length and
+        # the size of the model's vocabulary
+        num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        max_seq_length = tokenizer.model_max_length
+        if hasattr(model.config, "vocab_size"):
+            vocab_size = model.config.vocab_size
+        elif hasattr(tokenizer, "vocab_size"):
+            vocab_size = tokenizer.vocab_size
+        else:
+            vocab_size = -1
+
+        # Store the metadata in a dictionary
+        metadata_dict = dict(
+            num_model_parameters=num_params,
+            max_sequence_length=max_seq_length,
+            vocabulary_size=vocab_size,
+        )
+
+        # Log the metadata
+        logger.info(
+            f"The model has {num_params:,} parameters, a vocabulary size of "
+            f"{vocab_size:,} and a maximum sequence length of {max_seq_length:,}."
+        )
+
+        return metadata_dict
+
+    def _get_training_args(self, iteration_idx: int) -> TrainingArguments:
 
         # Set the logging strategy
         if self.benchmark_config.verbose:
@@ -300,6 +308,9 @@ class BenchmarkDataset(ABC):
 
         # Set batch size variable
         batch_size = 32 if not self.benchmark_config.testing else 1
+
+        # Set seed variable
+        seed = 4242 + iteration_idx
 
         # Initialise training arguments
         with warnings.catch_warnings():
@@ -322,7 +333,7 @@ class BenchmarkDataset(ABC):
                 gradient_accumulation_steps=1,
                 load_best_model_at_end=True,
                 optim=OptimizerNames.ADAMW_TORCH,
-                seed=4242,
+                seed=seed,
                 no_cuda=self.benchmark_config.testing,
                 use_mps_device=use_mps_device,
                 fp16=False,
@@ -381,6 +392,7 @@ class BenchmarkDataset(ABC):
 
     def _benchmark_single_iteration(
         self,
+        iteration_idx: int,
         model_config: ModelConfig,
         train: Dataset,
         prepared_train: Dataset,
@@ -395,6 +407,8 @@ class BenchmarkDataset(ABC):
         """Run a single iteration of a benchmark.
 
         Args:
+            iteration_idx (int):
+                The index of the iteration.
             model_config (ModelConfig):
                 The model configuration.
             train (Dataset):
@@ -428,7 +442,8 @@ class BenchmarkDataset(ABC):
         try:
             # Set random seeds to enforce reproducibility of the randomly initialised
             # weights
-            enforce_reproducibility(framework=model_config.framework)
+            seed = 4242 + iteration_idx
+            enforce_reproducibility(framework=model_config.framework, seed=seed)
 
             # Reinitialise a new model
             if tokenizer is None or model is None:
