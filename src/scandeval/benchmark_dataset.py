@@ -159,7 +159,7 @@ class BenchmarkDataset(ABC):
         train, val, test = self._load_data()
 
         # Set variable with number of iterations
-        num_iter = 1 if not self.benchmark_config.testing else 2
+        num_iter = 10 if not self.benchmark_config.testing else 2
 
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
