@@ -468,6 +468,12 @@ class BenchmarkDataset(ABC):
             if self.benchmark_config.progress_bar:
                 trainer.add_callback(NeverLeaveProgressCallback)
 
+            # TEMP: Get dataloader
+            dataloader = trainer.get_train_dataloader()
+            for batch in dataloader:
+                print(batch)
+                breakpoint()
+
             # Finetune the model
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
@@ -504,7 +510,6 @@ class BenchmarkDataset(ABC):
                 del tokenizer
             except UnboundLocalError:
                 pass
-            raise e
             clear_memory()
             return e
 
