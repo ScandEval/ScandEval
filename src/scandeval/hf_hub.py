@@ -221,7 +221,12 @@ def get_model_lists(
             for model in models
             if model.pipeline_tag is None
             or model.pipeline_tag
-            in {"fill-mask", "sentence-similarity", "feature-extraction"}
+            in {
+                "fill-mask",
+                "sentence-similarity",
+                "feature-extraction",
+                "text-generation",
+            }
         ]
 
         # Extract the model IDs
