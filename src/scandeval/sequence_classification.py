@@ -55,21 +55,6 @@ class SequenceClassification(BenchmarkDataset):
         cls_token = special_token_metadata["cls_token"]
         sep_token = special_token_metadata["sep_token"]
 
-        # If the tokenizer does not have a padding token (e.g. GPT-2), we use the SEP
-        # token as the padding token
-        if tokenizer.pad_token is None:
-            if has_sep_token:
-                tokenizer.pad_token = sep_token
-            elif hasattr(tokenizer, "eos_token"):
-                tokenizer.pad_token = tokenizer.eos_token
-            elif hasattr(tokenizer, "sep_token"):
-                tokenizer.pad_token = tokenizer.sep_token
-            else:
-                raise ValueError(
-                    "The tokenizer does not have a padding token and does not have a "
-                    "SEP token or EOS token to use as a padding token."
-                )
-
         def tokenise(examples: dict) -> TokenizedOutputs:
 
             # If the tokenizer is not adding special tokens, then we add them manually

@@ -35,7 +35,7 @@ and this project adheres to
   512, since an unset context length results in a very large `model_max_length` value
   of the tokenizer. This conflicted with longformer-style models whose context length
   _actually_ was greater than 1,000, so now this upper bound has been increased to
-  10,000.
+  100,000.
 - Now includes `sacremoses` as a dependency, as this is required by some tokenizers.
 
 

@@ -185,11 +185,32 @@ def load_model(
             cache_dir=cache_dir,
         )
 
+    # Fix the model and the tokenizer
+    model, tokenizer = fix_model_and_tokenizer(model, tokenizer)
+
+    return tokenizer, model
+
+
+def fix_model_and_tokenizer(
+    model: Model, tokenizer: Tokenizer
+) -> Tuple[Model, Tokenizer]:
+    """Fixes the model and tokenizer to be compatible with the benchmarking framework.
+
+    Args:
+        model (Model):
+            The model to fix.
+        tokenizer (Tokenizer):
+            The tokenizer to fix.
+
+    Returns:
+        pair of (model, tokenizer):
+            The fixed model and tokenizer.
+    """
     # Set the maximal length of the tokenizer to the model's maximal length. This is
     # required for proper truncation
     if (
         not hasattr(tokenizer, "model_max_length")
-        or tokenizer.model_max_length > 10_000
+        or tokenizer.model_max_length > 100_000
     ):
 
         if hasattr(tokenizer, "max_model_input_sizes"):
@@ -202,4 +223,19 @@ def load_model(
         else:
             tokenizer.model_max_length = 512
 
-    return tokenizer, model
+    # If the tokenizer does not have a padding token (e.g. GPT-2), we use the SEP token
+    # as the padding token
+    if tokenizer.pad_token is None:
+        if hasattr(tokenizer, "eos_token"):
+            tokenizer.pad_token = tokenizer.eos_token
+            model.config.pad_token_id = model.config.eos_token_id
+        elif hasattr(tokenizer, "sep_token"):
+            tokenizer.pad_token = tokenizer.sep_token
+            model.config.pad_token_id = model.config.sep_token_id
+        else:
+            raise ValueError(
+                "The tokenizer does not have a padding token and does not have a "
+                "SEP token or EOS token to use as a padding token."
+            )
+
+    return model, tokenizer
