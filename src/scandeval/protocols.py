@@ -56,6 +56,7 @@ class Tokenizer(Protocol):
     sep_token_id: int
     eos_token_id: int
     vocab_size: int
+    vocab: Dict[str, int]
 
     def encode(self, *args, **kwargs) -> List[int]:
         ...
