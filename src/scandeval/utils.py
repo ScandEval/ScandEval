@@ -33,7 +33,7 @@ def clear_memory():
     # TODO: Also empty MPS cache
     if torch.cuda.is_available():
         current_device = torch.cuda.current_device()
-        cuda.select_device(current_device)
+        # cuda.select_device(current_device)
         cuda.close()
         cuda.select_device(current_device)
         torch.cuda.empty_cache()
