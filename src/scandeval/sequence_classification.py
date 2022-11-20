@@ -70,6 +70,8 @@ class SequenceClassification(BenchmarkDataset):
                     "SEP token or EOS token to use as a padding token."
                 )
 
+        breakpoint()
+
         def tokenise(examples: dict) -> TokenizedOutputs:
 
             # If the tokenizer is not adding special tokens, then we add them manually
