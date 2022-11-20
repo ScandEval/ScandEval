@@ -504,6 +504,7 @@ class BenchmarkDataset(ABC):
                 del tokenizer
             except UnboundLocalError:
                 pass
+            breakpoint()
             clear_memory()
             return e
 
