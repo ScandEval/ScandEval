@@ -29,7 +29,6 @@ pandas = "^1.4.0"
 python-dotenv = ">=0.20.0,<1.0.0"
 evaluate = ">=0.3.0,<1.0.0"
 sacremoses = ">=0.0.53,<1.0.0"
-numba = ">=0.56.4,<1.0.0"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^7.1.1"
