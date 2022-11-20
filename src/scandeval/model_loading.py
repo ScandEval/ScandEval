@@ -240,8 +240,8 @@ def fix_model_and_tokenizer(
         else:
             tokenizer.model_max_length = 512
 
-    # If the tokenizer does not have a padding token (e.g. GPT-2), we use the SEP token
-    # as the padding token
+    # If the tokenizer does not have a padding token (e.g. GPT-2), we use find a
+    # suitable padding token and set it
     if tokenizer.pad_token is None:
 
         # There are two cases. The first case is if the tokenizer's vocab size is
@@ -258,8 +258,8 @@ def fix_model_and_tokenizer(
                 model.config.pad_token_id = tokenizer.pad_token_id
             else:
                 raise ValueError(
-                    "The tokenizer does not have a padding token and does not have a SEP "
-                    "token or EOS token to use as a padding token."
+                    "The tokenizer does not have a padding token and does not have a "
+                    "SEP token or EOS token to use as a padding token."
                 )
 
         # The second case is if the tokenizer's vocab size is not consistent with the
@@ -280,5 +280,41 @@ def fix_model_and_tokenizer(
                     "The tokenizer does not have a padding token and no padding token "
                     "candidates were found in the tokenizer's vocab."
                 )
+
+    # If the tokenizer does not have a BOS token, we use find a suitable BOS token and
+    # set it
+    if tokenizer.bos_token is None and tokenizer.cls_token is None:
+
+        for pad_candidate in ["<s>", "[CLS]"]:
+            if pad_candidate in tokenizer.vocab:
+                tokenizer.bos_token = pad_candidate
+                model.config.bos_token_id = tokenizer.bos_token_id
+                break
+
+        # If none of the BOS candidates are in the tokenizer's vocab, then we
+        # raise an error.
+        else:
+            raise ValueError(
+                "The tokenizer does not have a BOS token and no BOS token "
+                "candidates were found in the tokenizer's vocab."
+            )
+
+    # If the tokenizer does not have a EOS token, we use find a suitable EOS token and
+    # set it
+    if tokenizer.eos_token is None and tokenizer.cls_token is None:
+
+        for pad_candidate in ["</s>", "[SEP]"]:
+            if pad_candidate in tokenizer.vocab:
+                tokenizer.eos_token = pad_candidate
+                model.config.eos_token_id = tokenizer.eos_token_id
+                break
+
+        # If none of the EOS candidates are in the tokenizer's vocab, then we
+        # raise an error.
+        else:
+            raise ValueError(
+                "The tokenizer does not have a EOS token and no EOS token "
+                "candidates were found in the tokenizer's vocab."
+            )
 
     return model, tokenizer

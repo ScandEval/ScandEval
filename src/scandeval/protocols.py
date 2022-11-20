@@ -13,6 +13,9 @@ class Config(Protocol):
     model_type: str
     pooler_hidden_size: int
     hidden_size: int
+    pad_token_id: int
+    bos_token_id: int
+    eos_token_id: int
 
     @classmethod
     def from_pretrained(cls, *args, **kwargs) -> "Config":
