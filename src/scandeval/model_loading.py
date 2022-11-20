@@ -242,18 +242,42 @@ def fix_model_and_tokenizer(
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use the SEP token
     # as the padding token
     if tokenizer.pad_token is None:
-        if tokenizer.eos_token is not None:
-            tokenizer.padding_side = "left"
-            tokenizer.pad_token = tokenizer.eos_token
-            model.config.pad_token_id = model.config.eos_token_id
-        elif tokenizer.sep_token is not None:
-            tokenizer.padding_side = "left"
-            tokenizer.pad_token = tokenizer.sep_token
-            model.config.pad_token_id = model.config.sep_token_id
+
+        # There are two cases. The first case is if the tokenizer's vocab size is
+        # consistent with the model's vocab size, in which we simply use the SEP token
+        # as the padding token.
+        if model.config.vocab_size == tokenizer.vocab_size:
+            if tokenizer.eos_token is not None:
+                tokenizer.padding_side = "left"
+                tokenizer.pad_token = tokenizer.eos_token
+                model.config.pad_token_id = tokenizer.pad_token_id
+            elif tokenizer.sep_token is not None:
+                tokenizer.padding_side = "left"
+                tokenizer.pad_token = tokenizer.sep_token
+                model.config.pad_token_id = tokenizer.pad_token_id
+            else:
+                raise ValueError(
+                    "The tokenizer does not have a padding token and does not have a SEP "
+                    "token or EOS token to use as a padding token."
+                )
+
+        # The second case is if the tokenizer's vocab size is not consistent with the
+        # model's vocab size, in which case we search for a token which looks like a
+        # padding token, and use that as the padding token.
         else:
-            raise ValueError(
-                "The tokenizer does not have a padding token and does not have a SEP "
-                "token or EOS token to use as a padding token."
-            )
+            for pad_candidate in ["<pad>", "[PAD]", "</s>", "[SEP]", "<s>", "[CLS]"]:
+                if pad_candidate in tokenizer.vocab:
+                    tokenizer.padding_side = "left"
+                    tokenizer.pad_token = pad_candidate
+                    model.config.pad_token_id = tokenizer.pad_token_id
+                    break
+
+            # If none of the padding candidates are in the tokenizer's vocab, then we
+            # raise an error.
+            else:
+                raise ValueError(
+                    "The tokenizer does not have a padding token and no padding token "
+                    "candidates were found in the tokenizer's vocab."
+                )
 
     return model, tokenizer
