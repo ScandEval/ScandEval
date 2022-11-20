@@ -26,9 +26,10 @@ sentencepiece = ">=0.1.96,<1.0.0"
 protobuf = ">=3.20.0,<3.21.0"
 seqeval = "^1.2.2"
 pandas = "^1.4.0"
-python-dotenv = "^0.20.0"
-evaluate = "^0.3.0"
-sacremoses = "^0.0.53"
+python-dotenv = ">=0.20.0,<1.0.0"
+evaluate = ">=0.3.0,<1.0.0"
+sacremoses = ">=0.0.53,<1.0.0"
+numba = ">=0.56.4,<1.0.0"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^7.1.1"
