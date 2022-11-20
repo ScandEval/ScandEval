@@ -75,7 +75,12 @@ class SequenceClassification(BenchmarkDataset):
         def tokenise(examples: dict) -> TokenizedOutputs:
 
             # If the tokenizer is not adding special tokens, then we add them manually
-            if not has_cls_token and not has_sep_token:
+            if (
+                not has_cls_token
+                and not has_sep_token
+                and cls_token is not None
+                and sep_token is not None
+            ):
                 examples["text"] = [
                     f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
                 ]
