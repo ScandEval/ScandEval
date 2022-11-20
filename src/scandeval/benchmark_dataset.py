@@ -163,13 +163,9 @@ class BenchmarkDataset(ABC):
 
         # Get bootstrap sample indices
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
-        breakpoint()
 
         # Get bootstrapped datasets
-        tests = [
-            Dataset.from_dict(test[test_bidxs[idx]])
-            for idx in range(test_bidxs.shape[0])
-        ]
+        tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
 
         # Preprocess the datasets
         try:
