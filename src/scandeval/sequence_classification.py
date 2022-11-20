@@ -54,6 +54,7 @@ class SequenceClassification(BenchmarkDataset):
         has_sep_token = special_token_metadata["has_sep_token"]
         cls_token = special_token_metadata["cls_token"]
         sep_token = special_token_metadata["sep_token"]
+        breakpoint()
 
         def tokenise(examples: dict) -> TokenizedOutputs:
 
