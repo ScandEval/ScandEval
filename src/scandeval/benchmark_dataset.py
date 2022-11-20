@@ -284,7 +284,7 @@ class BenchmarkDataset(ABC):
         )
 
         # Set batch size variable
-        batch_size = 32 if not self.benchmark_config.testing else 1
+        batch_size = 1 if not self.benchmark_config.testing else 1
 
         # Initialise training arguments
         with warnings.catch_warnings():
