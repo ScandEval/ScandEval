@@ -234,6 +234,13 @@ class BenchmarkDataset(ABC):
                 else:
                     bs = training_args.per_device_train_batch_size
                     ga = training_args.gradient_accumulation_steps
+
+                    logger.info(
+                        "CUDA ran out of memory, so we are reducing the batch size "
+                        f"from {bs} to {bs // 2} and increasing the gradient "
+                        f"accumulation steps from {ga} to {ga * 2}."
+                    )
+
                     bs, ga = handle_error(
                         e=itr_scores,
                         per_device_train_batch_size=bs,
