@@ -254,9 +254,13 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
     elif tokenizer.bos_token_id in test_input_ids:
         cls_token_id = tokenizer.bos_token_id
         cls_token = tokenizer.bos_token
-    else:
+    elif tokenizer.cls_token is not None:
         cls_token_id = tokenizer.cls_token_id
         cls_token = tokenizer.cls_token
+        has_cls_token = False
+    else:
+        cls_token_id = tokenizer.bos_token_id
+        cls_token = tokenizer.bos_token
         has_cls_token = False
 
     # Extract the SEP token IDs from the tokenizer, if it's using them
@@ -265,8 +269,11 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
         sep_token = tokenizer.sep_token
     elif tokenizer.eos_token_id in test_input_ids:
         sep_token = tokenizer.eos_token
-    else:
+    elif tokenizer.sep_token is not None:
         sep_token = tokenizer.sep_token
+        has_sep_token = False
+    else:
+        sep_token = tokenizer.eos_token
         has_sep_token = False
 
     return dict(
