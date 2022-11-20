@@ -239,6 +239,8 @@ def fix_model_and_tokenizer(
         else:
             tokenizer.model_max_length = 512
 
+    tokenizer.model_max_length = 512
+
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use the SEP token
     # as the padding token
     if tokenizer.pad_token is None:
