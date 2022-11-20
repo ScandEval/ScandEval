@@ -289,7 +289,7 @@ class BenchmarkDataset(ABC):
         )
 
         # Set batch size variable
-        batch_size = 1 if not self.benchmark_config.testing else 1
+        batch_size = 32 if not self.benchmark_config.testing else 1
 
         # Initialise training arguments
         with warnings.catch_warnings():
@@ -446,7 +446,7 @@ class BenchmarkDataset(ABC):
             trainer = self._get_trainer(
                 model=model,
                 args=training_args,
-                train_dataset=prepared_train.select(range(400, 1000)),
+                train_dataset=prepared_train,
                 eval_dataset=prepared_val,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
@@ -474,13 +474,9 @@ class BenchmarkDataset(ABC):
                 trainer.add_callback(NeverLeaveProgressCallback)
 
             # Finetune the model
-            try:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=UserWarning)
-                    trainer.train()
-            except Exception as e:
-                breakpoint()
-                print(e)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                trainer.train()
 
             # Log training scores and save the state
             if self.benchmark_config.evaluate_train:
