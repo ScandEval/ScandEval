@@ -68,7 +68,7 @@ class SequenceClassification(BenchmarkDataset):
                     f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
                 ]
 
-            return tokenizer(examples["text"], truncation=True, padding=True)
+            return tokenizer(examples["text"], truncation=True, padding=False)
 
         tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
 
