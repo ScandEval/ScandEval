@@ -12,6 +12,7 @@ from transformers.models.electra.modeling_electra import (
     ElectraForSequenceClassification,
     ElectraForTokenClassification,
 )
+from transformers.models.gptj.modeling_gptj import GPTJForQuestionAnswering
 from transformers.models.xlm_roberta.modeling_xlm_roberta import (
     XLMRobertaForQuestionAnswering,
     XLMRobertaForSequenceClassification,
@@ -98,10 +99,14 @@ def load_model(
             )
 
             # Get the model class associated with the supertask
-            model_cls_or_none: Union[None, Type[Model]] = get_class_by_name(
-                class_name=f"auto-model-for-{supertask}",
-                module_name="transformers",
-            )
+            model_cls_or_none: Union[None, Type[Model]]
+            if supertask == "question-answering" and config.model_type == "gpt2":
+                model_cls_or_none = GPTJForQuestionAnswering
+            else:
+                model_cls_or_none = get_class_by_name(
+                    class_name=f"auto-model-for-{supertask}",
+                    module_name="transformers",
+                )
 
             # If the model class could not be found then raise an error
             if not model_cls_or_none:
