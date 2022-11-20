@@ -510,6 +510,7 @@ class BenchmarkDataset(ABC):
             except UnboundLocalError:
                 pass
             clear_memory()
+            breakpoint()
             return e
 
     def __call__(self, *args, **kwargs):
