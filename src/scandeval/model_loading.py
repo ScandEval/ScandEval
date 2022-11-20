@@ -4,6 +4,7 @@
 import warnings
 from typing import Dict, List, Tuple, Type, Union
 
+from transformers import PreTrainedModel
 from transformers.models.auto.configuration_auto import AutoConfig
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.electra.modeling_electra import (
@@ -73,39 +74,7 @@ def load_model(
     try:
         # If the model ID specifies a fresh model, then load that.
         if model_id.startswith("fresh"):
-
-            if model_id == "fresh-xlmr-base":
-                model_id = "xlm-roberta-base"
-                if supertask == "sequence-classification":
-                    model_cls = XLMRobertaForSequenceClassification
-                elif supertask == "token-classification":
-                    model_cls = XLMRobertaForTokenClassification
-                elif supertask == "question-answering":
-                    model_cls = XLMRobertaForQuestionAnswering
-                else:
-                    raise InvalidBenchmark(
-                        f"Supertask {supertask} is not supported for model {model_id}"
-                    )
-
-            elif model_id == "fresh-electra-small":
-                model_id = "google/electra-small-discriminator"
-                if supertask == "sequence-classification":
-                    model_cls = ElectraForSequenceClassification
-                elif supertask == "token-classification":
-                    model_cls = ElectraForTokenClassification
-                elif supertask == "question-answering":
-                    model_cls = ElectraForQuestionAnswering
-                else:
-                    raise InvalidBenchmark(
-                        f"Supertask {supertask} is not supported for model {model_id}"
-                    )
-
-            else:
-                raise ValueError(
-                    f"A fresh model was chosen, `{model_id}`, but it was not "
-                    "recognized."
-                )
-
+            model_cls = load_fresh_model_class(model_id=model_id, supertask=supertask)
             config = AutoConfig.from_pretrained(
                 model_id,
                 use_auth_token=use_auth_token,
@@ -189,6 +158,53 @@ def load_model(
     model, tokenizer = fix_model_and_tokenizer(model, tokenizer)
 
     return tokenizer, model
+
+
+def load_fresh_model_class(model_id: str, supertask: str) -> Type[PreTrainedModel]:
+    """Load a fresh model class.
+
+    Args:
+        model_id (str):
+            The Hugging Face ID of the model.
+        supertask (str):
+            The supertask of the task to benchmark the model on.
+
+    Returns:
+        Type[PreTrainedModel]:
+            The model class.
+    """
+    if model_id == "fresh-xlmr-base":
+        model_id = "xlm-roberta-base"
+        if supertask == "sequence-classification":
+            model_cls = XLMRobertaForSequenceClassification
+        elif supertask == "token-classification":
+            model_cls = XLMRobertaForTokenClassification
+        elif supertask == "question-answering":
+            model_cls = XLMRobertaForQuestionAnswering
+        else:
+            raise InvalidBenchmark(
+                f"Supertask {supertask} is not supported for model {model_id}"
+            )
+
+    elif model_id == "fresh-electra-small":
+        model_id = "google/electra-small-discriminator"
+        if supertask == "sequence-classification":
+            model_cls = ElectraForSequenceClassification
+        elif supertask == "token-classification":
+            model_cls = ElectraForTokenClassification
+        elif supertask == "question-answering":
+            model_cls = ElectraForQuestionAnswering
+        else:
+            raise InvalidBenchmark(
+                f"Supertask {supertask} is not supported for model {model_id}"
+            )
+
+    else:
+        raise ValueError(
+            f"A fresh model was chosen, `{model_id}`, but it was not " "recognized."
+        )
+
+    return model_cls
 
 
 def fix_model_and_tokenizer(
