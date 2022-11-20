@@ -336,6 +336,7 @@ class BenchmarkDataset(ABC):
             )
 
         # Remove all other keys than 'train', 'val' and 'test'
+        breakpoint()
         dataset_dict = DatasetDict(
             {key: dataset_dict[key] for key in ["train", "val", "test"]}
         )
