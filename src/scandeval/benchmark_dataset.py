@@ -245,11 +245,6 @@ class BenchmarkDataset(ABC):
                     training_args.per_device_eval_batch_size = bs
                     training_args.gradient_accumulation_steps = ga
 
-                    logger.info(
-                        f"Retrying with batch size {bs} and gradient accumulation steps "
-                        f"{ga}."
-                    )
-
                     # Clear memory, to avoid memory issues
                     try:
                         del model
