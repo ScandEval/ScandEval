@@ -31,7 +31,10 @@ def clear_memory():
     # Empty the CUDA cache
     # TODO: Also empty MPS cache
     if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+        try:
+            torch.cuda.empty_cache()
+        except RuntimeError:
+            pass
 
 
 def enforce_reproducibility(framework: str, seed: int = 4242):
