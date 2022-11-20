@@ -441,7 +441,7 @@ class BenchmarkDataset(ABC):
             trainer = self._get_trainer(
                 model=model,
                 args=training_args,
-                train_dataset=prepared_train.select(range(120, 1000)),
+                train_dataset=prepared_train.select(range(100, 1000)),
                 eval_dataset=prepared_val,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
