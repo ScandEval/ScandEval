@@ -204,6 +204,10 @@ class BenchmarkDataset(ABC):
                         "Preprocessing of the test dataset could not be done."
                     )
 
+                # Re-block terminal output, as it gets unblocked by the `transformers`
+                # package before training
+                block_terminal_output()
+
                 # Get the training arguments
                 training_args = self._get_training_args(iteration_idx=idx)
 
