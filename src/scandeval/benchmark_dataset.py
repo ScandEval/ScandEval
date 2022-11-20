@@ -476,7 +476,8 @@ class BenchmarkDataset(ABC):
             # TEMP: Get the dataloader
             dataloader = trainer.get_train_dataloader()
             for batch in dataloader:
-                batch = {k: v.to("mps") for k, v in batch.items()}
+                batch = {k: v.to("cuda") for k, v in batch.items()}
+                batch.pop("labels")
                 print(batch)
                 breakpoint()
                 break
