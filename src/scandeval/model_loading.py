@@ -129,7 +129,8 @@ def load_model(
             else:
                 model = model_or_tuple
 
-    except (OSError, ValueError):
+    except (OSError, ValueError) as e:
+        raise e
         msg = (
             f"The model {model_id} either does not exist on the Hugging Face Hub, or "
             "it has no frameworks registered, or it is a private model. If it *does* "
