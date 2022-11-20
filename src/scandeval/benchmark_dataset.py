@@ -23,7 +23,6 @@ from transformers.trainer_callback import (
 )
 from transformers.trainer_utils import IntervalStrategy
 from transformers.training_args import OptimizerNames, TrainingArguments
-from transformers.utils.import_utils import is_torch_tpu_available
 
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
