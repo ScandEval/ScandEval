@@ -152,6 +152,7 @@ def load_model(
             use_fast=True,
             add_prefix_space=prefix,
             cache_dir=cache_dir,
+            verbose=False,
         )
 
     # Fix the model and the tokenizer
