@@ -14,6 +14,7 @@ import pkg_resources
 import requests
 import torch
 from datasets.utils import disable_progress_bar
+from numba import cuda
 from requests.exceptions import RequestException
 from transformers import logging as tf_logging
 
@@ -31,10 +32,11 @@ def clear_memory():
     # Empty the CUDA cache
     # TODO: Also empty MPS cache
     if torch.cuda.is_available():
-        try:
-            torch.cuda.empty_cache()
-        except RuntimeError:
-            pass
+        current_device = torch.cuda.current_device()
+        cuda.select_device(current_device)
+        cuda.close()
+        cuda.select_device(current_device)
+        torch.cuda.empty_cache()
 
 
 def enforce_reproducibility(framework: str, seed: int = 4242):
