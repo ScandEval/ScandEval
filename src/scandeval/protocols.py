@@ -47,6 +47,7 @@ class Tokenizer(Protocol):
     bos_token: str
     sep_token: str
     eos_token: str
+    pad_token: str
     cls_token_id: int
     bos_token_id: int
     sep_token_id: int
