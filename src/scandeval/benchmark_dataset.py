@@ -468,18 +468,6 @@ class BenchmarkDataset(ABC):
             if self.benchmark_config.progress_bar:
                 trainer.add_callback(NeverLeaveProgressCallback)
 
-            # TEMP: Get the dataloader
-            dataloader = trainer.get_train_dataloader()
-            for batch in dataloader:
-
-                # Move the batch to cuda
-                batch = {key: value.cuda() for key, value in batch.items()}
-                batch.pop("labels")
-
-                print(batch)
-                breakpoint()
-                break
-
             # Finetune the model
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
