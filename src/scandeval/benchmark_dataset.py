@@ -162,18 +162,19 @@ class BenchmarkDataset(ABC):
         num_iter = 10 if not self.benchmark_config.testing else 2
 
         # Get bootstrap sample indices
+        train_bidxs = rng.integers(0, len(train), size=(num_iter, len(train)))
+        val_bidxs = rng.integers(0, len(val), size=(num_iter, len(val)))
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
 
         # Get bootstrapped datasets
+        trains = [train.select(train_bidxs[idx]) for idx in range(train_bidxs.shape[0])]
+        vals = [val.select(val_bidxs[idx]) for idx in range(val_bidxs.shape[0])]
         tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
 
-        # Preprocess the datasets
-        try:
-            params = dict(framework="pytorch", config=model.config, tokenizer=tokenizer)
-            prepared_train = self._preprocess_data(train, split="train", **params)
-            prepared_val = self._preprocess_data(val, split="val", **params)
-        except ValueError:
-            raise InvalidBenchmark("Preprocessing of the dataset could not be done.")
+        # Set up the preprocessing parameters
+        preprocess_params = dict(
+            framework="pytorch", config=model.config, tokenizer=tokenizer
+        )
 
         # Get the training arguments
         training_args = self._get_training_args()
@@ -206,9 +207,26 @@ class BenchmarkDataset(ABC):
 
             while True:
 
-                # Prepare the bootstrapped test dataset
+                # Get the boostrapped dataset for this iteration
+                train = trains[idx]
+                val = vals[idx]
                 test = tests[idx]
-                prepared_test = self._preprocess_data(test, split="test", **params)
+
+                # Prepare the datasets
+                try:
+                    prepared_train = self._preprocess_data(
+                        train, split="train", **preprocess_params
+                    )
+                    prepared_val = self._preprocess_data(
+                        val, split="val", **preprocess_params
+                    )
+                    prepared_test = self._preprocess_data(
+                        test, split="test", **preprocess_params
+                    )
+                except ValueError:
+                    raise InvalidBenchmark(
+                        "Preprocessing of the dataset could not be done."
+                    )
 
                 itr_scores = self._benchmark_single_iteration(
                     model_config=model_config,
