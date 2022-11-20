@@ -474,9 +474,13 @@ class BenchmarkDataset(ABC):
                 trainer.add_callback(NeverLeaveProgressCallback)
 
             # Finetune the model
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=UserWarning)
-                trainer.train()
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=UserWarning)
+                    trainer.train()
+            except Exception as e:
+                print(e)
+                breakpoint()
 
             # Log training scores and save the state
             if self.benchmark_config.evaluate_train:

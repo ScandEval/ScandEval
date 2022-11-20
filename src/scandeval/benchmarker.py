@@ -334,6 +334,8 @@ class Benchmarker:
             return record
 
         except InvalidBenchmark as e:
+
+            # TEMP
             raise e
 
             # If the model ID is not valid then raise an error, if specified
