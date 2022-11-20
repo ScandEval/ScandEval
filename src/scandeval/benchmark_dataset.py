@@ -289,7 +289,7 @@ class BenchmarkDataset(ABC):
         )
 
         # Set batch size variable
-        batch_size = 32 if not self.benchmark_config.testing else 1
+        batch_size = 8 if not self.benchmark_config.testing else 1
 
         # Initialise training arguments
         with warnings.catch_warnings():
@@ -479,8 +479,8 @@ class BenchmarkDataset(ABC):
                     warnings.simplefilter("ignore", category=UserWarning)
                     trainer.train()
             except Exception as e:
-                print(e)
                 breakpoint()
+                print(e)
 
             # Log training scores and save the state
             if self.benchmark_config.evaluate_train:
