@@ -242,16 +242,18 @@ def fix_model_and_tokenizer(
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use the SEP token
     # as the padding token
     if tokenizer.pad_token is None:
-        if hasattr(tokenizer, "eos_token"):
+        if tokenizer.eos_token is not None:
+            tokenizer.padding_side = "left"
             tokenizer.pad_token = tokenizer.eos_token
             model.config.pad_token_id = model.config.eos_token_id
-        elif hasattr(tokenizer, "sep_token"):
+        elif tokenizer.sep_token is not None:
+            tokenizer.padding_side = "left"
             tokenizer.pad_token = tokenizer.sep_token
             model.config.pad_token_id = model.config.sep_token_id
         else:
             raise ValueError(
-                "The tokenizer does not have a padding token and does not have a "
-                "SEP token or EOS token to use as a padding token."
+                "The tokenizer does not have a padding token and does not have a SEP "
+                "token or EOS token to use as a padding token."
             )
 
     return model, tokenizer
