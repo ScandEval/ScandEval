@@ -40,7 +40,7 @@ and this project adheres to
 
 
 ## [v5.0.0] - 2022-11-03
-### Added
+### Added
 - A new argument, `ignore_duplicates` (or `--ignore-duplicates/--no-ignore-duplicates`
   in the CLI) further ignores an evaluation if it has previously been evaluated. This
   argument defaults to `True`.
@@ -50,7 +50,7 @@ and this project adheres to
   includes the number of trainable model parameters, the size of the model's vocabulary
   and the model's maximum sequence length.
 
-### Changed
+### Changed
 - Evaluation results are now saved in a JSONL file instead of a JSON file, and results
   are appended onto the file after every evaluation.
 - You can now specify your Hugging Face authentication token in the `use_auth_token`
@@ -64,7 +64,7 @@ and this project adheres to
   adapt to the task at hand, rather than having to benchmark, e.g.,
   `fresh-xlmr-base-sequence-clf` and `fresh-xlmr-base-token-clf` separately.
 
-### Fixed
+### Fixed
 - ScandEval now works on TPUs.
 - Removed `bf16` precision, as it only works for some GPUs.
 - Should output less `transformers` logging now.
@@ -91,7 +91,7 @@ and this project adheres to
   `model_dict` were not removed from memory after each run, potentially causing a
   memory leak.
 
-### Added
+### Added
 - Added the `HuggingFaceHubDown` and `NoInternetConnection` exceptions, to give more
   information to the user when benchmarking fails.
 - Added unit tests.
