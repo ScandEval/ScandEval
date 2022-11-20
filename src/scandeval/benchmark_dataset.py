@@ -170,6 +170,8 @@ class BenchmarkDataset(ABC):
                 "done."
             )
 
+        bs: int = 32
+        ga: int = 1
         scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
         for idx in itr:
 
@@ -211,6 +213,11 @@ class BenchmarkDataset(ABC):
                 # Get the training arguments
                 training_args = self._get_training_args(iteration_idx=idx)
 
+                # Set the correct batch size and gradient accumulation
+                training_args.per_device_train_batch_size = bs
+                training_args.per_device_eval_batch_size = bs
+                training_args.gradient_accumulation_steps = ga
+
                 itr_scores = self._benchmark_single_iteration(
                     iteration_idx=idx,
                     model_config=model_config,
@@ -246,12 +253,6 @@ class BenchmarkDataset(ABC):
                         per_device_train_batch_size=bs,
                         gradient_accumulation_steps=ga,
                     )
-
-                    print(bs, ga)
-
-                    training_args.per_device_train_batch_size = bs
-                    training_args.per_device_eval_batch_size = bs
-                    training_args.gradient_accumulation_steps = ga
 
                     # Clear memory, to avoid memory issues
                     try:
