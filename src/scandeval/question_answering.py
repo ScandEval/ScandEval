@@ -6,6 +6,7 @@ from typing import Callable, List, Optional
 
 from datasets import Value
 from datasets.arrow_dataset import Dataset
+from pyarrow import ArrowInvalid
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
@@ -73,6 +74,11 @@ class QuestionAnswering(BenchmarkDataset):
             )
         except NotImplementedError as e:
             raise InvalidBenchmark(str(e))
+        except (ArrowInvalid, OverflowError) as e:
+            print("ERROR")
+            print(e)
+            breakpoint()
+            print(e)
 
         # The Trainer hides the columns that are not used by the model (here `id` and
         # `offset_mapping` which we will need for our post-processing), so we set them
