@@ -160,6 +160,7 @@ class BenchmarkDataset(ABC):
 
         # TEMP: Preprocess the test data
         for idx, test in enumerate(tests):
+            print(idx)
             self._preprocess_data(test, split="test", **preprocess_params)
         breakpoint()
 
