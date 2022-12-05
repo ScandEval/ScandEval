@@ -70,6 +70,7 @@ class QuestionAnswering(BenchmarkDataset):
             preprocessed = dataset.map(
                 preprocess_fn,
                 batched=True,
+                batch_size=10,
                 remove_columns=dataset.column_names,
             )
         except NotImplementedError as e:
