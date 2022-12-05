@@ -79,7 +79,7 @@ class BenchmarkDataset(ABC):
             for metric_cfg in dataset_config.task.metrics
         }
 
-    def benchmark(
+    def benchmark(  # noqa
         self,
         model_id: str,
     ) -> Tuple[SCORE_DICT, Dict[str, int]]:
@@ -157,6 +157,11 @@ class BenchmarkDataset(ABC):
         preprocess_params = dict(
             framework="pytorch", config=model.config, tokenizer=tokenizer
         )
+
+        # TEMP: Preprocess the test data
+        for idx, test in enumerate(tests):
+            self._preprocess_data(test, split="test", **preprocess_params)
+        breakpoint()
 
         # Prepare the train and validation datasets
         try:
