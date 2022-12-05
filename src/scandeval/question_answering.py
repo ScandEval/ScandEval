@@ -71,7 +71,7 @@ class QuestionAnswering(BenchmarkDataset):
             )
         except NotImplementedError as e:
             raise InvalidBenchmark(str(e))
-        except ArrowInvalid as e:
+        except (ArrowInvalid, OverflowError) as e:
             breakpoint()
             print(e)
 
