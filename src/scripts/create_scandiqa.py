@@ -78,7 +78,7 @@ def main() -> None:
             pass
 
         # Push the dataset to the Hugging Face Hub
-        dataset.push_to_hub(mini_dataset_id, private=True)
+        dataset.push_to_hub(mini_dataset_id)
 
 
 if __name__ == "__main__":
