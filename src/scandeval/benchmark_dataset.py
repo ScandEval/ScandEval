@@ -163,7 +163,6 @@ class BenchmarkDataset(ABC):
             print(idx)
             self._preprocess_data(test, split="test", **preprocess_params)
         print("Done")
-        breakpoint()
 
         # Prepare the train and validation datasets
         try:

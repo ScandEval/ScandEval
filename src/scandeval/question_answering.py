@@ -4,9 +4,8 @@ import logging
 from functools import partial
 from typing import Callable, List, Optional
 
-import numpy as np
+from datasets import Value
 from datasets.arrow_dataset import Dataset
-from pyarrow import ArrowInvalid
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
@@ -56,6 +55,9 @@ class QuestionAnswering(BenchmarkDataset):
         split: str = kwargs.pop("split")
         tokenizer: Tokenizer = kwargs.pop("tokenizer")
 
+        # Convert "id" column datatype to string
+        dataset = dataset.cast_column(column="id", feature=Value(dtype="string"))
+
         # Choose the preprocessing function depending on the dataset split
         if split == "test":
             preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
@@ -71,11 +73,6 @@ class QuestionAnswering(BenchmarkDataset):
             )
         except NotImplementedError as e:
             raise InvalidBenchmark(str(e))
-        except (ArrowInvalid, OverflowError) as e:
-            print("ERROR")
-            print(e)
-            breakpoint()
-            print(e)
 
         # The Trainer hides the columns that are not used by the model (here `id` and
         # `offset_mapping` which we will need for our post-processing), so we set them
