@@ -4,7 +4,6 @@ import logging
 from functools import partial
 from typing import Callable, List, Optional
 
-from datasets import Value
 from datasets.arrow_dataset import Dataset
 from pyarrow import ArrowInvalid
 from transformers.data.data_collator import DataCollatorWithPadding
@@ -55,9 +54,6 @@ class QuestionAnswering(BenchmarkDataset):
         """
         split: str = kwargs.pop("split")
         tokenizer: Tokenizer = kwargs.pop("tokenizer")
-
-        # Convert "id" column datatype to string
-        dataset = dataset.cast_column(column="id", feature=Value(dtype="string"))
 
         # Choose the preprocessing function depending on the dataset split
         if split == "test":
