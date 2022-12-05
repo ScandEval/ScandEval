@@ -71,11 +71,6 @@ class QuestionAnswering(BenchmarkDataset):
             )
         except NotImplementedError as e:
             raise InvalidBenchmark(str(e))
-        except (ArrowInvalid, OverflowError) as e:
-            print("ERROR")
-            print(e)
-            breakpoint()
-            print(e)
 
         # The Trainer hides the columns that are not used by the model (here `id` and
         # `offset_mapping` which we will need for our post-processing), so we set them

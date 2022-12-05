@@ -158,12 +158,6 @@ class BenchmarkDataset(ABC):
             framework="pytorch", config=model.config, tokenizer=tokenizer
         )
 
-        # TEMP: Preprocess the test data
-        for idx, test in enumerate(tests):
-            print(idx)
-            self._preprocess_data(test, split="test", **preprocess_params)
-        print("Done")
-
         # Prepare the train and validation datasets
         try:
             prepared_train = self._preprocess_data(
