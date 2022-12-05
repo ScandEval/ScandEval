@@ -37,6 +37,8 @@ and this project adheres to
   _actually_ was greater than 1,000, so now this upper bound has been increased to
   100,000.
 - Now includes `sacremoses` as a dependency, as this is required by some tokenizers.
+- Converted the `id` column in ScandiQA to a string, to avoid integer overflow errors
+  during preprocessing.
 
 
 ## [v5.0.0] - 2022-11-03
