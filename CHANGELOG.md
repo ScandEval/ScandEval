@@ -39,6 +39,8 @@ and this project adheres to
 - Now includes `sacremoses` as a dependency, as this is required by some tokenizers.
 - Converted the `id` column in ScandiQA to a string, to avoid integer overflow errors
   during preprocessing.
+- If there is a `torch` operation which does not have a deterministic component, then a
+  warning will be issued instead of raising an error.
 
 
 ## [v5.0.0] - 2022-11-03
