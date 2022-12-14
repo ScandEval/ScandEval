@@ -16,8 +16,7 @@ import torch
 from datasets.utils import disable_progress_bar
 from requests.exceptions import RequestException
 from transformers import logging as tf_logging
-
-from scandeval.protocols import Tokenizer
+from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .exceptions import InvalidBenchmark
 
@@ -232,11 +231,11 @@ def internet_connection_available() -> bool:
         return False
 
 
-def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
+def get_special_token_metadata(tokenizer: PreTrainedTokenizer) -> dict:
     """Get the special token metadata for a tokenizer.
 
     Args:
-        tokenizer (Tokenizer):
+        tokenizer (PreTrainedTokenizer):
             The tokenizer.
 
     Returns:

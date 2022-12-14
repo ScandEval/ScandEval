@@ -9,11 +9,12 @@ import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from numpy._typing import NDArray
+from transformers import BatchEncoding
 from transformers.data.data_collator import DataCollatorForTokenClassification
+from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
-from .protocols import TokenizedOutputs, Tokenizer
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -144,8 +145,8 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
 
     def _tokenize_and_align_labels(
-        self, examples: dict, tokenizer: Tokenizer, label2id: Dict[str, int]
-    ) -> TokenizedOutputs:
+        self, examples: dict, tokenizer: PreTrainedTokenizer, label2id: Dict[str, int]
+    ) -> BatchEncoding:
         """Tokenise all texts and align the labels with them.
 
         Args:
@@ -157,7 +158,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 A dictionary that converts NER tags to IDs.
 
         Returns:
-            TokenizedOutputs:
+            BatchEncoding:
                 A dictionary containing the tokenized data as well as labels.
         """
         # Tokenize the texts. We use the `is_split_into_words` argument here because
@@ -303,11 +304,11 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
         return tokenised_dataset
 
-    def _load_data_collator(self, tokenizer: Optional[Tokenizer] = None):
+    def _load_data_collator(self, tokenizer: Optional[PreTrainedTokenizer] = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Tokenizer or None, optional):
+            tokenizer (PreTrainedTokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 

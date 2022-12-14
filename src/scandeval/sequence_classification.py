@@ -5,13 +5,14 @@ from functools import partial
 from typing import Optional
 
 from datasets.arrow_dataset import Dataset
-from transformers.data.data_collator import DataCollatorWithPadding
+from transformers import BatchEncoding
+from transformers.data.data_collator import DataCollator, DataCollatorWithPadding
+from transformers.tokenization_utils import PreTrainedTokenizer
 
 from scandeval.utils import get_special_token_metadata
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
-from .protocols import DataCollator, TokenizedOutputs, Tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class SequenceClassification(BenchmarkDataset):
             Hugging Face dataset:
                 The preprocessed dataset.
         """
-        tokenizer: Tokenizer = kwargs["tokenizer"]
+        tokenizer: PreTrainedTokenizer = kwargs["tokenizer"]
 
         # Extract special token metadata from the tokenizer
         special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
@@ -55,7 +56,7 @@ class SequenceClassification(BenchmarkDataset):
         cls_token = special_token_metadata["cls_token"]
         sep_token = special_token_metadata["sep_token"]
 
-        def tokenise(examples: dict) -> TokenizedOutputs:
+        def tokenise(examples: dict) -> BatchEncoding:
 
             # If the tokenizer is not adding special tokens, then we add them manually
             if (
@@ -92,7 +93,7 @@ class SequenceClassification(BenchmarkDataset):
         return examples
 
     def _load_data_collator(
-        self, tokenizer: Optional[Tokenizer] = None
+        self, tokenizer: Optional[PreTrainedTokenizer] = None
     ) -> DataCollator:
         """Load the data collator used to prepare samples during finetuning.
 

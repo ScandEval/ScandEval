@@ -4,6 +4,7 @@ import warnings
 from typing import Dict, List, Tuple, Type, Union
 
 from transformers import PreTrainedModel
+from transformers.configuration_utils import PretrainedConfig
 from transformers.models.auto.configuration_auto import AutoConfig
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.electra.modeling_electra import (
@@ -16,9 +17,9 @@ from transformers.models.xlm_roberta.modeling_xlm_roberta import (
     XLMRobertaForSequenceClassification,
     XLMRobertaForTokenClassification,
 )
+from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .exceptions import InvalidBenchmark
-from .protocols import Config, Model, Tokenizer
 from .utils import block_terminal_output, get_class_by_name
 
 
@@ -32,7 +33,7 @@ def load_model(
     from_flax: bool,
     use_auth_token: Union[bool, str],
     cache_dir: str,
-) -> Tuple[Tokenizer, Model]:
+) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     """Load a model.
 
     Args:
@@ -67,7 +68,7 @@ def load_model(
         RuntimeError:
             If the framework is not recognized.
     """
-    config: Config
+    config: PretrainedConfig
     block_terminal_output()
 
     try:
@@ -99,7 +100,7 @@ def load_model(
             )
 
             # Get the model class associated with the supertask
-            model_cls_or_none: Union[None, Type[Model]] = get_class_by_name(
+            model_cls_or_none: Union[None, Type[PreTrainedModel]] = get_class_by_name(
                 class_name=f"auto-model-for-{supertask}",
                 module_name="transformers",
             )
@@ -146,7 +147,7 @@ def load_model(
     prefix = "Roberta" in type(model).__name__
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        tokenizer: Tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
             model_id,
             revision=revision,
             use_auth_token=use_auth_token,
@@ -212,14 +213,14 @@ def load_fresh_model_class(
 
 
 def fix_model_and_tokenizer(
-    model: Model, tokenizer: Tokenizer
-) -> Tuple[Model, Tokenizer]:
+    model: PreTrainedModel, tokenizer: PreTrainedTokenizer
+) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
     """Fixes the model and tokenizer to be compatible with the benchmarking framework.
 
     Args:
-        model (Model):
+        model (PreTrainedModel):
             The model to fix.
-        tokenizer (Tokenizer):
+        tokenizer (PreTrainedTokenizer):
             The tokenizer to fix.
 
     Returns:
@@ -291,7 +292,7 @@ def fix_model_and_tokenizer(
         # If the tokenizer does not have a BOS token, we use find a suitable BOS token
         # and set it
         for pad_candidate in ["<s>", "[CLS]", "<|endoftext|>"]:
-            if pad_candidate in tokenizer.vocab:
+            if pad_candidate in tokenizer.get_vocab():
                 tokenizer.bos_token = pad_candidate
                 model.config.bos_token_id = tokenizer.bos_token_id
                 break

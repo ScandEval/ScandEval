@@ -5,8 +5,9 @@ from functools import partial
 from typing import Callable, List, Optional
 
 from datasets.arrow_dataset import Dataset
-from pyarrow import ArrowInvalid
-from transformers.data.data_collator import DataCollatorWithPadding
+from transformers.data.data_collator import DataCollator, DataCollatorWithPadding
+from transformers.modeling_utils import PreTrainedModel
+from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
 from transformers.trainer_callback import TrainerCallback
@@ -16,7 +17,6 @@ from scandeval.utils import get_special_token_metadata
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
-from .protocols import DataCollator, Model, TokenizedOutputs, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
 
 # Set up logger
@@ -53,7 +53,7 @@ class QuestionAnswering(BenchmarkDataset):
             Hugging Face dataset: The preprocessed dataset.
         """
         split: str = kwargs.pop("split")
-        tokenizer: Tokenizer = kwargs.pop("tokenizer")
+        tokenizer: PreTrainedTokenizer = kwargs.pop("tokenizer")
 
         # Choose the preprocessing function depending on the dataset split
         if split == "test":
@@ -85,11 +85,11 @@ class QuestionAnswering(BenchmarkDataset):
 
     def _get_trainer(
         self,
-        model: Model,
+        model: PreTrainedModel,
         args: TrainingArguments,
         train_dataset: Dataset,
         eval_dataset: Dataset,
-        tokenizer: Tokenizer,
+        tokenizer: PreTrainedTokenizer,
         data_collator: DataCollator,
         compute_metrics: Callable,
         callbacks: List[TrainerCallback],
@@ -118,7 +118,7 @@ class QuestionAnswering(BenchmarkDataset):
             metric_key_prefix=metric_key_prefix,
         )
 
-    def _load_data_collator(self, tokenizer: Optional[Tokenizer] = None):
+    def _load_data_collator(self, tokenizer: Optional[PreTrainedTokenizer] = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
@@ -135,8 +135,8 @@ class QuestionAnswering(BenchmarkDataset):
 
 def prepare_train_examples(
     examples: BatchEncoding,
-    tokenizer: Tokenizer,
-) -> TokenizedOutputs:
+    tokenizer: PreTrainedTokenizer,
+) -> BatchEncoding:
     """Prepare the features for training.
 
     Args:
@@ -144,7 +144,7 @@ def prepare_train_examples(
             The examples to prepare.
 
     Returns:
-        TokenizedOutputs:
+        BatchEncoding:
             The prepared examples.
     """
     # Some of the questions have lots of whitespace on the left, which is not useful
@@ -274,8 +274,8 @@ def prepare_train_examples(
 
 def prepare_test_examples(
     examples: BatchEncoding,
-    tokenizer: Tokenizer,
-) -> TokenizedOutputs:
+    tokenizer: PreTrainedTokenizer,
+) -> BatchEncoding:
     """Prepare test examples.
 
     Args:
@@ -285,7 +285,7 @@ def prepare_test_examples(
             The tokenizer used to preprocess the examples.
 
     Returns:
-        TokenizedOutputs:
+        BatchEncoding:
             The prepared test examples.
     """
     # Some of the questions have lots of whitespace on the left, which is not useful

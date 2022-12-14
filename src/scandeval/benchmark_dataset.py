@@ -14,6 +14,9 @@ from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from tqdm.auto import tqdm
+from transformers.data.data_collator import DataCollator
+from transformers.modeling_utils import PreTrainedModel
+from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.trainer import Trainer
 from transformers.trainer_callback import (
     EarlyStoppingCallback,
@@ -29,7 +32,6 @@ from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_config
 from .model_loading import load_model
-from .protocols import DataCollator, Model, Tokenizer
 from .scores import log_scores
 from .types import SCORE_DICT
 from .utils import (
@@ -273,7 +275,9 @@ class BenchmarkDataset(ABC):
 
         return all_scores, metadata_dict
 
-    def _get_metadata(self, model: Model, tokenizer: Tokenizer) -> Dict[str, int]:
+    def _get_metadata(
+        self, model: PreTrainedModel, tokenizer: PreTrainedTokenizer
+    ) -> Dict[str, int]:
 
         # Store the number of parameters in the model, the maximum sequence length and
         # the size of the model's vocabulary
@@ -409,8 +413,8 @@ class BenchmarkDataset(ABC):
         prepared_test: Dataset,
         data_collator: DataCollator,
         training_args: TrainingArguments,
-        tokenizer: Optional[Tokenizer] = None,
-        model: Optional[Model] = None,
+        tokenizer: Optional[PreTrainedTokenizer] = None,
+        model: Optional[PreTrainedModel] = None,
     ) -> Union[Dict[str, Dict[str, float]], Exception]:
         """Run a single iteration of a benchmark.
 
@@ -433,10 +437,10 @@ class BenchmarkDataset(ABC):
                 The data collator.
             training_args (TrainingArguments):
                 The training arguments.
-            tokenizer (Tokenizer or None, optional):
+            tokenizer (PreTrainedTokenizer or None, optional):
                 The tokenizer to use in the benchmark. If None then a new tokenizer
                 will be loaded. Defaults to None.
-            model (Model or None, optional):
+            model (PreTrainedModel or None, optional):
                 The model to use in the benchmark. If None then a new model will be
                 loaded. Defaults to None.
 
@@ -550,11 +554,11 @@ class BenchmarkDataset(ABC):
 
     def _get_trainer(
         self,
-        model: Model,
+        model: PreTrainedModel,
         args: TrainingArguments,
         train_dataset: Dataset,
         eval_dataset: Dataset,
-        tokenizer: Tokenizer,
+        tokenizer: PreTrainedTokenizer,
         data_collator: DataCollator,
         compute_metrics: Callable,
         callbacks: List[TrainerCallback],
@@ -562,7 +566,7 @@ class BenchmarkDataset(ABC):
         """Get a Trainer object.
 
         Args:
-            model (Model):
+            model (PreTrainedModel):
                 The model to finetune.
             args (TrainingArguments):
                 The training arguments.
@@ -570,7 +574,7 @@ class BenchmarkDataset(ABC):
                 The training dataset.
             eval_dataset (Dataset):
                 The evaluation dataset.
-            tokenizer (Tokenizer):
+            tokenizer (PreTrainedTokenizer):
                 The tokenizer.
             data_collator (DataCollator):
                 The data collator.
@@ -653,12 +657,12 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _load_data_collator(
-        self, tokenizer: Optional[Tokenizer] = None
+        self, tokenizer: Optional[PreTrainedTokenizer] = None
     ) -> DataCollator:
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Tokenizer or None, optional):
+            tokenizer (PreTrainedTokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
