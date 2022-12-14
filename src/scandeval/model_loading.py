@@ -73,7 +73,9 @@ def load_model(
     try:
         # If the model ID specifies a fresh model, then load that.
         if model_id.startswith("fresh"):
-            model_cls = load_fresh_model_class(model_id=model_id, supertask=supertask)
+            model_cls, model_id = load_fresh_model_class(
+                model_id=model_id, supertask=supertask
+            )
             config = AutoConfig.from_pretrained(
                 model_id,
                 use_auth_token=use_auth_token,
@@ -160,7 +162,9 @@ def load_model(
     return tokenizer, model
 
 
-def load_fresh_model_class(model_id: str, supertask: str) -> Type[PreTrainedModel]:
+def load_fresh_model_class(
+    model_id: str, supertask: str
+) -> Tuple[Type[PreTrainedModel], str]:
     """Load a fresh model class.
 
     Args:
@@ -170,8 +174,8 @@ def load_fresh_model_class(model_id: str, supertask: str) -> Type[PreTrainedMode
             The supertask of the task to benchmark the model on.
 
     Returns:
-        Type[PreTrainedModel]:
-            The model class.
+        pair of Type[PreTrainedModel] and str:
+            The model class and the pretrained model ID.
     """
     if model_id == "fresh-xlmr-base":
         model_id = "xlm-roberta-base"
@@ -204,7 +208,7 @@ def load_fresh_model_class(model_id: str, supertask: str) -> Type[PreTrainedMode
             f"A fresh model was chosen, `{model_id}`, but it was not " "recognized."
         )
 
-    return model_cls
+    return model_cls, model_id
 
 
 def fix_model_and_tokenizer(
