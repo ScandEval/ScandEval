@@ -368,7 +368,7 @@ class BenchmarkDataset(ABC):
 
         # If the dataset turns out not to be a DatasetDict, then we raise an error
         if not isinstance(dataset_dict, DatasetDict):
-            raise ValueError(
+            raise InvalidBenchmark(
                 f"Expected `dataset_dict` to be a `DatasetDict`, but got "
                 f"{type(dataset_dict)}."
             )

@@ -205,8 +205,8 @@ def load_fresh_model_class(
             )
 
     else:
-        raise ValueError(
-            f"A fresh model was chosen, `{model_id}`, but it was not " "recognized."
+        raise InvalidBenchmark(
+            f"A fresh model was chosen, `{model_id}`, but it was not recognized."
         )
 
     return model_cls, model_id
@@ -261,7 +261,7 @@ def fix_model_and_tokenizer(
                 tokenizer.pad_token = tokenizer.sep_token
                 model.config.pad_token_id = tokenizer.pad_token_id
             else:
-                raise ValueError(
+                raise InvalidBenchmark(
                     "The tokenizer does not have a padding token and does not have a "
                     "SEP token or EOS token to use as a padding token."
                 )
@@ -280,7 +280,7 @@ def fix_model_and_tokenizer(
             # If none of the padding candidates are in the tokenizer's vocab, then we
             # raise an error.
             else:
-                raise ValueError(
+                raise InvalidBenchmark(
                     "The tokenizer does not have a padding token and no padding token "
                     "candidates were found in the tokenizer's vocab."
                 )
@@ -288,7 +288,7 @@ def fix_model_and_tokenizer(
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we set the BOS and EOS tokens
     if model.config.vocab_size != tokenizer.vocab_size:
-        raise ValueError(
+        raise InvalidBenchmark(
             "The vocab size of the tokenizer and the vocab size of the model do not "
             "match. This is not supported."
         )
