@@ -50,24 +50,25 @@ class SequenceClassification(BenchmarkDataset):
         tokenizer: PreTrainedTokenizer = kwargs["tokenizer"]
 
         # Extract special token metadata from the tokenizer
-        special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
-        has_cls_token = special_token_metadata["has_cls_token"]
-        has_sep_token = special_token_metadata["has_sep_token"]
-        cls_token = special_token_metadata["cls_token"]
-        sep_token = special_token_metadata["sep_token"]
+        # special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
+        # has_cls_token = special_token_metadata["has_cls_token"]
+        # has_sep_token = special_token_metadata["has_sep_token"]
+        # cls_token = special_token_metadata["cls_token"]
+        # sep_token = special_token_metadata["sep_token"]
 
         def tokenise(examples: dict) -> BatchEncoding:
 
+            # TEMP
             # If the tokenizer is not adding special tokens, then we add them manually
-            if (
-                not has_cls_token
-                and not has_sep_token
-                and cls_token is not None
-                and sep_token is not None
-            ):
-                examples["text"] = [
-                    f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
-                ]
+            # if (
+            #    not has_cls_token
+            #    and not has_sep_token
+            #    and cls_token is not None
+            #    and sep_token is not None
+            # ):
+            #    examples["text"] = [
+            #        f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
+            #    ]
 
             return tokenizer(examples["text"], truncation=True, padding=False)
 

@@ -271,7 +271,7 @@ def fix_model_and_tokenizer(
         # padding token, and use that as the padding token.
         else:
             for pad_candidate in ["<pad>", "[PAD]", "</s>", "[SEP]", "<s>", "[CLS]"]:
-                if pad_candidate in tokenizer.vocab:
+                if pad_candidate in tokenizer.get_vocab():
                     tokenizer.padding_side = "left"
                     tokenizer.pad_token = pad_candidate
                     model.config.pad_token_id = tokenizer.pad_token_id
@@ -308,7 +308,7 @@ def fix_model_and_tokenizer(
         # If the tokenizer does not have a EOS token, we use find a suitable EOS token
         # and set it
         for pad_candidate in ["</s>", "[SEP]", "<|endoftext|>"]:
-            if pad_candidate in tokenizer.vocab:
+            if pad_candidate in tokenizer.get_vocab():
                 tokenizer.eos_token = pad_candidate
                 model.config.eos_token_id = tokenizer.eos_token_id
                 break
