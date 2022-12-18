@@ -515,6 +515,8 @@ class BenchmarkDataset(ABC):
             for batch in dl:
                 print(batch["input_ids"].max())
 
+            breakpoint()
+
             # Finetune the model
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
