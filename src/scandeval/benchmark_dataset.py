@@ -514,6 +514,9 @@ class BenchmarkDataset(ABC):
             dl = trainer.get_train_dataloader()
             for batch in dl:
                 print(batch["input_ids"].max())
+            dl = trainer.get_eval_dataloader()
+            for batch in dl:
+                print(batch["input_ids"].max())
 
             breakpoint()
 
