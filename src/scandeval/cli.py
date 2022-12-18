@@ -80,7 +80,7 @@ from .languages import get_all_languages
 )
 @click.option(
     "--batch-size",
-    default=32,
+    default="32",
     type=click.Choice(["1", "2", "4", "8", "16", "32"]),
     help="The batch size to use.",
 )
