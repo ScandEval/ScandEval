@@ -288,37 +288,9 @@ def fix_model_and_tokenizer(
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we set the BOS and EOS tokens
     if model.config.vocab_size != tokenizer.vocab_size:
-
-        # If the tokenizer does not have a BOS token, we use find a suitable BOS token
-        # and set it
-        for pad_candidate in ["<s>", "[CLS]", "<|endoftext|>"]:
-            if pad_candidate in tokenizer.get_vocab():
-                tokenizer.bos_token = pad_candidate
-                model.config.bos_token_id = tokenizer.bos_token_id
-                break
-
-        # If none of the BOS candidates are in the tokenizer's vocab, then we
-        # raise an error
-        else:
-            raise ValueError(
-                "The tokenizer does not have a BOS token and no BOS token "
-                "candidates were found in the tokenizer's vocab."
-            )
-
-        # If the tokenizer does not have a EOS token, we use find a suitable EOS token
-        # and set it
-        for pad_candidate in ["</s>", "[SEP]", "<|endoftext|>"]:
-            if pad_candidate in tokenizer.get_vocab():
-                tokenizer.eos_token = pad_candidate
-                model.config.eos_token_id = tokenizer.eos_token_id
-                break
-
-        # If none of the EOS candidates are in the tokenizer's vocab, then we
-        # raise an error
-        else:
-            raise ValueError(
-                "The tokenizer does not have a EOS token and no EOS token "
-                "candidates were found in the tokenizer's vocab."
-            )
+        raise ValueError(
+            "The vocab size of the tokenizer and the vocab size of the model do not "
+            "match. This is not supported."
+        )
 
     return model, tokenizer
