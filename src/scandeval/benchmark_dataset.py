@@ -332,7 +332,7 @@ class BenchmarkDataset(ABC):
                 evaluation_strategy=IntervalStrategy.STEPS,
                 logging_strategy=logging_strategy,
                 save_strategy=IntervalStrategy.STEPS,
-                eval_steps=30,
+                eval_steps=1,  # TEMP
                 logging_steps=30,
                 save_steps=30,
                 max_steps=10_000 if not self.benchmark_config.testing else 2,
