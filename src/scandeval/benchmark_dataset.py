@@ -538,6 +538,7 @@ class BenchmarkDataset(ABC):
             return scores
 
         except (RuntimeError, ValueError, IndexError) as e:
+            raise e  # TEMP
             try:
                 del model
             except UnboundLocalError:
