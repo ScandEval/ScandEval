@@ -29,6 +29,9 @@ pandas = "^1.4.0"
 python-dotenv = ">=0.20.0,<1.0.0"
 evaluate = ">=0.3.0,<1.0.0"
 sacremoses = ">=0.0.53,<1.0.0"
+jax = "^0.4.1"
+flax = "^0.6.3"
+jaxlib = "^0.4.1"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^7.1.1"
