@@ -118,14 +118,16 @@ def load_model(
                 config.pooler_hidden_size = config.hidden_size
 
             # Otherwise load the model
-            model_or_tuple = model_cls_or_none.from_pretrained(
-                model_id,
-                revision=revision,
-                use_auth_token=use_auth_token,
-                config=config,
-                cache_dir=cache_dir,
-                from_flax=from_flax,
-            )
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning)
+                model_or_tuple = model_cls_or_none.from_pretrained(
+                    model_id,
+                    revision=revision,
+                    use_auth_token=use_auth_token,
+                    config=config,
+                    cache_dir=cache_dir,
+                    from_flax=from_flax,
+                )
             if isinstance(model_or_tuple, tuple):
                 model = model_or_tuple[0]
             else:
