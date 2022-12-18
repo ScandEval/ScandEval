@@ -84,6 +84,8 @@ class BenchmarkConfig:
             The languages of the datasets in the benchmark.
         dataset_tasks (sequence of DatasetTask):
             The tasks to benchmark.
+        batch_size (int):
+            The batch size to use.
         raise_error_on_invalid_model (bool):
             Whether to raise an error if a model is invalid.
         cache_dir (str):
@@ -109,6 +111,7 @@ class BenchmarkConfig:
     model_languages: Sequence[Language]
     dataset_languages: Sequence[Language]
     dataset_tasks: Sequence[DatasetTask]
+    batch_size: int
     raise_error_on_invalid_model: bool
     cache_dir: str
     evaluate_train: bool

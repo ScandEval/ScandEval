@@ -79,6 +79,12 @@ from .languages import get_all_languages
     help="The dataset tasks to consider.",
 )
 @click.option(
+    "--batch-size",
+    default=32,
+    type=click.Choice(["1", "2", "4", "8", "16", "32"]),
+    help="The batch size to use.",
+)
+@click.option(
     "--evaluate-train/--no-evaluate-train",
     default=False,
     show_default=True,
@@ -149,6 +155,7 @@ def benchmark(
     dataset_language: Tuple[str],
     raise_error_on_invalid_model: bool,
     dataset_task: Tuple[str],
+    batch_size: str,
     evaluate_train: bool,
     progress_bar: bool,
     save_results: bool,
@@ -167,6 +174,7 @@ def benchmark(
     model_languages = None if len(model_language) == 0 else list(model_language)
     dataset_languages = None if len(dataset_language) == 0 else list(dataset_language)
     dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
+    batch_size_int = int(batch_size)
     auth: Union[str, bool] = auth_token if auth_token != "" else use_auth_token
 
     # Initialise the benchmarker class
@@ -175,6 +183,7 @@ def benchmark(
         model_language=model_languages,
         dataset_language=dataset_languages,
         dataset_task=dataset_tasks,
+        batch_size=batch_size_int,
         progress_bar=progress_bar,
         save_results=save_results,
         evaluate_train=evaluate_train,

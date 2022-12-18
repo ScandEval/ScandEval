@@ -42,6 +42,8 @@ class Benchmarker:
         dataset_task (str or sequence of str, optional):
             The tasks to include for dataset. If "all" then datasets will not be
             filtered based on their task. Defaults to "all".
+        batch_size (int, optional):
+            The batch size to use. Defaults to 32.
         evaluate_train (bool, optional):
             Whether to evaluate the training set as well. Defaults to False.
         raise_error_on_invalid_model (bool, optional):
@@ -79,6 +81,7 @@ class Benchmarker:
         model_language: Optional[Union[str, Sequence[str]]] = None,
         dataset_language: Optional[Union[str, Sequence[str]]] = None,
         dataset_task: Optional[Union[str, Sequence[str]]] = None,
+        batch_size: int = 32,
         evaluate_train: bool = False,
         raise_error_on_invalid_model: bool = False,
         cache_dir: str = ".scandeval_cache",
@@ -92,6 +95,7 @@ class Benchmarker:
             model_language=model_language,
             dataset_language=dataset_language,
             dataset_task=dataset_task,
+            batch_size=batch_size,
             raise_error_on_invalid_model=raise_error_on_invalid_model,
             cache_dir=cache_dir,
             evaluate_train=evaluate_train,

@@ -172,8 +172,8 @@ class BenchmarkDataset(ABC):
                 "done."
             )
 
-        bs: int = 32
-        ga: int = 1
+        bs: int = self.benchmark_config.batch_size
+        ga: int = 32 // bs
         scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
         for idx in itr:
 

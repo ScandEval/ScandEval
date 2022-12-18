@@ -19,6 +19,8 @@ and this project adheres to
   his Bachelor thesis "Sentiment Analysis With Convolutional Neural Networks:
   Classifying sentiment in Swedish reviews".
 - Added historic BERT models from `dbmdz` as part of the default multilingual list.
+- Added the `--batch-size` argument, which can be used to manually select a batch size.
+  Must be among 1, 2, 4, 8, 16 and 32.
 
 ### Removed
 - As SweReC is a drop-in replacement for ABSAbank-Imm, the latter has been removed from
