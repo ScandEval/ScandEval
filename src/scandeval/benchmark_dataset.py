@@ -129,6 +129,7 @@ class BenchmarkDataset(ABC):
             use_auth_token=self.benchmark_config.use_auth_token,
             cache_dir=self.benchmark_config.cache_dir,
         )
+        breakpoint()
 
         # Get the metadata
         metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
