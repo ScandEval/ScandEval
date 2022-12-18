@@ -510,16 +510,6 @@ class BenchmarkDataset(ABC):
             if self.benchmark_config.progress_bar:
                 trainer.add_callback(NeverLeaveProgressCallback)
 
-            # TEMP: Get dataloader
-            dl = trainer.get_train_dataloader()
-            for batch in dl:
-                print(batch["input_ids"].max())
-            dl = trainer.get_eval_dataloader()
-            for batch in dl:
-                print(batch["input_ids"].max())
-
-            breakpoint()
-
             # Finetune the model
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
