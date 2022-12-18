@@ -513,7 +513,7 @@ class BenchmarkDataset(ABC):
             # TEMP: Get dataloader
             dl = trainer.get_train_dataloader()
             for batch in dl:
-                print(batch)
+                print(batch["input_ids"].max())
 
             # Finetune the model
             with warnings.catch_warnings():
