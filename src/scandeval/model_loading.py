@@ -249,10 +249,10 @@ def fix_model_and_tokenizer(
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
     if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
-        if model.config.vocab_size != tokenizer.vocab_size:
+        if model.config.vocab_size < tokenizer.vocab_size:
             raise InvalidBenchmark(
-                "The vocab size of the tokenizer and the vocab size of the model do "
-                "not match. This is not supported."
+                "The vocab size of the tokenizer is larger than the vocab size of the "
+                "model. This is not supported."
             )
 
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use find a
