@@ -10,6 +10,7 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
+- Added support for decoder models such as the GPT-series.
 - Added new Swedish sentiment classification dataset, SweReC, which is not
   aspect-based, contrary to the previous ABSAbank-Imm dataset. This dataset is a
   three-way classification task into the classical `positive`, `neutral` and `negative`
