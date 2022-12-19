@@ -246,53 +246,30 @@ def fix_model_and_tokenizer(
         else:
             tokenizer.model_max_length = 512
 
+    # If there is a mismatch between the vocab size according to the tokenizer and
+    # the vocab size according to the model, we raise an error
+    if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
+        if model.config.vocab_size != tokenizer.vocab_size:
+            raise InvalidBenchmark(
+                "The vocab size of the tokenizer and the vocab size of the model do "
+                "not match. This is not supported."
+            )
+
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use find a
     # suitable padding token and set it
     if tokenizer.pad_token is None:
-
-        # There are two cases. The first case is if the tokenizer's vocab size is
-        # consistent with the model's vocab size, in which we simply use the SEP token
-        # as the padding token.
-        if model.config.vocab_size == tokenizer.vocab_size:
-            if tokenizer.eos_token is not None:
-                tokenizer.padding_side = "left"
-                tokenizer.pad_token = tokenizer.eos_token
-                model.config.pad_token_id = tokenizer.pad_token_id
-            elif tokenizer.sep_token is not None:
-                tokenizer.padding_side = "left"
-                tokenizer.pad_token = tokenizer.sep_token
-                model.config.pad_token_id = tokenizer.pad_token_id
-            else:
-                raise InvalidBenchmark(
-                    "The tokenizer does not have a padding token and does not have a "
-                    "SEP token or EOS token to use as a padding token."
-                )
-
-        # The second case is if the tokenizer's vocab size is not consistent with the
-        # model's vocab size, in which case we search for a token which looks like a
-        # padding token, and use that as the padding token.
+        if tokenizer.eos_token is not None:
+            tokenizer.padding_side = "left"
+            tokenizer.pad_token = tokenizer.eos_token
+            model.config.pad_token_id = tokenizer.pad_token_id
+        elif tokenizer.sep_token is not None:
+            tokenizer.padding_side = "left"
+            tokenizer.pad_token = tokenizer.sep_token
+            model.config.pad_token_id = tokenizer.pad_token_id
         else:
-            for pad_candidate in ["<pad>", "[PAD]", "</s>", "[SEP]", "<s>", "[CLS]"]:
-                if pad_candidate in tokenizer.get_vocab():
-                    tokenizer.padding_side = "left"
-                    tokenizer.pad_token = pad_candidate
-                    model.config.pad_token_id = tokenizer.pad_token_id
-                    break
-
-            # If none of the padding candidates are in the tokenizer's vocab, then we
-            # raise an error.
-            else:
-                raise InvalidBenchmark(
-                    "The tokenizer does not have a padding token and no padding token "
-                    "candidates were found in the tokenizer's vocab."
-                )
-
-    # If there is a mismatch between the vocab size according to the tokenizer and
-    # the vocab size according to the model, we set the BOS and EOS tokens
-    if model.config.vocab_size != tokenizer.vocab_size:
-        raise InvalidBenchmark(
-            "The vocab size of the tokenizer and the vocab size of the model do not "
-            "match. This is not supported."
-        )
+            raise InvalidBenchmark(
+                "The tokenizer does not have a padding token and does not have a "
+                "SEP token or EOS token to use as a padding token."
+            )
 
     return model, tokenizer
