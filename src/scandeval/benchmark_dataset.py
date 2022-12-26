@@ -513,8 +513,12 @@ class BenchmarkDataset(ABC):
             # TEMP: Get dataloader
             dataloader = trainer.get_train_dataloader()
             for batch in dataloader:
-                print(batch)
-                break
+                try:
+                    prepared_batch = data_collator(batch)
+                    model(**prepared_batch)
+                except Exception as e:
+                    print(batch)
+                    raise e
 
             # Finetune the model
             with warnings.catch_warnings():
