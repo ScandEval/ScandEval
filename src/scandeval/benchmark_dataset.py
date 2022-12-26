@@ -515,8 +515,7 @@ class BenchmarkDataset(ABC):
             for batch in dataloader:
                 try:
                     breakpoint()
-                    prepared_batch = data_collator(batch["input_ids"])
-                    model(**prepared_batch)
+                    model(**batch)
                 except Exception as e:
                     print(batch)
                     raise e
