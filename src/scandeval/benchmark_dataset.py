@@ -510,16 +510,6 @@ class BenchmarkDataset(ABC):
             if self.benchmark_config.progress_bar:
                 trainer.add_callback(NeverLeaveProgressCallback)
 
-            # TEMP: Get dataloader
-            # dataloader = trainer.get_train_dataloader()
-            # for batch in dataloader:
-            #    try:
-            #        breakpoint()
-            #        model(**batch)
-            #    except Exception as e:
-            #        print(batch)
-            #        raise e
-
             # Finetune the model
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
@@ -548,7 +538,6 @@ class BenchmarkDataset(ABC):
             return scores
 
         except (RuntimeError, ValueError, IndexError) as e:
-            raise e  # TEMP
             try:
                 del model
             except UnboundLocalError:
