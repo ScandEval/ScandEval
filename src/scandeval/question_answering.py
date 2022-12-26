@@ -94,6 +94,7 @@ class QuestionAnswering(BenchmarkDataset):
         compute_metrics: Callable,
         callbacks: List[TrainerCallback],
     ) -> Trainer:
+        model.config.type_vocab_size = max(2, model.config.type_vocab_size)
         return QuestionAnsweringTrainer(
             model=model,
             args=args,
