@@ -514,8 +514,8 @@ class BenchmarkDataset(ABC):
             dataloader = trainer.get_train_dataloader()
             for batch in dataloader:
                 try:
-                    prepared_batch = data_collator(batch)
                     breakpoint()
+                    prepared_batch = data_collator(batch["input_ids"])
                     model(**prepared_batch)
                 except Exception as e:
                     print(batch)
