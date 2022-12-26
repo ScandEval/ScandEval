@@ -117,7 +117,12 @@ def load_model(
             if config.model_type == "deberta-v2":
                 config.pooler_hidden_size = config.hidden_size
 
-            # Otherwise load the model
+            # If we are benchmarking a question answering model then we need to set
+            # the type_vocab_size to 2
+            if supertask == "question-answering":
+                config.type_vocab_size = 2
+
+            # Load the model
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=UserWarning)
                 model_or_tuple = model_cls_or_none.from_pretrained(
