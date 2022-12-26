@@ -154,9 +154,9 @@ def load_model(
             model_id,
             revision=revision,
             use_auth_token=use_auth_token,
-            use_fast=True,
             add_prefix_space=prefix,
             cache_dir=cache_dir,
+            use_fast=True,
             verbose=False,
         )
 
