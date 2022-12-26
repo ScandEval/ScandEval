@@ -513,7 +513,6 @@ class BenchmarkDataset(ABC):
             # Finetune the model
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
-                breakpoint()
                 trainer.train()
 
             # Log training scores and save the state
@@ -539,6 +538,7 @@ class BenchmarkDataset(ABC):
             return scores
 
         except (RuntimeError, ValueError, IndexError) as e:
+            raise e
             try:
                 del model
             except UnboundLocalError:
