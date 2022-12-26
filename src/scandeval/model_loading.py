@@ -146,7 +146,8 @@ def load_model(
 
     # If the model is a subclass of a RoBERTa model then we have to add a prefix
     # space to the tokens, by the way the model is constructed.
-    prefix = "Roberta" in type(model).__name__ or "GPT" in type(model).__name__
+    prefix_models = ["Roberta", "GPT", "Deberta"]
+    prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
         tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
