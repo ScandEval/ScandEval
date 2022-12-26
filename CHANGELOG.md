@@ -11,6 +11,9 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Added prefix space to DeBERTa models.
+- Now automatically changes a model's `type_vocab_size` to at least 2 when benchmarking
+  the model on question-answering tasks. This previously caused an error when a model
+  config had it set to 1.
 
 
 ## [v6.0.0] - 2022-12-24
