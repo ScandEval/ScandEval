@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Added prefix space to DeBERTa models.
+
+
 ## [v6.0.0] - 2022-12-24
 ### Added
 - Added support for decoder models such as the GPT-series.
