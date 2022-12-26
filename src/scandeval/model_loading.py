@@ -132,6 +132,7 @@ def load_model(
                     config=config,
                     cache_dir=cache_dir,
                     from_flax=from_flax,
+                    ignore_mismatched_sizes=True,
                 )
             if isinstance(model_or_tuple, tuple):
                 model = model_or_tuple[0]
