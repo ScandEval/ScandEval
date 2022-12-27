@@ -1,9 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -19,42 +16,26 @@ jobs:
   pytest:
     strategy:
         matrix:
-            os: [macos-latest, windows-latest, ubuntu-latest]
-            python-version: ['3.8', '3.9', '3.10']
+            os: [windows-latest, macos-latest, ubuntu-latest]
+            python-version: ["3.8", "3.9", "3.10"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v3
 
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.0.0
-        with:
-          poetry-version: 1.1.10
+        run: pipx install poetry
 
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs
-
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v1
-        id: cache
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          path: ~/.virtualenvs
-          key: poetry-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            poetry-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
 
       - name: Install Dependencies
-        run: poetry install
-        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          poetry env use "${{ matrix.python-version }}"
+          poetry install
 
       - name: Test with pytest
-        run: poetry run pytest -n 1
-        env:
-          HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
+        run: poetry run pytest --dist no -n 0
+
