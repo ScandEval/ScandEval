@@ -17,10 +17,10 @@ from scandeval.named_entity_recognition import NamedEntityRecognition
 @pytest.mark.parametrize(
     argnames=["dataset", "correct_scores"],
     argvalues=[
-        (DANE_CONFIG, (0.00, 0.00)),
-        (SUC3_CONFIG, (0.00, 0.00)),
-        (NORNE_NB_CONFIG, (0.00, 0.00)),
-        (NORNE_NN_CONFIG, (0.00, 0.00)),
+        (DANE_CONFIG, (1.87, 1.22)),
+        (SUC3_CONFIG, (1.86, 2.26)),
+        (NORNE_NB_CONFIG, (1.83, 1.94)),
+        (NORNE_NN_CONFIG, (1.14, 1.20)),
     ],
     ids=[
         "dane",
@@ -42,7 +42,6 @@ class TestScores:
             yield benchmark.benchmark(model_id)[0]["total"]
 
     def test_micro_f1_is_correct(self, scores, correct_scores):
-        print(scores, correct_scores)
         min_score = scores["test_micro_f1"] - scores["test_micro_f1_se"]
         max_score = scores["test_micro_f1"] + scores["test_micro_f1_se"]
         assert min_score <= correct_scores[0] <= max_score

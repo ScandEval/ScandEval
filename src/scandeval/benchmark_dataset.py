@@ -137,7 +137,7 @@ class BenchmarkDataset(ABC):
         data_collator = self._load_data_collator(tokenizer)
 
         # Set variable with number of iterations
-        num_iter = 10 if not self.benchmark_config.testing else 2
+        num_iter = 10 if not self.benchmark_config.testing else 5
 
         # Set up progress bar
         itr = tqdm(
@@ -327,7 +327,7 @@ class BenchmarkDataset(ABC):
                 eval_steps=30,
                 logging_steps=30,
                 save_steps=30,
-                max_steps=10_000 if not self.benchmark_config.testing else 100,
+                max_steps=10_000 if not self.benchmark_config.testing else 10,
                 report_to=[],
                 save_total_limit=1,
                 per_device_train_batch_size=self.benchmark_config.batch_size,

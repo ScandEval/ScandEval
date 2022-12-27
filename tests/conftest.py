@@ -38,5 +38,4 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
 
 @pytest.fixture(scope="session")
 def model_id():
-    # yield "Maltehb/aelaectra-danish-electra-small-cased"
-    yield "vesteinn/ScandiBERT"
+    yield "jonfd/electra-small-nordic"
