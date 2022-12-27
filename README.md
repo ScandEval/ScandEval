@@ -75,9 +75,13 @@ with the `AngryTweets` dataset again:
 >>> benchmark('<model_id>', 'angry-tweets')
 ```
 
-This would benchmark all Nynorsk models on Nynorsk datasets:
+If you want to benchmark a subset of all the models on the Hugging Face Hub, you can
+specify several parameters in the `Benchmarker` initializer to narrow down the list of
+models to the ones you care about. As a simple example, the following would benchmark
+all the Nynorsk models on Nynorsk datasets:
 ```
->>> benchmark(language='nn')
+>>> benchmark = Benchmarker(language='nn')
+>>> benchmark()
 ```
 
 
