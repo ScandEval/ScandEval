@@ -29,6 +29,7 @@ def test_cli_param_names(params):
         "auth_token",
         "use_auth_token",
         "ignore_duplicates",
+        "batch_size",
         "help",
     }
 
@@ -40,6 +41,7 @@ def test_cli_param_types(params):
     assert isinstance(params["model_language"], Choice)
     assert isinstance(params["dataset_language"], Choice)
     assert isinstance(params["dataset_task"], Choice)
+    assert isinstance(params["batch_size"], Choice)
     assert params["evaluate_train"] == BOOL
     assert params["progress_bar"] == BOOL
     assert params["raise_error_on_invalid_model"] == BOOL

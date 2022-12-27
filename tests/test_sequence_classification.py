@@ -1,58 +1,33 @@
-"""Unit tests for the `text_classification` module."""
+"""Unit tests for the `sequence_classification` module."""
 
 import pytest
 
-from scandeval.config import BenchmarkConfig
 from scandeval.dataset_configs import (
-    ABSABANK_IMM_CONFIG,
     ANGRY_TWEETS_CONFIG,
     NOREC_CONFIG,
     SCALA_DA_CONFIG,
     SCALA_NB_CONFIG,
     SCALA_NN_CONFIG,
     SCALA_SV_CONFIG,
+    SWEREC_CONFIG,
 )
-from scandeval.dataset_tasks import LA, SENT
-from scandeval.languages import DA, NO, SV
 from scandeval.sequence_classification import SequenceClassification
-
-
-@pytest.fixture(scope="module")
-def benchmark_config():
-    yield BenchmarkConfig(
-        model_languages=[DA, SV, NO],
-        dataset_languages=[DA, SV, NO],
-        dataset_tasks=[LA, SENT],
-        raise_error_on_invalid_model=False,
-        cache_dir=".scandeval_cache",
-        evaluate_train=True,
-        use_auth_token=False,
-        progress_bar=False,
-        save_results=False,
-        verbose=False,
-        testing=True,
-    )
-
-
-@pytest.fixture(scope="module")
-def model_id():
-    yield "Maltehb/aelaectra-danish-electra-small-cased"
 
 
 @pytest.mark.parametrize(
     argnames=["dataset", "correct_scores"],
     argvalues=[
-        (ANGRY_TWEETS_CONFIG, (0.00, 13.79)),
-        (ABSABANK_IMM_CONFIG, (0.00, 10.15)),
-        (NOREC_CONFIG, (0.00, 16.79)),
-        (SCALA_DA_CONFIG, (0.00, 35.31)),
-        (SCALA_SV_CONFIG, (0.00, 29.48)),
-        (SCALA_NB_CONFIG, (0.00, 32.06)),
-        (SCALA_NN_CONFIG, (0.00, 33.91)),
+        (ANGRY_TWEETS_CONFIG, (8.51, 24.34)),
+        (SWEREC_CONFIG, (47.77, 49.46)),
+        (NOREC_CONFIG, (0.00, 21.00)),
+        (SCALA_DA_CONFIG, (59.30, 76.28)),
+        (SCALA_SV_CONFIG, (26.34, 59.87)),
+        (SCALA_NB_CONFIG, (26.34, 59.87)),
+        (SCALA_NN_CONFIG, (4.31, 51.58)),
     ],
     ids=[
         "angry-tweets",
-        "absabank-imm",
+        "swerec",
         "norec",
         "scala-da",
         "scala-sv",
@@ -61,7 +36,7 @@ def model_id():
     ],
     scope="class",
 )
-class TestTextClassificationScores:
+class TestScores:
     @pytest.fixture(scope="class")
     def scores(self, benchmark_config, model_id, dataset):
         benchmark = SequenceClassification(

@@ -1,41 +1,14 @@
 """Unit tests for the `hf_hub` module."""
 
-import os
-
 import pytest
 
-from scandeval.config import BenchmarkConfig, ModelConfig
-from scandeval.dataset_tasks import SENT
+from scandeval.config import ModelConfig
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.hf_hub import get_model_config, get_model_lists
 from scandeval.languages import DA, EN
 
 
 class TestGetModelConfig:
-    @pytest.fixture(scope="class")
-    def benchmark_config(self):
-
-        # Get the authentication token to the Hugging Face Hub
-        auth = os.environ.get("HUGGINGFACE_HUB_TOKEN", True)
-
-        # Ensure that the token does not contain quotes or whitespace
-        if isinstance(auth, str):
-            auth = auth.strip(" \"'")
-
-        # Build and yield the benchmark configuration
-        yield BenchmarkConfig(
-            model_languages=[DA],
-            dataset_languages=[DA],
-            dataset_tasks=[SENT],
-            raise_error_on_invalid_model=False,
-            cache_dir=".",
-            evaluate_train=False,
-            use_auth_token=auth,
-            progress_bar=True,
-            save_results=True,
-            verbose=True,
-        )
-
     @pytest.fixture(scope="class")
     def model_config(self, benchmark_config):
         yield get_model_config(

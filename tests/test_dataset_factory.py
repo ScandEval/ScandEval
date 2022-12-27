@@ -4,29 +4,13 @@ from copy import deepcopy
 
 import pytest
 
-from scandeval.config import BenchmarkConfig, DatasetConfig
+from scandeval.config import DatasetConfig
 from scandeval.dataset_factory import DatasetFactory
 from scandeval.dataset_tasks import LA, NER, QA, SENT
-from scandeval.languages import DA, FO, IS, NO, SV
+from scandeval.languages import DA, IS
 from scandeval.named_entity_recognition import NamedEntityRecognition
 from scandeval.question_answering import QuestionAnswering
 from scandeval.sequence_classification import SequenceClassification
-
-
-@pytest.fixture(scope="module")
-def benchmark_config():
-    yield BenchmarkConfig(
-        model_languages=[DA, SV, NO],
-        dataset_languages=[IS, FO],
-        dataset_tasks=[SENT, NER, LA, QA],
-        raise_error_on_invalid_model=False,
-        cache_dir=".",
-        evaluate_train=True,
-        use_auth_token=False,
-        progress_bar=False,
-        save_results=False,
-        verbose=False,
-    )
 
 
 @pytest.fixture(scope="module")

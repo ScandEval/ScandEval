@@ -313,14 +313,6 @@ class BenchmarkDataset(ABC):
         else:
             logging_strategy = IntervalStrategy.NO
 
-        # Set variable on whether to use MPS device
-        use_mps_device = (
-            torch.backends.mps.is_available() and not self.benchmark_config.testing
-        )
-
-        # Set batch size variable
-        batch_size = 32 if not self.benchmark_config.testing else 1
-
         # Set seed variable
         seed = 4242 + iteration_idx
 
@@ -335,19 +327,18 @@ class BenchmarkDataset(ABC):
                 eval_steps=30,
                 logging_steps=30,
                 save_steps=30,
-                max_steps=10_000 if not self.benchmark_config.testing else 2,
-                report_to="none",
+                max_steps=10_000 if not self.benchmark_config.testing else 100,
+                report_to=[],
                 save_total_limit=1,
-                per_device_train_batch_size=batch_size,
-                per_device_eval_batch_size=batch_size,
+                per_device_train_batch_size=self.benchmark_config.batch_size,
+                per_device_eval_batch_size=self.benchmark_config.batch_size,
                 learning_rate=2e-5,
                 warmup_ratio=0.01,
                 gradient_accumulation_steps=1,
                 load_best_model_at_end=True,
                 optim=OptimizerNames.ADAMW_TORCH,
                 seed=seed,
-                no_cuda=self.benchmark_config.testing,
-                use_mps_device=use_mps_device,
+                use_mps_device=torch.backends.mps.is_available(),
                 fp16=False,
             )
 

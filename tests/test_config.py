@@ -85,6 +85,7 @@ class TestBenchmarkConfig:
             progress_bar=True,
             save_results=True,
             verbose=True,
+            batch_size=32,
         )
 
     def test_benchmark_config_is_object(self, benchmark_config):
