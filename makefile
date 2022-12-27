@@ -104,7 +104,7 @@ publish-minor: bump-minor publish
 publish-patch: bump-patch publish
 
 test:
-	@poetry run pytest && readme-cov
+	@PYTORCH_ENABLE_MPS_FALLBACK=1 poetry run pytest && readme-cov
 
 tree:
 	@tree -a \
