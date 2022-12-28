@@ -212,5 +212,5 @@ SPEED_CONFIG = DatasetConfig(
     pretty_name="the speed estimation benchmark",
     huggingface_id="",
     task=SPEED,
-    languages=[],
+    languages=list(get_all_languages().values()),
 )
