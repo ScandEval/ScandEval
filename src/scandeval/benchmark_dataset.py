@@ -9,7 +9,6 @@ from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import evaluate
 import numpy as np
-import pyinfer
 import torch
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
@@ -34,6 +33,7 @@ from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_config
 from .model_loading import load_model
 from .scores import log_scores
+from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT
 from .utils import (
     block_terminal_output,
@@ -151,50 +151,15 @@ class BenchmarkDataset(ABC):
 
         # If we are running the speed estimation benchmark then call that directly
         if self.dataset_config.task.name == "speed":
-            for idx in itr:
-
-                # Set variable that tracks whether we need to initialize new models in
-                # the `_benchmark_single_iteration` call
-                model_already_initialized = idx == 0
-
-                # Clear memory after first iteration
-                if not model_already_initialized:
-                    try:
-                        del model
-                    except UnboundLocalError:
-                        pass
-                    try:
-                        del tokenizer
-                    except UnboundLocalError:
-                        pass
-                    clear_memory()
-
-                # Run the speed benchmark
-                itr_scores = self._benchmark_speed_single_iteration(
-                    tokenizer=tokenizer if model_already_initialized else None,
-                    model=model if model_already_initialized else None,
-                    model_config=model_config,
-                )
-
-                # If the iteration was unsuccessful then raise an error
-                if isinstance(itr_scores, Exception):
-                    raise InvalidBenchmark(
-                        f"Speed benchmark failed with error: {itr_scores!r}"
-                    )
-
-                # Otherwise, append the scores to the list and log the result
-                else:
-                    scores["test"].append(itr_scores["test"])
-                    if self.benchmark_config.verbose:
-                        print(itr_scores)
-
-            all_scores = log_scores(
-                dataset_name=self.dataset_config.pretty_name,
-                metric_configs=self.dataset_config.task.metrics,
+            all_scores = benchmark_speed(
+                itr=itr,
                 scores=scores,
-                model_id=model_config.model_id,
+                tokenizer=tokenizer,
+                model=model,
+                model_config=model_config,
+                dataset_config=self.dataset_config,
+                benchmark_config=self.benchmark_config,
             )
-
             return all_scores, metadata_dict
 
         # Load the data collator
@@ -445,101 +410,6 @@ class BenchmarkDataset(ABC):
             test = test.select(range(128))
 
         return train, val, test
-
-    def _benchmark_speed_single_iteration(
-        self,
-        model_config: ModelConfig,
-        tokenizer: Optional[PreTrainedTokenizer] = None,
-        model: Optional[PreTrainedModel] = None,
-    ) -> Union[Dict[str, Dict[str, float]], Exception]:
-        """Run a single iteration of the speed benchmark.
-
-        Args:
-            model_config (ModelConfig):
-                The model configuration.
-            tokenizer (PreTrainedTokenizer or None, optional):
-                The tokenizer to use in the benchmark. If None then a new tokenizer
-                will be loaded. Defaults to None.
-            model (PreTrainedModel or None, optional):
-                The model to use in the benchmark. If None then a new model will be
-                loaded. Defaults to None.
-
-        Returns:
-            dict or Exception:
-                A dictionary containing the scores for the current iteration, with keys
-                `train` and `test`. If an exception is raised, then the exception is
-                returned.
-        """
-        scores: Dict[str, Dict[str, float]] = dict()
-        try:
-
-            # Reinitialise a new model
-            if tokenizer is None or model is None:
-                tokenizer, model = load_model(
-                    model_id=model_config.model_id,
-                    revision=model_config.revision,
-                    supertask=self.dataset_config.task.supertask,
-                    num_labels=self.dataset_config.num_labels,
-                    label2id=self.dataset_config.label2id,
-                    id2label=self.dataset_config.id2label,
-                    from_flax=model_config.framework == "jax",
-                    use_auth_token=self.benchmark_config.use_auth_token,
-                    cache_dir=self.benchmark_config.cache_dir,
-                )
-
-            # Ensure that the model is on the CPU
-            model.cpu()
-
-            # Create a dummy document
-            doc = "This is a dummy document. " * 100
-
-            def predict(docs: List[str]) -> None:
-                """Function used to benchmark inference speed of the model."""
-
-                # Raise an error if the tokenizer or model is undefined
-                if tokenizer is None or model is None:
-                    raise ValueError("Tokenizer and model must not be None.")
-
-                # Tokenize the document
-                inputs = tokenizer(
-                    docs,
-                    padding=True,
-                    truncation=True,
-                    return_tensors="pt",
-                )
-
-                # Run inference with the model
-                with torch.no_grad():
-                    model(**inputs)
-
-            # Do a warmup run
-            pyinfer.InferenceReport(model=predict, inputs=doc, n_iterations=10).run(
-                print_report=False
-            )
-
-            # Initialise the speed benchmark
-            speed_benchmark = pyinfer.InferenceReport(
-                model=predict,
-                inputs=doc,
-                n_iterations=100,
-            )
-
-            # Run the speed benchmark
-            speed_scores = speed_benchmark.run(print_report=False)
-
-            # Close the speed benchmark
-            del speed_benchmark
-
-            # Store the scores
-            scores["test"] = {"test_speed": speed_scores["Infer(p/sec)"]}
-            if self.benchmark_config.evaluate_train:
-                scores["train"] = {"train_speed": speed_scores["Infer(p/sec)"]}
-
-            # Return the scores
-            return scores
-
-        except (RuntimeError, ValueError, IndexError) as e:
-            return e
 
     def _benchmark_single_iteration(
         self,
