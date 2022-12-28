@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.0.1] - 2022-12-28
 ### Fixed
 - Added prefix space to DeBERTa models.
 - Now automatically changes a model's `type_vocab_size` to at least 2 when benchmarking
