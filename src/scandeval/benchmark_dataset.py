@@ -182,9 +182,11 @@ class BenchmarkDataset(ABC):
                         f"Speed benchmark failed with error: {itr_scores!r}"
                     )
 
-                # Otherwise, append the scores to the list
+                # Otherwise, append the scores to the list and log the result
                 else:
                     scores["test"].append(itr_scores["test"])
+                    if self.benchmark_config.verbose:
+                        logger.info(itr_scores)
 
             all_scores = log_scores(
                 dataset_name=self.dataset_config.pretty_name,
