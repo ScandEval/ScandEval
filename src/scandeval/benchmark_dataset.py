@@ -186,7 +186,7 @@ class BenchmarkDataset(ABC):
                 else:
                     scores["test"].append(itr_scores["test"])
                     if self.benchmark_config.verbose:
-                        logger.info(itr_scores)
+                        print(itr_scores)
 
             all_scores = log_scores(
                 dataset_name=self.dataset_config.pretty_name,
