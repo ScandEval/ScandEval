@@ -47,15 +47,15 @@ def log_scores(
     for metric_cfg in metric_configs:
         agg_scores = aggregate_scores(scores=scores, metric_config=metric_cfg)
         test_score, test_se = agg_scores["test"]
-        test_score = metric_cfg.postprocessing_fn(test_score)
-        test_se = metric_cfg.postprocessing_fn(test_se)
-        msg = f"{metric_cfg.pretty_name}:\n  - Test: {test_score:.2f}% ± {test_se:.2f}%"
+        test_score, test_score_str = metric_cfg.postprocessing_fn(test_score)
+        test_se, test_se_str = metric_cfg.postprocessing_fn(test_se)
+        msg = f"{metric_cfg.pretty_name}:\n  - Test: {test_score_str} ± {test_se_str}"
 
         if "train" in agg_scores.keys():
             train_score, train_se = agg_scores["train"]
-            train_score = metric_cfg.postprocessing_fn(train_score)
-            train_se = metric_cfg.postprocessing_fn(train_se)
-            msg += f"\n  - Train: {train_score:.2f}% ± {train_se:.2f}%"
+            train_score, train_score_str = metric_cfg.postprocessing_fn(train_score)
+            train_se, train_se_str = metric_cfg.postprocessing_fn(train_se)
+            msg += f"\n  - Train: {train_score_str} ± {train_se_str}"
 
             # Store the aggregated train scores
             total_dict[f"train_{metric_cfg.name}"] = train_score

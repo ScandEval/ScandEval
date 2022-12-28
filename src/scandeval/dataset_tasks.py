@@ -77,14 +77,14 @@ QA = DatasetTask(
             pretty_name="Exact Match",
             huggingface_id="squad_v2",
             results_key="exact",
-            postprocessing_fn=lambda raw_score: raw_score,
+            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
         ),
         MetricConfig(
             name="f1",
             pretty_name="F1-score",
             huggingface_id="squad_v2",
             results_key="f1",
-            postprocessing_fn=lambda raw_score: raw_score,
+            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
         ),
     ],
     labels=["START_POSITIONS", "END_POSITIONS"],
@@ -110,4 +110,20 @@ SENT = DatasetTask(
         ),
     ],
     labels=["NEGATIVE", "NEUTRAL", "POSITIVE"],
+)
+
+
+SPEED = DatasetTask(
+    name="speed",
+    supertask="sequence-classification",
+    metrics=[
+        MetricConfig(
+            name="speed",
+            pretty_name="Inferences per second",
+            huggingface_id="",
+            results_key="speed",
+            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}"),
+        ),
+    ],
+    labels=[],
 )

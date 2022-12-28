@@ -3,8 +3,8 @@
 from typing import Dict
 
 from .config import DatasetConfig
-from .dataset_tasks import LA, NER, QA, SENT
-from .languages import DA, FO, IS, NB, NN, SV
+from .dataset_tasks import LA, NER, QA, SENT, SPEED
+from .languages import DA, FO, IS, NB, NN, SV, get_all_languages
 
 
 def get_all_dataset_configs() -> Dict[str, DatasetConfig]:
@@ -204,4 +204,13 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-sv-mini",
     task=QA,
     languages=[SV],
+)
+
+
+SPEED_CONFIG = DatasetConfig(
+    name="speed",
+    pretty_name="the speed estimation benchmark",
+    huggingface_id="",
+    task=SPEED,
+    languages=[],
 )
