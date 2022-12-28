@@ -531,8 +531,9 @@ class BenchmarkDataset(ABC):
             del speed_benchmark
 
             # Store the scores
-            scores["train"] = {"train_speed": speed_scores["Infer(p/sec)"]}
             scores["test"] = {"test_speed": speed_scores["Infer(p/sec)"]}
+            if self.benchmark_config.evaluate_train:
+                scores["train"] = {"train_speed": speed_scores["Infer(p/sec)"]}
 
             # Return the scores
             return scores
