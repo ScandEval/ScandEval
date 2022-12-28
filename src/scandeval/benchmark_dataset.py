@@ -511,7 +511,7 @@ class BenchmarkDataset(ABC):
                     model(**inputs)
 
             # Do a warmup run
-            pyinfer.InferenceReport(model=predict, inputs=doc, n_iterations=1).run(
+            pyinfer.InferenceReport(model=predict, inputs=doc, n_iterations=10).run(
                 print_report=False
             )
 
