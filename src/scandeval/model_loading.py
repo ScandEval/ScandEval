@@ -139,8 +139,16 @@ def load_model(
             else:
                 model = model_or_tuple
 
-    except (OSError, ValueError):
-        msg = (
+    except (OSError, ValueError) as e:
+
+        # Deal with the case where the checkpoint is incorrect
+        if "checkpoint seems to be incorrect" in str(e):
+            raise InvalidBenchmark(
+                f"The model {model_id!r} has an incorrect checkpoint."
+            )
+
+        # Otherwise raise a more generic error
+        raise InvalidBenchmark(
             f"The model {model_id} either does not exist on the Hugging Face Hub, or "
             "it has no frameworks registered, or it is a private model. If it *does* "
             "exist on the Hub and is a public model then please ensure that it has a "
@@ -148,7 +156,6 @@ def load_model(
             "`--use-auth-token` flag and make sure that you are logged in to the Hub "
             "via the `huggingface-cli login` command."
         )
-        raise InvalidBenchmark(msg)
 
     # If the model is a subclass of a RoBERTa model then we have to add a prefix
     # space to the tokens, by the way the model is constructed.
