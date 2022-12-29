@@ -1,6 +1,7 @@
 """Benchmarking model inference speed."""
 
-from typing import Dict, List, Optional, Union
+from collections import defaultdict
+from typing import Dict, List, Union
 
 import pyinfer
 import torch
@@ -13,14 +14,12 @@ from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_loading import load_model
 from .types import SCORE_DICT
-from .utils import clear_memory
 
 
 def benchmark_speed(
     itr: tqdm,
-    scores: Dict[str, List[Dict[str, float]]],
-    tokenizer: Optional[PreTrainedTokenizer],
-    model: Optional[PreTrainedModel],
+    tokenizer: PreTrainedTokenizer,
+    model: PreTrainedModel,
     model_config: ModelConfig,
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
@@ -30,11 +29,9 @@ def benchmark_speed(
     Args:
         itr (tqdm):
             tqdm iterator.
-        scores (Dict[str, List[Dict[str, float]]]):
-            Empty dictionary of scores.
-        tokenizer (Optional[PreTrainedTokenizer]):
+        tokenizer (PreTrainedTokenizer):
             Tokenizer to use.
-        model (Optional[PreTrainedModel]):
+        model (PreTrainedModel):
             Model to use.
         model_config (ModelConfig):
             Model configuration.
@@ -47,28 +44,15 @@ def benchmark_speed(
         SCORE_DICT:
             Dictionary of scores.
     """
-    for idx in itr:
+    # Initialise the `scores` dictionary
+    scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
 
-        # Set variable that tracks whether we need to initialize new models in
-        # the `_benchmark_single_iteration` call
-        model_already_initialized = idx == 0
-
-        # Clear memory after first iteration
-        if not model_already_initialized:
-            try:
-                del model
-            except UnboundLocalError:
-                pass
-            try:
-                del tokenizer
-            except UnboundLocalError:
-                pass
-            clear_memory()
+    for _ in itr:
 
         # Run the speed benchmark
         itr_scores = benchmark_speed_single_iteration(
-            tokenizer=tokenizer if model_already_initialized else None,
-            model=model if model_already_initialized else None,
+            tokenizer=tokenizer,
+            model=model,
             model_config=model_config,
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
@@ -81,6 +65,8 @@ def benchmark_speed(
         # Otherwise, append the scores to the list and log the result
         else:
             scores["test"].append(itr_scores["test"])
+            if benchmark_config.evaluate_train:
+                scores["train"].append(itr_scores["train"])
             if benchmark_config.verbose:
                 print(itr_scores)
 
@@ -95,23 +81,21 @@ def benchmark_speed(
 
 
 def benchmark_speed_single_iteration(
+    tokenizer: PreTrainedTokenizer,
+    model: PreTrainedModel,
     model_config: ModelConfig,
-    tokenizer: Optional[PreTrainedTokenizer],
-    model: Optional[PreTrainedModel],
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
 ) -> Union[Dict[str, Dict[str, float]], Exception]:
     """Run a single iteration of the speed benchmark.
 
     Args:
+        tokenizer (PreTrainedTokenizer):
+            The tokenizer to use in the benchmark.
+        model (PreTrainedModel):
+            The model to use in the benchmark.
         model_config (ModelConfig):
             The model configuration.
-        tokenizer (PreTrainedTokenizer or None):
-            The tokenizer to use in the benchmark. If None then a new tokenizer
-            will be loaded.
-        model (PreTrainedModel or None):
-            The model to use in the benchmark. If None then a new model will be
-            loaded.
         dataset_config (DatasetConfig):
             The dataset configuration.
         benchmark_config (BenchmarkConfig):

@@ -146,14 +146,10 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
-        # Initialise the `scores` dictionary
-        scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
-
         # If we are running the speed estimation benchmark then call that directly
         if self.dataset_config.task.name == "speed":
             all_scores = benchmark_speed(
                 itr=itr,
-                scores=scores,
                 tokenizer=tokenizer,
                 model=model,
                 model_config=model_config,
@@ -190,6 +186,9 @@ class BenchmarkDataset(ABC):
                 "Preprocessing of the training and validation datasets could not be "
                 "done."
             )
+
+        # Initialise the `scores` dictionary
+        scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
 
         bs: int = self.benchmark_config.batch_size
         ga: int = 32 // bs
