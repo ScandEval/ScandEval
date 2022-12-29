@@ -124,7 +124,6 @@ World](https://satwcomic.com/) team. Go check them out!
 │   └── scandeval.png
 ├── makefile
 ├── notebooks
-│   └── scandeval-truncation.ipynb
 ├── poetry.toml
 ├── pyproject.toml
 ├── src
@@ -148,6 +147,7 @@ World](https://satwcomic.com/) team. Go check them out!
 │   │   ├── question_answering_trainer.py
 │   │   ├── scores.py
 │   │   ├── sequence_classification.py
+│   │   ├── speed_benchmark.py
 │   │   ├── types.py
 │   │   └── utils.py
 │   └── scripts
@@ -186,6 +186,7 @@ World](https://satwcomic.com/) team. Go check them out!
     ├── test_question_answering_trainer.py
     ├── test_scores.py
     ├── test_sequence_classification.py
+    ├── test_speed_benchmark.py
     ├── test_types.py
     └── test_utils.py
 ```
