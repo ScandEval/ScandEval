@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.1.0] - 2022-12-29
 ### Added
 - Added model inference speed estimation benchmark. This can now be run by setting
   either `task` or `dataset` to "speed". E.g., `scandeval -m <model_id> -d speed` or
