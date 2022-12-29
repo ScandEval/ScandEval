@@ -33,6 +33,7 @@ from .exceptions import InvalidBenchmark
 from .hf_hub import get_model_config
 from .model_loading import load_model
 from .scores import log_scores
+from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT
 from .utils import (
     block_terminal_output,
@@ -78,6 +79,8 @@ class BenchmarkDataset(ABC):
             metric_cfg.name: evaluate.load(
                 metric_cfg.huggingface_id, cache_dir=self.benchmark_config.cache_dir
             )
+            if metric_cfg.huggingface_id != ""
+            else None
             for metric_cfg in dataset_config.task.metrics
         }
 
@@ -133,9 +136,6 @@ class BenchmarkDataset(ABC):
         # Get the metadata
         metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
-        # Load the data collator
-        data_collator = self._load_data_collator(tokenizer)
-
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
 
@@ -145,6 +145,21 @@ class BenchmarkDataset(ABC):
             desc="Benchmarking",
             disable=not self.benchmark_config.progress_bar,
         )
+
+        # If we are running the speed estimation benchmark then call that directly
+        if self.dataset_config.task.name == "speed":
+            all_scores = benchmark_speed(
+                itr=itr,
+                tokenizer=tokenizer,
+                model=model,
+                model_config=model_config,
+                dataset_config=self.dataset_config,
+                benchmark_config=self.benchmark_config,
+            )
+            return all_scores, metadata_dict
+
+        # Load the data collator
+        data_collator = self._load_data_collator(tokenizer)
 
         # Load the data
         train, val, test = self._load_data()
@@ -172,9 +187,11 @@ class BenchmarkDataset(ABC):
                 "done."
             )
 
+        # Initialise the `scores` dictionary
+        scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
+
         bs: int = self.benchmark_config.batch_size
         ga: int = 32 // bs
-        scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
         for idx in itr:
 
             # Set variable that tracks whether we need to initialize new models in the

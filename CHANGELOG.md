@@ -8,6 +8,16 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added model inference speed estimation benchmark. This can now be run by setting
+  either `task` or `dataset` to "speed". E.g., `scandeval -m <model_id> -d speed` or
+  `scandeval -m <model_id> -dt speed`. This runs 10 iterations of 100 model inferences
+  on a document of length 2,600 (the document "This is a dummy document. " repeated 100
+  times). The inference speed includes tokenization, and is powered by the `pyinfer`
+  package.
+
+
 ## [v6.0.1] - 2022-12-28
 ### Fixed
 - Added prefix space to DeBERTa models.
