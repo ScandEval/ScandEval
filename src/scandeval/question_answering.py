@@ -214,12 +214,13 @@ def prepare_train_examples(
 
         # Manually ensure that the special tokens are set to None in `sequence_ids`
         for special_token in tokenizer.special_tokens_map.keys():
-            special_token_id = getattr(tokenizer, f"{special_token}_id")
-            if special_token_id is not None:
-                sequence_ids = [
-                    None if token_id == special_token_id else seq_id
-                    for token_id, seq_id in zip(input_ids, sequence_ids)
-                ]
+            if hasattr(tokenizer, f"{special_token}_id"):
+                special_token_id = getattr(tokenizer, f"{special_token}_id")
+                if special_token_id is not None:
+                    sequence_ids = [
+                        None if token_id == special_token_id else seq_id
+                        for token_id, seq_id in zip(input_ids, sequence_ids)
+                    ]
 
         # One example can give several spans, this is the index of the example
         # containing this span of text.

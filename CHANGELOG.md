@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Fixed error where some tokenizers did not have special token IDs registered.
+
+
 ## [v6.1.0] - 2022-12-29
 ### Added
 - Added model inference speed estimation benchmark. This can now be run by setting
