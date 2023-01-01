@@ -1,6 +1,7 @@
 """Functions related to the loading of models."""
 
 import warnings
+from json import JSONDecodeError
 from typing import Dict, List, Tuple, Type, Union
 
 from transformers import PreTrainedModel
@@ -139,7 +140,7 @@ def load_model(
             else:
                 model = model_or_tuple
 
-    except (OSError, ValueError) as e:
+    except (OSError, ValueError, JSONDecodeError) as e:
 
         # Deal with the case where the checkpoint is incorrect
         if "checkpoint seems to be incorrect" in str(e):

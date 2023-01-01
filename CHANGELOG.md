@@ -11,6 +11,7 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Fixed error where some tokenizers did not have special token IDs registered.
+- Now catches JSONDecodeError when loading tokenizers.
 
 
 ## [v6.1.0] - 2022-12-29
