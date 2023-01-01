@@ -140,7 +140,7 @@ def load_model(
             else:
                 model = model_or_tuple
 
-    except (OSError, ValueError, JSONDecodeError) as e:
+    except (OSError, ValueError) as e:
 
         # Deal with the case where the checkpoint is incorrect
         if "checkpoint seems to be incorrect" in str(e):
@@ -164,15 +164,18 @@ def load_model(
     prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
-            model_id,
-            revision=revision,
-            use_auth_token=use_auth_token,
-            add_prefix_space=prefix,
-            cache_dir=cache_dir,
-            use_fast=True,
-            verbose=False,
-        )
+        try:
+            tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
+                model_id,
+                revision=revision,
+                use_auth_token=use_auth_token,
+                add_prefix_space=prefix,
+                cache_dir=cache_dir,
+                use_fast=True,
+                verbose=False,
+            )
+        except JSONDecodeError:
+            raise InvalidBenchmark(f"Could not load tokenizer for model {model_id!r}.")
 
     # Fix the model and the tokenizer
     model, tokenizer = fix_model_and_tokenizer(model, tokenizer)
