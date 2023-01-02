@@ -90,15 +90,21 @@ def load_model(
 
         # Otherwise load the pretrained model
         else:
-            config = AutoConfig.from_pretrained(
-                model_id,
-                revision=revision,
-                use_auth_token=use_auth_token,
-                num_labels=num_labels,
-                id2label=id2label,
-                label2id=label2id,
-                cache_dir=cache_dir,
-            )
+            try:
+                config = AutoConfig.from_pretrained(
+                    model_id,
+                    revision=revision,
+                    use_auth_token=use_auth_token,
+                    num_labels=num_labels,
+                    id2label=id2label,
+                    label2id=label2id,
+                    cache_dir=cache_dir,
+                )
+            except KeyError as e:
+                raise InvalidBenchmark(
+                    f"The model config for the mmodel {model_id!r} could not be "
+                    f"loaded, as the key {e!r} was not found in the config."
+                )
 
             # Get the model class associated with the supertask
             model_cls_or_none: Union[None, Type[PreTrainedModel]] = get_class_by_name(

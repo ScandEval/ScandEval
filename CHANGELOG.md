@@ -11,7 +11,8 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Fixed error where some tokenizers did not have special token IDs registered.
-- Now catches JSONDecodeError when loading tokenizers.
+- Now catches `JSONDecodeError` when loading tokenizers.
+- Now catches `KeyError` when loading model configurations.
 
 
 ## [v6.1.0] - 2022-12-29
