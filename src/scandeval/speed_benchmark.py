@@ -116,6 +116,7 @@ def benchmark_speed_single_iteration(
                 model_id=model_config.model_id,
                 revision=model_config.revision,
                 supertask=dataset_config.task.supertask,
+                language=dataset_config.languages[0].code,
                 num_labels=dataset_config.num_labels,
                 label2id=dataset_config.label2id,
                 id2label=dataset_config.id2label,

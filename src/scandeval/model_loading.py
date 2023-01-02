@@ -28,6 +28,7 @@ def load_model(
     model_id: str,
     revision: str,
     supertask: str,
+    language: str,
     num_labels: int,
     id2label: List[str],
     label2id: Dict[str, int],
@@ -45,6 +46,8 @@ def load_model(
             commit hash.
         supertask (str):
             The supertask of the task to benchmark the model on.
+        language (str):
+            The language of the dataset on which to benchmark the model.
         num_labels (int):
             The number of labels in the dataset.
         id2label (list of str):
@@ -165,8 +168,23 @@ def load_model(
             "via the `huggingface-cli login` command."
         )
 
-    # If the model is a subclass of a RoBERTa model then we have to add a prefix
-    # space to the tokens, by the way the model is constructed.
+    # If the model is of type XMOD then we need to set the default language
+    if "XMOD" in type(model).__name__:
+        language_mapping = dict(
+            da="da_DK",
+            sv="sv_SE",
+            nb="no_XX",
+            nn="no_XX",
+            no="no_XX",
+        )
+        if language not in language_mapping:
+            raise InvalidBenchmark(
+                f"The language {language!r} is not supported by the XMOD model."
+            )
+        model.set_default_language(language_mapping[language])
+
+    # Load the tokenizer. If the model is a subclass of a RoBERTa model then we have to
+    # add a prefix space to the tokens, by the way the model is constructed.
     prefix_models = ["Roberta", "GPT", "Deberta"]
     prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
     with warnings.catch_warnings():
