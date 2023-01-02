@@ -11,6 +11,10 @@ and this project adheres to
 ## [Unreleased]
 ### Fixed
 - Now sets the default language for the (upcoming) XMOD models.
+- If a model's `token_type_embeddings` layer has size (1, ...) when benchmarking the
+  model for question answering, it is expanded to size (2, ...) with the second row
+  being randomly initialised. This is required as question answering tasks need a least
+  two token type embeddings.
 
 
 ## [v6.1.1] - 2023-01-02

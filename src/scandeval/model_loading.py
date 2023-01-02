@@ -2,8 +2,10 @@
 
 import warnings
 from json import JSONDecodeError
-from typing import Dict, List, Tuple, Type, Union
+from typing import Any, Dict, List, Tuple, Type, Union
 
+import torch
+import torch.nn as nn
 from transformers import PreTrainedModel
 from transformers.configuration_utils import PretrainedConfig
 from transformers.models.auto.configuration_auto import AutoConfig
@@ -128,11 +130,6 @@ def load_model(
             if config.model_type == "deberta-v2":
                 config.pooler_hidden_size = config.hidden_size
 
-            # If we are benchmarking a question answering model then we need to set
-            # the type_vocab_size to 2
-            if supertask == "question-answering":
-                config.type_vocab_size = 2
-
             # Load the model
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=UserWarning)
@@ -183,6 +180,10 @@ def load_model(
             )
         model.set_default_language(language_mapping[language])
 
+    # Set up the model for question answering
+    if supertask == "question-answering":
+        model = setup_model_for_question_answering(model=model)
+
     # Load the tokenizer. If the model is a subclass of a RoBERTa model then we have to
     # add a prefix space to the tokens, by the way the model is constructed.
     prefix_models = ["Roberta", "GPT", "Deberta"]
@@ -202,8 +203,8 @@ def load_model(
         except JSONDecodeError:
             raise InvalidBenchmark(f"Could not load tokenizer for model {model_id!r}.")
 
-    # Fix the model and the tokenizer
-    model, tokenizer = fix_model_and_tokenizer(model, tokenizer)
+    # Align the model and the tokenizer
+    model, tokenizer = align_model_and_tokenizer(model=model, tokenizer=tokenizer)
 
     return tokenizer, model
 
@@ -257,10 +258,92 @@ def load_fresh_model_class(
     return model_cls, model_id
 
 
-def fix_model_and_tokenizer(
+def get_children_of_module(
+    name: str, module: nn.Module
+) -> Union[nn.Module, Dict[str, Any], None]:
+    """Get the children of a module.
+
+    Args:
+        name (str):
+            The name of the module.
+        module (nn.Module):
+            The module to get the children of.
+
+    Returns:
+        Union[nn.Module, Dict[str, Any], None]:
+            The children of the module, or None if the module has no children.
+    """
+    if len(list(module.children())) == 0:
+        if name == "token_type_embeddings":
+            return module
+        else:
+            return None
+    else:
+        submodules = dict()
+        for subname, submodule in module.named_children():
+            children = get_children_of_module(name=subname, module=submodule)
+            if children:
+                submodules[subname] = children
+        return submodules
+
+
+def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedModel:
+    """Setup a model for question answering.
+
+    Args:
+        model (PreTrainedModel):
+            The model to setup.
+
+    Returns:
+        PreTrainedModel:
+            The setup model.
+    """
+
+    # Get the models' token type embedding children, if they exist
+    children = get_children_of_module(name="model", module=model)
+
+    # If the model has token type embeddings then get them
+    if children:
+
+        # Get the list of attributes that are token type embeddings
+        attribute_list = list()
+        done = False
+        while not done:
+            for key, value in children.items():
+                attribute_list.append(key)
+                if isinstance(value, dict):
+                    children = value
+                else:
+                    done = True
+                break
+
+        # Get the token type embeddings
+        token_type_embeddings = model
+        for attribute in attribute_list:
+            token_type_embeddings = getattr(token_type_embeddings, attribute)
+
+        # If the token type embeddings has shape (1, ...) then set the shape to
+        # (2, ...) by randomly initializing the second token type embedding
+        if token_type_embeddings.weight.data.shape[0] == 1:
+            token_type_embeddings.weight.data = torch.cat(
+                (
+                    token_type_embeddings.weight.data,
+                    torch.rand_like(token_type_embeddings.weight.data),
+                ),
+                dim=0,
+            )
+            token_type_embeddings.num_embeddings = 2
+
+    # Set the model config to use the new type vocab size
+    model.config.type_vocab_size = 2
+
+    return model
+
+
+def align_model_and_tokenizer(
     model: PreTrainedModel, tokenizer: PreTrainedTokenizer
 ) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
-    """Fixes the model and tokenizer to be compatible with the benchmarking framework.
+    """Aligns the model and the tokenizer.
 
     Args:
         model (PreTrainedModel):
