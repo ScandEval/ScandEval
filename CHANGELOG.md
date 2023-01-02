@@ -15,6 +15,7 @@ and this project adheres to
   model for question answering, it is expanded to size (2, ...) with the second row
   being randomly initialised. This is required as question answering tasks need a least
   two token type embeddings.
+- Now catches `OSError` when loading tokenizers.
 
 
 ## [v6.1.1] - 2023-01-02

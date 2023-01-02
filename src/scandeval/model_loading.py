@@ -200,7 +200,7 @@ def load_model(
                 use_fast=True,
                 verbose=False,
             )
-        except JSONDecodeError:
+        except (JSONDecodeError, OSError):
             raise InvalidBenchmark(f"Could not load tokenizer for model {model_id!r}.")
 
     # Align the model and the tokenizer
