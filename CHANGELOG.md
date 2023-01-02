@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.1.1] - 2023-01-02
 ### Fixed
 - Fixed error where some tokenizers did not have special token IDs registered.
 - Now catches `JSONDecodeError` when loading tokenizers.
