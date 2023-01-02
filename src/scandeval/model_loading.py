@@ -103,7 +103,7 @@ def load_model(
             except KeyError as e:
                 raise InvalidBenchmark(
                     f"The model config for the mmodel {model_id!r} could not be "
-                    f"loaded, as the key {e!r} was not found in the config."
+                    f"loaded, as the key {str(e)!r} was not found in the config."
                 )
 
             # Get the model class associated with the supertask
