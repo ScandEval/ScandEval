@@ -55,6 +55,12 @@ class QuestionAnswering(BenchmarkDataset):
         split: str = kwargs.pop("split")
         tokenizer: PreTrainedTokenizer = kwargs.pop("tokenizer")
 
+        # If the tokenizer is not a fast variant then raise an error
+        if not tokenizer.is_fast:
+            raise InvalidBenchmark(
+                "Question-answering benchmarks require a fast tokenizer."
+            )
+
         # Choose the preprocessing function depending on the dataset split
         if split == "test":
             preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
