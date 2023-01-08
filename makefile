@@ -7,7 +7,7 @@
 
 # Create .env file if it does not already exist
 ifeq (,$(wildcard .env))
-	$(shell touch .env)
+  $(shell touch .env)
 endif
 
 # Includes environment variables from the .env file
