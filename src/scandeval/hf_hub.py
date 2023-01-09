@@ -234,7 +234,7 @@ def get_model_lists(
         model_ids: List[str] = [model.modelId for model in models if model.modelId]
 
         # Remove models that are too large, and thus needs to be specified manually
-        large_regex = re.compile(r"(-|_)x+l(arge)?")
+        large_regex = re.compile(r"(-|_)(x+l(arge)?|[1-9.]+[Bb])")
         model_ids = [
             model_id
             for model_id in model_ids

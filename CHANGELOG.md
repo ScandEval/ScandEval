@@ -9,6 +9,10 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Changed
+- Does not include by default models which indicate in their name that they're using
+  more than a billion parameters, such as `EleutherAI/gpt-j-6B`.
+
 ### Fixed
 - Now sets the default language for the (upcoming) XMOD models.
 - If a model's `token_type_embeddings` layer has size (1, ...) when benchmarking the
