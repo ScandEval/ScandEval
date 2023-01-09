@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.2.0] - 2023-01-09
 ### Changed
 - Does not include by default models which indicate in their name that they're using
   more than a billion parameters, such as `EleutherAI/gpt-j-6B`.
