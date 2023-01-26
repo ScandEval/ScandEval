@@ -1,6 +1,6 @@
 # This ensures that we can call `make <target>` even if `<target>` exists as a file or
 # directory.
-.PHONY: notebook docs
+.PHONY: notebook docs help
 
 # Exports all variables defined in the makefile available to scripts
 .EXPORT_ALL_VARIABLES:
@@ -17,6 +17,9 @@ include .env
 export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
 export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
 install-poetry:
 	@echo "Installing poetry..."
 	@pipx install poetry==1.2.0
@@ -26,7 +29,7 @@ uninstall-poetry:
 	@echo "Uninstalling poetry..."
 	@pipx uninstall poetry
 
-install:
+install: ## Install dependencies
 	@echo "Installing..."
 	@if [ "$(shell which poetry)" = "" ]; then \
 		$(MAKE) install-poetry; \
@@ -97,16 +100,16 @@ publish:
 	fi
 	@echo "Published!"
 
-publish-major: bump-major publish
+publish-major: bump-major publish  ## Publish a major version
 
-publish-minor: bump-minor publish
+publish-minor: bump-minor publish  ## Publish a minor version
 
-publish-patch: bump-patch publish
+publish-patch: bump-patch publish  ## Publish a patch version
 
-test:
+test:  ## Run tests
 	@PYTORCH_ENABLE_MPS_FALLBACK=1 poetry run pytest && readme-cov
 
-tree:
+tree:  ## Print directory tree
 	@tree -a \
 		-I ".git" \
 		-I ".mypy_cache" \
