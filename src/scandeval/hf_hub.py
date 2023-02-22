@@ -241,6 +241,11 @@ def get_model_lists(
             if re.search(large_regex, model_id) is None
         ]
 
+        # Remove models that have "finetuned" in their name
+        model_ids = [
+            model_id for model_id in model_ids if "finetuned" not in model_id.lower()
+        ]
+
         # Store the model IDs
         model_lists["all"].extend(model_ids)
         if language is not None:
