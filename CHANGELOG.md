@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.2.1] - 2023-02-22
 ### Fixed
 - Now does not include models with the word "finetuned" in their name when benchmarking
   all models. These can still be benchmarked if specified directly.
