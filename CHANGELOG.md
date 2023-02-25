@@ -13,7 +13,6 @@ and this project adheres to
 - If `max_position_embeddings` is smaller than any of the context lengths specified in
   `model_max_length` and `max_model_input_sizes` then we use that as the the
   tokenization max length. This avoids dimension errors related to truncation.
-- Set CUDA RNG state to the default RNG state.
 
 
 ## [v6.2.1] - 2023-02-22
