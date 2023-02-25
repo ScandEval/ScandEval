@@ -362,7 +362,9 @@ def align_model_and_tokenizer(
         # Get all possible maximal lengths
         all_max_lengths: List[int] = []
         if hasattr(model.config, "max_position_embeddings"):
-            all_max_lengths.append(model.config.max_position_embeddings)
+            all_max_lengths.append(
+                model.config.max_position_embeddings - tokenizer.pad_token_id - 1
+            )
         if hasattr(tokenizer, "max_model_input_sizes"):
             all_max_lengths.extend(
                 [

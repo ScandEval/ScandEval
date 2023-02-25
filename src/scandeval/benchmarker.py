@@ -356,7 +356,6 @@ class Benchmarker:
 
             # Otherwise, return the error message
             else:
-                raise e
                 return dict(error=str(e))
 
     def __call__(
