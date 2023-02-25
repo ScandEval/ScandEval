@@ -194,7 +194,6 @@ class BenchmarkDataset(ABC):
         bs: int = self.benchmark_config.batch_size
         ga: int = 32 // bs
         for idx in itr:
-
             # Set variable that tracks whether we need to initialize new models in the
             # `_benchmark_single_iteration` call
             model_already_initialized = idx == 0
@@ -212,7 +211,6 @@ class BenchmarkDataset(ABC):
                 clear_memory()
 
             while True:
-
                 # Get the boostrapped dataset for this iteration
                 test = tests[idx]
 
@@ -262,6 +260,8 @@ class BenchmarkDataset(ABC):
                     bs = training_args.per_device_train_batch_size
                     ga = training_args.gradient_accumulation_steps
 
+                    raise itr_scores
+
                     bs, ga = handle_error(
                         e=itr_scores,
                         per_device_train_batch_size=bs,
@@ -296,7 +296,6 @@ class BenchmarkDataset(ABC):
     def _get_metadata(
         self, model: PreTrainedModel, tokenizer: PreTrainedTokenizer
     ) -> Dict[str, int]:
-
         # Store the number of parameters in the model, the maximum sequence length and
         # the size of the model's vocabulary
         num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -324,7 +323,6 @@ class BenchmarkDataset(ABC):
         return metadata_dict
 
     def _get_training_args(self, iteration_idx: int) -> TrainingArguments:
-
         # Set the logging strategy
         if self.benchmark_config.verbose:
             logging_strategy = IntervalStrategy.STEPS
@@ -367,7 +365,6 @@ class BenchmarkDataset(ABC):
         return training_args
 
     def _load_data(self):
-
         # Download dataset from the HF Hub
         dataset_dict = load_dataset(
             path=self.dataset_config.huggingface_id,
