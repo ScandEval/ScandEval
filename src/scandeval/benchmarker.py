@@ -167,7 +167,6 @@ class Benchmarker:
         # Iterate over all the models and datasets
         for m_id in model_ids:
             for dataset_config in dataset_configs:
-
                 # Skip if we have already benchmarked this model on this dataset and
                 # `ignore_duplicates` is set
                 if self.ignore_duplicates and self._has_been_benchmarked(
@@ -338,7 +337,6 @@ class Benchmarker:
             return record
 
         except InvalidBenchmark as e:
-
             # If the model ID is not valid then raise an error, if specified
             model_err_msg = "does not exist on the Hugging Face Hub"
             if (
@@ -358,6 +356,7 @@ class Benchmarker:
 
             # Otherwise, return the error message
             else:
+                raise e
                 return dict(error=str(e))
 
     def __call__(
