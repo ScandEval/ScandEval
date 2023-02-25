@@ -53,6 +53,7 @@ def enforce_reproducibility(framework: str, seed: int = 4242):
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
         torch.use_deterministic_algorithms(True, warn_only=True)
+        torch.cuda.set_rng_state(torch.cuda.default_rng().get_state())
     return rng
 
 
@@ -142,7 +143,6 @@ def get_class_by_name(
 
     # Loop over the class names
     for name in class_name:
-
         # Get the snake_case and PascalCase version of the class name
         name_snake = name.replace("-", "_")
         name_pascal = kebab_to_pascal(name)
