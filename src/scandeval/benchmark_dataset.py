@@ -260,6 +260,7 @@ class BenchmarkDataset(ABC):
                     bs = training_args.per_device_train_batch_size
                     ga = training_args.gradient_accumulation_steps
 
+                    breakpoint()
                     raise itr_scores
 
                     bs, ga = handle_error(
