@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- If `max_position_embeddings` is smaller than any of the context lengths specified in
+  `model_max_length` and `max_model_input_sizes` then we use that as the the
+  tokenization max length. This avoids dimension errors related to truncation.
+
+
 ## [v6.2.1] - 2023-02-22
 ### Fixed
 - Now does not include models with the word "finetuned" in their name when benchmarking

@@ -148,7 +148,6 @@ def load_model(
                 model = model_or_tuple
 
     except (OSError, ValueError) as e:
-
         # Deal with the case where the checkpoint is incorrect
         if "checkpoint seems to be incorrect" in str(e):
             raise InvalidBenchmark(
@@ -304,7 +303,6 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
 
     # If the model has token type embeddings then get them
     if children:
-
         # Get the list of attributes that are token type embeddings
         attribute_list = list()
         done = False
@@ -361,14 +359,25 @@ def align_model_and_tokenizer(
         not hasattr(tokenizer, "model_max_length")
         or tokenizer.model_max_length > 100_000
     ):
-
+        # Get all possible maximal lengths
+        all_max_lengths: List[int] = []
+        if hasattr(model.config, "max_position_embeddings"):
+            all_max_lengths.append(model.config.max_position_embeddings)
         if hasattr(tokenizer, "max_model_input_sizes"):
-            all_max_lengths = tokenizer.max_model_input_sizes.values()
-            if len(list(all_max_lengths)) > 0:
-                min_max_length = min(list(all_max_lengths))
-                tokenizer.model_max_length = min_max_length
-            else:
-                tokenizer.model_max_length = 512
+            all_max_lengths.extend(
+                [
+                    size
+                    for size in tokenizer.max_model_input_sizes.values()
+                    if size is not None
+                ]
+            )
+
+        # If any maximal lengths were found then use the shortest one
+        if len(list(all_max_lengths)) > 0:
+            min_max_length = min(list(all_max_lengths))
+            tokenizer.model_max_length = min_max_length
+
+        # Otherwise, use the default maximal length
         else:
             tokenizer.model_max_length = 512
 
