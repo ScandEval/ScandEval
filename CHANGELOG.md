@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.2.2] - 2023-02-25
 ### Fixed
 - If `max_position_embeddings` is smaller than any of the context lengths specified in
   `model_max_length` and `max_model_input_sizes` then we use that as the the
