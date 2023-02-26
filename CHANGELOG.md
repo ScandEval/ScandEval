@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Ensure that the `max_position_embeddings` fix from v6.2.2 only occurs if the
+  tokenizer has a padding token, as this is used to set the `model_max_length`.
+
+
 ## [v6.2.2] - 2023-02-25
 ### Fixed
 - If `max_position_embeddings` is smaller than any of the context lengths specified in
