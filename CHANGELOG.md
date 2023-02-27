@@ -12,6 +12,8 @@ and this project adheres to
 ### Fixed
 - Ensure that the `max_position_embeddings` fix from v6.2.2 only occurs if the
   tokenizer has a padding token, as this is used to set the `model_max_length`.
+- If a model only has a JAX model but also has tags on the Hugging Face Hub from
+  another framework, then re-try the evaluation with `from_flax` set to `True`.
 
 
 ## [v6.2.2] - 2023-02-25

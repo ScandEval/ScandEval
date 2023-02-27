@@ -77,92 +77,104 @@ def load_model(
     config: PretrainedConfig
     block_terminal_output()
 
-    try:
-        # If the model ID specifies a fresh model, then load that.
-        if model_id.startswith("fresh"):
-            model_cls, model_id = load_fresh_model_class(
-                model_id=model_id, supertask=supertask
-            )
-            config = AutoConfig.from_pretrained(
-                model_id,
-                use_auth_token=use_auth_token,
-                num_labels=num_labels,
-                id2label=id2label,
-                label2id=label2id,
-                cache_dir=cache_dir,
-            )
-            model = model_cls(config)
-
-        # Otherwise load the pretrained model
-        else:
-            try:
+    while True:
+        try:
+            # If the model ID specifies a fresh model, then load that.
+            if model_id.startswith("fresh"):
+                model_cls, model_id = load_fresh_model_class(
+                    model_id=model_id, supertask=supertask
+                )
                 config = AutoConfig.from_pretrained(
                     model_id,
-                    revision=revision,
                     use_auth_token=use_auth_token,
                     num_labels=num_labels,
                     id2label=id2label,
                     label2id=label2id,
                     cache_dir=cache_dir,
                 )
-            except KeyError as e:
-                key = e.args[0]
-                raise InvalidBenchmark(
-                    f"The model config for the mmodel {model_id!r} could not be "
-                    f"loaded, as the key {key!r} was not found in the config."
-                )
+                model = model_cls(config)
 
-            # Get the model class associated with the supertask
-            model_cls_or_none: Union[None, Type[PreTrainedModel]] = get_class_by_name(
-                class_name=f"auto-model-for-{supertask}",
-                module_name="transformers",
-            )
-
-            # If the model class could not be found then raise an error
-            if not model_cls_or_none:
-                raise InvalidBenchmark(
-                    f"The supertask '{supertask}' does not correspond to a Hugging Face"
-                    " AutoModel type (such as `AutoModelForSequenceClassification`)."
-                )
-
-            # If the model is a DeBERTaV2 model then we ensure that
-            # `pooler_hidden_size` is the same size as `hidden_size`
-            if config.model_type == "deberta-v2":
-                config.pooler_hidden_size = config.hidden_size
-
-            # Load the model
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=UserWarning)
-                model_or_tuple = model_cls_or_none.from_pretrained(
-                    model_id,
-                    revision=revision,
-                    use_auth_token=use_auth_token,
-                    config=config,
-                    cache_dir=cache_dir,
-                    from_flax=from_flax,
-                    ignore_mismatched_sizes=True,
-                )
-            if isinstance(model_or_tuple, tuple):
-                model = model_or_tuple[0]
+            # Otherwise load the pretrained model
             else:
-                model = model_or_tuple
+                try:
+                    config = AutoConfig.from_pretrained(
+                        model_id,
+                        revision=revision,
+                        use_auth_token=use_auth_token,
+                        num_labels=num_labels,
+                        id2label=id2label,
+                        label2id=label2id,
+                        cache_dir=cache_dir,
+                    )
+                except KeyError as e:
+                    key = e.args[0]
+                    raise InvalidBenchmark(
+                        f"The model config for the mmodel {model_id!r} could not be "
+                        f"loaded, as the key {key!r} was not found in the config."
+                    )
 
-    except (OSError, ValueError) as e:
-        # Deal with the case where the checkpoint is incorrect
-        if "checkpoint seems to be incorrect" in str(e):
+                # Get the model class associated with the supertask
+                model_cls_or_none: Union[
+                    None, Type[PreTrainedModel]
+                ] = get_class_by_name(
+                    class_name=f"auto-model-for-{supertask}",
+                    module_name="transformers",
+                )
+
+                # If the model class could not be found then raise an error
+                if not model_cls_or_none:
+                    raise InvalidBenchmark(
+                        f"The supertask '{supertask}' does not correspond to a Hugging Face"
+                        " AutoModel type (such as `AutoModelForSequenceClassification`)."
+                    )
+
+                # If the model is a DeBERTaV2 model then we ensure that
+                # `pooler_hidden_size` is the same size as `hidden_size`
+                if config.model_type == "deberta-v2":
+                    config.pooler_hidden_size = config.hidden_size
+
+                # Load the model
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=UserWarning)
+                    model_or_tuple = model_cls_or_none.from_pretrained(
+                        model_id,
+                        revision=revision,
+                        use_auth_token=use_auth_token,
+                        config=config,
+                        cache_dir=cache_dir,
+                        from_flax=from_flax,
+                        ignore_mismatched_sizes=True,
+                    )
+                if isinstance(model_or_tuple, tuple):
+                    model = model_or_tuple[0]
+                else:
+                    model = model_or_tuple
+
+            # Break out of the loop
+            break
+
+        except (OSError, ValueError) as e:
+            # If `from_flax` is False but only Flax models are available then try again
+            # with `from_flax` set to True
+            if not from_flax and "Use `from_flax=True` to load this model" in str(e):
+                from_flax = True
+                continue
+
+            # Deal with the case where the checkpoint is incorrect
+            if "checkpoint seems to be incorrect" in str(e):
+                raise InvalidBenchmark(
+                    f"The model {model_id!r} has an incorrect checkpoint."
+                )
+
+            # Otherwise raise a more generic error
             raise InvalidBenchmark(
-                f"The model {model_id!r} has an incorrect checkpoint."
+                f"The model {model_id} either does not exist on the Hugging Face Hub, "
+                "or it has no frameworks registered, or it is a private model. If "
+                "it *does* exist on the Hub and is a public model then please "
+                "ensure that it has a framework registered. If it is a private "
+                "model then enable the `--use-auth-token` flag and make sure that "
+                "you are logged in to the Hub via the `huggingface-cli login` command."
             )
-
-        # Otherwise raise a more generic error
-        raise InvalidBenchmark(
-            f"The model {model_id} either does not exist on the Hugging Face Hub, or "
-            "it has no frameworks registered, or it is a private model. If it *does* "
-            "exist on the Hub and is a public model then please ensure that it has a "
-            "framework registered. If it is a private model then enable the "
-            "`--use-auth-token` flag and make sure that you are logged in to the Hub "
-            "via the `huggingface-cli login` command."
-        )
 
     # If the model is of type XMOD then we need to set the default language
     if "XMOD" in type(model).__name__:
