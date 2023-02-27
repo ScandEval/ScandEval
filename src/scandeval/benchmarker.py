@@ -3,6 +3,7 @@
 import json
 import logging
 from pathlib import Path
+from time import sleep
 from typing import Dict, List, Optional, Sequence, Union
 
 from .benchmark_config_factory import build_benchmark_config
@@ -320,43 +321,50 @@ class Benchmarker:
                 key 'error', with the associated value being the error message.
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
-        try:
-            dataset = self.dataset_factory.build_dataset(dataset_config)
-            results, metadata_dict = dataset(model_id)
-            record: Dict[str, Union[str, int, List[str], SCORE_DICT]] = dict(
-                dataset=dataset_config.name,
-                task=dataset_config.task.name,
-                dataset_languages=[
-                    language.code for language in dataset_config.languages
-                ],
-                model=model_id,
-                results=results,
-                **metadata_dict,
-            )
-            logger.debug(f"Results:\n{results}")
-            return record
-
-        except InvalidBenchmark as e:
-            # If the model ID is not valid then raise an error, if specified
-            model_err_msg = "does not exist on the Hugging Face Hub"
-            if (
-                self.benchmark_config.raise_error_on_invalid_model
-                and model_err_msg in str(e)
-            ):
-                raise e
-
-            # Otherwise, if the error is due to the MPS fallback not being enabled,
-            # then raise an error asking the user to enable it
-            elif "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
-                raise RuntimeError(
-                    "The benchmark failed because the environment variable "
-                    "`PYTORCH_ENABLE_MPS_FALLBACK` is not set. Please set this "
-                    "environment variable to `1` and try again."
+        while True:
+            try:
+                dataset = self.dataset_factory.build_dataset(dataset_config)
+                results, metadata_dict = dataset(model_id)
+                record: Dict[str, Union[str, int, List[str], SCORE_DICT]] = dict(
+                    dataset=dataset_config.name,
+                    task=dataset_config.task.name,
+                    dataset_languages=[
+                        language.code for language in dataset_config.languages
+                    ],
+                    model=model_id,
+                    results=results,
+                    **metadata_dict,
                 )
+                logger.debug(f"Results:\n{results}")
+                return record
 
-            # Otherwise, return the error message
-            else:
-                return dict(error=str(e))
+            except InvalidBenchmark as e:
+                # If the model ID is not valid then raise an error, if specified
+                model_err_msg = "does not exist on the Hugging Face Hub"
+                if (
+                    self.benchmark_config.raise_error_on_invalid_model
+                    and model_err_msg in str(e)
+                ):
+                    raise e
+
+                # Otherwise, if the error is due to Hugging Face Hub being down, then
+                # wait a bit and try again
+                if "The Hugging Face Hub seems to be down." in str(e):
+                    sleep(30)
+                    continue
+
+                # Otherwise, if the error is due to the MPS fallback not being enabled,
+                # then raise an error asking the user to enable it
+                elif "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
+                    raise RuntimeError(
+                        "The benchmark failed because the environment variable "
+                        "`PYTORCH_ENABLE_MPS_FALLBACK` is not set. Please set this "
+                        "environment variable to `1` and try again."
+                    )
+
+                # Otherwise, return the error message
+                else:
+                    return dict(error=str(e))
 
     def __call__(
         self, *args, **kwargs

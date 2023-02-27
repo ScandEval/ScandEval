@@ -13,6 +13,7 @@ import torch
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
+from huggingface_hub.utils._errors import HfHubHTTPError
 from tqdm.auto import tqdm
 from transformers.data.data_collator import DataCollator
 from transformers.modeling_utils import PreTrainedModel
@@ -364,11 +365,14 @@ class BenchmarkDataset(ABC):
 
     def _load_data(self):
         # Download dataset from the HF Hub
-        dataset_dict = load_dataset(
-            path=self.dataset_config.huggingface_id,
-            use_auth_token=self.benchmark_config.use_auth_token,
-            cache_dir=self.benchmark_config.cache_dir,
-        )
+        try:
+            dataset_dict = load_dataset(
+                path=self.dataset_config.huggingface_id,
+                use_auth_token=self.benchmark_config.use_auth_token,
+                cache_dir=self.benchmark_config.cache_dir,
+            )
+        except HfHubHTTPError:
+            raise InvalidBenchmark("The Hugging Face Hub seems to be down.")
 
         # If the dataset turns out not to be a DatasetDict, then we raise an error
         if not isinstance(dataset_dict, DatasetDict):
