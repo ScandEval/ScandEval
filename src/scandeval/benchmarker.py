@@ -350,7 +350,12 @@ class Benchmarker:
                 # Otherwise, if the error is due to Hugging Face Hub being down, then
                 # wait a bit and try again
                 if "The Hugging Face Hub seems to be down." in str(e):
-                    sleep(30)
+                    wait_time = 30
+                    logger.debug(
+                        "The Hugging Face Hub seems to be down. Retrying in "
+                        f"{wait_time} seconds."
+                    )
+                    sleep(wait_time)
                     continue
 
                 # Otherwise, if the error is due to the MPS fallback not being enabled,
