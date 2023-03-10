@@ -184,7 +184,10 @@ def kebab_to_pascal(kebab_string: str) -> str:
 
 
 def handle_error(
-    e: Exception, per_device_train_batch_size: int, gradient_accumulation_steps: int
+    e: Exception,
+    per_device_train_batch_size: int,
+    gradient_accumulation_steps: int,
+    raise_errors: bool = False,
 ) -> Tuple[int, int]:
     """Handle an error that occurred during the benchmarking process.
 
@@ -195,6 +198,9 @@ def handle_error(
             The batch size used for training.
         gradient_accumulation_steps (int):
             The number of gradient accumulation steps.
+        raise_errors (bool, optional):
+            Whether to raise the error if it is not a CUDA memory error. Defaults to
+            False.
 
     Returns:
         pair of int:
@@ -207,6 +213,8 @@ def handle_error(
 
     # If it is an unknown error, then simply report it
     if all([err not in str(e) for err in cuda_errs]):
+        if raise_errors:
+            raise e
         raise InvalidBenchmark(str(e))
 
     # If it is a CUDA memory error, then reduce batch size and up gradient
