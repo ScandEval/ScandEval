@@ -47,8 +47,9 @@ class Benchmarker:
             The batch size to use. Defaults to 32.
         evaluate_train (bool, optional):
             Whether to evaluate the training set as well. Defaults to False.
-        raise_error_on_invalid_model (bool, optional):
-            Whether to raise an error if a model is invalid. Defaults to False.
+        raise_errors (bool, optional):
+            Whether to raise errors instead of skipping the model evaluation. Defaults
+            to False.
         cache_dir (str, optional):
             Directory to store cached models. Defaults to '.scandeval_cache'.
         use_auth_token (bool or str, optional):
@@ -84,7 +85,7 @@ class Benchmarker:
         dataset_task: Optional[Union[str, Sequence[str]]] = None,
         batch_size: int = 32,
         evaluate_train: bool = False,
-        raise_error_on_invalid_model: bool = False,
+        raise_errors: bool = False,
         cache_dir: str = ".scandeval_cache",
         use_auth_token: Union[bool, str] = False,
         ignore_duplicates: bool = True,
@@ -97,7 +98,7 @@ class Benchmarker:
             dataset_language=dataset_language,
             dataset_task=dataset_task,
             batch_size=batch_size,
-            raise_error_on_invalid_model=raise_error_on_invalid_model,
+            raise_errors=raise_errors,
             cache_dir=cache_dir,
             evaluate_train=evaluate_train,
             use_auth_token=use_auth_token,
@@ -341,10 +342,7 @@ class Benchmarker:
             except InvalidBenchmark as e:
                 # If the model ID is not valid then raise an error, if specified
                 model_err_msg = "does not exist on the Hugging Face Hub"
-                if (
-                    self.benchmark_config.raise_error_on_invalid_model
-                    and model_err_msg in str(e)
-                ):
+                if self.benchmark_config.raise_errors and model_err_msg in str(e):
                     raise e
 
                 # Otherwise, if the error is due to Hugging Face Hub being down, then
@@ -367,8 +365,10 @@ class Benchmarker:
                         "environment variable to `1` and try again."
                     )
 
-                # Otherwise, return the error message
+                # Otherwise, raise the error or return the error message
                 else:
+                    if self.benchmark_config.raise_errors:
+                        raise e
                     return dict(error=str(e))
 
     def __call__(

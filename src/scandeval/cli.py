@@ -98,10 +98,10 @@ from .languages import get_all_languages
     help="Whether to show a progress bar.",
 )
 @click.option(
-    "--raise-error-on-invalid-model/--no-raise-error-on-invalid-model",
+    "--raise-errors/--no-raise-errors",
     default=False,
     show_default=True,
-    help="Whether to raise an error if a model is invalid.",
+    help="Whether to raise errors instead of skipping the evaluation.",
 )
 @click.option(
     "--verbose/--no-verbose",
@@ -153,7 +153,7 @@ def benchmark(
     language: Tuple[str],
     model_language: Tuple[str],
     dataset_language: Tuple[str],
-    raise_error_on_invalid_model: bool,
+    raise_errors: bool,
     dataset_task: Tuple[str],
     batch_size: str,
     evaluate_train: bool,
@@ -187,7 +187,7 @@ def benchmark(
         progress_bar=progress_bar,
         save_results=save_results,
         evaluate_train=evaluate_train,
-        raise_error_on_invalid_model=raise_error_on_invalid_model,
+        raise_errors=raise_errors,
         verbose=verbose,
         use_auth_token=auth,
         ignore_duplicates=ignore_duplicates,

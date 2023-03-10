@@ -87,8 +87,8 @@ class BenchmarkConfig:
             The tasks to benchmark.
         batch_size (int):
             The batch size to use.
-        raise_error_on_invalid_model (bool):
-            Whether to raise an error if a model is invalid.
+        raise_errors (bool):
+            Whether to raise errors instead of skipping them.
         cache_dir (str):
             Directory to store cached models and datasets.
         evaluate_train (bool):
@@ -113,7 +113,7 @@ class BenchmarkConfig:
     dataset_languages: Sequence[Language]
     dataset_tasks: Sequence[DatasetTask]
     batch_size: int
-    raise_error_on_invalid_model: bool
+    raise_errors: bool
     cache_dir: str
     evaluate_train: bool
     use_auth_token: Union[bool, str]

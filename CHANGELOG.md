@@ -13,6 +13,10 @@ and this project adheres to
 - If the Hugging Face Hub is down, throwing a `HfHubHTTPError`, then catch it, wait 30
   seconds, and try again.
 
+### Changed
+- Changed `raise-error-on-invalid-model` to `raise-errors`. The flag now raises all
+  errors instead of skipping the model evaluations, which can be used for debugging.
+
 
 ## [v6.2.3] - 2023-02-27
 ### Fixed

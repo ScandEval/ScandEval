@@ -13,7 +13,7 @@ def build_benchmark_config(
     dataset_language: Optional[Union[str, Sequence[str]]],
     dataset_task: Optional[Union[str, Sequence[str]]],
     batch_size: int,
-    raise_error_on_invalid_model: bool,
+    raise_errors: bool,
     cache_dir: str,
     evaluate_train: bool,
     use_auth_token: Union[bool, str],
@@ -40,8 +40,8 @@ def build_benchmark_config(
             filtered based on their task.
         batch_size (int):
             The batch size to use.
-        raise_error_on_invalid_model (bool, optional):
-            Whether to raise an error if a model is invalid.
+        raise_errors (bool, optional):
+            Whether to raise errore instead of skipping them.
         cache_dir (str, optional):
             Directory to store cached models.
         evaluate_train (bool, optional):
@@ -83,7 +83,7 @@ def build_benchmark_config(
         dataset_languages=dataset_languages,
         dataset_tasks=dataset_tasks,
         batch_size=batch_size,
-        raise_error_on_invalid_model=raise_error_on_invalid_model,
+        raise_errors=raise_errors,
         cache_dir=cache_dir,
         evaluate_train=evaluate_train,
         use_auth_token=use_auth_token,
