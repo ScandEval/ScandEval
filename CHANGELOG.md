@@ -12,6 +12,8 @@ and this project adheres to
 ### Fixed
 - If the Hugging Face Hub is down, throwing a `HfHubHTTPError`, then catch it, wait 30
   seconds, and try again.
+- Now always fixes the `model_max_length` attribute of the tokenizer, to prevent index
+  errors during finetuning.
 
 ### Changed
 - Changed `raise-error-on-invalid-model` to `raise-errors`. The flag now raises all
