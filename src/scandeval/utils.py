@@ -213,9 +213,7 @@ def handle_error(
 
     # If it is an unknown error, then simply report it
     if all([err not in str(e) for err in cuda_errs]):
-        if raise_errors:
-            raise e
-        raise InvalidBenchmark(str(e))
+        raise e  # InvalidBenchmark(str(e))
 
     # If it is a CUDA memory error, then reduce batch size and up gradient
     # accumulation
