@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.2.4] - 2023-03-10
 ### Fixed
 - If the Hugging Face Hub is down, throwing a `HfHubHTTPError`, then catch it, wait 30
   seconds, and try again.
