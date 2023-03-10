@@ -365,6 +365,7 @@ def align_model_and_tokenizer(
         pair of (model, tokenizer):
             The fixed model and tokenizer.
     """
+    tokenizer.model_max_length = 512
     # Set the maximal length of the tokenizer to the model's maximal length. This is
     # required for proper truncation
     if (
