@@ -177,7 +177,6 @@ class NamedEntityRecognition(BenchmarkDataset):
         labels: List[str]
         word_ids: List[Optional[int]]
         for i, labels in enumerate(examples["ner_tags"]):
-
             # Try to get the word IDs from the tokenizer
             try:
                 word_ids = tokenized_inputs.word_ids(batch_index=i)
@@ -185,7 +184,6 @@ class NamedEntityRecognition(BenchmarkDataset):
             # If the tokenizer is not of a "fast" variant, we have to extract the word
             # IDs manually
             except ValueError:
-
                 # Get the list of words in the document
                 words: List[str] = examples["tokens"][i]
 
@@ -202,7 +200,13 @@ class NamedEntityRecognition(BenchmarkDataset):
                         for prefix in prefixes_to_remove:
                             if tok.startswith(prefix):
                                 tokens[tok_idx] = tok[len(prefix) :]
-                    tokens[tok_idx] = tok
+
+                # Replace UNK tokens with the correct word
+                tokens = self._handle_unk_tokens(
+                    tokenizer=tokenizer,
+                    tokens=tokens,
+                    words=words,
+                )
 
                 # Get list of special tokens. Some tokenizers do not record these
                 # properly, which is why we convert the values to their indices and
@@ -255,7 +259,6 @@ class NamedEntityRecognition(BenchmarkDataset):
             previous_word_idx: Optional[int] = None
             label_ids: List[int] = list()
             for word_id in word_ids:
-
                 # Special tokens have a word id that is None. We set the label to -100
                 # so they are automatically ignored in the loss function
                 if word_id is None:
@@ -280,6 +283,63 @@ class NamedEntityRecognition(BenchmarkDataset):
             all_labels.append(label_ids)
         tokenized_inputs["labels"] = all_labels
         return tokenized_inputs
+
+    def _handle_unk_tokens(
+        self, tokenizer: PreTrainedTokenizer, tokens: List[str], words: List[str]
+    ) -> List[str]:
+        """Replace unknown tokens in the tokens with the corresponding word.
+
+        Args:
+            tokenizer (PreTrainedTokenizer):
+                The tokenizer used to tokenize the words.
+            tokens (list of str):
+                The list of tokens.
+            words (list of str):
+                The list of words.
+
+        Returns:
+            list of str:
+                The list of tokens with unknown tokens replaced by the corresponding
+                word.
+        """
+        # Locate the token indices of the unknown tokens
+        token_unk_idxs = [
+            i for i, tok in enumerate(tokens) if tok == tokenizer.unk_token
+        ]
+
+        # Locate the word indices of the words which contain an unknown token
+        word_unk_idxs = [
+            i
+            for i, word in enumerate(words)
+            if tokenizer.unk_token
+            in tokenizer.convert_ids_to_tokens(
+                tokenizer.encode(word, add_special_tokens=False)
+            )
+        ]
+
+        # Iterate over the token index and word index pairs
+        for tok_idx, word_idx in zip(token_unk_idxs, word_unk_idxs):
+            # Fetch the word
+            word = words[word_idx]
+
+            # Tokenize the word, which is now a list containing at least one UNK token
+            tokens_with_unk = tokenizer.convert_ids_to_tokens(
+                tokenizer.encode(word, add_special_tokens=False)
+            )
+
+            # Iterate over the tokens in the word
+            for possible_unk_token in tokens_with_unk:
+                # If the token is not an UNK token then we remove the content of this
+                # token from the word. The result of the `word` variable will be the
+                # content of the UNK token.
+                if possible_unk_token != tokenizer.unk_token:
+                    word = word.replace(possible_unk_token, "")
+
+            # Replace the token with the word
+            tokens[tok_idx] = word
+
+        # Return the tokens
+        return tokens
 
     def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
         """Preprocess a dataset by tokenizing and aligning the labels.

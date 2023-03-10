@@ -8,6 +8,15 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now handles word-token alignment properly with SentencePiece tokenisers, which caused
+  some models not being able to be benchmarked on token classification tasks.
+- Now handles UNK tokens during word-token alignment, where it locates the word that is
+  being tokenised into the UNK token, extracting the original value of the UNK token
+  and replacing the token by that value.
+
+
 ## [v6.2.4] - 2023-03-10
 ### Fixed
 - If the Hugging Face Hub is down, throwing a `HfHubHTTPError`, then catch it, wait 30
