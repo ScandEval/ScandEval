@@ -329,11 +329,15 @@ class NamedEntityRecognition(BenchmarkDataset):
 
             # Iterate over the tokens in the word
             for possible_unk_token in tokens_with_unk:
-                # If the token is not an UNK token then we remove the content of this
-                # token from the word. The result of the `word` variable will be the
-                # content of the UNK token.
+                # If the token is not an UNK token then we remove the first occurence
+                # of the content of this token from the word. The result of the `word`
+                # variable will be the content of the UNK token.
+                # NOTE: This is a bit hacky and not bulletproof. For instance, if the
+                # word is "1925-1950" and the tokenizer splits it into ["[UNK]", "-",
+                # "19", "50"], then the result will be 2519 instead of 1925. This
+                # happens almost never, however, so we can live with it.
                 if possible_unk_token != tokenizer.unk_token:
-                    word = word.replace(possible_unk_token, "")
+                    word = word.replace(possible_unk_token, "", 1)
 
             # Replace the token with the word
             tokens[tok_idx] = word
