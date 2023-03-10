@@ -365,40 +365,41 @@ def align_model_and_tokenizer(
         pair of (model, tokenizer):
             The fixed model and tokenizer.
     """
-    tokenizer.model_max_length = 512
-    # Set the maximal length of the tokenizer to the model's maximal length. This is
-    # required for proper truncation
+    # Get all possible maximal lengths
+    all_max_lengths: List[int] = []
+
+    # Add the registered max length of the tokenizer
+    if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < 100_000:
+        all_max_lengths.append(tokenizer.model_max_length)
+
+    # Add the max length derived from the position embeddings
     if (
-        not hasattr(tokenizer, "model_max_length")
-        or tokenizer.model_max_length > 100_000
+        hasattr(model.config, "max_position_embeddings")
+        and hasattr(tokenizer, "pad_token_id")
+        and tokenizer.pad_token_id is not None
     ):
-        # Get all possible maximal lengths
-        all_max_lengths: List[int] = []
-        if (
-            hasattr(model.config, "max_position_embeddings")
-            and hasattr(tokenizer, "pad_token_id")
-            and tokenizer.pad_token_id is not None
-        ):
-            all_max_lengths.append(
-                model.config.max_position_embeddings - tokenizer.pad_token_id - 1
-            )
-        if hasattr(tokenizer, "max_model_input_sizes"):
-            all_max_lengths.extend(
-                [
-                    size
-                    for size in tokenizer.max_model_input_sizes.values()
-                    if size is not None
-                ]
-            )
+        all_max_lengths.append(
+            model.config.max_position_embeddings - tokenizer.pad_token_id - 1
+        )
 
-        # If any maximal lengths were found then use the shortest one
-        if len(list(all_max_lengths)) > 0:
-            min_max_length = min(list(all_max_lengths))
-            tokenizer.model_max_length = min_max_length
+    # Add the max length derived from the model's input sizes
+    if hasattr(tokenizer, "max_model_input_sizes"):
+        all_max_lengths.extend(
+            [
+                size
+                for size in tokenizer.max_model_input_sizes.values()
+                if size is not None
+            ]
+        )
 
-        # Otherwise, use the default maximal length
-        else:
-            tokenizer.model_max_length = 512
+    # If any maximal lengths were found then use the shortest one
+    if len(list(all_max_lengths)) > 0:
+        min_max_length = min(list(all_max_lengths))
+        tokenizer.model_max_length = min_max_length
+
+    # Otherwise, use the default maximal length
+    else:
+        tokenizer.model_max_length = 512
 
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
