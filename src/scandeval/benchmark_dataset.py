@@ -482,6 +482,7 @@ class BenchmarkDataset(ABC):
                     from_flax=model_config.framework == "jax",
                     use_auth_token=self.benchmark_config.use_auth_token,
                     cache_dir=self.benchmark_config.cache_dir,
+                    fix_embedding=False,
                 )
 
             # Initialise compute_metrics function
