@@ -121,6 +121,8 @@ class BenchmarkConfig:
     save_results: bool
     verbose: bool
     testing: bool = False
+    fix_embedding: bool = False
+    override_model_config: dict = None
 
 
 @dataclass

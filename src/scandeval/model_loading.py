@@ -37,6 +37,7 @@ def load_model(
     from_flax: bool,
     use_auth_token: Union[bool, str],
     cache_dir: str,
+    fix_embedding: bool
 ) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     """Load a model.
 
@@ -215,7 +216,7 @@ def load_model(
             raise InvalidBenchmark(f"Could not load tokenizer for model {model_id!r}.")
 
     # Align the model and the tokenizer
-    model, tokenizer = align_model_and_tokenizer(model=model, tokenizer=tokenizer)
+    model, tokenizer = align_model_and_tokenizer(model=model, tokenizer=tokenizer, fix_embedding=fix_embedding)
 
     return tokenizer, model
 
@@ -351,7 +352,7 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
 
 
 def align_model_and_tokenizer(
-    model: PreTrainedModel, tokenizer: PreTrainedTokenizer
+    model: PreTrainedModel, tokenizer: PreTrainedTokenizer, fix_embedding: bool
 ) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
     """Aligns the model and the tokenizer.
 
@@ -405,10 +406,13 @@ def align_model_and_tokenizer(
     # the vocab size according to the model, we raise an error
     if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
         if model.config.vocab_size < tokenizer.vocab_size:
-            raise InvalidBenchmark(
-                "The vocab size of the tokenizer is larger than the vocab size of the "
-                "model. This is not supported."
-            )
+            if fix_embedding:
+                model.resize_token_embeddings(tokenizer.vocab_size+1)
+            else:
+                raise InvalidBenchmark(
+                    "The vocab size of the tokenizer is larger than the vocab size of the "
+                    "model. This is not supported."
+                )
 
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use find a
     # suitable padding token and set it

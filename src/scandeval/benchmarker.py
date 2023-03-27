@@ -63,6 +63,9 @@ class Benchmarker:
             to True.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
+        fix_embedding (bool, optional):
+            Whether to increase the size of the model embedding to the size of the
+            tokenizer vocabulary, if needed.
 
     Attributes:
         progress_bar (bool): Whether progress bars should be shown.
@@ -90,6 +93,8 @@ class Benchmarker:
         use_auth_token: Union[bool, str] = False,
         ignore_duplicates: bool = True,
         verbose: bool = False,
+        fix_embedding: bool = False,
+        override_model_config: Optional[dict] = None,
     ) -> None:
         # Build benchmark configuration
         self.benchmark_config = build_benchmark_config(
@@ -105,6 +110,8 @@ class Benchmarker:
             progress_bar=progress_bar,
             save_results=save_results,
             verbose=verbose,
+            fix_embedding=fix_embedding,
+            override_model_config=override_model_config,
         )
 
         # Set attributes from arguments

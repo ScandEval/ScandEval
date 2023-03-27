@@ -147,6 +147,25 @@ from .languages import get_all_languages
     help="""Whether to skip evaluation of models which have already been evaluated,
     with scores lying in the 'scandeval_benchmark_results.jsonl' file.""",
 )
+@click.option(
+    "--fix-embedding/--no-fix-embedding",
+    "-f/-nf",
+    default=False,
+    show_default=True,
+    help="""Whether to increase the size of the model embedding to the size of the
+            tokenizer vocabulary, if needed."""
+)
+@click.option(
+    "--override-model-config",
+    "-o",
+    default=None,
+    show_default=True,
+    help="""Override model config from HF Hub with revision, framework, task and
+            languages. This parameter is expected to be a dictionary mapping
+            a string defining the model id to a dictionary mapping revision, framework,
+            and task to appropriate strings and languages to a list of strings
+            with language codes."""
+)
 def benchmark(
     model_id: Tuple[str],
     dataset: Tuple[str],
@@ -164,6 +183,8 @@ def benchmark(
     auth_token: str,
     ignore_duplicates: bool,
     verbose: bool = False,
+    fix_embedding: bool = False,
+    override_model_config: dict = None,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -176,6 +197,7 @@ def benchmark(
     dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
     batch_size_int = int(batch_size)
     auth: Union[str, bool] = auth_token if auth_token != "" else use_auth_token
+    override_model_config = None if override_model_config is None else eval(override_model_config)
 
     # Initialise the benchmarker class
     benchmarker = Benchmarker(
@@ -192,6 +214,8 @@ def benchmark(
         use_auth_token=auth,
         ignore_duplicates=ignore_duplicates,
         cache_dir=cache_dir,
+        fix_embedding=fix_embedding,
+        override_model_config=override_model_config,
     )
 
     # Perform the benchmark evaluation

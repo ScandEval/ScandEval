@@ -113,9 +113,12 @@ class BenchmarkDataset(ABC):
                 If the extracted framework is not recognized.
         """
         # Fetch the model config
-        model_config = get_model_config(
-            model_id=model_id, benchmark_config=self.benchmark_config
-        )
+        if self.benchmark_config.override_model_config:
+            model_config = ModelConfig(model_id, **self.benchmark_config.override_model_config[model_id])
+        else:
+            model_config = get_model_config(
+                model_id=model_id, benchmark_config=self.benchmark_config
+            )
 
         # Set random seeds to enforce reproducibility of the randomly initialised
         # weights
@@ -133,6 +136,7 @@ class BenchmarkDataset(ABC):
             from_flax=model_config.framework == "jax",
             use_auth_token=self.benchmark_config.use_auth_token,
             cache_dir=self.benchmark_config.cache_dir,
+            fix_embedding=self.benchmark_config.fix_embedding
         )
 
         # Get the metadata

@@ -20,6 +20,8 @@ def build_benchmark_config(
     progress_bar: bool,
     save_results: bool,
     verbose: bool,
+    fix_embedding: bool,
+    override_model_config: Optional[dict],
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -58,6 +60,15 @@ def build_benchmark_config(
             'scandeval_benchmark_results.json'.
         verbose (bool, optional):
             Whether to output additional output.
+        fix_embedding (bool, optional):
+            Whether to increase the size of the model embedding to the size of the
+            tokenizer vocabulary, if needed.
+        override_model_config (dict, optional):
+            Override model config from HF Hub with revision, framework, task and
+            languages. This parameter is expected to be a dictionary mapping
+            a string defining the model id to a dictionary mapping revision, framework,
+            and task to appropriate strings and languages to a list of strings
+            with language codes.
     """
     # Prepare the languages
     languages = prepare_languages(language=language)
@@ -90,6 +101,8 @@ def build_benchmark_config(
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose,
+        fix_embedding=fix_embedding,
+        override_model_config=override_model_config,
     )
 
 
