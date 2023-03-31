@@ -150,7 +150,7 @@ from .languages import get_all_languages
 @click.option(
     "--fix-embedding/--no-fix-embedding",
     "-f/-nf",
-    default=False,
+    default=True,
     show_default=True,
     help="""Whether to increase the size of the model embedding to the size of the
             tokenizer vocabulary, if needed."""
@@ -183,7 +183,7 @@ def benchmark(
     auth_token: str,
     ignore_duplicates: bool,
     verbose: bool = False,
-    fix_embedding: bool = False,
+    fix_embedding: bool = True,
     override_model_config: dict = None,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""

@@ -93,7 +93,7 @@ class Benchmarker:
         use_auth_token: Union[bool, str] = False,
         ignore_duplicates: bool = True,
         verbose: bool = False,
-        fix_embedding: bool = False,
+        fix_embedding: bool = True,
         override_model_config: Optional[dict] = None,
     ) -> None:
         # Build benchmark configuration
