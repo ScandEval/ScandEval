@@ -407,7 +407,7 @@ def align_model_and_tokenizer(
     if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
         if model.config.vocab_size < tokenizer.vocab_size:
             if fix_embedding:
-                model.resize_token_embeddings(tokenizer.vocab_size+1)
+                model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size+1)
             else:
                 raise InvalidBenchmark(
                     "The vocab size of the tokenizer is larger than the vocab size of the "
