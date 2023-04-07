@@ -1,6 +1,7 @@
 """Abstract benchmarking dataset class."""
 
 import logging
+import os
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -45,6 +46,15 @@ from .utils import (
 
 # Set up logger
 logger = logging.getLogger(__name__)
+
+def _local_model_config(model_id: str, benchmark_config: BenchmarkConfig):
+    framework = benchmark_config.model_framework
+    if framework is None:
+        if benchmark_config.raise_errors:
+            raise RuntimeError(f"No framework specified for local model `{model_id}`!")
+        framework = "pytorch"
+    model_config = ModelConfig(model_id=model_id, revision="local", framework=framework, task="unknown", languages=[])
+    return model_config
 
 
 class BenchmarkDataset(ABC):
@@ -113,12 +123,10 @@ class BenchmarkDataset(ABC):
                 If the extracted framework is not recognized.
         """
         # Fetch the model config
-        if self.benchmark_config.override_model_config:
-            model_config = ModelConfig(model_id, **self.benchmark_config.override_model_config[model_id])
-        else:
-            model_config = get_model_config(
-                model_id=model_id, benchmark_config=self.benchmark_config
-            )
+        model_configurator = _local_model_config if os.path.isdir(model_id) else get_model_config
+        model_config = model_configurator(
+            model_id=model_id, benchmark_config=self.benchmark_config
+        )
 
         # Set random seeds to enforce reproducibility of the randomly initialised
         # weights
@@ -136,7 +144,7 @@ class BenchmarkDataset(ABC):
             from_flax=model_config.framework == "jax",
             use_auth_token=self.benchmark_config.use_auth_token,
             cache_dir=self.benchmark_config.cache_dir,
-            fix_embedding=self.benchmark_config.fix_embedding
+            raise_errors=self.benchmark_config.raise_errors,
         )
 
         # Get the metadata
@@ -482,7 +490,7 @@ class BenchmarkDataset(ABC):
                     from_flax=model_config.framework == "jax",
                     use_auth_token=self.benchmark_config.use_auth_token,
                     cache_dir=self.benchmark_config.cache_dir,
-                    fix_embedding=self.benchmark_config.fix_embedding,
+                    raise_errors=self.benchmark_config.raise_errors,
                 )
 
             # Initialise compute_metrics function

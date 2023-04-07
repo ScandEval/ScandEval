@@ -20,8 +20,7 @@ def build_benchmark_config(
     progress_bar: bool,
     save_results: bool,
     verbose: bool,
-    fix_embedding: bool,
-    override_model_config: Optional[dict],
+    model_framework: Optional[str],
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -101,8 +100,7 @@ def build_benchmark_config(
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose,
-        fix_embedding=fix_embedding,
-        override_model_config=override_model_config,
+        model_framework=model_framework,
     )
 
 

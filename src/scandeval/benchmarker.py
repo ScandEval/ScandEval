@@ -36,6 +36,9 @@ class Benchmarker:
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages. Defaults
             to None.
+        model_framework (None, str or sequence of str, optional):
+            The model framework to use. Only relevant if `model-id` refers to a local path.
+            Otherwise, the framework will be set automatically. Defaults to None.
         dataset_language (None, str or sequence of str, optional):
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
@@ -93,8 +96,7 @@ class Benchmarker:
         use_auth_token: Union[bool, str] = False,
         ignore_duplicates: bool = True,
         verbose: bool = False,
-        fix_embedding: bool = True,
-        override_model_config: Optional[dict] = None,
+        model_framework: str = None,
     ) -> None:
         # Build benchmark configuration
         self.benchmark_config = build_benchmark_config(
@@ -110,8 +112,7 @@ class Benchmarker:
             progress_bar=progress_bar,
             save_results=save_results,
             verbose=verbose,
-            fix_embedding=fix_embedding,
-            override_model_config=override_model_config,
+            model_framework=model_framework,
         )
 
         # Set attributes from arguments

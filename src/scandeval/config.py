@@ -81,6 +81,8 @@ class BenchmarkConfig:
     Attributes:
         model_languages (sequence of Language objects):
             The languages of the models to benchmark.
+        model_framework (str):
+            The framework of the models to benchmark.
         dataset_languages (sequence of Language objects):
             The languages of the datasets in the benchmark.
         dataset_tasks (sequence of DatasetTask):
@@ -121,8 +123,7 @@ class BenchmarkConfig:
     save_results: bool
     verbose: bool
     testing: bool = False
-    fix_embedding: bool = False
-    override_model_config: dict = None
+    model_framework: str = None
 
 
 @dataclass

@@ -123,6 +123,7 @@ def benchmark_speed_single_iteration(
                 from_flax=model_config.framework == "jax",
                 use_auth_token=benchmark_config.use_auth_token,
                 cache_dir=benchmark_config.cache_dir,
+                raise_errors=benchmark_config.raise_errors,
             )
 
         # Ensure that the model is on the CPU
