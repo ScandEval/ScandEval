@@ -66,9 +66,6 @@ class Benchmarker:
             to True.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
-        fix_embedding (bool, optional):
-            Whether to increase the size of the model embedding to the size of the
-            tokenizer vocabulary, if needed.
 
     Attributes:
         progress_bar (bool): Whether progress bars should be shown.
