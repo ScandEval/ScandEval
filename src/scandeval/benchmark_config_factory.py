@@ -32,6 +32,9 @@ def build_benchmark_config(
         model_language (None, str or sequence of str, optional):
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages.
+        model_framework (None, str, optional):
+            The model framework to use. Only relevant if `model-id` refers to a local path.
+            Otherwise, the framework will be set automatically.
         dataset_language (None, str or sequence of str, optional):
             The language codes of the languages to include for datasets. If
             specified then this overrides the `language` parameter for dataset
@@ -59,15 +62,6 @@ def build_benchmark_config(
             'scandeval_benchmark_results.json'.
         verbose (bool, optional):
             Whether to output additional output.
-        fix_embedding (bool, optional):
-            Whether to increase the size of the model embedding to the size of the
-            tokenizer vocabulary, if needed.
-        override_model_config (dict, optional):
-            Override model config from HF Hub with revision, framework, task and
-            languages. This parameter is expected to be a dictionary mapping
-            a string defining the model id to a dictionary mapping revision, framework,
-            and task to appropriate strings and languages to a list of strings
-            with language codes.
     """
     # Prepare the languages
     languages = prepare_languages(language=language)
