@@ -62,7 +62,6 @@ from .languages import get_all_languages
     "-mf",
     default=None,
     show_default=True,
-    multiple=True,
     type=click.Choice(["pytorch", "jax"]),
     help="""The model framework to use. Only relevant if `model-id` refers to a local path.
     Otherwise, the framework will be set automatically.""",
