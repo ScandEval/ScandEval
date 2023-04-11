@@ -37,7 +37,7 @@ def load_model(
     from_flax: bool,
     use_auth_token: Union[bool, str],
     cache_dir: str,
-    raise_errors: bool,
+    raise_errors: bool = False,
 ) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     """Load a model.
 
@@ -66,6 +66,8 @@ def load_model(
             token.
         cache_dir (str):
             The directory to cache the model in.
+        raise_errors (bool, optional):
+            Whether to raise errors instead of trying to fix them silently.
 
     Returns:
         pair of (tokenizer, model):
@@ -361,7 +363,7 @@ def align_model_and_tokenizer(
             The model to fix.
         tokenizer (PreTrainedTokenizer):
             The tokenizer to fix.
-        raise_errors (bool):
+        raise_errors (bool, optional):
             Whether to raise errors instead of trying to fix them silently.
 
     Returns:
