@@ -53,7 +53,7 @@ def _local_model_config(model_id: str, benchmark_config: BenchmarkConfig):
         if benchmark_config.raise_errors:
             raise RuntimeError(f"No framework specified for local model `{model_id}`!")
         framework = "pytorch"
-    model_config = ModelConfig(model_id=model_id, revision="local", framework=framework, task="unknown", languages=[])
+    model_config = ModelConfig(model_id=model_id, revision="main", framework=framework, task="fill-mask", languages=[])
     return model_config
 
 
