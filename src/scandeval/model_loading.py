@@ -361,6 +361,8 @@ def align_model_and_tokenizer(
             The model to fix.
         tokenizer (PreTrainedTokenizer):
             The tokenizer to fix.
+        raise_errors (bool):
+            Whether to raise errors instead of trying to fix them silently.
 
     Returns:
         pair of (model, tokenizer):
