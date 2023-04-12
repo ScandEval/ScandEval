@@ -1,11 +1,11 @@
 """Abstract benchmarking dataset class."""
 
 import logging
-import os
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import partial
+from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import evaluate
@@ -47,10 +47,10 @@ from .utils import (
 # Set up logger
 logger = logging.getLogger(__name__)
 
+
 def get_local_model_config(
-    model_id: str,
-    benchmark_config: BenchmarkConfig
-    ) -> ModelConfig:
+    model_id: str, benchmark_config: BenchmarkConfig
+) -> ModelConfig:
     """Builds the configuration for a local model.
 
     Args:
@@ -72,32 +72,38 @@ def get_local_model_config(
     framework = benchmark_config.model_framework
     if framework is None:
         try:
-            exts = {f.split('.')[-1] for f in os.listdir(model_id)}
-            if "bin" in exts:
+            exts = {f.suffix for f in Path(model_id).iterdir()}
+            if ".bin" in exts:
                 framework = "pytorch"
-            elif "msgpack" in exts:
+            elif ".msgpack" in exts:
                 framework = "jax"
-            elif "whl" in exts:
+            elif ".whl" in exts:
                 raise InvalidBenchmark("SpaCy models are not supported.")
-            elif "h5" in exts:
+            elif ".h5" in exts:
                 raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
         except OSError as e:
-            logger.info(
-                f"Cannot list files for local model `{model_id}`!"
-            )
+            logger.info(f"Cannot list files for local model `{model_id}`!")
             if benchmark_config.raise_errors:
                 raise e
     if framework is None:
         if benchmark_config.raise_errors:
-            raise InvalidBenchmark(f"Cannot recognize framework automatically for "
-                                   "local model `{model_id}`! "
-                                   "Please use the --model-framework option.")
+            raise InvalidBenchmark(
+                "Cannot recognize framework automatically for local model "
+                f"`{model_id}`! Please use the --model-framework option."
+            )
         logger.info(
             f"Assuming 'pytorch' as the framework for local model `{model_id}`! "
             "If this is in error, please use the --model-framework option to override."
         )
         framework = "pytorch"
-    model_config = ModelConfig(model_id=model_id, revision="main", framework=framework, task="fill-mask", languages=[])
+
+    model_config = ModelConfig(
+        model_id=model_id,
+        revision="main",
+        framework=framework,
+        task="fill-mask",
+        languages=list(),
+    )
     return model_config
 
 
@@ -167,7 +173,10 @@ class BenchmarkDataset(ABC):
                 If the extracted framework is not recognized.
         """
         # Fetch the model config
-        model_configurator = get_local_model_config if os.path.isdir(model_id) else get_model_config
+        if Path(model_id).is_dir():
+            model_configurator = get_local_model_config
+        else:
+            model_configurator = get_model_config
         model_config = model_configurator(
             model_id=model_id, benchmark_config=self.benchmark_config
         )
