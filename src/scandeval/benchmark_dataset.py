@@ -93,7 +93,7 @@ def get_local_model_config(
                                    "local model `{model_id}`! "
                                    "Please use the --model-framework option.")
         logger.info(
-            f"Assuming 'pytroch' as the framework for local model `{model_id}`! "
+            f"Assuming 'pytorch' as the framework for local model `{model_id}`! "
             "If this is in error, please use the --model-framework option to override."
         )
         framework = "pytorch"
