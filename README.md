@@ -6,7 +6,6 @@
 
 ______________________________________________________________________
 [![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://pypi.org/project/scandeval/)
-[![Documentation](https://img.shields.io/badge/docs-passing-green)](https://saattrupdan.github.io/ScandEval/scandeval.html)
 [![License](https://img.shields.io/github/license/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/commits/main)
 [![Code Coverage](https://img.shields.io/badge/Coverage-73%25-yellow.svg)](https://github.com/saattrupdan/ScandEval/tree/main/tests)
@@ -86,11 +85,6 @@ all the Nynorsk models on Nynorsk datasets:
 ```
 
 
-## Documentation
-
-See the full documentation [here](https://saattrupdan.github.io/ScandEval/scandeval.html).
-
-
 ## Citing ScandEval
 If you want to cite the framework then feel free to use this:
 ```
@@ -113,8 +107,7 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── .flake8
 ├── .github
 │   └── workflows
-│       ├── ci.yaml
-│       └── docs.yaml
+│       └── ci.yaml
 ├── .gitignore
 ├── .pre-commit-config.yaml
 ├── CHANGELOG.md
@@ -123,7 +116,6 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── gfx
 │   └── scandeval.png
 ├── makefile
-├── notebooks
 ├── poetry.toml
 ├── pyproject.toml
 ├── src
