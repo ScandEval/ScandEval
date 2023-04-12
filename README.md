@@ -87,14 +87,16 @@ all the Nynorsk models on Nynorsk datasets:
 
 ## Citing ScandEval
 If you want to cite the framework then feel free to use this:
+
 ```
-@article{nielsen2022scandeval,
-  title={ScandEval: Evaluation of language models on mono- or multilingual Scandinavian language tasks.},
+@inproceedings{nielsenscandeval,
+  title={ScandEval: A Benchmark for Scandinavian Natural Language Processing},
   author={Nielsen, Dan Saattrup},
-  journal={GitHub. Note: https://github.com/saattrupdan/ScandEval},
-  year={2022}
+  booktitle={The 24rd Nordic Conference on Computational Linguistics},
+  year={2023}
 }
 ```
+
 
 ## Remarks
 The image used in the logo has been created by the amazing [Scandinavia and the
