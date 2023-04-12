@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v6.3.0] - 2023-04-12
 ### Added
 - Now added support for benchmarking local models in the Hugging Face format (i.e.,
   saved with the `save_pretrained` method). This automatically detects the framework
