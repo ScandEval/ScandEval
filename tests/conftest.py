@@ -12,7 +12,6 @@ from scandeval.languages import DA, NO, SV
 
 @pytest.fixture(scope="session")
 def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
-
     # Get the authentication token to the Hugging Face Hub
     auth = os.environ.get("HUGGINGFACE_HUB_TOKEN", True)
 
@@ -24,7 +23,7 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         model_languages=[DA, SV, NO],
         dataset_languages=[DA, SV, NO],
         dataset_tasks=[NER, QA, SENT, LA],
-        raise_error_on_invalid_model=False,
+        raise_errors=False,
         cache_dir=".scandeval_cache",
         evaluate_train=False,
         use_auth_token=auth,

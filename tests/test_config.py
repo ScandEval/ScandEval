@@ -78,7 +78,7 @@ class TestBenchmarkConfig:
             model_languages=[language],
             dataset_languages=[language],
             dataset_tasks=[dataset_task],
-            raise_error_on_invalid_model=True,
+            raise_errors=True,
             cache_dir="cache_dir",
             evaluate_train=True,
             use_auth_token=True,
@@ -97,7 +97,7 @@ class TestBenchmarkConfig:
         assert benchmark_config.model_languages == [language]
         assert benchmark_config.dataset_languages == [language]
         assert benchmark_config.dataset_tasks == [dataset_task]
-        assert benchmark_config.raise_error_on_invalid_model is True
+        assert benchmark_config.raise_errors is True
         assert benchmark_config.cache_dir == "cache_dir"
         assert benchmark_config.evaluate_train is True
         assert benchmark_config.use_auth_token is True

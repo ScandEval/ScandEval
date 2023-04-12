@@ -18,18 +18,19 @@ def test_cli_param_names(params):
         "dataset",
         "language",
         "model_language",
+        "model_framework",
         "dataset_language",
         "dataset_task",
+        "batch_size",
         "evaluate_train",
         "progress_bar",
-        "raise_error_on_invalid_model",
+        "raise_errors",
         "verbose",
         "save_results",
         "cache_dir",
         "auth_token",
         "use_auth_token",
         "ignore_duplicates",
-        "batch_size",
         "help",
     }
 
@@ -44,7 +45,7 @@ def test_cli_param_types(params):
     assert isinstance(params["batch_size"], Choice)
     assert params["evaluate_train"] == BOOL
     assert params["progress_bar"] == BOOL
-    assert params["raise_error_on_invalid_model"] == BOOL
+    assert params["raise_errors"] == BOOL
     assert params["verbose"] == BOOL
     assert params["save_results"] == BOOL
     assert params["cache_dir"] == STRING
