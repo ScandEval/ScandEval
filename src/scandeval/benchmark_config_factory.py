@@ -20,6 +20,7 @@ def build_benchmark_config(
     progress_bar: bool,
     save_results: bool,
     verbose: bool,
+    model_framework: Optional[str],
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -31,6 +32,9 @@ def build_benchmark_config(
         model_language (None, str or sequence of str, optional):
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages.
+        model_framework (str, optional):
+            The model framework to use. Only relevant if `model-id` refers to a local path.
+            Otherwise, the framework will be set automatically.
         dataset_language (None, str or sequence of str, optional):
             The language codes of the languages to include for datasets. If
             specified then this overrides the `language` parameter for dataset
@@ -90,6 +94,7 @@ def build_benchmark_config(
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose,
+        model_framework=model_framework,
     )
 
 

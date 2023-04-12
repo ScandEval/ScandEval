@@ -37,6 +37,7 @@ def load_model(
     from_flax: bool,
     use_auth_token: Union[bool, str],
     cache_dir: str,
+    raise_errors: bool = False,
 ) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
     """Load a model.
 
@@ -65,6 +66,8 @@ def load_model(
             token.
         cache_dir (str):
             The directory to cache the model in.
+        raise_errors (bool, optional):
+            Whether to raise errors instead of trying to fix them silently.
 
     Returns:
         pair of (tokenizer, model):
@@ -215,7 +218,7 @@ def load_model(
             raise InvalidBenchmark(f"Could not load tokenizer for model {model_id!r}.")
 
     # Align the model and the tokenizer
-    model, tokenizer = align_model_and_tokenizer(model=model, tokenizer=tokenizer)
+    model, tokenizer = align_model_and_tokenizer(model=model, tokenizer=tokenizer, raise_errors=raise_errors)
 
     return tokenizer, model
 
@@ -351,7 +354,7 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
 
 
 def align_model_and_tokenizer(
-    model: PreTrainedModel, tokenizer: PreTrainedTokenizer
+    model: PreTrainedModel, tokenizer: PreTrainedTokenizer, raise_errors: bool = False
 ) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
     """Aligns the model and the tokenizer.
 
@@ -360,6 +363,8 @@ def align_model_and_tokenizer(
             The model to fix.
         tokenizer (PreTrainedTokenizer):
             The tokenizer to fix.
+        raise_errors (bool, optional):
+            Whether to raise errors instead of trying to fix them silently.
 
     Returns:
         pair of (model, tokenizer):
@@ -405,10 +410,13 @@ def align_model_and_tokenizer(
     # the vocab size according to the model, we raise an error
     if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
         if model.config.vocab_size < tokenizer.vocab_size:
-            raise InvalidBenchmark(
-                "The vocab size of the tokenizer is larger than the vocab size of the "
-                "model. This is not supported."
-            )
+            if raise_errors:
+                raise InvalidBenchmark(
+                    "The vocab size of the tokenizer is larger than the vocab size of the "
+                    "model. As the --raise-errors option was specified, the embeddings "
+                    "of the model will not be automatically adjusted."
+                )
+            model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size+1)
 
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use find a
     # suitable padding token and set it
