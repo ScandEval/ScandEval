@@ -124,7 +124,7 @@ class BenchmarkConfig:
     save_results: bool
     verbose: bool
     testing: bool = False
-    model_framework: str = None
+    model_framework: Optional[str] = None
 
 
 @dataclass
