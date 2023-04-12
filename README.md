@@ -90,7 +90,7 @@ all the Nynorsk models on Nynorsk datasets:
 If you want to cite the framework then feel free to use this:
 
 ```
-@inproceedings{nielsenscandeval,
+@inproceedings{nielsen2023scandeval,
   title={ScandEval: A Benchmark for Scandinavian Natural Language Processing},
   author={Nielsen, Dan Saattrup},
   booktitle={The 24rd Nordic Conference on Computational Linguistics},
