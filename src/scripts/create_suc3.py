@@ -7,8 +7,9 @@ from typing import Dict, List, Union
 
 import pandas as pd
 import requests
-from datasets import Dataset, DatasetDict
-from huggingface_hub import HfApi
+from datasets.arrow_dataset import Dataset
+from datasets.dataset_dict import DatasetDict
+from huggingface_hub.hf_api import HfApi
 from lxml import etree
 from requests.exceptions import HTTPError
 
@@ -50,7 +51,6 @@ def main():
     tokens: List[str] = list()
     ner_tags: List[str] = list()
     for action, elt in context:
-
         # If the current element begins a name then set the `ner_tag` to the
         # corresponding `B` value
         if elt.tag == "name" and action == "start":
@@ -76,7 +76,6 @@ def main():
         # If the current element ends a sentence then store all the data in the list of
         # records
         elif elt.tag == "sentence" and action == "end" and len(tokens) > 0:
-
             # Create document from the tokens
             doc = re.sub(" ([.,])", "\1", " ".join(tokens))
 

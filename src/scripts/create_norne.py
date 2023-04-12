@@ -6,8 +6,9 @@ from typing import Dict, List, Union
 
 import pandas as pd
 import requests
-from datasets import Dataset, DatasetDict
-from huggingface_hub import HfApi
+from datasets.arrow_dataset import Dataset
+from datasets.dataset_dict import DatasetDict
+from huggingface_hub.hf_api import HfApi
 from requests.exceptions import HTTPError
 from tqdm.auto import tqdm
 
@@ -49,7 +50,6 @@ def main():
     # Set up the progress bar and iterate over the languages
     with tqdm(["nb", "nn"], desc="Creating NorNE-mini datasets") as pbar:
         for lang in pbar:
-
             # Define download URLs
             train_url = base_urls[lang].format("train")
             val_url = base_urls[lang].format("dev")
@@ -68,7 +68,6 @@ def main():
             # Iterate over the data splits
             dfs = dict()
             for split, lines in data.items():
-
                 # Initialise the records, data dictionary and document
                 records = list()
                 data_dict: Dict[str, List[Union[int, str]]] = defaultdict(list)
@@ -76,7 +75,6 @@ def main():
 
                 # Iterate over the data for the given split
                 for line in lines:
-
                     # If we are at the first line of an entry then extract the document
                     if line.startswith("# text = "):
                         doc = re.sub("# text = ", "", line)

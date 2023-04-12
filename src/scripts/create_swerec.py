@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
-from huggingface_hub import HfApi
+from huggingface_hub.hf_api import HfApi
 from requests.exceptions import HTTPError
 from sklearn.model_selection import train_test_split
 

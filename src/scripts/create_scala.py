@@ -6,8 +6,9 @@ import warnings
 from typing import List, Tuple, Union
 
 import pandas as pd
-from datasets import Dataset, DatasetDict
-from huggingface_hub import HfApi
+from datasets.arrow_dataset import Dataset
+from datasets.dataset_dict import DatasetDict
+from huggingface_hub.hf_api import HfApi
 from load_ud_pos import (
     load_ddt_pos,
     load_fdt_pos,
@@ -16,7 +17,7 @@ from load_ud_pos import (
     load_ndt_nn_pos,
     load_sdt_pos,
 )
-from pandas.core.common import SettingWithCopyWarning
+from pandas.errors import SettingWithCopyWarning
 from requests.exceptions import HTTPError
 from tqdm.auto import tqdm
 
@@ -42,7 +43,6 @@ def main():
     # Set up the progress bar and iterate over the languages
     with tqdm(pos_datasets.items(), desc="Creating ScaLA datasets") as pbar:
         for lang, fn in pbar:
-
             # Update the progress bar description
             pbar.set_description(f"Creating ScaLA datasets - {lang}")
 
@@ -319,7 +319,6 @@ def corrupt(
 
     # Continue until we have achieved the desired number of corruptions
     while len(corruptions) < num_corruptions:
-
         # Choose which corruption to perform, at random
         corruption_fn = random.choice([flip_neighbours, delete])
 

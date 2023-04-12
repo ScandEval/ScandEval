@@ -1,11 +1,12 @@
 """Create the ScandiQA-mini datasets and upload them to the HF Hub."""
 
 import pandas as pd
-from datasets.arrow_dataset import Dataset, concatenate_datasets
+from datasets.arrow_dataset import Dataset
+from datasets.combine import concatenate_datasets
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from datasets.splits import Split
-from huggingface_hub import HfApi
+from huggingface_hub.hf_api import HfApi
 from requests.exceptions import HTTPError
 
 
@@ -16,7 +17,6 @@ def main() -> None:
 
     # Iterate over the Danish, Norwegian and Swedish languages
     for language in ["da", "no", "sv"]:
-
         # Load the datasets from the `alexandrainst` organisation
         train = load_dataset(dataset_id, language, split="train", use_auth_token=True)
         val = load_dataset(dataset_id, language, split="val", use_auth_token=True)
