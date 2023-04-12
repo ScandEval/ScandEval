@@ -9,6 +9,12 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- Now added support for benchmarking local models in the Hugging Face format (i.e.,
+  saved with the `save_pretrained` method). This automatically detects the framework
+  based on the file extension, but can also be set using the new `--model-framework`
+  argument. Thanks to @peter-sk for implementing this! :tada:
+
 ### Fixed
 - Now handles word-token alignment properly with SentencePiece tokenisers, which caused
   some models not being able to be benchmarked on token classification tasks.
