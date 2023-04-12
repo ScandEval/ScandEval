@@ -167,7 +167,7 @@ class BenchmarkDataset(ABC):
                 If the extracted framework is not recognized.
         """
         # Fetch the model config
-        model_configurator = _local_model_config if os.path.isdir(model_id) else get_model_config
+        model_configurator = get_local_model_config if os.path.isdir(model_id) else get_model_config
         model_config = model_configurator(
             model_id=model_id, benchmark_config=self.benchmark_config
         )
