@@ -37,8 +37,8 @@ class Benchmarker:
             then this overrides the `language` parameter for model languages. Defaults
             to None.
         model_framework (None, str or sequence of str, optional):
-            The model framework to use. Only relevant if `model-id` refers to a local path.
-            Otherwise, the framework will be set automatically. Defaults to None.
+            The model framework to use. Only relevant if `model-id` refers to a local
+            path. Otherwise, the framework will be set automatically. Defaults to None.
         dataset_language (None, str or sequence of str, optional):
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.

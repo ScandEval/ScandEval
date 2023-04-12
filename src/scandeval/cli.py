@@ -63,8 +63,8 @@ from .languages import get_all_languages
     default=None,
     show_default=True,
     type=click.Choice(["pytorch", "jax"]),
-    help="""The model framework to use. Only relevant if `model-id` refers to a local path.
-    Otherwise, the framework will be set automatically.""",
+    help="""The model framework to use. Only relevant if `model-id` refers to a local
+    path. Otherwise, the framework will be set automatically.""",
 )
 @click.option(
     "--dataset-language",

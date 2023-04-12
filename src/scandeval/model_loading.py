@@ -127,8 +127,9 @@ def load_model(
                 # If the model class could not be found then raise an error
                 if not model_cls_or_none:
                     raise InvalidBenchmark(
-                        f"The supertask '{supertask}' does not correspond to a Hugging Face"
-                        " AutoModel type (such as `AutoModelForSequenceClassification`)."
+                        f"The supertask '{supertask}' does not correspond to a "
+                        "Hugging Face AutoModel type (such as "
+                        "`AutoModelForSequenceClassification`)."
                     )
 
                 # If the model is a DeBERTaV2 model then we ensure that
@@ -218,7 +219,9 @@ def load_model(
             raise InvalidBenchmark(f"Could not load tokenizer for model {model_id!r}.")
 
     # Align the model and the tokenizer
-    model, tokenizer = align_model_and_tokenizer(model=model, tokenizer=tokenizer, raise_errors=raise_errors)
+    model, tokenizer = align_model_and_tokenizer(
+        model=model, tokenizer=tokenizer, raise_errors=raise_errors
+    )
 
     return tokenizer, model
 
@@ -412,11 +415,11 @@ def align_model_and_tokenizer(
         if model.config.vocab_size < tokenizer.vocab_size:
             if raise_errors:
                 raise InvalidBenchmark(
-                    "The vocab size of the tokenizer is larger than the vocab size of the "
-                    "model. As the --raise-errors option was specified, the embeddings "
-                    "of the model will not be automatically adjusted."
+                    "The vocab size of the tokenizer is larger than the vocab size of "
+                    "the model. As the --raise-errors option was specified, the "
+                    "embeddings of the model will not be automatically adjusted."
                 )
-            model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size+1)
+            model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size + 1)
 
     # If the tokenizer does not have a padding token (e.g. GPT-2), we use find a
     # suitable padding token and set it
