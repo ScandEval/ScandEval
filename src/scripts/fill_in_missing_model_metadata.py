@@ -78,6 +78,7 @@ def main() -> None:
                         from_flax=False,
                         use_auth_token=True,
                         cache_dir=".scandeval_cache",
+                        raise_errors=False,
                     )
 
                     # Add the metadata to the record

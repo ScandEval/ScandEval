@@ -58,6 +58,15 @@ from .languages import get_all_languages
     will use the `language` value.""",
 )
 @click.option(
+    "--model-framework",
+    "-mf",
+    default=None,
+    show_default=True,
+    type=click.Choice(["pytorch", "jax"]),
+    help="""The model framework to use. Only relevant if `model-id` refers to a local path.
+    Otherwise, the framework will be set automatically.""",
+)
+@click.option(
     "--dataset-language",
     "-dl",
     default=None,
@@ -164,6 +173,7 @@ def benchmark(
     auth_token: str,
     ignore_duplicates: bool,
     verbose: bool = False,
+    model_framework: str = None,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -192,6 +202,7 @@ def benchmark(
         use_auth_token=auth,
         ignore_duplicates=ignore_duplicates,
         cache_dir=cache_dir,
+        model_framework=model_framework,
     )
 
     # Perform the benchmark evaluation
