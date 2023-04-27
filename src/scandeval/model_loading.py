@@ -425,11 +425,11 @@ def align_model_and_tokenizer(
     # suitable padding token and set it
     if tokenizer.pad_token is None:
         if tokenizer.eos_token is not None:
-            tokenizer.padding_side = "left"
+            tokenizer.padding_side = "right"
             tokenizer.pad_token = tokenizer.eos_token
             model.config.pad_token_id = tokenizer.pad_token_id
         elif tokenizer.sep_token is not None:
-            tokenizer.padding_side = "left"
+            tokenizer.padding_side = "right"
             tokenizer.pad_token = tokenizer.sep_token
             model.config.pad_token_id = tokenizer.pad_token_id
         else:
