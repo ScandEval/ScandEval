@@ -8,6 +8,17 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now uses PyTorch 2.0, which (among other things) includes more control over the MPS.
+  This means that MPS out of memory errors will now be caught and dealt with like CUDA
+  out of memory errors, and we clear the MPS cache in between runs.
+
+### Fixed
+- Ensure that `type_vocab_size` is not changed if it was previously set to 0. This
+  caused issues for some models when benchmarking question answering tasks.
+
+
 ## [v6.3.0] - 2023-04-12
 ### Added
 - Now added support for benchmarking local models in the Hugging Face format (i.e.,
