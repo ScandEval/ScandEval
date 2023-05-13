@@ -2,10 +2,10 @@
 .. include:: ../../README.md
 """
 
+import importlib.metadata
 import logging
 import os
 
-import pkg_resources
 from dotenv import load_dotenv
 from termcolor import colored
 
@@ -13,7 +13,7 @@ from .benchmarker import Benchmarker  # noqa
 from .utils import block_terminal_output
 
 # Fetches the version of the package as defined in pyproject.toml
-__version__ = pkg_resources.get_distribution("scandeval").version
+__version__ = importlib.metadata.version(__package__)
 
 
 # Block unwanted terminal outputs
