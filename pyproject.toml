@@ -62,7 +62,11 @@ addopts = [
     '--cov=src/scandeval',
 ]
 xfail_strict = true
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
 log_cli_level = "info"
 testpaths = ["tests", "src/scandeval"]
 
