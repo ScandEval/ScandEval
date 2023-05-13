@@ -350,8 +350,8 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
             )
             token_type_embeddings.num_embeddings = 2
 
-    # Set the model config to use the new type vocab size
-    model.config.type_vocab_size = 2
+        # Set the model config to use the new type vocab size
+        model.config.type_vocab_size = 2
 
     return model
 
