@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v7.0.0] - 2023-05-13
 ### Changed
 - Now uses PyTorch 2.0, which (among other things) includes more control over the MPS.
   This means that MPS out of memory errors will now be caught and dealt with like CUDA
