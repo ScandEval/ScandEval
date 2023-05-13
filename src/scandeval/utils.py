@@ -27,10 +27,10 @@ def clear_memory():
     # Clear the Python cache
     gc.collect()
 
-    # Empty the CUDA cache
-    # TODO: Also empty MPS cache
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+    if torch.backends.mps.is_available():
+        torch.mps.empty_cache()
 
 
 def enforce_reproducibility(framework: str, seed: int = 4242):
@@ -202,19 +202,16 @@ def handle_error(
         pair of int:
             The batch size and gradient accumulation steps to use.
     """
-    # We assume that all these CUDA errors are caused by
-    # insufficient GPU memory
-    # TODO: Handle MPS out of memory as well
-    cuda_errs = ["CUDA out of memory", "CUDA error"]
+    # We assume that all these errors are caused by insufficient GPU memory
+    gpu_errors = ["CUDA out of memory", "CUDA error", "MPS backend out of memory"]
 
     # If it is an unknown error, then simply report it
-    if all([err not in str(e) for err in cuda_errs]):
+    if all([err not in str(e) for err in gpu_errors]):
         raise InvalidBenchmark(str(e))
 
-    # If it is a CUDA memory error, then reduce batch size and up gradient
-    # accumulation
+    # If it is a GPU memory error, then reduce batch size and up gradient accumulation
     if per_device_train_batch_size == 1:
-        raise InvalidBenchmark("CUDA out of memory, even with a batch size of 1!")
+        raise InvalidBenchmark("GPU out of memory, even with a batch size of 1!")
     return per_device_train_batch_size // 2, gradient_accumulation_steps * 2
 
 
