@@ -1,4 +1,10 @@
-"""Classes used to handle the NorBERT3 models."""
+"""Classes used to handle the NorBERT3 models.
+
+These are included separately here until they are properly integrated into the
+`transformers` package.
+
+From https://huggingface.co/ltg/norbert3-base/blob/main/modeling_norbert.py.
+"""
 
 import math
 import warnings
