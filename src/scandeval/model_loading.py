@@ -23,6 +23,7 @@ from transformers.models.xlm_roberta.modeling_xlm_roberta import (
 from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .exceptions import InvalidBenchmark
+from .norbert import load_norbert_model
 from .utils import block_terminal_output, get_class_by_name
 
 
@@ -96,6 +97,21 @@ def load_model(
                     cache_dir=cache_dir,
                 )
                 model = model_cls(config)
+
+            # Special handling of NorBERT3 models, as they are not included in the
+            # `transformers` library yet
+            elif "norbert3" in model_id:
+                model = load_norbert_model(
+                    model_id=model_id,
+                    revision=revision,
+                    supertask=supertask,
+                    num_labels=num_labels,
+                    id2label=id2label,
+                    label2id=label2id,
+                    from_flax=from_flax,
+                    use_auth_token=use_auth_token,
+                    cache_dir=cache_dir,
+                )
 
             # Otherwise load the pretrained model
             else:
