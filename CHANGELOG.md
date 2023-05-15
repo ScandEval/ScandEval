@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added support for the NorBERT3 models.
+
+
 ## [v7.0.0] - 2023-05-13
 ### Changed
 - Now uses PyTorch 2.0, which (among other things) includes more control over the MPS.
