@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v7.1.0] - 2023-05-15
 ### Added
 - Added support for the NorBERT3 models.
 
