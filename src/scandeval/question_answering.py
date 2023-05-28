@@ -166,8 +166,15 @@ def prepare_train_examples(
     cls_token = special_token_metadata["cls_token"]
     sep_token = special_token_metadata["sep_token"]
 
+    # If the tokenizer has no special clss token, then we add it manually
+    if cls_token is None:
+        cls_token = '<CLS'
+    if cls_token_id is None:
+        tokenizer.add_special_tokens({'cls_token': cls_token})
+        cls_token_id = tokenizer.convert_tokens_to_ids(cls_token)
+
     # If the tokenizer is not adding special tokens, then we add them manually
-    if not has_cls_token and not has_sep_token:
+    if not has_cls_token or not has_sep_token:
         examples["question"] = [
             f"{cls_token}{q}{sep_token}" for q in examples["question"]
         ]
