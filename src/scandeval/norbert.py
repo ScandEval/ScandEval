@@ -8,7 +8,7 @@ From https://huggingface.co/ltg/norbert3-base/blob/main/modeling_norbert.py.
 
 import math
 import warnings
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Type
 
 import torch
 import torch.nn as nn
@@ -33,10 +33,10 @@ def load_norbert_model(
     revision: str,
     supertask: str,
     num_labels: int,
-    id2label: List[str],
-    label2id: Dict[str, int],
+    id2label: list[str],
+    label2id: dict[str, int],
     from_flax: bool,
-    use_auth_token: Union[bool, str],
+    use_auth_token: bool | str,
     cache_dir: str,
 ) -> PreTrainedModel:
     try:
@@ -57,7 +57,7 @@ def load_norbert_model(
         )
 
     # Get the model class associated with the supertask
-    model_cls_or_none: Union[None, Type[PreTrainedModel]] = get_class_by_name(
+    model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
         class_name=f"norbert-for-{supertask}",
         module_name="scandeval.norbert",
     )
@@ -271,7 +271,8 @@ class Attention(nn.Module):
 
         if config.hidden_size % config.num_attention_heads != 0:
             raise ValueError(
-                f"The hidden size {config.hidden_size} is not a multiple of the number of attention heads {config.num_attention_heads}"
+                f"The hidden size {config.hidden_size} is not a multiple of the "
+                f"number of attention heads {config.num_attention_heads}"
             )
 
         self.hidden_size = config.hidden_size
@@ -498,8 +499,8 @@ class NorbertModel(NorbertPreTrainedModel):
 
     def get_contextualized_embeddings(
         self,
-        input_ids: Optional[torch.Tensor] = None,
-        attention_mask: Optional[torch.Tensor] = None,
+        input_ids: torch.Tensor | None = None,
+        attention_mask: torch.Tensor | None = None,
     ):
         if input_ids is not None:
             input_shape = input_ids.size()
@@ -533,14 +534,14 @@ class NorbertModel(NorbertPreTrainedModel):
 
     def forward(
         self,
-        input_ids: Optional[torch.Tensor] = None,
-        attention_mask: Optional[torch.Tensor] = None,
-        token_type_ids: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.Tensor] = None,
-        output_hidden_states: Optional[bool] = None,
-        output_attentions: Optional[bool] = None,
-        return_dict: Optional[bool] = None,
-    ) -> Union[Tuple[torch.Tensor], BaseModelOutput]:
+        input_ids: torch.Tensor | None = None,
+        attention_mask: torch.Tensor | None = None,
+        token_type_ids: torch.Tensor | None = None,
+        position_ids: torch.Tensor | None = None,
+        output_hidden_states: bool | None = None,
+        output_attentions: bool | None = None,
+        return_dict: bool | None = None,
+    ) -> tuple[torch.Tensor] | BaseModelOutput:
         return_dict = (
             return_dict if return_dict is not None else self.config.use_return_dict
         )
@@ -614,15 +615,15 @@ class NorbertForSequenceClassification(NorbertModel):
 
     def forward(  # type: ignore
         self,
-        input_ids: Optional[torch.Tensor] = None,
-        attention_mask: Optional[torch.Tensor] = None,
-        token_type_ids: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.Tensor] = None,
-        output_attentions: Optional[bool] = None,
-        output_hidden_states: Optional[bool] = None,
-        return_dict: Optional[bool] = None,
-        labels: Optional[torch.LongTensor] = None,
-    ) -> Union[Tuple[torch.Tensor], SequenceClassifierOutput]:
+        input_ids: torch.Tensor | None = None,
+        attention_mask: torch.Tensor | None = None,
+        token_type_ids: torch.Tensor | None = None,
+        position_ids: torch.Tensor | None = None,
+        output_attentions: bool | None = None,
+        output_hidden_states: bool | None = None,
+        return_dict: bool | None = None,
+        labels: torch.LongTensor | None = None,
+    ) -> tuple[torch.Tensor] | SequenceClassifierOutput:
         return_dict = (
             return_dict if return_dict is not None else self.config.use_return_dict
         )
@@ -687,15 +688,15 @@ class NorbertForTokenClassification(NorbertModel):
 
     def forward(  # type: ignore
         self,
-        input_ids: Optional[torch.Tensor] = None,
-        attention_mask: Optional[torch.Tensor] = None,
-        token_type_ids: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.Tensor] = None,
-        output_attentions: Optional[bool] = None,
-        output_hidden_states: Optional[bool] = None,
-        return_dict: Optional[bool] = None,
-        labels: Optional[torch.LongTensor] = None,
-    ) -> Union[Tuple[torch.Tensor], TokenClassifierOutput]:
+        input_ids: torch.Tensor | None = None,
+        attention_mask: torch.Tensor | None = None,
+        token_type_ids: torch.Tensor | None = None,
+        position_ids: torch.Tensor | None = None,
+        output_attentions: bool | None = None,
+        output_hidden_states: bool | None = None,
+        return_dict: bool | None = None,
+        labels: torch.LongTensor | None = None,
+    ) -> tuple[torch.Tensor] | TokenClassifierOutput:
         return_dict = (
             return_dict if return_dict is not None else self.config.use_return_dict
         )
@@ -740,16 +741,16 @@ class NorbertForQuestionAnswering(NorbertModel):
 
     def forward(  # type: ignore
         self,
-        input_ids: Optional[torch.Tensor] = None,
-        attention_mask: Optional[torch.Tensor] = None,
-        token_type_ids: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.Tensor] = None,
-        output_attentions: Optional[bool] = None,
-        output_hidden_states: Optional[bool] = None,
-        return_dict: Optional[bool] = None,
-        start_positions: Optional[torch.Tensor] = None,
-        end_positions: Optional[torch.Tensor] = None,
-    ) -> Union[Tuple[torch.Tensor], QuestionAnsweringModelOutput]:
+        input_ids: torch.Tensor | None = None,
+        attention_mask: torch.Tensor | None = None,
+        token_type_ids: torch.Tensor | None = None,
+        position_ids: torch.Tensor | None = None,
+        output_attentions: bool | None = None,
+        output_hidden_states: bool | None = None,
+        return_dict: bool | None = None,
+        start_positions: torch.Tensor | None = None,
+        end_positions: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor] | QuestionAnsweringModelOutput:
         return_dict = (
             return_dict if return_dict is not None else self.config.use_return_dict
         )
@@ -773,7 +774,8 @@ class NorbertForQuestionAnswering(NorbertModel):
             if len(end_positions.size()) > 1:
                 end_positions = end_positions.squeeze(-1)
 
-            # sometimes the start/end positions are outside our model inputs, we ignore these terms
+            # sometimes the start/end positions are outside our model inputs, we ignore
+            # these terms
             ignored_index = start_logits.size(1)
             start_positions = start_positions.clamp(0, ignored_index)
             end_positions = end_positions.clamp(0, ignored_index)

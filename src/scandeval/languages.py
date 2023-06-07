@@ -4,12 +4,10 @@ Taken from https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 
 Last updated 19 June 2022.
 """
-from typing import Dict
-
 from .config import Language
 
 
-def get_all_languages() -> Dict[str, Language]:
+def get_all_languages() -> dict[str, Language]:
     """Get a list of all the languages.
 
     Returns:

@@ -1,7 +1,9 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable
+
+from .enums import Framework
 
 
 @dataclass
@@ -32,8 +34,8 @@ class MetricConfig:
     pretty_name: str
     huggingface_id: str
     results_key: str
-    compute_kwargs: Dict[str, Any] = field(default_factory=dict)
-    postprocessing_fn: Callable[[float], Tuple[float, str]] = field(
+    compute_kwargs: dict[str, Any] = field(default_factory=dict)
+    postprocessing_fn: Callable[[float], tuple[float, str]] = field(
         default_factory=lambda: lambda raw_score: (100 * raw_score, f"{raw_score:.2%}")
     )
 
@@ -47,16 +49,16 @@ class DatasetTask:
             The name of the task.
         supertask (str):
             The supertask of the task, describing the overall type of task.
-        metrics (sequence of MetricConfig objects):
+        metrics (list of MetricConfig objects):
             The metrics used to evaluate the task.
-        labels (sequence of str):
+        labels (list of str):
             The labels used in the task.
     """
 
     name: str
     supertask: str
-    metrics: Sequence[MetricConfig]
-    labels: Sequence[str]
+    metrics: list[MetricConfig]
+    labels: list[str]
 
 
 @dataclass
@@ -79,14 +81,14 @@ class BenchmarkConfig:
     """General benchmarking configuration, across datasets and models.
 
     Attributes:
-        model_languages (sequence of Language objects):
+        model_languages (list of Language objects):
             The languages of the models to benchmark.
-        model_framework (str or None, optional):
+        model_framework (Framework or None, optional):
             The framework of the models to benchmark. If None then the framework will
             be inferred. Defaults to None.
-        dataset_languages (sequence of Language objects):
+        dataset_languages (list of Language objects):
             The languages of the datasets in the benchmark.
-        dataset_tasks (sequence of DatasetTask):
+        dataset_tasks (list of DatasetTask):
             The tasks to benchmark.
         batch_size (int):
             The batch size to use.
@@ -112,19 +114,19 @@ class BenchmarkConfig:
             Whether a unit test is being run. Defaults to False.
     """
 
-    model_languages: Sequence[Language]
-    dataset_languages: Sequence[Language]
-    dataset_tasks: Sequence[DatasetTask]
+    model_languages: list[Language]
+    dataset_languages: list[Language]
+    dataset_tasks: list[DatasetTask]
     batch_size: int
     raise_errors: bool
     cache_dir: str
     evaluate_train: bool
-    use_auth_token: Union[bool, str]
+    use_auth_token: bool | str
     progress_bar: bool
     save_results: bool
     verbose: bool
     testing: bool = False
-    model_framework: Optional[str] = None
+    model_framework: Framework | None = None
 
 
 @dataclass
@@ -155,14 +157,14 @@ class DatasetConfig:
     pretty_name: str
     huggingface_id: str
     task: DatasetTask
-    languages: Sequence[Language]
+    languages: list[Language]
 
     @property
-    def id2label(self) -> List[str]:
+    def id2label(self) -> list[str]:
         return [label for label in self.task.labels]
 
     @property
-    def label2id(self) -> Dict[str, int]:
+    def label2id(self) -> dict[str, int]:
         return {label: i for i, label in enumerate(self.task.labels)}
 
     @property
@@ -191,4 +193,4 @@ class ModelConfig:
     revision: str
     framework: str
     task: str
-    languages: Sequence[Language]
+    languages: list[Language]

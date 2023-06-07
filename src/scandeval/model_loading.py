@@ -2,7 +2,7 @@
 
 import warnings
 from json import JSONDecodeError
-from typing import Any, Dict, List, Tuple, Type, Union
+from typing import Any, Type
 
 import torch
 import torch.nn as nn
@@ -33,13 +33,13 @@ def load_model(
     supertask: str,
     language: str,
     num_labels: int,
-    id2label: List[str],
-    label2id: Dict[str, int],
+    id2label: list[str],
+    label2id: dict[str, int],
     from_flax: bool,
-    use_auth_token: Union[bool, str],
+    use_auth_token: bool | str,
     cache_dir: str,
     raise_errors: bool = False,
-) -> Tuple[PreTrainedTokenizer, PreTrainedModel]:
+) -> tuple[PreTrainedTokenizer, PreTrainedModel]:
     """Load a model.
 
     Args:
@@ -133,9 +133,7 @@ def load_model(
                     )
 
                 # Get the model class associated with the supertask
-                model_cls_or_none: Union[
-                    None, Type[PreTrainedModel]
-                ] = get_class_by_name(
+                model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
                     class_name=f"auto-model-for-{supertask}",
                     module_name="transformers",
                 )
@@ -244,7 +242,7 @@ def load_model(
 
 def load_fresh_model_class(
     model_id: str, supertask: str
-) -> Tuple[Type[PreTrainedModel], str]:
+) -> tuple[Type[PreTrainedModel], str]:
     """Load a fresh model class.
 
     Args:
@@ -293,7 +291,7 @@ def load_fresh_model_class(
 
 def get_children_of_module(
     name: str, module: nn.Module
-) -> Union[nn.Module, Dict[str, Any], None]:
+) -> nn.Module | dict[str, Any] | None:
     """Get the children of a module.
 
     Args:
@@ -303,7 +301,7 @@ def get_children_of_module(
             The module to get the children of.
 
     Returns:
-        Union[nn.Module, Dict[str, Any], None]:
+        nn.Module, dict[str, Any] or None:
             The children of the module, or None if the module has no children.
     """
     if len(list(module.children())) == 0:
@@ -374,7 +372,7 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
 
 def align_model_and_tokenizer(
     model: PreTrainedModel, tokenizer: PreTrainedTokenizer, raise_errors: bool = False
-) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
+) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
     """Aligns the model and the tokenizer.
 
     Args:
@@ -390,7 +388,7 @@ def align_model_and_tokenizer(
             The fixed model and tokenizer.
     """
     # Get all possible maximal lengths
-    all_max_lengths: List[int] = []
+    all_max_lengths: list[int] = []
 
     # Add the registered max length of the tokenizer
     if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < 100_000:

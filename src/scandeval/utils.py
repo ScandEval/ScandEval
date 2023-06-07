@@ -7,18 +7,26 @@ import os
 import random
 import re
 import warnings
-from typing import Optional, Sequence, Tuple, Type, Union
+from collections import defaultdict
+from copy import deepcopy
+from typing import Type
 
 import numpy as np
 import pkg_resources
 import requests
 import torch
 from datasets.utils import disable_progress_bar
+from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub.hf_api import ModelInfo
 from requests.exceptions import RequestException
 from transformers import logging as tf_logging
 from transformers.tokenization_utils import PreTrainedTokenizer
 
+from .config import Language
 from .exceptions import InvalidBenchmark
+from .languages import DA, NB, NN, NO, SV, get_all_languages
+
+logger = logging.getLogger(__name__)
 
 
 def clear_memory():
@@ -116,9 +124,9 @@ def block_terminal_output():
 
 
 def get_class_by_name(
-    class_name: Union[str, Sequence[str]],
-    module_name: Optional[str] = None,
-) -> Union[None, Type]:
+    class_name: str | list[str],
+    module_name: str | None = None,
+) -> Type | None:
     """Get a class by its name.
 
     Args:
@@ -187,7 +195,7 @@ def handle_error(
     e: Exception,
     per_device_train_batch_size: int,
     gradient_accumulation_steps: int,
-) -> Tuple[int, int]:
+) -> tuple[int, int]:
     """Handle an error that occurred during the benchmarking process.
 
     Args:
@@ -280,3 +288,216 @@ def get_special_token_metadata(tokenizer: PreTrainedTokenizer) -> dict:
         has_cls_token=has_cls_token,
         has_sep_token=has_sep_token,
     )
+
+
+# TODO: Cache this
+def get_huggingface_model_lists(
+    languages: list[Language] | None,
+    use_auth_token: bool | str,
+) -> dict[str, list[str]]:
+    """Fetches up-to-date model lists from the Hugging Face Hub.
+
+    Args:
+        languages (None or sequence of Language objects):
+            The language codes of the language to consider. If None then the models
+            will not be filtered on language.
+        use_auth_token (bool or str):
+            The authentication token for the Hugging Face Hub. If a boolean value is
+            specified then the token will be fetched from the Hugging Face CLI, where
+            the user has logged in through `huggingface-cli login`. If a string is
+            specified then it will be used as the token. Defaults to False.
+
+    Returns:
+        dict:
+            The keys are filterings of the list, which includes all language codes,
+            including 'multilingual', as well as 'all'. The values are lists
+            of model IDs.
+    """
+    # Get list of all languages
+    all_languages = list(get_all_languages().values())
+
+    # If no languages are specified, then include all languages
+    language_list = all_languages if languages is None else languages
+
+    # Form string of languages
+    if len(language_list) == 1:
+        language_string = language_list[0].name
+    else:
+        language_list = sorted(language_list, key=lambda x: x.name)
+        if {lang.code for lang in language_list} == {
+            lang.code for lang in all_languages
+        }:
+            language_string = "all"
+        else:
+            # Remove generic 'Norwegian' from the list of languages if both 'Bokmål'
+            # and 'Nynorsk' already exist in the list
+            if all([lang in language_list for lang in [NO, NB, NN]]):
+                language_list = [lang for lang in language_list if lang != NO]
+
+            language_string = (
+                f"{', '.join(l.name for l in language_list[:-1])} and "
+                f"{language_list[-1].name}"
+            )
+
+    # Log fetching message
+    logger.info(f"Fetching list of {language_string} models from the Hugging Face Hub.")
+
+    # Initialise the API
+    api: HfApi = HfApi()
+
+    # Initialise model lists
+    model_lists = defaultdict(list)
+
+    # Do not iterate over all the languages if we are not filtering on language
+    language_itr: list[Language | None]
+    if {lang.code for lang in language_list} == {lang.code for lang in all_languages}:
+        language_itr = [None]
+    else:
+        language_itr = deepcopy(language_list)  # type: ignore[arg-type]
+
+    for language in language_itr:
+        # Extract the language code
+        language_str: str | None
+        if language is not None:
+            language_str = language.code
+        else:
+            language_str = None
+
+        # Fetch the model list
+        models: list[ModelInfo] = api.list_models(
+            filter=ModelFilter(language=language_str),
+            use_auth_token=use_auth_token,
+        )
+
+        # Filter the models to only keep the ones with the specified language
+        models = [
+            model
+            for model in models
+            if (language is None or language.code in model.tags)
+        ]
+
+        # Only keep the models which are not finetuned
+        models = [
+            model
+            for model in models
+            if model.pipeline_tag is None
+            or model.pipeline_tag
+            in {
+                "fill-mask",
+                "sentence-similarity",
+                "feature-extraction",
+                "text-generation",
+            }
+        ]
+
+        # Extract the model IDs
+        model_ids: list[str] = [model.modelId for model in models if model.modelId]
+
+        # Remove models that are too large, and thus needs to be specified manually
+        large_regex = re.compile(r"(-|_)(x+l(arge)?|[1-9.]+[Bb])")
+        model_ids = [
+            model_id
+            for model_id in model_ids
+            if re.search(large_regex, model_id) is None
+        ]
+
+        # Remove models that have "finetuned" in their name
+        model_ids = [
+            model_id for model_id in model_ids if "finetuned" not in model_id.lower()
+        ]
+
+        # Store the model IDs
+        model_lists["all"].extend(model_ids)
+        if language is not None:
+            model_lists[language.code].extend(model_ids)
+
+    # Add multilingual models manually
+    multi_models = [
+        "bert-base-multilingual-cased",
+        "bert-base-multilingual-uncased",
+        "distilbert-base-multilingual-cased",
+        "cardiffnlp/twitter-xlm-roberta-base",
+        "microsoft/infoxlm-base",
+        "microsoft/infoxlm-large",
+        "microsoft/xlm-align-base",
+        "microsoft/mdeberta-v3-base",
+        "setu4993/LaBSE",
+        "sentence-transformers/distilbert-multilingual-nli-stsb-quora-ranking",
+        "sentence-transformers/distiluse-base-multilingual-cased",
+        "sentence-transformers/distiluse-base-multilingual-cased-v1",
+        "sentence-transformers/distiluse-base-multilingual-cased-v2",
+        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
+        "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+        "sentence-transformers/quora-distilbert-multilingual",
+        "sentence-transformers/stsb-xlm-r-multilingual",
+        "sentence-transformers/use-cmlm-multilingual",
+        "studio-ousia/mluke-base",
+        "studio-ousia/mluke-large",
+        "xlm-roberta-base",
+        "xlm-roberta-large",
+        "dbmdz/bert-tiny-historic-multilingual-cased",
+        "dbmdz/bert-mini-historic-multilingual-cased",
+        "dbmdz/bert-base-historic-multilingual-cased",
+        "dbmdz/bert-medium-historic-multilingual-cased",
+    ]
+    model_lists["multilingual"] = multi_models
+    model_lists["all"].extend(multi_models)
+
+    # Add fresh models
+    fresh_models = ["fresh-xlmr-base", "fresh-electra-small"]
+    model_lists["fresh"].extend(fresh_models)
+    model_lists["all"].extend(fresh_models)
+
+    # Add some multilingual Danish models manually that have not marked 'da' as their
+    # language
+    if DA in language_itr:
+        multi_da_models: list[str] = [
+            "Geotrend/bert-base-en-da-cased",
+            "Geotrend/bert-base-25lang-cased",
+            "Geotrend/bert-base-en-fr-de-no-da-cased",
+            "Geotrend/distilbert-base-en-da-cased",
+            "Geotrend/distilbert-base-25lang-cased",
+            "Geotrend/distilbert-base-en-fr-de-no-da-cased",
+        ]
+        model_lists["da"].extend(multi_da_models)
+        model_lists["all"].extend(multi_da_models)
+
+    # Add some multilingual Swedish models manually that have not marked 'sv' as their
+    # language
+    if SV in language_itr:
+        multi_sv_models: list[str] = []
+        model_lists["sv"].extend(multi_sv_models)
+        model_lists["all"].extend(multi_sv_models)
+
+    # Add some multilingual Norwegian models manually that have not marked 'no', 'nb'
+    # or 'nn' as their language
+    if any(lang in language_itr for lang in [NO, NB, NN]):
+        multi_no_models: list[str] = [
+            "Geotrend/bert-base-en-no-cased",
+            "Geotrend/bert-base-25lang-cased",
+            "Geotrend/bert-base-en-fr-de-no-da-cased",
+            "Geotrend/distilbert-base-en-no-cased",
+            "Geotrend/distilbert-base-25lang-cased",
+            "Geotrend/distilbert-base-en-fr-de-no-da-cased",
+        ]
+        model_lists["no"].extend(multi_no_models)
+        model_lists["all"].extend(multi_no_models)
+
+    # Remove duplicates from the lists
+    for lang, model_list in model_lists.items():
+        model_lists[lang] = list(set(model_list))
+
+    # Remove banned models
+    BANNED_MODELS = [
+        r"TransQuest/siamesetransquest-da.*",
+        r"M-CLIP/.*",
+    ]
+    for lang, model_list in model_lists.items():
+        model_lists[lang] = [
+            model
+            for model in model_list
+            if not any(re.search(regex, model) is not None for regex in BANNED_MODELS)
+        ]
+
+    return dict(model_lists)

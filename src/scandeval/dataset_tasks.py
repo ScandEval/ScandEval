@@ -1,11 +1,9 @@
 """All benchmarks tasks used in ScandEval."""
 
-from typing import Dict
-
 from .config import DatasetTask, MetricConfig
 
 
-def get_all_dataset_tasks() -> Dict[str, DatasetTask]:
+def get_all_dataset_tasks() -> dict[str, DatasetTask]:
     """Get a list of all the dataset tasks.
 
     Returns:

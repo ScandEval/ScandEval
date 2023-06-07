@@ -3,7 +3,6 @@
 import logging
 from copy import deepcopy
 from functools import partial
-from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 import numpy as np
 from datasets.arrow_dataset import Dataset
@@ -49,7 +48,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         """
         # Check what labels are present in the dataset, and store if MISC tags are not
         # present
-        labels_in_train: Set[str] = {
+        labels_in_train: set[str] = {
             tag for tag_list in dataset_dict["train"]["ner_tags"] for tag in tag_list
         }
         self.has_misc_tags = "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
@@ -59,9 +58,9 @@ class NamedEntityRecognition(BenchmarkDataset):
 
     def _compute_metrics(
         self,
-        predictions_and_labels: Tuple[NDArray, NDArray],
-        id2label: Optional[Sequence[str]] = None,
-    ) -> Dict[str, float]:
+        predictions_and_labels: tuple[NDArray, NDArray],
+        id2label: list[str] | None = None,
+    ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
         Args:
@@ -145,7 +144,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
 
     def _tokenize_and_align_labels(
-        self, examples: dict, tokenizer: PreTrainedTokenizer, label2id: Dict[str, int]
+        self, examples: dict, tokenizer: PreTrainedTokenizer, label2id: dict[str, int]
     ) -> BatchEncoding:
         """Tokenise all texts and align the labels with them.
 
@@ -173,9 +172,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         # Extract a mapping between all the tokens and their corresponding word. If the
         # tokenizer is of a "fast" variant then this can be accessed through the
         # `word_ids` method. Otherwise, we have to extract it manually.
-        all_labels: List[List[int]] = list()
-        labels: List[str]
-        word_ids: List[Optional[int]]
+        all_labels: list[list[int]] = list()
+        labels: list[str]
+        word_ids: list[int | None]
         for i, labels in enumerate(examples["ner_tags"]):
             # Try to get the word IDs from the tokenizer
             try:
@@ -185,10 +184,10 @@ class NamedEntityRecognition(BenchmarkDataset):
             # IDs manually
             except ValueError:
                 # Get the list of words in the document
-                words: List[str] = examples["tokens"][i]
+                words: list[str] = examples["tokens"][i]
 
                 # Get the list of token IDs in the document
-                tok_ids: List[int] = tokenized_inputs.input_ids[i]
+                tok_ids: list[int] = tokenized_inputs.input_ids[i]
 
                 # Decode the token IDs
                 tokens = tokenizer.convert_ids_to_tokens(tok_ids)
@@ -256,8 +255,8 @@ class NamedEntityRecognition(BenchmarkDataset):
                         ][0]
                         word_ids.append(word_idx)
 
-            previous_word_idx: Optional[int] = None
-            label_ids: List[int] = list()
+            previous_word_idx: int | None = None
+            label_ids: list[int] = list()
             for word_id in word_ids:
                 # Special tokens have a word id that is None. We set the label to -100
                 # so they are automatically ignored in the loss function
@@ -285,8 +284,8 @@ class NamedEntityRecognition(BenchmarkDataset):
         return tokenized_inputs
 
     def _handle_unk_tokens(
-        self, tokenizer: PreTrainedTokenizer, tokens: List[str], words: List[str]
-    ) -> List[str]:
+        self, tokenizer: PreTrainedTokenizer, tokens: list[str], words: list[str]
+    ) -> list[str]:
         """Replace unknown tokens in the tokens with the corresponding word.
 
         Args:
@@ -368,7 +367,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
         return tokenised_dataset
 
-    def _load_data_collator(self, tokenizer: Optional[PreTrainedTokenizer] = None):
+    def _load_data_collator(self, tokenizer: PreTrainedTokenizer | None = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:

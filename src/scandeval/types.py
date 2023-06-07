@@ -1,5 +1,3 @@
 """Types used throughout the project."""
 
-from typing import Dict, List, Union
-
-SCORE_DICT = Dict[str, Union[Dict[str, float], Dict[str, List[Dict[str, float]]]]]
+SCORE_DICT = dict[str, dict[str, float] | dict[str, list[dict[str, float]]]]

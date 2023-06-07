@@ -1,26 +1,25 @@
 """Factory class for creating dataset configurations."""
 
-from typing import List, Optional, Sequence, Union
-
 from .config import BenchmarkConfig, DatasetTask, Language
 from .dataset_tasks import get_all_dataset_tasks
+from .enums import Framework
 from .languages import get_all_languages
 
 
 def build_benchmark_config(
-    language: Union[str, List[str]],
-    model_language: Optional[Union[str, Sequence[str]]],
-    dataset_language: Optional[Union[str, Sequence[str]]],
-    dataset_task: Optional[Union[str, Sequence[str]]],
+    language: str | list[str],
+    model_language: str | list[str] | None,
+    dataset_language: str | list[str] | None,
+    dataset_task: str | list[str] | None,
     batch_size: int,
     raise_errors: bool,
     cache_dir: str,
     evaluate_train: bool,
-    use_auth_token: Union[bool, str],
+    use_auth_token: bool | str,
     progress_bar: bool,
     save_results: bool,
     verbose: bool,
-    model_framework: Optional[str],
+    model_framework: Framework | None,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -29,17 +28,14 @@ def build_benchmark_config(
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
             to 'all' if all languages (also non-Scandinavian) should be considered.
-        model_language (None, str or sequence of str, optional):
+        model_language (None, str or list of str, optional):
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages.
-        model_framework (str, optional):
-            The model framework to use. Only relevant if `model-id` refers to a local
-            path. Otherwise, the framework will be set automatically.
-        dataset_language (None, str or sequence of str, optional):
+        dataset_language (None, str or list of str, optional):
             The language codes of the languages to include for datasets. If
             specified then this overrides the `language` parameter for dataset
             languages.
-        dataset_task (str or sequence of str, optional):
+        dataset_task (str or list of str, optional):
             The tasks to include for dataset. If "all" then datasets will not be
             filtered based on their task.
         batch_size (int):
@@ -62,6 +58,9 @@ def build_benchmark_config(
             'scandeval_benchmark_results.json'.
         verbose (bool, optional):
             Whether to output additional output.
+        model_framework (Framework, optional):
+            The model framework to use. Only relevant if `model-id` refers to a local
+            path. Otherwise, the framework will be set automatically.
     """
     # Prepare the languages
     languages = prepare_languages(language=language)
@@ -98,7 +97,7 @@ def build_benchmark_config(
     )
 
 
-def prepare_languages(language: Union[str, List[str]]) -> Sequence[str]:
+def prepare_languages(language: str | list[str]) -> list[str]:
     """Prepare language(s) for benchmarking.
 
     Args:
@@ -108,7 +107,7 @@ def prepare_languages(language: Union[str, List[str]]) -> Sequence[str]:
             to 'all' if all languages (also non-Scandinavian) should be considered.
 
     Returns:
-        sequence of str:
+        list of str:
             The prepared languages.
     """
     # Create a dictionary that maps languages to their associated language objects
@@ -133,27 +132,27 @@ def prepare_languages(language: Union[str, List[str]]) -> Sequence[str]:
 
 
 def prepare_model_languages(
-    model_language: Optional[Union[str, Sequence[str]]],
-    languages: Sequence[str],
-) -> Sequence[Language]:
+    model_language: str | list[str] | None,
+    languages: list[str],
+) -> list[Language]:
     """Prepare model language(s) for benchmarking.
 
     Args:
-        model_language (None, str or sequence of str):
+        model_language (None, str or list of str):
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages.
-        languages (sequence of str):
+        languages (list of str):
             The default language codes of the languages to include.
 
     Returns:
-        sequence of Language objects:
+        list of Language objects:
             The prepared model languages.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
 
     # Create the list `model_languages`
-    model_languages_str: Sequence[str]
+    model_languages_str: list[str]
     if model_language is None:
         model_languages_str = languages
     elif isinstance(model_language, str):
@@ -173,28 +172,28 @@ def prepare_model_languages(
 
 
 def prepare_dataset_languages(
-    dataset_language: Optional[Union[str, Sequence[str]]],
-    languages: Sequence[str],
-) -> Sequence[Language]:
+    dataset_language: str | list[str] | None,
+    languages: list[str],
+) -> list[Language]:
     """Prepare dataset language(s) for benchmarking.
 
     Args:
-        model_language (None, str or sequence of str):
+        model_language (None, str or list of str):
             The language codes of the languages to include for datasets. If
             specified then this overrides the `language` parameter for dataset
             languages.
-        languages (sequence of str):
+        languages (list of str):
             The default language codes of the languages to include.
 
     Returns:
-        sequence of Language objects:
+        list of Language objects:
             The prepared dataset languages.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
 
     # Create the list `dataset_languages_str`
-    dataset_languages_str: Sequence[str]
+    dataset_languages_str: list[str]
     if dataset_language is None:
         dataset_languages_str = languages
     elif isinstance(dataset_language, str):
@@ -213,18 +212,16 @@ def prepare_dataset_languages(
     return dataset_languages
 
 
-def prepare_dataset_tasks(
-    dataset_task: Optional[Union[str, Sequence[str]]]
-) -> Sequence[DatasetTask]:
+def prepare_dataset_tasks(dataset_task: str | list[str] | None) -> list[DatasetTask]:
     """Prepare dataset task(s) for benchmarking.
 
     Args:
-        dataset_task (str or sequence of str, optional):
-            The tasks to include for dataset. If "all" then datasets will not be
-            filtered based on their task. Defaults to "all".
+        dataset_task (str or list of str or None):
+            The tasks to include for dataset. If None then datasets will not be
+            filtered based on their task.
 
     Returns:
-        sequence of DatasetTask:
+        list of DatasetTask:
             The prepared dataset tasks.
     """
     # Create a dictionary that maps benchmark tasks to their associated benchmark

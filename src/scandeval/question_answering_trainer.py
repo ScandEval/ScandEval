@@ -1,10 +1,10 @@
 """Question answering Trainer subclass."""
 
 from collections import defaultdict
-from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 from datasets.arrow_dataset import Dataset
+from transformers import TrainerControl
 from transformers.trainer import Trainer
 
 from scandeval.utils import get_special_token_metadata
@@ -25,9 +25,9 @@ class QuestionAnsweringTrainer(Trainer):
 
     def evaluate(
         self,
-        eval_dataset: Optional[Dataset] = None,
-        orig_eval_dataset: Optional[Dataset] = None,
-        ignore_keys: Optional[List[str]] = None,
+        eval_dataset: Dataset | None = None,
+        orig_eval_dataset: Dataset | None = None,
+        ignore_keys: list[str] | None = None,
         metric_key_prefix: str = "eval",
     ):
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
@@ -71,22 +71,25 @@ class QuestionAnsweringTrainer(Trainer):
         if self.args.should_log:
             self.log(output.metrics)
 
-        self.control = self.callback_handler.on_evaluate(
-            self.args, self.state, self.control, output.metrics  # type: ignore[has-type]
+        self.control: TrainerControl = self.callback_handler.on_evaluate(
+            args=self.args,
+            state=self.state,
+            control=self.control,
+            metrics=output.metrics,
         )
         return output.metrics
 
 
 def postprocess_predictions_and_labels(
-    predictions: Sequence,
+    predictions: list,
     dataset: Dataset,
     prepared_dataset: Dataset,
     cls_token_index: int,
-) -> Tuple[List[dict], List[dict]]:
+) -> tuple[list[dict], list[dict]]:
     """Postprocess the predictions and labels, to allow easier metric computation.
 
     Args:
-        predictions (Sequence):
+        predictions (list):
             The predictions to postprocess.
         dataset (Dataset):
             The dataset containing the examples.
@@ -117,7 +120,6 @@ def postprocess_predictions_and_labels(
     predictions = list()
     labels = list()
     for example_index, example in enumerate(dataset):
-
         # Extract the best valid answer associated with the current example
         best_answer = find_best_answer(
             all_start_logits=all_start_logits,
@@ -162,7 +164,7 @@ def find_best_answer(
     all_start_logits: np.ndarray,
     all_end_logits: np.ndarray,
     prepared_dataset: Dataset,
-    feature_indices: List[int],
+    feature_indices: list[int],
     context: str,
     max_answer_length: int,
     num_best_logits: int,
@@ -198,7 +200,6 @@ def find_best_answer(
     # Loop through all the features associated to the current example
     valid_answers = list()
     for feature_index in feature_indices:
-
         # Get the features associated with the current example
         features = prepared_dataset[feature_index]
 
@@ -238,12 +239,12 @@ def find_best_answer(
 def find_valid_answers(
     start_logits: np.ndarray,
     end_logits: np.ndarray,
-    offset_mapping: List[Tuple[int, int]],
+    offset_mapping: list[tuple[int, int]],
     context: str,
     max_answer_length: int,
     num_best_logits: int,
     min_null_score: float,
-) -> List[dict]:
+) -> list[dict]:
     """Find the valid answers from the start and end indexes.
 
     Args:
@@ -275,7 +276,6 @@ def find_valid_answers(
     valid_answers = list()
     for start_index in start_indexes:
         for end_index in end_indexes:
-
             # If the starting or ending index is out-of-scope, meaning that they are
             # either out of bounds or correspond to part of the input_ids that are not
             # in the context, then we skip this index

@@ -2,7 +2,6 @@
 
 import logging
 from functools import partial
-from typing import Optional
 
 from datasets.arrow_dataset import Dataset
 from transformers import BatchEncoding
@@ -57,7 +56,6 @@ class SequenceClassification(BenchmarkDataset):
         sep_token = special_token_metadata["sep_token"]
 
         def tokenise(examples: dict) -> BatchEncoding:
-
             # If the tokenizer is not adding special tokens, then we add them manually
             if (
                 not has_cls_token
@@ -93,7 +91,7 @@ class SequenceClassification(BenchmarkDataset):
         return examples
 
     def _load_data_collator(
-        self, tokenizer: Optional[PreTrainedTokenizer] = None
+        self, tokenizer: PreTrainedTokenizer | None = None
     ) -> DataCollator:
         """Load the data collator used to prepare samples during finetuning.
 

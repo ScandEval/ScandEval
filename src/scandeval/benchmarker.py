@@ -4,15 +4,15 @@ import json
 import logging
 from pathlib import Path
 from time import sleep
-from typing import Dict, List, Optional, Sequence, Union
 
 from .benchmark_config_factory import build_benchmark_config
 from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
+from .enums import Framework
 from .exceptions import InvalidBenchmark
-from .hf_hub import get_model_lists
 from .types import SCORE_DICT
+from .utils import get_huggingface_model_lists
 
 # Create logger
 logger = logging.getLogger(__name__)
@@ -82,18 +82,18 @@ class Benchmarker:
         self,
         progress_bar: bool = True,
         save_results: bool = False,
-        language: Union[str, List[str]] = ["da", "sv", "no"],
-        model_language: Optional[Union[str, Sequence[str]]] = None,
-        dataset_language: Optional[Union[str, Sequence[str]]] = None,
-        dataset_task: Optional[Union[str, Sequence[str]]] = None,
+        language: str | list[str] = ["da", "sv", "no"],
+        model_language: str | list[str] | None = None,
+        dataset_language: str | list[str] | None = None,
+        dataset_task: str | list[str] | None = None,
         batch_size: int = 32,
         evaluate_train: bool = False,
         raise_errors: bool = False,
         cache_dir: str = ".scandeval_cache",
-        use_auth_token: Union[bool, str] = False,
+        use_auth_token: bool | str = False,
         ignore_duplicates: bool = True,
         verbose: bool = False,
-        model_framework: str = None,
+        model_framework: Framework | None = None,
     ) -> None:
         # Build benchmark configuration
         self.benchmark_config = build_benchmark_config(
@@ -116,7 +116,7 @@ class Benchmarker:
         self.ignore_duplicates = ignore_duplicates
 
         # Initialise variable storing model lists, so we only have to fetch it once
-        self._model_lists: Union[Dict[str, Sequence[str]], None] = None
+        self._model_lists: dict[str, list[str]] | None = None
 
         # Set up the results path
         self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
@@ -124,7 +124,7 @@ class Benchmarker:
         # Set up the benchmark results variable, which will be populated with the
         # contents of the results file if it exists. If not, then it will be an empty
         # list
-        self.benchmark_results: List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]
+        self.benchmark_results: list[dict[str, str | int | list[str] | SCORE_DICT]]
         if self.results_path.exists():
             with self.results_path.open() as f:
                 self.benchmark_results = [
@@ -142,9 +142,9 @@ class Benchmarker:
 
     def benchmark(
         self,
-        model_id: Optional[Union[Sequence[str], str]] = None,
-        dataset: Optional[Union[Sequence[str], str]] = None,
-    ) -> List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]:
+        model_id: list[str] | str | None = None,
+        dataset: list[str] | str | None = None,
+    ) -> list[dict[str, str | int | list[str] | SCORE_DICT]]:
         """Benchmarks models on datasets.
 
         Args:
@@ -231,8 +231,8 @@ class Benchmarker:
 
     def _prepare_model_ids(
         self,
-        model_id: Optional[Union[Sequence[str], str]],
-    ) -> Sequence[str]:
+        model_id: list[str] | str | None,
+    ) -> list[str]:
         """Prepare the model ID(s) to be benchmarked.
 
         Args:
@@ -244,7 +244,7 @@ class Benchmarker:
             sequence of str:
                 The prepared list of model IDs.
         """
-        model_ids: Sequence[str]
+        model_ids: list[str]
 
         # If `model_id` is not specified, then fetch all the relevant model IDs
         if model_id is None:
@@ -272,8 +272,8 @@ class Benchmarker:
 
     def _prepare_dataset_configs(
         self,
-        dataset: Optional[Union[Sequence[str], str]],
-    ) -> Sequence[DatasetConfig]:
+        dataset: list[str] | str | None,
+    ) -> list[DatasetConfig]:
         """Prepare the dataset configuration(s) to be benchmarked.
 
         Args:
@@ -310,7 +310,7 @@ class Benchmarker:
         self,
         dataset_config: DatasetConfig,
         model_id: str,
-    ) -> Dict[str, Union[str, int, List[str], SCORE_DICT]]:
+    ) -> dict[str, str | int | list[str] | SCORE_DICT]:
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -331,7 +331,7 @@ class Benchmarker:
             try:
                 dataset = self.dataset_factory.build_dataset(dataset_config)
                 results, metadata_dict = dataset(model_id)
-                record: Dict[str, Union[str, int, List[str], SCORE_DICT]] = dict(
+                record: dict[str, str | int | list[str] | SCORE_DICT] = dict(
                     dataset=dataset_config.name,
                     task=dataset_config.task.name,
                     dataset_languages=[
@@ -378,13 +378,13 @@ class Benchmarker:
 
     def __call__(
         self, *args, **kwargs
-    ) -> List[Dict[str, Union[str, int, List[str], SCORE_DICT]]]:
+    ) -> list[dict[str, str | int | list[str] | SCORE_DICT]]:
         return self.benchmark(*args, **kwargs)
 
     def _get_model_ids(
         self,
-        languages: Sequence[Language],
-    ) -> List[str]:
+        languages: list[Language],
+    ) -> list[str]:
         """Get list of model IDs from the Hugging Face Hub.
 
         Args:
@@ -402,13 +402,13 @@ class Benchmarker:
 
         # If the model lists have not been fetched already, then do it
         if self._model_lists is None or new_languages:
-            self._model_lists = get_model_lists(
+            self._model_lists = get_huggingface_model_lists(
                 languages=languages,
                 use_auth_token=self.benchmark_config.use_auth_token,
             )
 
         # Extract all the model IDs from the model lists, for the chosen languages
-        model_ids: List[str] = list()
+        model_ids: list[str] = list()
         for language in languages:
             model_ids.extend(self._model_lists[language.code])
 

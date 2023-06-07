@@ -1,6 +1,6 @@
 """Factory which produces datasets from a configuration."""
 
-from typing import Optional, Type, Union
+from typing import Type
 
 from .benchmark_dataset import BenchmarkDataset
 from .config import BenchmarkConfig, DatasetConfig
@@ -23,7 +23,7 @@ class DatasetFactory:
     def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         self.benchmark_config = benchmark_config
 
-    def build_dataset(self, dataset: Union[str, DatasetConfig]) -> BenchmarkDataset:
+    def build_dataset(self, dataset: str | DatasetConfig) -> BenchmarkDataset:
         """Build a dataset from a configuration or a name.
 
         Args:
@@ -41,7 +41,7 @@ class DatasetFactory:
             dataset_config = dataset
 
         # Get the benchmark class based on the task
-        benchmark_cls: Optional[Type[BenchmarkDataset]] = get_class_by_name(
+        benchmark_cls: Type[BenchmarkDataset] | None = get_class_by_name(
             [
                 dataset_config.name,
                 dataset_config.task.name,

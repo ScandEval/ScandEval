@@ -1,13 +1,11 @@
 """All dataset configurations used in ScandEval."""
 
-from typing import Dict
-
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED
 from .languages import DA, FO, IS, NB, NN, SV, get_all_languages
 
 
-def get_all_dataset_configs() -> Dict[str, DatasetConfig]:
+def get_all_dataset_configs() -> dict[str, DatasetConfig]:
     """Get a mapping of all the dataset configurations.
 
     Returns:
@@ -204,6 +202,24 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-sv-mini",
     task=QA,
     languages=[SV],
+)
+
+
+NQII_CONFIG = DatasetConfig(
+    name="nqii",
+    pretty_name="Natural Questions in Icelandic",
+    huggingface_id="ScandEval/nqii-mini",
+    task=QA,
+    languages=[IS],
+)
+
+
+FOQA_CONFIG = DatasetConfig(
+    name="???",
+    pretty_name="???",
+    huggingface_id="ScandEval/???",
+    task=QA,
+    languages=[FO],
 )
 
 

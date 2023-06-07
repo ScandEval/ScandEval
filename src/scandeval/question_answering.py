@@ -2,7 +2,7 @@
 
 import logging
 from functools import partial
-from typing import Callable, List, Optional
+from typing import Callable
 
 from datasets.arrow_dataset import Dataset
 from transformers.data.data_collator import DataCollator, DataCollatorWithPadding
@@ -98,7 +98,7 @@ class QuestionAnswering(BenchmarkDataset):
         tokenizer: PreTrainedTokenizer,
         data_collator: DataCollator,
         compute_metrics: Callable,
-        callbacks: List[TrainerCallback],
+        callbacks: list[TrainerCallback],
     ) -> Trainer:
         return QuestionAnsweringTrainer(
             model=model,
@@ -124,7 +124,7 @@ class QuestionAnswering(BenchmarkDataset):
             metric_key_prefix=metric_key_prefix,
         )
 
-    def _load_data_collator(self, tokenizer: Optional[PreTrainedTokenizer] = None):
+    def _load_data_collator(self, tokenizer: PreTrainedTokenizer | None = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
@@ -207,7 +207,6 @@ def prepare_train_examples(
     tokenized_examples["end_positions"] = list()
 
     for i, offsets in enumerate(offset_mapping):
-
         # Get the input IDs for the current example
         input_ids = tokenized_examples.input_ids[i]
 
@@ -342,7 +341,6 @@ def prepare_test_examples(
     tokenized_examples["id"] = list()
 
     for i in range(len(tokenized_examples.input_ids)):
-
         # Grab the sequence corresponding to that example (to know what is the context
         # and what is the question).
         sequence_ids = tokenized_examples.sequence_ids(i)

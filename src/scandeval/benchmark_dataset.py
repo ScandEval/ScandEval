@@ -5,8 +5,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import partial
-from pathlib import Path
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Callable
 
 import evaluate
 import numpy as np
@@ -16,6 +15,7 @@ from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from huggingface_hub.utils._errors import HfHubHTTPError
 from tqdm.auto import tqdm
+from transformers import PretrainedConfig
 from transformers.data.data_collator import DataCollator
 from transformers.modeling_utils import PreTrainedModel
 from transformers.tokenization_utils import PreTrainedTokenizer
@@ -31,8 +31,9 @@ from transformers.training_args import OptimizerNames, TrainingArguments
 
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .enums import Framework
 from .exceptions import InvalidBenchmark
-from .hf_hub import get_model_config
+from .model_config import get_model_config
 from .model_loading import load_model
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
@@ -46,65 +47,6 @@ from .utils import (
 
 # Set up logger
 logger = logging.getLogger(__name__)
-
-
-def get_local_model_config(
-    model_id: str, benchmark_config: BenchmarkConfig
-) -> ModelConfig:
-    """Builds the configuration for a local model.
-
-    Args:
-        model_id (str):
-            The path of the local model.
-        benchmark_config (BenchmarkConfig):
-            The configuration of the benchmark.
-
-    Returns:
-        ModelConfig:
-            The model configuration.
-
-    Raises:
-        RuntimeError:
-            If the --raise-errors option has been set to True and
-            the framework cannot be recognized automatically and
-            it has not explicitly been provided using --model-framework.
-    """
-    framework = benchmark_config.model_framework
-    if framework is None:
-        try:
-            exts = {f.suffix for f in Path(model_id).iterdir()}
-            if ".bin" in exts:
-                framework = "pytorch"
-            elif ".msgpack" in exts:
-                framework = "jax"
-            elif ".whl" in exts:
-                raise InvalidBenchmark("SpaCy models are not supported.")
-            elif ".h5" in exts:
-                raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
-        except OSError as e:
-            logger.info(f"Cannot list files for local model `{model_id}`!")
-            if benchmark_config.raise_errors:
-                raise e
-    if framework is None:
-        if benchmark_config.raise_errors:
-            raise InvalidBenchmark(
-                "Cannot recognize framework automatically for local model "
-                f"`{model_id}`! Please use the --model-framework option."
-            )
-        logger.info(
-            f"Assuming 'pytorch' as the framework for local model `{model_id}`! "
-            "If this is in error, please use the --model-framework option to override."
-        )
-        framework = "pytorch"
-
-    model_config = ModelConfig(
-        model_id=model_id,
-        revision="main",
-        framework=framework,
-        task="fill-mask",
-        languages=list(),
-    )
-    return model_config
 
 
 class BenchmarkDataset(ABC):
@@ -148,7 +90,7 @@ class BenchmarkDataset(ABC):
     def benchmark(  # noqa
         self,
         model_id: str,
-    ) -> Tuple[SCORE_DICT, Dict[str, int]]:
+    ) -> tuple[SCORE_DICT, dict[str, int]]:
         """Benchmark a model.
 
         Args:
@@ -160,11 +102,11 @@ class BenchmarkDataset(ABC):
 
         Returns:
             pair of dicts:
-                A pair (score_dict, metadata_dict), with `score_dict` being a
-                dictionary containing the scores, and `metadata_dict` being a
-                dictionary containing various model metadata, such as the number of
-                model parameters, the model's maximum sequence length and the size of
-                the model's vocabulary. The keys in `score_dict` are 'raw' and 'total',
+                A pair (scores, metadata_dict), with `scores` being a dictionary
+                containing the scores, and `metadata_dict` being a dictionary
+                containing various model metadata, such as the number of model
+                parameters, the model's maximum sequence length and the size of the
+                model's vocabulary. The keys in `score_dict` are 'raw' and 'total',
                 with all the raw scores in the first dictionary and the aggregated
                 scores in the second.
 
@@ -172,20 +114,43 @@ class BenchmarkDataset(ABC):
             RuntimeError:
                 If the extracted framework is not recognized.
         """
-        # Fetch the model config
-        if Path(model_id).is_dir():
-            model_configurator = get_local_model_config
-        else:
-            model_configurator = get_model_config
-        model_config = model_configurator(
+        model_config = get_model_config(
             model_id=model_id, benchmark_config=self.benchmark_config
         )
 
+        scores, metadata_dict = self._benchmark_huggingface(model_config=model_config)
+
+        all_scores = log_scores(
+            dataset_name=self.dataset_config.pretty_name,
+            metric_configs=self.dataset_config.task.metrics,
+            scores=scores,
+            model_id=model_config.model_id,
+        )
+
+        return all_scores, metadata_dict
+
+    def _benchmark_huggingface(
+        self, model_config: ModelConfig
+    ) -> tuple[dict[str, list[dict[str, float]]], dict[str, int]]:
+        """Benchmark a model using the Hugging Face `transformers` package.
+
+        Args:
+            model_config (ModelConfig):
+                The configuration of the model to benchmark.
+
+        Returns:
+            tuple of dicts:
+                A pair (score_dict, metadata_dict), with `score_dict` being a
+                dictionary containing the scores, and `metadata_dict` being a
+                dictionary containing various model metadata, such as the number of
+                model parameters, the model's maximum sequence length and the size of
+                the model's vocabulary. The keys in `score_dict` are 'test' and
+                possibly 'train'.
+        """
         # Set random seeds to enforce reproducibility of the randomly initialised
         # weights
         rng = enforce_reproducibility(framework=model_config.framework)
 
-        # Load the model
         tokenizer, model = load_model(
             model_id=model_config.model_id,
             revision=model_config.revision,
@@ -194,14 +159,11 @@ class BenchmarkDataset(ABC):
             num_labels=self.dataset_config.num_labels,
             id2label=self.dataset_config.id2label,
             label2id=self.dataset_config.label2id,
-            from_flax=model_config.framework == "jax",
+            from_flax=model_config.framework == Framework.JAX,
             use_auth_token=self.benchmark_config.use_auth_token,
             cache_dir=self.benchmark_config.cache_dir,
             raise_errors=self.benchmark_config.raise_errors,
         )
-
-        # Get the metadata
-        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
@@ -213,7 +175,6 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
-        # If we are running the speed estimation benchmark then call that directly
         if self.dataset_config.task.name == "speed":
             all_scores = benchmark_speed(
                 itr=itr,
@@ -223,39 +184,18 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-            return all_scores, metadata_dict
+            return all_scores, self._get_metadata(model=model, tokenizer=tokenizer)
 
-        # Load the data collator
-        data_collator = self._load_data_collator(tokenizer)
-
-        # Load the data
-        train, val, test = self._load_data()
-
-        # Get bootstrap sample indices
-        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
-
-        # Get bootstrapped datasets
-        tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
-
-        # Set up the preprocessing parameters
-        preprocess_params = dict(
-            framework="pytorch", config=model.config, tokenizer=tokenizer
+        # Load data
+        all_data = self._load_prepared_data(
+            num_iter=num_iter,
+            rng=rng,
+            hf_model_config=model.config,
+            tokenizer=tokenizer,
         )
 
-        # Prepare the train and validation datasets
-        try:
-            prepared_train = self._preprocess_data(
-                train, split="train", **preprocess_params
-            )
-            prepared_val = self._preprocess_data(val, split="val", **preprocess_params)
-        except ValueError:
-            raise InvalidBenchmark(
-                "Preprocessing of the training and validation datasets could not be "
-                "done."
-            )
-
         # Initialise the `scores` dictionary
-        scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
+        scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
         bs: int = self.benchmark_config.batch_size
         ga: int = 32 // bs
@@ -277,24 +217,14 @@ class BenchmarkDataset(ABC):
                 clear_memory()
 
             while True:
-                # Get the boostrapped dataset for this iteration
-                test = tests[idx]
-
-                # Prepare the test dataset
-                try:
-                    prepared_test = self._preprocess_data(
-                        test, split="test", **preprocess_params
-                    )
-                except ValueError:
-                    raise InvalidBenchmark(
-                        "Preprocessing of the test dataset could not be done."
-                    )
+                test = all_data["tests"][idx]
+                prepared_test = all_data["prepared_tests"][idx]
+                assert isinstance(test, Dataset) and isinstance(prepared_test, Dataset)
 
                 # Re-block terminal output, as it gets unblocked by the `transformers`
                 # package before training
                 block_terminal_output()
 
-                # Get the training arguments
                 training_args = self._get_training_args(iteration_idx=idx)
 
                 # Set the correct batch size and gradient accumulation
@@ -305,12 +235,12 @@ class BenchmarkDataset(ABC):
                 itr_scores = self._benchmark_single_iteration(
                     iteration_idx=idx,
                     model_config=model_config,
-                    train=train,
-                    prepared_train=prepared_train,
-                    prepared_val=prepared_val,
+                    train=all_data["train"],
+                    prepared_train=all_data["prepared_train"],
+                    prepared_val=all_data["prepared_val"],
                     test=test,
                     prepared_test=prepared_test,
-                    data_collator=data_collator,
+                    data_collator=self._load_data_collator(tokenizer),
                     training_args=training_args,
                     tokenizer=tokenizer if model_already_initialized else None,
                     model=model if model_already_initialized else None,
@@ -348,18 +278,11 @@ class BenchmarkDataset(ABC):
                 scores["train"].append(itr_scores["train"])
             scores["test"].append(itr_scores["test"])
 
-        all_scores = log_scores(
-            dataset_name=self.dataset_config.pretty_name,
-            metric_configs=self.dataset_config.task.metrics,
-            scores=scores,
-            model_id=model_config.model_id,
-        )
-
-        return all_scores, metadata_dict
+        return scores, self._get_metadata(model=model, tokenizer=tokenizer)
 
     def _get_metadata(
         self, model: PreTrainedModel, tokenizer: PreTrainedTokenizer
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         # Store the number of parameters in the model, the maximum sequence length and
         # the size of the model's vocabulary
         num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -475,20 +398,62 @@ class BenchmarkDataset(ABC):
 
         return train, val, test
 
+    def _load_prepared_data(
+        self,
+        num_iter: int,
+        rng: np.random.Generator,
+        hf_model_config: PretrainedConfig,
+        tokenizer: PreTrainedTokenizer,
+    ) -> dict[str, Dataset | list[Dataset]]:
+        # Load data and build bootstrapped test sets
+        train, val, test = self._load_data()
+        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
+        tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
+
+        # Set up the preprocessing parameters
+        preprocess_params = dict(
+            framework=Framework.PYTORCH, config=hf_model_config, tokenizer=tokenizer
+        )
+
+        # Prepare the train and validation datasets
+        try:
+            prepared_train = self._preprocess_data(
+                train, split="train", **preprocess_params
+            )
+            prepared_val = self._preprocess_data(val, split="val", **preprocess_params)
+            prepared_tests = [
+                self._preprocess_data(test, split="test", **preprocess_params)
+                for test in tests
+            ]
+        except ValueError:
+            raise InvalidBenchmark(
+                "Preprocessing of the training and validation datasets could not be "
+                "done."
+            )
+
+        return dict(
+            train=train,
+            val=val,
+            test=test,
+            prepared_train=prepared_train,
+            prepared_val=prepared_val,
+            prepared_tests=prepared_tests,
+        )
+
     def _benchmark_single_iteration(
         self,
         iteration_idx: int,
         model_config: ModelConfig,
         train: Dataset,
+        test: Dataset,
         prepared_train: Dataset,
         prepared_val: Dataset,
-        test: Dataset,
         prepared_test: Dataset,
         data_collator: DataCollator,
         training_args: TrainingArguments,
-        tokenizer: Optional[PreTrainedTokenizer] = None,
-        model: Optional[PreTrainedModel] = None,
-    ) -> Union[Dict[str, Dict[str, float]], Exception]:
+        tokenizer: PreTrainedTokenizer | None = None,
+        model: PreTrainedModel | None = None,
+    ) -> dict[str, dict[str, float]] | Exception:
         """Run a single iteration of a benchmark.
 
         Args:
@@ -498,12 +463,12 @@ class BenchmarkDataset(ABC):
                 The model configuration.
             train (Dataset):
                 The original training dataset.
+            test (Dataset):
+                The original test dataset.
             prepared_train (Dataset):
                 The prepared training dataset.
             prepared_val (Dataset):
                 The prepared validation dataset.
-            test (Dataset):
-                The original test dataset.
             prepared_test (Dataset):
                 The prepared test dataset.
             data_collator (DataCollator):
@@ -523,7 +488,7 @@ class BenchmarkDataset(ABC):
                 `train` and `test`. If an exception is raised, then the exception is
                 returned.
         """
-        scores: Dict[str, Dict[str, float]] = dict()
+        scores: dict[str, dict[str, float]] = dict()
         try:
             # Set random seeds to enforce reproducibility of the randomly initialised
             # weights
@@ -540,7 +505,7 @@ class BenchmarkDataset(ABC):
                     num_labels=self.dataset_config.num_labels,
                     label2id=self.dataset_config.label2id,
                     id2label=self.dataset_config.id2label,
-                    from_flax=model_config.framework == "jax",
+                    from_flax=model_config.framework == Framework.JAX,
                     use_auth_token=self.benchmark_config.use_auth_token,
                     cache_dir=self.benchmark_config.cache_dir,
                     raise_errors=self.benchmark_config.raise_errors,
@@ -636,7 +601,7 @@ class BenchmarkDataset(ABC):
         tokenizer: PreTrainedTokenizer,
         data_collator: DataCollator,
         compute_metrics: Callable,
-        callbacks: List[TrainerCallback],
+        callbacks: list[TrainerCallback],
     ) -> Trainer:
         """Get a Trainer object.
 
@@ -679,7 +644,7 @@ class BenchmarkDataset(ABC):
         dataset: Dataset,
         prepared_dataset: Dataset,
         metric_key_prefix: str,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Evaluate a dataset.
 
         Args:
@@ -732,7 +697,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _load_data_collator(
-        self, tokenizer: Optional[PreTrainedTokenizer] = None
+        self, tokenizer: PreTrainedTokenizer | None = None
     ) -> DataCollator:
         """Load the data collator used to prepare samples during finetuning.
 
@@ -749,9 +714,9 @@ class BenchmarkDataset(ABC):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: Tuple[Sequence, Sequence],
-        id2label: Optional[Sequence[str]] = None,
-    ) -> Dict[str, float]:
+        model_outputs_and_labels: tuple[list, list],
+        id2label: list[str] | None = None,
+    ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
         Args:
@@ -774,10 +739,10 @@ class BenchmarkDataset(ABC):
         else:
             predictions = model_outputs
 
-        results: Dict[str, float] = dict()
+        results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
-            score_dict: Union[None, Dict[str, float]] = metric.compute(
+            score_dict: dict[str, float] | None = metric.compute(
                 predictions=predictions,
                 references=labels,
                 **cfg.compute_kwargs,
