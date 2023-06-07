@@ -23,6 +23,7 @@ from transformers import logging as tf_logging
 from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .config import Language
+from .enums import Framework
 from .exceptions import InvalidBenchmark
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 
@@ -41,11 +42,11 @@ def clear_memory():
         torch.mps.empty_cache()
 
 
-def enforce_reproducibility(framework: str, seed: int = 4242):
+def enforce_reproducibility(framework: Framework, seed: int = 4242):
     """Ensures reproducibility of experiments.
 
     Args:
-        framework (str):
+        framework (Framework):
             The framework used for the benchmarking.
         seed (int):
             Seed for the random number generator.
@@ -53,7 +54,7 @@ def enforce_reproducibility(framework: str, seed: int = 4242):
     random.seed(seed)
     np.random.seed(seed)
     rng = np.random.default_rng(seed)
-    if framework in ("pytorch", "jax"):
+    if framework in (Framework.PYTORCH, Framework.JAX):
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         os.environ["CUDA_LAUNCH_BLOCKING"] = "1"

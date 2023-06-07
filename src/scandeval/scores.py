@@ -6,6 +6,7 @@ import warnings
 import numpy as np
 
 from .config import MetricConfig
+from .types import SCORE_DICT
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ def log_scores(
     metric_configs: list[MetricConfig],
     scores: dict[str, list[dict[str, float]]],
     model_id: str,
-) -> dict[str, dict[str, float] | dict[str, list[dict[str, float]]]]:
+) -> SCORE_DICT:
     """Log the scores.
 
     Args:

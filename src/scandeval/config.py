@@ -181,7 +181,7 @@ class ModelConfig:
             The ID of the model.
         revision (str):
             The revision of the model.
-        framework (str):
+        framework (Framework):
             The framework of the model.
         task (str):
             The task that the model was trained on.
@@ -191,6 +191,6 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: str
+    framework: Framework
     task: str
     languages: list[Language]
