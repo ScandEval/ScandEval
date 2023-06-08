@@ -103,6 +103,9 @@ class BenchmarkConfig:
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token. Defaults to False.
+        openai_api_key (str or None):
+            The API key for the OpenAI API. If None then OpenAI models will not be
+            benchmarked.
         progress_bar (bool):
             Whether to show a progress bar.
         save_results (bool):
@@ -122,6 +125,7 @@ class BenchmarkConfig:
     cache_dir: str
     evaluate_train: bool
     use_auth_token: bool | str
+    openai_api_key: str | None
     progress_bar: bool
     save_results: bool
     verbose: bool

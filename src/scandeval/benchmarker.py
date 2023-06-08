@@ -32,18 +32,18 @@ class Benchmarker:
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
             'all' if all languages (also non-Scandinavian) should be considered.
             Defaults to ['da', 'sv', 'no'].
-        model_language (None, str or sequence of str, optional):
+        model_language (None, str or list of str, optional):
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages. Defaults
             to None.
-        model_framework (None, str or sequence of str, optional):
+        model_framework (None, str or list of str, optional):
             The model framework to use. Only relevant if `model-id` refers to a local
             path. Otherwise, the framework will be set automatically. Defaults to None.
-        dataset_language (None, str or sequence of str, optional):
+        dataset_language (None, str or list of str, optional):
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
             Defaults to None.
-        dataset_task (str or sequence of str, optional):
+        dataset_task (str or list of str, optional):
             The tasks to include for dataset. If "all" then datasets will not be
             filtered based on their task. Defaults to "all".
         batch_size (int, optional):
@@ -60,6 +60,9 @@ class Benchmarker:
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token. Defaults to False.
+        openai_api_key (str or None, optional):
+            The OpenAI API key to use for authentication. If None, then no OpenAI
+            models will be evaluated. Defaults to None.
         ignore_duplicates (bool, optional):
             Whether to skip evaluation of models which have already been evaluated,
             with scores lying in the 'scandeval_benchmark_results.jsonl' file. Defaults
@@ -84,6 +87,7 @@ class Benchmarker:
         save_results: bool = False,
         language: str | list[str] = ["da", "sv", "no"],
         model_language: str | list[str] | None = None,
+        model_framework: Framework | None = None,
         dataset_language: str | list[str] | None = None,
         dataset_task: str | list[str] | None = None,
         batch_size: int = 32,
@@ -91,9 +95,9 @@ class Benchmarker:
         raise_errors: bool = False,
         cache_dir: str = ".scandeval_cache",
         use_auth_token: bool | str = False,
+        openai_api_key: str | None = None,
         ignore_duplicates: bool = True,
         verbose: bool = False,
-        model_framework: Framework | None = None,
     ) -> None:
         # Build benchmark configuration
         self.benchmark_config = build_benchmark_config(
@@ -106,6 +110,7 @@ class Benchmarker:
             cache_dir=cache_dir,
             evaluate_train=evaluate_train,
             use_auth_token=use_auth_token,
+            openai_api_key=openai_api_key,
             progress_bar=progress_bar,
             save_results=save_results,
             verbose=verbose,
@@ -241,7 +246,7 @@ class Benchmarker:
                 will be retrieved.
 
         Returns:
-            sequence of str:
+            list of str:
                 The prepared list of model IDs.
         """
         model_ids: list[str]
@@ -282,7 +287,7 @@ class Benchmarker:
                 benchmarked. Defaults to None.
 
         Returns:
-            sequence of str:
+            list of str:
                 The prepared list of model IDs.
         """
         if dataset is None:
@@ -381,14 +386,11 @@ class Benchmarker:
     ) -> list[dict[str, str | int | list[str] | SCORE_DICT]]:
         return self.benchmark(*args, **kwargs)
 
-    def _get_model_ids(
-        self,
-        languages: list[Language],
-    ) -> list[str]:
+    def _get_model_ids(self, languages: list[Language]) -> list[str]:
         """Get list of model IDs from the Hugging Face Hub.
 
         Args:
-            languages (sequence of Language objects):
+            languages (list of Language objects):
                 The languages of the models to fetch.
 
         Returns:

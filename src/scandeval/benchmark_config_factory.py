@@ -16,6 +16,7 @@ def build_benchmark_config(
     cache_dir: str,
     evaluate_train: bool,
     use_auth_token: bool | str,
+    openai_api_key: str | None,
     progress_bar: bool,
     save_results: bool,
     verbose: bool,
@@ -24,43 +25,45 @@ def build_benchmark_config(
     """Create a benchmark configuration.
 
     Args:
-        language (str or list of str, optional):
+        language (str or list of str):
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
             to 'all' if all languages (also non-Scandinavian) should be considered.
-        model_language (None, str or list of str, optional):
+        model_language (str, list of str, or None):
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages.
-        dataset_language (None, str or list of str, optional):
+        dataset_language (str, list of str, or None):
             The language codes of the languages to include for datasets. If
             specified then this overrides the `language` parameter for dataset
             languages.
-        dataset_task (str or list of str, optional):
-            The tasks to include for dataset. If "all" then datasets will not be
+        dataset_task (str, list of str, or None):
+            The tasks to include for dataset. If None then datasets will not be
             filtered based on their task.
         batch_size (int):
             The batch size to use.
-        raise_errors (bool, optional):
+        raise_errors (bool):
             Whether to raise errore instead of skipping them.
-        cache_dir (str, optional):
+        cache_dir (str):
             Directory to store cached models.
-        evaluate_train (bool, optional):
+        evaluate_train (bool):
             Whether to evaluate the training set as well.
-        use_auth_token (bool or str, optional):
+        use_auth_token (bool or str):
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token. Defaults to False.
-        progress_bar (bool, optional):
+            specified then it will be used as the token.
+        openai_api_key (str or None):
+            The OpenAI API key to use for authentication. If None, then None will be
+            returned.
+        progress_bar (bool):
             Whether progress bars should be shown.
-        save_results (bool, optional):
-            Whether to save the benchmark results to
-            'scandeval_benchmark_results.json'.
-        verbose (bool, optional):
+        save_results (bool):
+            Whether to save the benchmark results to local JSON file.
+        verbose (bool):
             Whether to output additional output.
-        model_framework (Framework, optional):
-            The model framework to use. Only relevant if `model-id` refers to a local
-            path. Otherwise, the framework will be set automatically.
+        model_framework (Framework or None):
+            The model framework to use. If None then the framework will be set
+            automatically. Only relevant if `model_id` refers to a local model.
     """
     # Prepare the languages
     languages = prepare_languages(language=language)
@@ -90,6 +93,7 @@ def build_benchmark_config(
         cache_dir=cache_dir,
         evaluate_train=evaluate_train,
         use_auth_token=use_auth_token,
+        openai_api_key=openai_api_key,
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose,
