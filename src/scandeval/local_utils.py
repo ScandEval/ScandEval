@@ -33,7 +33,7 @@ def get_local_model_config(
             be recognized automatically and it has not explicitly been provided using
             --framework.
     """
-    framework = benchmark_config.framework
+    framework: Framework | str | None = benchmark_config.framework
     if framework is None:
         try:
             exts = {f.suffix for f in Path(model_id).iterdir()}
