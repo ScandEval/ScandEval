@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 from termcolor import colored
 
-from .benchmarker import Benchmarker  # noqa
+from .benchmarker import Benchmarker
 from .utils import block_terminal_output
 
 # Fetches the version of the package as defined in pyproject.toml

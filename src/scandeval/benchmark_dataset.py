@@ -80,14 +80,15 @@ class BenchmarkDataset(ABC):
         self.benchmark_config = benchmark_config
         self._metrics = {
             metric_cfg.name: evaluate.load(
-                metric_cfg.huggingface_id, cache_dir=self.benchmark_config.cache_dir
+                path=metric_cfg.huggingface_id,
+                cache_dir=self.benchmark_config.cache_dir,
             )
             if metric_cfg.huggingface_id != ""
             else None
             for metric_cfg in dataset_config.task.metrics
         }
 
-    def benchmark(  # noqa
+    def benchmark(
         self,
         model_id: str,
     ) -> tuple[SCORE_DICT, dict[str, int]]:
