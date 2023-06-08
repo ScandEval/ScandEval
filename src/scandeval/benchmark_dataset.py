@@ -405,6 +405,23 @@ class BenchmarkDataset(ABC):
         hf_model_config: PretrainedConfig,
         tokenizer: PreTrainedTokenizer,
     ) -> dict[str, Dataset | list[Dataset]]:
+        """Load the data and prepare it for training.
+
+        Args:
+            num_iter (int):
+                The number of iterations to run.
+            rng (np.random.Generator):
+                The random number generator.
+            hf_model_config (PretrainedConfig):
+                The Hugging Face model configuration.
+            tokenizer (PreTrainedTokenizer):
+                The Hugging Face tokenizer.
+
+        Returns:
+            dict[str, Dataset or list[Dataset]]:
+                The prepared datasets, with keys "train", "prepared_train", "val",
+                "prepared_val", "tests" and "prepared_tests".
+        """
         # Load data and build bootstrapped test sets
         train, val, test = self._load_data()
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
@@ -434,7 +451,7 @@ class BenchmarkDataset(ABC):
         return dict(
             train=train,
             val=val,
-            test=test,
+            tests=tests,
             prepared_train=prepared_train,
             prepared_val=prepared_val,
             prepared_tests=prepared_tests,
