@@ -48,10 +48,10 @@ install: ## Install dependencies
 	@$(MAKE) setup-git
 
 setup-poetry:
-	@poetry env use python3.10 && poetry install
+	@poetry env use python3.11 && poetry install
 
 setup-environment-variables:
-	@poetry run python3.10 -m src.scripts.fix_dot_env_file
+	@poetry run python -m src.scripts.fix_dot_env_file
 
 setup-git:
 	@git init
