@@ -7,6 +7,7 @@ import click
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
 from .dataset_tasks import get_all_dataset_tasks
+from .enums import Framework
 from .languages import get_all_languages
 
 
@@ -58,11 +59,11 @@ from .languages import get_all_languages
     will use the `language` value.""",
 )
 @click.option(
-    "--model-framework",
-    "-mf",
+    "--framework",
+    "-f",
     default=None,
     show_default=True,
-    type=click.Choice(["pytorch", "jax"]),
+    type=click.Choice([framework.lower() for framework in Framework.__members__]),
     help="""The model framework to use. Only relevant if `model-id` refers to a local
     path. Otherwise, the framework will be set automatically.""",
 )
@@ -173,7 +174,7 @@ def benchmark(
     auth_token: str,
     ignore_duplicates: bool,
     verbose: bool = False,
-    model_framework: str = None,
+    framework: str | None = None,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -202,7 +203,7 @@ def benchmark(
         use_auth_token=auth,
         ignore_duplicates=ignore_duplicates,
         cache_dir=cache_dir,
-        model_framework=model_framework,
+        framework=framework,
     )
 
     # Perform the benchmark evaluation

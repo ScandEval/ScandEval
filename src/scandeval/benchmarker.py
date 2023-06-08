@@ -36,7 +36,7 @@ class Benchmarker:
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages. Defaults
             to None.
-        model_framework (None, str or list of str, optional):
+        framework (None, str or list of str, optional):
             The model framework to use. Only relevant if `model-id` refers to a local
             path. Otherwise, the framework will be set automatically. Defaults to None.
         dataset_language (None, str or list of str, optional):
@@ -87,7 +87,7 @@ class Benchmarker:
         save_results: bool = False,
         language: str | list[str] = ["da", "sv", "no"],
         model_language: str | list[str] | None = None,
-        model_framework: Framework | None = None,
+        framework: Framework | str | None = None,
         dataset_language: str | list[str] | None = None,
         dataset_task: str | list[str] | None = None,
         batch_size: int = 32,
@@ -114,7 +114,7 @@ class Benchmarker:
             progress_bar=progress_bar,
             save_results=save_results,
             verbose=verbose,
-            model_framework=model_framework,
+            framework=framework,
         )
 
         # Set attributes from arguments

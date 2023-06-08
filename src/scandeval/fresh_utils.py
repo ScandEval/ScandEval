@@ -1,6 +1,7 @@
 """Utility functions related to fresh models."""
 
 from .config import ModelConfig
+from .enums import Framework
 
 
 def get_fresh_model_config(model_id: str) -> ModelConfig:
@@ -16,7 +17,7 @@ def get_fresh_model_config(model_id: str) -> ModelConfig:
     """
     return ModelConfig(
         model_id=model_id,
-        framework="pytorch",
+        framework=Framework.PYTORCH,
         task="fill-mask",
         languages=list(),
         revision="main",

@@ -20,7 +20,7 @@ def build_benchmark_config(
     progress_bar: bool,
     save_results: bool,
     verbose: bool,
-    model_framework: Framework | None,
+    framework: Framework | str | None,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -61,7 +61,7 @@ def build_benchmark_config(
             Whether to save the benchmark results to local JSON file.
         verbose (bool):
             Whether to output additional output.
-        model_framework (Framework or None):
+        framework (Framework or None):
             The model framework to use. If None then the framework will be set
             automatically. Only relevant if `model_id` refers to a local model.
     """
@@ -97,7 +97,7 @@ def build_benchmark_config(
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose,
-        model_framework=model_framework,
+        framework=framework,
     )
 
 

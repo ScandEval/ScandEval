@@ -31,9 +31,9 @@ def get_local_model_config(
         OSError:
             If the --raise-errors option has been set to True and the framework cannot
             be recognized automatically and it has not explicitly been provided using
-            --model-framework.
+            --framework.
     """
-    framework = benchmark_config.model_framework
+    framework = benchmark_config.framework
     if framework is None:
         try:
             exts = {f.suffix for f in Path(model_id).iterdir()}
@@ -53,7 +53,7 @@ def get_local_model_config(
     if framework is None:
         logger.info(
             f"Assuming 'pytorch' as the framework for local model `{model_id}`! "
-            "If this is in error, please use the --model-framework option to override."
+            "If this is in error, please use the --framework option to override."
         )
         framework = Framework.PYTORCH
 

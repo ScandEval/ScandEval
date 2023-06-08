@@ -83,7 +83,7 @@ class BenchmarkConfig:
     Attributes:
         model_languages (list of Language objects):
             The languages of the models to benchmark.
-        model_framework (Framework or None, optional):
+        framework (Framework or None, optional):
             The framework of the models to benchmark. If None then the framework will
             be inferred. Defaults to None.
         dataset_languages (list of Language objects):
@@ -130,7 +130,7 @@ class BenchmarkConfig:
     save_results: bool
     verbose: bool
     testing: bool = False
-    model_framework: Framework | None = None
+    framework: Framework | str | None = None
 
 
 @dataclass
@@ -195,6 +195,6 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: Framework
+    framework: Framework | str
     task: str
     languages: list[Language]

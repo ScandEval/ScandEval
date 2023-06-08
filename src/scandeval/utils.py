@@ -42,7 +42,7 @@ def clear_memory():
         torch.mps.empty_cache()
 
 
-def enforce_reproducibility(framework: Framework, seed: int = 4242):
+def enforce_reproducibility(framework: Framework | str, seed: int = 4242):
     """Ensures reproducibility of experiments.
 
     Args:
