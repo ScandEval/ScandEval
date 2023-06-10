@@ -127,6 +127,8 @@ class BenchmarkDataset(ABC):
             benchmark_config=self.benchmark_config,
         )
 
+        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
+
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
 
@@ -236,8 +238,6 @@ class BenchmarkDataset(ABC):
                 if "train" in itr_scores:
                     scores["train"].append(itr_scores["train"])
                 scores["test"].append(itr_scores["test"])
-
-        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
         all_scores = log_scores(
             dataset_name=self.dataset_config.pretty_name,
