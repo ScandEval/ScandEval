@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from .enums import Framework
+from .enums import Framework, ModelType
 
 
 @dataclass
@@ -191,6 +191,8 @@ class ModelConfig:
             The task that the model was trained on.
         languages (sequence of Language objects):
             The languages of the model.
+        model_type (ModelType):
+            The type of the model.
     """
 
     model_id: str
@@ -198,3 +200,4 @@ class ModelConfig:
     framework: Framework | str
     task: str
     languages: list[Language]
+    model_type: ModelType | str

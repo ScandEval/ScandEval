@@ -21,7 +21,7 @@ from transformers import (
 from scandeval.exceptions import InvalidBenchmark
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
-from ..enums import Framework
+from ..enums import Framework, ModelType
 from ..utils import block_terminal_output
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
@@ -83,6 +83,7 @@ class FreshModelSetup:
             task="fill-mask",
             languages=list(),
             revision="main",
+            model_type=ModelType.FRESH,
         )
 
     def load_model(

@@ -38,13 +38,30 @@ class Framework(AutoStrEnum):
             PyTorch framework.
         JAX:
             JAX framework.
-        SPACY:
-            spaCy framework.
-        OPENAI:
-            OpenAI framework.
+        API:
+            Accessible via an API.
     """
 
     PYTORCH = auto()
     JAX = auto()
-    SPACY = auto()
+    API = auto()
+
+
+class ModelType(AutoStrEnum):
+    """The type of a model.
+
+    Attributes:
+        FRESH:
+            Randomly initialised Hugging Face model.
+        HF:
+            Model from the Hugging Face Hub.
+        LOCAL:
+            Locally stored Hugging Face model.
+        OPENAI:
+            Model from OpenAI.
+    """
+
+    FRESH = auto()
+    HF = auto()
+    LOCAL = auto()
     OPENAI = auto()

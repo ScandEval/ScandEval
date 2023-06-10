@@ -6,7 +6,7 @@ from pathlib import Path
 from transformers import AutoConfig, PreTrainedModel, PreTrainedTokenizer
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
-from ..enums import Framework
+from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark
 from .hf import HFModelSetup
 
@@ -102,6 +102,7 @@ class LocalModelSetup:
             framework=framework,
             task="fill-mask",
             languages=list(),
+            model_type=ModelType.LOCAL,
         )
         return model_config
 

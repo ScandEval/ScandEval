@@ -17,7 +17,7 @@ from transformers import (
 )
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
-from ..enums import Framework
+from ..enums import Framework, ModelType
 from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
 from ..languages import get_all_languages
 from ..norbert import load_norbert_model
@@ -173,6 +173,7 @@ class HFModelSetup:
                     language_mapping[tag] for tag in tags if tag in language_codes
                 ],
                 revision=revision,
+                model_type=ModelType.HF,
             )
 
         # If fetching from the Hugging Face Hub failed then throw a reasonable

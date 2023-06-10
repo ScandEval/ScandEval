@@ -7,7 +7,7 @@ import openai
 from transformers import PreTrainedModel, PreTrainedTokenizer
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
-from ..enums import Framework
+from ..enums import Framework, ModelType
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class OpenAIModelSetup:
                 logger.warning(
                     "It looks like you're trying to use an OpenAI model, but you "
                     "haven't set your OpenAI API key. Please set your OpenAI API key "
-                    "using the environment variable OPENAI_API_KEY, or by passing it "
+                    "using the environment variable `OPENAI_API_KEY`, or by passing it "
                     "as the `--openai-api-key` argument."
                 )
             else:
@@ -121,7 +121,7 @@ class OpenAIModelSetup:
                     "It doesn't seem like the model exists on OpenAI, but we can't be "
                     "sure because you haven't set your OpenAI API key. If you intended "
                     "to use an OpenAI model, please set your OpenAI API key using the "
-                    "environment variable OPENAI_API_KEY, or by passing it as the "
+                    "environment variable `OPENAI_API_KEY`, or by passing it as the "
                     "`--openai-api-key` argument."
                 )
             return model_exists
@@ -140,9 +140,10 @@ class OpenAIModelSetup:
         return ModelConfig(
             model_id=model_id,
             revision="main",
-            framework=Framework.OPENAI,
+            framework=Framework.API,
             task="text-generation",
             languages=list(),
+            model_type=ModelType.OPENAI,
         )
 
     def load_model(
