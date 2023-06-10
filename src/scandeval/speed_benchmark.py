@@ -101,17 +101,9 @@ def benchmark_speed_single_iteration(
         # Reinitialise a new model
         if tokenizer is None or model is None:
             tokenizer, model = load_model(
-                model_id=model_config.model_id,
-                revision=model_config.revision,
-                supertask=dataset_config.task.supertask,
-                language=dataset_config.languages[0].code,
-                num_labels=dataset_config.num_labels,
-                label2id=dataset_config.label2id,
-                id2label=dataset_config.id2label,
-                from_flax=model_config.framework == "jax",
-                use_auth_token=benchmark_config.use_auth_token,
-                cache_dir=benchmark_config.cache_dir,
-                raise_errors=benchmark_config.raise_errors,
+                model_config=model_config,
+                dataset_config=dataset_config,
+                benchmark_config=benchmark_config,
             )
 
         # Ensure that the model is on the CPU

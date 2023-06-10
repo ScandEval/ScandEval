@@ -1,7 +1,7 @@
-"""Utility functions related to fresh models."""
+"""Functions related to configurations of fresh Hugging Face models."""
 
-from .config import ModelConfig
-from .enums import Framework
+from ..config import ModelConfig
+from ..enums import Framework
 
 
 def get_fresh_model_config(model_id: str) -> ModelConfig:

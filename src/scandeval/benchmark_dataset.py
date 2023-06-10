@@ -119,51 +119,12 @@ class BenchmarkDataset(ABC):
             model_id=model_id, benchmark_config=self.benchmark_config
         )
 
-        scores, metadata_dict = self._benchmark_huggingface(model_config=model_config)
-
-        all_scores = log_scores(
-            dataset_name=self.dataset_config.pretty_name,
-            metric_configs=self.dataset_config.task.metrics,
-            scores=scores,
-            model_id=model_config.model_id,
-        )
-
-        return all_scores, metadata_dict
-
-    def _benchmark_huggingface(
-        self, model_config: ModelConfig
-    ) -> tuple[dict[str, list[dict[str, float]]], dict[str, int]]:
-        """Benchmark a model using the Hugging Face `transformers` package.
-
-        Args:
-            model_config (ModelConfig):
-                The configuration of the model to benchmark.
-
-        Returns:
-            tuple of dicts:
-                A pair (score_dict, metadata_dict), with `score_dict` being a
-                dictionary containing the scores, and `metadata_dict` being a
-                dictionary containing various model metadata, such as the number of
-                model parameters, the model's maximum sequence length and the size of
-                the model's vocabulary. The keys in `score_dict` are 'test' and
-                possibly 'train'.
-        """
-        # Set random seeds to enforce reproducibility of the randomly initialised
-        # weights
         rng = enforce_reproducibility(framework=model_config.framework)
 
         tokenizer, model = load_model(
-            model_id=model_config.model_id,
-            revision=model_config.revision,
-            supertask=self.dataset_config.task.supertask,
-            language=self.dataset_config.languages[0].code,
-            num_labels=self.dataset_config.num_labels,
-            id2label=self.dataset_config.id2label,
-            label2id=self.dataset_config.label2id,
-            from_flax=model_config.framework == Framework.JAX,
-            use_auth_token=self.benchmark_config.use_auth_token,
-            cache_dir=self.benchmark_config.cache_dir,
-            raise_errors=self.benchmark_config.raise_errors,
+            model_config=model_config,
+            dataset_config=self.dataset_config,
+            benchmark_config=self.benchmark_config,
         )
 
         # Set variable with number of iterations
@@ -176,8 +137,10 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
+        scores: dict[str, list[dict[str, float]]] = defaultdict(list)
+
         if self.dataset_config.task.name == "speed":
-            all_scores = benchmark_speed(
+            scores = benchmark_speed(
                 itr=itr,
                 tokenizer=tokenizer,
                 model=model,
@@ -185,85 +148,23 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-            return all_scores, self._get_metadata(model=model, tokenizer=tokenizer)
+        else:
+            all_data = self._load_prepared_data(
+                num_iter=num_iter,
+                rng=rng,
+                hf_model_config=model.config,
+                tokenizer=tokenizer,
+            )
 
-        # Load data
-        all_data = self._load_prepared_data(
-            num_iter=num_iter,
-            rng=rng,
-            hf_model_config=model.config,
-            tokenizer=tokenizer,
-        )
+            bs: int = self.benchmark_config.batch_size
+            ga: int = 32 // bs
+            for idx in itr:
+                # Set variable that tracks whether we need to initialize new models in
+                # the `benchmark_single_iteration` call
+                model_already_initialized = idx == 0
 
-        # Initialise the `scores` dictionary
-        scores: dict[str, list[dict[str, float]]] = defaultdict(list)
-
-        bs: int = self.benchmark_config.batch_size
-        ga: int = 32 // bs
-        for idx in itr:
-            # Set variable that tracks whether we need to initialize new models in the
-            # `_benchmark_single_iteration` call
-            model_already_initialized = idx == 0
-
-            # Clear memory after first iteration
-            if not model_already_initialized:
-                try:
-                    del model
-                except UnboundLocalError:
-                    pass
-                try:
-                    del tokenizer
-                except UnboundLocalError:
-                    pass
-                clear_memory()
-
-            while True:
-                test = all_data["tests"][idx]
-                prepared_test = all_data["prepared_tests"][idx]
-                assert isinstance(test, Dataset) and isinstance(prepared_test, Dataset)
-
-                # Re-block terminal output, as it gets unblocked by the `transformers`
-                # package before training
-                block_terminal_output()
-
-                training_args = self._get_training_args(iteration_idx=idx)
-
-                # Set the correct batch size and gradient accumulation
-                training_args.per_device_train_batch_size = bs
-                training_args.per_device_eval_batch_size = bs
-                training_args.gradient_accumulation_steps = ga
-
-                itr_scores = self._benchmark_single_iteration(
-                    iteration_idx=idx,
-                    model_config=model_config,
-                    train=all_data["train"],
-                    prepared_train=all_data["prepared_train"],
-                    prepared_val=all_data["prepared_val"],
-                    test=test,
-                    prepared_test=prepared_test,
-                    data_collator=self._load_data_collator(tokenizer),
-                    training_args=training_args,
-                    tokenizer=tokenizer if model_already_initialized else None,
-                    model=model if model_already_initialized else None,
-                )
-
-                # If the iteration was successful then break the loop
-                if isinstance(itr_scores, dict):
-                    break
-
-                # Otherwise we encountered an error, so we have to deal with it and try
-                # again
-                else:
-                    bs = training_args.per_device_train_batch_size
-                    ga = training_args.gradient_accumulation_steps
-
-                    bs, ga = handle_error(
-                        e=itr_scores,
-                        per_device_train_batch_size=bs,
-                        gradient_accumulation_steps=ga,
-                    )
-
-                    # Clear memory, to avoid memory issues
+                # Clear memory after first iteration
+                if not model_already_initialized:
                     try:
                         del model
                     except UnboundLocalError:
@@ -273,13 +174,80 @@ class BenchmarkDataset(ABC):
                     except UnboundLocalError:
                         pass
                     clear_memory()
-                    model_already_initialized = False
 
-            if "train" in itr_scores:
-                scores["train"].append(itr_scores["train"])
-            scores["test"].append(itr_scores["test"])
+                while True:
+                    test = all_data["tests"][idx]
+                    prepared_test = all_data["prepared_tests"][idx]
+                    assert isinstance(test, Dataset)
+                    assert isinstance(prepared_test, Dataset)
 
-        return scores, self._get_metadata(model=model, tokenizer=tokenizer)
+                    # Re-block terminal output, as it gets unblocked by the
+                    # `transformers` package before training
+                    block_terminal_output()
+
+                    training_args = self._get_training_args(iteration_idx=idx)
+
+                    # Set the correct batch size and gradient accumulation
+                    training_args.per_device_train_batch_size = bs
+                    training_args.per_device_eval_batch_size = bs
+                    training_args.gradient_accumulation_steps = ga
+
+                    itr_scores = self._benchmark_single_iteration(
+                        iteration_idx=idx,
+                        model_config=model_config,
+                        train=all_data["train"],
+                        prepared_train=all_data["prepared_train"],
+                        prepared_val=all_data["prepared_val"],
+                        test=test,
+                        prepared_test=prepared_test,
+                        data_collator=self._load_data_collator(tokenizer),
+                        training_args=training_args,
+                        tokenizer=tokenizer if model_already_initialized else None,
+                        model=model if model_already_initialized else None,
+                    )
+
+                    # If the iteration was successful then break the loop
+                    if isinstance(itr_scores, dict):
+                        break
+
+                    # Otherwise we encountered an error, so we have to deal with it and
+                    # try again
+                    else:
+                        bs = training_args.per_device_train_batch_size
+                        ga = training_args.gradient_accumulation_steps
+
+                        bs, ga = handle_error(
+                            e=itr_scores,
+                            per_device_train_batch_size=bs,
+                            gradient_accumulation_steps=ga,
+                        )
+
+                        # Clear memory, to avoid memory issues
+                        try:
+                            del model
+                        except UnboundLocalError:
+                            pass
+                        try:
+                            del tokenizer
+                        except UnboundLocalError:
+                            pass
+                        clear_memory()
+                        model_already_initialized = False
+
+                if "train" in itr_scores:
+                    scores["train"].append(itr_scores["train"])
+                scores["test"].append(itr_scores["test"])
+
+        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
+
+        all_scores = log_scores(
+            dataset_name=self.dataset_config.pretty_name,
+            metric_configs=self.dataset_config.task.metrics,
+            scores=scores,
+            model_id=model_config.model_id,
+        )
+
+        return all_scores, metadata_dict
 
     def _get_metadata(
         self, model: PreTrainedModel, tokenizer: PreTrainedTokenizer
@@ -516,17 +484,9 @@ class BenchmarkDataset(ABC):
             # Reinitialise a new model
             if tokenizer is None or model is None:
                 tokenizer, model = load_model(
-                    model_id=model_config.model_id,
-                    revision=model_config.revision,
-                    supertask=self.dataset_config.task.supertask,
-                    language=self.dataset_config.languages[0].code,
-                    num_labels=self.dataset_config.num_labels,
-                    label2id=self.dataset_config.label2id,
-                    id2label=self.dataset_config.id2label,
-                    from_flax=model_config.framework == Framework.JAX,
-                    use_auth_token=self.benchmark_config.use_auth_token,
-                    cache_dir=self.benchmark_config.cache_dir,
-                    raise_errors=self.benchmark_config.raise_errors,
+                    model_config=model_config,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=self.benchmark_config,
                 )
 
             # Initialise compute_metrics function
