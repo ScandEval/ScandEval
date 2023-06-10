@@ -2,12 +2,23 @@
 
 import logging
 import os
+from typing import Callable
 
 import openai
-from transformers import PreTrainedModel, PreTrainedTokenizer
+from torch import LongTensor, Tensor
+from transformers import (
+    GenerationConfig,
+    LogitsProcessorList,
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    StoppingCriteriaList,
+)
+from transformers.generation.streamers import BaseStreamer
+from transformers.utils import ModelOutput
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
+from .base import GenerativeModel
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +159,7 @@ class OpenAIModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[PreTrainedTokenizer, PreTrainedModel]:
+    ) -> tuple[PreTrainedTokenizer | None, PreTrainedModel | GenerativeModel]:
         """Load an OpenAI model.
 
         Args:
@@ -160,5 +171,58 @@ class OpenAIModelSetup:
         Returns:
             pair of (tokenizer, model):
                 The tokenizer and model.
+        """
+        return None, OpenAIModel(model_config=model_config)
+
+
+class OpenAIModel:
+    """An OpenAI model.
+
+    Args:
+        model_config (ModelConfig):
+            The model configuration.
+
+    Attributes:
+        model_config (ModelConfig):
+            The model configuration.
+    """
+
+    def __init__(self, model_config: ModelConfig) -> None:
+        self.model_config = model_config
+
+    def generate(
+        self,
+        generation_config: GenerationConfig | None = None,
+        logits_processor: LogitsProcessorList | None = None,
+        stopping_criteria: StoppingCriteriaList | None = None,
+        prefix_allowed_tokens_fn: Callable[[int, Tensor], list[int]] | None = None,
+        synced_gpus: bool | None = None,
+        assistant_model: PreTrainedModel | None = None,
+        streamer: BaseStreamer | None = None,
+        **model_kwargs,
+    ) -> ModelOutput | LongTensor:
+        """Generate text using the model.
+
+        Args:
+            generation_config (GenerationConfig or None, optional):
+                The generation configuration. Defaults to None.
+            logits_processor (LogitsProcessorList or None, optional):
+                The logits processor. Defaults to None.
+            stopping_criteria (StoppingCriteriaList or None, optional):
+                The stopping criteria. Defaults to None.
+            prefix_allowed_tokens_fn (Callable or None, optional):
+                The prefix allowed tokens function. Defaults to None.
+            synced_gpus (bool or None, optional):
+                Whether to synchronize the GPUs. Defaults to None.
+            assistant_model (PreTrainedModel or None, optional):
+                The assistant model. Defaults to None.
+            streamer (BaseStreamer or None, optional):
+                The streamer. Defaults to None.
+            **model_kwargs:
+                Additional model keyword arguments.
+
+        Returns:
+            ModelOutput or LongTensor:
+                The model output.
         """
         raise NotImplementedError

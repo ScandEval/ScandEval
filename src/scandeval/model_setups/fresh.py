@@ -18,11 +18,11 @@ from transformers import (
     XLMRobertaForTokenClassification,
 )
 
-from scandeval.exceptions import InvalidBenchmark
-
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
+from ..exceptions import InvalidBenchmark
 from ..utils import block_terminal_output
+from .base import GenerativeModel
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 FRESH_MODELS: list[str] = [
@@ -88,7 +88,7 @@ class FreshModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[PreTrainedTokenizer, PreTrainedModel]:
+    ) -> tuple[PreTrainedTokenizer | None, PreTrainedModel | GenerativeModel]:
         """Load a fresh model.
 
         Args:

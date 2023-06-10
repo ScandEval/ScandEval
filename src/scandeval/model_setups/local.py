@@ -8,6 +8,7 @@ from transformers import AutoConfig, PreTrainedModel, PreTrainedTokenizer
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark
+from .base import GenerativeModel
 from .hf import HFModelSetup
 
 logger = logging.getLogger(__name__)
@@ -108,7 +109,7 @@ class LocalModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[PreTrainedTokenizer, PreTrainedModel]:
+    ) -> tuple[PreTrainedTokenizer | None, PreTrainedModel | GenerativeModel]:
         """Load a local Hugging Face model.
 
         Args:
