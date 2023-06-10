@@ -31,7 +31,7 @@ from transformers.training_args import OptimizerNames, TrainingArguments
 
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .enums import Framework
+from .enums import Framework, ModelType
 from .exceptions import InvalidBenchmark
 from .model_config import get_model_config
 from .model_loading import load_model
@@ -127,7 +127,11 @@ class BenchmarkDataset(ABC):
             benchmark_config=self.benchmark_config,
         )
 
-        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
+        metadata_dict = self._get_metadata(
+            model=model,
+            tokenizer=tokenizer,
+            model_config=model_config,
+        )
 
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
@@ -150,6 +154,8 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
+        elif model_config.model_type == ModelType.OPENAI:
+            scores = dict(train=list(), test=list())  # TODO
         else:
             all_data = self._load_prepared_data(
                 num_iter=num_iter,
@@ -249,7 +255,10 @@ class BenchmarkDataset(ABC):
         return all_scores, metadata_dict
 
     def _get_metadata(
-        self, model: PreTrainedModel, tokenizer: PreTrainedTokenizer
+        self,
+        model: PreTrainedModel,
+        tokenizer: PreTrainedTokenizer,
+        model_config: ModelConfig,
     ) -> dict[str, int]:
         """Get metadata about the model.
 
@@ -258,22 +267,99 @@ class BenchmarkDataset(ABC):
                 The model to get metadata about.
             tokenizer (PreTrainedTokenizer):
                 The tokenizer to get metadata about.
+            model_config (ModelConfig):
+                The model configuration.
 
         Returns:
             dict[str, int]:
                 A dictionary containing metadata about the model, with the keys being
                 the metadata names and the values being the metadata values.
         """
-        # Store the number of parameters in the model, the maximum sequence length and
-        # the size of the model's vocabulary
-        num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        max_seq_length = tokenizer.model_max_length
-        if hasattr(model.config, "vocab_size"):
-            vocab_size = model.config.vocab_size
-        elif hasattr(tokenizer, "vocab_size"):
-            vocab_size = tokenizer.vocab_size
+        if model_config.model_type in [ModelType.HF, ModelType.FRESH, ModelType.LOCAL]:
+            num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            max_seq_length = tokenizer.model_max_length
+            if hasattr(model.config, "vocab_size"):
+                vocab_size = model.config.vocab_size
+            elif hasattr(tokenizer, "vocab_size"):
+                vocab_size = tokenizer.vocab_size
+            else:
+                vocab_size = -1
+
+        elif model_config.model_type == ModelType.OPENAI:
+            num_params_mapping = {
+                "ada": 350_000_000,
+                "babbage": 3_000_000_000,
+                "curie": 13_000_000_000,
+                "davinci": 175_000_000_000,
+                "text-ada-001": 350_000_000,
+                "text-babbage-001": 3_000_000_000,
+                "text-curie-001": 13_000_000_000,
+                "text-davinci-001": 175_000_000_000,
+                "text-davinci-002": 175_000_000_000,
+                "text-davinci-003": 175_000_000_000,
+                "code-cushman-001": 12_000_000_000,
+                "code-davinci-001": 175_000_000_000,
+                "code-cushman-002": 12_000_000_000,
+                "code-davinci-002": 175_000_000_000,
+                "gpt-3.5-turbo": 175_000_000_000,
+                "gpt-3.5-turbo-0301": 175_000_000_000,
+                "gpt-4": -1,
+                "gpt-4-0314": -1,
+                "gpt-4-32k": -1,
+                "gpt-4-32k-0314": -1,
+            }
+            num_params = num_params_mapping.get(model_config.model_id, -1)
+
+            max_seq_length_mapping = {
+                "ada": 2049,
+                "babbage": 2049,
+                "curie": 2049,
+                "davinci": 2049,
+                "text-ada-001": 2049,
+                "text-babbage-001": 2049,
+                "text-curie-001": 2049,
+                "text-davinci-001": 2049,
+                "text-davinci-002": 4097,
+                "text-davinci-003": 4097,
+                "code-cushman-001": 2048,
+                "code-davinci-001": 8001,
+                "code-cushman-002": 2048,
+                "code-davinci-002": 8001,
+                "gpt-3.5-turbo": 4096,
+                "gpt-3.5-turbo-0301": 4096,
+                "gpt-4": 8192,
+                "gpt-4-0314": 8192,
+                "gpt-4-32k": 32_768,
+                "gpt-4-32k-0314": 32_768,
+            }
+            max_seq_length = max_seq_length_mapping.get(model_config.model_id, -1)
+
+            vocab_size_mapping = {
+                "ada": 50_257,
+                "babbage": 50_257,
+                "curie": 50_257,
+                "davinci": 50_257,
+                "text-ada-001": 50_281,
+                "text-babbage-001": 50_281,
+                "text-curie-001": 50_281,
+                "text-davinci-001": 50_281,
+                "text-davinci-002": 50_281,
+                "text-davinci-003": 50_281,
+                "code-cushman-001": 50_281,
+                "code-davinci-001": 50_281,
+                "code-cushman-002": 50_281,
+                "code-davinci-002": 50_281,
+                "gpt-3.5-turbo": 100_256,
+                "gpt-3.5-turbo-0301": 100_256,
+                "gpt-4": 100_256,
+                "gpt-4-0314": 100_256,
+                "gpt-4-32k": 100_256,
+                "gpt-4-32k-0314": 100_256,
+            }
+            vocab_size = vocab_size_mapping.get(model_config.model_id, -1)
+
         else:
-            vocab_size = -1
+            raise ValueError(f"Unknown model type: {model_config.model_type}")
 
         # Store the metadata in a dictionary
         metadata_dict = dict(
