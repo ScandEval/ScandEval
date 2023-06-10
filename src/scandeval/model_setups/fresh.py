@@ -150,8 +150,7 @@ class FreshModelSetup:
             model = setup_model_for_question_answering(model=model)
 
         # Load the tokenizer. If the model is a subclass of a RoBERTa model then we
-        # have to add a prefix space to the tokens, by the way the model is
-        # constructed.
+        # have to add a prefix space to the tokens, by the way the model is constructed
         prefix_models = ["Roberta", "GPT", "Deberta"]
         prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
         with warnings.catch_warnings():
