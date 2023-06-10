@@ -200,7 +200,6 @@ class BenchmarkDataset(ABC):
                         prepared_val=all_data["prepared_val"],
                         test=test,
                         prepared_test=prepared_test,
-                        data_collator=self._load_data_collator(tokenizer),
                         training_args=training_args,
                         tokenizer=tokenizer if model_already_initialized else None,
                         model=model if model_already_initialized else None,
@@ -252,6 +251,19 @@ class BenchmarkDataset(ABC):
     def _get_metadata(
         self, model: PreTrainedModel, tokenizer: PreTrainedTokenizer
     ) -> dict[str, int]:
+        """Get metadata about the model.
+
+        Args:
+            model (PreTrainedModel):
+                The model to get metadata about.
+            tokenizer (PreTrainedTokenizer):
+                The tokenizer to get metadata about.
+
+        Returns:
+            dict[str, int]:
+                A dictionary containing metadata about the model, with the keys being
+                the metadata names and the values being the metadata values.
+        """
         # Store the number of parameters in the model, the maximum sequence length and
         # the size of the model's vocabulary
         num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -279,6 +291,17 @@ class BenchmarkDataset(ABC):
         return metadata_dict
 
     def _get_training_args(self, iteration_idx: int) -> TrainingArguments:
+        """Get the training arguments for the current iteration.
+
+        Args:
+            iteration_idx (int):
+                The index of the current iteration. This is only used to generate a
+                unique random seed for the current iteration.
+
+        Returns:
+            TrainingArguments:
+                The training arguments for the current iteration.
+        """
         # Set the logging strategy
         if self.benchmark_config.verbose:
             logging_strategy = IntervalStrategy.STEPS
@@ -435,7 +458,6 @@ class BenchmarkDataset(ABC):
         prepared_train: Dataset,
         prepared_val: Dataset,
         prepared_test: Dataset,
-        data_collator: DataCollator,
         training_args: TrainingArguments,
         tokenizer: PreTrainedTokenizer | None = None,
         model: PreTrainedModel | None = None,
@@ -457,8 +479,6 @@ class BenchmarkDataset(ABC):
                 The prepared validation dataset.
             prepared_test (Dataset):
                 The prepared test dataset.
-            data_collator (DataCollator):
-                The data collator.
             training_args (TrainingArguments):
                 The training arguments.
             tokenizer (PreTrainedTokenizer or None, optional):
@@ -504,7 +524,6 @@ class BenchmarkDataset(ABC):
                 train_dataset=prepared_train,
                 eval_dataset=prepared_val,
                 tokenizer=tokenizer,
-                data_collator=data_collator,
                 compute_metrics=compute_metrics,
                 callbacks=[early_stopping],
             )
@@ -577,7 +596,6 @@ class BenchmarkDataset(ABC):
         train_dataset: Dataset,
         eval_dataset: Dataset,
         tokenizer: PreTrainedTokenizer,
-        data_collator: DataCollator,
         compute_metrics: Callable,
         callbacks: list[TrainerCallback],
     ) -> Trainer:
@@ -594,8 +612,6 @@ class BenchmarkDataset(ABC):
                 The evaluation dataset.
             tokenizer (PreTrainedTokenizer):
                 The tokenizer.
-            data_collator (DataCollator):
-                The data collator.
             compute_metrics (Callable):
                 The function used to compute the metrics.
             callbacks (list of TrainerCallback):
@@ -611,7 +627,6 @@ class BenchmarkDataset(ABC):
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
             tokenizer=tokenizer,
-            data_collator=data_collator,
             compute_metrics=compute_metrics,
             callbacks=callbacks,
         )

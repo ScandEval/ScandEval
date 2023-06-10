@@ -3,10 +3,7 @@
 import logging
 
 from .config import BenchmarkConfig, ModelConfig
-from .fresh_models import get_fresh_model_config, model_exists_fresh
-from .hf_models import get_hf_model_config, model_exists_on_hf_hub
-from .local_models import get_local_model_config, model_exists_locally
-from .openai_models import get_openai_model_config, model_exists_on_openai
+from .model_setups import MODEL_SETUP_CLASSES
 
 logger = logging.getLogger(__name__)
 
@@ -26,27 +23,11 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
     Raises:
         RuntimeError:
-            If the extracted framework is not recognized.
+            If the model doesn't exist.
     """
-    if model_exists_fresh(model_id=model_id):
-        return get_fresh_model_config(model_id=model_id)
-    elif model_exists_locally(model_id=model_id):
-        return get_local_model_config(
-            model_id=model_id,
-            framework=benchmark_config.framework,
-            raise_errors=benchmark_config.raise_errors,
-        )
-    elif model_exists_on_hf_hub(
-        model_id=model_id, use_auth_token=benchmark_config.use_auth_token
-    ):
-        return get_hf_model_config(
-            model_id=model_id, use_auth_token=benchmark_config.use_auth_token
-        )
-    elif model_exists_on_openai(
-        model_id=model_id, openai_api_key=benchmark_config.openai_api_key
-    ):
-        return get_openai_model_config(model_id=model_id)
+    for setup_class in MODEL_SETUP_CLASSES:
+        setup = setup_class(benchmark_config=benchmark_config)
+        if setup.model_exists(model_id=model_id):
+            return setup.get_model_config(model_id=model_id)
     else:
-        raise RuntimeError(
-            f"Model {model_id} not found in any of the supported locations."
-        )
+        raise RuntimeError(f"Model {model_id} not found.")
