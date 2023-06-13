@@ -8,6 +8,7 @@ from functools import partial
 from typing import Callable
 
 import evaluate
+import Levenshtein
 import numpy as np
 import torch
 from datasets.arrow_dataset import Dataset
@@ -18,7 +19,6 @@ from tqdm.auto import tqdm
 from transformers import PretrainedConfig
 from transformers.data.data_collator import DataCollator
 from transformers.modeling_utils import PreTrainedModel
-from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.trainer import Trainer
 from transformers.trainer_callback import (
     EarlyStoppingCallback,
@@ -31,10 +31,10 @@ from transformers.training_args import OptimizerNames, TrainingArguments
 
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .enums import Framework, ModelType
 from .exceptions import InvalidBenchmark
 from .model_config import get_model_config
 from .model_loading import load_model
+from .model_setups import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT
@@ -127,11 +127,7 @@ class BenchmarkDataset(ABC):
             benchmark_config=self.benchmark_config,
         )
 
-        metadata_dict = self._get_metadata(
-            model=model,
-            tokenizer=tokenizer,
-            model_config=model_config,
-        )
+        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
@@ -143,8 +139,6 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
-        scores: dict[str, list[dict[str, float]]] = defaultdict(list)
-
         if self.dataset_config.task.name == "speed":
             scores = benchmark_speed(
                 itr=itr,
@@ -154,96 +148,24 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-        elif model_config.model_type == ModelType.OPENAI:
-            scores = dict(train=list(), test=list())  # TODO
-        else:
-            all_data = self._load_prepared_data(
+        elif isinstance(model, GenerativeModel):
+            scores = self._generate(
+                itr=itr,
                 num_iter=num_iter,
                 rng=rng,
-                hf_model_config=model.config,
+                model=model,
                 tokenizer=tokenizer,
+                model_config=model_config,
             )
-
-            bs: int = self.benchmark_config.batch_size
-            ga: int = 32 // bs
-            for idx in itr:
-                # Set variable that tracks whether we need to initialize new models in
-                # the `benchmark_single_iteration` call
-                model_already_initialized = idx == 0
-
-                # Clear memory after first iteration
-                if not model_already_initialized:
-                    try:
-                        del model
-                    except UnboundLocalError:
-                        pass
-                    try:
-                        del tokenizer
-                    except UnboundLocalError:
-                        pass
-                    clear_memory()
-
-                while True:
-                    test = all_data["tests"][idx]
-                    prepared_test = all_data["prepared_tests"][idx]
-                    assert isinstance(test, Dataset)
-                    assert isinstance(prepared_test, Dataset)
-
-                    # Re-block terminal output, as it gets unblocked by the
-                    # `transformers` package before training
-                    block_terminal_output()
-
-                    training_args = self._get_training_args(iteration_idx=idx)
-
-                    # Set the correct batch size and gradient accumulation
-                    training_args.per_device_train_batch_size = bs
-                    training_args.per_device_eval_batch_size = bs
-                    training_args.gradient_accumulation_steps = ga
-
-                    itr_scores = self._benchmark_single_iteration(
-                        iteration_idx=idx,
-                        model_config=model_config,
-                        train=all_data["train"],
-                        prepared_train=all_data["prepared_train"],
-                        prepared_val=all_data["prepared_val"],
-                        test=test,
-                        prepared_test=prepared_test,
-                        training_args=training_args,
-                        tokenizer=tokenizer if model_already_initialized else None,
-                        model=model if model_already_initialized else None,
-                    )
-
-                    # If the iteration was successful then break the loop
-                    if isinstance(itr_scores, dict):
-                        break
-
-                    # Otherwise we encountered an error, so we have to deal with it and
-                    # try again
-                    else:
-                        bs = training_args.per_device_train_batch_size
-                        ga = training_args.gradient_accumulation_steps
-
-                        bs, ga = handle_error(
-                            e=itr_scores,
-                            per_device_train_batch_size=bs,
-                            gradient_accumulation_steps=ga,
-                        )
-
-                        # Clear memory, to avoid memory issues
-                        try:
-                            del model
-                        except UnboundLocalError:
-                            pass
-                        try:
-                            del tokenizer
-                        except UnboundLocalError:
-                            pass
-                        clear_memory()
-                        model_already_initialized = False
-
-                if "train" in itr_scores:
-                    scores["train"].append(itr_scores["train"])
-                scores["test"].append(itr_scores["test"])
+        else:
+            scores = self._finetune(
+                itr=itr,
+                num_iter=num_iter,
+                rng=rng,
+                model=model,
+                tokenizer=tokenizer,
+                model_config=model_config,
+            )
 
         all_scores = log_scores(
             dataset_name=self.dataset_config.pretty_name,
@@ -254,288 +176,134 @@ class BenchmarkDataset(ABC):
 
         return all_scores, metadata_dict
 
-    def _get_metadata(
+    def _finetune(
         self,
-        model: PreTrainedModel,
-        tokenizer: PreTrainedTokenizer,
-        model_config: ModelConfig,
-    ) -> dict[str, int]:
-        """Get metadata about the model.
-
-        Args:
-            model (PreTrainedModel):
-                The model to get metadata about.
-            tokenizer (PreTrainedTokenizer):
-                The tokenizer to get metadata about.
-            model_config (ModelConfig):
-                The model configuration.
-
-        Returns:
-            dict[str, int]:
-                A dictionary containing metadata about the model, with the keys being
-                the metadata names and the values being the metadata values.
-        """
-        if model_config.model_type in [ModelType.HF, ModelType.FRESH, ModelType.LOCAL]:
-            num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-            max_seq_length = tokenizer.model_max_length
-            if hasattr(model.config, "vocab_size"):
-                vocab_size = model.config.vocab_size
-            elif hasattr(tokenizer, "vocab_size"):
-                vocab_size = tokenizer.vocab_size
-            else:
-                vocab_size = -1
-
-        elif model_config.model_type == ModelType.OPENAI:
-            num_params_mapping = {
-                "ada": 350_000_000,
-                "babbage": 3_000_000_000,
-                "curie": 13_000_000_000,
-                "davinci": 175_000_000_000,
-                "text-ada-001": 350_000_000,
-                "text-babbage-001": 3_000_000_000,
-                "text-curie-001": 13_000_000_000,
-                "text-davinci-001": 175_000_000_000,
-                "text-davinci-002": 175_000_000_000,
-                "text-davinci-003": 175_000_000_000,
-                "code-cushman-001": 12_000_000_000,
-                "code-davinci-001": 175_000_000_000,
-                "code-cushman-002": 12_000_000_000,
-                "code-davinci-002": 175_000_000_000,
-                "gpt-3.5-turbo": 175_000_000_000,
-                "gpt-3.5-turbo-0301": 175_000_000_000,
-                "gpt-4": -1,
-                "gpt-4-0314": -1,
-                "gpt-4-32k": -1,
-                "gpt-4-32k-0314": -1,
-            }
-            num_params = num_params_mapping.get(model_config.model_id, -1)
-
-            max_seq_length_mapping = {
-                "ada": 2049,
-                "babbage": 2049,
-                "curie": 2049,
-                "davinci": 2049,
-                "text-ada-001": 2049,
-                "text-babbage-001": 2049,
-                "text-curie-001": 2049,
-                "text-davinci-001": 2049,
-                "text-davinci-002": 4097,
-                "text-davinci-003": 4097,
-                "code-cushman-001": 2048,
-                "code-davinci-001": 8001,
-                "code-cushman-002": 2048,
-                "code-davinci-002": 8001,
-                "gpt-3.5-turbo": 4096,
-                "gpt-3.5-turbo-0301": 4096,
-                "gpt-4": 8192,
-                "gpt-4-0314": 8192,
-                "gpt-4-32k": 32_768,
-                "gpt-4-32k-0314": 32_768,
-            }
-            max_seq_length = max_seq_length_mapping.get(model_config.model_id, -1)
-
-            vocab_size_mapping = {
-                "ada": 50_257,
-                "babbage": 50_257,
-                "curie": 50_257,
-                "davinci": 50_257,
-                "text-ada-001": 50_281,
-                "text-babbage-001": 50_281,
-                "text-curie-001": 50_281,
-                "text-davinci-001": 50_281,
-                "text-davinci-002": 50_281,
-                "text-davinci-003": 50_281,
-                "code-cushman-001": 50_281,
-                "code-davinci-001": 50_281,
-                "code-cushman-002": 50_281,
-                "code-davinci-002": 50_281,
-                "gpt-3.5-turbo": 100_256,
-                "gpt-3.5-turbo-0301": 100_256,
-                "gpt-4": 100_256,
-                "gpt-4-0314": 100_256,
-                "gpt-4-32k": 100_256,
-                "gpt-4-32k-0314": 100_256,
-            }
-            vocab_size = vocab_size_mapping.get(model_config.model_id, -1)
-
-        else:
-            raise ValueError(f"Unknown model type: {model_config.model_type}")
-
-        # Store the metadata in a dictionary
-        metadata_dict = dict(
-            num_model_parameters=num_params,
-            max_sequence_length=max_seq_length,
-            vocabulary_size=vocab_size,
-        )
-
-        # Log the metadata
-        logger.info(
-            f"The model has {num_params:,} parameters, a vocabulary size of "
-            f"{vocab_size:,} and a maximum sequence length of {max_seq_length:,}."
-        )
-
-        return metadata_dict
-
-    def _get_training_args(self, iteration_idx: int) -> TrainingArguments:
-        """Get the training arguments for the current iteration.
-
-        Args:
-            iteration_idx (int):
-                The index of the current iteration. This is only used to generate a
-                unique random seed for the current iteration.
-
-        Returns:
-            TrainingArguments:
-                The training arguments for the current iteration.
-        """
-        # Set the logging strategy
-        if self.benchmark_config.verbose:
-            logging_strategy = IntervalStrategy.STEPS
-        else:
-            logging_strategy = IntervalStrategy.NO
-
-        # Set seed variable
-        seed = 4242 + iteration_idx
-
-        # Initialise training arguments
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            training_args = TrainingArguments(
-                output_dir=self.benchmark_config.cache_dir,
-                evaluation_strategy=IntervalStrategy.STEPS,
-                logging_strategy=logging_strategy,
-                save_strategy=IntervalStrategy.STEPS,
-                eval_steps=30,
-                logging_steps=30,
-                save_steps=30,
-                max_steps=10_000 if not self.benchmark_config.testing else 10,
-                report_to=[],
-                save_total_limit=1,
-                per_device_train_batch_size=self.benchmark_config.batch_size,
-                per_device_eval_batch_size=self.benchmark_config.batch_size,
-                learning_rate=2e-5,
-                warmup_ratio=0.01,
-                gradient_accumulation_steps=1,
-                load_best_model_at_end=True,
-                optim=OptimizerNames.ADAMW_TORCH,
-                seed=seed,
-                use_mps_device=torch.backends.mps.is_available(),
-                fp16=False,
-            )
-
-        # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
-        if self.benchmark_config.progress_bar:
-            training_args.disable_tqdm = False
-
-        return training_args
-
-    def _load_data(self):
-        # Download dataset from the HF Hub
-        try:
-            dataset_dict = load_dataset(
-                path=self.dataset_config.huggingface_id,
-                use_auth_token=self.benchmark_config.use_auth_token,
-                cache_dir=self.benchmark_config.cache_dir,
-            )
-        except HfHubHTTPError:
-            raise InvalidBenchmark("The Hugging Face Hub seems to be down.")
-
-        # If the dataset turns out not to be a DatasetDict, then we raise an error
-        if not isinstance(dataset_dict, DatasetDict):
-            raise InvalidBenchmark(
-                f"Expected `dataset_dict` to be a `DatasetDict`, but got "
-                f"{type(dataset_dict)}."
-            )
-
-        # Remove all other keys than 'train', 'val' and 'test'
-        dataset_dict = DatasetDict(
-            {key: dataset_dict[key] for key in ["train", "val", "test"]}
-        )
-
-        # Process the datasets
-        dataset_dict = self._process_data(dataset_dict)
-
-        # Extract the dataset splits
-        train = dataset_dict["train"]
-        val = dataset_dict["val"]
-        test = dataset_dict["test"]
-
-        # Remove empty examples from the datasets
-        if "tokens" in train.features:
-            train = train.filter(lambda x: len(x["tokens"]) > 0)
-            val = val.filter(lambda x: len(x["tokens"]) > 0)
-            test = test.filter(lambda x: len(x["tokens"]) > 0)
-        elif "doc" in train.features:
-            train = train.filter(lambda x: len(x["doc"]) > 0)
-            val = val.filter(lambda x: len(x["doc"]) > 0)
-            test = test.filter(lambda x: len(x["doc"]) > 0)
-
-        # If we are testing then truncate the test set
-        if self.benchmark_config.testing:
-            test = test.select(range(128))
-
-        return train, val, test
-
-    def _load_prepared_data(
-        self,
+        itr: tqdm,
         num_iter: int,
         rng: np.random.Generator,
-        hf_model_config: PretrainedConfig,
-        tokenizer: PreTrainedTokenizer,
-    ) -> dict[str, Dataset | list[Dataset]]:
-        """Load the data and prepare it for training.
+        model: PreTrainedModel,
+        tokenizer: Tokenizer,
+        model_config: ModelConfig,
+    ) -> dict[str, list[dict[str, float]]]:
+        """Evaluate a model on a dataset through finetuning.
 
         Args:
+            itr (tqdm.tqdm):
+                The progress bar iterator.
             num_iter (int):
                 The number of iterations to run.
             rng (np.random.Generator):
                 The random number generator.
-            hf_model_config (PretrainedConfig):
-                The Hugging Face model configuration.
-            tokenizer (PreTrainedTokenizer):
-                The Hugging Face tokenizer.
+            model (PreTrainedModel):
+                The model to evaluate.
+            tokenizer (Tokenizer):
+                The tokenizer to use.
+            model_config (ModelConfig):
+                The configuration of the model.
 
         Returns:
-            dict[str, Dataset or list[Dataset]]:
-                The prepared datasets, with keys "train", "prepared_train", "val",
-                "prepared_val", "tests" and "prepared_tests".
+            dict[str, list[dict[str, float]]]:
+                A dictionary containing the scores, with keys "test" and maybe "train",
+                with values being lists of dicts containing the scores for each metric
+                for each iteration.
         """
-        # Load data and build bootstrapped test sets
-        train, val, test = self._load_data()
-        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
-        tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
+        scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
-        # Set up the preprocessing parameters
-        preprocess_params = dict(
-            framework=Framework.PYTORCH, config=hf_model_config, tokenizer=tokenizer
-        )
+        train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
 
-        # Prepare the train and validation datasets
-        try:
-            prepared_train = self._preprocess_data(
-                train, split="train", **preprocess_params
-            )
-            prepared_val = self._preprocess_data(val, split="val", **preprocess_params)
-            prepared_tests = [
-                self._preprocess_data(test, split="test", **preprocess_params)
-                for test in tests
-            ]
-        except ValueError:
-            raise InvalidBenchmark(
-                "Preprocessing of the training and validation datasets could not be "
-                "done."
-            )
-
-        return dict(
+        prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
             train=train,
             val=val,
             tests=tests,
-            prepared_train=prepared_train,
-            prepared_val=prepared_val,
-            prepared_tests=prepared_tests,
+            model_config=model_config,
+            hf_model_config=model.config,
+            tokenizer=tokenizer,
         )
 
-    def _benchmark_single_iteration(
+        bs: int = self.benchmark_config.batch_size
+        ga: int = 32 // bs
+        for idx in itr:
+            # Set variable that tracks whether we need to initialize new models in
+            # the `finetune_single_iteration` call
+            model_already_initialized = idx == 0
+
+            # Clear memory after first iteration
+            if not model_already_initialized:
+                try:
+                    del model
+                except UnboundLocalError:
+                    pass
+                try:
+                    del tokenizer
+                except UnboundLocalError:
+                    pass
+                clear_memory()
+
+            while True:
+                test = tests[idx]
+                prepared_test = prepared_tests[idx]
+                assert isinstance(test, Dataset)
+                assert isinstance(prepared_test, Dataset)
+
+                # Re-block terminal output, as it gets unblocked by the
+                # `transformers` package before training
+                block_terminal_output()
+
+                training_args = self._get_training_args(iteration_idx=idx)
+
+                # Set the correct batch size and gradient accumulation
+                training_args.per_device_train_batch_size = bs
+                training_args.per_device_eval_batch_size = bs
+                training_args.gradient_accumulation_steps = ga
+
+                itr_scores = self._finetune_single_iteration(
+                    iteration_idx=idx,
+                    model_config=model_config,
+                    train=train,
+                    prepared_train=prepared_train,
+                    prepared_val=prepared_val,
+                    test=test,
+                    prepared_test=prepared_test,
+                    training_args=training_args,
+                    tokenizer=tokenizer if model_already_initialized else None,
+                    model=model if model_already_initialized else None,
+                )
+
+                # If the iteration was successful then break the loop
+                if isinstance(itr_scores, dict):
+                    break
+
+                # Otherwise we encountered an error, so we have to deal with it and
+                # try again
+                else:
+                    bs = training_args.per_device_train_batch_size
+                    ga = training_args.gradient_accumulation_steps
+
+                    bs, ga = handle_error(
+                        e=itr_scores,
+                        per_device_train_batch_size=bs,
+                        gradient_accumulation_steps=ga,
+                    )
+
+                    # Clear memory, to avoid memory issues
+                    try:
+                        del model
+                    except UnboundLocalError:
+                        pass
+                    try:
+                        del tokenizer
+                    except UnboundLocalError:
+                        pass
+                    clear_memory()
+                    model_already_initialized = False
+
+            if "train" in itr_scores:
+                scores["train"].append(itr_scores["train"])
+            scores["test"].append(itr_scores["test"])
+
+        return scores
+
+    def _finetune_single_iteration(
         self,
         iteration_idx: int,
         model_config: ModelConfig,
@@ -545,8 +313,8 @@ class BenchmarkDataset(ABC):
         prepared_val: Dataset,
         prepared_test: Dataset,
         training_args: TrainingArguments,
-        tokenizer: PreTrainedTokenizer | None = None,
-        model: PreTrainedModel | None = None,
+        tokenizer: Tokenizer | None = None,
+        model: PreTrainedModel | GenerativeModel | None = None,
     ) -> dict[str, dict[str, float]] | Exception:
         """Run a single iteration of a benchmark.
 
@@ -567,10 +335,10 @@ class BenchmarkDataset(ABC):
                 The prepared test dataset.
             training_args (TrainingArguments):
                 The training arguments.
-            tokenizer (PreTrainedTokenizer or None, optional):
+            tokenizer (Tokenizer or None, optional):
                 The tokenizer to use in the benchmark. If None then a new tokenizer
                 will be loaded. Defaults to None.
-            model (PreTrainedModel or None, optional):
+            model (PreTrainedModel, GenerativeModel or None, optional):
                 The model to use in the benchmark. If None then a new model will be
                 loaded. Defaults to None.
 
@@ -597,7 +365,7 @@ class BenchmarkDataset(ABC):
 
             # Initialise compute_metrics function
             compute_metrics = partial(
-                self._compute_metrics, id2label=model.config.id2label
+                self._compute_metrics, id2label=self.dataset_config.id2label
             )
 
             # Initialise early stopping callback
@@ -672,23 +440,372 @@ class BenchmarkDataset(ABC):
             clear_memory()
             return e
 
+    def _generate(
+        self,
+        itr: tqdm,
+        num_iter: int,
+        rng: np.random.Generator,
+        model: GenerativeModel,
+        tokenizer: Tokenizer,
+        model_config: ModelConfig,
+    ) -> dict[str, list[dict[str, float]]]:
+        """Evaluate a model on a dataset through generation.
+
+        Args:
+            itr (tqdm.tqdm):
+                The progress bar iterator.
+            num_iter (int):
+                The number of iterations to run.
+            rng (np.random.Generator):
+                The random number generator.
+            model (GenerativeModel):
+                The model to evaluate.
+            tokenizer (Tokenizer):
+                The tokenizer to use for the model. If `None` then the model's
+                tokenizer will be used.
+            model_config (ModelConfig):
+                The configuration of the model.
+
+        Returns:
+            dict[str, list[dict[str, float]]]:
+                A dictionary containing the scores, with keys "test" and maybe "train",
+                with values being lists of dicts containing the scores for each metric
+                for each iteration.
+        """
+        scores: dict[str, list[dict[str, float]]] = defaultdict(list)
+
+        train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
+
+        prepared_train, _, prepared_tests = self._load_prepared_data(
+            train=train,
+            val=val,
+            tests=tests,
+            model_config=model_config,
+            hf_model_config=model.config,
+            tokenizer=tokenizer,
+        )
+
+        for idx in itr:
+            test = tests[idx]
+            prepared_test = prepared_tests[idx]
+            assert isinstance(test, Dataset)
+            assert isinstance(prepared_test, Dataset)
+
+            test_scores = self._generate_single_iteration(
+                prepared_dataset=prepared_test,
+                model=model,
+                tokenizer=tokenizer,
+            )
+            scores["test"].append(test_scores)
+
+            if self.benchmark_config.evaluate_train:
+                train_scores = self._generate_single_iteration(
+                    prepared_dataset=prepared_train,
+                    model=model,
+                    tokenizer=tokenizer,
+                )
+                scores["train"].append(train_scores)
+
+        return scores
+
+    def _generate_single_iteration(
+        self,
+        prepared_dataset: Dataset,
+        model: GenerativeModel,
+        tokenizer: Tokenizer,
+    ) -> dict[str, float]:
+        """Evaluate a model on a dataset in a single iteration through generation.
+
+        Args:
+            prepared_dataset (Dataset):
+                The dataset to evaluate on.
+            model (GenerativeModel):
+                The model to evaluate.
+            tokenizer (Tokenizer):
+                The tokenizer to use for the model.
+
+        Returns:
+            list[dict[str, float]]:
+                A list of dictionaries containing the scores for each metric.
+        """
+        all_preds: list[str] = list()
+        all_labels: list[str] = list()
+        candidate_labels = self.dataset_config.id2label
+        for example in tqdm(prepared_dataset):
+            ids = torch.LongTensor(example["input_ids"])
+            completion_ids: list[int] = model.generate(
+                inputs=ids,
+                max_length=512,
+                temperature=0.0,
+                do_sample=False,
+            )[0].tolist()
+
+            # Get the label which is the most similar to the completion
+            completion = tokenizer.decode(completion_ids)
+            predicted_label = completion.split("Label:")[-1].strip()
+
+            edit_distances = [
+                Levenshtein.distance(s1=predicted_label.upper(), s2=label.upper())
+                for label in candidate_labels
+            ]
+            predicted_label = candidate_labels[np.argmin(edit_distances)].upper()
+            true_label = example["label"].upper()
+
+            all_preds.append(predicted_label)
+            all_labels.append(true_label)
+
+        itr_scores = self._compute_metrics(
+            model_outputs_and_labels=(all_preds, all_labels),
+            id2label=self.dataset_config.id2label,
+        )
+
+        return itr_scores
+
+    def _get_metadata(
+        self,
+        model: PreTrainedModel | GenerativeModel,
+        tokenizer: Tokenizer,
+    ) -> dict[str, int]:
+        """Get metadata about the model.
+
+        Args:
+            model (PreTrainedModel or GenerativeModel):
+                The model to get metadata about.
+            tokenizer (Tokenizer):
+                The tokenizer to get metadata about.
+
+        Returns:
+            dict[str, int]:
+                A dictionary containing metadata about the model, with the keys being
+                the metadata names and the values being the metadata values.
+        """
+        if hasattr(model.config, "num_params"):
+            num_params = model.config.num_params
+        elif isinstance(model, PreTrainedModel):
+            num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        else:
+            num_params = -1
+
+        if hasattr(model.config, "model_max_length"):
+            max_seq_length = getattr(model.config, "model_max_length")
+        elif hasattr(tokenizer, "model_max_length"):
+            max_seq_length = getattr(tokenizer, "model_max_length")
+        else:
+            max_seq_length = -1
+
+        if hasattr(model.config, "vocab_size"):
+            vocab_size = getattr(model.config, "vocab_size")
+        elif hasattr(tokenizer, "vocab_size"):
+            vocab_size = getattr(tokenizer, "vocab_size")
+        else:
+            vocab_size = -1
+
+        # Store the metadata in a dictionary
+        metadata_dict = dict(
+            num_model_parameters=num_params,
+            max_sequence_length=max_seq_length,
+            vocabulary_size=vocab_size,
+        )
+
+        # Log the metadata
+        logger.info(
+            f"The model has {num_params:,} parameters, a vocabulary size of "
+            f"{vocab_size:,} and a maximum sequence length of {max_seq_length:,}."
+        )
+
+        return metadata_dict
+
+    def _get_training_args(self, iteration_idx: int) -> TrainingArguments:
+        """Get the training arguments for the current iteration.
+
+        Args:
+            iteration_idx (int):
+                The index of the current iteration. This is only used to generate a
+                unique random seed for the current iteration.
+
+        Returns:
+            TrainingArguments:
+                The training arguments for the current iteration.
+        """
+        # Set the logging strategy
+        if self.benchmark_config.verbose:
+            logging_strategy = IntervalStrategy.STEPS
+        else:
+            logging_strategy = IntervalStrategy.NO
+
+        # Set seed variable
+        seed = 4242 + iteration_idx
+
+        # Initialise training arguments
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            training_args = TrainingArguments(
+                output_dir=self.benchmark_config.cache_dir,
+                evaluation_strategy=IntervalStrategy.STEPS,
+                logging_strategy=logging_strategy,
+                save_strategy=IntervalStrategy.STEPS,
+                eval_steps=30,
+                logging_steps=30,
+                save_steps=30,
+                max_steps=10_000 if not self.benchmark_config.testing else 10,
+                report_to=[],
+                save_total_limit=1,
+                per_device_train_batch_size=self.benchmark_config.batch_size,
+                per_device_eval_batch_size=self.benchmark_config.batch_size,
+                learning_rate=2e-5,
+                warmup_ratio=0.01,
+                gradient_accumulation_steps=1,
+                load_best_model_at_end=True,
+                optim=OptimizerNames.ADAMW_TORCH,
+                seed=seed,
+                use_mps_device=torch.backends.mps.is_available(),
+                fp16=False,
+            )
+
+        # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
+        if self.benchmark_config.progress_bar:
+            training_args.disable_tqdm = False
+
+        return training_args
+
+    def _load_data(
+        self,
+        num_iter: int,
+        rng: np.random.Generator,
+    ) -> tuple[Dataset, Dataset, list[Dataset]]:
+        """Load the raw bootstrapped datasets.
+
+        Args:
+            num_iter (int):
+                The number of iterations to run.
+            rng (np.random.Generator):
+                The random number generator to use.
+
+        Returns:
+            tuple[Dataset, Dataset, list[Dataset]]:
+                A tuple containing the training, validation and test datasets.
+        """
+        # Download dataset from the HF Hub
+        try:
+            dataset_dict = load_dataset(
+                path=self.dataset_config.huggingface_id,
+                use_auth_token=self.benchmark_config.use_auth_token,
+                cache_dir=self.benchmark_config.cache_dir,
+            )
+        except HfHubHTTPError:
+            raise InvalidBenchmark("The Hugging Face Hub seems to be down.")
+
+        # If the dataset turns out not to be a DatasetDict, then we raise an error
+        if not isinstance(dataset_dict, DatasetDict):
+            raise InvalidBenchmark(
+                f"Expected `dataset_dict` to be a `DatasetDict`, but got "
+                f"{type(dataset_dict)}."
+            )
+
+        # Remove all other keys than 'train', 'val' and 'test'
+        dataset_dict = DatasetDict(
+            {key: dataset_dict[key] for key in ["train", "val", "test"]}
+        )
+
+        # Process the datasets
+        dataset_dict = self._process_data(dataset_dict)
+
+        # Extract the dataset splits
+        train = dataset_dict["train"]
+        val = dataset_dict["val"]
+        test = dataset_dict["test"]
+
+        # Remove empty examples from the datasets
+        if "tokens" in train.features:
+            train = train.filter(lambda x: len(x["tokens"]) > 0)
+            val = val.filter(lambda x: len(x["tokens"]) > 0)
+            test = test.filter(lambda x: len(x["tokens"]) > 0)
+        elif "doc" in train.features:
+            train = train.filter(lambda x: len(x["doc"]) > 0)
+            val = val.filter(lambda x: len(x["doc"]) > 0)
+            test = test.filter(lambda x: len(x["doc"]) > 0)
+
+        # If we are testing then truncate the test set
+        if self.benchmark_config.testing:
+            test = test.select(range(128))
+
+        # Bootstrap the test set
+        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
+        tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
+
+        return train, val, tests
+
+    def _load_prepared_data(
+        self,
+        train: Dataset,
+        val: Dataset,
+        tests: list[Dataset],
+        model_config: ModelConfig,
+        hf_model_config: PretrainedConfig,
+        tokenizer: Tokenizer,
+    ) -> tuple[Dataset, Dataset, list[Dataset]]:
+        """Load the data and prepare it for training.
+
+        Args:
+            train (Dataset):
+                The raw training dataset.
+            val (Dataset):
+                The raw validation dataset.
+            tests (list[Dataset]):
+                The raw bootstrapped test datasets.
+            model_config (ModelConfig):
+                The model configuration.
+            hf_model_config (PretrainedConfig):
+                The Hugging Face model configuration.
+            tokenizer (Tokenizer):
+                The Hugging Face tokenizer.
+
+        Returns:
+            tuple[Dataset, Dataset, list[Dataset]]:
+                A tuple containing the prepared training, validation and test datasets.
+        """
+        # Set up the preprocessing parameters
+        preprocess_params = dict(
+            hf_model_config=hf_model_config,
+            model_config=model_config,
+            tokenizer=tokenizer,
+        )
+
+        # Prepare the train and validation datasets
+        try:
+            prepared_train = self._preprocess_data(
+                train, split="train", **preprocess_params
+            )
+            prepared_val = self._preprocess_data(val, split="val", **preprocess_params)
+            prepared_tests = [
+                self._preprocess_data(test, split="test", **preprocess_params)
+                for test in tests
+            ]
+        except ValueError:
+            raise InvalidBenchmark(
+                "Preprocessing of the training and validation datasets could not be "
+                "done."
+            )
+
+        return prepared_train, prepared_val, prepared_tests
+
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)
 
     def _get_trainer(
         self,
-        model: PreTrainedModel,
+        model: PreTrainedModel | GenerativeModel,
         args: TrainingArguments,
         train_dataset: Dataset,
         eval_dataset: Dataset,
-        tokenizer: PreTrainedTokenizer,
+        tokenizer: Tokenizer,
         compute_metrics: Callable,
         callbacks: list[TrainerCallback],
     ) -> Trainer:
         """Get a Trainer object.
 
         Args:
-            model (PreTrainedModel):
+            model (PreTrainedModel or GenerativeModel):
                 The model to finetune.
             args (TrainingArguments):
                 The training arguments.
@@ -696,7 +813,7 @@ class BenchmarkDataset(ABC):
                 The training dataset.
             eval_dataset (Dataset):
                 The evaluation dataset.
-            tokenizer (PreTrainedTokenizer):
+            tokenizer (Tokenizer):
                 The tokenizer.
             compute_metrics (Callable):
                 The function used to compute the metrics.
@@ -775,13 +892,11 @@ class BenchmarkDataset(ABC):
         pass
 
     @abstractmethod
-    def _load_data_collator(
-        self, tokenizer: PreTrainedTokenizer | None = None
-    ) -> DataCollator:
+    def _load_data_collator(self, tokenizer: Tokenizer | None = None) -> DataCollator:
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (PreTrainedTokenizer or None, optional):
+            tokenizer (Tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
@@ -793,8 +908,8 @@ class BenchmarkDataset(ABC):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[list, list],
-        id2label: list[str] | None = None,
+        model_outputs_and_labels: tuple[list[int] | list[str], list[int] | list[str]],
+        id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -817,6 +932,16 @@ class BenchmarkDataset(ABC):
             predictions = np.asarray(model_outputs).argmax(axis=-1)
         else:
             predictions = model_outputs
+
+        predictions = [
+            id2label.index(pred) if isinstance(pred, str) else pred
+            for pred in predictions
+        ]
+
+        labels = [
+            id2label.index(label) if isinstance(label, str) else label
+            for label in labels
+        ]
 
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:

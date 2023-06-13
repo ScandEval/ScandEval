@@ -20,12 +20,12 @@ from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
 from requests.exceptions import RequestException
 from transformers import logging as tf_logging
-from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .config import Language
 from .enums import Framework
 from .exceptions import InvalidBenchmark
 from .languages import DA, NB, NN, NO, SV, get_all_languages
+from .model_setups import Tokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -238,11 +238,11 @@ def internet_connection_available() -> bool:
         return False
 
 
-def get_special_token_metadata(tokenizer: PreTrainedTokenizer) -> dict:
+def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
     """Get the special token metadata for a tokenizer.
 
     Args:
-        tokenizer (PreTrainedTokenizer):
+        tokenizer (Tokenizer):
             The tokenizer.
 
     Returns:

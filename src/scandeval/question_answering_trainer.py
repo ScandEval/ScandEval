@@ -7,7 +7,7 @@ from datasets.arrow_dataset import Dataset
 from transformers import TrainerControl
 from transformers.trainer import Trainer
 
-from scandeval.utils import get_special_token_metadata
+from .utils import get_special_token_metadata
 
 
 class QuestionAnsweringTrainer(Trainer):

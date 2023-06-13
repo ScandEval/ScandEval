@@ -2,15 +2,17 @@
 
 from typing import Type
 
-from transformers import PreTrainedModel, PreTrainedTokenizer
+from transformers import PreTrainedModel
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .model_setups import (
     FreshModelSetup,
+    GenerativeModel,
     HFModelSetup,
     LocalModelSetup,
     ModelSetup,
     OpenAIModelSetup,
+    Tokenizer,
 )
 
 
@@ -18,7 +20,7 @@ def load_model(
     model_config: ModelConfig,
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
-) -> tuple[PreTrainedTokenizer, PreTrainedModel]:
+) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
     """Load a model.
 
     Args:

@@ -155,6 +155,9 @@ class DatasetConfig:
             The mapping from label to ID.
         num_labels (int):
             The number of labels in the dataset.
+        prompt_template (str):
+            The template for the prompt to use when benchmarking the dataset using
+            few-shot evaluation.
     """
 
     name: str
@@ -162,6 +165,7 @@ class DatasetConfig:
     huggingface_id: str
     task: DatasetTask
     languages: list[Language]
+    prompt_template: str
 
     @property
     def id2label(self) -> list[str]:

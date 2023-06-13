@@ -3,6 +3,7 @@
 import logging
 
 from .config import BenchmarkConfig, ModelConfig
+from .exceptions import InvalidBenchmark
 from .model_setups import MODEL_SETUP_CLASSES
 
 logger = logging.getLogger(__name__)
@@ -30,4 +31,4 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
         if setup.model_exists(model_id=model_id):
             return setup.get_model_config(model_id=model_id)
     else:
-        raise RuntimeError(f"Model {model_id} not found.")
+        raise InvalidBenchmark(f"Model {model_id} not found.")

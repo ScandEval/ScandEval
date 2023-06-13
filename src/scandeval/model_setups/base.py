@@ -1,34 +1,52 @@
 """Base class for a model setup."""
 
-from typing import Callable, Protocol
+from typing import Protocol, runtime_checkable
 
-from torch import LongTensor, Tensor
+from torch import LongTensor
 from transformers import (
+    BatchEncoding,
     GenerationConfig,
-    LogitsProcessorList,
+    PretrainedConfig,
     PreTrainedModel,
-    PreTrainedTokenizer,
-    StoppingCriteriaList,
 )
-from transformers.generation.streamers import BaseStreamer
 from transformers.utils import ModelOutput
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 
 
+@runtime_checkable
+class Tokenizer(Protocol):
+    """A protocol for a tokenizer."""
+
+    cls_token: str
+    sep_token: str
+    bos_token: str
+    eos_token: str
+    cls_token_id: int
+    sep_token_id: int
+    bos_token_id: int
+    eos_token_id: int
+
+    def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
+        ...
+
+    def decode(self, token_ids: list[int]) -> str:
+        ...
+
+
+@runtime_checkable
 class GenerativeModel(Protocol):
     """A protocol for a generative model."""
 
+    @property
+    def config(self) -> PretrainedConfig:
+        ...
+
     def generate(
         self,
+        inputs: LongTensor,
         generation_config: GenerationConfig | None = None,
-        logits_processor: LogitsProcessorList | None = None,
-        stopping_criteria: StoppingCriteriaList | None = None,
-        prefix_allowed_tokens_fn: Callable[[int, Tensor], list[int]] | None = None,
-        synced_gpus: bool | None = None,
-        assistant_model: PreTrainedModel | None = None,
-        streamer: BaseStreamer | None = None,
-        **model_kwargs,
+        **generation_kwargs,
     ) -> ModelOutput | LongTensor:
         ...
 
@@ -47,5 +65,5 @@ class ModelSetup(Protocol):
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[PreTrainedTokenizer | None, PreTrainedModel | GenerativeModel]:
+    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
         ...

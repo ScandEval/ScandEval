@@ -26,7 +26,7 @@ from ..utils import (
     get_class_by_name,
     internet_connection_available,
 )
-from .base import GenerativeModel
+from .base import GenerativeModel, Tokenizer
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 logger = logging.getLogger(__name__)
@@ -189,7 +189,7 @@ class HFModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[PreTrainedTokenizer | None, PreTrainedModel | GenerativeModel]:
+    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
         """Load an OpenAI model.
 
         Args:

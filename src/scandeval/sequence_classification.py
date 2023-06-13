@@ -6,12 +6,11 @@ from functools import partial
 from datasets.arrow_dataset import Dataset
 from transformers import BatchEncoding
 from transformers.data.data_collator import DataCollator, DataCollatorWithPadding
-from transformers.tokenization_utils import PreTrainedTokenizer
-
-from scandeval.utils import get_special_token_metadata
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
+from .model_setups import Tokenizer
+from .utils import get_special_token_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ class SequenceClassification(BenchmarkDataset):
             Hugging Face dataset:
                 The preprocessed dataset.
         """
-        tokenizer: PreTrainedTokenizer = kwargs["tokenizer"]
+        tokenizer: Tokenizer = kwargs["tokenizer"]
 
         # Extract special token metadata from the tokenizer
         special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
@@ -56,12 +55,15 @@ class SequenceClassification(BenchmarkDataset):
         sep_token = special_token_metadata["sep_token"]
 
         def tokenise(examples: dict) -> BatchEncoding:
-            # If the tokenizer is not adding special tokens, then we add them manually
+            # If the tokenizer is not adding special tokens, then we add them manually.
+            # We don't need this when performing few-shot evaluations, so in that case
+            # we don't add the special tokens.
             if (
                 not has_cls_token
                 and not has_sep_token
                 and cls_token is not None
                 and sep_token is not None
+                and kwargs["model_config"].task != "text-generation"
             ):
                 examples["text"] = [
                     f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
@@ -71,14 +73,16 @@ class SequenceClassification(BenchmarkDataset):
 
         tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
 
-        numericalise = partial(
-            self._create_numerical_labels, label2id=kwargs["config"].label2id
-        )
-        preprocessed = tokenised.map(
-            numericalise, batched=True, load_from_cache_file=False
-        )
-
-        return preprocessed.remove_columns(["text"])
+        if kwargs["model_config"].task != "text-generation":
+            numericalise = partial(
+                self._create_numerical_labels,
+                label2id=kwargs["hf_model_config"].label2id,
+            )
+            return tokenised.map(
+                numericalise, batched=True, load_from_cache_file=False
+            ).remove_columns(["text"])
+        else:
+            return tokenised
 
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
         try:
@@ -90,14 +94,12 @@ class SequenceClassification(BenchmarkDataset):
             )
         return examples
 
-    def _load_data_collator(
-        self, tokenizer: PreTrainedTokenizer | None = None
-    ) -> DataCollator:
+    def _load_data_collator(self, tokenizer: Tokenizer | None = None) -> DataCollator:
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Hugging Face tokenizer or None, optional):
-                A pretrained tokenizer. Can be None if the tokenizer is not used in the
+            tokenizer (Tokenizer or None, optional):
+                A tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
         Returns:

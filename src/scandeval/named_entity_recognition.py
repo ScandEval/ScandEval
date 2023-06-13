@@ -360,7 +360,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         map_fn = partial(
             self._tokenize_and_align_labels,
             tokenizer=kwargs["tokenizer"],
-            label2id=kwargs["config"].label2id,
+            label2id=kwargs["hf_model_config"].label2id,
         )
         tokenised_dataset: Dataset = dataset.map(
             map_fn, batched=True, load_from_cache_file=False
