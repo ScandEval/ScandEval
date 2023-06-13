@@ -35,6 +35,8 @@ jaxlib = ">=0.4.1,<1.0.0"
 pyinfer = ">=0.0.3,<1.0.0"
 accelerate = ">=0.19.0,<1.0.0"
 openai = ">=0.27.8,<1.0.0"
+tiktoken = ">=0.4.0,<1.0.0"
+levenshtein = ">=0.21.1,<1.0.0"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^7.1.1"
