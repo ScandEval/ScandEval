@@ -1,13 +1,19 @@
 """Model and tokenizer wrapper for OpenAI models."""
 
+import logging
+from time import sleep
+
 import openai
 import tiktoken
+from openai.error import APIError, InvalidRequestError, RateLimitError
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
+from tqdm.auto import tqdm
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
-from transformers.utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAITokenizer:
@@ -35,11 +41,11 @@ class OpenAITokenizer:
         self.hf_model_config = hf_model_config
         self.encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
 
-        self.bos_token_id: int = self.hf_model_config.bos_token_id
+        self.bos_token_id: int = self.hf_model_config.bos_token_id or -1
         self.cls_token_id: int = self.bos_token_id
-        self.eos_token_id: int = self.hf_model_config.eos_token_id
+        self.eos_token_id: int = self.hf_model_config.eos_token_id or -1
         self.sep_token_id: int = self.eos_token_id
-        self.pad_token_id: int = self.hf_model_config.pad_token_id
+        self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
         self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
@@ -143,11 +149,11 @@ class OpenAIModel:
         inputs: Tensor,
         generation_config: GenerationConfig | None = None,
         **generation_kwargs,
-    ) -> ModelOutput | LongTensor:
+    ) -> LongTensor:
         """Generate text using the model.
 
         Args:
-            inputs (LongTensor):
+            inputs (Tensor or list of Tensor):
                 The input IDs.
             generation_config (GenerationConfig or None, optional):
                 The generation configuration. If None then a default GenerationConfig
@@ -157,7 +163,7 @@ class OpenAIModel:
                 generation configuration.
 
         Returns:
-            ModelOutput or LongTensor:
+            LongTensor:
                 The model output.
         """
         if generation_config is None:
@@ -185,29 +191,92 @@ class OpenAIModel:
                 if token_id != self.config.pad_token_id
             ]
 
-        generation_output = openai.Completion.create(
-            model=self.model_config.model_id,
-            prompt=inputs_list,
-            max_tokens=generation_config.max_length,
-            temperature=generation_config.temperature,
-            top_p=generation_config.top_p,
-            n=generation_config.num_return_sequences,
-            frequency_penalty=generation_config.repetition_penalty - 1.0,
-            stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
-        )
+        # Check if the model is a chat model
+        try:
+            openai.Completion.create(
+                model=self.model_config.model_id,
+                prompt="Test",
+                max_tokens=10,
+            )
+            is_chat_model = False
+        except InvalidRequestError as e:
+            if "This is a chat model" in str(e):
+                is_chat_model = True
+            else:
+                raise e
 
-        completion_ids_list: list[list[int]] = [
-            self.tokenizer(choice.text.strip())["input_ids"][0].tolist()
-            for choice in generation_output.choices
-        ]
+        while True:
+            try:
+                completion_ids_list: list[list[int]]
+                if not is_chat_model:
+                    generation_output = openai.Completion.create(
+                        model=self.model_config.model_id,
+                        prompt=inputs_list,
+                        max_tokens=generation_config.max_length,
+                        temperature=generation_config.temperature,
+                        top_p=generation_config.top_p,
+                        n=generation_config.num_return_sequences,
+                        frequency_penalty=generation_config.repetition_penalty - 1.0,
+                        stop=[
+                            "\n\n",
+                            self.tokenizer.eos_token,
+                            self.tokenizer.pad_token,
+                        ],
+                    )
+                    completion_ids_list = [
+                        self.tokenizer(choice.text.strip())["input_ids"][0].tolist()
+                        for choice in generation_output.choices
+                    ]
+
+                else:
+                    completion_ids_list = list()
+                    for input_ids in tqdm(inputs_list, leave=False):
+                        single_output = openai.ChatCompletion.create(
+                            model=self.model_config.model_id,
+                            messages=[
+                                dict(
+                                    role="user",
+                                    content=self.tokenizer.decode(input_ids),
+                                ),
+                            ],
+                            max_tokens=generation_config.max_length,
+                            temperature=generation_config.temperature,
+                            top_p=generation_config.top_p,
+                            n=generation_config.num_return_sequences,
+                            frequency_penalty=(
+                                generation_config.repetition_penalty - 1.0
+                            ),
+                            stop=[
+                                "\n\n",
+                                self.tokenizer.eos_token,
+                                self.tokenizer.pad_token,
+                            ],
+                        )
+                        completion_ids: list[int] = self.tokenizer(
+                            single_output.choices[0].message.content.strip()
+                        )["input_ids"][0].tolist()
+                        completion_ids_list.append(completion_ids)
+                    break
+
+            except RateLimitError:
+                logger.debug("Rate limit exceeded, trying again in a few seconds...")
+                sleep(10)
+                continue
+
+            except APIError:
+                logger.debug(
+                    "Encountered an error with the OpenAI API, trying again in a "
+                    "few seconds..."
+                )
+                sleep(10)
+                continue
 
         if multiple_inputs:
-            return LongTensor(
-                pad_sequence(
-                    sequences=list(map(Tensor, completion_ids_list)),
-                    batch_first=True,
-                    padding_value=self.tokenizer.pad_token_id,
-                )
+            padded = pad_sequence(
+                sequences=list(map(Tensor, completion_ids_list)),
+                batch_first=True,
+                padding_value=self.tokenizer.pad_token_id,
             )
+            return padded.long()
         else:
             return LongTensor(completion_ids_list)

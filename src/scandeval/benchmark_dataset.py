@@ -15,6 +15,7 @@ from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from huggingface_hub.utils._errors import HfHubHTTPError
+from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import PretrainedConfig
 from transformers.data.data_collator import DataCollator
@@ -486,9 +487,7 @@ class BenchmarkDataset(ABC):
         )
 
         for idx in itr:
-            test = tests[idx]
             prepared_test = prepared_tests[idx]
-            assert isinstance(test, Dataset)
             assert isinstance(prepared_test, Dataset)
 
             test_scores = self._generate_single_iteration(
@@ -531,28 +530,43 @@ class BenchmarkDataset(ABC):
         all_preds: list[str] = list()
         all_labels: list[str] = list()
         candidate_labels = self.dataset_config.id2label
-        for example in tqdm(prepared_dataset):
-            ids = torch.LongTensor(example["input_ids"])
-            completion_ids: list[int] = model.generate(
-                inputs=ids,
+
+        dataloader = DataLoader(
+            prepared_dataset.with_format("torch"),
+            batch_size=20,  # OpenAI API limit
+            shuffle=False,
+        )
+
+        for batch in tqdm(dataloader, leave=False):
+            completion_ids_list: list[list[int]] = model.generate(
+                inputs=batch["input_ids"],
                 max_length=512,
                 temperature=0.0,
                 do_sample=False,
-            )[0].tolist()
+            ).tolist()
 
-            # Get the label which is the most similar to the completion
-            completion = tokenizer.decode(completion_ids)
-            predicted_label = completion.split("Label:")[-1].strip()
-
-            edit_distances = [
-                Levenshtein.distance(s1=predicted_label.upper(), s2=label.upper())
-                for label in candidate_labels
+            predicted_labels = [
+                tokenizer.decode(completion_ids).split("Label:")[-1].strip()
+                for completion_ids in completion_ids_list
             ]
-            predicted_label = candidate_labels[np.argmin(edit_distances)].upper()
-            true_label = example["label"].upper()
 
-            all_preds.append(predicted_label)
-            all_labels.append(true_label)
+            # Ensure that the predicted labels are in the candidate labels by computing
+            # the edit distance between the predicted label and each candidate label
+            # and choosing the candidate label with the smallest edit distance
+            for idx, predicted_label in enumerate(predicted_labels):
+                edit_distances = [
+                    Levenshtein.distance(
+                        s1=predicted_label.upper(), s2=candidate_label.upper()
+                    )
+                    for candidate_label in candidate_labels
+                ]
+                predicted_label = candidate_labels[np.argmin(edit_distances)].upper()
+                predicted_labels[idx] = predicted_label
+
+            true_labels = [label.upper() for label in batch["label"]]
+
+            all_preds.extend(predicted_labels)
+            all_labels.extend(true_labels)
 
         itr_scores = self._compute_metrics(
             model_outputs_and_labels=(all_preds, all_labels),

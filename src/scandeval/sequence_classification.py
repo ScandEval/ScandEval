@@ -54,6 +54,9 @@ class SequenceClassification(BenchmarkDataset):
         cls_token = special_token_metadata["cls_token"]
         sep_token = special_token_metadata["sep_token"]
 
+        if kwargs["model_config"].task == "text-generation":
+            dataset = dataset.map(self._apply_few_shot_prompt, batched=True)
+
         def tokenise(examples: dict) -> BatchEncoding:
             # If the tokenizer is not adding special tokens, then we add them manually.
             # We don't need this when performing few-shot evaluations, so in that case
@@ -83,6 +86,13 @@ class SequenceClassification(BenchmarkDataset):
             ).remove_columns(["text"])
         else:
             return tokenised
+
+    def _apply_few_shot_prompt(self, examples: dict) -> dict:
+        examples["text"] = [
+            self.dataset_config.prompt_template.format(text=text).strip()
+            for text in examples["text"]
+        ]
+        return examples
 
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
         try:

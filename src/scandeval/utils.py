@@ -114,6 +114,7 @@ def block_terminal_output():
     logging.getLogger("filelock").setLevel(logging.ERROR)
     logging.getLogger("absl").setLevel(logging.ERROR)
     logging.getLogger("datasets").setLevel(logging.ERROR)
+    logging.getLogger("openai").setLevel(logging.ERROR)
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
