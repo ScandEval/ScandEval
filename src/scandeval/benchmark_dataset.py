@@ -547,7 +547,6 @@ class BenchmarkDataset(ABC):
                 A list of dictionaries containing the scores for each metric.
         """
         all_preds: list[str] = list()
-        all_labels: list[str] = list()
         candidate_labels = self.dataset_config.id2label
 
         stop_word_ids: list[torch.Tensor] = list()
@@ -581,7 +580,9 @@ class BenchmarkDataset(ABC):
         )
         stop_word_ids = [double_newline_ids, two_single_newline_ids]
 
-        torch_dataset = prepared_dataset.with_format("torch").remove_columns(["text"])
+        torch_dataset = prepared_dataset.with_format("torch").remove_columns(
+            ["text", "label"]
+        )
         dataloader = DataLoader(
             dataset=torch_dataset,
             batch_size=self.benchmark_config.batch_size,
@@ -608,7 +609,6 @@ class BenchmarkDataset(ABC):
             # the edit distance between the predicted label and each candidate label
             # and choosing the candidate label with the smallest edit distance
             # TODO: Use logprobs instead if they are available?
-            all_labels.extend([label.upper() for label in batch["label"]])
             for predicted_label in predicted_labels:
                 edit_distances = [
                     Levenshtein.distance(
@@ -616,11 +616,11 @@ class BenchmarkDataset(ABC):
                     )
                     for candidate_label in candidate_labels
                 ]
-                predicted_label = candidate_labels[np.argmin(edit_distances)].upper()
+                predicted_label = candidate_labels[np.argmin(edit_distances).item()]
                 all_preds.append(predicted_label)
 
         itr_scores = self._compute_metrics(
-            model_outputs_and_labels=(all_preds, all_labels),
+            model_outputs_and_labels=(all_preds, prepared_dataset["label"]),
             id2label=self.dataset_config.id2label,
         )
 
