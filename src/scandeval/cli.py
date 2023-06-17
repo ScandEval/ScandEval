@@ -7,7 +7,7 @@ import click
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
 from .dataset_tasks import get_all_dataset_tasks
-from .enums import Framework
+from .enums import Device, Framework
 from .languages import get_all_languages
 
 
@@ -163,6 +163,14 @@ from .languages import get_all_languages
     show_default=True,
     help="""Whether to evaluate models using few-shot learning. This is only applicable
     for generative models (i.e., decoder and encoder-decoder models).""",
+)
+@click.option(
+    "--device",
+    default=None,
+    show_default=True,
+    type=click.Choice([device.lower() for device in Device.__members__]),
+    help="""The device to use for evaluation. If not specified then the device will be
+    set automatically.""",
 )
 def benchmark(
     model_id: Tuple[str],

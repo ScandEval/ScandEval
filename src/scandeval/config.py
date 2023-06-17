@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
+import torch
+
 from .enums import Framework, ModelType
 
 
@@ -83,9 +85,9 @@ class BenchmarkConfig:
     Attributes:
         model_languages (list of Language objects):
             The languages of the models to benchmark.
-        framework (Framework or None, optional):
+        framework (Framework or None):
             The framework of the models to benchmark. If None then the framework will
-            be inferred. Defaults to None.
+            be inferred.
         few_shot (bool):
             Whether to benchmark the models in few-shot mode.
         dataset_languages (list of Language objects):
@@ -113,6 +115,8 @@ class BenchmarkConfig:
         save_results (bool):
             Whether to save the benchmark results to
             'scandeval_benchmark_results.json'.
+        device (torch.device):
+            The device to use for benchmarking.
         verbose (bool):
             Whether to print verbose output.
         testing (bool, optional):
@@ -120,6 +124,8 @@ class BenchmarkConfig:
     """
 
     model_languages: list[Language]
+    framework: Framework | str | None
+    few_shot: bool
     dataset_languages: list[Language]
     dataset_tasks: list[DatasetTask]
     batch_size: int
@@ -130,10 +136,9 @@ class BenchmarkConfig:
     openai_api_key: str | None
     progress_bar: bool
     save_results: bool
+    device: torch.device
     verbose: bool
     testing: bool = False
-    framework: Framework | str | None = None
-    few_shot: bool = False
 
 
 @dataclass

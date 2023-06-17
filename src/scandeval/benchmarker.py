@@ -9,7 +9,7 @@ from .benchmark_config_factory import build_benchmark_config
 from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
-from .enums import Framework
+from .enums import Device, Framework
 from .exceptions import InvalidBenchmark
 from .types import SCORE_DICT
 from .utils import get_huggingface_model_lists
@@ -102,6 +102,7 @@ class Benchmarker:
         use_auth_token: bool | str = False,
         openai_api_key: str | None = None,
         ignore_duplicates: bool = True,
+        device: Device | None = None,
         verbose: bool = False,
     ) -> None:
         # Build benchmark configuration
@@ -120,6 +121,7 @@ class Benchmarker:
             save_results=save_results,
             verbose=verbose,
             framework=framework,
+            device=device,
             few_shot=few_shot,
         )
 

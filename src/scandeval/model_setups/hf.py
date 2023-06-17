@@ -367,8 +367,7 @@ class HFModelSetup:
             raise_errors=self.benchmark_config.raise_errors,
         )
 
-        # TODO: Move model to device
-
-        # TODO: Set up the model for inference
+        model.to(self.benchmark_config.device)
+        model.eval()
 
         return tokenizer, model

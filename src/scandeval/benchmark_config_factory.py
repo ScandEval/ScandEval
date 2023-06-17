@@ -1,8 +1,10 @@
 """Factory class for creating dataset configurations."""
 
+import torch
+
 from .config import BenchmarkConfig, DatasetTask, Language
 from .dataset_tasks import get_all_dataset_tasks
-from .enums import Framework
+from .enums import Device, Framework
 from .languages import get_all_languages
 
 
@@ -22,6 +24,8 @@ def build_benchmark_config(
     verbose: bool,
     framework: Framework | str | None,
     few_shot: bool,
+    device: Device | None,
+    testing: bool = False,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -67,24 +71,25 @@ def build_benchmark_config(
             automatically. Only relevant if `model_id` refers to a local model.
         few_shot (bool):
             Whether to use the few-shot version of the benchmark.
+        device (Device or None):
+            The device to use for running the models. If None then the device will be
+            set automatically.
+        testing (bool, optional):
+            Whether to run the benchmark in testing mode. Defaults to False.
     """
-    # Prepare the languages
     languages = prepare_languages(language=language)
-
-    # Prepare the model languages
     model_languages = prepare_model_languages(
         model_language=model_language,
         languages=languages,
     )
-
-    # Prepare the dataset languages
     dataset_languages = prepare_dataset_languages(
         dataset_language=dataset_language,
         languages=languages,
     )
 
-    # Prepare the dataset tasks
     dataset_tasks = prepare_dataset_tasks(dataset_task=dataset_task)
+
+    torch_device = prepare_device(device=device)
 
     # Build benchmark config and return it
     return BenchmarkConfig(
@@ -102,6 +107,8 @@ def build_benchmark_config(
         verbose=verbose,
         framework=framework,
         few_shot=few_shot,
+        device=torch_device,
+        testing=testing,
     )
 
 
@@ -245,3 +252,31 @@ def prepare_dataset_tasks(dataset_task: str | list[str] | None) -> list[DatasetT
         dataset_tasks = [dataset_task_mapping[task] for task in dataset_task]
 
     return dataset_tasks
+
+
+def prepare_device(device: Device | None) -> torch.device:
+    """Prepare device for benchmarking.
+
+    Args:
+        device (Device or None):
+            The device to use for running the models. If None then the device will be
+            set automatically.
+
+    Returns:
+        torch.device:
+            The prepared device.
+    """
+    device_mapping = {
+        Device.CPU: torch.device("cpu"),
+        Device.CUDA: torch.device("cuda"),
+        Device.MPS: torch.device("mps"),
+    }
+    if isinstance(device, Device):
+        return device_mapping[device]
+
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
