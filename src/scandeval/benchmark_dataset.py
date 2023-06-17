@@ -546,7 +546,6 @@ class BenchmarkDataset(ABC):
             list[dict[str, float]]:
                 A list of dictionaries containing the scores for each metric.
         """
-        all_preds: list[str] = list()
         candidate_labels = self.dataset_config.id2label
 
         stop_word_ids: list[torch.Tensor] = list()
@@ -592,48 +591,76 @@ class BenchmarkDataset(ABC):
         torch_dataset = prepared_dataset.with_format("torch").remove_columns(
             ["text", "label", "length"]
         )
-        dataloader = DataLoader(
-            dataset=torch_dataset,
-            batch_size=self.benchmark_config.batch_size,
-            shuffle=False,
-            num_workers=4,
-            collate_fn=self._load_data_collator(tokenizer=tokenizer),
-        )
 
-        for batch in tqdm(dataloader, leave=False):
-            completion_ids_lists: list[list[int]] = model.generate(
-                inputs=batch["input_ids"].to(model.device),
-                max_length=512,
-                temperature=0.0,
-                do_sample=False,
-                stopping_criteria=[StopWordCriteria(stop_word_ids=stop_word_ids)],
-            ).tolist()
+        batch_sizes = [
+            self.benchmark_config.batch_size // n
+            for n in range(1, np.log2(self.benchmark_config.batch_size).astype(int))
+        ]
+        for batch_size in batch_sizes:
+            all_preds: list[str] = list()
 
-            predicted_labels = [
-                tokenizer.decode(completion_ids_list).split("Label:")[-1].strip()
-                for completion_ids_list in completion_ids_lists
-            ]
+            dataloader = DataLoader(
+                dataset=torch_dataset,
+                batch_size=batch_size,
+                shuffle=False,
+                num_workers=4,
+                collate_fn=self._load_data_collator(tokenizer=tokenizer),
+            )
 
-            # Ensure that the predicted labels are in the candidate labels by computing
-            # the edit distance between the predicted label and each candidate label
-            # and choosing the candidate label with the smallest edit distance
-            # TODO: Use logprobs instead if they are available?
-            for predicted_label in predicted_labels:
-                edit_distances = [
-                    Levenshtein.distance(
-                        s1=predicted_label.upper(), s2=candidate_label.upper()
-                    )
-                    for candidate_label in candidate_labels
+            skip_evaluation = False
+            for batch in tqdm(dataloader, leave=False):
+                try:
+                    completion_ids_lists: list[list[int]] = model.generate(
+                        inputs=batch["input_ids"].to(model.device),
+                        max_length=512,
+                        temperature=0.0,
+                        do_sample=False,
+                        stopping_criteria=[
+                            StopWordCriteria(stop_word_ids=stop_word_ids)
+                        ],
+                    ).tolist()
+                except Exception as e:
+                    oom_error = [
+                        "CUDA out of memory",
+                        "CUDA error",
+                        "MPS backend out of memory",
+                    ]
+                    if all([error not in str(e) for error in oom_error]):
+                        raise InvalidBenchmark(str(e))
+                    skip_evaluation = True
+                    break
+
+                predicted_labels = [
+                    tokenizer.decode(completion_ids_list).split("Label:")[-1].strip()
+                    for completion_ids_list in completion_ids_lists
                 ]
-                predicted_label = candidate_labels[np.argmin(edit_distances).item()]
-                all_preds.append(predicted_label)
 
-        itr_scores = self._compute_metrics(
-            model_outputs_and_labels=(all_preds, prepared_dataset["label"]),
-            id2label=self.dataset_config.id2label,
-        )
+                # Ensure that the predicted labels are in the candidate labels by
+                # computing the edit distance between the predicted label and each
+                # candidate label and choosing the candidate label with the smallest
+                # edit distance
+                # TODO: Use logprobs instead if they are available?
+                for predicted_label in predicted_labels:
+                    edit_distances = [
+                        Levenshtein.distance(
+                            s1=predicted_label.upper(), s2=candidate_label.upper()
+                        )
+                        for candidate_label in candidate_labels
+                    ]
+                    predicted_label = candidate_labels[np.argmin(edit_distances).item()]
+                    all_preds.append(predicted_label)
 
-        return itr_scores
+            if skip_evaluation:
+                continue
+
+            itr_scores = self._compute_metrics(
+                model_outputs_and_labels=(all_preds, prepared_dataset["label"]),
+                id2label=self.dataset_config.id2label,
+            )
+
+            return itr_scores
+        else:
+            raise InvalidBenchmark("GPU out of memory, even with a batch size of 1!")
 
     def _get_metadata(
         self,
