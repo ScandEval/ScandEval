@@ -585,7 +585,7 @@ class BenchmarkDataset(ABC):
         prepared_dataset = prepared_dataset.add_column(
             name="length", column=[len(x) for x in prepared_dataset["text"]]
         )
-        prepared_dataset = prepared_dataset.sort(column_names="length", reverse=True)
+        prepared_dataset = prepared_dataset.sort("length", reverse=True)
 
         # Enable batching by building a dataloader. The dataloader cannot deal with
         # text columns, so we create a copy of the dataset without these
