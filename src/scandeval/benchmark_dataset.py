@@ -157,6 +157,7 @@ class BenchmarkDataset(ABC):
         elif isinstance(model, GenerativeModel) and (
             self.benchmark_config.few_shot or model_config.framework == Framework.API
         ):
+            breakpoint()
             scores = self._generate(
                 itr=itr,
                 num_iter=num_iter,
