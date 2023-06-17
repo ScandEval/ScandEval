@@ -556,12 +556,12 @@ class BenchmarkDataset(ABC):
                 text=["\n\n"],
                 add_special_tokens=False,
                 return_tensors="pt",
-            )["input_ids"][0]
+            )["input_ids"][0].to(model.device)
             single_newline_ids = tokenizer(
                 text=["\n"],
                 add_special_tokens=False,
                 return_tensors="pt",
-            )["input_ids"][0]
+            )["input_ids"][0].to(model.device)
 
             double_newline_ids = double_newline_ids[
                 [tokenizer.decode(tok) != "" for tok in double_newline_ids]
