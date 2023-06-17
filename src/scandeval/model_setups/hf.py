@@ -343,6 +343,7 @@ class HFModelSetup:
         # constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
         prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
+        padding_side = "left" if isinstance(model, GenerativeModel) else "right"
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             try:
@@ -354,6 +355,7 @@ class HFModelSetup:
                     cache_dir=self.benchmark_config.cache_dir,
                     use_fast=True,
                     verbose=False,
+                    padding_side=padding_side,
                 )
             except (JSONDecodeError, OSError):
                 raise InvalidBenchmark(
