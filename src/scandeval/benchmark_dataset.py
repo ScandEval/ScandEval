@@ -580,8 +580,17 @@ class BenchmarkDataset(ABC):
         )
         stop_word_ids = [double_newline_ids, two_single_newline_ids]
 
+        # Sort the dataset by the length of the text, to minimise the amount of padding
+        # that needs to be added, speeding up generation
+        prepared_dataset = prepared_dataset.add_column(
+            name="length", column=[len(x) for x in prepared_dataset["text"]]
+        )
+        prepared_dataset = prepared_dataset.sort(column_names="length")
+
+        # Enable batching by building a dataloader. The dataloader cannot deal with
+        # text columns, so we create a copy of the dataset without these
         torch_dataset = prepared_dataset.with_format("torch").remove_columns(
-            ["text", "label"]
+            ["text", "label", "length"]
         )
         dataloader = DataLoader(
             dataset=torch_dataset,
