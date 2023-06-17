@@ -90,6 +90,10 @@ class BenchmarkDataset(ABC):
             for metric_cfg in dataset_config.task.metrics
         }
 
+        # Set logging level based on verbosity
+        logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
+        logger.setLevel(logging_level)
+
     def benchmark(
         self,
         model_id: str,
@@ -302,8 +306,10 @@ class BenchmarkDataset(ABC):
                     model_already_initialized = False
 
             if "train" in itr_scores:
+                logger.debug(f"Train scores for iteration {idx}: {itr_scores['train']}")
                 scores["train"].append(itr_scores["train"])
             scores["test"].append(itr_scores["test"])
+            logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
 
         return scores
 
@@ -498,6 +504,7 @@ class BenchmarkDataset(ABC):
                 model=model,
                 tokenizer=tokenizer,
             )
+            logger.debug(f"Test scores for iteration {idx}: {test_scores}")
             scores["test"].append(test_scores)
 
             if self.benchmark_config.evaluate_train:
@@ -506,6 +513,7 @@ class BenchmarkDataset(ABC):
                     model=model,
                     tokenizer=tokenizer,
                 )
+                logger.debug(f"Train scores for iteration {idx}: {train_scores}")
                 scores["train"].append(train_scores)
 
         return scores
@@ -593,11 +601,12 @@ class BenchmarkDataset(ABC):
             predicted_label = (
                 tokenizer.decode(completion_ids_list).split("Label:")[-1].strip()
             )
+            breakpoint()
 
             # Ensure that the predicted labels are in the candidate labels by computing
             # the edit distance between the predicted label and each candidate label
             # and choosing the candidate label with the smallest edit distance
-            # TODO: Use logprobs instead if they are available
+            # TODO: Use logprobs instead if they are available?
             edit_distances = [
                 Levenshtein.distance(
                     s1=predicted_label.upper(), s2=candidate_label.upper()
