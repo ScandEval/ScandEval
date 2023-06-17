@@ -552,16 +552,24 @@ class BenchmarkDataset(ABC):
                     return False
 
             stop_word_ids: list[torch.Tensor] = list()
-            double_newline_ids = tokenizer(
-                text=["\n\n"],
-                add_special_tokens=False,
-                return_tensors="pt",
-            )["input_ids"][0].to(model.device)
-            single_newline_ids = tokenizer(
-                text=["\n"],
-                add_special_tokens=False,
-                return_tensors="pt",
-            )["input_ids"][0].to(model.device)
+            double_newline_ids: torch.Tensor = (
+                tokenizer(
+                    text=["\n\n"],
+                    add_special_tokens=False,
+                    return_tensors="pt",
+                )
+                .input_ids[0]
+                .to(model.device)
+            )
+            single_newline_ids: torch.Tensor = (
+                tokenizer(
+                    text=["\n"],
+                    add_special_tokens=False,
+                    return_tensors="pt",
+                )
+                .input_ids[0]
+                .to(model.device)
+            )
 
             double_newline_ids = double_newline_ids[
                 [tokenizer.decode(tok) != "" for tok in double_newline_ids]

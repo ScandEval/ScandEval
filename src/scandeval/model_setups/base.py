@@ -9,7 +9,6 @@ from transformers import (
     PretrainedConfig,
     PreTrainedModel,
 )
-from transformers.utils import ModelOutput
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 
@@ -51,7 +50,7 @@ class GenerativeModel(Protocol):
         inputs: torch.LongTensor,
         generation_config: GenerationConfig | None = None,
         **generation_kwargs,
-    ) -> ModelOutput | torch.LongTensor:
+    ) -> torch.LongTensor:
         ...
 
 
