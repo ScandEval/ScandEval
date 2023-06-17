@@ -15,9 +15,8 @@ from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from huggingface_hub.utils._errors import HfHubHTTPError
-from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from transformers import PretrainedConfig
+from transformers import PretrainedConfig, StoppingCriteria
 from transformers.data.data_collator import DataCollator
 from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer import Trainer
@@ -32,6 +31,8 @@ from transformers.training_args import OptimizerNames, TrainingArguments
 
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .dataset_tasks import SPEED
+from .enums import Framework
 from .exceptions import InvalidBenchmark
 from .model_config import get_model_config
 from .model_loading import load_model
@@ -140,7 +141,7 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
-        if self.dataset_config.task.name == "speed":
+        if self.dataset_config.task.name == SPEED:
             scores = benchmark_speed(
                 itr=itr,
                 tokenizer=tokenizer,
@@ -149,7 +150,9 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-        elif isinstance(model, GenerativeModel):
+        elif isinstance(model, GenerativeModel) and (
+            self.benchmark_config.few_shot or model_config.framework == Framework.API
+        ):
             scores = self._generate(
                 itr=itr,
                 num_iter=num_iter,
@@ -531,42 +534,79 @@ class BenchmarkDataset(ABC):
         all_labels: list[str] = list()
         candidate_labels = self.dataset_config.id2label
 
-        dataloader = DataLoader(
-            prepared_dataset.with_format("torch"),
-            batch_size=20,  # OpenAI API limit
-            shuffle=False,
-        )
+        for example in tqdm(prepared_dataset.with_format("torch"), leave=False):
 
-        for batch in tqdm(dataloader, leave=False):
-            completion_ids_list: list[list[int]] = model.generate(
-                inputs=batch["input_ids"],
+            class StopWordCriteria(StoppingCriteria):
+                def __init__(self, stop_word_ids: list[torch.Tensor]):
+                    super().__init__()
+                    self.stop_word_ids = stop_word_ids
+
+                def __call__(
+                    self, input_ids: torch.LongTensor, scores: torch.FloatTensor
+                ) -> bool:
+                    for stop_word_tensor in self.stop_word_ids:
+                        if torch.all(
+                            (stop_word_tensor == input_ids[0][-len(stop_word_tensor) :])
+                        ).item():
+                            return True
+                    return False
+
+            stop_word_ids: list[torch.Tensor] = list()
+            double_newline_ids = tokenizer(
+                text=["\n\n"],
+                add_special_tokens=False,
+                return_tensors="pt",
+            )["input_ids"][0]
+            single_newline_ids = tokenizer(
+                text=["\n"],
+                add_special_tokens=False,
+                return_tensors="pt",
+            )["input_ids"][0]
+
+            double_newline_ids = double_newline_ids[
+                [tokenizer.decode(tok) != "" for tok in double_newline_ids]
+            ]
+            single_newline_ids = single_newline_ids[
+                [tokenizer.decode(tok) != "" for tok in single_newline_ids]
+            ]
+
+            two_single_newline_ids = torch.cat(
+                [single_newline_ids, single_newline_ids], dim=0
+            )
+            stop_word_ids = [double_newline_ids, two_single_newline_ids]
+            completion_ids_list: list[int] = model.generate(
+                inputs=example["input_ids"].unsqueeze(dim=0),
                 max_length=512,
                 temperature=0.0,
                 do_sample=False,
-            ).tolist()
+                stopping_criteria=[StopWordCriteria(stop_word_ids=stop_word_ids)],
+            ).tolist()[0]
 
-            predicted_labels = [
-                tokenizer.decode(completion_ids).split("Label:")[-1].strip()
-                for completion_ids in completion_ids_list
-            ]
+            predicted_label = (
+                tokenizer.decode(completion_ids_list).split("Label:")[-1].strip()
+            )
 
             # Ensure that the predicted labels are in the candidate labels by computing
             # the edit distance between the predicted label and each candidate label
             # and choosing the candidate label with the smallest edit distance
-            for idx, predicted_label in enumerate(predicted_labels):
-                edit_distances = [
-                    Levenshtein.distance(
-                        s1=predicted_label.upper(), s2=candidate_label.upper()
-                    )
-                    for candidate_label in candidate_labels
-                ]
-                predicted_label = candidate_labels[np.argmin(edit_distances)].upper()
-                predicted_labels[idx] = predicted_label
+            # TODO: Use logprobs instead if they are available
+            edit_distances = [
+                Levenshtein.distance(
+                    s1=predicted_label.upper(), s2=candidate_label.upper()
+                )
+                for candidate_label in candidate_labels
+            ]
+            predicted_label = candidate_labels[np.argmin(edit_distances)].upper()
+            true_label = example["label"].upper()
 
-            true_labels = [label.upper() for label in batch["label"]]
+            # TEMP
+            print(f"\nGenerated: {tokenizer.decode(completion_ids_list)}")
+            print(f"Predicted: {predicted_label}")
+            print(f"True: {true_label}")
+            print()
 
-            all_preds.extend(predicted_labels)
-            all_labels.extend(true_labels)
+            all_preds.append(predicted_label)
+            all_labels.append(true_label)
 
         itr_scores = self._compute_metrics(
             model_outputs_and_labels=(all_preds, all_labels),

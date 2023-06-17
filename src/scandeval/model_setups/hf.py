@@ -247,8 +247,15 @@ class HFModelSetup:
                         )
 
                     # Get the model class associated with the supertask
+                    if (
+                        self.benchmark_config.few_shot
+                        or model_config.framework == Framework.API
+                    ):
+                        model_cls_supertask = "causal-l-m"
+                    else:
+                        model_cls_supertask = supertask
                     model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
-                        class_name=f"auto-model-for-{supertask}",
+                        class_name=f"auto-model-for-{model_cls_supertask}",
                         module_name="transformers",
                     )
 
@@ -359,5 +366,9 @@ class HFModelSetup:
             tokenizer=tokenizer,
             raise_errors=self.benchmark_config.raise_errors,
         )
+
+        # TODO: Move model to device
+
+        # TODO: Set up the model for inference
 
         return tokenizer, model

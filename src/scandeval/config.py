@@ -86,6 +86,8 @@ class BenchmarkConfig:
         framework (Framework or None, optional):
             The framework of the models to benchmark. If None then the framework will
             be inferred. Defaults to None.
+        few_shot (bool):
+            Whether to benchmark the models in few-shot mode.
         dataset_languages (list of Language objects):
             The languages of the datasets in the benchmark.
         dataset_tasks (list of DatasetTask):
@@ -131,6 +133,7 @@ class BenchmarkConfig:
     verbose: bool
     testing: bool = False
     framework: Framework | str | None = None
+    few_shot: bool = False
 
 
 @dataclass

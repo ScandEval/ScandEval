@@ -59,15 +59,6 @@ from .languages import get_all_languages
     will use the `language` value.""",
 )
 @click.option(
-    "--framework",
-    "-f",
-    default=None,
-    show_default=True,
-    type=click.Choice([framework.lower() for framework in Framework.__members__]),
-    help="""The model framework to use. Only relevant if `model-id` refers to a local
-    path. Otherwise, the framework will be set automatically.""",
-)
-@click.option(
     "--dataset-language",
     "-dl",
     default=None,
@@ -157,6 +148,22 @@ from .languages import get_all_languages
     help="""Whether to skip evaluation of models which have already been evaluated,
     with scores lying in the 'scandeval_benchmark_results.jsonl' file.""",
 )
+@click.option(
+    "--framework",
+    "-f",
+    default=None,
+    show_default=True,
+    type=click.Choice([framework.lower() for framework in Framework.__members__]),
+    help="""The model framework to use. Only relevant if `model-id` refers to a local
+    path. Otherwise, the framework will be set automatically.""",
+)
+@click.option(
+    "--few-shot/--no-few-shot",
+    default=False,
+    show_default=True,
+    help="""Whether to evaluate models using few-shot learning. This is only applicable
+    for generative models (i.e., decoder and encoder-decoder models).""",
+)
 def benchmark(
     model_id: Tuple[str],
     dataset: Tuple[str],
@@ -175,6 +182,7 @@ def benchmark(
     ignore_duplicates: bool,
     verbose: bool = False,
     framework: str | None = None,
+    few_shot: bool = False,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -204,6 +212,7 @@ def benchmark(
         ignore_duplicates=ignore_duplicates,
         cache_dir=cache_dir,
         framework=framework,
+        few_shot=few_shot,
     )
 
     # Perform the benchmark evaluation

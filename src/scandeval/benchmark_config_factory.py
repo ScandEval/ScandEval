@@ -21,6 +21,7 @@ def build_benchmark_config(
     save_results: bool,
     verbose: bool,
     framework: Framework | str | None,
+    few_shot: bool,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -64,6 +65,8 @@ def build_benchmark_config(
         framework (Framework or None):
             The model framework to use. If None then the framework will be set
             automatically. Only relevant if `model_id` refers to a local model.
+        few_shot (bool):
+            Whether to use the few-shot version of the benchmark.
     """
     # Prepare the languages
     languages = prepare_languages(language=language)
@@ -98,6 +101,7 @@ def build_benchmark_config(
         save_results=save_results,
         verbose=verbose,
         framework=framework,
+        few_shot=few_shot,
     )
 
 

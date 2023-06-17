@@ -39,6 +39,10 @@ class Benchmarker:
         framework (None, str or list of str, optional):
             The model framework to use. Only relevant if `model-id` refers to a local
             path. Otherwise, the framework will be set automatically. Defaults to None.
+        few_shot (bool, optional):
+            Whether to evaluate models using few-shot learning. This is only applicable
+            for generative models (i.e., decoder and encoder-decoder models). Defaults
+            to False.
         dataset_language (None, str or list of str, optional):
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
@@ -88,6 +92,7 @@ class Benchmarker:
         language: str | list[str] = ["da", "sv", "no"],
         model_language: str | list[str] | None = None,
         framework: Framework | str | None = None,
+        few_shot: bool = False,
         dataset_language: str | list[str] | None = None,
         dataset_task: str | list[str] | None = None,
         batch_size: int = 32,
@@ -115,6 +120,7 @@ class Benchmarker:
             save_results=save_results,
             verbose=verbose,
             framework=framework,
+            few_shot=few_shot,
         )
 
         # Set attributes from arguments
