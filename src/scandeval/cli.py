@@ -191,6 +191,7 @@ def benchmark(
     verbose: bool = False,
     framework: str | None = None,
     few_shot: bool = False,
+    device: str | None = None,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -203,6 +204,7 @@ def benchmark(
     dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
     batch_size_int = int(batch_size)
     auth: Union[str, bool] = auth_token if auth_token != "" else use_auth_token
+    device = Device[device.upper()] if device is not None else None
 
     # Initialise the benchmarker class
     benchmarker = Benchmarker(
@@ -221,6 +223,7 @@ def benchmark(
         cache_dir=cache_dir,
         framework=framework,
         few_shot=few_shot,
+        device=device,
     )
 
     # Perform the benchmark evaluation
