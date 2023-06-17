@@ -210,7 +210,7 @@ class HFModelSetup:
         supertask = dataset_config.task.supertask
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
-        load_in_4bit = True
+        load_in_4bit = self.benchmark_config.few_shot
 
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,
