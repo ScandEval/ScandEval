@@ -582,6 +582,7 @@ class BenchmarkDataset(ABC):
         stop_word_ids = [double_newline_ids, two_single_newline_ids]
 
         torch_dataset = prepared_dataset.with_format("torch")
+        breakpoint()
         dataloader = DataLoader(
             dataset=torch_dataset,
             batch_size=self.benchmark_config.batch_size,
