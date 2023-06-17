@@ -275,6 +275,7 @@ class HFModelSetup:
                     # Load the model
                     with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", category=UserWarning)
+                        breakpoint()
                         model_or_tuple = model_cls_or_none.from_pretrained(
                             model_config.model_id,
                             revision=model_config.revision,
