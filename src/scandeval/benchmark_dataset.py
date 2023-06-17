@@ -575,7 +575,7 @@ class BenchmarkDataset(ABC):
             )
             stop_word_ids = [double_newline_ids, two_single_newline_ids]
             completion_ids_list: list[int] = model.generate(
-                inputs=example["input_ids"].unsqueeze(dim=0),
+                inputs=example["input_ids"].unsqueeze(dim=0).to(model.device),
                 max_length=512,
                 temperature=0.0,
                 do_sample=False,

@@ -2,7 +2,7 @@
 
 from typing import Protocol, runtime_checkable
 
-from torch import LongTensor
+import torch
 from transformers import (
     BatchEncoding,
     GenerationConfig,
@@ -42,12 +42,16 @@ class GenerativeModel(Protocol):
     def config(self) -> PretrainedConfig:
         ...
 
+    @property
+    def device(self) -> torch.device:
+        ...
+
     def generate(
         self,
-        inputs: LongTensor,
+        inputs: torch.LongTensor,
         generation_config: GenerationConfig | None = None,
         **generation_kwargs,
-    ) -> ModelOutput | LongTensor:
+    ) -> ModelOutput | torch.LongTensor:
         ...
 
 
