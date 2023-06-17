@@ -288,6 +288,7 @@ class HFModelSetup:
                             config=config,
                             from_flax=from_flax,
                             ignore_mismatched_sizes=ignore_mismatched_sizes,
+                            load_in_4bit=True,
                             **loading_kwargs,
                         )
                     if isinstance(model_or_tuple, tuple):
