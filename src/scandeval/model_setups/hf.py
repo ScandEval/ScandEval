@@ -3,7 +3,7 @@
 import logging
 import warnings
 from json import JSONDecodeError
-from typing import Type
+from typing import Type, TypedDict
 
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import RepositoryNotFoundError
@@ -208,6 +208,18 @@ class HFModelSetup:
         model_id = model_config.model_id
         supertask = dataset_config.task.supertask
         from_flax = model_config.framework == Framework.JAX
+        ignore_mismatched_sizes = False
+
+        class LoadingArguments(TypedDict):
+            revision: str
+            use_auth_token: str | bool
+            cache_dir: str
+
+        loading_kwargs: LoadingArguments = {
+            "revision": model_config.revision,
+            "use_auth_token": self.benchmark_config.use_auth_token,
+            "cache_dir": self.benchmark_config.cache_dir,
+        }
 
         while True:
             try:
@@ -216,14 +228,12 @@ class HFModelSetup:
                 if "norbert3" in model_id:
                     model = load_norbert_model(
                         model_id=model_id,
-                        revision=model_config.revision,
                         supertask=supertask,
                         num_labels=dataset_config.num_labels,
                         id2label=dataset_config.id2label,
                         label2id=dataset_config.label2id,
                         from_flax=from_flax,
-                        use_auth_token=self.benchmark_config.use_auth_token,
-                        cache_dir=self.benchmark_config.cache_dir,
+                        **loading_kwargs,
                     )
 
                 # Otherwise load the pretrained model
@@ -231,12 +241,10 @@ class HFModelSetup:
                     try:
                         config = AutoConfig.from_pretrained(
                             model_id,
-                            revision=model_config.revision,
-                            use_auth_token=self.benchmark_config.use_auth_token,
                             num_labels=dataset_config.num_labels,
                             id2label=dataset_config.id2label,
                             label2id=dataset_config.label2id,
-                            cache_dir=self.benchmark_config.cache_dir,
+                            **loading_kwargs,
                         )
                     except KeyError as e:
                         key = e.args[0]
@@ -275,23 +283,25 @@ class HFModelSetup:
                     # Load the model
                     with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", category=UserWarning)
-                        breakpoint()
                         model_or_tuple = model_cls_or_none.from_pretrained(
                             model_config.model_id,
-                            revision=model_config.revision,
-                            use_auth_token=self.benchmark_config.use_auth_token,
                             config=config,
-                            cache_dir=self.benchmark_config.cache_dir,
                             from_flax=from_flax,
-                            ignore_mismatched_sizes=True,
+                            ignore_mismatched_sizes=ignore_mismatched_sizes,
+                            **loading_kwargs,
                         )
                     if isinstance(model_or_tuple, tuple):
                         model = model_or_tuple[0]
                     else:
                         model = model_or_tuple
 
-                # Break out of the loop
                 break
+
+            except KeyError as e:
+                if not ignore_mismatched_sizes:
+                    ignore_mismatched_sizes = True
+                else:
+                    raise InvalidBenchmark(str(e))
 
             except (OSError, ValueError) as e:
                 # If `from_flax` is False but only Flax models are available then try
@@ -319,22 +329,6 @@ class HFModelSetup:
                     "`huggingface-cli login` command."
                 )
 
-        # If the model is of type XMOD then we need to set the default language
-        if "XMOD" in type(model).__name__:
-            language_mapping = dict(
-                da="da_DK",
-                sv="sv_SE",
-                nb="no_XX",
-                nn="no_XX",
-                no="no_XX",
-            )
-            language = dataset_config.languages[0].code
-            if language not in language_mapping:
-                raise InvalidBenchmark(
-                    f"The language {language!r} is not supported by the XMOD model."
-                )
-            model.set_default_language(language_mapping[language])
-
         # Set up the model for question answering
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
@@ -350,13 +344,11 @@ class HFModelSetup:
             try:
                 tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
                     model_id,
-                    revision=model_config.revision,
-                    use_auth_token=self.benchmark_config.use_auth_token,
                     add_prefix_space=prefix,
-                    cache_dir=self.benchmark_config.cache_dir,
                     use_fast=True,
                     verbose=False,
                     padding_side=padding_side,
+                    **loading_kwargs,
                 )
             except (JSONDecodeError, OSError):
                 raise InvalidBenchmark(
