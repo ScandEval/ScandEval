@@ -278,15 +278,17 @@ class HFModelSetup:
                         config.pooler_hidden_size = config.hidden_size
 
                     # Load the model
-                    with HiddenPrints():
-                        model_or_tuple = model_cls_or_none.from_pretrained(
-                            model_config.model_id,
-                            config=config,
-                            from_flax=from_flax,
-                            ignore_mismatched_sizes=ignore_mismatched_sizes,
-                            load_in_4bit=load_in_4bit,
-                            **loading_kwargs,
-                        )
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings("ignore", category=UserWarning)
+                        with HiddenPrints():
+                            model_or_tuple = model_cls_or_none.from_pretrained(
+                                model_config.model_id,
+                                config=config,
+                                from_flax=from_flax,
+                                ignore_mismatched_sizes=ignore_mismatched_sizes,
+                                load_in_4bit=load_in_4bit,
+                                **loading_kwargs,
+                            )
                     if isinstance(model_or_tuple, tuple):
                         model = model_or_tuple[0]
                     else:
