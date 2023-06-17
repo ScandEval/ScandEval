@@ -8,13 +8,7 @@ from typing import Type, TypedDict
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from requests import RequestException
-from transformers import (
-    AutoConfig,
-    AutoTokenizer,
-    PretrainedConfig,
-    PreTrainedModel,
-    PreTrainedTokenizer,
-)
+from transformers import AutoConfig, AutoTokenizer, PretrainedConfig, PreTrainedModel
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
@@ -30,6 +24,12 @@ from .base import GenerativeModel, Tokenizer
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 logger = logging.getLogger(__name__)
+
+
+class LoadingArguments(TypedDict):
+    revision: str
+    use_auth_token: str | bool
+    cache_dir: str
 
 
 class HFModelSetup:
@@ -209,11 +209,7 @@ class HFModelSetup:
         supertask = dataset_config.task.supertask
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
-
-        class LoadingArguments(TypedDict):
-            revision: str
-            use_auth_token: str | bool
-            cache_dir: str
+        load_in_4bit = True
 
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,
@@ -288,7 +284,7 @@ class HFModelSetup:
                             config=config,
                             from_flax=from_flax,
                             ignore_mismatched_sizes=ignore_mismatched_sizes,
-                            load_in_4bit=True,
+                            load_in_4bit=load_in_4bit,
                             **loading_kwargs,
                         )
                     if isinstance(model_or_tuple, tuple):
@@ -334,7 +330,45 @@ class HFModelSetup:
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
-        # Load the tokenizer. If the model is a subclass of a RoBERTa model then we
+        tokenizer = self._load_tokenizer(
+            model=model, model_id=model_id, loading_kwargs=loading_kwargs
+        )
+
+        # Align the model and the tokenizer
+        model, tokenizer = align_model_and_tokenizer(
+            model=model,
+            tokenizer=tokenizer,
+            raise_errors=self.benchmark_config.raise_errors,
+        )
+
+        model.eval()
+        if not load_in_4bit:
+            model.to(self.benchmark_config.device)
+
+        return tokenizer, model
+
+    def _load_tokenizer(
+        self,
+        model: PreTrainedModel | GenerativeModel,
+        model_id: str,
+        loading_kwargs: LoadingArguments,
+    ) -> Tokenizer:
+        """Load the tokenizer.
+
+        Args:
+            model (PreTrainedModel or GenerativeModel):
+                The model, which is used to determine whether to add a prefix space to
+                the tokens.
+            model_id (str):
+                The model identifier. Used for logging.
+            loading_kwargs (LoadingArguments):
+                The loading arguments.
+
+        Returns:
+            Tokenizer:
+                The loaded tokenizer.
+        """
+        # If the model is a subclass of a RoBERTa model then we
         # have to add a prefix space to the tokens, by the way the model is
         # constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
@@ -343,7 +377,7 @@ class HFModelSetup:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             try:
-                tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
+                return AutoTokenizer.from_pretrained(
                     model_id,
                     add_prefix_space=prefix,
                     use_fast=True,
@@ -355,15 +389,3 @@ class HFModelSetup:
                 raise InvalidBenchmark(
                     f"Could not load tokenizer for model {model_id!r}."
                 )
-
-        # Align the model and the tokenizer
-        model, tokenizer = align_model_and_tokenizer(
-            model=model,
-            tokenizer=tokenizer,
-            raise_errors=self.benchmark_config.raise_errors,
-        )
-
-        model.to(self.benchmark_config.device)
-        model.eval()
-
-        return tokenizer, model
