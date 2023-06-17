@@ -16,6 +16,7 @@ from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnect
 from ..languages import get_all_languages
 from ..norbert import load_norbert_model
 from ..utils import (
+    HiddenPrints,
     block_terminal_output,
     get_class_by_name,
     internet_connection_available,
@@ -279,14 +280,15 @@ class HFModelSetup:
                     # Load the model
                     with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", category=UserWarning)
-                        model_or_tuple = model_cls_or_none.from_pretrained(
-                            model_config.model_id,
-                            config=config,
-                            from_flax=from_flax,
-                            ignore_mismatched_sizes=ignore_mismatched_sizes,
-                            load_in_4bit=load_in_4bit,
-                            **loading_kwargs,
-                        )
+                        with HiddenPrints():
+                            model_or_tuple = model_cls_or_none.from_pretrained(
+                                model_config.model_id,
+                                config=config,
+                                from_flax=from_flax,
+                                ignore_mismatched_sizes=ignore_mismatched_sizes,
+                                load_in_4bit=load_in_4bit,
+                                **loading_kwargs,
+                            )
                     if isinstance(model_or_tuple, tuple):
                         model = model_or_tuple[0]
                     else:

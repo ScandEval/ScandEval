@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import re
+import sys
 import warnings
 from collections import defaultdict
 from copy import deepcopy
@@ -503,3 +504,13 @@ def get_huggingface_model_lists(
         ]
 
     return dict(model_lists)
+
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, "w")
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
