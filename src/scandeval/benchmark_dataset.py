@@ -599,7 +599,6 @@ class BenchmarkDataset(ABC):
                 do_sample=False,
                 stopping_criteria=[StopWordCriteria(stop_word_ids=stop_word_ids)],
             ).tolist()
-            breakpoint()
 
             predicted_labels = [
                 tokenizer.decode(completion_ids_list).split("Label:")[-1].strip()
