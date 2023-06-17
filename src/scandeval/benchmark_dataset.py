@@ -599,6 +599,7 @@ class BenchmarkDataset(ABC):
                 do_sample=False,
                 stopping_criteria=[StopWordCriteria(stop_word_ids=stop_word_ids)],
             ).tolist()
+            breakpoint()
 
             predicted_labels = [
                 tokenizer.decode(completion_ids_list).split("Label:")[-1].strip()
@@ -999,12 +1000,12 @@ class BenchmarkDataset(ABC):
             predictions = model_outputs
 
         predictions = [
-            id2label.index(pred) if isinstance(pred, str) else pred
+            id2label.index(pred.upper()) if isinstance(pred, str) else pred
             for pred in predictions
         ]
 
         labels = [
-            id2label.index(label) if isinstance(label, str) else label
+            id2label.index(label.upper()) if isinstance(label, str) else label
             for label in labels
         ]
 
