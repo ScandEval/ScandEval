@@ -56,7 +56,6 @@ class SequenceClassification(BenchmarkDataset):
 
         if kwargs["model_config"].task == "text-generation":
             dataset = dataset.map(self._apply_few_shot_prompt, batched=True)
-            breakpoint()
 
         def tokenise(examples: dict) -> BatchEncoding:
             # If the tokenizer is not adding special tokens, then we add them manually.

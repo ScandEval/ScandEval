@@ -608,7 +608,6 @@ class BenchmarkDataset(ABC):
             predicted_label = (
                 tokenizer.decode(completion_ids_list).split("Label:")[-1].strip()
             )
-            breakpoint()
 
             # Ensure that the predicted labels are in the candidate labels by computing
             # the edit distance between the predicted label and each candidate label
@@ -624,10 +623,10 @@ class BenchmarkDataset(ABC):
             true_label = example["label"].upper()
 
             # TEMP
-            print(f"\nGenerated: {tokenizer.decode(completion_ids_list)}")
-            print(f"Predicted: {predicted_label}")
-            print(f"True: {true_label}")
-            print()
+            # print(f"\nGenerated: {tokenizer.decode(completion_ids_list)}")
+            # print(f"Predicted: {predicted_label}")
+            # print(f"True: {true_label}")
+            # print()
 
             all_preds.append(predicted_label)
             all_labels.append(true_label)
