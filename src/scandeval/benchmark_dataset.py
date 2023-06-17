@@ -593,8 +593,8 @@ class BenchmarkDataset(ABC):
         )
 
         batch_sizes = [
-            self.benchmark_config.batch_size // n
-            for n in range(1, np.log2(self.benchmark_config.batch_size).astype(int))
+            self.benchmark_config.batch_size // (2**n)
+            for n in range(1 + np.log2(self.benchmark_config.batch_size).astype(int))
         ]
         for batch_size in batch_sizes:
             all_preds: list[str] = list()
