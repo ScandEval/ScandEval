@@ -133,6 +133,13 @@ class BenchmarkDataset(ABC):
             benchmark_config=self.benchmark_config,
         )
 
+        # This happens when a local model is used, as we cannot fetch the model metadata
+        if model_config.task == "unknown":
+            if isinstance(model, GenerativeModel):
+                model_config.task = "text-generation"
+            else:
+                model_config.task = "fill-mask"
+
         metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
         # Set variable with number of iterations
@@ -157,7 +164,6 @@ class BenchmarkDataset(ABC):
         elif isinstance(model, GenerativeModel) and (
             self.benchmark_config.few_shot or model_config.framework == Framework.API
         ):
-            breakpoint()
             scores = self._generate(
                 itr=itr,
                 num_iter=num_iter,

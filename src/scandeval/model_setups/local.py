@@ -101,7 +101,7 @@ class LocalModelSetup:
             model_id=model_id,
             revision="main",
             framework=framework,
-            task="fill-mask",
+            task="unknown",
             languages=list(),
             model_type=ModelType.LOCAL,
         )
