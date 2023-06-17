@@ -5,6 +5,7 @@ from time import sleep
 
 import openai
 import tiktoken
+import torch
 from openai.error import APIError, InvalidRequestError, RateLimitError
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
@@ -128,6 +129,8 @@ class OpenAIModel:
             The benchmark configuration.
         tokenizer (OpenAITokenizer):
             The tokenizer.
+        device (torch.device):
+            The device to use, is always CPU.
     """
 
     def __init__(
@@ -143,6 +146,7 @@ class OpenAIModel:
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
+        self.device = torch.device("cpu")
 
     def generate(
         self,
