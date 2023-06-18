@@ -664,13 +664,6 @@ class BenchmarkDataset(ABC):
                     for completion in completions
                 ]
 
-                # TEMP
-                for completion, predicted_label in zip(completions, predicted_labels):
-                    print("Thoughts: ", completion.split("Thoughts:")[4].strip())
-                    print(f"LABEL: {predicted_label}")
-                    print("\n-------------------------------\n")
-
-                breakpoint()
                 # Ensure that the predicted labels are in the candidate labels by
                 # computing the edit distance between the predicted label and each
                 # candidate label and choosing the candidate label with the smallest
