@@ -571,6 +571,7 @@ class BenchmarkDataset(ABC):
         """
         candidate_labels = self.dataset_config.id2label
 
+        # TODO: This should not be done if dealing with an OpenAI model
         stop_word_ids: list[torch.Tensor] = list()
         double_newline_ids: torch.Tensor = (
             tokenizer(
@@ -627,6 +628,7 @@ class BenchmarkDataset(ABC):
                 batch_size=batch_size,
                 shuffle=False,
                 num_workers=4,
+                # TODO: Change this to deal with OpenAI models
                 collate_fn=self._load_data_collator(tokenizer=tokenizer),
             )
 
@@ -638,6 +640,7 @@ class BenchmarkDataset(ABC):
                         max_new_tokens=512,
                         temperature=0.0,
                         do_sample=False,
+                        # TODO: Change this to deal with OpenAI models
                         stopping_criteria=[
                             StopWordCriteria(stop_word_ids=stop_word_ids)
                         ],
