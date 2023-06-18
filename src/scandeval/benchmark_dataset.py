@@ -663,6 +663,7 @@ class BenchmarkDataset(ABC):
                     else completion.split("Thoughts:")[4].split("\n")[0].strip()
                     for completion in completions
                 ]
+                breakpoint()
 
                 # Ensure that the predicted labels are in the candidate labels by
                 # computing the edit distance between the predicted label and each
