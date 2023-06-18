@@ -54,6 +54,8 @@ class OpenAITokenizer:
         self.sep_token = self.eos_token
         self.pad_token = "<pad>"
 
+        self.padding_side = "left"
+
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.
 
