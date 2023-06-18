@@ -673,11 +673,10 @@ class BenchmarkDataset(ABC):
                     all_preds.append(predicted_label)
 
                 # TEMP
-                for inputs, raw_outputs, pred in zip(
-                    batch["input_ids"], completion_ids_lists, all_preds
-                ):
-                    print(f"Input: {tokenizer.decode(inputs).split('Tweet:')[-1]}")
-                    print(f"Output: {tokenizer.decode(raw_outputs)}")
+                for raw_outputs, pred in zip(completion_ids_lists, all_preds):
+                    print(
+                        f"Output: {tokenizer.decode(raw_outputs).split('Tweet:')[-1]}"
+                    )
                     print(f"Prediction: {pred}")
                     print()
 
