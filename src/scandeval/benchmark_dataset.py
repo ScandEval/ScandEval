@@ -653,18 +653,22 @@ class BenchmarkDataset(ABC):
                     skip_evaluation = True
                     break
 
-                predicted_labels = [
+                completions = [
                     tokenizer.decode(completion_ids_list)
                     for completion_ids_list in completion_ids_lists
                 ]
-                breakpoint()
                 predicted_labels = [
-                    predicted_label.split("Label:")[4].split("\n")[0].strip()
-                    if len(predicted_label.split("Label:")) > 4
-                    else predicted_label.split("Thoughts:")[4].split("\n")[0].strip()
-                    for predicted_label in predicted_labels
+                    completion.split("Label:")[4].split("\n")[0].strip()
+                    if len(completion.split("Label:")) > 4
+                    else completion.split("Thoughts:")[4].split("\n")[0].strip()
+                    for completion in completions
                 ]
 
+                # TEMP
+                for completion, predicted_label in zip(completions, predicted_labels):
+                    print(completion.split("Thoughts: ")[4].strip(), predicted_label)
+
+                breakpoint()
                 # Ensure that the predicted labels are in the candidate labels by
                 # computing the edit distance between the predicted label and each
                 # candidate label and choosing the candidate label with the smallest
