@@ -905,7 +905,7 @@ class BenchmarkDataset(ABC):
 
         # Prepare the train and validation datasets
         try:
-            with tqdm(total=12, desc="Preprocessing datasets", leave=False) as pbar:
+            with tqdm(total=12, desc="Preprocessing data splits", leave=False) as pbar:
                 prepared_train = self._preprocess_data(
                     train, split="train", **preprocess_params
                 )
