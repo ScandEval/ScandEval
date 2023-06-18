@@ -639,7 +639,6 @@ class BenchmarkDataset(ABC):
                 # computing the edit distance between the predicted label and each
                 # candidate label and choosing the candidate label with the smallest
                 # edit distance
-                # TODO: Use logprobs instead if they are available?
                 for predicted_label in predicted_labels:
                     edit_distances = [
                         Levenshtein.distance(
@@ -649,6 +648,15 @@ class BenchmarkDataset(ABC):
                     ]
                     predicted_label = candidate_labels[np.argmin(edit_distances).item()]
                     all_preds.append(predicted_label)
+
+                # TEMP
+                for inputs, raw_outputs, pred in zip(
+                    batch["input_ids"], completion_ids_lists, all_preds
+                ):
+                    print(f"Input: {tokenizer.decode(inputs)}")
+                    print(f"Output: {tokenizer.decode(raw_outputs)}")
+                    print(f"Prediction: {pred}")
+                    print()
 
             if skip_evaluation:
                 continue
