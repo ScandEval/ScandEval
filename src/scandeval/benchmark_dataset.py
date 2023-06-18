@@ -146,6 +146,17 @@ class BenchmarkDataset(ABC):
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
 
+        if self.dataset_config.task.name != SPEED:
+            train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
+            prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
+                train=train,
+                val=val,
+                tests=tests,
+                model_config=model_config,
+                hf_model_config=model.config,
+                tokenizer=tokenizer,
+            )
+
         # Set up progress bar
         itr = tqdm(
             iterable=range(num_iter),
@@ -167,17 +178,24 @@ class BenchmarkDataset(ABC):
         ):
             scores = self._generate(
                 itr=itr,
-                num_iter=num_iter,
-                rng=rng,
+                train=train,
+                val=val,
+                tests=tests,
+                prepared_train=prepared_train,
+                prepared_val=prepared_val,
+                prepared_tests=prepared_tests,
                 model=model,
                 tokenizer=tokenizer,
-                model_config=model_config,
             )
         else:
             scores = self._finetune(
                 itr=itr,
-                num_iter=num_iter,
-                rng=rng,
+                train=train,
+                val=val,
+                tests=tests,
+                prepared_train=prepared_train,
+                prepared_val=prepared_val,
+                prepared_tests=prepared_tests,
                 model=model,
                 tokenizer=tokenizer,
                 model_config=model_config,
@@ -195,8 +213,12 @@ class BenchmarkDataset(ABC):
     def _finetune(
         self,
         itr: tqdm,
-        num_iter: int,
-        rng: np.random.Generator,
+        train: Dataset,
+        val: Dataset,
+        tests: list[Dataset],
+        prepared_train: Dataset,
+        prepared_val: Dataset,
+        prepared_tests: list[Dataset],
         model: PreTrainedModel,
         tokenizer: Tokenizer,
         model_config: ModelConfig,
@@ -206,10 +228,18 @@ class BenchmarkDataset(ABC):
         Args:
             itr (tqdm.tqdm):
                 The progress bar iterator.
-            num_iter (int):
-                The number of iterations to run.
-            rng (np.random.Generator):
-                The random number generator.
+            train (Dataset):
+                The training dataset.
+            val (Dataset):
+                The validation dataset.
+            tests (list[Dataset]):
+                The bootstrapped test datasets.
+            prepared_train (Dataset):
+                The prepared training dataset.
+            prepared_val (Dataset):
+                The prepared validation dataset.
+            prepared_tests (list[Dataset]):
+                The prepared bootstrapped test datasets.
             model (PreTrainedModel):
                 The model to evaluate.
             tokenizer (Tokenizer):
@@ -224,17 +254,6 @@ class BenchmarkDataset(ABC):
                 for each iteration.
         """
         scores: dict[str, list[dict[str, float]]] = defaultdict(list)
-
-        train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
-
-        prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
-            train=train,
-            val=val,
-            tests=tests,
-            model_config=model_config,
-            hf_model_config=model.config,
-            tokenizer=tokenizer,
-        )
 
         bs: int = self.benchmark_config.batch_size
         ga: int = 32 // bs
@@ -461,17 +480,32 @@ class BenchmarkDataset(ABC):
     def _generate(
         self,
         itr: tqdm,
-        num_iter: int,
-        rng: np.random.Generator,
+        train: Dataset,
+        val: Dataset,
+        tests: list[Dataset],
+        prepared_train: Dataset,
+        prepared_val: Dataset,
+        prepared_tests: list[Dataset],
         model: GenerativeModel,
         tokenizer: Tokenizer,
-        model_config: ModelConfig,
     ) -> dict[str, list[dict[str, float]]]:
         """Evaluate a model on a dataset through generation.
 
         Args:
             itr (tqdm.tqdm):
                 The progress bar iterator.
+            train (Dataset):
+                The training dataset.
+            val (Dataset):
+                The validation dataset.
+            tests (list[Dataset]):
+                The bootstrapped test datasets.
+            prepared_train (Dataset):
+                The prepared training dataset.
+            prepared_val (Dataset):
+                The prepared validation dataset.
+            prepared_tests (list[Dataset]):
+                The prepared bootstrapped test datasets.
             num_iter (int):
                 The number of iterations to run.
             rng (np.random.Generator):
@@ -491,17 +525,6 @@ class BenchmarkDataset(ABC):
                 for each iteration.
         """
         scores: dict[str, list[dict[str, float]]] = defaultdict(list)
-
-        train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
-
-        prepared_train, _, prepared_tests = self._load_prepared_data(
-            train=train,
-            val=val,
-            tests=tests,
-            model_config=model_config,
-            hf_model_config=model.config,
-            tokenizer=tokenizer,
-        )
 
         for idx in itr:
             prepared_test = prepared_tests[idx]
@@ -884,14 +907,21 @@ class BenchmarkDataset(ABC):
 
         # Prepare the train and validation datasets
         try:
-            prepared_train = self._preprocess_data(
-                train, split="train", **preprocess_params
-            )
-            prepared_val = self._preprocess_data(val, split="val", **preprocess_params)
-            prepared_tests = [
-                self._preprocess_data(test, split="test", **preprocess_params)
-                for test in tests
-            ]
+            with tqdm(total=12, desc="Preprocessing datasets", leave=False) as pbar:
+                prepared_train = self._preprocess_data(
+                    train, split="train", **preprocess_params
+                )
+                pbar.update(1)
+                prepared_val = self._preprocess_data(
+                    val, split="val", **preprocess_params
+                )
+                pbar.update(1)
+                prepared_tests: list[Dataset] = list()
+                for test in tests:
+                    prepared_tests.append(
+                        self._preprocess_data(test, split="test", **preprocess_params)
+                    )
+                    pbar.update(1)
         except ValueError:
             raise InvalidBenchmark(
                 "Preprocessing of the training and validation datasets could not be "
