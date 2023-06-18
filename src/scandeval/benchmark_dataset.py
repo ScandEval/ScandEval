@@ -635,7 +635,7 @@ class BenchmarkDataset(ABC):
                 try:
                     completion_ids_lists: list[list[int]] = model.generate(
                         inputs=batch["input_ids"].to(model.device),
-                        num_new_tokens=512,
+                        max_new_tokens=512,
                         temperature=0.0,
                         do_sample=False,
                         stopping_criteria=[
