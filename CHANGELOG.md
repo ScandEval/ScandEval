@@ -13,19 +13,12 @@ and this project adheres to
 - Support for evaluation of decoder and encoder-decoder models on the Hugging Face Hub.
   This performs finetuning for smaller models, as with the encoder models, and
   parameter-efficient finetuning (PEFT) for larger models.
-- Support for zero- and few-shot evaluation of decoder and encoder-decoder models, both
-  from the Hugging Face Hub and OpenAI models. This can be enabled using `--zero-shot`
-  or `--few-shot`.
+- Support for few-shot evaluation of decoder and encoder-decoder models, both
+  from the Hugging Face Hub and OpenAI models. This can be enabled using the
+  `--few-shot` flag.
 
 ### Changed
 - Now only supports Python 3.10 and above.
-- Model IDs now contains a prefix denoting where the model is located. The default
-  prefix, which is automatically added if none are specified, is "hfhub::", denoting
-  models available on the Hugging Face Hub. Other prefixes are "openai::", "local::"
-  and "fresh::", for the OpenAI models, local Hugging Face models, and fresh (i.e.,
-  randomly initialised) models. These are automatically inferred, so they can be left
-  out, but the user can supply a prefix in case of a name clash (e.g., if they have a
-  local model directory named the same as a model ID on the Hugging Face Hub).
 
 
 ## [v7.1.0] - 2023-05-15

@@ -51,7 +51,7 @@ class FreshModelSetup:
 
     @staticmethod
     def _strip_model_id(model_id: str) -> str:
-        return re.sub("(^.*::|@.*$|^fresh-)", "", model_id)
+        return re.sub("(@.*$|^fresh-)", "", model_id)
 
     def model_exists(self, model_id: str) -> bool:
         """Check if a model ID denotes a fresh model.
