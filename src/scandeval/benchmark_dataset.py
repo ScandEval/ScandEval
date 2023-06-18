@@ -655,10 +655,13 @@ class BenchmarkDataset(ABC):
 
                 predicted_labels = [
                     tokenizer.decode(completion_ids_list)
-                    .split("Label:")[3]
-                    .split("\n")[0]
-                    .strip()
                     for completion_ids_list in completion_ids_lists
+                ]
+                predicted_labels = [
+                    predicted_label.split("Label:")[4].split("\n")[0].strip()
+                    if len(predicted_label.split("Label:")) > 4
+                    else predicted_label.split("Thoughts:")[4].split("\n")[0].strip()
+                    for predicted_label in predicted_labels
                 ]
 
                 # Ensure that the predicted labels are in the candidate labels by
