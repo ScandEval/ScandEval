@@ -675,8 +675,8 @@ class BenchmarkDataset(ABC):
                 # TEMP
                 for raw_outputs, pred in zip(completion_ids_lists, all_preds):
                     print(
-                        f"GENERATED\n"
-                        f"{tokenizer.decode(raw_outputs).split('Tweet:')[-1]}"
+                        f"GENERATED\nTweet: "
+                        f"{tokenizer.decode(raw_outputs).split('Tweet: ')[-1]}"
                     )
                     print(f"PREDICTION\n{pred}")
                     print("\n-------------------------------\n")
