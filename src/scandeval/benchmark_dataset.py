@@ -635,7 +635,7 @@ class BenchmarkDataset(ABC):
                 try:
                     completion_ids_lists: list[list[int]] = model.generate(
                         inputs=batch["input_ids"].to(model.device),
-                        max_length=512,
+                        num_new_tokens=512,
                         temperature=0.0,
                         do_sample=False,
                         stopping_criteria=[
@@ -676,7 +676,7 @@ class BenchmarkDataset(ABC):
                 for raw_outputs, pred in zip(completion_ids_lists, all_preds):
                     print(
                         f"GENERATED\nTweet: "
-                        f"{tokenizer.decode(raw_outputs).split('Tweet: ')[-1]}"
+                        f"{tokenizer.decode(raw_outputs).split('Tweet: ')[-1]}\n"
                     )
                     print(f"PREDICTION\n{pred}")
                     print("\n-------------------------------\n")
