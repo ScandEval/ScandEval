@@ -36,6 +36,8 @@ class OpenAITokenizer:
             The encoding.
     """
 
+    unk_token = "<unk>"
+    unk_token_id = -1
     pad_token = "<pad>"
     padding_side = "left"
     is_fast = False
@@ -52,13 +54,11 @@ class OpenAITokenizer:
         self.eos_token_id: int = self.hf_model_config.eos_token_id or -1
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
-        self.unk_token_id: int = self.hf_model_config.unk_token_id or -1
 
         self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
         self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
-        self.unk_token = self.encoding.decode([self.unk_token_id])
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.
