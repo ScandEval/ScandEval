@@ -660,7 +660,7 @@ class BenchmarkDataset(ABC):
                 predicted_labels = [
                     completion.split("Label:")[4].split("\n")[0].strip()
                     if len(completion.split("Label:")) >= 4
-                    else completion.split("Tweet:")[4].split("\n")[0].strip()
+                    else completion.split("Thoughts:")[4].split("\n")[0].strip()
                     for completion in completions
                 ]
 

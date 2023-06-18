@@ -60,19 +60,22 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     task=SENT,
     languages=[DA],
     prompt_template="""The following are Danish tweets along with their sentiment
-labels.
+labels, and the thought process behind the labels.
 
 Tweet: Et stort tillykke til @USER og vinderne af årets Cavlingpris 💪 [LINK]
+Thoughts: The tweet is congratulating someone and uses the emoji 💪 to emphasise that they did hard work.
 Label: positive
 
 Tweet: @USER En international bilateral aftale er f.eks. en aftale mellem 2 lande i modsætning til en indgået mellem mange lande.
+Thoughts: The tweet is explaining the meaning of the word "bilateral" to another user, in a polite and informative manner.
 Label: neutral
 
 Tweet: Hvorfor er det, at vi ikke længere må se TV-billederne af gengivelserne, når der er VAR? Det er da grænseløst irriterende #CLDK
+Thoughts: The tweet is expressing frustration about not being able to see the TV images when the VAR is on.
 Label: negative
 
 Tweet: {text}
-Label: """,
+Thoughts: """,
 )
 
 
