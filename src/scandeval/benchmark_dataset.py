@@ -657,6 +657,7 @@ class BenchmarkDataset(ABC):
                     tokenizer.decode(completion_ids_list)
                     for completion_ids_list in completion_ids_lists
                 ]
+                breakpoint()
                 predicted_labels = [
                     predicted_label.split("Label:")[4].split("\n")[0].strip()
                     if len(predicted_label.split("Label:")) > 4
