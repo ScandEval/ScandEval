@@ -677,20 +677,6 @@ class BenchmarkDataset(ABC):
                     ]
                     closest_label = candidate_labels[np.argmin(edit_distances).item()]
                     all_preds.append(closest_label)
-                    print(f"Predicted label: {predicted_label}")
-                    print(f"Closest label: {closest_label}")
-                    print("\n-------------------------------\n")
-
-                # TEMP
-                for raw_outputs, pred in zip(completion_ids_lists, all_preds):
-                    print(
-                        f"GENERATED\nTweet: "
-                        f"{tokenizer.decode(raw_outputs).split('Tweet: ')[4]}"
-                    )
-                    print(f"PREDICTION: {pred}")
-                    print("\n-------------------------------\n")
-
-                breakpoint()
 
             if skip_evaluation:
                 continue
