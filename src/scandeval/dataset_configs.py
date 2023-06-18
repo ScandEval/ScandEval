@@ -59,7 +59,10 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/angry-tweets-mini",
     task=SENT,
     languages=[DA],
-    prompt_template="""Tweet: Et stort tillykke til @USER og vinderne af årets Cavlingpris 💪 [LINK]
+    prompt_template="""The following are tweets along with their sentiment labels, and
+the thought process behind the labels.
+
+Tweet: Et stort tillykke til @USER og vinderne af årets Cavlingpris 💪 [LINK]
 Thoughts: The tweet is congratulating someone and uses the emoji 💪 to emphasise that they did hard work.
 Label: positive
 
