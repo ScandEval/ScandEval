@@ -13,6 +13,7 @@ from tqdm.auto import tqdm
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .types import is_list_of_int, is_list_of_str
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,10 @@ class OpenAITokenizer:
             The encoding.
     """
 
+    pad_token = "<pad>"
+    padding_side = "left"
+    is_fast = False
+
     def __init__(
         self, model_config: ModelConfig, hf_model_config: PretrainedConfig
     ) -> None:
@@ -47,14 +52,13 @@ class OpenAITokenizer:
         self.eos_token_id: int = self.hf_model_config.eos_token_id or -1
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
+        self.unk_token_id: int = self.hf_model_config.unk_token_id or -1
 
         self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
         self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
-        self.pad_token = "<pad>"
-
-        self.padding_side = "left"
+        self.unk_token = self.encoding.decode([self.unk_token_id])
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.
@@ -103,6 +107,93 @@ class OpenAITokenizer:
             token_id for token_id in token_ids if token_id != self.pad_token_id
         ]
         return self.encoding.decode(tokens=token_ids)
+
+    def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
+        """Encode text.
+
+        Args:
+            text (str or list of str or list of int):
+                The text to encode.
+
+        Returns:
+            list of int:
+                The encoded text.
+        """
+        if is_list_of_int(text):
+            return text
+        elif is_list_of_str(text) or isinstance(text, str):
+            return self(text, **kwargs).input_ids.tolist()
+        else:
+            raise TypeError(f"Cannot encode {type(text)}.")
+
+    @property
+    def special_tokens_map(self) -> dict[str, str | list[str]]:
+        """A mapping of special tokens to their values.
+
+        Returns:
+            dict[str, str or list of str]:
+                The mapping of special tokens to their values.
+        """
+        return dict(
+            bos_token=self.bos_token,
+            cls_token=self.cls_token,
+            eos_token=self.eos_token,
+            sep_token=self.sep_token,
+            pad_token=self.pad_token,
+        )
+
+    @property
+    def model_max_length(self) -> int:
+        """The maximum length of a sequence for this model.
+
+        Returns:
+            int:
+                The maximum length of a sequence for this model.
+        """
+        return self.hf_model_config.model_max_length
+
+    def convert_ids_to_tokens(
+        self, ids: int | list[int], skip_special_tokens: bool = False
+    ) -> str | list[str]:
+        """Convert token IDs to tokens.
+
+        Args:
+            ids (int or list of int):
+
+        Returns:
+            str or list of str:
+                The tokens.
+        """
+        if isinstance(ids, int):
+            ids = [ids]
+        tokens = self.encoding.decode(tokens=ids)
+        if skip_special_tokens:
+            tokens = [
+                token
+                for token in tokens
+                if token not in self.special_tokens_map.values()
+            ]
+        if len(tokens) == 1:
+            return tokens[0]
+        return tokens
+
+    def convert_tokens_to_ids(self, tokens: str | list[str]) -> int | list[int]:
+        """Convert tokens to token IDs.
+
+        Args:
+            tokens (str or list of str):
+                The tokens to convert.
+
+        Returns:
+            int or list of int:
+                The token IDs.
+        """
+        if isinstance(tokens, str):
+            tokens = [tokens]
+        ids = [self.encode(text=token)[0] for token in tokens]
+        if len(ids) == 1:
+            return ids[0]
+        return ids
 
 
 class OpenAIModel:

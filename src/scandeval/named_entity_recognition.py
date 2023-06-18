@@ -10,10 +10,10 @@ from datasets.dataset_dict import DatasetDict
 from numpy._typing import NDArray
 from transformers import BatchEncoding
 from transformers.data.data_collator import DataCollatorForTokenClassification
-from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
+from .model_setups import Tokenizer
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -144,14 +144,14 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
 
     def _tokenize_and_align_labels(
-        self, examples: dict, tokenizer: PreTrainedTokenizer, label2id: dict[str, int]
+        self, examples: dict, tokenizer: Tokenizer, label2id: dict[str, int]
     ) -> BatchEncoding:
         """Tokenise all texts and align the labels with them.
 
         Args:
             examples (dict):
                 The examples to be tokenised.
-            tokenizer (Hugging Face tokenizer):
+            tokenizer (Tokenizer):
                 A pretrained tokenizer.
             label2id (dict):
                 A dictionary that converts NER tags to IDs.
@@ -191,6 +191,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
                 # Decode the token IDs
                 tokens = tokenizer.convert_ids_to_tokens(tok_ids)
+                assert isinstance(tokens, list)
 
                 # Remove prefixes from the tokens
                 prefixes_to_remove = ["▁", "##"]
@@ -218,7 +219,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 ]
 
                 # Replace special tokens with `None`
-                tokens = [None if tok in sp_toks else tok for tok in tokens]
+                tokens_with_none = [None if tok in sp_toks else tok for tok in tokens]
 
                 # Get the alignment between the words and the tokens, on a character
                 # level
@@ -227,9 +228,9 @@ class NamedEntityRecognition(BenchmarkDataset):
                 ]
                 token_idxs = [
                     tok_idx
-                    for tok_idx, tok in enumerate(tokens)
-                    for _ in str(tok)
-                    if tok is not None
+                    for tok_idx, tok_or_none in enumerate(tokens_with_none)
+                    for _ in str(tok_or_none)
+                    if tok_or_none is not None
                 ]
                 alignment = list(zip(word_idxs, token_idxs))
 
@@ -244,8 +245,8 @@ class NamedEntityRecognition(BenchmarkDataset):
 
                 # Get the aligned word IDs
                 word_ids = list()
-                for tok_idx, tok in enumerate(tokens):
-                    if tok is None or tok == "":
+                for tok_idx, tok_or_none in enumerate(tokens_with_none):
+                    if tok_or_none is None or tok_or_none == "":
                         word_ids.append(None)
                     else:
                         word_idx = [
@@ -284,12 +285,12 @@ class NamedEntityRecognition(BenchmarkDataset):
         return tokenized_inputs
 
     def _handle_unk_tokens(
-        self, tokenizer: PreTrainedTokenizer, tokens: list[str], words: list[str]
+        self, tokenizer: Tokenizer, tokens: list[str], words: list[str]
     ) -> list[str]:
         """Replace unknown tokens in the tokens with the corresponding word.
 
         Args:
-            tokenizer (PreTrainedTokenizer):
+            tokenizer (Tokenizer):
                 The tokenizer used to tokenize the words.
             tokens (list of str):
                 The list of tokens.
@@ -367,11 +368,11 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
         return tokenised_dataset
 
-    def _load_data_collator(self, tokenizer: PreTrainedTokenizer | None = None):
+    def _load_data_collator(self, tokenizer: Tokenizer | None = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (PreTrainedTokenizer or None, optional):
+            tokenizer (Tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 

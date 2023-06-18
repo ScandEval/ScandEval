@@ -5,19 +5,18 @@ from functools import partial
 from typing import Callable
 
 from datasets.arrow_dataset import Dataset
-from transformers.data.data_collator import DataCollator, DataCollatorWithPadding
+from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.modeling_utils import PreTrainedModel
-from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
 from transformers.trainer_callback import TrainerCallback
 from transformers.training_args import TrainingArguments
 
-from scandeval.utils import get_special_token_metadata
-
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
+from .model_setups import GenerativeModel, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
+from .utils import get_special_token_metadata
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -53,7 +52,7 @@ class QuestionAnswering(BenchmarkDataset):
             Hugging Face dataset: The preprocessed dataset.
         """
         split: str = kwargs.pop("split")
-        tokenizer: PreTrainedTokenizer = kwargs.pop("tokenizer")
+        tokenizer: Tokenizer = kwargs.pop("tokenizer")
 
         # If the tokenizer is not a fast variant then raise an error
         if not tokenizer.is_fast:
@@ -91,12 +90,11 @@ class QuestionAnswering(BenchmarkDataset):
 
     def _get_trainer(
         self,
-        model: PreTrainedModel,
+        model: PreTrainedModel | GenerativeModel,
         args: TrainingArguments,
         train_dataset: Dataset,
         eval_dataset: Dataset,
-        tokenizer: PreTrainedTokenizer,
-        data_collator: DataCollator,
+        tokenizer: Tokenizer,
         compute_metrics: Callable,
         callbacks: list[TrainerCallback],
     ) -> Trainer:
@@ -106,7 +104,6 @@ class QuestionAnswering(BenchmarkDataset):
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
             tokenizer=tokenizer,
-            data_collator=data_collator,
             compute_metrics=compute_metrics,
             callbacks=callbacks,
         )
@@ -124,11 +121,11 @@ class QuestionAnswering(BenchmarkDataset):
             metric_key_prefix=metric_key_prefix,
         )
 
-    def _load_data_collator(self, tokenizer: PreTrainedTokenizer | None = None):
+    def _load_data_collator(self, tokenizer: Tokenizer | None = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Hugging Face tokenizer or None, optional):
+            tokenizer (Tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
@@ -141,13 +138,15 @@ class QuestionAnswering(BenchmarkDataset):
 
 def prepare_train_examples(
     examples: BatchEncoding,
-    tokenizer: PreTrainedTokenizer,
+    tokenizer: Tokenizer,
 ) -> BatchEncoding:
     """Prepare the features for training.
 
     Args:
         examples (BatchEncoding):
             The examples to prepare.
+        tokenizer (Tokenizer):
+            The tokenizer to use to prepare the examples.
 
     Returns:
         BatchEncoding:
@@ -183,7 +182,7 @@ def prepare_train_examples(
     # context of the previous feature.
     tokenized_examples = tokenizer(
         examples["question"],
-        examples["context"],
+        text_pair=examples["context"],
         truncation="only_second",
         max_length=max_length,
         stride=stride,
@@ -280,14 +279,14 @@ def prepare_train_examples(
 
 def prepare_test_examples(
     examples: BatchEncoding,
-    tokenizer: PreTrainedTokenizer,
+    tokenizer: Tokenizer,
 ) -> BatchEncoding:
     """Prepare test examples.
 
     Args:
         examples (BatchEncoding):
             Dictionary of test examples.
-        tokenizer (Hugging Face tokenizer):
+        tokenizer (Tokenizer):
             The tokenizer used to preprocess the examples.
 
     Returns:
@@ -323,7 +322,7 @@ def prepare_test_examples(
     # the context of the previous feature.
     tokenized_examples = tokenizer(
         examples["question"],
-        examples["context"],
+        text_pair=examples["context"],
         truncation="only_second",
         max_length=max_length,
         stride=stride,

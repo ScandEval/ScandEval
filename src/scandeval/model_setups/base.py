@@ -21,15 +21,39 @@ class Tokenizer(Protocol):
     sep_token: str
     bos_token: str
     eos_token: str
+    pad_token: str
+    unk_token: str
     cls_token_id: int
     sep_token_id: int
     bos_token_id: int
     eos_token_id: int
+    pad_token_id: int
+    unk_token_id: int
+    is_fast: bool
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         ...
 
     def decode(self, token_ids: list[int]) -> str:
+        ...
+
+    def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
+        ...
+
+    def convert_ids_to_tokens(
+        self, ids: int | list[int], skip_special_tokens: bool = False
+    ) -> str | list[str]:
+        ...
+
+    def convert_tokens_to_ids(self, tokens: str | list[str]) -> int | list[int]:
+        ...
+
+    @property
+    def special_tokens_map(self) -> dict[str, str | list[str]]:
+        ...
+
+    @property
+    def model_max_length(self) -> int:
         ...
 
 

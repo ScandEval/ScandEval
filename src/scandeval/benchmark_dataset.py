@@ -18,7 +18,6 @@ from huggingface_hub.utils._errors import HfHubHTTPError
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import PretrainedConfig, StoppingCriteria
-from transformers.data.data_collator import DataCollator
 from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer import Trainer
 from transformers.trainer_callback import (
@@ -38,6 +37,7 @@ from .exceptions import InvalidBenchmark
 from .model_config import get_model_config
 from .model_loading import load_model
 from .model_setups import GenerativeModel, Tokenizer
+from .openai_models import OpenAIModel
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT
@@ -571,37 +571,10 @@ class BenchmarkDataset(ABC):
         """
         candidate_labels = self.dataset_config.id2label
 
-        # TODO: This should not be done if dealing with an OpenAI model
-        stop_word_ids: list[torch.Tensor] = list()
-        double_newline_ids: torch.Tensor = (
-            tokenizer(
-                text=["\n\n"],
-                add_special_tokens=False,
-                return_tensors="pt",
-            )
-            .input_ids[0]
-            .to(model.device)
+        # Tokens used in generation to know when generation is finished
+        stopping_criteria = self._get_generation_stopping_criteria(
+            tokenizer=tokenizer, model=model
         )
-        single_newline_ids: torch.Tensor = (
-            tokenizer(
-                text=["\n"],
-                add_special_tokens=False,
-                return_tensors="pt",
-            )
-            .input_ids[0]
-            .to(model.device)
-        )
-        double_newline_ids = double_newline_ids[
-            [tokenizer.decode(tok) != "" for tok in double_newline_ids]
-        ]
-        single_newline_ids = single_newline_ids[
-            [tokenizer.decode(tok) != "" for tok in single_newline_ids]
-        ]
-
-        two_single_newline_ids = torch.cat(
-            [single_newline_ids, single_newline_ids], dim=0
-        )
-        stop_word_ids = [double_newline_ids, two_single_newline_ids]
 
         # Sort the dataset by the length of the text, to minimise the amount of padding
         # that needs to be added, speeding up generation
@@ -628,7 +601,6 @@ class BenchmarkDataset(ABC):
                 batch_size=batch_size,
                 shuffle=False,
                 num_workers=4,
-                # TODO: Change this to deal with OpenAI models
                 collate_fn=self._load_data_collator(tokenizer=tokenizer),
             )
 
@@ -641,9 +613,7 @@ class BenchmarkDataset(ABC):
                         temperature=0.0,
                         do_sample=False,
                         # TODO: Change this to deal with OpenAI models
-                        stopping_criteria=[
-                            StopWordCriteria(stop_word_ids=stop_word_ids)
-                        ],
+                        stopping_criteria=stopping_criteria,
                     ).tolist()
                 except Exception as e:
                     oom_error = [
@@ -690,6 +660,61 @@ class BenchmarkDataset(ABC):
             return itr_scores
         else:
             raise InvalidBenchmark("GPU out of memory, even with a batch size of 1!")
+
+    def _get_generation_stopping_criteria(
+        self,
+        tokenizer: Tokenizer,
+        model: GenerativeModel,
+    ) -> list[StoppingCriteria]:
+        """Get the stopping criteria for generation.
+
+        Args:
+            tokenizer (Tokenizer):
+                The tokenizer used to tokenize the stop words.
+            model (GenerativeModel):
+                The generative model, which we use to ensure the tensors are on the
+                same device, and also determine whether stop words are needed, based on
+                the model type.
+
+        Returns:
+            list[torch.Tensor]:
+                A list of tensors containing the stop words to use for generation.
+        """
+        if isinstance(model, OpenAIModel):
+            return list()
+
+        stop_word_ids: list[torch.Tensor] = list()
+        double_newline_ids: torch.Tensor = (
+            tokenizer(
+                text=["\n\n"],
+                add_special_tokens=False,
+                return_tensors="pt",
+            )
+            .input_ids[0]
+            .to(model.device)
+        )
+        single_newline_ids: torch.Tensor = (
+            tokenizer(
+                text=["\n"],
+                add_special_tokens=False,
+                return_tensors="pt",
+            )
+            .input_ids[0]
+            .to(model.device)
+        )
+        double_newline_ids = double_newline_ids[
+            [tokenizer.decode(tok) != "" for tok in double_newline_ids]
+        ]
+        single_newline_ids = single_newline_ids[
+            [tokenizer.decode(tok) != "" for tok in single_newline_ids]
+        ]
+
+        two_single_newline_ids = torch.cat(
+            [single_newline_ids, single_newline_ids], dim=0
+        )
+        stop_word_ids = [double_newline_ids, two_single_newline_ids]
+
+        return [StopWordCriteria(stop_word_ids=stop_word_ids)]
 
     def _get_metadata(
         self,
@@ -1029,11 +1054,11 @@ class BenchmarkDataset(ABC):
         pass
 
     @abstractmethod
-    def _load_data_collator(self, tokenizer: Tokenizer | None = None) -> DataCollator:
+    def _load_data_collator(self, tokenizer: Tokenizer | None = None):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Tokenizer or None, optional):
+            tokenizer (Hugging Face tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
 
