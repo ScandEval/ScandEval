@@ -571,36 +571,36 @@ class BenchmarkDataset(ABC):
         """
         candidate_labels = self.dataset_config.id2label
 
-        stop_word_ids: list[torch.Tensor] = list()
-        double_newline_ids: torch.Tensor = (
-            tokenizer(
-                text=["\n\n"],
-                add_special_tokens=False,
-                return_tensors="pt",
-            )
-            .input_ids[0]
-            .to(model.device)
-        )
-        single_newline_ids: torch.Tensor = (
-            tokenizer(
-                text=["\n"],
-                add_special_tokens=False,
-                return_tensors="pt",
-            )
-            .input_ids[0]
-            .to(model.device)
-        )
-        double_newline_ids = double_newline_ids[
-            [tokenizer.decode(tok) != "" for tok in double_newline_ids]
-        ]
-        single_newline_ids = single_newline_ids[
-            [tokenizer.decode(tok) != "" for tok in single_newline_ids]
-        ]
+        # stop_word_ids: list[torch.Tensor] = list()
+        # double_newline_ids: torch.Tensor = (
+        #    tokenizer(
+        #        text=["\n\n"],
+        #        add_special_tokens=False,
+        #        return_tensors="pt",
+        #    )
+        #    .input_ids[0]
+        #    .to(model.device)
+        # )
+        # single_newline_ids: torch.Tensor = (
+        #    tokenizer(
+        #        text=["\n"],
+        #        add_special_tokens=False,
+        #        return_tensors="pt",
+        #    )
+        #    .input_ids[0]
+        #    .to(model.device)
+        # )
+        # double_newline_ids = double_newline_ids[
+        #    [tokenizer.decode(tok) != "" for tok in double_newline_ids]
+        # ]
+        # single_newline_ids = single_newline_ids[
+        #    [tokenizer.decode(tok) != "" for tok in single_newline_ids]
+        # ]
 
-        two_single_newline_ids = torch.cat(
-            [single_newline_ids, single_newline_ids], dim=0
-        )
-        stop_word_ids = [double_newline_ids, two_single_newline_ids]
+        # two_single_newline_ids = torch.cat(
+        #    [single_newline_ids, single_newline_ids], dim=0
+        # )
+        # stop_word_ids = [double_newline_ids, two_single_newline_ids]
 
         # Sort the dataset by the length of the text, to minimise the amount of padding
         # that needs to be added, speeding up generation
@@ -638,9 +638,9 @@ class BenchmarkDataset(ABC):
                         max_new_tokens=512,
                         temperature=0.0,
                         do_sample=False,
-                        stopping_criteria=[
-                            StopWordCriteria(stop_word_ids=stop_word_ids)
-                        ],
+                        # stopping_criteria=[
+                        #    StopWordCriteria(stop_word_ids=stop_word_ids)
+                        # ],
                     ).tolist()
                 except Exception as e:
                     oom_error = [
@@ -674,10 +674,7 @@ class BenchmarkDataset(ABC):
 
                 # TEMP
                 for raw_outputs, pred in zip(completion_ids_lists, all_preds):
-                    print(
-                        f"GENERATED\nTweet: "
-                        f"{tokenizer.decode(raw_outputs).split('Tweet: ')[-1]}\n"
-                    )
+                    print(f"GENERATED\n" f"{tokenizer.decode(raw_outputs)}\n")
                     print(f"PREDICTION\n{pred}")
                     print("\n-------------------------------\n")
 
