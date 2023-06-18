@@ -666,7 +666,9 @@ class BenchmarkDataset(ABC):
 
                 # TEMP
                 for completion, predicted_label in zip(completions, predicted_labels):
-                    print(completion.split("Thoughts: ")[4].strip(), predicted_label)
+                    print("Thoughts: ", completion.split("Thoughts:")[4].strip())
+                    print(f"LABEL: {predicted_label}")
+                    print("\n-------------------------------\n")
 
                 breakpoint()
                 # Ensure that the predicted labels are in the candidate labels by
