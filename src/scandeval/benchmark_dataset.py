@@ -660,7 +660,7 @@ class BenchmarkDataset(ABC):
                 predicted_labels = [
                     completion.split("Label:")[4].split("\n")[0].strip()
                     if len(completion.split("Label:")) >= 4
-                    else completion.split("Thoughts:")[4].split("\n")[0].strip()
+                    else completion.split("Tweet:")[4].split("\n")[0].strip()
                     for completion in completions
                 ]
 
@@ -675,8 +675,11 @@ class BenchmarkDataset(ABC):
                         )
                         for candidate_label in candidate_labels
                     ]
-                    predicted_label = candidate_labels[np.argmin(edit_distances).item()]
-                    all_preds.append(predicted_label)
+                    closest_label = candidate_labels[np.argmin(edit_distances).item()]
+                    all_preds.append(closest_label)
+                    print(f"Predicted label: {predicted_label}")
+                    print(f"Closest label: {closest_label}")
+                    print("\n-------------------------------\n")
 
                 # TEMP
                 for raw_outputs, pred in zip(completion_ids_lists, all_preds):
