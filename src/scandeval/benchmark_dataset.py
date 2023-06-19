@@ -612,7 +612,6 @@ class BenchmarkDataset(ABC):
                         max_new_tokens=512,
                         temperature=0.0,
                         do_sample=False,
-                        # TODO: Change this to deal with OpenAI models
                         stopping_criteria=stopping_criteria,
                     ).tolist()
                 except Exception as e:
@@ -620,6 +619,7 @@ class BenchmarkDataset(ABC):
                         "CUDA out of memory",
                         "CUDA error",
                         "MPS backend out of memory",
+                        "Too many parallel completions requested.",  # OpenAI specific
                     ]
                     if all([error not in str(e) for error in oom_error]):
                         raise InvalidBenchmark(str(e))
@@ -632,6 +632,8 @@ class BenchmarkDataset(ABC):
                 ]
                 predicted_labels = [
                     completion.split("Label:")[4].split("\n")[0].strip()
+                    if "Label:" in completion
+                    else completion.strip()
                     for completion in completions
                 ]
 

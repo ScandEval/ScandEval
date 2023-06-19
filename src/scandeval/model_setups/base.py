@@ -56,6 +56,17 @@ class Tokenizer(Protocol):
     def model_max_length(self) -> int:
         ...
 
+    def pad(
+        self,
+        encoded_inputs: BatchEncoding
+        | list[BatchEncoding]
+        | dict[str, list[str]]
+        | dict[str, list[list[str]]]
+        | list[dict[str, list[str]]],
+        **kwargs,
+    ) -> BatchEncoding:
+        ...
+
 
 @runtime_checkable
 class GenerativeModel(Protocol):

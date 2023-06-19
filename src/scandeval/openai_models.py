@@ -6,14 +6,19 @@ from time import sleep
 import openai
 import tiktoken
 import torch
-from openai.error import APIError, InvalidRequestError, RateLimitError
+from openai.error import (
+    APIError,
+    InvalidRequestError,
+    RateLimitError,
+    ServiceUnavailableError,
+)
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
 from tqdm.auto import tqdm
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .types import is_list_of_int, is_list_of_str
+from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 logger = logging.getLogger(__name__)
 
@@ -72,25 +77,24 @@ class OpenAITokenizer:
                 The tokenized text.
         """
         text_list = [text] if isinstance(text, str) else text
-        input_ids = [
-            Tensor(
-                self.encoding.encode(
-                    text,
-                    allowed_special={
-                        self.bos_token,
-                        self.eos_token,
-                        self.cls_token,
-                        self.sep_token,
-                        self.pad_token,
-                    },
+        encoded_inputs = [
+            BatchEncoding(
+                dict(
+                    input_ids=self.encoding.encode(
+                        text,
+                        allowed_special={
+                            self.bos_token,
+                            self.eos_token,
+                            self.cls_token,
+                            self.sep_token,
+                            self.pad_token,
+                        },
+                    )
                 )
             )
             for text in text_list
         ]
-        padded_input_ids = pad_sequence(
-            sequences=input_ids, batch_first=True, padding_value=self.pad_token_id
-        ).long()
-        return BatchEncoding(dict(input_ids=padded_input_ids))
+        return self.pad(encoded_inputs=encoded_inputs)
 
     def decode(self, token_ids: list[int]) -> str:
         """Decode token IDs.
@@ -164,9 +168,8 @@ class OpenAITokenizer:
             str or list of str:
                 The tokens.
         """
-        if isinstance(ids, int):
-            ids = [ids]
-        tokens = self.encoding.decode(tokens=ids)
+        ids_list = [ids] if isinstance(ids, int) else ids
+        tokens = [self.decode(token_ids=[i]) for i in ids_list]
         if skip_special_tokens:
             tokens = [
                 token
@@ -194,6 +197,62 @@ class OpenAITokenizer:
         if len(ids) == 1:
             return ids[0]
         return ids
+
+    def pad(
+        self,
+        encoded_inputs: BatchEncoding
+        | list[BatchEncoding]
+        | dict[str, list[int]]
+        | dict[str, list[list[int]]]
+        | list[dict[str, list[int]]],
+        **kwargs,
+    ) -> BatchEncoding:
+        """Pad encoded inputs.
+
+        Args:
+            encoded_inputs (BatchEncoding, list or dict):
+                Tokenized inputs. Can represent one input (BatchEncoding or Dict[str,
+                List[int]]) or a batch of tokenized inputs (list of BatchEncoding,
+                Dict[str, List[List[int]]] or List[Dict[str, List[int]]]) so you can
+                use this method during preprocessing as well as in a PyTorch Dataloader
+                collate function.
+            **kwargs:
+        """
+        # Single example
+        if isinstance(encoded_inputs, BatchEncoding):
+            return encoded_inputs
+        elif isinstance(encoded_inputs, dict) and is_list_of_int(
+            encoded_inputs["input_ids"]
+        ):
+            return BatchEncoding(data=encoded_inputs)
+
+        # Batch of examples
+        if isinstance(encoded_inputs, dict) and is_list_of_list_of_int(
+            encoded_inputs["input_ids"]
+        ):
+            input_ids = encoded_inputs["input_ids"]
+        else:
+            assert isinstance(encoded_inputs, list)
+            input_ids = [list(example["input_ids"]) for example in encoded_inputs]
+
+        # Flip the token IDs in the lists, since `pad_sequence` pads to the right by
+        # default, and we want padding to the left
+        flipped_input_ids: list[Tensor] = []
+        for input_id_list in input_ids:
+            input_id_list.reverse()
+            flipped_input_ids.append(LongTensor(input_id_list))
+
+        padded_input_ids = (
+            pad_sequence(
+                sequences=flipped_input_ids,
+                batch_first=True,
+                padding_value=self.pad_token_id,
+            )
+            .flip(dims=[1])
+            .long()
+        )
+
+        return BatchEncoding(dict(input_ids=padded_input_ids))
 
 
 class OpenAIModel:
@@ -250,7 +309,7 @@ class OpenAIModel:
         """Generate text using the model.
 
         Args:
-            inputs (Tensor or list of Tensor):
+            inputs (Tensor):
                 The input IDs.
             generation_config (GenerationConfig or None, optional):
                 The generation configuration. If None then a default GenerationConfig
@@ -289,18 +348,25 @@ class OpenAIModel:
             ]
 
         # Check if the model is a chat model
-        try:
-            openai.Completion.create(
-                model=self.model_config.model_id,
-                prompt="Test",
-                max_tokens=10,
-            )
-            is_chat_model = False
-        except InvalidRequestError as e:
-            if "This is a chat model" in str(e):
-                is_chat_model = True
-            else:
-                raise e
+        while True:
+            try:
+                openai.Completion.create(
+                    model=self.model_config.model_id,
+                    prompt="Test",
+                    max_tokens=1,
+                )
+                is_chat_model = False
+                break
+            except InvalidRequestError as e:
+                if "This is a chat model" in str(e):
+                    is_chat_model = True
+                    break
+                else:
+                    raise e
+            except (RateLimitError, ServiceUnavailableError, APIError):
+                logger.debug("Service unavailable, trying again in a few seconds...")
+                sleep(10)
+                continue
 
         while True:
             try:
@@ -353,18 +419,10 @@ class OpenAIModel:
                             single_output.choices[0].message.content.strip()
                         )["input_ids"][0].tolist()
                         completion_ids_list.append(completion_ids)
-                    break
+                break
 
-            except RateLimitError:
-                logger.debug("Rate limit exceeded, trying again in a few seconds...")
-                sleep(10)
-                continue
-
-            except APIError:
-                logger.debug(
-                    "Encountered an error with the OpenAI API, trying again in a "
-                    "few seconds..."
-                )
+            except (RateLimitError, ServiceUnavailableError, APIError):
+                logger.debug("Service unavailable, trying again in a few seconds...")
                 sleep(10)
                 continue
 

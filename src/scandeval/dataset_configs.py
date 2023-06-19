@@ -59,19 +59,17 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/angry-tweets-mini",
     task=SENT,
     languages=[DA],
-    prompt_template="""The following are Danish tweets along with their sentiment labels:
-
-Tweet: Et stort tillykke til @USER og vinderne af årets Cavlingpris 💪 [LINK]
-Label: positive
+    prompt_template="""Tweet: Et stort tillykke til @USER og vinderne af årets Cavlingpris 💪 [LINK]
+Sentiment: positive
 
 Tweet: @USER En international bilateral aftale er f.eks. en aftale mellem 2 lande i modsætning til en indgået mellem mange lande.
-Label: neutral
+Sentiment: neutral
 
 Tweet: Hvorfor er det, at vi ikke længere må se TV-billederne af gengivelserne, når der er VAR? Det er da grænseløst irriterende #CLDK
-Label: negative
+Sentiment: negative
 
 Tweet: {text}
-Label: """,
+Sentiment: """,
 )
 
 
