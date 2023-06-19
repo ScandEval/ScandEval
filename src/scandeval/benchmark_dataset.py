@@ -610,14 +610,16 @@ class BenchmarkDataset(ABC):
             skip_evaluation = False
             for batch in tqdm(dataloader, leave=False):
                 try:
-                    inputs = batch["input_ids"].to(model.device)
-                    completion_ids_lists: list[list[int]] = model.generate(
-                        inputs=inputs,
-                        max_new_tokens=512,
-                        temperature=0.0,
-                        do_sample=False,
-                        stopping_criteria=stopping_criteria,
-                    ).tolist()
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", category=UserWarning)
+                        inputs = batch["input_ids"].to(model.device)
+                        completion_ids_lists: list[list[int]] = model.generate(
+                            inputs=inputs,
+                            max_new_tokens=512,
+                            temperature=0.0,
+                            do_sample=False,
+                            stopping_criteria=stopping_criteria,
+                        ).tolist()
                 except Exception as e:
                     oom_error = [
                         "CUDA out of memory",
