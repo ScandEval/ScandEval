@@ -1,6 +1,7 @@
 """Sequence classification benchmark dataset."""
 
 import logging
+import re
 from functools import partial
 
 from datasets.arrow_dataset import Dataset
@@ -54,8 +55,15 @@ class SequenceClassification(BenchmarkDataset):
         cls_token = special_token_metadata["cls_token"]
         sep_token = special_token_metadata["sep_token"]
 
-        if kwargs["model_config"].task == "text-generation":
-            dataset = dataset.map(self._apply_few_shot_prompt, batched=True)
+        if (
+            kwargs["model_config"].task == "text-generation"
+            and "few_shot_examples" in kwargs
+        ):
+            few_shot_examples = kwargs["few_shot_examples"]
+            few_shot_fn = partial(
+                self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
+            )
+            dataset = dataset.map(few_shot_fn, batched=True)
 
         def tokenise(examples: dict) -> BatchEncoding:
             # If the tokenizer is not adding special tokens, then we add them manually.
@@ -91,11 +99,42 @@ class SequenceClassification(BenchmarkDataset):
         else:
             return tokenised
 
-    def _apply_few_shot_prompt(self, examples: dict) -> dict:
-        examples["text"] = [
-            self.dataset_config.prompt_template.format(text=text).strip()
+    def _apply_few_shot_prompt(
+        self, examples: dict, few_shot_examples: list[dict]
+    ) -> dict:
+        """Apply a few-shot prompt to the examples.
+
+        Args:
+            examples (dict):
+                The examples to apply the prompt to.
+            few_shot_examples (list of dict):
+                The examples to be included in the few-shot prompt.
+
+        Returns:
+            dict:
+                The examples with the few-shot prompt applied.
+        """
+        # Build the few-shot part of the prompt
+        few_shot_prompts = [
+            self.dataset_config.prompt_template.format(
+                text=re.sub(" +", " ", example["text"].replace("\n", " ")).strip(),
+                label=example["label"],
+            )
+            for example in few_shot_examples
+        ]
+        few_shot_prompt = "\n\n".join(few_shot_prompts)
+
+        # Add the texts from the examples to the prompts
+        new_prompts = [
+            self.dataset_config.prompt_template.format(
+                text=re.sub(" +", " ", text.replace("\n", " ")).strip(), label=""
+            )
             for text in examples["text"]
         ]
+        examples["text"] = [
+            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
+        ]
+
         return examples
 
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:

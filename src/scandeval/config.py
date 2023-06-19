@@ -166,6 +166,10 @@ class DatasetConfig:
         prompt_template (str):
             The template for the prompt to use when benchmarking the dataset using
             few-shot evaluation.
+        num_few_shot_examples (int):
+            The number of examples to use when benchmarking the dataset using few-shot
+            evaluation. For a classification task, these will be drawn evenly from
+            each label.
     """
 
     name: str
@@ -174,6 +178,7 @@ class DatasetConfig:
     task: DatasetTask
     languages: list[Language]
     prompt_template: str
+    num_few_shot_examples: int
 
     @property
     def id2label(self) -> list[str]:

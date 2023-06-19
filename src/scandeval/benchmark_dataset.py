@@ -1,15 +1,17 @@
 """Abstract benchmarking dataset class."""
 
+import itertools as it
 import logging
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import partial
-from typing import Callable
+from typing import Any, Callable
 
 import evaluate
 import Levenshtein
 import numpy as np
+import pandas as pd
 import torch
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
@@ -594,6 +596,7 @@ class BenchmarkDataset(ABC):
             for n in range(1 + np.log2(self.benchmark_config.batch_size).astype(int))
         ]
         for batch_size in batch_sizes:
+            logger.debug(f"Trying batch size {batch_size}")
             all_preds: list[str] = list()
 
             dataloader = DataLoader(
@@ -607,8 +610,9 @@ class BenchmarkDataset(ABC):
             skip_evaluation = False
             for batch in tqdm(dataloader, leave=False):
                 try:
+                    inputs = batch["input_ids"].to(model.device)
                     completion_ids_lists: list[list[int]] = model.generate(
-                        inputs=batch["input_ids"].to(model.device),
+                        inputs=inputs,
                         max_new_tokens=512,
                         temperature=0.0,
                         do_sample=False,
@@ -626,15 +630,13 @@ class BenchmarkDataset(ABC):
                     skip_evaluation = True
                     break
 
-                completions = [
-                    tokenizer.decode(completion_ids_list)
-                    for completion_ids_list in completion_ids_lists
-                ]
                 predicted_labels = [
-                    completion.split("Label:")[4].split("\n")[0].strip()
-                    if "Label:" in completion
-                    else completion.strip()
-                    for completion in completions
+                    tokenizer.decode(completion_ids_list)
+                    .split("\n\n")[3]
+                    .split("\n")[-1]
+                    .split(":")[-1]
+                    .strip()
+                    for completion_ids_list in completion_ids_lists
                 ]
 
                 # Ensure that the predicted labels are in the candidate labels by
@@ -915,14 +917,14 @@ class BenchmarkDataset(ABC):
             hf_model_config (PretrainedConfig):
                 The Hugging Face model configuration.
             tokenizer (Tokenizer):
-                The Hugging Face tokenizer.
+                The tokenizer.
 
         Returns:
             tuple[Dataset, Dataset, list[Dataset]]:
                 A tuple containing the prepared training, validation and test datasets.
         """
         # Set up the preprocessing parameters
-        preprocess_params = dict(
+        preprocess_params: dict[str, Any] = dict(
             hf_model_config=hf_model_config,
             model_config=model_config,
             tokenizer=tokenizer,
@@ -935,12 +937,38 @@ class BenchmarkDataset(ABC):
                     train, split="train", **preprocess_params
                 )
                 pbar.update(1)
+
                 prepared_val = self._preprocess_data(
                     val, split="val", **preprocess_params
                 )
                 pbar.update(1)
+
                 prepared_tests: list[Dataset] = list()
-                for test in tests:
+                for itr_idx, test in enumerate(tests):
+                    # Add few-shot examples
+                    if model_config.task == "text-generation":
+                        itr_seed = 4242 + itr_idx
+                        shuffled_train = train.shuffle(seed=itr_seed)
+                        num_few_shots = self.dataset_config.num_few_shot_examples
+
+                        supertask = self.dataset_config.task.supertask
+                        if supertask == "sequence-classification":
+                            labels = it.cycle(self.dataset_config.task.labels)
+                            few_shot_examples: list[dict] = list()
+                            while len(few_shot_examples) < num_few_shots:
+                                label = next(labels)
+                                examples = shuffled_train.filter(
+                                    lambda x: x["label"].upper() == label.upper()
+                                ).select(range(1))
+                                few_shot_examples.append(examples[0])
+                        else:
+                            examples_df = shuffled_train.select(
+                                range(num_few_shots)
+                            ).to_pandas()
+                            assert isinstance(examples_df, pd.DataFrame)
+                            few_shot_examples = examples_df.to_dict("records")
+
+                        preprocess_params["few_shot_examples"] = few_shot_examples
                     prepared_tests.append(
                         self._preprocess_data(test, split="test", **preprocess_params)
                     )

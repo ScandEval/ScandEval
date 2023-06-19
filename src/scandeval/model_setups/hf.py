@@ -5,6 +5,7 @@ import warnings
 from json import JSONDecodeError
 from typing import Type, TypedDict
 
+import torch
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from requests import RequestException
@@ -210,7 +211,10 @@ class HFModelSetup:
         supertask = dataset_config.task.supertask
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
-        load_in_4bit = self.benchmark_config.few_shot
+        load_in_4bit = (
+            self.benchmark_config.few_shot
+            and self.benchmark_config.device != torch.device("cpu")
+        )
 
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,

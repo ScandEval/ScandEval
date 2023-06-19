@@ -49,7 +49,8 @@ SWEREC_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/swerec-mini",
     task=SENT,
     languages=[SV],
-    prompt_template="{text}",  # TODO
+    prompt_template="Review: {text}\nSentiment: {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -59,17 +60,8 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/angry-tweets-mini",
     task=SENT,
     languages=[DA],
-    prompt_template="""Tweet: Et stort tillykke til @USER og vinderne af årets Cavlingpris 💪 [LINK]
-Sentiment: positive
-
-Tweet: @USER En international bilateral aftale er f.eks. en aftale mellem 2 lande i modsætning til en indgået mellem mange lande.
-Sentiment: neutral
-
-Tweet: Hvorfor er det, at vi ikke længere må se TV-billederne af gengivelserne, når der er VAR? Det er da grænseløst irriterende #CLDK
-Sentiment: negative
-
-Tweet: {text}
-Sentiment: """,
+    prompt_template="Tweet: {text}\nSentiment: {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -79,7 +71,8 @@ NOREC_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norec-mini",
     task=SENT,
     languages=[NB, NN],
-    prompt_template="{text}",  # TODO
+    prompt_template="Review: {text}\nSentiment: {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -89,7 +82,8 @@ SUC3_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/suc3-mini",
     task=NER,
     languages=[SV],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -99,7 +93,8 @@ DANE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/dane-mini",
     task=NER,
     languages=[DA],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -109,7 +104,8 @@ NORNE_NB_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nb-mini",
     task=NER,
     languages=[NB],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -119,7 +115,8 @@ NORNE_NN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nn-mini",
     task=NER,
     languages=[NN],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -129,7 +126,8 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mim-gold-ner-mini",
     task=NER,
     languages=[IS],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -139,7 +137,8 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/wikiann-fo-mini",
     task=NER,
     languages=[FO],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
+    num_few_shot_examples=3,
 )
 
 
@@ -149,7 +148,8 @@ SCALA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-sv",
     task=LA,
     languages=[SV],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nGrammatically correct: {label}",
+    num_few_shot_examples=2,
 )
 
 
@@ -159,7 +159,8 @@ SCALA_DA_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-da",
     task=LA,
     languages=[DA],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nGrammatically correct: {label}",
+    num_few_shot_examples=2,
 )
 
 
@@ -169,7 +170,8 @@ SCALA_NB_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-nb",
     task=LA,
     languages=[NB],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nGrammatically correct: {label}",
+    num_few_shot_examples=2,
 )
 
 
@@ -179,7 +181,8 @@ SCALA_NN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-nn",
     task=LA,
     languages=[NN],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nGrammatically correct: {label}",
+    num_few_shot_examples=2,
 )
 
 
@@ -189,7 +192,8 @@ SCALA_IS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-is",
     task=LA,
     languages=[IS],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nGrammatically correct: {label}",
+    num_few_shot_examples=2,
 )
 
 
@@ -199,7 +203,8 @@ SCALA_FO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-fo",
     task=LA,
     languages=[FO],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nGrammatically correct: {label}",
+    num_few_shot_examples=2,
 )
 
 
@@ -209,7 +214,8 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-da-mini",
     task=QA,
     languages=[DA],
-    prompt_template="{text}",  # TODO
+    prompt_template="Text: {text}\nQuestion: {question}\nAnswer: {label}",
+    num_few_shot_examples=1,
 )
 
 
@@ -220,6 +226,7 @@ SCANDIQA_NO_CONFIG = DatasetConfig(
     task=QA,
     languages=[NB, NN],
     prompt_template="{text}",  # TODO
+    num_few_shot_examples=1,
 )
 
 
@@ -230,6 +237,7 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     task=QA,
     languages=[SV],
     prompt_template="{text}",  # TODO
+    num_few_shot_examples=1,
 )
 
 
@@ -240,6 +248,7 @@ NQII_CONFIG = DatasetConfig(
     task=QA,
     languages=[IS],
     prompt_template="{text}",  # TODO
+    num_few_shot_examples=1,
 )
 
 
@@ -250,6 +259,7 @@ FOQA_CONFIG = DatasetConfig(
     task=QA,
     languages=[FO],
     prompt_template="{text}",  # TODO
+    num_few_shot_examples=1,
 )
 
 
@@ -259,5 +269,6 @@ SPEED_CONFIG = DatasetConfig(
     huggingface_id="",
     task=SPEED,
     languages=list(get_all_languages().values()),
-    prompt_template="{text}",  # TODO
+    prompt_template="",
+    num_few_shot_examples=0,
 )
