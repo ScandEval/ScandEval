@@ -877,14 +877,11 @@ class BenchmarkDataset(ABC):
         test = dataset_dict["test"]
 
         # Remove empty examples from the datasets
-        if "tokens" in train.features:
-            train = train.filter(lambda x: len(x["tokens"]) > 0)
-            val = val.filter(lambda x: len(x["tokens"]) > 0)
-            test = test.filter(lambda x: len(x["tokens"]) > 0)
-        elif "doc" in train.features:
-            train = train.filter(lambda x: len(x["doc"]) > 0)
-            val = val.filter(lambda x: len(x["doc"]) > 0)
-            test = test.filter(lambda x: len(x["doc"]) > 0)
+        for text_feature in ["tokens", "doc", "text"]:
+            if text_feature in train.features:
+                train = train.filter(lambda x: len(x[text_feature]) > 0)
+                val = val.filter(lambda x: len(x[text_feature]) > 0)
+                test = test.filter(lambda x: len(x[text_feature]) > 0)
 
         # If we are testing then truncate the test set
         if self.benchmark_config.testing:
