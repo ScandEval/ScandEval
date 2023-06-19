@@ -32,6 +32,7 @@ class LoadingArguments(TypedDict):
     revision: str
     use_auth_token: str | bool
     cache_dir: str
+    trust_remote_code: bool
 
 
 class HFModelSetup:
@@ -220,6 +221,7 @@ class HFModelSetup:
             "revision": model_config.revision,
             "use_auth_token": self.benchmark_config.use_auth_token,
             "cache_dir": self.benchmark_config.cache_dir,
+            "trust_remote_code": True,  # TODO: Make this an argument
         }
 
         while True:
@@ -319,6 +321,13 @@ class HFModelSetup:
                 if "checkpoint seems to be incorrect" in str(e):
                     raise InvalidBenchmark(
                         f"The model {model_id!r} has an incorrect checkpoint."
+                    )
+
+                if "trust_remote_code" in str(e):
+                    raise InvalidBenchmark(
+                        f"Loading the model {model_id!r} needs to trust remote code. "
+                        "If you trust the suppliers of this model, then you can enable "
+                        "this by setting the `--trust-remote-code` flag."
                     )
 
                 # Otherwise raise a more generic error

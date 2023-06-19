@@ -38,6 +38,7 @@ def load_norbert_model(
     from_flax: bool,
     use_auth_token: bool | str,
     cache_dir: str,
+    **kwargs,
 ) -> PreTrainedModel:
     try:
         config = NorbertConfig.from_pretrained(

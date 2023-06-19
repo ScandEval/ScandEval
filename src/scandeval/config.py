@@ -119,6 +119,9 @@ class BenchmarkConfig:
             The device to use for benchmarking.
         verbose (bool):
             Whether to print verbose output.
+        trust_remote_code (bool):
+            Whether to trust remote code when loading models from the Hugging Face
+            Hub.
         testing (bool, optional):
             Whether a unit test is being run. Defaults to False.
     """
@@ -138,6 +141,7 @@ class BenchmarkConfig:
     save_results: bool
     device: torch.device
     verbose: bool
+    trust_remote_code: bool
     testing: bool = False
 
 

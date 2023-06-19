@@ -172,6 +172,13 @@ from .languages import get_all_languages
     help="""The device to use for evaluation. If not specified then the device will be
     set automatically.""",
 )
+@click.option(
+    "--trust-remote-code/--no-trust-remote-code",
+    default=False,
+    show_default=True,
+    help="""Whether to trust remote code. Only set this flag if you trust the supplier
+    of the model.""",
+)
 def benchmark(
     model_id: Tuple[str],
     dataset: Tuple[str],
@@ -192,6 +199,7 @@ def benchmark(
     framework: str | None = None,
     few_shot: bool = False,
     device: str | None = None,
+    trust_remote_code: bool = False,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -224,6 +232,7 @@ def benchmark(
         framework=framework,
         few_shot=few_shot,
         device=device,
+        trust_remote_code=trust_remote_code,
     )
 
     # Perform the benchmark evaluation

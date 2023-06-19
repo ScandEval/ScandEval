@@ -73,6 +73,8 @@ class Benchmarker:
             to True.
         verbose (bool, optional):
             Whether to output additional output. Defaults to False.
+        trust_remote_code (bool, optional):
+            Whether to trust remote code when loading models. Defaults to False.
 
     Attributes:
         progress_bar (bool): Whether progress bars should be shown.
@@ -104,8 +106,8 @@ class Benchmarker:
         ignore_duplicates: bool = True,
         device: Device | None = None,
         verbose: bool = False,
+        trust_remote_code: bool = False,
     ) -> None:
-        # Build benchmark configuration
         self.benchmark_config = build_benchmark_config(
             language=language,
             model_language=model_language,
@@ -123,6 +125,7 @@ class Benchmarker:
             framework=framework,
             device=device,
             few_shot=few_shot,
+            trust_remote_code=trust_remote_code,
         )
 
         # Set attributes from arguments

@@ -25,6 +25,7 @@ def build_benchmark_config(
     framework: Framework | str | None,
     few_shot: bool,
     device: Device | None,
+    trust_remote_code: bool = False,
     testing: bool = False,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
@@ -74,6 +75,9 @@ def build_benchmark_config(
         device (Device or None):
             The device to use for running the models. If None then the device will be
             set automatically.
+        trust_remote_code (bool):
+            Whether to trust remote code when loading models from the Hugging Face
+            Hub.
         testing (bool, optional):
             Whether to run the benchmark in testing mode. Defaults to False.
     """
@@ -108,6 +112,7 @@ def build_benchmark_config(
         framework=framework,
         few_shot=few_shot,
         device=torch_device,
+        trust_remote_code=trust_remote_code,
         testing=testing,
     )
 
