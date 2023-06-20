@@ -1,16 +1,15 @@
 """Sequence classification benchmark dataset."""
 
 import logging
-import re
 from functools import partial
 
 from datasets.arrow_dataset import Dataset
-from transformers import BatchEncoding
-from transformers.data.data_collator import DataCollator, DataCollatorWithPadding
+from transformers import BatchEncoding, PreTrainedModel
+from transformers.data.data_collator import DataCollatorWithPadding
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
-from .model_setups import Tokenizer
+from .model_setups import GenerativeModel, Tokenizer
 from .utils import get_special_token_metadata
 
 logger = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ class SequenceClassification(BenchmarkDataset):
             few_shot_fn = partial(
                 self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
             )
-            dataset = dataset.map(few_shot_fn, batched=True)
+            dataset = dataset.map(few_shot_fn, batched=True, load_from_cache_file=False)
 
         def tokenise(examples: dict) -> BatchEncoding:
             # If the tokenizer is not adding special tokens, then we add them manually.
@@ -117,7 +116,7 @@ class SequenceClassification(BenchmarkDataset):
         # Build the few-shot part of the prompt
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=re.sub(" +", " ", example["text"].replace("\n", " ")).strip(),
+                text=example["text"].replace("\n", " ").strip(),
                 label=example["label"],
             )
             for example in few_shot_examples
@@ -127,7 +126,7 @@ class SequenceClassification(BenchmarkDataset):
         # Add the texts from the examples to the prompts
         new_prompts = [
             self.dataset_config.prompt_template.format(
-                text=re.sub(" +", " ", text.replace("\n", " ")).strip(), label=""
+                text=text.replace("\n", " ").strip(), label=""
             )
             for text in examples["text"]
         ]
@@ -147,12 +146,19 @@ class SequenceClassification(BenchmarkDataset):
             )
         return examples
 
-    def _load_data_collator(self, tokenizer: Tokenizer | None = None) -> DataCollator:
+    def _load_data_collator(
+        self,
+        tokenizer: Tokenizer | None = None,
+        model: PreTrainedModel | GenerativeModel | None = None,
+    ):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
             tokenizer (Tokenizer or None, optional):
-                A tokenizer. Can be None if the tokenizer is not used in the
+                A pretrained tokenizer. Can be None if the tokenizer is not used in the
+                initialisation of the data collator. Defaults to None.
+            model (PreTrainedModel or GenerativeModel or None, optional):
+                A pretrained model. Can be None if the model is not used in the
                 initialisation of the data collator. Defaults to None.
 
         Returns:

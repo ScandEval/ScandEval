@@ -148,6 +148,9 @@ class BenchmarkDataset(ABC):
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
 
+        # TEMP
+        # num_iter = 1
+
         if self.dataset_config.task.name != SPEED:
             train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
             prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
@@ -580,15 +583,20 @@ class BenchmarkDataset(ABC):
 
         # Sort the dataset by the length of the text, to minimise the amount of padding
         # that needs to be added, speeding up generation
+        text_column = "text" if "text" in prepared_dataset.column_names else "doc"
         prepared_dataset = prepared_dataset.add_column(
-            name="length", column=[len(x) for x in prepared_dataset["text"]]
+            name="length", column=[len(x) for x in prepared_dataset[text_column]]
         )
         prepared_dataset = prepared_dataset.sort("length", reverse=True)
 
         # Enable batching by building a dataloader. The dataloader cannot deal with
         # text columns, so we create a copy of the dataset without these
         torch_dataset = prepared_dataset.with_format("torch").remove_columns(
-            ["text", "label", "length"]
+            list(
+                {"text", "label", "length", "tokens"}.intersection(
+                    prepared_dataset.column_names
+                )
+            )
         )
 
         batch_sizes = [
@@ -604,7 +612,7 @@ class BenchmarkDataset(ABC):
                 batch_size=batch_size,
                 shuffle=False,
                 num_workers=4,
-                collate_fn=self._load_data_collator(tokenizer=tokenizer),
+                collate_fn=self._load_data_collator(tokenizer=tokenizer, model=model),
             )
 
             skip_evaluation = False
@@ -630,6 +638,10 @@ class BenchmarkDataset(ABC):
                     if all([error not in str(e) for error in oom_error]):
                         raise InvalidBenchmark(str(e))
                     skip_evaluation = True
+                    del batch
+                    if "inputs" in locals():
+                        del inputs
+                    clear_memory()
                     break
 
                 predicted_labels = [
@@ -644,16 +656,20 @@ class BenchmarkDataset(ABC):
                 # Ensure that the predicted labels are in the candidate labels by
                 # computing the edit distance between the predicted label and each
                 # candidate label and choosing the candidate label with the smallest
-                # edit distance
-                for predicted_label in predicted_labels:
-                    edit_distances = [
-                        Levenshtein.distance(
-                            s1=predicted_label.upper(), s2=candidate_label.upper()
-                        )
-                        for candidate_label in candidate_labels
-                    ]
-                    closest_label = candidate_labels[np.argmin(edit_distances).item()]
-                    all_preds.append(closest_label)
+                # edit distance. This only makes sense if we are doing sequence
+                # classification.
+                if self.dataset_config.task.supertask == "sequence-classification":
+                    for predicted_label in predicted_labels:
+                        edit_distances = [
+                            Levenshtein.distance(
+                                s1=predicted_label.upper(), s2=candidate_label.upper()
+                            )
+                            for candidate_label in candidate_labels
+                        ]
+                        closest_label = candidate_labels[
+                            np.argmin(edit_distances).item()
+                        ]
+                        all_preds.append(closest_label)
 
             if skip_evaluation:
                 continue
@@ -876,6 +892,9 @@ class BenchmarkDataset(ABC):
         val = dataset_dict["val"]
         test = dataset_dict["test"]
 
+        # TEMP
+        # test = val
+
         # Remove empty examples from the datasets
         for text_feature in ["tokens", "doc", "text"]:
             if text_feature in train.features:
@@ -980,6 +999,24 @@ class BenchmarkDataset(ABC):
 
         return prepared_train, prepared_val, prepared_tests
 
+    def _extract_few_shot_examples(self, shuffled_train: Dataset) -> list[dict]:
+        supertask = self.dataset_config.task.supertask
+        num_few_shots = self.dataset_config.num_few_shot_examples
+        if supertask == "sequence-classification":
+            labels = it.cycle(self.dataset_config.task.labels)
+            few_shot_examples: list[dict] = list()
+            while len(few_shot_examples) < num_few_shots:
+                label = next(labels)
+                examples = shuffled_train.filter(
+                    lambda x: x["label"].upper() == label.upper()
+                ).select(range(1))
+                few_shot_examples.append(examples[0])
+        else:
+            examples_df = shuffled_train.select(range(num_few_shots)).to_pandas()
+            assert isinstance(examples_df, pd.DataFrame)
+            few_shot_examples = examples_df.to_dict("records")
+        return few_shot_examples
+
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)
 
@@ -1023,6 +1060,7 @@ class BenchmarkDataset(ABC):
             tokenizer=tokenizer,
             compute_metrics=compute_metrics,
             callbacks=callbacks,
+            data_collator=self._load_data_collator(tokenizer=tokenizer, model=model),
         )
 
     def _evaluate_dataset(
@@ -1083,12 +1121,19 @@ class BenchmarkDataset(ABC):
         pass
 
     @abstractmethod
-    def _load_data_collator(self, tokenizer: Tokenizer | None = None):
+    def _load_data_collator(
+        self,
+        tokenizer: Tokenizer | None = None,
+        model: PreTrainedModel | GenerativeModel | None = None,
+    ):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Hugging Face tokenizer or None, optional):
+            tokenizer (Tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
+                initialisation of the data collator. Defaults to None.
+            model (PreTrainedModel or GenerativeModel or None, optional):
+                A pretrained model. Can be None if the model is not used in the
                 initialisation of the data collator. Defaults to None.
 
         Returns:

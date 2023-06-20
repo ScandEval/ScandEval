@@ -121,12 +121,19 @@ class QuestionAnswering(BenchmarkDataset):
             metric_key_prefix=metric_key_prefix,
         )
 
-    def _load_data_collator(self, tokenizer: Tokenizer | None = None):
+    def _load_data_collator(
+        self,
+        tokenizer: Tokenizer | None = None,
+        model: PreTrainedModel | GenerativeModel | None = None,
+    ):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
             tokenizer (Tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
+                initialisation of the data collator. Defaults to None.
+            model (PreTrainedModel or GenerativeModel or None, optional):
+                A pretrained model. Can be None if the model is not used in the
                 initialisation of the data collator. Defaults to None.
 
         Returns:

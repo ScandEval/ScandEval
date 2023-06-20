@@ -8,8 +8,10 @@ import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from numpy._typing import NDArray
-from transformers import BatchEncoding
+from transformers import BatchEncoding, DataCollatorWithPadding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorForTokenClassification
+
+from scandeval.model_setups.base import GenerativeModel
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
@@ -54,7 +56,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         self.has_misc_tags = "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
 
         # Return the dataset dictionary
-        return dataset_dict
+        return dataset_dict.rename_column("ner_tags", "label")
 
     def _compute_metrics(
         self,
@@ -175,7 +177,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         all_labels: list[list[int]] = list()
         labels: list[str]
         word_ids: list[int | None]
-        for i, labels in enumerate(examples["ner_tags"]):
+        for i, labels in enumerate(examples["label"]):
             # Try to get the word IDs from the tokenizer
             try:
                 word_ids = tokenized_inputs.word_ids(batch_index=i)
@@ -358,26 +360,122 @@ class NamedEntityRecognition(BenchmarkDataset):
         Returns:
             Hugging Face dataset: The preprocessed dataset.
         """
-        map_fn = partial(
-            self._tokenize_and_align_labels,
-            tokenizer=kwargs["tokenizer"],
-            label2id=kwargs["hf_model_config"].label2id,
-        )
-        tokenised_dataset: Dataset = dataset.map(
-            map_fn, batched=True, load_from_cache_file=False
-        )
+        if (
+            kwargs["model_config"].task == "text-generation"
+            and "few_shot_examples" in kwargs
+        ):
+            few_shot_examples = kwargs["few_shot_examples"]
+            few_shot_fn = partial(
+                self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
+            )
+            dataset = dataset.map(few_shot_fn, batched=True, load_from_cache_file=False)
+
+            def tokenise(examples: dict) -> BatchEncoding:
+                return kwargs["tokenizer"](
+                    text=examples["text"],
+                    truncation=True,
+                    padding=False,
+                )
+
+            tokenised_dataset = dataset.map(
+                tokenise, batched=True, load_from_cache_file=False
+            )
+
+        else:
+            map_fn = partial(
+                self._tokenize_and_align_labels,
+                tokenizer=kwargs["tokenizer"],
+                label2id=kwargs["hf_model_config"].label2id,
+            )
+            tokenised_dataset = dataset.map(
+                map_fn, batched=True, load_from_cache_file=False
+            )
+
         return tokenised_dataset
 
-    def _load_data_collator(self, tokenizer: Tokenizer | None = None):
+    def _apply_few_shot_prompt(
+        self, examples: dict, few_shot_examples: list[dict]
+    ) -> dict:
+        """Apply a few-shot prompt to the examples.
+
+        Args:
+            examples (dict):
+                The examples to apply the prompt to.
+            few_shot_examples (list of dict):
+                The examples to be included in the few-shot prompt.
+
+        Returns:
+            dict:
+                The examples with the few-shot prompt applied.
+        """
+
+        def create_label(example: dict) -> str:
+            label_parts: list[str] = list()
+            running_tag: str = ""
+            for token, ner_tag in zip(example["tokens"], example["label"]):
+                if ner_tag == "O":
+                    if running_tag:
+                        label_parts.append(f"###</{running_tag}>")
+                        running_tag = ""
+                    label_parts.append(token)
+                elif ner_tag.startswith("B-"):
+                    if running_tag:
+                        label_parts.append(f"###</{running_tag}>")
+                        running_tag = ""
+                    label_parts.append(f"<{ner_tag[2:]}>###")
+                    label_parts.append(token)
+                    running_tag = ner_tag[2:]
+                elif ner_tag.startswith("I-"):
+                    label_parts.append(token)
+            if running_tag:
+                label_parts.append(f"###</{running_tag}>")
+            label = " ".join(label_parts).replace(" ###", "").replace("### ", "")
+            return label
+
+        # Build the few-shot part of the prompt
+        few_shot_prompts = [
+            self.dataset_config.prompt_template.format(
+                text=" ".join(example["tokens"]),
+                label=create_label(example),
+            )
+            for example in few_shot_examples
+        ]
+        few_shot_prompt = "\n\n".join(few_shot_prompts)
+
+        # Add the texts from the examples to the prompts
+        new_prompts = [
+            self.dataset_config.prompt_template.format(text=" ".join(tokens), label="")
+            for tokens in examples["tokens"]
+        ]
+        examples["text"] = [
+            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
+        ]
+        examples.pop("doc")
+
+        return examples
+
+    def _load_data_collator(
+        self,
+        tokenizer: Tokenizer | None = None,
+        model: PreTrainedModel | GenerativeModel | None = None,
+    ):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
             tokenizer (Tokenizer or None, optional):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
+            model (PreTrainedModel or GenerativeModel or None, optional):
+                A pretrained model. Can be None if the model is not used in the
+                initialisation of the data collator. Defaults to None.
 
         Returns:
             Hugging Face data collator:
                 The data collator.
         """
-        return DataCollatorForTokenClassification(tokenizer, label_pad_token_id=-100)
+        if isinstance(model, GenerativeModel):
+            return DataCollatorWithPadding(tokenizer=tokenizer)
+        else:
+            return DataCollatorForTokenClassification(
+                tokenizer=tokenizer, label_pad_token_id=-100
+            )
