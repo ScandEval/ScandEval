@@ -15,7 +15,6 @@ from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
 from ..languages import get_all_languages
-from ..norbert import load_norbert_model
 from ..utils import (
     HiddenPrints,
     block_terminal_output,
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 class LoadingArguments(TypedDict):
     revision: str
-    use_auth_token: str | bool
+    token: str | bool
     cache_dir: str
     trust_remote_code: bool
 
@@ -79,11 +78,7 @@ class HFModelSetup:
                 token = None
             else:
                 token = self.benchmark_config.use_auth_token
-            hf_api.model_info(
-                repo_id=model_id,
-                revision=revision,
-                token=token,
-            )
+            hf_api.model_info(repo_id=model_id, revision=revision, token=token)
             return True
 
         # If the repository was not found on Hugging Face Hub then raise that error
@@ -220,71 +215,57 @@ class HFModelSetup:
 
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,
-            "use_auth_token": self.benchmark_config.use_auth_token,
+            "token": self.benchmark_config.use_auth_token,
             "cache_dir": self.benchmark_config.cache_dir,
             "trust_remote_code": True,  # TODO: Make this an argument
         }
 
         while True:
             try:
-                # Special handling of NorBERT3 models, as they are not included in the
-                # `transformers` library yet
-                if "norbert3" in model_id:
-                    model = load_norbert_model(
-                        model_id=model_id,
-                        supertask=supertask,
+                try:
+                    config = AutoConfig.from_pretrained(
+                        model_id,
                         num_labels=dataset_config.num_labels,
                         id2label=dataset_config.id2label,
                         label2id=dataset_config.label2id,
-                        from_flax=from_flax,
                         **loading_kwargs,
                     )
-
-                # Otherwise load the pretrained model
-                else:
-                    try:
-                        config = AutoConfig.from_pretrained(
-                            model_id,
-                            num_labels=dataset_config.num_labels,
-                            id2label=dataset_config.id2label,
-                            label2id=dataset_config.label2id,
-                            **loading_kwargs,
-                        )
-                    except KeyError as e:
-                        key = e.args[0]
-                        raise InvalidBenchmark(
-                            f"The model config for the model {model_id!r} could not "
-                            f"be loaded, as the key {key!r} was not found in the "
-                            "config."
-                        )
-
-                    # Get the model class associated with the supertask
-                    if model_config.task == "text-generation":
-                        model_cls_supertask = "causal-l-m"
-                    else:
-                        model_cls_supertask = supertask
-                    model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
-                        class_name=f"auto-model-for-{model_cls_supertask}",
-                        module_name="transformers",
+                except KeyError as e:
+                    key = e.args[0]
+                    raise InvalidBenchmark(
+                        f"The model config for the model {model_id!r} could not "
+                        f"be loaded, as the key {key!r} was not found in the "
+                        "config."
                     )
 
-                    # If the model class could not be found then raise an error
-                    if not model_cls_or_none:
-                        raise InvalidBenchmark(
-                            f"The supertask {supertask!r} does not correspond to a "
-                            "Hugging Face AutoModel type (such as "
-                            "`AutoModelForSequenceClassification`)."
-                        )
+                # Get the model class associated with the supertask
+                if model_config.task == "text-generation":
+                    model_cls_supertask = "causal-l-m"
+                else:
+                    model_cls_supertask = supertask
+                model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
+                    class_name=f"auto-model-for-{model_cls_supertask}",
+                    module_name="transformers",
+                )
 
-                    # If the model is a DeBERTaV2 model then we ensure that
-                    # `pooler_hidden_size` is the same size as `hidden_size`
-                    if config.model_type == "deberta-v2":
-                        config.pooler_hidden_size = config.hidden_size
+                # If the model class could not be found then raise an error
+                if not model_cls_or_none:
+                    raise InvalidBenchmark(
+                        f"The supertask {supertask!r} does not correspond to a "
+                        "Hugging Face AutoModel type (such as "
+                        "`AutoModelForSequenceClassification`)."
+                    )
 
-                    # Load the model
-                    with warnings.catch_warnings():
-                        warnings.filterwarnings("ignore", category=UserWarning)
-                        with HiddenPrints():
+                # If the model is a DeBERTaV2 model then we ensure that
+                # `pooler_hidden_size` is the same size as `hidden_size`
+                if config.model_type == "deberta-v2":
+                    config.pooler_hidden_size = config.hidden_size
+
+                # Load the model
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=UserWarning)
+                    with HiddenPrints():
+                        try:
                             model_or_tuple = model_cls_or_none.from_pretrained(
                                 model_config.model_id,
                                 config=config,
@@ -294,18 +275,17 @@ class HFModelSetup:
                                 bnb_4bit_use_double_quant=load_in_4bit,
                                 **loading_kwargs,
                             )
-                    if isinstance(model_or_tuple, tuple):
-                        model = model_or_tuple[0]
-                    else:
-                        model = model_or_tuple
-
-                break
-
-            except KeyError as e:
-                if not ignore_mismatched_sizes:
-                    ignore_mismatched_sizes = True
+                        except KeyError as e:
+                            if not ignore_mismatched_sizes:
+                                ignore_mismatched_sizes = True
+                                continue
+                            else:
+                                raise InvalidBenchmark(str(e))
+                if isinstance(model_or_tuple, tuple):
+                    model = model_or_tuple[0]
                 else:
-                    raise InvalidBenchmark(str(e))
+                    model = model_or_tuple
+                break
 
             except (OSError, ValueError) as e:
                 # If `from_flax` is False but only Flax models are available then try
@@ -344,11 +324,7 @@ class HFModelSetup:
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
-        tokenizer = self._load_tokenizer(
-            model=model,
-            model_id=model_id,
-            loading_kwargs=loading_kwargs,
-        )
+        tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         # Align the model and the tokenizer
         model, tokenizer = align_model_and_tokenizer(
@@ -368,7 +344,6 @@ class HFModelSetup:
         self,
         model: PreTrainedModel | GenerativeModel,
         model_id: str,
-        loading_kwargs: LoadingArguments,
     ) -> Tokenizer:
         """Load the tokenizer.
 
@@ -378,8 +353,6 @@ class HFModelSetup:
                 the tokens.
             model_id (str):
                 The model identifier. Used for logging.
-            loading_kwargs (LoadingArguments):
-                The loading arguments.
 
         Returns:
             Tokenizer:
@@ -400,7 +373,6 @@ class HFModelSetup:
                     verbose=False,
                     padding_side=padding_side,
                     truncation_side=padding_side,
-                    **loading_kwargs,
                 )
             except (JSONDecodeError, OSError):
                 raise InvalidBenchmark(
