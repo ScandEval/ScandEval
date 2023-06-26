@@ -72,8 +72,6 @@ class Tokenizer(Protocol):
 class GenerativeModel(Protocol):
     """A protocol for a generative model."""
 
-    is_generative: bool = True
-
     @property
     def config(self) -> PretrainedConfig:
         ...

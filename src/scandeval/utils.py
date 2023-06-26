@@ -23,13 +23,11 @@ from requests.exceptions import RequestException
 from transformers import PreTrainedModel
 from transformers import logging as tf_logging
 
-from scandeval.model_setups.base import GenerativeModel
-
 from .config import Language
 from .enums import Framework
 from .exceptions import InvalidBenchmark
 from .languages import DA, NB, NN, NO, SV, get_all_languages
-from .model_setups import Tokenizer
+from .model_setups import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__name__)
 

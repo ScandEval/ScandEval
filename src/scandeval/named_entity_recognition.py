@@ -11,11 +11,10 @@ from numpy._typing import NDArray
 from transformers import BatchEncoding, DataCollatorWithPadding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorForTokenClassification
 
-from scandeval.model_setups.base import GenerativeModel
-
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
-from .model_setups import Tokenizer
+from .model_setups import GenerativeModel, Tokenizer
+from .utils import model_is_generative
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -473,7 +472,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             Hugging Face data collator:
                 The data collator.
         """
-        if isinstance(model, GenerativeModel):
+        if model_is_generative(model=model):
             return DataCollatorWithPadding(tokenizer=tokenizer)
         else:
             return DataCollatorForTokenClassification(

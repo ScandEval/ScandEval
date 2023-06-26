@@ -48,6 +48,7 @@ from .utils import (
     clear_memory,
     enforce_reproducibility,
     handle_error,
+    model_is_generative,
 )
 
 # Set up logger
@@ -135,7 +136,7 @@ class BenchmarkDataset(ABC):
 
         # This happens when a local model is used, as we cannot fetch the model metadata
         if model_config.task == "unknown":
-            if isinstance(model, GenerativeModel):
+            if model_is_generative(model=model):
                 model_config.task = "text-generation"
             else:
                 model_config.task = "fill-mask"
@@ -172,7 +173,7 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-        elif isinstance(model, GenerativeModel):
+        elif model_is_generative(model=model):
             scores = self._generate(
                 itr=itr,
                 train=train,
