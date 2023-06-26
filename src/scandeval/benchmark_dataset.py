@@ -145,9 +145,6 @@ class BenchmarkDataset(ABC):
         # Set variable with number of iterations
         num_iter = 10 if not self.benchmark_config.testing else 5
 
-        # TEMP
-        # num_iter = 1
-
         if self.dataset_config.task.name != SPEED:
             train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
             prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
@@ -611,7 +608,6 @@ class BenchmarkDataset(ABC):
                     "Too many parallel completions requested.",  # OpenAI specific
                 ]
                 if all(error not in str(e) for error in oom_error):
-                    breakpoint()
                     raise InvalidBenchmark(str(e))
                 torch.cuda.empty_cache()
                 continue
