@@ -74,10 +74,10 @@ class HFModelSetup:
 
         # Get the model info, and return it
         try:
-            if isinstance(self.benchmark_config.use_auth_token, bool):
+            if isinstance(self.benchmark_config.token, bool):
                 token = None
             else:
-                token = self.benchmark_config.use_auth_token
+                token = self.benchmark_config.token
             hf_api.model_info(repo_id=model_id, revision=revision, token=token)
             return True
 
@@ -127,7 +127,7 @@ class HFModelSetup:
             # Fetch the model metadata
             models = api.list_models(
                 filter=ModelFilter(author=author, model_name=model_name),
-                token=self.benchmark_config.use_auth_token,
+                token=self.benchmark_config.token,
             )
 
             # Filter the models to only keep the one with the specified model ID
@@ -215,7 +215,7 @@ class HFModelSetup:
 
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,
-            "token": self.benchmark_config.use_auth_token,
+            "token": self.benchmark_config.token,
             "cache_dir": self.benchmark_config.cache_dir,
             "trust_remote_code": True,  # TODO: Make this an argument
         }
@@ -315,7 +315,7 @@ class HFModelSetup:
                     "Hub, or it has no frameworks registered, or it is a private "
                     "model. If it *does* exist on the Hub and is a public model then "
                     "please ensure that it has a framework registered. If it is a "
-                    "private model then enable the `--use-auth-token` flag and make "
+                    "private model then enable the `--token` flag and make "
                     "sure that you are logged in to the Hub via the "
                     "`huggingface-cli login` command."
                 )

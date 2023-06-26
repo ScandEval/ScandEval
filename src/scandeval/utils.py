@@ -297,7 +297,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 # TODO: Cache this
 def get_huggingface_model_lists(
     languages: list[Language] | None,
-    use_auth_token: bool | str,
+    token: bool | str,
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -305,7 +305,7 @@ def get_huggingface_model_lists(
         languages (None or sequence of Language objects):
             The language codes of the language to consider. If None then the models
             will not be filtered on language.
-        use_auth_token (bool or str):
+        token (bool or str):
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
@@ -369,8 +369,7 @@ def get_huggingface_model_lists(
 
         # Fetch the model list
         models: list[ModelInfo] = api.list_models(
-            filter=ModelFilter(language=language_str),
-            token=use_auth_token,
+            filter=ModelFilter(language=language_str), token=token
         )
 
         # Filter the models to only keep the ones with the specified language

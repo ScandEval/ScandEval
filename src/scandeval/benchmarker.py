@@ -55,7 +55,7 @@ class Benchmarker:
             to False.
         cache_dir (str, optional):
             Directory to store cached models. Defaults to '.scandeval_cache'.
-        use_auth_token (bool or str, optional):
+        token (bool or str, optional):
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
@@ -82,7 +82,7 @@ class Benchmarker:
         dataset_task (str or list of str): The dataset tasks to include.
         evaluate_train (bool): Whether to evaluate the training set as well.
         verbose (bool): Whether to output additional output.
-        use_auth_token (str or bool): The authentication token for the Hugging Face Hub.
+        token (str or bool): The authentication token for the Hugging Face Hub.
         benchmark_results (dict): The benchmark results.
     """
 
@@ -99,7 +99,7 @@ class Benchmarker:
         evaluate_train: bool = False,
         raise_errors: bool = False,
         cache_dir: str = ".scandeval_cache",
-        use_auth_token: bool | str = False,
+        token: bool | str = False,
         openai_api_key: str | None = None,
         ignore_duplicates: bool = True,
         device: Device | None = None,
@@ -116,7 +116,7 @@ class Benchmarker:
             raise_errors=raise_errors,
             cache_dir=cache_dir,
             evaluate_train=evaluate_train,
-            use_auth_token=use_auth_token,
+            token=token,
             openai_api_key=openai_api_key,
             progress_bar=progress_bar,
             save_results=save_results,
@@ -416,7 +416,7 @@ class Benchmarker:
         if self._model_lists is None or new_languages:
             self._model_lists = get_huggingface_model_lists(
                 languages=languages,
-                use_auth_token=self.benchmark_config.use_auth_token,
+                token=self.benchmark_config.token,
             )
 
         # Extract all the model IDs from the model lists, for the chosen languages

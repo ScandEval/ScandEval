@@ -138,7 +138,7 @@ class FreshModelSetup:
 
         config = AutoConfig.from_pretrained(
             model_id,
-            token=self.benchmark_config.use_auth_token,
+            token=self.benchmark_config.token,
             num_labels=dataset_config.num_labels,
             id2label=dataset_config.id2label,
             label2id=dataset_config.label2id,
@@ -160,7 +160,7 @@ class FreshModelSetup:
                 tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
                     model_id,
                     revision=model_config.revision,
-                    token=self.benchmark_config.use_auth_token,
+                    token=self.benchmark_config.token,
                     add_prefix_space=prefix,
                     cache_dir=self.benchmark_config.cache_dir,
                     use_fast=True,

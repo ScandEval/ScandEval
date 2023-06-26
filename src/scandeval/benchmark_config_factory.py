@@ -17,7 +17,7 @@ def build_benchmark_config(
     raise_errors: bool,
     cache_dir: str,
     evaluate_train: bool,
-    use_auth_token: bool | str,
+    token: bool | str,
     openai_api_key: str | None,
     progress_bar: bool,
     save_results: bool,
@@ -53,7 +53,7 @@ def build_benchmark_config(
             Directory to store cached models.
         evaluate_train (bool):
             Whether to evaluate the training set as well.
-        use_auth_token (bool or str):
+        token (bool or str):
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
@@ -105,7 +105,7 @@ def build_benchmark_config(
         raise_errors=raise_errors,
         cache_dir=cache_dir,
         evaluate_train=evaluate_train,
-        use_auth_token=use_auth_token,
+        token=token,
         openai_api_key=openai_api_key,
         progress_bar=progress_bar,
         save_results=save_results,

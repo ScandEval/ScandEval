@@ -1,7 +1,5 @@
 """Command-line interface for benchmarking."""
 
-from typing import List, Tuple, Union
-
 import click
 
 from .benchmarker import Benchmarker
@@ -126,15 +124,15 @@ from .languages import get_all_languages
     help="The directory where models are datasets are cached.",
 )
 @click.option(
-    "--auth-token",
+    "--token",
     type=str,
     default="",
     show_default=True,
     help="""The authentication token for the Hugging Face Hub. If specified then the
-    `--use-auth-token` flag will be set to True.""",
+    `--token` flag will be set to True.""",
 )
 @click.option(
-    "--use-auth-token/--no-use-auth-token",
+    "--use-token/--no-use-auth-token",
     default=False,
     show_default=True,
     help="""Whether an authentication token should be used, enabling evaluation of
@@ -181,20 +179,20 @@ from .languages import get_all_languages
     prompt used for evaluation.""",
 )
 def benchmark(
-    model_id: Tuple[str],
-    dataset: Tuple[str],
-    language: Tuple[str],
-    model_language: Tuple[str],
-    dataset_language: Tuple[str],
+    model_id: tuple[str],
+    dataset: tuple[str],
+    language: tuple[str],
+    model_language: tuple[str],
+    dataset_language: tuple[str],
     raise_errors: bool,
-    dataset_task: Tuple[str],
+    dataset_task: tuple[str],
     batch_size: str,
     evaluate_train: bool,
     progress_bar: bool,
     save_results: bool,
     cache_dir: str,
-    use_auth_token: bool,
-    auth_token: str,
+    use_token: bool,
+    token: str,
     ignore_duplicates: bool,
     verbose: bool = False,
     framework: str | None = None,
@@ -207,13 +205,13 @@ def benchmark(
     # Set up language variables
     model_ids = None if len(model_id) == 0 else list(model_id)
     datasets = None if len(dataset) == 0 else list(dataset)
-    languages: List[str] = list(language)
+    languages: list[str] = list(language)
     model_languages = None if len(model_language) == 0 else list(model_language)
     dataset_languages = None if len(dataset_language) == 0 else list(dataset_language)
     dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
     batch_size_int = int(batch_size)
-    auth: Union[str, bool] = auth_token if auth_token != "" else use_auth_token
     device = Device[device.upper()] if device is not None else None
+    token_str_bool: str | bool = token if token != "" else use_token
 
     # Initialise the benchmarker class
     benchmarker = Benchmarker(
@@ -227,7 +225,7 @@ def benchmark(
         evaluate_train=evaluate_train,
         raise_errors=raise_errors,
         verbose=verbose,
-        use_auth_token=auth,
+        token=token_str_bool,
         ignore_duplicates=ignore_duplicates,
         cache_dir=cache_dir,
         framework=framework,

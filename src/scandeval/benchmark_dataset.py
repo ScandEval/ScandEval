@@ -1026,7 +1026,7 @@ class BenchmarkDataset(ABC):
         try:
             dataset_dict = load_dataset(
                 path=self.dataset_config.huggingface_id,
-                use_auth_token=self.benchmark_config.use_auth_token,
+                token=self.benchmark_config.token,
                 cache_dir=self.benchmark_config.cache_dir,
             )
         except HfHubHTTPError:
