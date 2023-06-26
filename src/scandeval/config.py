@@ -88,8 +88,6 @@ class BenchmarkConfig:
         framework (Framework or None):
             The framework of the models to benchmark. If None then the framework will
             be inferred.
-        few_shot (bool):
-            Whether to benchmark the models in few-shot mode.
         dataset_languages (list of Language objects):
             The languages of the datasets in the benchmark.
         dataset_tasks (list of DatasetTask):
@@ -122,13 +120,15 @@ class BenchmarkConfig:
         trust_remote_code (bool):
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
+        instruction_tuned (bool):
+            Whether the model is instruction finetuned, as this changes the prompt
+            template. Only relevant if the model is a generative model.
         testing (bool, optional):
             Whether a unit test is being run. Defaults to False.
     """
 
     model_languages: list[Language]
     framework: Framework | str | None
-    few_shot: bool
     dataset_languages: list[Language]
     dataset_tasks: list[DatasetTask]
     batch_size: int
@@ -142,6 +142,7 @@ class BenchmarkConfig:
     device: torch.device
     verbose: bool
     trust_remote_code: bool
+    instruction_tuned: bool
     testing: bool = False
 
 
@@ -167,13 +168,24 @@ class DatasetConfig:
             The mapping from label to ID.
         num_labels (int):
             The number of labels in the dataset.
+        prompt_prefix (str):
+            The prefix to use in the few-shot prompt.
         prompt_template (str):
             The template for the prompt to use when benchmarking the dataset using
             few-shot evaluation.
+        prompt_label_mapping (dict of str to str):
+            A mapping from the labels to another phrase which is used as a substitute
+            for the label in few-shot evaluation.
+        prompt_instruction_infix (str):
+            The infix to use in the few-shot prompt between the few-shot examples and
+            the new example.
         num_few_shot_examples (int):
             The number of examples to use when benchmarking the dataset using few-shot
             evaluation. For a classification task, these will be drawn evenly from
             each label.
+        max_generated_tokens (int):
+            The maximum number of tokens to generate when benchmarking the dataset
+            using few-shot evaluation.
     """
 
     name: str
@@ -181,8 +193,12 @@ class DatasetConfig:
     huggingface_id: str
     task: DatasetTask
     languages: list[Language]
+    prompt_prefix: str
+    prompt_instruction_infix: str
     prompt_template: str
+    prompt_label_mapping: dict[str, str]
     num_few_shot_examples: int
+    max_generated_tokens: int
 
     @property
     def id2label(self) -> list[str]:

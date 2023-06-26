@@ -7,6 +7,7 @@ import torch.nn as nn
 from transformers import PreTrainedModel, PreTrainedTokenizer
 
 from ..exceptions import InvalidBenchmark
+from .base import GenerativeModel
 
 
 def get_children_of_module(
@@ -115,14 +116,8 @@ def align_model_and_tokenizer(
         all_max_lengths.append(tokenizer.model_max_length)
 
     # Add the max length derived from the position embeddings
-    if (
-        hasattr(model.config, "max_position_embeddings")
-        and hasattr(tokenizer, "pad_token_id")
-        and tokenizer.pad_token_id is not None
-    ):
-        all_max_lengths.append(
-            model.config.max_position_embeddings - tokenizer.pad_token_id - 1
-        )
+    if hasattr(model.config, "max_position_embeddings"):
+        all_max_lengths.append(model.config.max_position_embeddings)
 
     # Add the max length derived from the model's input sizes
     if hasattr(tokenizer, "max_model_input_sizes"):
@@ -133,6 +128,14 @@ def align_model_and_tokenizer(
                 if size is not None
             ]
         )
+
+    # If the model is a generative model then we need to subtract the generation length
+    # from the maximum length, to allow it to keep generating
+    generation_length = 32
+    if isinstance(model, GenerativeModel):
+        all_max_lengths = [
+            max_length - generation_length for max_length in all_max_lengths
+        ]
 
     # If any maximal lengths were found then use the shortest one
     if len(list(all_max_lengths)) > 0:
@@ -161,10 +164,12 @@ def align_model_and_tokenizer(
         if tokenizer.eos_token is not None:
             tokenizer.padding_side = "left"
             tokenizer.pad_token = tokenizer.eos_token
+            tokenizer.pad_token_id = tokenizer.eos_token_id
             model.config.pad_token_id = tokenizer.pad_token_id
         elif tokenizer.sep_token is not None:
             tokenizer.padding_side = "left"
             tokenizer.pad_token = tokenizer.sep_token
+            tokenizer.pad_token_id = tokenizer.sep_token_id
             model.config.pad_token_id = tokenizer.pad_token_id
         else:
             raise InvalidBenchmark(

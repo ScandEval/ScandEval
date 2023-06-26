@@ -2,6 +2,7 @@
 
 import itertools as it
 import logging
+import random
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -19,8 +20,8 @@ from datasets.load import load_dataset
 from huggingface_hub.utils._errors import HfHubHTTPError
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from transformers import PretrainedConfig, StoppingCriteria
-from transformers.modeling_utils import PreTrainedModel
+from transformers import GenerationConfig, PretrainedConfig, StoppingCriteria
+from transformers.modeling_utils import ModelOutput, PreTrainedModel
 from transformers.trainer import Trainer
 from transformers.trainer_callback import (
     EarlyStoppingCallback,
@@ -34,7 +35,6 @@ from transformers.training_args import OptimizerNames, TrainingArguments
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .dataset_tasks import SPEED
-from .enums import Framework
 from .exceptions import InvalidBenchmark
 from .model_config import get_model_config
 from .model_loading import load_model
@@ -97,10 +97,7 @@ class BenchmarkDataset(ABC):
         logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
         logger.setLevel(logging_level)
 
-    def benchmark(
-        self,
-        model_id: str,
-    ) -> tuple[SCORE_DICT, dict[str, int]]:
+    def benchmark(self, model_id: str) -> tuple[SCORE_DICT, dict[str, int]]:
         """Benchmark a model.
 
         Args:
@@ -178,9 +175,7 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-        elif isinstance(model, GenerativeModel) and (
-            self.benchmark_config.few_shot or model_config.framework == Framework.API
-        ):
+        elif isinstance(model, GenerativeModel):
             scores = self._generate(
                 itr=itr,
                 train=train,
@@ -574,12 +569,55 @@ class BenchmarkDataset(ABC):
             list[dict[str, float]]:
                 A list of dictionaries containing the scores for each metric.
         """
-        candidate_labels = self.dataset_config.id2label
-
         # Tokens used in generation to know when generation is finished
         stopping_criteria = self._get_generation_stopping_criteria(
             tokenizer=tokenizer, model=model
         )
+
+        generation_config = GenerationConfig(
+            max_new_tokens=self.dataset_config.max_generated_tokens,
+            temperature=0.0,
+            do_sample=False,
+            stopping_criteria=stopping_criteria,
+            output_scores=True,
+            return_dict_in_generate=True,
+            bos_token_id=tokenizer.bos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            pad_token_id=tokenizer.pad_token_id,
+        )
+
+        # Find the largest batch size that fits in memory
+        max_seq_len_in_dataset = max(map(len, prepared_dataset["input_ids"]))
+        batch_sizes: list[int] = [
+            self.benchmark_config.batch_size // (2**n)
+            for n in range(1 + np.log2(self.benchmark_config.batch_size).astype(int))
+        ]
+        batch_size = batch_sizes[0]
+        for batch_size in batch_sizes:
+            dummy_inputs = torch.full(
+                size=(batch_size, max_seq_len_in_dataset),
+                fill_value=tokenizer.pad_token_id,
+                device=model.device,
+                dtype=torch.long,
+            )
+            try:
+                model.generate(dummy_inputs, generation_config=generation_config)
+                break
+            except Exception as e:
+                oom_error = [
+                    "CUDA out of memory",
+                    "CUDA error",
+                    "MPS backend out of memory",
+                    "Too many parallel completions requested.",  # OpenAI specific
+                ]
+                if all(error not in str(e) for error in oom_error):
+                    breakpoint()
+                    raise InvalidBenchmark(str(e))
+                torch.cuda.empty_cache()
+                continue
+        else:
+            raise InvalidBenchmark("GPU out of memory, even with a batch size of 1!")
+        self.benchmark_config.batch_size = batch_size
 
         # Sort the dataset by the length of the text, to minimise the amount of padding
         # that needs to be added, speeding up generation
@@ -592,96 +630,189 @@ class BenchmarkDataset(ABC):
         # Enable batching by building a dataloader. The dataloader cannot deal with
         # text columns, so we create a copy of the dataset without these
         torch_dataset = prepared_dataset.with_format("torch").remove_columns(
-            list(
-                {"text", "label", "length", "tokens"}.intersection(
-                    prepared_dataset.column_names
-                )
-            )
+            [
+                column
+                for column in prepared_dataset.column_names
+                if column != "input_ids"
+            ]
         )
 
-        batch_sizes = [
-            self.benchmark_config.batch_size // (2**n)
-            for n in range(1 + np.log2(self.benchmark_config.batch_size).astype(int))
+        all_preds: list[str] = list()
+
+        dataloader = DataLoader(
+            dataset=torch_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4,
+            collate_fn=self._load_data_collator(tokenizer=tokenizer, model=model),
+        )
+
+        for batch in tqdm(dataloader, leave=False):
+            # Generate the completions of the documents in the batch
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                inputs = batch["input_ids"].to(model.device)
+                with torch.no_grad():
+                    model_output: ModelOutput = model.generate(
+                        inputs=inputs, generation_config=generation_config
+                    )
+
+            # Extract the predicted labels from the model output
+            if self.dataset_config.task.supertask == "sequence-classification":
+                if "scores" in model_output:
+                    predicted_labels = self._get_closest_logprobs_labels(
+                        generation_logprobs=model_output["scores"],
+                        tokenizer=tokenizer,
+                    )
+                else:
+                    predicted_labels = self._get_closest_word_edit_labels(
+                        generated_sequences=model_output["sequences"],
+                        tokenizer=tokenizer,
+                    )
+
+            all_preds.extend(predicted_labels)
+
+        true_labels = [
+            self.dataset_config.prompt_label_mapping[lbl]
+            for lbl in prepared_dataset["label"]
         ]
-        for batch_size in batch_sizes:
-            logger.debug(f"Trying batch size {batch_size}")
-            all_preds: list[str] = list()
 
-            dataloader = DataLoader(
-                dataset=torch_dataset,
-                batch_size=batch_size,
-                shuffle=False,
-                num_workers=4,
-                collate_fn=self._load_data_collator(tokenizer=tokenizer, model=model),
-            )
+        itr_scores = self._compute_metrics(
+            model_outputs_and_labels=(all_preds, true_labels),
+            id2label=self.dataset_config.id2label,
+        )
 
-            skip_evaluation = False
-            for batch in tqdm(dataloader, leave=False):
-                try:
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore", category=UserWarning)
-                        inputs = batch["input_ids"].to(model.device)
-                        completion_ids_lists: list[list[int]] = model.generate(
-                            inputs=inputs,
-                            max_new_tokens=512,
-                            temperature=0.0,
-                            do_sample=False,
-                            stopping_criteria=stopping_criteria,
-                        ).tolist()
-                except Exception as e:
-                    oom_error = [
-                        "CUDA out of memory",
-                        "CUDA error",
-                        "MPS backend out of memory",
-                        "Too many parallel completions requested.",  # OpenAI specific
-                    ]
-                    if all([error not in str(e) for error in oom_error]):
-                        raise InvalidBenchmark(str(e))
-                    skip_evaluation = True
-                    del batch
-                    if "inputs" in locals():
-                        del inputs
-                    clear_memory()
-                    break
+        return itr_scores
 
-                predicted_labels = [
-                    tokenizer.decode(completion_ids_list)
-                    .split("\n\n")[3]
-                    .split("\n")[-1]
-                    .split(":")[-1]
-                    .strip()
-                    for completion_ids_list in completion_ids_lists
-                ]
+    def _get_closest_logprobs_labels(
+        self, generation_logprobs: tuple[torch.Tensor], tokenizer: Tokenizer
+    ) -> list[str]:
+        """Get the labels with the highest predicted logprob value.
 
-                # Ensure that the predicted labels are in the candidate labels by
-                # computing the edit distance between the predicted label and each
-                # candidate label and choosing the candidate label with the smallest
-                # edit distance. This only makes sense if we are doing sequence
-                # classification.
-                if self.dataset_config.task.supertask == "sequence-classification":
-                    for predicted_label in predicted_labels:
-                        edit_distances = [
-                            Levenshtein.distance(
-                                s1=predicted_label.upper(), s2=candidate_label.upper()
-                            )
-                            for candidate_label in candidate_labels
-                        ]
-                        closest_label = candidate_labels[
-                            np.argmin(edit_distances).item()
-                        ]
-                        all_preds.append(closest_label)
+        In case a candidate label is split into multiple tokens, we only use the first
+        token to compute the logprob value. E.g., if the candidate label "positive" is
+        tokenised as ["pos", "itive"], we only use the logprob value of "pos" to
+        represent the logprob value of the entire label.
 
-            if skip_evaluation:
-                continue
+        Args:
+            generation_logprobs (tuple[torch.Tensor]):
+                The logprobs of the generated tokens.
+            tokenizer (Tokenizer):
+                The tokenizer used to generate the tokens.
 
-            itr_scores = self._compute_metrics(
-                model_outputs_and_labels=(all_preds, prepared_dataset["label"]),
-                id2label=self.dataset_config.id2label,
-            )
+        Returns:
+            list[str]:
+                The predicted labels.
+        """
+        candidate_labels = [
+            self.dataset_config.prompt_label_mapping[lbl]
+            for lbl in self.dataset_config.id2label
+        ]
 
-            return itr_scores
-        else:
-            raise InvalidBenchmark("GPU out of memory, even with a batch size of 1!")
+        # Shape: [batch_size, num_generated_tokens, vocab_size]
+        all_logprobs = torch.stack(generation_logprobs, dim=1)
+
+        # Shape: [batch_size, num_candidate_labels]
+        pred_logprobs = torch.empty(
+            all_logprobs.shape[0], len(candidate_labels), device=all_logprobs.device
+        )
+
+        for idx, candidate_label in enumerate(candidate_labels):
+            # We only use the first token to represent the logprob value of the entire
+            # label.
+            candidate_label_ids: list[list[int]] = tokenizer(
+                [candidate_label.lower()], add_special_tokens=False
+            )["input_ids"]
+            candidate_label_id: int = candidate_label_ids[0][0]
+            pred_logprobs[:, idx] = all_logprobs[:, 0, candidate_label_id]
+
+        # Shape: [batch_size,]
+        predicted_label_ids = pred_logprobs.argmax(dim=1)
+
+        return [candidate_labels[idx] for idx in predicted_label_ids]
+
+    def _get_closest_word_edit_labels(
+        self, generated_sequences: list[list[int]], tokenizer: Tokenizer
+    ) -> list[str]:
+        """Get the labels with the smallest edit distance to the predicted labels.
+
+        Args:
+            generated_sequences (list of list of int):
+                The generated sequences from the model. The outer-most list is the
+                batch dimension, the inner-most list is the sequence dimension,
+                consisting of token IDs.
+            tokenizer (Tokenizer):
+                The tokenizer used to generate the tokens.
+
+        Returns:
+            list of str:
+                The candidate labels with the smallest edit distance to the predicted
+                labels.
+        """
+        raw_predictions = self._extract_raw_predictions(
+            generated_sequences=generated_sequences, tokenizer=tokenizer
+        )
+
+        candidate_labels = self.dataset_config.id2label
+        new_predicted_labels: list[str] = list()
+        for predicted_label in raw_predictions:
+            edit_distances = [
+                Levenshtein.distance(
+                    s1=predicted_label.lower(), s2=candidate_label.lower()
+                )
+                for candidate_label in candidate_labels
+            ]
+            closest_label = candidate_labels[np.argmin(edit_distances).item()]
+            new_predicted_labels.append(closest_label)
+        return new_predicted_labels
+
+    def _extract_raw_predictions(
+        self, generated_sequences: list[list[int]], tokenizer: Tokenizer
+    ) -> list[str]:
+        """Get the labels with the smallest edit distance to the predicted labels.
+
+        Args:
+            generated_sequences (list of list of int):
+                The generated sequences from the model. The outer-most list is the
+                batch dimension, the inner-most list is the sequence dimension,
+                consisting of token IDs.
+            tokenizer (Tokenizer):
+                The tokenizer used to generate the tokens.
+
+        Returns:
+            list of str:
+                The candidate labels with the smallest edit distance to the predicted
+                labels.
+        """
+
+        completion_ids_lists = [
+            [
+                token_id
+                for token_id in completion_ids
+                if token_id not in [tokenizer.bos_token_id, tokenizer.eos_token_id]
+            ]
+            for completion_ids in generated_sequences
+        ]
+
+        # For some models the generated tokens also includes the input tokens, so
+        # we need to deal with both cases when extracting the predicted labels
+        try:
+            pred_idx = self.dataset_config.num_few_shot_examples + 1
+            if self.dataset_config.prompt_instruction_infix:
+                pred_idx += 1
+            return [
+                tokenizer.decode(completion_ids_list)
+                .split("\n\n")[pred_idx]
+                .split("\n")[-1]
+                .split(":")[-1]
+                .strip()
+                for completion_ids_list in completion_ids_lists
+            ]
+        except IndexError:
+            return [
+                tokenizer.decode(completion_ids_list).strip()
+                for completion_ids_list in completion_ids_lists
+            ]
 
     def _get_generation_stopping_criteria(
         self,
@@ -706,6 +837,7 @@ class BenchmarkDataset(ABC):
             return list()
 
         stop_word_ids: list[torch.Tensor] = list()
+
         double_newline_ids: torch.Tensor = (
             tokenizer(
                 text=["\n\n"],
@@ -724,17 +856,48 @@ class BenchmarkDataset(ABC):
             .input_ids[0]
             .to(model.device)
         )
+        bos_token_ids: torch.Tensor = (
+            tokenizer(
+                text=[tokenizer.bos_token],
+                add_special_tokens=False,
+                return_tensors="pt",
+            )
+            .input_ids[0]
+            .to(model.device)
+        )
+        eos_token_ids: torch.Tensor = (
+            tokenizer(
+                text=[tokenizer.eos_token],
+                add_special_tokens=False,
+                return_tensors="pt",
+            )
+            .input_ids[0]
+            .to(model.device)
+        )
+
         double_newline_ids = double_newline_ids[
             [tokenizer.decode(tok) != "" for tok in double_newline_ids]
         ]
         single_newline_ids = single_newline_ids[
             [tokenizer.decode(tok) != "" for tok in single_newline_ids]
         ]
+        bos_token_ids = bos_token_ids[
+            [tokenizer.decode(tok) != "" for tok in bos_token_ids]
+        ]
+        eos_token_ids = eos_token_ids[
+            [tokenizer.decode(tok) != "" for tok in eos_token_ids]
+        ]
 
         two_single_newline_ids = torch.cat(
             [single_newline_ids, single_newline_ids], dim=0
         )
-        stop_word_ids = [double_newline_ids, two_single_newline_ids]
+
+        stop_word_ids = [
+            double_newline_ids,
+            two_single_newline_ids,
+            bos_token_ids,
+            eos_token_ids,
+        ]
 
         return [StopWordCriteria(stop_word_ids=stop_word_ids)]
 
@@ -893,7 +1056,7 @@ class BenchmarkDataset(ABC):
         test = dataset_dict["test"]
 
         # TEMP
-        # test = val
+        test = val
 
         # Remove empty examples from the datasets
         for text_feature in ["tokens", "doc", "text"]:
@@ -963,7 +1126,6 @@ class BenchmarkDataset(ABC):
 
                 prepared_tests: list[Dataset] = list()
                 for itr_idx, test in enumerate(tests):
-                    # Add few-shot examples
                     if model_config.task == "text-generation":
                         itr_seed = 4242 + itr_idx
                         shuffled_train = train.shuffle(seed=itr_seed)
@@ -975,10 +1137,13 @@ class BenchmarkDataset(ABC):
                             few_shot_examples: list[dict] = list()
                             while len(few_shot_examples) < num_few_shots:
                                 label = next(labels)
-                                examples = shuffled_train.filter(
-                                    lambda x: x["label"].upper() == label.upper()
-                                ).select(range(1))
-                                few_shot_examples.append(examples[0])
+                                example = shuffled_train.filter(
+                                    lambda x: x["label"].lower() == label.lower()
+                                ).select(range(1))[0]
+                                few_shot_examples.append(example)
+                                shuffled_train = shuffled_train.filter(
+                                    lambda x: x["text"] != example["text"]
+                                )
                         else:
                             examples_df = shuffled_train.select(
                                 range(num_few_shots)
@@ -986,6 +1151,8 @@ class BenchmarkDataset(ABC):
                             assert isinstance(examples_df, pd.DataFrame)
                             few_shot_examples = examples_df.to_dict("records")
 
+                        random.seed(itr_seed)
+                        random.shuffle(few_shot_examples)
                         preprocess_params["few_shot_examples"] = few_shot_examples
                     prepared_tests.append(
                         self._preprocess_data(test, split="test", **preprocess_params)
@@ -1008,7 +1175,7 @@ class BenchmarkDataset(ABC):
             while len(few_shot_examples) < num_few_shots:
                 label = next(labels)
                 examples = shuffled_train.filter(
-                    lambda x: x["label"].upper() == label.upper()
+                    lambda x: x["label"].lower() == label.lower()
                 ).select(range(1))
                 few_shot_examples.append(examples[0])
         else:
@@ -1169,13 +1336,21 @@ class BenchmarkDataset(ABC):
         else:
             predictions = model_outputs
 
+        prompt_label_to_label_mapping = {
+            prompt_label: label
+            for label, prompt_label in self.dataset_config.prompt_label_mapping.items()
+        }
         predictions = [
-            id2label.index(pred.upper()) if isinstance(pred, str) else pred
+            id2label.index(prompt_label_to_label_mapping[pred.lower()])
+            if isinstance(pred, str)
+            else pred
             for pred in predictions
         ]
 
         labels = [
-            id2label.index(label.upper()) if isinstance(label, str) else label
+            id2label.index(prompt_label_to_label_mapping[label.lower()])
+            if isinstance(label, str)
+            else label
             for label in labels
         ]
 

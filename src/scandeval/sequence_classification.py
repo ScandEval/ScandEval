@@ -114,34 +114,50 @@ class SequenceClassification(BenchmarkDataset):
                 The examples with the few-shot prompt applied.
         """
         # Build the few-shot part of the prompt
+        label_mapping = self.dataset_config.prompt_label_mapping
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
                 text=example["text"].replace("\n", " ").strip(),
-                label=example["label"],
+                label=label_mapping[example["label"].lower()],
             )
             for example in few_shot_examples
         ]
-        few_shot_prompt = "\n\n".join(few_shot_prompts)
+        few_shot_prompt = (
+            self.dataset_config.prompt_prefix + "\n\n" + "\n\n".join(few_shot_prompts)
+        )
 
-        # Add the texts from the examples to the prompts
+        # Add the texts from the examples to the prompts. We remove newlines from the
+        # examples as they have the special function to separate the few-shot examples
+        # from one another
         new_prompts = [
             self.dataset_config.prompt_template.format(
                 text=text.replace("\n", " ").strip(), label=""
             )
             for text in examples["text"]
         ]
+
+        # If the model is instruction tuned then we add an infix prompt between the
+        # few-shot examples and the new prompt, to make it more of an instruction. This
+        # improves the performance of these models
+        infix_prompt = (
+            self.dataset_config.prompt_instruction_infix + "\n\n"
+            if self.benchmark_config.instruction_tuned
+            else ""
+        )
+
         examples["text"] = [
-            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
+            few_shot_prompt + "\n\n" + infix_prompt + new_prompt
+            for new_prompt in new_prompts
         ]
 
         return examples
 
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
         try:
-            examples["label"] = [label2id[lbl.upper()] for lbl in examples["label"]]
+            examples["label"] = [label2id[lbl.lower()] for lbl in examples["label"]]
         except KeyError:
             raise InvalidBenchmark(
-                f"One of the labels in the dataset, {examples['label'].upper()}, does "
+                f"One of the labels in the dataset, {examples['label'].lower()}, does "
                 f"not occur in the label2id dictionary {label2id}."
             )
         return examples

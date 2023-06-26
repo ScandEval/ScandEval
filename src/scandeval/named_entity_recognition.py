@@ -270,7 +270,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 elif word_id != previous_word_idx:
                     label = labels[word_id]
                     try:
-                        label_id = label2id[label.upper()]
+                        label_id = label2id[label.lower()]
                     except KeyError:
                         msg = f"The label {label} was not found in the model's config."
                         raise InvalidBenchmark(msg)

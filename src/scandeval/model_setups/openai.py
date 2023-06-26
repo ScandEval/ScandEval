@@ -2,6 +2,7 @@
 
 import logging
 import os
+import re
 
 import openai
 import tiktoken
@@ -15,127 +16,45 @@ from .base import GenerativeModel, Tokenizer
 logger = logging.getLogger(__name__)
 
 
-# This is a list of all OpenAI language models available as of June 10, 2023. It's used
-# to check if a model ID denotes an OpenAI model, without having to use an OpenAI API
-# key
+# This is a list of the major models that OpenAI has released
 CACHED_OPENAI_MODEL_IDS: list[str] = [
+    "ada|babbage|curie|davinci",
     "babbage",
-    "davinci",
-    "text-davinci-edit-001",
-    "babbage-code-search-code",
-    "text-similarity-babbage-001",
-    "code-davinci-edit-001",
-    "text-davinci-001",
-    "ada",
-    "babbage-code-search-text",
-    "babbage-similarity",
-    "code-search-babbage-text-001",
-    "text-curie-001",
-    "code-search-babbage-code-001",
-    "text-ada-001",
-    "text-similarity-ada-001",
-    "curie-instruct-beta",
-    "ada-code-search-code",
-    "ada-similarity",
-    "code-search-ada-text-001",
-    "text-search-ada-query-001",
-    "davinci-search-document",
-    "ada-code-search-text",
-    "text-search-ada-doc-001",
-    "davinci-instruct-beta",
-    "text-similarity-curie-001",
-    "code-search-ada-code-001",
-    "ada-search-query",
-    "text-search-davinci-query-001",
-    "curie-search-query",
-    "davinci-search-query",
-    "babbage-search-document",
-    "ada-search-document",
-    "text-search-curie-query-001",
-    "text-search-babbage-doc-001",
-    "curie-search-document",
-    "text-search-curie-doc-001",
-    "babbage-search-query",
-    "text-babbage-001",
-    "text-search-davinci-doc-001",
-    "text-embedding-ada-002",
-    "text-search-babbage-query-001",
-    "curie-similarity",
     "curie",
-    "text-similarity-davinci-001",
-    "text-davinci-002",
-    "gpt-4-0314",
-    "gpt-3.5-turbo",
-    "text-davinci-003",
-    "davinci-similarity",
-    "gpt-4",
-    "gpt-3.5-turbo-0301",
+    "davinci",
+    "(code|text)-(ada|babbage|curie|davinci)-[0-9]{3}",
+    "gpt-3.5-turbo-[0-9]{4}",
+    "gpt-3.5-turbo-16k-[0-9]{4}",
+    "gpt-4-[0-9]{4}",
+    "gpt-4-32k-[0-9]{4}",
 ]
 
 
 VOCAB_SIZE_MAPPING = {
-    "ada": 50_257,
-    "text-ada-001": 50_257,
-    "babbage": 50_257,
-    "curie": 50_257,
-    "davinci": 50_257,
-    "text-babbage-001": 50_257,
-    "text-curie-001": 50_257,
-    "text-davinci-001": 50_257,
-    "text-davinci-002": 50_281,
-    "text-davinci-003": 50_281,
-    "code-davinci-001": 50_281,
-    "code-davinci-002": 50_281,
-    "gpt-3.5-turbo": 100_256,
-    "gpt-3.5-turbo-0301": 100_256,
-    "gpt-4": 100_256,
-    "gpt-4-0314": 100_256,
-    "gpt-4-32k": 100_256,
-    "gpt-4-32k-0314": 100_256,
+    "(text-)?(ada|babbage|curie|davinci)(-001)?": 50_257,
+    "(code|text)-davinci-00[2-9]": 50_281,
+    "gpt-3.5-turbo-(16k-)?[0-9]{4}": 100_256,
+    "gpt-4-(32k-)?[0-9]{4}": 100_256,
 }
 
 
 MODEL_MAX_LENGTH_MAPPING = {
-    "ada": 2049,
-    "babbage": 2049,
-    "curie": 2049,
-    "davinci": 2049,
-    "text-ada-001": 2049,
-    "text-babbage-001": 2049,
-    "text-curie-001": 2049,
-    "text-davinci-001": 2049,
-    "text-davinci-002": 4097,
-    "text-davinci-003": 4097,
-    "code-davinci-001": 8001,
-    "code-davinci-002": 8001,
-    "gpt-3.5-turbo": 4096,
-    "gpt-3.5-turbo-0301": 4096,
-    "gpt-4": 8192,
-    "gpt-4-0314": 8192,
-    "gpt-4-32k": 32_768,
-    "gpt-4-32k-0314": 32_768,
+    "(text-)?(ada|babbage|curie|davinci)(-001)?": 2_049,
+    "text-davinci-00[2-9]": 4_097,
+    "code-davinci-00[1-9]": 8_001,
+    "gpt-3.5-turbo-[0-9]{4}": 4_096,
+    "gpt-3.5-turbo-16k-[0-9]{4}": 16_384,
+    "gpt-4-[0-9]{4}": 8_192,
+    "gpt-4-32k-[0-9]{4}": 32_768,
 }
 
 
 NUM_PARAMS_MAPPING = {
-    "ada": 350_000_000,
-    "babbage": 3_000_000_000,
-    "curie": 13_000_000_000,
-    "davinci": 175_000_000_000,
-    "text-ada-001": 350_000_000,
-    "text-babbage-001": 3_000_000_000,
-    "text-curie-001": 13_000_000_000,
-    "text-davinci-001": 175_000_000_000,
-    "text-davinci-002": 175_000_000_000,
-    "text-davinci-003": 175_000_000_000,
-    "code-davinci-001": 175_000_000_000,
-    "code-davinci-002": 175_000_000_000,
-    "gpt-3.5-turbo": 175_000_000_000,
-    "gpt-3.5-turbo-0301": 175_000_000_000,
-    "gpt-4": -1,
-    "gpt-4-0314": -1,
-    "gpt-4-32k": -1,
-    "gpt-4-32k-0314": -1,
+    "(text-)?ada(-001)?": 350_000_000,
+    "(text-)?babbage(-001)?": 3_000_000_000,
+    "(text-)?curie(-001)?": 13_000_000_000,
+    "((text|code)-)?davinci(-00[1-9])?": 175_000_000_000,
+    "gpt-(3.5|4)-turbo-((16|32)k-)?[0-9]{4}": -1,
 }
 
 
@@ -177,7 +96,12 @@ class OpenAIModelSetup:
             all_models = openai.Model.list()["data"]
             return model_id in [model["id"] for model in all_models]
         else:
-            model_exists = model_id in CACHED_OPENAI_MODEL_IDS
+            model_exists = any(
+                [
+                    re.match(pattern=model_pattern, string=model_id) is not None
+                    for model_pattern in CACHED_OPENAI_MODEL_IDS
+                ]
+            )
             if model_exists:
                 logger.warning(
                     "It looks like you're trying to use an OpenAI model, but you "
@@ -231,33 +155,47 @@ class OpenAIModelSetup:
                 The tokenizer and model.
         """
         hf_model_config = PretrainedConfig.from_pretrained("gpt2")
-        hf_model_config.vocab_size = (
-            VOCAB_SIZE_MAPPING.get(model_config.model_id, -2) + 1
-        )
-        hf_model_config.model_max_length = MODEL_MAX_LENGTH_MAPPING.get(
-            model_config.model_id, -1
-        )
-        hf_model_config.num_params = NUM_PARAMS_MAPPING.get(model_config.model_id, -1)
+
+        vocab_sizes = [
+            vocab_size
+            for pattern, vocab_size in VOCAB_SIZE_MAPPING.items()
+            if re.match(pattern=pattern, string=model_config.model_id)
+        ]
+        hf_model_config.vocab_size = vocab_sizes[0] if vocab_sizes else 100_256
+
+        model_lengths = [
+            model_length
+            for pattern, model_length in MODEL_MAX_LENGTH_MAPPING.items()
+            if re.match(pattern=pattern, string=model_config.model_id)
+        ]
+        hf_model_config.model_max_length = model_lengths[0] if model_lengths else -1
+
+        num_params = [
+            num_param
+            for pattern, num_param in NUM_PARAMS_MAPPING.items()
+            if re.match(pattern=pattern, string=model_config.model_id)
+        ]
+        hf_model_config.num_params = num_params[0] if num_params else -1
+
         hf_model_config.id2label = dataset_config.id2label
         hf_model_config.label2id = dataset_config.label2id
-        hf_model_config.eos_token_id = hf_model_config.vocab_size - 2
-        hf_model_config.bos_token_id = hf_model_config.vocab_size - 2
+        hf_model_config.eos_token_id = hf_model_config.vocab_size - 1
+        hf_model_config.bos_token_id = hf_model_config.vocab_size - 1
         hf_model_config.pad_token_id = hf_model_config.vocab_size - 1
 
-        # If the vocab size is -1, we're finding it by brute force
-        if hf_model_config.vocab_size == -1:
-            tok = tiktoken.encoding_for_model(model_name=model_config.model_id)
-            for idx in range(1, 100_256, -1):
-                try:
-                    tok.decode([idx])
-                    hf_model_config.vocab_size = idx + 1
-                    break
-                except KeyError:
-                    pass
-            else:
-                raise ValueError(
-                    f"Couldn't find vocab size for model {model_config.model_id}"
-                )
+        # Check if the vocab size is correct, and if not then correct it
+        tok = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        for idx in range(0, hf_model_config.vocab_size, -1):
+            try:
+                tok.decode([idx])
+                hf_model_config.vocab_size = idx + 1
+                break
+            except KeyError:
+                pass
+        else:
+            raise ValueError(
+                f"Couldn't find vocab size for the model {model_config.model_id!r}"
+            )
 
         tokenizer = OpenAITokenizer(
             model_config=model_config, hf_model_config=hf_model_config

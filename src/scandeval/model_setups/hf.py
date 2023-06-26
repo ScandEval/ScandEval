@@ -131,7 +131,7 @@ class HFModelSetup:
             # Fetch the model metadata
             models = api.list_models(
                 filter=ModelFilter(author=author, model_name=model_name),
-                use_auth_token=self.benchmark_config.use_auth_token,
+                token=self.benchmark_config.use_auth_token,
             )
 
             # Filter the models to only keep the one with the specified model ID
@@ -213,7 +213,7 @@ class HFModelSetup:
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
         load_in_4bit = (
-            self.benchmark_config.few_shot
+            model_config.task == "text-generation"
             and self.benchmark_config.device != torch.device("cpu")
         )
 
@@ -258,10 +258,7 @@ class HFModelSetup:
                         )
 
                     # Get the model class associated with the supertask
-                    if (
-                        self.benchmark_config.few_shot
-                        or model_config.framework == Framework.API
-                    ):
+                    if model_config.task == "text-generation":
                         model_cls_supertask = "causal-l-m"
                     else:
                         model_cls_supertask = supertask
@@ -383,9 +380,8 @@ class HFModelSetup:
             Tokenizer:
                 The loaded tokenizer.
         """
-        # If the model is a subclass of a RoBERTa model then we
-        # have to add a prefix space to the tokens, by the way the model is
-        # constructed.
+        # If the model is a subclass of a RoBERTa model then we have to add a prefix
+        # space to the tokens, by the way the model is constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
         prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
         padding_side = "left" if isinstance(model, GenerativeModel) else "right"
@@ -398,6 +394,7 @@ class HFModelSetup:
                     use_fast=True,
                     verbose=False,
                     padding_side=padding_side,
+                    truncation_side=padding_side,
                     **loading_kwargs,
                 )
             except (JSONDecodeError, OSError):

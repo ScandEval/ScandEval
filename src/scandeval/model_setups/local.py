@@ -97,11 +97,19 @@ class LocalModelSetup:
             )
             framework = Framework.PYTORCH
 
+        hf_model_config = AutoConfig.from_pretrained(model_id)
+        if "gpt" in hf_model_config.model_type.lower():
+            task = "text-generation"
+        elif "bert" in hf_model_config.model_type.lower():
+            task = "fill-mask"
+        else:
+            task = "unknown"
+
         model_config = ModelConfig(
             model_id=model_id,
             revision="main",
             framework=framework,
-            task="unknown",
+            task=task,
             languages=list(),
             model_type=ModelType.LOCAL,
         )

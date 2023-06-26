@@ -16,6 +16,7 @@ from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
 from tqdm.auto import tqdm
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
+from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
@@ -305,7 +306,7 @@ class OpenAIModel:
         inputs: Tensor,
         generation_config: GenerationConfig | None = None,
         **generation_kwargs,
-    ) -> LongTensor:
+    ) -> Tensor | LongTensor | ModelOutput:
         """Generate text using the model.
 
         Args:
@@ -319,7 +320,7 @@ class OpenAIModel:
                 generation configuration.
 
         Returns:
-            LongTensor:
+            Tensor or ModelOutput:
                 The model output.
         """
         if generation_config is None:
@@ -427,11 +428,15 @@ class OpenAIModel:
                 continue
 
         if multiple_inputs:
-            padded = pad_sequence(
+            output = pad_sequence(
                 sequences=list(map(Tensor, completion_ids_list)),
                 batch_first=True,
                 padding_value=self.tokenizer.pad_token_id,
-            )
-            return padded.long()
+            ).long()
         else:
-            return LongTensor(completion_ids_list)
+            output = LongTensor(completion_ids_list)
+
+        if generation_config.return_dict_in_generate:
+            output = ModelOutput(dict(sequences=output))
+
+        return output

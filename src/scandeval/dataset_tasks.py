@@ -31,7 +31,7 @@ LA = DatasetTask(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=["INCORRECT", "CORRECT"],
+    labels=["incorrect", "correct"],
 )
 
 
@@ -53,15 +53,15 @@ NER = DatasetTask(
         ),
     ],
     labels=[
-        "O",
-        "B-LOC",
-        "I-LOC",
-        "B-ORG",
-        "I-ORG",
-        "B-PER",
-        "I-PER",
-        "B-MISC",
-        "I-MISC",
+        "o",
+        "b-loc",
+        "i-loc",
+        "b-org",
+        "i-org",
+        "b-per",
+        "i-per",
+        "b-misc",
+        "i-misc",
     ],
 )
 
@@ -85,7 +85,7 @@ QA = DatasetTask(
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
         ),
     ],
-    labels=["START_POSITIONS", "END_POSITIONS"],
+    labels=["start_positions", "end_positions"],
 )
 
 
@@ -107,7 +107,7 @@ SENT = DatasetTask(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=["NEGATIVE", "NEUTRAL", "POSITIVE"],
+    labels=["negative", "neutral", "positive"],
 )
 
 

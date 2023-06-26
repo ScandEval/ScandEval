@@ -369,7 +369,7 @@ def get_huggingface_model_lists(
         # Fetch the model list
         models: list[ModelInfo] = api.list_models(
             filter=ModelFilter(language=language_str),
-            use_auth_token=use_auth_token,
+            token=use_auth_token,
         )
 
         # Filter the models to only keep the ones with the specified language

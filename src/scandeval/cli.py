@@ -158,13 +158,6 @@ from .languages import get_all_languages
     path. Otherwise, the framework will be set automatically.""",
 )
 @click.option(
-    "--few-shot/--no-few-shot",
-    default=False,
-    show_default=True,
-    help="""Whether to evaluate models using few-shot learning. This is only applicable
-    for generative models (i.e., decoder and encoder-decoder models).""",
-)
-@click.option(
     "--device",
     default=None,
     show_default=True,
@@ -178,6 +171,14 @@ from .languages import get_all_languages
     show_default=True,
     help="""Whether to trust remote code. Only set this flag if you trust the supplier
     of the model.""",
+)
+@click.option(
+    "--instruction-tuned/--no-instruction-tuned",
+    "-it/-nit",
+    default=False,
+    show_default=True,
+    help="""Whether the models have been instruction finetuned, as this changes the
+    prompt used for evaluation.""",
 )
 def benchmark(
     model_id: Tuple[str],
@@ -197,9 +198,9 @@ def benchmark(
     ignore_duplicates: bool,
     verbose: bool = False,
     framework: str | None = None,
-    few_shot: bool = False,
     device: str | None = None,
     trust_remote_code: bool = False,
+    instruction_tuned: bool = False,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -230,9 +231,9 @@ def benchmark(
         ignore_duplicates=ignore_duplicates,
         cache_dir=cache_dir,
         framework=framework,
-        few_shot=few_shot,
         device=device,
         trust_remote_code=trust_remote_code,
+        instruction_tuned=instruction_tuned,
     )
 
     # Perform the benchmark evaluation

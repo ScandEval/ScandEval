@@ -39,10 +39,6 @@ class Benchmarker:
         framework (None, str or list of str, optional):
             The model framework to use. Only relevant if `model-id` refers to a local
             path. Otherwise, the framework will be set automatically. Defaults to None.
-        few_shot (bool, optional):
-            Whether to evaluate models using few-shot learning. This is only applicable
-            for generative models (i.e., decoder and encoder-decoder models). Defaults
-            to False.
         dataset_language (None, str or list of str, optional):
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
@@ -75,6 +71,9 @@ class Benchmarker:
             Whether to output additional output. Defaults to False.
         trust_remote_code (bool, optional):
             Whether to trust remote code when loading models. Defaults to False.
+        instruction_tuned (bool, optional):
+            Whether the models are instruction finetuned, as this changes the prompt
+            used for evaluation. Defaults to False.
 
     Attributes:
         progress_bar (bool): Whether progress bars should be shown.
@@ -94,7 +93,6 @@ class Benchmarker:
         language: str | list[str] = ["da", "sv", "no"],
         model_language: str | list[str] | None = None,
         framework: Framework | str | None = None,
-        few_shot: bool = False,
         dataset_language: str | list[str] | None = None,
         dataset_task: str | list[str] | None = None,
         batch_size: int = 32,
@@ -107,6 +105,7 @@ class Benchmarker:
         device: Device | None = None,
         verbose: bool = False,
         trust_remote_code: bool = False,
+        instruction_tuned: bool = False,
     ) -> None:
         self.benchmark_config = build_benchmark_config(
             language=language,
@@ -124,8 +123,8 @@ class Benchmarker:
             verbose=verbose,
             framework=framework,
             device=device,
-            few_shot=few_shot,
             trust_remote_code=trust_remote_code,
+            instruction_tuned=instruction_tuned,
         )
 
         # Set attributes from arguments
@@ -200,6 +199,9 @@ class Benchmarker:
                         " as it has already been benchmarked."
                     )
                     continue
+
+                # TEMP
+                logger.debug(f"Dataset config: {dataset_config}")
 
                 # Benchmark a single model on a single dataset
                 record = self._benchmark_single(
