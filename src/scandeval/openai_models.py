@@ -284,7 +284,11 @@ class OpenAIModel:
             The tokenizer.
         device (torch.device):
             The device to use, is always CPU.
+        is_generative (bool):
+            Whether the model is generative or not. Always True.
     """
+
+    is_generative: bool = True
 
     def __init__(
         self,

@@ -7,7 +7,7 @@ import torch.nn as nn
 from transformers import PreTrainedModel, PreTrainedTokenizer
 
 from ..exceptions import InvalidBenchmark
-from .base import GenerativeModel
+from ..utils import model_is_generative
 
 
 def get_children_of_module(
@@ -92,7 +92,10 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
 
 
 def align_model_and_tokenizer(
-    model: PreTrainedModel, tokenizer: PreTrainedTokenizer, raise_errors: bool = False
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    generation_length: int,
+    raise_errors: bool = False,
 ) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
     """Aligns the model and the tokenizer.
 
@@ -101,6 +104,9 @@ def align_model_and_tokenizer(
             The model to fix.
         tokenizer (PreTrainedTokenizer):
             The tokenizer to fix.
+        generation_length (int):
+            The length of the generation, which depends on the benchmark dataset. Only
+            relevant if the model is a generative model.
         raise_errors (bool, optional):
             Whether to raise errors instead of trying to fix them silently.
 
@@ -131,8 +137,7 @@ def align_model_and_tokenizer(
 
     # If the model is a generative model then we need to subtract the generation length
     # from the maximum length, to allow it to keep generating
-    generation_length = 32
-    if isinstance(model, GenerativeModel):
+    if model_is_generative(model=model):
         all_max_lengths = [
             max_length - generation_length for max_length in all_max_lengths
         ]

@@ -21,6 +21,7 @@ from ..utils import (
     block_terminal_output,
     get_class_by_name,
     internet_connection_available,
+    model_is_generative,
 )
 from .base import GenerativeModel, Tokenizer
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
@@ -343,13 +344,16 @@ class HFModelSetup:
             model = setup_model_for_question_answering(model=model)
 
         tokenizer = self._load_tokenizer(
-            model=model, model_id=model_id, loading_kwargs=loading_kwargs
+            model=model,
+            model_id=model_id,
+            loading_kwargs=loading_kwargs,
         )
 
         # Align the model and the tokenizer
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,
+            generation_length=dataset_config.max_generated_tokens,
             raise_errors=self.benchmark_config.raise_errors,
         )
 
@@ -384,7 +388,7 @@ class HFModelSetup:
         # space to the tokens, by the way the model is constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
         prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
-        padding_side = "left" if isinstance(model, GenerativeModel) else "right"
+        padding_side = "left" if model_is_generative(model=model) else "right"
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             try:

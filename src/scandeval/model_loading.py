@@ -14,6 +14,7 @@ from .model_setups import (
     OpenAIModelSetup,
     Tokenizer,
 )
+from .utils import model_is_generative
 
 
 def load_model(
@@ -43,4 +44,8 @@ def load_model(
     )
     setup_class = model_type_to_model_setup_mapping[model_config.model_type]
     setup = setup_class(benchmark_config=benchmark_config)
-    return setup.load_model(model_config=model_config, dataset_config=dataset_config)
+    tokenizer, model = setup.load_model(
+        model_config=model_config, dataset_config=dataset_config
+    )
+    model.is_generative = model_is_generative(model=model)
+    return tokenizer, model

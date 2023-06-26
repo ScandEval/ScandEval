@@ -175,6 +175,7 @@ class FreshModelSetup:
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,
+            generation_length=dataset_config.max_generated_tokens,
             raise_errors=self.benchmark_config.raise_errors,
         )
 

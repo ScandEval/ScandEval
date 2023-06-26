@@ -20,7 +20,10 @@ from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
 from requests.exceptions import RequestException
+from transformers import PreTrainedModel
 from transformers import logging as tf_logging
+
+from scandeval.model_setups.base import GenerativeModel
 
 from .config import Language
 from .enums import Framework
@@ -516,3 +519,22 @@ class HiddenPrints:
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
+
+
+def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
+    """Check if a model is generative or not.
+
+    Args:
+        model (PreTrainedModel or GenerativeModel):
+            The model to check.
+
+    Returns:
+        bool:
+            Whether the model is generative or not.
+    """
+    try:
+        dummy_inputs = torch.Tensor([[0]], device=model.device, dtype=torch.long)
+        model.generate(inputs=dummy_inputs, max_new_tokens=1)
+        return True
+    except (NotImplementedError, TypeError):
+        return False
