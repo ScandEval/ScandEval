@@ -531,7 +531,7 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
             Whether the model is generative or not.
     """
     try:
-        dummy_inputs = torch.Tensor([[0]], device=model.device, dtype=torch.long)
+        dummy_inputs = torch.tensor([[0]], device=model.device, dtype=torch.long)
         model.generate(inputs=dummy_inputs, max_new_tokens=1)
         return True
     except (NotImplementedError, TypeError):
