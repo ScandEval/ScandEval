@@ -200,9 +200,6 @@ class Benchmarker:
                     )
                     continue
 
-                # TEMP
-                logger.debug(f"Dataset config: {dataset_config}")
-
                 # Benchmark a single model on a single dataset
                 record = self._benchmark_single(
                     dataset_config=dataset_config,
