@@ -390,6 +390,8 @@ def get_huggingface_model_lists(
                 "sentence-similarity",
                 "feature-extraction",
                 "text-generation",
+                "text2text-generation",
+                "conversational",
             }
         ]
 
