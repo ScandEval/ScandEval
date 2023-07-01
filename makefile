@@ -112,29 +112,6 @@ publish-minor: bump-minor publish  ## Publish a minor version
 
 publish-patch: bump-patch publish  ## Publish a patch version
 
-tree:  ## Print directory tree
-	@tree -a \
-		-I .git \
-		-I .mypy_cache \
-		-I .env \
-		-I .venv \
-		-I poetry.lock \
-		-I .ipynb_checkpoints \
-		-I dist \
-		-I .gitkeep \
-		-I docs \
-		-I .pytest_cache \
-		-I outputs \
-		-I .DS_Store \
-		-I .cache \
-		-I raw \
-		-I processed \
-		-I final \
-		-I checkpoint-* \
-		-I .coverage* \
-		-I .DS_Store \
-		-I __pycache__ \
-		.
 test:  ## Run tests
 	@PYTORCH_ENABLE_MPS_FALLBACK=1 poetry run pytest && readme-cov
 
