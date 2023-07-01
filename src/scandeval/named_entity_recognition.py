@@ -359,19 +359,19 @@ class NamedEntityRecognition(BenchmarkDataset):
         Returns:
             Hugging Face dataset: The preprocessed dataset.
         """
-        if (
-            kwargs["model_config"].task == "text-generation"
-            and "few_shot_examples" in kwargs
-        ):
-            few_shot_examples = kwargs["few_shot_examples"]
-            few_shot_fn = partial(
-                self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
-            )
-            dataset = dataset.map(few_shot_fn, batched=True, load_from_cache_file=False)
+        if kwargs["model_config"].task == "text-generation":
+            if "few_shot_examples" in kwargs:
+                few_shot_examples = kwargs["few_shot_examples"]
+                few_shot_fn = partial(
+                    self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
+                )
+                dataset = dataset.map(
+                    few_shot_fn, batched=True, load_from_cache_file=False
+                )
 
             def tokenise(examples: dict) -> BatchEncoding:
                 return kwargs["tokenizer"](
-                    text=examples["text"],
+                    text=examples["doc"],
                     truncation=True,
                     padding=False,
                 )

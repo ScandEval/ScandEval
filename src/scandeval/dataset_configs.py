@@ -132,8 +132,8 @@ DANE_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=3,
-    max_generated_tokens=3,
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
 )
 
 

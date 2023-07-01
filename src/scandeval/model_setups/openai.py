@@ -19,22 +19,19 @@ logger = logging.getLogger(__name__)
 # This is a list of the major models that OpenAI has released
 CACHED_OPENAI_MODEL_IDS: list[str] = [
     "ada|babbage|curie|davinci",
-    "babbage",
-    "curie",
-    "davinci",
     "(code|text)-(ada|babbage|curie|davinci)-[0-9]{3}",
-    "gpt-3.5-turbo-[0-9]{4}",
-    "gpt-3.5-turbo-16k-[0-9]{4}",
-    "gpt-4-[0-9]{4}",
-    "gpt-4-32k-[0-9]{4}",
+    "gpt-3.5-turbo(-[0-9]{4})?",
+    "gpt-3.5-turbo-16k(-[0-9]{4})?",
+    "gpt-4(-[0-9]{4})?",
+    "gpt-4-32k(-[0-9]{4})?",
 ]
 
 
 VOCAB_SIZE_MAPPING = {
     "(text-)?(ada|babbage|curie|davinci)(-001)?": 50_257,
     "(code|text)-davinci-00[2-9]": 50_281,
-    "gpt-3.5-turbo-(16k-)?[0-9]{4}": 100_256,
-    "gpt-4-(32k-)?[0-9]{4}": 100_256,
+    "gpt-3.5-turbo(-16k)?(-[0-9]{4})?": 100_256,
+    "gpt-4-(32k)?(-[0-9]{4})?": 100_256,
 }
 
 
@@ -42,10 +39,10 @@ MODEL_MAX_LENGTH_MAPPING = {
     "(text-)?(ada|babbage|curie|davinci)(-001)?": 2_049,
     "text-davinci-00[2-9]": 4_097,
     "code-davinci-00[1-9]": 8_001,
-    "gpt-3.5-turbo-[0-9]{4}": 4_096,
-    "gpt-3.5-turbo-16k-[0-9]{4}": 16_384,
-    "gpt-4-[0-9]{4}": 8_192,
-    "gpt-4-32k-[0-9]{4}": 32_768,
+    "gpt-3.5-turbo(-[0-9]{4})?": 4_096,
+    "gpt-3.5-turbo-16k(-[0-9]{4})?": 16_384,
+    "gpt-4(-[0-9]{4})?": 8_192,
+    "gpt-4-32k(-[0-9]{4})?": 32_768,
 }
 
 
@@ -54,7 +51,7 @@ NUM_PARAMS_MAPPING = {
     "(text-)?babbage(-001)?": 3_000_000_000,
     "(text-)?curie(-001)?": 13_000_000_000,
     "((text|code)-)?davinci(-00[1-9])?": 175_000_000_000,
-    "gpt-(3.5|4)-turbo-((16|32)k-)?[0-9]{4}": -1,
+    "gpt-(3.5|4)-turbo-((16|32)k)?(-[0-9]{4})?": -1,
 }
 
 
@@ -185,12 +182,12 @@ class OpenAIModelSetup:
 
         # Check if the vocab size is correct, and if not then correct it
         tok = tiktoken.encoding_for_model(model_name=model_config.model_id)
-        for idx in range(0, hf_model_config.vocab_size, -1):
+        for idx in range(hf_model_config.vocab_size - 1, 0, -1):
             try:
                 tok.decode([idx])
                 hf_model_config.vocab_size = idx + 1
                 break
-            except KeyError:
+            except Exception:
                 pass
         else:
             raise ValueError(

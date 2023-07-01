@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import torch
 from datasets import Dataset
-from torch.cuda import OutOfMemoryError
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import DataCollator, GenerationConfig, StoppingCriteria
@@ -100,7 +99,15 @@ def generate(
                     dataset_config=dataset_config,
                 )
                 break
-            except OutOfMemoryError:
+            except Exception as e:
+                oom_error = [
+                    "CUDA out of memory",
+                    "CUDA error",
+                    "MPS backend out of memory",
+                    "Too many parallel completions requested.",  # OpenAI specific
+                ]
+                if all(error not in str(e) for error in oom_error):
+                    raise InvalidBenchmark(str(e))
                 clear_memory()
                 benchmark_config.batch_size //= 2
 
@@ -173,42 +180,6 @@ def generate_single_iteration(
         pad_token_id=tokenizer.pad_token_id,
     )
 
-    # Find the largest batch size that fits in memory
-    max_seq_len_in_dataset = max(map(len, prepared_dataset["input_ids"]))
-    max_input_length_plus_buffer = min(
-        int(max_seq_len_in_dataset * 1.1), tokenizer.model_max_length
-    )
-    batch_sizes: list[int] = [
-        benchmark_config.batch_size // (2**n)
-        for n in range(1 + np.log2(benchmark_config.batch_size).astype(int))
-    ]
-    batch_size = batch_sizes[0]
-    for batch_size in batch_sizes:
-        dummy_inputs = torch.full(
-            size=(batch_size, max_input_length_plus_buffer),
-            fill_value=tokenizer.pad_token_id,
-            device=model.device,
-            dtype=torch.long,
-        )
-        try:
-            with torch.no_grad():
-                model.generate(dummy_inputs, generation_config=generation_config)
-            break
-        except Exception as e:
-            oom_error = [
-                "CUDA out of memory",
-                "CUDA error",
-                "MPS backend out of memory",
-                "Too many parallel completions requested.",  # OpenAI specific
-            ]
-            if all(error not in str(e) for error in oom_error):
-                raise InvalidBenchmark(str(e))
-            clear_memory()
-            continue
-    else:
-        raise InvalidBenchmark("GPU out of memory, even with a batch size of 1!")
-    benchmark_config.batch_size = batch_size
-
     # Sort the dataset by the length of the text, to minimise the amount of padding
     # that needs to be added, speeding up generation
     text_column = "text" if "text" in prepared_dataset.column_names else "doc"
@@ -227,7 +198,7 @@ def generate_single_iteration(
 
     dataloader = DataLoader(
         dataset=torch_dataset,
-        batch_size=batch_size,
+        batch_size=benchmark_config.batch_size,
         shuffle=False,
         num_workers=4,
         collate_fn=data_collator,
@@ -244,6 +215,7 @@ def generate_single_iteration(
                 )
 
         # Extract the predicted labels from the model output
+        breakpoint()
         if dataset_config.task.supertask == "sequence-classification":
             if "scores" in model_output:
                 predicted_labels = get_closest_logprobs_labels(

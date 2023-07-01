@@ -481,11 +481,12 @@ class BenchmarkDataset(ABC):
 
                 prepared_tests: list[Dataset] = list()
                 for itr_idx, test in enumerate(tests):
-                    if model_config.task == "text-generation":
+                    if model_config.task in ["text-generation", "conversational"]:
                         itr_seed = 4242 + itr_idx
                         shuffled_train = train.shuffle(seed=itr_seed)
                         num_few_shots = self.dataset_config.num_few_shot_examples
 
+                        task = self.dataset_config.task.name
                         supertask = self.dataset_config.task.supertask
                         if supertask == "sequence-classification":
                             labels = it.cycle(self.dataset_config.task.labels)
@@ -499,6 +500,27 @@ class BenchmarkDataset(ABC):
                                 shuffled_train = shuffled_train.filter(
                                     lambda x: x["text"] != example["text"]
                                 )
+
+                        elif task == "named-entity-recognition":
+                            labels = it.cycle(
+                                [
+                                    label.lower()
+                                    for label in self.dataset_config.task.labels
+                                    if label.lower().startswith("b-")
+                                ]
+                            )
+                            few_shot_examples = list()
+                            while len(few_shot_examples) < num_few_shots:
+                                label = next(labels)
+                                example = shuffled_train.filter(
+                                    lambda x: label
+                                    in [tag.lower() for tag in x["label"]]
+                                ).select(range(1))[0]
+                                few_shot_examples.append(example)
+                                shuffled_train = shuffled_train.filter(
+                                    lambda x: x["doc"] != example["doc"]
+                                )
+
                         else:
                             examples_df = shuffled_train.select(
                                 range(num_few_shots)
