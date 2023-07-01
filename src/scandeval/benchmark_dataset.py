@@ -414,7 +414,7 @@ class BenchmarkDataset(ABC):
         test = val
 
         # Remove empty examples from the datasets
-        for text_feature in ["tokens", "doc", "text"]:
+        for text_feature in ["tokens", "text"]:
             if text_feature in train.features:
                 train = train.filter(lambda x: len(x[text_feature]) > 0)
                 val = val.filter(lambda x: len(x[text_feature]) > 0)

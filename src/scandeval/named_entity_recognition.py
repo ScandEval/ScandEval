@@ -50,7 +50,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         # Check what labels are present in the dataset, and store if MISC tags are not
         # present
         labels_in_train: set[str] = {
-            tag for tag_list in dataset_dict["train"]["ner_tags"] for tag in tag_list
+            tag for tag_list in dataset_dict["train"]["labels"] for tag in tag_list
         }
         self.has_misc_tags = "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
 
@@ -176,7 +176,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         all_labels: list[list[int]] = list()
         labels: list[str]
         word_ids: list[int | None]
-        for i, labels in enumerate(examples["label"]):
+        for i, labels in enumerate(examples["labels"]):
             # Try to get the word IDs from the tokenizer
             try:
                 word_ids = tokenized_inputs.word_ids(batch_index=i)

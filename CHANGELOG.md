@@ -21,6 +21,12 @@ and this project adheres to
 - Now only supports Python 3.10 and above.
 
 
+## [v7.1.1] - 2023-07-01
+### Fixed
+- The feature names of the NER datasets have been changed, so the code have been
+  updated to reflect this.
+
+
 ## [v7.1.0] - 2023-05-15
 ### Added
 - Added support for the NorBERT3 models.
