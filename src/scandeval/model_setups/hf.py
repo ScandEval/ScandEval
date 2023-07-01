@@ -272,7 +272,7 @@ class HFModelSetup:
                                 from_flax=from_flax,
                                 ignore_mismatched_sizes=ignore_mismatched_sizes,
                                 load_in_4bit=load_in_4bit,
-                                bnb_4bit_use_double_quant=load_in_4bit,
+                                # bnb_4bit_use_double_quant=load_in_4bit,  # TEMP?
                                 **loading_kwargs,
                             )
                         except KeyError as e:

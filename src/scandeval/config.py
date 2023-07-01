@@ -176,9 +176,6 @@ class DatasetConfig:
         prompt_label_mapping (dict of str to str):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation.
-        prompt_instruction_infix (str):
-            The infix to use in the few-shot prompt between the few-shot examples and
-            the new example.
         num_few_shot_examples (int):
             The number of examples to use when benchmarking the dataset using few-shot
             evaluation. For a classification task, these will be drawn evenly from
@@ -194,7 +191,6 @@ class DatasetConfig:
     task: DatasetTask
     languages: list[Language]
     prompt_prefix: str
-    prompt_instruction_infix: str
     prompt_template: str
     prompt_label_mapping: dict[str, str]
     num_few_shot_examples: int

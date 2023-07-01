@@ -50,11 +50,10 @@ SWEREC_CONFIG = DatasetConfig(
     task=SENT,
     languages=[SV],
     prompt_prefix="Följande är recensioner och deras sentiment, som kan vara 'positiv', 'neutral' eller 'negativ'.",
-    prompt_template="Recension: {text}\nSentiment: {label}",
+    prompt_template="Recension: {text}\n\nSentiment: {label}",
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    prompt_instruction_infix="Vänligen ange sentiment för följande recension:",
     num_few_shot_examples=6,
     max_generated_tokens=3,
 )
@@ -71,8 +70,7 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    prompt_instruction_infix="Angiv venligst sentimentet i følgende tweet:",
-    num_few_shot_examples=6,
+    num_few_shot_examples=30,
     max_generated_tokens=3,
 )
 
@@ -88,8 +86,7 @@ NOREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="nøytral", negative="negativ"
     ),
-    prompt_instruction_infix="Vennligst angi sentimentet i følgende anmeldelse:",
-    num_few_shot_examples=6,
+    num_few_shot_examples=3,
     max_generated_tokens=3,
 )
 
@@ -100,10 +97,18 @@ SUC3_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/suc3-mini",
     task=NER,
     languages=[SV],
-    prompt_prefix="",  # TODO
-    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
-    prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
+    prompt_prefix="Följande är dokument och deras namngivna entiteter, som kan vara 'person', 'plats', 'organisation' och 'diverse':",
+    prompt_template="Dokument: {text}\nNamngivna entiteter: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "plats",
+        "i-loc": "plats",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "diverse",
+        "i-misc": "diverse",
+    },
     num_few_shot_examples=3,
     max_generated_tokens=3,
 )
@@ -115,10 +120,18 @@ DANE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/dane-mini",
     task=NER,
     languages=[DA],
-    prompt_prefix="",  # TODO
-    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
-    prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
+    prompt_prefix="Det følgende er dokumenter og deres navngivne enheder, som kan være 'person', 'sted', 'organisation' og 'diverse':",
+    prompt_template="Dokument: {text}\nNavngivne enheder: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "sted",
+        "i-loc": "sted",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "diverse",
+        "i-misc": "diverse",
+    },
     num_few_shot_examples=3,
     max_generated_tokens=3,
 )
@@ -130,10 +143,18 @@ NORNE_NB_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nb-mini",
     task=NER,
     languages=[NB],
-    prompt_prefix="",  # TODO
-    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
-    prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
+    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være ‘person', 'sted', 'organisasjon' og 'diverse':",
+    prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "sted",
+        "i-loc": "sted",
+        "b-org": "organisasjon",
+        "i-org": "organisasjon",
+        "b-misc": "diverse",
+        "i-misc": "diverse",
+    },
     num_few_shot_examples=3,
     max_generated_tokens=3,
 )
@@ -145,10 +166,18 @@ NORNE_NN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nn-mini",
     task=NER,
     languages=[NN],
-    prompt_prefix="",  # TODO
-    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
-    prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
+    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være ‘person', 'sted', 'organisasjon' og 'diverse':",
+    prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "sted",
+        "i-loc": "sted",
+        "b-org": "organisasjon",
+        "i-org": "organisasjon",
+        "b-misc": "diverse",
+        "i-misc": "diverse",
+    },
     num_few_shot_examples=3,
     max_generated_tokens=3,
 )
@@ -160,10 +189,18 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mim-gold-ner-mini",
     task=NER,
     languages=[IS],
-    prompt_prefix="",  # TODO
-    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
-    prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
+    prompt_prefix="Eftirfarandi eru skjöl og nafngreindir aðilar þeirra, sem geta verið 'persóna', 'staðsetning', 'stofnun' og 'ýmislegt':",
+    prompt_template="Dokument: {text}\nNafngreindir aðilar: {label}",
+    prompt_label_mapping={
+        "b-per": "persóna",
+        "i-per": "persóna",
+        "b-loc": "staðsetning",
+        "i-loc": "staðsetning",
+        "b-org": "stofnun",
+        "i-org": "stofnun",
+        "b-misc": "ýmislegt",
+        "i-misc": "ýmislegt",
+    },
     num_few_shot_examples=3,
     max_generated_tokens=3,
 )
@@ -178,7 +215,6 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
     num_few_shot_examples=3,
     max_generated_tokens=3,
 )
@@ -190,11 +226,9 @@ SCALA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-sv",
     task=LA,
     languages=[SV],
-    prompt_prefix="",
-    # prompt_prefix="Följande är meningar och huruvida de är grammatiskt korrekta:",
-    prompt_template="{text}\nFråga: Är denna mening grammatiskt korrekt?\nSvar: {label}",
+    prompt_prefix="Följande är meningar och huruvida de är grammatiskt korrekta.",
+    prompt_template="Mening: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
-    prompt_instruction_infix="Please indicate whether the following document is grammatically correct:",
     num_few_shot_examples=4,
     max_generated_tokens=3,
 )
@@ -206,10 +240,9 @@ SCALA_DA_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-da",
     task=LA,
     languages=[DA],
-    prompt_prefix="The following are documents and whether they are grammatically correct or not, indicated by 'correct' or 'incorrect'.",
-    prompt_template="Text: {text}\nGrammatically correct: {label}",
-    prompt_label_mapping=dict(),
-    prompt_instruction_infix="Please indicate whether the following document is grammatically correct:",
+    prompt_prefix="Følgende er sætninger og om de er grammatisk korrekte.",
+    prompt_template="Sætning: {text}\nGrammatisk korrekt: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nej"),
     num_few_shot_examples=4,
     max_generated_tokens=3,
 )
@@ -225,7 +258,6 @@ SCALA_NB_CONFIG = DatasetConfig(
     prompt_prefix="",
     prompt_template="{text}\nSpørsmål: Er denne setningen grammatisk korrekt (ja eller nei)?\nSvar: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
-    prompt_instruction_infix="Please indicate whether the following document is grammatically correct:",
     num_few_shot_examples=4,
     max_generated_tokens=3,
 )
@@ -240,7 +272,6 @@ SCALA_NN_CONFIG = DatasetConfig(
     prompt_prefix="The following are documents and whether they are grammatically correct or not, indicated by 'correct' or 'incorrect'.",
     prompt_template="Text: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="Please indicate whether the following document is grammatically correct:",
     num_few_shot_examples=4,
     max_generated_tokens=3,
 )
@@ -255,7 +286,6 @@ SCALA_IS_CONFIG = DatasetConfig(
     prompt_prefix="The following are documents and whether they are grammatically correct or not, indicated by 'correct' or 'incorrect'.",
     prompt_template="Text: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="Please indicate whether the following document is grammatically correct:",
     num_few_shot_examples=4,
     max_generated_tokens=3,
 )
@@ -270,7 +300,6 @@ SCALA_FO_CONFIG = DatasetConfig(
     prompt_prefix="The following are documents and whether they are grammatically correct or not, indicated by 'correct' or 'incorrect'.",
     prompt_template="Text: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="Please indicate whether the following document is grammatically correct:",
     num_few_shot_examples=4,
     max_generated_tokens=3,
 )
@@ -285,7 +314,6 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="Text: {text}\nQuestion: {question}\nAnswer: {label}",
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
     num_few_shot_examples=1,
     max_generated_tokens=3,
 )
@@ -300,7 +328,6 @@ SCANDIQA_NO_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="{text}",  # TODO
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
     num_few_shot_examples=1,
     max_generated_tokens=3,
 )
@@ -315,7 +342,6 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="{text}",  # TODO
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
     num_few_shot_examples=1,
     max_generated_tokens=3,
 )
@@ -330,7 +356,6 @@ NQII_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="{text}",  # TODO
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
     num_few_shot_examples=1,
     max_generated_tokens=3,
 )
@@ -345,7 +370,6 @@ FOQA_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="{text}",  # TODO
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="",  # TODO
     num_few_shot_examples=1,
     max_generated_tokens=3,
 )
@@ -360,7 +384,6 @@ SPEED_CONFIG = DatasetConfig(
     prompt_prefix="",
     prompt_template="",
     prompt_label_mapping=dict(),
-    prompt_instruction_infix="",
     num_few_shot_examples=0,
     max_generated_tokens=1,
 )

@@ -122,9 +122,10 @@ class SequenceClassification(BenchmarkDataset):
             )
             for example in few_shot_examples
         ]
-        few_shot_prompt = (
-            self.dataset_config.prompt_prefix + "\n\n" + "\n\n".join(few_shot_prompts)
-        )
+        prompt_prefix = ""
+        if self.dataset_config.prompt_prefix:
+            prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
 
         # Add the texts from the examples to the prompts. We remove newlines from the
         # examples as they have the special function to separate the few-shot examples
@@ -136,18 +137,8 @@ class SequenceClassification(BenchmarkDataset):
             for text in examples["text"]
         ]
 
-        # If the model is instruction tuned then we add an infix prompt between the
-        # few-shot examples and the new prompt, to make it more of an instruction. This
-        # improves the performance of these models
-        infix_prompt = (
-            self.dataset_config.prompt_instruction_infix + "\n\n"
-            if self.benchmark_config.instruction_tuned
-            else ""
-        )
-
         examples["text"] = [
-            few_shot_prompt + "\n\n" + infix_prompt + new_prompt
-            for new_prompt in new_prompts
+            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
 
         return examples
