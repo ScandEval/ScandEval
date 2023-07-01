@@ -464,10 +464,10 @@ class BenchmarkDataset(ABC):
             train = train.filter(lambda x: len(x["tokens"]) > 0)
             val = val.filter(lambda x: len(x["tokens"]) > 0)
             test = test.filter(lambda x: len(x["tokens"]) > 0)
-        elif "doc" in train.features:
-            train = train.filter(lambda x: len(x["doc"]) > 0)
-            val = val.filter(lambda x: len(x["doc"]) > 0)
-            test = test.filter(lambda x: len(x["doc"]) > 0)
+        elif "text" in train.features:
+            train = train.filter(lambda x: len(x["text"]) > 0)
+            val = val.filter(lambda x: len(x["text"]) > 0)
+            test = test.filter(lambda x: len(x["text"]) > 0)
 
         # If we are testing then truncate the test set
         if self.benchmark_config.testing:
