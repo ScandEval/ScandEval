@@ -210,7 +210,7 @@ class HFModelSetup:
         ignore_mismatched_sizes = False
         load_in_4bit = (
             model_config.task == "text-generation"
-            and self.benchmark_config.device != torch.device("cpu")
+            and self.benchmark_config.device == torch.device("cuda")
         )
 
         loading_kwargs: LoadingArguments = {
