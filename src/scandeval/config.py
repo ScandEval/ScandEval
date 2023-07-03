@@ -120,9 +120,8 @@ class BenchmarkConfig:
         trust_remote_code (bool):
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
-        instruction_tuned (bool):
-            Whether the model is instruction finetuned, as this changes the prompt
-            template. Only relevant if the model is a generative model.
+        load_in_4bit (bool):
+            Whether to load models in 4-bit precision.
         testing (bool, optional):
             Whether a unit test is being run. Defaults to False.
     """
@@ -142,7 +141,7 @@ class BenchmarkConfig:
     device: torch.device
     verbose: bool
     trust_remote_code: bool
-    instruction_tuned: bool
+    load_in_4bit: bool
     testing: bool = False
 
 

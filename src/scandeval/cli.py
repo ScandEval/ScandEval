@@ -171,12 +171,10 @@ from .languages import get_all_languages
     of the model.""",
 )
 @click.option(
-    "--instruction-tuned/--no-instruction-tuned",
-    "-it/-nit",
+    "--load-in-4bit/--no-load-in-4bit",
     default=False,
     show_default=True,
-    help="""Whether the models have been instruction finetuned, as this changes the
-    prompt used for evaluation.""",
+    help="Whether to load the model in 4-bit precision.",
 )
 def benchmark(
     model_id: tuple[str],
@@ -194,11 +192,11 @@ def benchmark(
     use_token: bool,
     token: str,
     ignore_duplicates: bool,
-    verbose: bool = False,
-    framework: str | None = None,
-    device: str | None = None,
-    trust_remote_code: bool = False,
-    instruction_tuned: bool = False,
+    verbose: bool,
+    framework: str | None,
+    device: str | None,
+    trust_remote_code: bool,
+    load_in_4bit: bool,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 
@@ -231,7 +229,7 @@ def benchmark(
         framework=framework,
         device=device,
         trust_remote_code=trust_remote_code,
-        instruction_tuned=instruction_tuned,
+        load_in_4bit=load_in_4bit,
     )
 
     # Perform the benchmark evaluation

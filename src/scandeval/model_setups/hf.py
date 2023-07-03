@@ -211,7 +211,7 @@ class HFModelSetup:
         load_in_4bit = (
             model_config.task == "text-generation"
             and self.benchmark_config.device == torch.device("cuda")
-        )
+        ) or self.benchmark_config.load_in_4bit
 
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,

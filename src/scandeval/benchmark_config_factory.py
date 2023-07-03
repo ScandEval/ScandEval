@@ -25,7 +25,7 @@ def build_benchmark_config(
     framework: Framework | str | None,
     device: Device | None,
     trust_remote_code: bool,
-    instruction_tuned: bool,
+    load_in_4bit: bool,
     testing: bool = False,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
@@ -76,9 +76,8 @@ def build_benchmark_config(
         trust_remote_code (bool):
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
-        instruction_tuned (bool):
-            Whether the models are instruction finetuned, as this changes the prompt
-            needed for evaluation.
+        load_in_4bit (bool):
+            Whether to load models in 4-bit precision.
         testing (bool, optional):
             Whether to run the benchmark in testing mode. Defaults to False.
     """
@@ -113,7 +112,7 @@ def build_benchmark_config(
         framework=framework,
         device=torch_device,
         trust_remote_code=trust_remote_code,
-        instruction_tuned=instruction_tuned,
+        load_in_4bit=load_in_4bit,
         testing=testing,
     )
 

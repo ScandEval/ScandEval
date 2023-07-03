@@ -71,9 +71,8 @@ class Benchmarker:
             Whether to output additional output. Defaults to False.
         trust_remote_code (bool, optional):
             Whether to trust remote code when loading models. Defaults to False.
-        instruction_tuned (bool, optional):
-            Whether the models are instruction finetuned, as this changes the prompt
-            used for evaluation. Defaults to False.
+        load_in_4bit (bool, optional):
+            Whether to load models in 4-bit precision. Defaults to False.
 
     Attributes:
         progress_bar (bool): Whether progress bars should be shown.
@@ -105,7 +104,7 @@ class Benchmarker:
         device: Device | None = None,
         verbose: bool = False,
         trust_remote_code: bool = False,
-        instruction_tuned: bool = False,
+        load_in_4bit: bool = False,
     ) -> None:
         self.benchmark_config = build_benchmark_config(
             language=language,
@@ -124,7 +123,7 @@ class Benchmarker:
             framework=framework,
             device=device,
             trust_remote_code=trust_remote_code,
-            instruction_tuned=instruction_tuned,
+            load_in_4bit=load_in_4bit,
         )
 
         # Set attributes from arguments
