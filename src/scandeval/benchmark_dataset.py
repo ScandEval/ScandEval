@@ -514,11 +514,11 @@ class BenchmarkDataset(ABC):
                                 label = next(labels)
                                 example = shuffled_train.filter(
                                     lambda x: label
-                                    in [tag.lower() for tag in x["label"]]
+                                    in [tag.lower() for tag in x["labels"]]
                                 ).select(range(1))[0]
                                 few_shot_examples.append(example)
                                 shuffled_train = shuffled_train.filter(
-                                    lambda x: x["doc"] != example["doc"]
+                                    lambda x: x["text"] != example["text"]
                                 )
 
                         else:
@@ -600,7 +600,7 @@ class BenchmarkDataset(ABC):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[list[int] | list[str], list[int] | list[str]],
+        model_outputs_and_labels: tuple[list, list],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.

@@ -1,6 +1,7 @@
 """Functions related to text generation of models."""
 
 import itertools as it
+import json
 import logging
 import warnings
 from collections import defaultdict
@@ -182,9 +183,8 @@ def generate_single_iteration(
 
     # Sort the dataset by the length of the text, to minimise the amount of padding
     # that needs to be added, speeding up generation
-    text_column = "text" if "text" in prepared_dataset.column_names else "doc"
     prepared_dataset = prepared_dataset.add_column(
-        name="length", column=[len(x) for x in prepared_dataset[text_column]]
+        name="length", column=[len(x) for x in prepared_dataset["text"]]
     )
     prepared_dataset = prepared_dataset.sort("length", reverse=True)
 
@@ -194,7 +194,7 @@ def generate_single_iteration(
         [column for column in prepared_dataset.column_names if column != "input_ids"]
     )
 
-    all_preds: list[str] = list()
+    all_preds: list[str | list[str]] = list()
 
     dataloader = DataLoader(
         dataset=torch_dataset,
@@ -204,7 +204,7 @@ def generate_single_iteration(
         collate_fn=data_collator,
     )
 
-    for batch in tqdm(dataloader, leave=False):
+    for batch_idx, batch in enumerate(tqdm(dataloader, leave=False)):
         # Generate the completions of the documents in the batch
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
@@ -215,31 +215,54 @@ def generate_single_iteration(
                 )
 
         # Extract the predicted labels from the model output
-        breakpoint()
         if dataset_config.task.supertask == "sequence-classification":
             if "scores" in model_output:
-                predicted_labels = get_closest_logprobs_labels(
-                    generation_logprobs=model_output["scores"],
-                    tokenizer=tokenizer,
-                    dataset_config=dataset_config,
+                all_preds.extend(
+                    get_closest_logprobs_labels(
+                        generation_logprobs=model_output["scores"],
+                        tokenizer=tokenizer,
+                        dataset_config=dataset_config,
+                    )
                 )
             else:
-                predicted_labels = get_closest_word_edit_labels(
+                all_preds.extend(
+                    get_closest_word_edit_labels(
+                        generated_sequences=model_output["sequences"],
+                        tokenizer=tokenizer,
+                        dataset_config=dataset_config,
+                    )
+                )
+
+        elif dataset_config.task.name == "named-entity-recognition":
+            all_preds.extend(
+                get_ner_labels(
+                    tokens=prepared_dataset[
+                        batch_idx
+                        * benchmark_config.batch_size : (batch_idx + 1)
+                        * benchmark_config.batch_size
+                    ]["tokens"],
                     generated_sequences=model_output["sequences"],
                     tokenizer=tokenizer,
                     dataset_config=dataset_config,
                 )
+            )
 
-        all_preds.extend(predicted_labels)
+            # TEMP
+            raw_labels = tokenizer.decode(model_output["sequences"][0])
+            logger.info(f"Predicted raw labels: {raw_labels}")
 
     true_labels = [
-        dataset_config.prompt_label_mapping[lbl] for lbl in prepared_dataset["label"]
+        [label.lower() for label in label_list]
+        for label_list in prepared_dataset["labels"]
     ]
 
     itr_scores = compute_metrics(
         model_outputs_and_labels=(all_preds, true_labels),
-        id2label=dataset_config.id2label,
     )
+
+    # TEMP
+    print(f"Scores for iteration: {itr_scores}")
+    breakpoint()
 
     return itr_scores
 
@@ -337,12 +360,71 @@ def get_closest_word_edit_labels(
     return new_predicted_labels
 
 
+def get_ner_labels(
+    tokens: list[list[str]],
+    generated_sequences: list[list[int]],
+    tokenizer: Tokenizer,
+    dataset_config: DatasetConfig,
+) -> list[list[str]]:
+    """Get the predicted labels for the NER task.
+
+    Args:
+        tokens (list of list of str):
+            The tokens of the input sequences. The outer-most list is the batch
+            dimension, the inner-most list is the sequence dimension, consisting of
+            tokens.
+        generated_sequences (list of list of int):
+            The generated sequences from the model. The outer-most list is the
+            batch dimension, the inner-most list is the sequence dimension,
+            consisting of token IDs.
+        tokenizer (Tokenizer):
+            The tokenizer used to generate the tokens.
+        dataset_config (DatasetConfig):
+            The configuration of the dataset.
+
+    Returns:
+        list of list of str:
+            The predicted labels.
+    """
+    raw_predictions = extract_raw_predictions(
+        generated_sequences=generated_sequences,
+        tokenizer=tokenizer,
+        dataset_config=dataset_config,
+    )
+
+    predicted_labels: list[list[str]] = [["o"] * len(token_ids) for token_ids in tokens]
+    for idx, raw_prediction in enumerate(raw_predictions):
+        try:
+            prediction_dict: dict[str, list[str]] = json.loads(raw_prediction)
+        except json.decoder.JSONDecodeError:
+            continue
+
+        for prompt_tag_name, named_entities in prediction_dict.items():
+            tag_name = [
+                tag[2:]
+                for tag, prompt_tag in dataset_config.prompt_label_mapping.items()
+                if prompt_tag == prompt_tag_name
+            ][0]
+            for named_entity in named_entities:
+                for ne_idx, named_entity_word in enumerate(named_entity.split()):
+                    for token_idx, token in enumerate(tokens[idx]):
+                        if named_entity_word in token:
+                            if ne_idx == 0:
+                                predicted_labels[idx][token_idx] = f"b-{tag_name}"
+                            elif (
+                                predicted_labels[idx][token_idx] == "o"
+                                and predicted_labels[idx][token_idx - 1][2:] == tag_name
+                            ):
+                                predicted_labels[idx][token_idx] = f"i-{tag_name}"
+    return predicted_labels
+
+
 def extract_raw_predictions(
     generated_sequences: list[list[int]],
     tokenizer: Tokenizer,
     dataset_config: DatasetConfig,
 ) -> list[str]:
-    """Get the labels with the smallest edit distance to the predicted labels.
+    """Get the raw predictions from the generated sequences.
 
     Args:
         generated_sequences (list of list of int):
@@ -485,7 +567,7 @@ def extract_few_shot_examples(
         while len(few_shot_examples) < num_few_shots:
             label = next(labels)
             examples = shuffled_train.filter(
-                lambda x: x["label"].lower() == label.lower()
+                lambda x: x["labels"].lower() == label.lower()
             ).select(range(1))
             few_shot_examples.append(examples[0])
     else:
