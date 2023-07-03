@@ -637,9 +637,7 @@ class BenchmarkDataset(ABC):
         ]
 
         labels = [
-            id2label.index(prompt_label_to_label_mapping[label.lower()])
-            if isinstance(label, str)
-            else label
+            id2label.index(label.lower()) if isinstance(label, str) else label
             for label in labels
         ]
 

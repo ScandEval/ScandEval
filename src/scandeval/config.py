@@ -120,8 +120,9 @@ class BenchmarkConfig:
         trust_remote_code (bool):
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
-        load_in_4bit (bool):
-            Whether to load models in 4-bit precision.
+        load_in_4bit (bool or None):
+            Whether to load models in 4-bit precision. If None then this will be done
+            if CUDA is available and the model is a decoder model. Defaults to None.
         testing (bool, optional):
             Whether a unit test is being run. Defaults to False.
     """
@@ -141,7 +142,7 @@ class BenchmarkConfig:
     device: torch.device
     verbose: bool
     trust_remote_code: bool
-    load_in_4bit: bool
+    load_in_4bit: bool | None
     testing: bool = False
 
 

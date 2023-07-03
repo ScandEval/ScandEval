@@ -71,8 +71,9 @@ class Benchmarker:
             Whether to output additional output. Defaults to False.
         trust_remote_code (bool, optional):
             Whether to trust remote code when loading models. Defaults to False.
-        load_in_4bit (bool, optional):
-            Whether to load models in 4-bit precision. Defaults to False.
+        load_in_4bit (bool or None, optional):
+            Whether to load models in 4-bit precision. If None then this will be done
+            if CUDA is available and the model is a decoder model. Defaults to None.
 
     Attributes:
         progress_bar (bool): Whether progress bars should be shown.
@@ -104,7 +105,7 @@ class Benchmarker:
         device: Device | None = None,
         verbose: bool = False,
         trust_remote_code: bool = False,
-        load_in_4bit: bool = False,
+        load_in_4bit: bool | None = None,
     ) -> None:
         self.benchmark_config = build_benchmark_config(
             language=language,
