@@ -53,7 +53,6 @@ class OpenAITokenizer:
     ) -> None:
         self.model_config = model_config
         self.hf_model_config = hf_model_config
-        self.encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
 
         self.bos_token_id: int = self.hf_model_config.bos_token_id or -1
         self.cls_token_id: int = self.bos_token_id
@@ -61,9 +60,10 @@ class OpenAITokenizer:
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
-        self.bos_token = self.encoding.decode([self.bos_token_id])
+        encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        self.bos_token = encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
-        self.eos_token = self.encoding.decode([self.eos_token_id])
+        self.eos_token = encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
@@ -77,11 +77,12 @@ class OpenAITokenizer:
             dict[str, LongTensor]:
                 The tokenized text.
         """
+        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         text_list = [text] if isinstance(text, str) else text
         encoded_inputs = [
             BatchEncoding(
                 dict(
-                    input_ids=self.encoding.encode(
+                    input_ids=encoding.encode(
                         text,
                         allowed_special={
                             self.bos_token,
@@ -108,10 +109,11 @@ class OpenAITokenizer:
             str:
                 The decoded text.
         """
+        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         token_ids = [
             token_id for token_id in token_ids if token_id != self.pad_token_id
         ]
-        return self.encoding.decode(tokens=token_ids)
+        return encoding.decode(tokens=token_ids)
 
     def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
         """Encode text.
@@ -376,7 +378,7 @@ class OpenAIModel:
                     generation_output = openai.Completion.create(
                         model=self.model_config.model_id,
                         prompt=inputs_list,
-                        max_tokens=generation_config.max_length,
+                        max_tokens=generation_config.max_new_tokens,
                         temperature=generation_config.temperature,
                         top_p=generation_config.top_p,
                         n=generation_config.num_return_sequences,
@@ -403,7 +405,7 @@ class OpenAIModel:
                                     content=self.tokenizer.decode(input_ids),
                                 ),
                             ],
-                            max_tokens=generation_config.max_length,
+                            max_tokens=generation_config.max_new_tokens,
                             temperature=generation_config.temperature,
                             top_p=generation_config.top_p,
                             n=generation_config.num_return_sequences,
