@@ -172,7 +172,7 @@ from .languages import get_all_languages
 )
 @click.option(
     "--load-in-4bit/--no-load-in-4bit",
-    default=False,
+    default=None,
     show_default=True,
     help="Whether to load the model in 4-bit precision.",
 )
@@ -196,7 +196,7 @@ def benchmark(
     framework: str | None,
     device: str | None,
     trust_remote_code: bool,
-    load_in_4bit: bool,
+    load_in_4bit: bool | None,
 ) -> None:
     """Benchmark pretrained language models on Scandinavian language tasks."""
 

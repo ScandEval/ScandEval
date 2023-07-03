@@ -208,10 +208,14 @@ class HFModelSetup:
         supertask = dataset_config.task.supertask
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
-        load_in_4bit = (
-            model_config.task == "text-generation"
-            and self.benchmark_config.device == torch.device("cuda")
-        ) or self.benchmark_config.load_in_4bit
+
+        if self.benchmark_config.load_in_4bit is not None:
+            load_in_4bit = self.benchmark_config.load_in_4bit
+        else:
+            load_in_4bit = (
+                model_config.task == "text-generation"
+                and self.benchmark_config.device == torch.device("cuda")
+            )
 
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,
@@ -296,29 +300,7 @@ class HFModelSetup:
                     from_flax = True
                     continue
 
-                # Deal with the case where the checkpoint is incorrect
-                if "checkpoint seems to be incorrect" in str(e):
-                    raise InvalidBenchmark(
-                        f"The model {model_id!r} has an incorrect checkpoint."
-                    )
-
-                if "trust_remote_code" in str(e):
-                    raise InvalidBenchmark(
-                        f"Loading the model {model_id!r} needs to trust remote code. "
-                        "If you trust the suppliers of this model, then you can enable "
-                        "this by setting the `--trust-remote-code` flag."
-                    )
-
-                # Otherwise raise a more generic error
-                raise InvalidBenchmark(
-                    f"The model {model_id} either does not exist on the Hugging Face "
-                    "Hub, or it has no frameworks registered, or it is a private "
-                    "model. If it *does* exist on the Hub and is a public model then "
-                    "please ensure that it has a framework registered. If it is a "
-                    "private model then enable the `--token` flag and make "
-                    "sure that you are logged in to the Hub via the "
-                    "`huggingface-cli login` command."
-                )
+                self._handle_loading_exception(exception=e, model_id=model_id)
 
         # Set up the model for question answering
         if supertask == "question-answering":
@@ -378,3 +360,25 @@ class HFModelSetup:
                 raise InvalidBenchmark(
                     f"Could not load tokenizer for model {model_id!r}."
                 )
+
+    @staticmethod
+    def _handle_loading_exception(exception: Exception, model_id: str) -> None:
+        if "checkpoint seems to be incorrect" in str(exception):
+            raise InvalidBenchmark(
+                f"The model {model_id!r} has an incorrect checkpoint."
+            )
+        if "trust_remote_code" in str(exception):
+            raise InvalidBenchmark(
+                f"Loading the model {model_id!r} needs to trust remote code. "
+                "If you trust the suppliers of this model, then you can enable "
+                "this by setting the `--trust-remote-code` flag."
+            )
+        raise InvalidBenchmark(
+            f"The model {model_id} either does not exist on the Hugging Face "
+            "Hub, or it has no frameworks registered, or it is a private "
+            "model. If it *does* exist on the Hub and is a public model then "
+            "please ensure that it has a framework registered. If it is a "
+            "private model then enable the `--token` flag and make "
+            "sure that you are logged in to the Hub via the "
+            "`huggingface-cli login` command."
+        )
