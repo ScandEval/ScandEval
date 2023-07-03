@@ -1,5 +1,6 @@
 """Named entity recognition benchmark dataset."""
 
+import json
 import logging
 from copy import deepcopy
 from functools import partial
@@ -7,7 +8,6 @@ from functools import partial
 import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
-from numpy._typing import NDArray
 from transformers import BatchEncoding, DataCollatorWithPadding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorForTokenClassification
 
@@ -55,11 +55,13 @@ class NamedEntityRecognition(BenchmarkDataset):
         self.has_misc_tags = "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
 
         # Return the dataset dictionary
-        return dataset_dict.rename_column("ner_tags", "label")
+        return dataset_dict
 
     def _compute_metrics(
         self,
-        predictions_and_labels: tuple[NDArray, NDArray],
+        model_outputs_and_labels: tuple[
+            list[list[list[float]]] | list[list[str]], list[list[int]] | list[list[str]]
+        ],
         id2label: list[str] | None = None,
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
@@ -77,53 +79,70 @@ class NamedEntityRecognition(BenchmarkDataset):
                 values as values.
         """
         # Get the predictions from the model
-        predictions, labels = predictions_and_labels
+        model_outputs, labels = model_outputs_and_labels
 
-        if id2label is not None:
-            raw_predictions: NDArray = np.argmax(predictions, axis=-1)
+        predictions: list[list[str]]
+        if id2label is not None and not isinstance(model_outputs[0][0], str):
+            raw_predictions: list[list[int]] = np.argmax(
+                model_outputs, axis=-1
+            ).tolist()
 
             # Remove ignored index (special tokens)
             predictions = [
                 [
                     id2label[pred_id]
-                    for pred_id, lbl_id in zip(pred, label)
+                    for pred_id, lbl_id in zip(  # type: ignore[call-overload]
+                        pred, label
+                    )
                     if lbl_id != -100
                 ]
                 for pred, label in zip(raw_predictions, labels)
             ]
             labels = [
-                [id2label[lbl_id] for _, lbl_id in zip(pred, label) if lbl_id != -100]
+                [
+                    id2label[lbl_id] if isinstance(lbl_id, int) else lbl_id
+                    for _, lbl_id in zip(pred, label)  # type: ignore[call-overload]
+                    if lbl_id != -100
+                ]
                 for pred, label in zip(raw_predictions, labels)
             ]
+
+        else:
+            predictions = model_outputs  # type: ignore[assignment]
 
         # Replace predicted tag with either MISC or O tags if they are not part of the
         # dataset
         id2label_without_misc = set(self.dataset_config.id2label).difference(
-            {"B-MISC", "I-MISC"}
+            {"b-misc", "i-misc"}
         )
+        ner_tag: str
         for i, prediction_list in enumerate(predictions):
             for j, ner_tag in enumerate(prediction_list):
                 if ner_tag not in id2label_without_misc:
-                    if self.has_misc_tags and ner_tag[:2] == "B-":
-                        predictions[i][j] = "B-MISC"
-                    elif self.has_misc_tags and ner_tag[:2] == "I-":
-                        predictions[i][j] = "I-MISC"
+                    if self.has_misc_tags and ner_tag[:2] == "b-":
+                        predictions[i][j] = "b-misc"
+                    elif self.has_misc_tags and ner_tag[:2] == "i-":
+                        predictions[i][j] = "i-misc"
                     else:
-                        predictions[i][j] = "O"
+                        predictions[i][j] = "o"
 
         # Remove MISC labels from predictions
         predictions_no_misc = deepcopy(predictions)
         for i, prediction_list in enumerate(predictions_no_misc):
             for j, ner_tag in enumerate(prediction_list):
-                if ner_tag[-4:] == "MISC":
-                    predictions_no_misc[i][j] = "O"
+                if ner_tag[-4:] == "misc":
+                    predictions_no_misc[i][j] = "o"
 
         # Remove MISC labels from labels
         labels_no_misc = deepcopy(labels)
         for i, label_list in enumerate(labels_no_misc):
-            for j, ner_tag in enumerate(label_list):
-                if ner_tag[-4:] == "MISC":
-                    labels_no_misc[i][j] = "O"
+            for j, ner_tag in enumerate(label_list):  # type: ignore[arg-type]
+                if (
+                    isinstance(ner_tag, str)
+                    and len(ner_tag) >= 4
+                    and ner_tag[-4:] == "misc"  # type: ignore[index]
+                ):
+                    labels_no_misc[i][j] = "o"  # type: ignore[call-overload]
 
         # Compute the metrics
         results = self._metrics["micro_f1"].compute(
@@ -371,7 +390,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
             def tokenise(examples: dict) -> BatchEncoding:
                 return kwargs["tokenizer"](
-                    text=examples["doc"],
+                    text=examples["text"],
                     truncation=True,
                     padding=False,
                 )
@@ -409,27 +428,20 @@ class NamedEntityRecognition(BenchmarkDataset):
         """
 
         def create_label(example: dict) -> str:
-            label_parts: list[str] = list()
-            running_tag: str = ""
-            for token, ner_tag in zip(example["tokens"], example["label"]):
-                if ner_tag == "O":
-                    if running_tag:
-                        label_parts.append(f"###</{running_tag}>")
-                        running_tag = ""
-                    label_parts.append(token)
-                elif ner_tag.startswith("B-"):
-                    if running_tag:
-                        label_parts.append(f"###</{running_tag}>")
-                        running_tag = ""
-                    label_parts.append(f"<{ner_tag[2:]}>###")
-                    label_parts.append(token)
-                    running_tag = ner_tag[2:]
-                elif ner_tag.startswith("I-"):
-                    label_parts.append(token)
-            if running_tag:
-                label_parts.append(f"###</{running_tag}>")
-            label = " ".join(label_parts).replace(" ###", "").replace("### ", "")
-            return label
+            labels: dict[str, list[str]] = {
+                prompt_label: []
+                for prompt_label in self.dataset_config.prompt_label_mapping.values()
+            }
+            for token, label in zip(example["tokens"], example["labels"]):
+                label = label.lower()
+                if label == "o":
+                    continue
+                prompt_label = self.dataset_config.prompt_label_mapping[label]
+                if label.startswith("b-"):
+                    labels[prompt_label].append(token)
+                elif label.startswith("i-"):
+                    labels[prompt_label][-1] += " " + token
+            return json.dumps(labels)
 
         # Build the few-shot part of the prompt
         few_shot_prompts = [
@@ -449,7 +461,6 @@ class NamedEntityRecognition(BenchmarkDataset):
         examples["text"] = [
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
-        examples.pop("doc")
 
         return examples
 
