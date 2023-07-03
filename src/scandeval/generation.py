@@ -247,10 +247,6 @@ def generate_single_iteration(
                 )
             )
 
-            # TEMP
-            raw_labels = tokenizer.decode(model_output["sequences"][0])
-            logger.info(f"Predicted raw labels: {raw_labels}")
-
     true_labels = [
         [label.lower() for label in label_list]
         for label_list in prepared_dataset["labels"]
@@ -259,10 +255,6 @@ def generate_single_iteration(
     itr_scores = compute_metrics(
         model_outputs_and_labels=(all_preds, true_labels),
     )
-
-    # TEMP
-    print(f"Scores for iteration: {itr_scores}")
-    breakpoint()
 
     return itr_scores
 
