@@ -247,13 +247,17 @@ def generate_single_iteration(
                 )
             )
 
-    true_labels = [
-        [label.lower() for label in label_list]
-        for label_list in prepared_dataset["labels"]
-    ]
+    if "label" in prepared_dataset.column_names:
+        true_labels = [label.lower() for label in prepared_dataset["label"]]
+    else:
+        true_labels = [
+            [label.lower() for label in label_list]
+            for label_list in prepared_dataset["labels"]
+        ]
 
-    itr_scores = compute_metrics(
+    itr_scores: dict[str, float] = compute_metrics(
         model_outputs_and_labels=(all_preds, true_labels),
+        id2label=dataset_config.id2label,
     )
 
     return itr_scores
