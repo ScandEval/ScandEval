@@ -100,9 +100,9 @@ SUC3_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/suc3-mini",
     task=NER,
     languages=[SV],
-    prompt_prefix="Följande är dokument och deras namngivna entiteter, som kan vara "
-    "'person', 'plats', 'organisation' och 'diverse':",
-    prompt_template="Dokument: {text}\nNamngivna entiteter: {label}",
+    prompt_prefix="Följande är meningar och JSON-ordböcker med de namngivna enheter "
+    "som förekommer i den givna meningen.",
+    prompt_template="Mening: {text}\nNamngivna entiteter: {label}",
     prompt_label_mapping={
         "b-per": "person",
         "i-per": "person",
@@ -113,8 +113,8 @@ SUC3_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=3,
-    max_generated_tokens=3,
+    num_few_shot_examples=4,
+    max_generated_tokens=128,
 )
 
 
@@ -161,8 +161,8 @@ NORNE_NB_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=3,
-    max_generated_tokens=3,
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
 )
 
 
@@ -185,8 +185,8 @@ NORNE_NN_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=3,
-    max_generated_tokens=3,
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
 )
 
 
@@ -209,8 +209,8 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
         "b-misc": "ýmislegt",
         "i-misc": "ýmislegt",
     },
-    num_few_shot_examples=3,
-    max_generated_tokens=3,
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
 )
 
 
@@ -223,8 +223,8 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
     prompt_label_mapping=dict(),
-    num_few_shot_examples=3,
-    max_generated_tokens=3,
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
 )
 
 

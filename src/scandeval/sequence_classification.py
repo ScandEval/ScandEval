@@ -2,13 +2,20 @@
 
 import logging
 from functools import partial
+from typing import Any
 
+import Levenshtein
+import numpy as np
+import torch
 from datasets.arrow_dataset import Dataset
 from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
+from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
+from .config import DatasetConfig
 from .exceptions import InvalidBenchmark
+from .generation import extract_raw_predictions
 from .model_setups import GenerativeModel, Tokenizer
 from .utils import get_special_token_metadata
 
@@ -143,6 +150,40 @@ class SequenceClassification(BenchmarkDataset):
 
         return examples
 
+    def _extract_labels_from_generation(
+        self,
+        input_batch: dict[str, list],
+        model_output: ModelOutput,
+        tokenizer: Tokenizer,
+    ) -> list[Any]:
+        """Extract the predicted labels from the generated output.
+
+        Args:
+            input_batch (dict):
+                The input batch, where the keys are the feature names and the values
+                are lists with the feature values.
+            model_output (ModelOutput):
+                The raw generated output of the model.
+            tokenizer (Tokenizer):
+                The tokenizer used together with the model.
+
+        Returns:
+            list:
+                The predicted labels.
+        """
+        if "scores" in model_output:
+            return get_closest_logprobs_labels(
+                generation_logprobs=model_output["scores"],
+                tokenizer=tokenizer,
+                dataset_config=self.dataset_config,
+            )
+        else:
+            return get_closest_word_edit_labels(
+                generated_sequences=model_output["sequences"],
+                tokenizer=tokenizer,
+                dataset_config=self.dataset_config,
+            )
+
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
         try:
             examples["label"] = [label2id[lbl.lower()] for lbl in examples["label"]]
@@ -173,3 +214,152 @@ class SequenceClassification(BenchmarkDataset):
                 The data collator.
         """
         return DataCollatorWithPadding(tokenizer, padding="longest")
+
+    def _compute_metrics(
+        self,
+        model_outputs_and_labels: tuple[list, list],
+        id2label: list[str],
+    ) -> dict[str, float]:
+        """Compute the metrics needed for evaluation.
+
+        Args:
+            model_outputs_and_labels (pair of sequences):
+                The first sequence contains the model outputs and the second sequence
+                contains the true labels.
+            id2label (list of str):
+                Conversion of indices to labels.
+
+        Returns:
+            dict:
+                A dictionary with the names of the metrics as keys and the metric
+                values as values.
+        """
+        model_outputs, labels = model_outputs_and_labels
+
+        model_output_dtype = np.asarray(model_outputs).dtype
+        if model_output_dtype in [np.float16, np.float32, np.float64]:
+            predictions = np.asarray(model_outputs).argmax(axis=-1)
+        else:
+            predictions = model_outputs
+
+        prompt_label_to_label_mapping = {
+            prompt_label: label
+            for label, prompt_label in self.dataset_config.prompt_label_mapping.items()
+        }
+        predictions = [
+            id2label.index(prompt_label_to_label_mapping[pred.lower()])
+            if isinstance(pred, str)
+            else pred
+            for pred in predictions
+        ]
+
+        labels = [
+            id2label.index(label.lower()) if isinstance(label, str) else label
+            for label in labels
+        ]
+
+        results: dict[str, float] = dict()
+        for cfg in self.dataset_config.task.metrics:
+            metric = self._metrics[cfg.name]
+            score_dict: dict[str, float] | None = metric.compute(
+                predictions=predictions,
+                references=labels,
+                **cfg.compute_kwargs,
+            )
+            if score_dict is not None:
+                scores = score_dict[cfg.results_key]
+                results[cfg.name] = scores
+        return results
+
+
+def get_closest_logprobs_labels(
+    generation_logprobs: tuple[torch.Tensor],
+    tokenizer: Tokenizer,
+    dataset_config: DatasetConfig,
+) -> list[str]:
+    """Get the labels with the highest predicted logprob value.
+
+    In case a candidate label is split into multiple tokens, we only use the first
+    token to compute the logprob value. E.g., if the candidate label "positive" is
+    tokenised as ["pos", "itive"], we only use the logprob value of "pos" to
+    represent the logprob value of the entire label.
+
+    Args:
+        generation_logprobs (tuple[torch.Tensor]):
+            The logprobs of the generated tokens.
+        tokenizer (Tokenizer):
+            The tokenizer used to generate the tokens.
+        dataset_config (DatasetConfig):
+            The configuration of the dataset.
+        benchmark_config (BenchmarkConfig):
+            The configuration of the benchmark.
+
+    Returns:
+        list[str]:
+            The predicted labels.
+    """
+    candidate_labels = [
+        dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
+    ]
+
+    # Shape: [batch_size, num_generated_tokens, vocab_size]
+    all_logprobs = torch.stack(generation_logprobs, dim=1)
+
+    # Shape: [batch_size, num_candidate_labels]
+    pred_logprobs = torch.empty(
+        all_logprobs.shape[0], len(candidate_labels), device=all_logprobs.device
+    )
+
+    for idx, candidate_label in enumerate(candidate_labels):
+        # We only use the first token to represent the logprob value of the entire
+        # label.
+        candidate_label_ids: list[list[int]] = tokenizer(
+            [candidate_label.lower()], add_special_tokens=False
+        )["input_ids"]
+        candidate_label_id: int = candidate_label_ids[0][0]
+        pred_logprobs[:, idx] = all_logprobs[:, 0, candidate_label_id]
+
+    # Shape: [batch_size,]
+    predicted_label_ids = pred_logprobs.argmax(dim=1)
+
+    return [candidate_labels[idx] for idx in predicted_label_ids]
+
+
+def get_closest_word_edit_labels(
+    generated_sequences: list[list[int]],
+    tokenizer: Tokenizer,
+    dataset_config: DatasetConfig,
+) -> list[str]:
+    """Get the labels with the smallest edit distance to the predicted labels.
+
+    Args:
+        generated_sequences (list of list of int):
+            The generated sequences from the model. The outer-most list is the
+            batch dimension, the inner-most list is the sequence dimension,
+            consisting of token IDs.
+        tokenizer (Tokenizer):
+            The tokenizer used to generate the tokens.
+        dataset_config (DatasetConfig):
+            The configuration of the dataset.
+
+    Returns:
+        list of str:
+            The candidate labels with the smallest edit distance to the predicted
+            labels.
+    """
+    raw_predictions = extract_raw_predictions(
+        generated_sequences=generated_sequences,
+        tokenizer=tokenizer,
+        dataset_config=dataset_config,
+    )
+
+    candidate_labels = dataset_config.id2label
+    new_predicted_labels: list[str] = list()
+    for predicted_label in raw_predictions:
+        edit_distances = [
+            Levenshtein.distance(s1=predicted_label.lower(), s2=candidate_label.lower())
+            for candidate_label in candidate_labels
+        ]
+        closest_label = candidate_labels[np.argmin(edit_distances).item()]
+        new_predicted_labels.append(closest_label)
+    return new_predicted_labels

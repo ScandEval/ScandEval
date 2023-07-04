@@ -1,19 +1,25 @@
 """Named entity recognition benchmark dataset."""
 
 import json
+import logging
 from copy import deepcopy
 from functools import partial
+from typing import Any
 
 import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from transformers import BatchEncoding, DataCollatorWithPadding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorForTokenClassification
+from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
+from .generation import extract_raw_predictions
 from .model_setups import GenerativeModel, Tokenizer
 from .utils import model_is_generative
+
+logger = logging.getLogger(__package__)
 
 
 class NamedEntityRecognition(BenchmarkDataset):
@@ -58,7 +64,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         model_outputs_and_labels: tuple[
             list[list[list[float]]] | list[list[str]], list[list[int]] | list[list[str]]
         ],
-        id2label: list[str] | None = None,
+        id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -66,8 +72,8 @@ class NamedEntityRecognition(BenchmarkDataset):
             predictions_and_labels (pair of arrays):
                 The first array contains the probability predictions and the second
                 array contains the true labels.
-            id2label (list or None, optional):
-                Conversion of indices to labels. Defaults to None.
+            id2label (list of str):
+                Conversion of indices to labels.
 
         Returns:
             dict:
@@ -78,7 +84,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         model_outputs, labels = model_outputs_and_labels
 
         predictions: list[list[str]]
-        if id2label is not None and not isinstance(model_outputs[0][0], str):
+        if not isinstance(model_outputs[0][0], str):
             raw_predictions: list[list[int]] = np.argmax(
                 model_outputs, axis=-1
             ).tolist()
@@ -462,6 +468,68 @@ class NamedEntityRecognition(BenchmarkDataset):
         ]
 
         return examples
+
+    def _extract_labels_from_generation(
+        self,
+        input_batch: dict[str, list],
+        model_output: ModelOutput,
+        tokenizer: Tokenizer,
+    ) -> list[Any]:
+        """Extract the predicted labels from the generated output.
+
+        Args:
+            input_batch (dict):
+                The input batch, where the keys are the feature names and the values
+                are lists with the feature values.
+            model_output (ModelOutput):
+                The raw generated output of the model.
+            tokenizer (Tokenizer):
+                The tokenizer used together with the model.
+
+        Returns:
+            list:
+                The predicted labels.
+        """
+        raw_predictions = extract_raw_predictions(
+            generated_sequences=model_output["sequences"],
+            tokenizer=tokenizer,
+            dataset_config=self.dataset_config,
+        )
+
+        tokens = input_batch["tokens"]
+        predicted_labels: list[list[str]] = [
+            ["o"] * len(token_ids) for token_ids in tokens
+        ]
+        for idx, raw_prediction in enumerate(raw_predictions):
+            try:
+                json_output = json.loads(raw_prediction)
+                if not isinstance(json_output, dict):
+                    raise ValueError("The output is not a dictionary.")
+                prediction_dict: dict[str, list[str]] = json_output
+            except (json.decoder.JSONDecodeError, ValueError):
+                logger.debug("The generated model output is not valid JSON. Skipping.")
+                continue
+
+            prompt_label_mapping = self.dataset_config.prompt_label_mapping
+            for prompt_tag_name, named_entities in prediction_dict.items():
+                tag_name = [
+                    tag[2:]
+                    for tag, prompt_tag in prompt_label_mapping.items()
+                    if prompt_tag == prompt_tag_name
+                ][0]
+                for named_entity in named_entities:
+                    for ne_idx, named_entity_word in enumerate(named_entity.split()):
+                        for token_idx, token in enumerate(tokens[idx]):
+                            if named_entity_word in token:
+                                if ne_idx == 0:
+                                    predicted_labels[idx][token_idx] = f"b-{tag_name}"
+                                elif (
+                                    predicted_labels[idx][token_idx] == "o"
+                                    and predicted_labels[idx][token_idx - 1][2:]
+                                    == tag_name
+                                ):
+                                    predicted_labels[idx][token_idx] = f"i-{tag_name}"
+        return predicted_labels
 
     def _load_data_collator(
         self,

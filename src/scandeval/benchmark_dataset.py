@@ -15,7 +15,7 @@ from datasets.load import load_dataset
 from huggingface_hub.utils._errors import HfHubHTTPError
 from tqdm.auto import tqdm
 from transformers import PretrainedConfig
-from transformers.modeling_utils import PreTrainedModel
+from transformers.modeling_utils import ModelOutput, PreTrainedModel
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .dataset_tasks import SPEED
@@ -142,6 +142,8 @@ class BenchmarkDataset(ABC):
             disable=not self.benchmark_config.progress_bar,
         )
 
+        data_collator = self._load_data_collator(tokenizer=tokenizer, model=model)
+
         if self.dataset_config.task.name == SPEED:
             scores = benchmark_speed(
                 itr=itr,
@@ -152,7 +154,7 @@ class BenchmarkDataset(ABC):
                 benchmark_config=self.benchmark_config,
             )
         elif model_is_generative(model=model):
-            scores = self._generate(
+            scores = generate(
                 itr=itr,
                 train=train,
                 val=val,
@@ -162,9 +164,14 @@ class BenchmarkDataset(ABC):
                 prepared_tests=prepared_tests,
                 model=model,
                 tokenizer=tokenizer,
+                data_collator=data_collator,
+                compute_metrics=self._compute_metrics,
+                extract_labels_fn=self._extract_labels_from_generation,
+                benchmark_config=self.benchmark_config,
+                dataset_config=self.dataset_config,
             )
         else:
-            scores = self._finetune(
+            scores = finetune(
                 itr=itr,
                 train=train,
                 val=val,
@@ -175,6 +182,10 @@ class BenchmarkDataset(ABC):
                 model=model,
                 tokenizer=tokenizer,
                 model_config=model_config,
+                dataset_config=self.dataset_config,
+                benchmark_config=self.benchmark_config,
+                compute_metrics=self._compute_metrics,
+                data_collator=data_collator,
             )
 
         all_scores = log_scores(
@@ -185,129 +196,6 @@ class BenchmarkDataset(ABC):
         )
 
         return all_scores, metadata_dict
-
-    def _finetune(
-        self,
-        itr: tqdm,
-        train: Dataset,
-        val: Dataset,
-        tests: list[Dataset],
-        prepared_train: Dataset,
-        prepared_val: Dataset,
-        prepared_tests: list[Dataset],
-        model: PreTrainedModel,
-        tokenizer: Tokenizer,
-        model_config: ModelConfig,
-    ) -> dict[str, list[dict[str, float]]]:
-        """Evaluate a model on a dataset through finetuning.
-
-        Args:
-            itr (tqdm.tqdm):
-                The progress bar iterator.
-            train (Dataset):
-                The training dataset.
-            val (Dataset):
-                The validation dataset.
-            tests (list[Dataset]):
-                The bootstrapped test datasets.
-            prepared_train (Dataset):
-                The prepared training dataset.
-            prepared_val (Dataset):
-                The prepared validation dataset.
-            prepared_tests (list[Dataset]):
-                The prepared bootstrapped test datasets.
-            model (PreTrainedModel):
-                The model to evaluate.
-            tokenizer (Tokenizer):
-                The tokenizer to use.
-            model_config (ModelConfig):
-                The configuration of the model.
-
-        Returns:
-            dict[str, list[dict[str, float]]]:
-                A dictionary containing the scores, with keys "test" and maybe "train",
-                with values being lists of dicts containing the scores for each metric
-                for each iteration.
-        """
-        return finetune(
-            itr=itr,
-            train=train,
-            val=val,
-            tests=tests,
-            prepared_train=prepared_train,
-            prepared_val=prepared_val,
-            prepared_tests=prepared_tests,
-            model=model,
-            tokenizer=tokenizer,
-            model_config=model_config,
-            dataset_config=self.dataset_config,
-            benchmark_config=self.benchmark_config,
-            compute_metrics=self._compute_metrics,
-            data_collator=self._load_data_collator(tokenizer=tokenizer, model=model),
-        )
-
-    def _generate(
-        self,
-        itr: tqdm,
-        train: Dataset,
-        val: Dataset,
-        tests: list[Dataset],
-        prepared_train: Dataset,
-        prepared_val: Dataset,
-        prepared_tests: list[Dataset],
-        model: GenerativeModel,
-        tokenizer: Tokenizer,
-    ) -> dict[str, list[dict[str, float]]]:
-        """Evaluate a model on a dataset through generation.
-
-        Args:
-            itr (tqdm.tqdm):
-                The progress bar iterator.
-            train (Dataset):
-                The training dataset.
-            val (Dataset):
-                The validation dataset.
-            tests (list[Dataset]):
-                The bootstrapped test datasets.
-            prepared_train (Dataset):
-                The prepared training dataset.
-            prepared_val (Dataset):
-                The prepared validation dataset.
-            prepared_tests (list[Dataset]):
-                The prepared bootstrapped test datasets.
-            num_iter (int):
-                The number of iterations to run.
-            rng (np.random.Generator):
-                The random number generator.
-            model (GenerativeModel):
-                The model to evaluate.
-            tokenizer (Tokenizer):
-                The tokenizer to use for the model. If `None` then the model's
-                tokenizer will be used.
-            model_config (ModelConfig):
-                The configuration of the model.
-
-        Returns:
-            dict[str, list[dict[str, float]]]:
-                A dictionary containing the scores, with keys "test" and maybe "train",
-                with values being lists of dicts containing the scores for each metric
-                for each iteration.
-        """
-        return generate(
-            itr=itr,
-            train=train,
-            val=val,
-            tests=tests,
-            prepared_train=prepared_train,
-            prepared_val=prepared_val,
-            prepared_tests=prepared_tests,
-            model=model,
-            tokenizer=tokenizer,
-            data_collator=self._load_data_collator(tokenizer=tokenizer, model=model),
-            compute_metrics=self._compute_metrics,
-            benchmark_config=self.benchmark_config,
-            dataset_config=self.dataset_config,
-        )
 
     def _get_metadata(
         self,
@@ -607,6 +495,31 @@ class BenchmarkDataset(ABC):
         """
         pass
 
+    @abstractmethod
+    def _extract_labels_from_generation(
+        self,
+        input_batch: dict[str, list],
+        model_output: ModelOutput,
+        tokenizer: Tokenizer,
+    ) -> list[Any]:
+        """Extract the predicted labels from the generated output.
+
+        Args:
+            input_batch (dict):
+                The input batch, where the keys are the feature names and the values
+                are lists with the feature values.
+            model_output (ModelOutput):
+                The raw generated output of the model.
+            tokenizer (Tokenizer):
+                The tokenizer used together with the model.
+
+        Returns:
+            list:
+                The predicted labels.
+        """
+        pass
+
+    @abstractmethod
     def _compute_metrics(
         self,
         model_outputs_and_labels: tuple[list, list],
@@ -618,47 +531,12 @@ class BenchmarkDataset(ABC):
             model_outputs_and_labels (pair of sequences):
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
-            id2label (list or None, optional):
-                Conversion of indices to labels. Defaults to None.
+            id2label (list of str):
+                Conversion of indices to labels.
 
         Returns:
             dict:
                 A dictionary with the names of the metrics as keys and the metric
                 values as values.
         """
-        model_outputs, labels = model_outputs_and_labels
-
-        model_output_dtype = np.asarray(model_outputs).dtype
-        if model_output_dtype in [np.float16, np.float32, np.float64]:
-            predictions = np.asarray(model_outputs).argmax(axis=-1)
-        else:
-            predictions = model_outputs
-
-        prompt_label_to_label_mapping = {
-            prompt_label: label
-            for label, prompt_label in self.dataset_config.prompt_label_mapping.items()
-        }
-        predictions = [
-            id2label.index(prompt_label_to_label_mapping[pred.lower()])
-            if isinstance(pred, str)
-            else pred
-            for pred in predictions
-        ]
-
-        labels = [
-            id2label.index(label.lower()) if isinstance(label, str) else label
-            for label in labels
-        ]
-
-        results: dict[str, float] = dict()
-        for cfg in self.dataset_config.task.metrics:
-            metric = self._metrics[cfg.name]
-            score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
-            )
-            if score_dict is not None:
-                scores = score_dict[cfg.results_key]
-                results[cfg.name] = scores
-        return results
+        pass

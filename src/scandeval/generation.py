@@ -1,14 +1,11 @@
 """Functions related to text generation of models."""
 
 import itertools as it
-import json
 import logging
 import warnings
 from collections import defaultdict
-from typing import Callable
+from typing import Any, Callable
 
-import Levenshtein
-import numpy as np
 import pandas as pd
 import torch
 from datasets import Dataset
@@ -38,6 +35,7 @@ def generate(
     tokenizer: Tokenizer,
     data_collator: DataCollator,
     compute_metrics: Callable,
+    extract_labels_fn: Callable[..., list[str]],
     benchmark_config: BenchmarkConfig,
     dataset_config: DatasetConfig,
 ) -> dict[str, list[dict[str, float]]]:
@@ -71,6 +69,8 @@ def generate(
             The data collator to use for the model.
         compute_metrics (Callable):
             The function to use to compute the metrics.
+        extract_labels_fn (Callable):
+            The function to use to extract the labels from the model output.
         benchmark_config (BenchmarkConfig):
             The configuration of the benchmark.
         dataset_config (DatasetConfig):
@@ -96,6 +96,7 @@ def generate(
                     tokenizer=tokenizer,
                     data_collator=data_collator,
                     compute_metrics=compute_metrics,
+                    extract_labels_fn=extract_labels_fn,
                     benchmark_config=benchmark_config,
                     dataset_config=dataset_config,
                 )
@@ -123,6 +124,7 @@ def generate(
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 compute_metrics=compute_metrics,
+                extract_labels_fn=extract_labels_fn,
                 benchmark_config=benchmark_config,
                 dataset_config=dataset_config,
             )
@@ -139,6 +141,7 @@ def generate_single_iteration(
     tokenizer: Tokenizer,
     data_collator: DataCollator,
     compute_metrics: Callable,
+    extract_labels_fn: Callable[..., list[Any]],
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
 ) -> dict[str, float]:
@@ -155,6 +158,8 @@ def generate_single_iteration(
             The data collator to use for the model.
         compute_metrics (Callable):
             The function to use to compute the metrics.
+        extract_labels_fn (Callable):
+            The function to use to extract the labels from the dataset.
         dataset_config (DatasetConfig):
             The configuration of the dataset.
         benchmark_config (BenchmarkConfig):
@@ -214,38 +219,13 @@ def generate_single_iteration(
                     inputs=inputs, generation_config=generation_config
                 )
 
-        # Extract the predicted labels from the model output
-        if dataset_config.task.supertask == "sequence-classification":
-            if "scores" in model_output:
-                all_preds.extend(
-                    get_closest_logprobs_labels(
-                        generation_logprobs=model_output["scores"],
-                        tokenizer=tokenizer,
-                        dataset_config=dataset_config,
-                    )
-                )
-            else:
-                all_preds.extend(
-                    get_closest_word_edit_labels(
-                        generated_sequences=model_output["sequences"],
-                        tokenizer=tokenizer,
-                        dataset_config=dataset_config,
-                    )
-                )
-
-        elif dataset_config.task.name == "named-entity-recognition":
-            all_preds.extend(
-                get_ner_labels(
-                    tokens=prepared_dataset[
-                        batch_idx
-                        * benchmark_config.batch_size : (batch_idx + 1)
-                        * benchmark_config.batch_size
-                    ]["tokens"],
-                    generated_sequences=model_output["sequences"],
-                    tokenizer=tokenizer,
-                    dataset_config=dataset_config,
-                )
-            )
+        batch_start = batch_idx * benchmark_config.batch_size
+        batch_end = (batch_idx + 1) * benchmark_config.batch_size
+        input_batch = prepared_dataset[batch_start:batch_end]
+        extracted_labels: list = extract_labels_fn(
+            input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+        )
+        all_preds.extend(extracted_labels)
 
     if "label" in prepared_dataset.column_names:
         true_labels = [label.lower() for label in prepared_dataset["label"]]
@@ -261,161 +241,6 @@ def generate_single_iteration(
     )
 
     return itr_scores
-
-
-def get_closest_logprobs_labels(
-    generation_logprobs: tuple[torch.Tensor],
-    tokenizer: Tokenizer,
-    dataset_config: DatasetConfig,
-) -> list[str]:
-    """Get the labels with the highest predicted logprob value.
-
-    In case a candidate label is split into multiple tokens, we only use the first
-    token to compute the logprob value. E.g., if the candidate label "positive" is
-    tokenised as ["pos", "itive"], we only use the logprob value of "pos" to
-    represent the logprob value of the entire label.
-
-    Args:
-        generation_logprobs (tuple[torch.Tensor]):
-            The logprobs of the generated tokens.
-        tokenizer (Tokenizer):
-            The tokenizer used to generate the tokens.
-        dataset_config (DatasetConfig):
-            The configuration of the dataset.
-        benchmark_config (BenchmarkConfig):
-            The configuration of the benchmark.
-
-    Returns:
-        list[str]:
-            The predicted labels.
-    """
-    candidate_labels = [
-        dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
-    ]
-
-    # Shape: [batch_size, num_generated_tokens, vocab_size]
-    all_logprobs = torch.stack(generation_logprobs, dim=1)
-
-    # Shape: [batch_size, num_candidate_labels]
-    pred_logprobs = torch.empty(
-        all_logprobs.shape[0], len(candidate_labels), device=all_logprobs.device
-    )
-
-    for idx, candidate_label in enumerate(candidate_labels):
-        # We only use the first token to represent the logprob value of the entire
-        # label.
-        candidate_label_ids: list[list[int]] = tokenizer(
-            [candidate_label.lower()], add_special_tokens=False
-        )["input_ids"]
-        candidate_label_id: int = candidate_label_ids[0][0]
-        pred_logprobs[:, idx] = all_logprobs[:, 0, candidate_label_id]
-
-    # Shape: [batch_size,]
-    predicted_label_ids = pred_logprobs.argmax(dim=1)
-
-    return [candidate_labels[idx] for idx in predicted_label_ids]
-
-
-def get_closest_word_edit_labels(
-    generated_sequences: list[list[int]],
-    tokenizer: Tokenizer,
-    dataset_config: DatasetConfig,
-) -> list[str]:
-    """Get the labels with the smallest edit distance to the predicted labels.
-
-    Args:
-        generated_sequences (list of list of int):
-            The generated sequences from the model. The outer-most list is the
-            batch dimension, the inner-most list is the sequence dimension,
-            consisting of token IDs.
-        tokenizer (Tokenizer):
-            The tokenizer used to generate the tokens.
-        dataset_config (DatasetConfig):
-            The configuration of the dataset.
-
-    Returns:
-        list of str:
-            The candidate labels with the smallest edit distance to the predicted
-            labels.
-    """
-    raw_predictions = extract_raw_predictions(
-        generated_sequences=generated_sequences,
-        tokenizer=tokenizer,
-        dataset_config=dataset_config,
-    )
-
-    candidate_labels = dataset_config.id2label
-    new_predicted_labels: list[str] = list()
-    for predicted_label in raw_predictions:
-        edit_distances = [
-            Levenshtein.distance(s1=predicted_label.lower(), s2=candidate_label.lower())
-            for candidate_label in candidate_labels
-        ]
-        closest_label = candidate_labels[np.argmin(edit_distances).item()]
-        new_predicted_labels.append(closest_label)
-    return new_predicted_labels
-
-
-def get_ner_labels(
-    tokens: list[list[str]],
-    generated_sequences: list[list[int]],
-    tokenizer: Tokenizer,
-    dataset_config: DatasetConfig,
-) -> list[list[str]]:
-    """Get the predicted labels for the NER task.
-
-    Args:
-        tokens (list of list of str):
-            The tokens of the input sequences. The outer-most list is the batch
-            dimension, the inner-most list is the sequence dimension, consisting of
-            tokens.
-        generated_sequences (list of list of int):
-            The generated sequences from the model. The outer-most list is the
-            batch dimension, the inner-most list is the sequence dimension,
-            consisting of token IDs.
-        tokenizer (Tokenizer):
-            The tokenizer used to generate the tokens.
-        dataset_config (DatasetConfig):
-            The configuration of the dataset.
-
-    Returns:
-        list of list of str:
-            The predicted labels.
-    """
-    raw_predictions = extract_raw_predictions(
-        generated_sequences=generated_sequences,
-        tokenizer=tokenizer,
-        dataset_config=dataset_config,
-    )
-
-    predicted_labels: list[list[str]] = [["o"] * len(token_ids) for token_ids in tokens]
-    for idx, raw_prediction in enumerate(raw_predictions):
-        try:
-            json_output = json.loads(raw_prediction)
-            if not isinstance(json_output, dict):
-                raise ValueError("The output is not a dictionary.")
-            prediction_dict: dict[str, list[str]] = json_output
-        except (json.decoder.JSONDecodeError, ValueError):
-            continue
-
-        for prompt_tag_name, named_entities in prediction_dict.items():
-            tag_name = [
-                tag[2:]
-                for tag, prompt_tag in dataset_config.prompt_label_mapping.items()
-                if prompt_tag == prompt_tag_name
-            ][0]
-            for named_entity in named_entities:
-                for ne_idx, named_entity_word in enumerate(named_entity.split()):
-                    for token_idx, token in enumerate(tokens[idx]):
-                        if named_entity_word in token:
-                            if ne_idx == 0:
-                                predicted_labels[idx][token_idx] = f"b-{tag_name}"
-                            elif (
-                                predicted_labels[idx][token_idx] == "o"
-                                and predicted_labels[idx][token_idx - 1][2:] == tag_name
-                            ):
-                                predicted_labels[idx][token_idx] = f"i-{tag_name}"
-    return predicted_labels
 
 
 def extract_raw_predictions(
