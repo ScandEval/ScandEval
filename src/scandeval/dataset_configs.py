@@ -49,7 +49,8 @@ SWEREC_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/swerec-mini",
     task=SENT,
     languages=[SV],
-    prompt_prefix="Följande är recensioner och deras sentiment, som kan vara 'positiv', 'neutral' eller 'negativ'.",
+    prompt_prefix="Följande är recensioner och deras sentiment, som kan vara "
+    "'positiv', 'neutral' eller 'negativ'.",
     prompt_template="Recension: {text}\n\nSentiment: {label}",
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
@@ -65,7 +66,8 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/angry-tweets-mini",
     task=SENT,
     languages=[DA],
-    prompt_prefix="Følgende er tweets og deres sentiment, som kan være 'positiv', 'neutral' eller 'negativ'.",
+    prompt_prefix="Følgende er tweets og deres sentiment, som kan være 'positiv', "
+    "'neutral' eller 'negativ'.",
     prompt_template="Tweet: {text}\nSentiment: {label}",
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
@@ -81,7 +83,8 @@ NOREC_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norec-mini",
     task=SENT,
     languages=[NB, NN],
-    prompt_prefix="Følgende er anmeldelser og deres sentiment, som kan være 'positiv', 'nøytral' eller 'negativ'.",
+    prompt_prefix="Følgende er anmeldelser og deres sentiment, som kan være 'positiv', "
+    "'nøytral' eller 'negativ'.",
     prompt_template="Anmeldelse: {text}\nSentiment: {label}",
     prompt_label_mapping=dict(
         positive="positiv", neutral="nøytral", negative="negativ"
@@ -97,7 +100,8 @@ SUC3_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/suc3-mini",
     task=NER,
     languages=[SV],
-    prompt_prefix="Följande är dokument och deras namngivna entiteter, som kan vara 'person', 'plats', 'organisation' och 'diverse':",
+    prompt_prefix="Följande är dokument och deras namngivna entiteter, som kan vara "
+    "'person', 'plats', 'organisation' och 'diverse':",
     prompt_template="Dokument: {text}\nNamngivna entiteter: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -120,7 +124,8 @@ DANE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/dane-mini",
     task=NER,
     languages=[DA],
-    prompt_prefix="Det følgende er dokumenter og deres navngivne enheder, som kan være 'person', 'sted', 'organisation' og 'diverse':",
+    prompt_prefix="Det følgende er dokumenter og deres navngivne enheder, som kan være "
+    "'person', 'sted', 'organisation' og 'diverse':",
     prompt_template="Dokument: {text}\nNavngivne enheder: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -143,7 +148,8 @@ NORNE_NB_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nb-mini",
     task=NER,
     languages=[NB],
-    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være ‘person', 'sted', 'organisasjon' og 'diverse':",
+    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være "
+    "'person', 'sted', 'organisasjon' og 'diverse':",
     prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -166,7 +172,8 @@ NORNE_NN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nn-mini",
     task=NER,
     languages=[NN],
-    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være ‘person', 'sted', 'organisasjon' og 'diverse':",
+    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være "
+    "'person', 'sted', 'organisasjon' og 'diverse':",
     prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -189,7 +196,8 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mim-gold-ner-mini",
     task=NER,
     languages=[IS],
-    prompt_prefix="Eftirfarandi eru skjöl og nafngreindir aðilar þeirra, sem geta verið 'persóna', 'staðsetning', 'stofnun' og 'ýmislegt':",
+    prompt_prefix="Eftirfarandi eru skjöl og nafngreindir aðilar þeirra, sem geta "
+    "verið 'persóna', 'staðsetning', 'stofnun' og 'ýmislegt':",
     prompt_template="Dokument: {text}\nNafngreindir aðilar: {label}",
     prompt_label_mapping={
         "b-per": "persóna",
@@ -254,9 +262,9 @@ SCALA_NB_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-nb",
     task=LA,
     languages=[NB],
-    # prompt_prefix="The following are Norwegian sentences and whether they are grammatically correct or not, which can be 'correct' or 'incorrect'.",
     prompt_prefix="",
-    prompt_template="{text}\nSpørsmål: Er denne setningen grammatisk korrekt (ja eller nei)?\nSvar: {label}",
+    prompt_template="{text}\nSpørsmål: Er denne setningen grammatisk korrekt "
+    "(ja eller nei)?\nSvar: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=4,
     max_generated_tokens=3,
@@ -269,7 +277,8 @@ SCALA_NN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-nn",
     task=LA,
     languages=[NN],
-    prompt_prefix="The following are documents and whether they are grammatically correct or not, indicated by 'correct' or 'incorrect'.",
+    prompt_prefix="The following are documents and whether they are grammatically "
+    "correct or not, indicated by 'correct' or 'incorrect'.",
     prompt_template="Text: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(),
     num_few_shot_examples=4,
@@ -283,7 +292,8 @@ SCALA_IS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-is",
     task=LA,
     languages=[IS],
-    prompt_prefix="The following are documents and whether they are grammatically correct or not, indicated by 'correct' or 'incorrect'.",
+    prompt_prefix="The following are documents and whether they are grammatically "
+    "correct or not, indicated by 'correct' or 'incorrect'.",
     prompt_template="Text: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(),
     num_few_shot_examples=4,
@@ -297,7 +307,8 @@ SCALA_FO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-fo",
     task=LA,
     languages=[FO],
-    prompt_prefix="The following are documents and whether they are grammatically correct or not, indicated by 'correct' or 'incorrect'.",
+    prompt_prefix="The following are documents and whether they are grammatically "
+    "correct or not, indicated by 'correct' or 'incorrect'.",
     prompt_template="Text: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(),
     num_few_shot_examples=4,
