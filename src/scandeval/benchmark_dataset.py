@@ -356,10 +356,20 @@ class BenchmarkDataset(ABC):
         )
 
         # Log the metadata
-        logger.info(
-            f"The model has {num_params:,} parameters, a vocabulary size of "
-            f"{vocab_size:,} and a maximum sequence length of {max_seq_length:,}."
-        )
+        logging_msg: str = ""
+        if num_params < 0:
+            logging_msg += "The model has an unknown number of parameters, "
+        else:
+            logging_msg += f"The model has {num_params:,} parameters, "
+        if vocab_size < 0:
+            logging_msg += "an unknown vocabulary size, "
+        else:
+            logging_msg += f"a vocabulary size of {vocab_size:,}, "
+        if max_seq_length < 0:
+            logging_msg += "and an unknown maximum sequence length."
+        else:
+            logging_msg += f"and a maximum sequence length of {max_seq_length:,}."
+        logger.info(logging_msg)
 
         return metadata_dict
 
