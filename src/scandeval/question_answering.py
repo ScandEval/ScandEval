@@ -19,7 +19,7 @@ from .question_answering_trainer import QuestionAnsweringTrainer
 from .utils import get_special_token_metadata
 
 # Set up logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 class QuestionAnswering(BenchmarkDataset):

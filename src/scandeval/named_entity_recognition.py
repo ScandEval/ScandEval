@@ -1,7 +1,6 @@
 """Named entity recognition benchmark dataset."""
 
 import json
-import logging
 from copy import deepcopy
 from functools import partial
 
@@ -15,9 +14,6 @@ from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .model_setups import GenerativeModel, Tokenizer
 from .utils import model_is_generative
-
-# Set up logger
-logger = logging.getLogger(__name__)
 
 
 class NamedEntityRecognition(BenchmarkDataset):
@@ -451,7 +447,10 @@ class NamedEntityRecognition(BenchmarkDataset):
             )
             for example in few_shot_examples
         ]
-        few_shot_prompt = "\n\n".join(few_shot_prompts)
+        prompt_prefix = ""
+        if self.dataset_config.prompt_prefix:
+            prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
 
         # Add the texts from the examples to the prompts
         new_prompts = [

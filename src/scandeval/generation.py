@@ -23,7 +23,7 @@ from .model_setups import GenerativeModel, Tokenizer
 from .openai_models import OpenAIModel
 from .utils import clear_memory
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 def generate(
@@ -193,7 +193,6 @@ def generate_single_iteration(
     torch_dataset = prepared_dataset.with_format("torch").remove_columns(
         [column for column in prepared_dataset.column_names if column != "input_ids"]
     )
-
     all_preds: list[str | list[str]] = list()
 
     dataloader = DataLoader(
@@ -209,6 +208,7 @@ def generate_single_iteration(
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             inputs = batch["input_ids"].to(model.device)
+
             with torch.no_grad():
                 model_output: ModelOutput = model.generate(
                     inputs=inputs, generation_config=generation_config
@@ -391,8 +391,11 @@ def get_ner_labels(
     predicted_labels: list[list[str]] = [["o"] * len(token_ids) for token_ids in tokens]
     for idx, raw_prediction in enumerate(raw_predictions):
         try:
-            prediction_dict: dict[str, list[str]] = json.loads(raw_prediction)
-        except json.decoder.JSONDecodeError:
+            json_output = json.loads(raw_prediction)
+            if not isinstance(json_output, dict):
+                raise ValueError("The output is not a dictionary.")
+            prediction_dict: dict[str, list[str]] = json_output
+        except (json.decoder.JSONDecodeError, ValueError):
             continue
 
         for prompt_tag_name, named_entities in prediction_dict.items():

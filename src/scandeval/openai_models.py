@@ -21,7 +21,7 @@ from transformers.modeling_utils import ModelOutput
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 class OpenAITokenizer:

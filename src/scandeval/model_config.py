@@ -1,12 +1,8 @@
 """Functions related to getting the model configuration."""
 
-import logging
-
 from .config import BenchmarkConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_setups import MODEL_SETUP_CLASSES
-
-logger = logging.getLogger(__name__)
 
 
 def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelConfig:

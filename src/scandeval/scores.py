@@ -8,7 +8,7 @@ import numpy as np
 from .config import MetricConfig
 from .types import SCORE_DICT
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 def log_scores(

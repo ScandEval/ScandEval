@@ -25,10 +25,8 @@ load_dotenv()
 
 
 # Set up logging
-fmt = colored("%(asctime)s [%(levelname)s] <%(name)s>\n↳ ", "green") + colored(
-    "%(message)s", "yellow"
-)
-logging.basicConfig(level=logging.INFO, format=fmt)
+fmt = colored("%(asctime)s", "light_blue") + " | " + colored("%(message)s", "green")
+logging.basicConfig(level=logging.INFO, format=fmt, datefmt="%Y-%m-%d %H:%M:%S")
 
 
 # Disable parallelisation when tokenizing, as that can lead to errors

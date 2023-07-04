@@ -34,7 +34,7 @@ from .utils import (
     handle_error,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 def finetune(

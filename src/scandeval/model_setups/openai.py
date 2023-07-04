@@ -13,7 +13,7 @@ from ..enums import Framework, ModelType
 from ..openai_models import OpenAIModel, OpenAITokenizer
 from .base import GenerativeModel, Tokenizer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 # This is a list of the major models that OpenAI has released

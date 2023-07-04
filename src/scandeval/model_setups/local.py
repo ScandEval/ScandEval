@@ -11,7 +11,7 @@ from ..exceptions import InvalidBenchmark
 from .base import GenerativeModel, Tokenizer
 from .hf import HFModelSetup
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 class LocalModelSetup:

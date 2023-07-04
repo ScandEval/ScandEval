@@ -30,8 +30,7 @@ from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT
 from .utils import enforce_reproducibility, model_is_generative
 
-# Set up logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 class BenchmarkDataset(ABC):

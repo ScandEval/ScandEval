@@ -12,7 +12,7 @@ from .exceptions import InvalidBenchmark
 from .model_setups import GenerativeModel, Tokenizer
 from .utils import get_special_token_metadata
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 class SequenceClassification(BenchmarkDataset):
@@ -133,7 +133,7 @@ class SequenceClassification(BenchmarkDataset):
         new_prompts = [
             self.dataset_config.prompt_template.format(
                 text=text.replace("\n", " ").strip(), label=""
-            )
+            ).strip()
             for text in examples["text"]
         ]
 

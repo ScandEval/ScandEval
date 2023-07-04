@@ -29,7 +29,7 @@ from .exceptions import InvalidBenchmark
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .model_setups import GenerativeModel, Tokenizer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 def clear_memory():

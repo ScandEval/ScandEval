@@ -14,8 +14,7 @@ from .exceptions import InvalidBenchmark
 from .types import SCORE_DICT
 from .utils import get_huggingface_model_lists
 
-# Create logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 class Benchmarker:
