@@ -25,7 +25,7 @@ load_dotenv()
 
 
 # Set up logging
-fmt = colored("%(asctime)s", "light_blue") + " | " + colored("%(message)s", "green")
+fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
 logging.basicConfig(level=logging.INFO, format=fmt, datefmt="%Y-%m-%d %H:%M:%S")
 
 
