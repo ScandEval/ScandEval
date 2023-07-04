@@ -132,7 +132,7 @@ from .languages import get_all_languages
     `--token` flag will be set to True.""",
 )
 @click.option(
-    "--use-token/--no-use-auth-token",
+    "--use-token/--no-use-token",
     default=False,
     show_default=True,
     help="""Whether an authentication token should be used, enabling evaluation of
