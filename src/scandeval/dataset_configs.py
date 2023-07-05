@@ -221,7 +221,21 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     task=NER,
     languages=[FO],
     prompt_prefix="",  # TODO
-    prompt_template="Text: {text}\nEntities (PER, LOC, ORG and MISC): {label}",
+    prompt_template="",  # TODO
+    prompt_label_mapping=dict(),
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
+
+FONE_CONFIG = DatasetConfig(
+    name="fone",
+    pretty_name="the truncated version of the FoNE dataset",
+    huggingface_id="ScandEval/fone-mini",  # TODO: Needs to be uploaded
+    task=NER,
+    languages=[FO],
+    prompt_prefix="",  # TODO
+    prompt_template="",  # TODO
     prompt_label_mapping=dict(),
     num_few_shot_examples=8,
     max_generated_tokens=128,
@@ -322,11 +336,11 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-da-mini",
     task=QA,
     languages=[DA],
-    prompt_prefix="",  # TODO
-    prompt_template="Text: {text}\nQuestion: {question}\nAnswer: {label}",
+    prompt_prefix="",
+    prompt_template="{text}\n\nSpørgsmål: {question}\nSvar: {label}",
     prompt_label_mapping=dict(),
-    num_few_shot_examples=1,
-    max_generated_tokens=3,
+    num_few_shot_examples=0,  # Only works with zero-shot
+    max_generated_tokens=32,
 )
 
 
@@ -336,11 +350,11 @@ SCANDIQA_NO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-no-mini",
     task=QA,
     languages=[NB, NN],
-    prompt_prefix="",  # TODO
-    prompt_template="{text}",  # TODO
+    prompt_prefix="",
+    prompt_template="{text}\n\nSpørsmål: {question}\nSvar: {label}",
     prompt_label_mapping=dict(),
-    num_few_shot_examples=1,
-    max_generated_tokens=3,
+    num_few_shot_examples=0,  # Only works with zero-shot
+    max_generated_tokens=32,
 )
 
 
@@ -350,39 +364,25 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-sv-mini",
     task=QA,
     languages=[SV],
-    prompt_prefix="",  # TODO
-    prompt_template="{text}",  # TODO
+    prompt_prefix="",
+    prompt_template="{text}\n\nFråga: {question}\nSvar: {label}",
     prompt_label_mapping=dict(),
-    num_few_shot_examples=1,
-    max_generated_tokens=3,
+    num_few_shot_examples=0,  # Only works with zero-shot
+    max_generated_tokens=32,
 )
 
 
 NQII_CONFIG = DatasetConfig(
     name="nqii",
     pretty_name="Natural Questions in Icelandic",
-    huggingface_id="ScandEval/nqii-mini",
+    huggingface_id="ScandEval/nqii-mini",  # TODO: Needs to be uploaded
     task=QA,
     languages=[IS],
-    prompt_prefix="",  # TODO
-    prompt_template="{text}",  # TODO
+    prompt_prefix="",
+    prompt_template="{text}\n\nSpurning: {question}\nSvar: {label}",
     prompt_label_mapping=dict(),
-    num_few_shot_examples=1,
-    max_generated_tokens=3,
-)
-
-
-FOQA_CONFIG = DatasetConfig(
-    name="???",
-    pretty_name="???",
-    huggingface_id="ScandEval/???",
-    task=QA,
-    languages=[FO],
-    prompt_prefix="",  # TODO
-    prompt_template="{text}",  # TODO
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=1,
-    max_generated_tokens=3,
+    num_few_shot_examples=0,  # Only works with zero-shot
+    max_generated_tokens=32,
 )
 
 
@@ -395,6 +395,6 @@ SPEED_CONFIG = DatasetConfig(
     prompt_prefix="",
     prompt_template="",
     prompt_label_mapping=dict(),
-    num_few_shot_examples=0,
+    num_few_shot_examples=0,  # Only works with zero-shot
     max_generated_tokens=1,
 )
