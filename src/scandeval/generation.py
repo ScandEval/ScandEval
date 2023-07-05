@@ -189,8 +189,9 @@ def generate_single_iteration(
 
     # Sort the dataset by the length of the text, to minimise the amount of padding
     # that needs to be added, speeding up generation
+    sort_column = "text" if "text" in prepared_dataset.column_names else "context"
     prepared_dataset = prepared_dataset.add_column(
-        name="length", column=[len(x) for x in prepared_dataset["text"]]
+        name="length", column=[len(x) for x in prepared_dataset[sort_column]]
     )
     prepared_dataset = prepared_dataset.sort("length", reverse=True)
 
@@ -228,10 +229,13 @@ def generate_single_iteration(
         all_preds.extend(extracted_labels)
 
     if "label" in prepared_dataset.column_names:
-        true_labels = [label.lower() for label in prepared_dataset["label"]]
+        true_labels = [
+            label.lower() if isinstance(label, str) else label
+            for label in prepared_dataset["label"]
+        ]
     else:
         true_labels = [
-            [label.lower() for label in label_list]
+            [label.lower() if isinstance(label, str) else label for label in label_list]
             for label_list in prepared_dataset["labels"]
         ]
 

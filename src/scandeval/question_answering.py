@@ -1,12 +1,14 @@
 """Question-answering benchmark dataset."""
 
 import logging
+import re
 from functools import partial
-from typing import Callable
+from typing import Any, Callable
 
+import numpy as np
 from datasets.arrow_dataset import Dataset
 from transformers.data.data_collator import DataCollatorWithPadding
-from transformers.modeling_utils import PreTrainedModel
+from transformers.modeling_utils import ModelOutput, PreTrainedModel
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
 from transformers.trainer_callback import TrainerCallback
@@ -14,6 +16,7 @@ from transformers.training_args import TrainingArguments
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
+from .generation import extract_raw_predictions
 from .model_setups import GenerativeModel, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
 from .utils import get_special_token_metadata
@@ -53,15 +56,20 @@ class QuestionAnswering(BenchmarkDataset):
         """
         split: str = kwargs.pop("split")
         tokenizer: Tokenizer = kwargs.pop("tokenizer")
+        generative_model: bool = kwargs.pop("generative_model")
 
         # If the tokenizer is not a fast variant then raise an error
-        if not tokenizer.is_fast:
+        if not tokenizer.is_fast and not generative_model:
             raise InvalidBenchmark(
                 "Question-answering benchmarks require a fast tokenizer."
             )
 
-        # Choose the preprocessing function depending on the dataset split
-        if split == "test":
+        if generative_model:
+            preprocess_fn = partial(
+                prepare_examples_for_generation,
+                tokenizer=tokenizer,
+            )
+        elif split == "test":
             preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
         else:
             preprocess_fn = partial(prepare_train_examples, tokenizer=tokenizer)
@@ -72,7 +80,6 @@ class QuestionAnswering(BenchmarkDataset):
                 preprocess_fn,
                 batched=True,
                 batch_size=10,
-                remove_columns=dataset.column_names,
             )
         except NotImplementedError as e:
             raise InvalidBenchmark(str(e))
@@ -140,7 +147,132 @@ class QuestionAnswering(BenchmarkDataset):
             Hugging Face data collator:
                 The data collator.
         """
-        return DataCollatorWithPadding(tokenizer)
+        return DataCollatorWithPadding(tokenizer=tokenizer)
+
+    def _compute_metrics(
+        self,
+        model_outputs_and_labels: tuple[list, list],
+        id2label: list[str],
+    ) -> dict[str, float]:
+        """Compute the metrics needed for evaluation.
+
+        Args:
+            model_outputs_and_labels (pair of sequences):
+                The first sequence contains the model outputs and the second sequence
+                contains the true labels.
+            id2label (list of str):
+                Conversion of indices to labels.
+
+        Returns:
+            dict:
+                A dictionary with the names of the metrics as keys and the metric
+                values as values.
+        """
+        model_outputs, labels = model_outputs_and_labels
+
+        model_output_dtype = np.asarray(model_outputs).dtype
+        if model_output_dtype in [np.float16, np.float32, np.float64]:
+            predictions = np.asarray(model_outputs).argmax(axis=-1)
+        else:
+            predictions = model_outputs
+
+        results: dict[str, float] = dict()
+        for cfg in self.dataset_config.task.metrics:
+            metric = self._metrics[cfg.name]
+            score_dict: dict[str, float] | None = metric.compute(
+                predictions=predictions,
+                references=labels,
+                **cfg.compute_kwargs,
+            )
+            if score_dict is not None:
+                scores = score_dict[cfg.results_key]
+                results[cfg.name] = scores
+        return results
+
+    def _extract_few_shot_examples(
+        self, train_dataset: Dataset, random_seed: int
+    ) -> list[dict[str, Any]]:
+        """Extract few-shot examples from the training dataset.
+
+        Args:
+            train_dataset (Hugging Face dataset):
+                The training dataset.
+            random_seed (int):
+                The random seed to use when extracting the few-shot examples.
+
+        Returns:
+            list[dict[str, Any]]:
+                The few-shot examples.
+        """
+        return list()
+
+    def _apply_few_shot_prompt(
+        self, examples: dict, few_shot_examples: list[dict]
+    ) -> dict:
+        """Apply a few-shot prompt to the examples.
+
+        Args:
+            examples (dict):
+                The examples to apply the prompt to.
+            few_shot_examples (list of dict):
+                The examples to be included in the few-shot prompt.
+
+        Returns:
+            dict:
+                The examples with the few-shot prompt applied.
+        """
+        prompt_prefix = ""
+        if self.dataset_config.prompt_prefix:
+            prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+
+        # Add the texts from the examples to the prompts
+        new_prompts = [
+            self.dataset_config.prompt_template.format(
+                text=re.sub(r"\n+", "\n", context), question=question, label=""
+            )
+            for context, question in zip(examples["context"], examples["question"])
+        ]
+        examples["text"] = [prompt_prefix + new_prompt for new_prompt in new_prompts]
+
+        return examples
+
+    def _extract_labels_from_generation(
+        self,
+        input_batch: dict[str, list],
+        model_output: ModelOutput,
+        tokenizer: Tokenizer,
+    ) -> list[Any]:
+        """Extract the predicted labels from the generated output.
+
+        Args:
+            input_batch (dict):
+                The input batch, where the keys are the feature names and the values
+                are lists with the feature values.
+            model_output (ModelOutput):
+                The raw generated output of the model.
+            tokenizer (Tokenizer):
+                The tokenizer used together with the model.
+
+        Returns:
+            list:
+                The predicted labels.
+        """
+        raw_predictions = extract_raw_predictions(
+            generated_sequences=model_output["sequences"],
+            tokenizer=tokenizer,
+            dataset_config=self.dataset_config,
+        )
+
+        predictions = [
+            dict(
+                id=id,
+                prediction_text=predicted_answer,
+                no_answer_probability=0.0,
+            )
+            for id, predicted_answer in zip(input_batch["id"], raw_predictions)
+        ]
+
+        return predictions
 
 
 def prepare_train_examples(
@@ -364,4 +496,27 @@ def prepare_test_examples(
             for k, o in enumerate(tokenized_examples.offset_mapping[i])
         ]
 
+    return tokenized_examples
+
+
+def prepare_examples_for_generation(
+    examples: BatchEncoding, tokenizer: Tokenizer
+) -> BatchEncoding:
+    """Prepare test examples.
+
+    Args:
+        examples (BatchEncoding):
+            Dictionary of test examples.
+        tokenizer (Tokenizer):
+            The tokenizer used to preprocess the examples.
+
+    Returns:
+        BatchEncoding:
+            The prepared test examples.
+    """
+    tokenized_examples = tokenizer(text=examples["text"], truncation=True)
+    tokenized_examples["label"] = [
+        dict(id=id, answers=answer_dct)
+        for id, answer_dct in zip(examples["id"], examples["answers"])
+    ]
     return tokenized_examples
