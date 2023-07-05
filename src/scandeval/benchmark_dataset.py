@@ -23,6 +23,7 @@ from .generation import generate
 from .model_config import get_model_config
 from .model_loading import load_model
 from .model_setups import GenerativeModel, Tokenizer
+from .openai_models import OpenAIModel
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT
@@ -234,6 +235,12 @@ class BenchmarkDataset(ABC):
         # length back on here
         if model_is_generative(model=model):
             max_seq_length += self.dataset_config.max_generated_tokens
+
+            # If the model is an OpenAI chat model then we add on 7 extra tokens, as
+            # these are part of the chat prompt and was removed from the sequence
+            # length
+            if isinstance(model, OpenAIModel) and model.is_chat_model:
+                max_seq_length += 7
 
         if hasattr(model.config, "vocab_size"):
             vocab_size = getattr(model.config, "vocab_size")
