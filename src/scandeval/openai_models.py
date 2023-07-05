@@ -418,6 +418,7 @@ class OpenAIModel:
                                 self.tokenizer.pad_token,
                             ],
                         )
+
                         completion_ids: list[int] = self.tokenizer(
                             single_output.choices[0].message.content.strip()
                         )["input_ids"][0].tolist()
