@@ -1,6 +1,8 @@
 """Sequence classification benchmark dataset."""
 
+import itertools as it
 import logging
+import random
 from functools import partial
 from typing import Any
 
@@ -61,16 +63,6 @@ class SequenceClassification(BenchmarkDataset):
         cls_token = special_token_metadata["cls_token"]
         sep_token = special_token_metadata["sep_token"]
 
-        if (
-            kwargs["model_config"].task == "text-generation"
-            and "few_shot_examples" in kwargs
-        ):
-            few_shot_examples = kwargs["few_shot_examples"]
-            few_shot_fn = partial(
-                self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
-            )
-            dataset = dataset.map(few_shot_fn, batched=True, load_from_cache_file=False)
-
         def tokenise(examples: dict) -> BatchEncoding:
             # If the tokenizer is not adding special tokens, then we add them manually.
             # We don't need this when performing few-shot evaluations, so in that case
@@ -100,85 +92,6 @@ class SequenceClassification(BenchmarkDataset):
             ).remove_columns(["text"])
         else:
             return tokenised
-
-    def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
-    ) -> dict:
-        """Apply a few-shot prompt to the examples.
-
-        Args:
-            examples (dict):
-                The examples to apply the prompt to.
-            few_shot_examples (list of dict):
-                The examples to be included in the few-shot prompt.
-
-        Returns:
-            dict:
-                The examples with the few-shot prompt applied.
-        """
-        # Build the few-shot part of the prompt
-        label_mapping = self.dataset_config.prompt_label_mapping
-        few_shot_prompts = [
-            self.dataset_config.prompt_template.format(
-                text=example["text"].replace("\n", " ").strip(),
-                label=label_mapping[example["label"].lower()],
-            )
-            for example in few_shot_examples
-        ]
-        prompt_prefix = ""
-        if self.dataset_config.prompt_prefix:
-            prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
-        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
-
-        # Add the texts from the examples to the prompts. We remove newlines from the
-        # examples as they have the special function to separate the few-shot examples
-        # from one another
-        new_prompts = [
-            self.dataset_config.prompt_template.format(
-                text=text.replace("\n", " ").strip(), label=""
-            ).strip()
-            for text in examples["text"]
-        ]
-
-        examples["text"] = [
-            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
-        ]
-
-        return examples
-
-    def _extract_labels_from_generation(
-        self,
-        input_batch: dict[str, list],
-        model_output: ModelOutput,
-        tokenizer: Tokenizer,
-    ) -> list[Any]:
-        """Extract the predicted labels from the generated output.
-
-        Args:
-            input_batch (dict):
-                The input batch, where the keys are the feature names and the values
-                are lists with the feature values.
-            model_output (ModelOutput):
-                The raw generated output of the model.
-            tokenizer (Tokenizer):
-                The tokenizer used together with the model.
-
-        Returns:
-            list:
-                The predicted labels.
-        """
-        if "scores" in model_output:
-            return get_closest_logprobs_labels(
-                generation_logprobs=model_output["scores"],
-                tokenizer=tokenizer,
-                dataset_config=self.dataset_config,
-            )
-        else:
-            return get_closest_word_edit_labels(
-                generated_sequences=model_output["sequences"],
-                tokenizer=tokenizer,
-                dataset_config=self.dataset_config,
-            )
 
     def _create_numerical_labels(self, examples: dict, label2id: dict) -> dict:
         try:
@@ -266,6 +179,117 @@ class SequenceClassification(BenchmarkDataset):
                 scores = score_dict[cfg.results_key]
                 results[cfg.name] = scores
         return results
+
+    def _extract_few_shot_examples(
+        self, train_dataset: Dataset, random_seed: int
+    ) -> list[dict[str, Any]]:
+        """Extract few-shot examples from the training dataset.
+
+        Args:
+            train_dataset (Hugging Face dataset):
+                The training dataset.
+            random_seed (int):
+                The random seed to use when extracting the few-shot examples.
+
+        Returns:
+            list[dict[str, Any]]:
+                The few-shot examples.
+        """
+        shuffled_train = train_dataset.shuffle(seed=random_seed)
+        num_few_shots = self.dataset_config.num_few_shot_examples
+        labels = it.cycle(self.dataset_config.task.labels)
+        few_shot_examples: list[dict[str, Any]] = list()
+        while len(few_shot_examples) < num_few_shots:
+            label = next(labels)
+            example = shuffled_train.filter(
+                lambda x: x["label"].lower() == label.lower()
+            ).select(range(1))[0]
+            few_shot_examples.append(example)
+            shuffled_train = shuffled_train.filter(
+                lambda x: x["text"] != example["text"]
+            )
+        random.seed(random_seed)
+        random.shuffle(few_shot_examples)
+        return few_shot_examples
+
+    def _apply_few_shot_prompt(
+        self, examples: dict, few_shot_examples: list[dict]
+    ) -> dict:
+        """Apply a few-shot prompt to the examples.
+
+        Args:
+            examples (dict):
+                The examples to apply the prompt to.
+            few_shot_examples (list of dict):
+                The examples to be included in the few-shot prompt.
+
+        Returns:
+            dict:
+                The examples with the few-shot prompt applied.
+        """
+        # Build the few-shot part of the prompt
+        label_mapping = self.dataset_config.prompt_label_mapping
+        few_shot_prompts = [
+            self.dataset_config.prompt_template.format(
+                text=example["text"].replace("\n", " ").strip(),
+                label=label_mapping[example["label"].lower()],
+            )
+            for example in few_shot_examples
+        ]
+        prompt_prefix = ""
+        if self.dataset_config.prompt_prefix:
+            prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
+
+        # Add the texts from the examples to the prompts. We remove newlines from the
+        # examples as they have the special function to separate the few-shot examples
+        # from one another
+        new_prompts = [
+            self.dataset_config.prompt_template.format(
+                text=text.replace("\n", " ").strip(), label=""
+            ).strip()
+            for text in examples["text"]
+        ]
+
+        examples["text"] = [
+            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
+        ]
+
+        return examples
+
+    def _extract_labels_from_generation(
+        self,
+        input_batch: dict[str, list],
+        model_output: ModelOutput,
+        tokenizer: Tokenizer,
+    ) -> list[Any]:
+        """Extract the predicted labels from the generated output.
+
+        Args:
+            input_batch (dict):
+                The input batch, where the keys are the feature names and the values
+                are lists with the feature values.
+            model_output (ModelOutput):
+                The raw generated output of the model.
+            tokenizer (Tokenizer):
+                The tokenizer used together with the model.
+
+        Returns:
+            list:
+                The predicted labels.
+        """
+        if "scores" in model_output:
+            return get_closest_logprobs_labels(
+                generation_logprobs=model_output["scores"],
+                tokenizer=tokenizer,
+                dataset_config=self.dataset_config,
+            )
+        else:
+            return get_closest_word_edit_labels(
+                generated_sequences=model_output["sequences"],
+                tokenizer=tokenizer,
+                dataset_config=self.dataset_config,
+            )
 
 
 def get_closest_logprobs_labels(

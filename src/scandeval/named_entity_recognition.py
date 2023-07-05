@@ -1,7 +1,9 @@
 """Named entity recognition benchmark dataset."""
 
+import itertools as it
 import json
 import logging
+import random
 from copy import deepcopy
 from functools import partial
 from typing import Any
@@ -413,6 +415,70 @@ class NamedEntityRecognition(BenchmarkDataset):
 
         return tokenised_dataset
 
+    def _load_data_collator(
+        self,
+        tokenizer: Tokenizer | None = None,
+        model: PreTrainedModel | GenerativeModel | None = None,
+    ):
+        """Load the data collator used to prepare samples during finetuning.
+
+        Args:
+            tokenizer (Tokenizer or None, optional):
+                A pretrained tokenizer. Can be None if the tokenizer is not used in the
+                initialisation of the data collator. Defaults to None.
+            model (PreTrainedModel or GenerativeModel or None, optional):
+                A pretrained model. Can be None if the model is not used in the
+                initialisation of the data collator. Defaults to None.
+
+        Returns:
+            Hugging Face data collator:
+                The data collator.
+        """
+        if model_is_generative(model=model):
+            return DataCollatorWithPadding(tokenizer=tokenizer)
+        else:
+            return DataCollatorForTokenClassification(
+                tokenizer=tokenizer, label_pad_token_id=-100
+            )
+
+    def _extract_few_shot_examples(
+        self, train_dataset: Dataset, random_seed: int
+    ) -> list[dict[str, Any]]:
+        """Extract few-shot examples from the training dataset.
+
+        Args:
+            train_dataset (Hugging Face dataset):
+                The training dataset.
+            random_seed (int):
+                The random seed to use when extracting the few-shot examples.
+
+        Returns:
+            list[dict[str, Any]]:
+                The few-shot examples.
+        """
+        shuffled_train = train_dataset.shuffle(seed=random_seed)
+        num_few_shots = self.dataset_config.num_few_shot_examples
+        labels = it.cycle(
+            [
+                label.lower()
+                for label in self.dataset_config.task.labels
+                if label.lower().startswith("b-")
+            ]
+        )
+        few_shot_examples: list[dict[str, Any]] = list()
+        while len(few_shot_examples) < num_few_shots:
+            label = next(labels)
+            example = shuffled_train.filter(
+                lambda x: label in [tag.lower() for tag in x["labels"]]
+            ).select(range(1))[0]
+            few_shot_examples.append(example)
+            shuffled_train = shuffled_train.filter(
+                lambda x: x["text"] != example["text"]
+            )
+        random.seed(random_seed)
+        random.shuffle(few_shot_examples)
+        return few_shot_examples
+
     def _apply_few_shot_prompt(
         self, examples: dict, few_shot_examples: list[dict]
     ) -> dict:
@@ -507,7 +573,9 @@ class NamedEntityRecognition(BenchmarkDataset):
                     raise ValueError("The output is not a dictionary.")
                 prediction_dict: dict[str, list[str]] = json_output
             except (json.decoder.JSONDecodeError, ValueError):
+                # TEMP
                 logger.debug("The generated model output is not valid JSON. Skipping.")
+
                 continue
 
             prompt_label_mapping = self.dataset_config.prompt_label_mapping
@@ -538,29 +606,3 @@ class NamedEntityRecognition(BenchmarkDataset):
                                 ):
                                     predicted_labels[idx][token_idx] = f"i-{tag_name}"
         return predicted_labels
-
-    def _load_data_collator(
-        self,
-        tokenizer: Tokenizer | None = None,
-        model: PreTrainedModel | GenerativeModel | None = None,
-    ):
-        """Load the data collator used to prepare samples during finetuning.
-
-        Args:
-            tokenizer (Tokenizer or None, optional):
-                A pretrained tokenizer. Can be None if the tokenizer is not used in the
-                initialisation of the data collator. Defaults to None.
-            model (PreTrainedModel or GenerativeModel or None, optional):
-                A pretrained model. Can be None if the model is not used in the
-                initialisation of the data collator. Defaults to None.
-
-        Returns:
-            Hugging Face data collator:
-                The data collator.
-        """
-        if model_is_generative(model=model):
-            return DataCollatorWithPadding(tokenizer=tokenizer)
-        else:
-            return DataCollatorForTokenClassification(
-                tokenizer=tokenizer, label_pad_token_id=-100
-            )
