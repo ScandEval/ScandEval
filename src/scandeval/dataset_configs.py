@@ -113,7 +113,7 @@ SUC3_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=4,
+    num_few_shot_examples=16,
     max_generated_tokens=128,
 )
 
