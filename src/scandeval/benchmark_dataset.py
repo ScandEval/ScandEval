@@ -1,14 +1,12 @@
 """Abstract benchmarking dataset class."""
 
-import itertools as it
 import logging
-import random
 from abc import ABC, abstractmethod
+from functools import partial
 from typing import Any
 
 import evaluate
 import numpy as np
-import pandas as pd
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
@@ -133,6 +131,7 @@ class BenchmarkDataset(ABC):
                 model_config=model_config,
                 hf_model_config=model.config,
                 tokenizer=tokenizer,
+                generative_model=model_is_generative(model=model),
             )
 
         # Set up progress bar
@@ -342,6 +341,7 @@ class BenchmarkDataset(ABC):
         model_config: ModelConfig,
         hf_model_config: PretrainedConfig,
         tokenizer: Tokenizer,
+        generative_model: bool,
     ) -> tuple[Dataset, Dataset, list[Dataset]]:
         """Load the data and prepare it for training.
 
@@ -358,6 +358,8 @@ class BenchmarkDataset(ABC):
                 The Hugging Face model configuration.
             tokenizer (Tokenizer):
                 The tokenizer.
+            generative_model (bool):
+                Whether the model is a generative model.
 
         Returns:
             tuple[Dataset, Dataset, list[Dataset]]:
@@ -368,76 +370,45 @@ class BenchmarkDataset(ABC):
             hf_model_config=hf_model_config,
             model_config=model_config,
             tokenizer=tokenizer,
+            generative_model=generative_model,
         )
 
         # Prepare the train and validation datasets
         try:
             with tqdm(total=12, desc="Preprocessing data splits", leave=False) as pbar:
-                prepared_train = self._preprocess_data(
-                    train, split="train", **preprocess_params
-                )
+                prepared_train = train
+                if not generative_model:
+                    prepared_train = self._preprocess_data(
+                        train, split="train", **preprocess_params
+                    )
                 pbar.update(1)
 
-                prepared_val = self._preprocess_data(
-                    val, split="val", **preprocess_params
-                )
+                prepared_val = val
+                if not generative_model:
+                    prepared_val = self._preprocess_data(
+                        val, split="val", **preprocess_params
+                    )
                 pbar.update(1)
 
                 prepared_tests: list[Dataset] = list()
                 for itr_idx, test in enumerate(tests):
-                    if model_config.task in ["text-generation", "conversational"]:
+                    if generative_model:
                         itr_seed = 4242 + itr_idx
-                        shuffled_train = train.shuffle(seed=itr_seed)
-                        num_few_shots = self.dataset_config.num_few_shot_examples
-
-                        task = self.dataset_config.task.name
-                        supertask = self.dataset_config.task.supertask
-                        if supertask == "sequence-classification":
-                            labels = it.cycle(self.dataset_config.task.labels)
-                            few_shot_examples: list[dict] = list()
-                            while len(few_shot_examples) < num_few_shots:
-                                label = next(labels)
-                                example = shuffled_train.filter(
-                                    lambda x: x["label"].lower() == label.lower()
-                                ).select(range(1))[0]
-                                few_shot_examples.append(example)
-                                shuffled_train = shuffled_train.filter(
-                                    lambda x: x["text"] != example["text"]
-                                )
-
-                        elif task == "named-entity-recognition":
-                            labels = it.cycle(
-                                [
-                                    label.lower()
-                                    for label in self.dataset_config.task.labels
-                                    if label.lower().startswith("b-")
-                                ]
-                            )
-                            few_shot_examples = list()
-                            while len(few_shot_examples) < num_few_shots:
-                                label = next(labels)
-                                example = shuffled_train.filter(
-                                    lambda x: label
-                                    in [tag.lower() for tag in x["labels"]]
-                                ).select(range(1))[0]
-                                few_shot_examples.append(example)
-                                shuffled_train = shuffled_train.filter(
-                                    lambda x: x["text"] != example["text"]
-                                )
-
-                        else:
-                            examples_df = shuffled_train.select(
-                                range(num_few_shots)
-                            ).to_pandas()
-                            assert isinstance(examples_df, pd.DataFrame)
-                            few_shot_examples = examples_df.to_dict("records")
-
-                        random.seed(itr_seed)
-                        random.shuffle(few_shot_examples)
-                        preprocess_params["few_shot_examples"] = few_shot_examples
-                    prepared_tests.append(
-                        self._preprocess_data(test, split="test", **preprocess_params)
+                        few_shot_examples = self._extract_few_shot_examples(
+                            train_dataset=train, random_seed=itr_seed
+                        )
+                        few_shot_fn = partial(
+                            self._apply_few_shot_prompt,
+                            few_shot_examples=few_shot_examples,
+                        )
+                        test = test.map(
+                            few_shot_fn, batched=True, load_from_cache_file=False
+                        )
+                    prepared_test = self._preprocess_data(
+                        test, split="test", **preprocess_params
                     )
+                    prepared_tests.append(prepared_test)
+
                     pbar.update(1)
         except ValueError:
             raise InvalidBenchmark(
@@ -503,6 +474,64 @@ class BenchmarkDataset(ABC):
         pass
 
     @abstractmethod
+    def _compute_metrics(
+        self,
+        model_outputs_and_labels: tuple[list, list],
+        id2label: list[str],
+    ) -> dict[str, float]:
+        """Compute the metrics needed for evaluation.
+
+        Args:
+            model_outputs_and_labels (pair of sequences):
+                The first sequence contains the model outputs and the second sequence
+                contains the true labels.
+            id2label (list of str):
+                Conversion of indices to labels.
+
+        Returns:
+            dict:
+                A dictionary with the names of the metrics as keys and the metric
+                values as values.
+        """
+        pass
+
+    @abstractmethod
+    def _extract_few_shot_examples(
+        self, train_dataset: Dataset, random_seed: int
+    ) -> list[dict[str, Any]]:
+        """Extract few-shot examples from the training dataset.
+
+        Args:
+            train_dataset (Hugging Face dataset):
+                The training dataset.
+            random_seed (int):
+                The random seed to use when extracting the few-shot examples.
+
+        Returns:
+            list[dict[str, Any]]:
+                The few-shot examples.
+        """
+        pass
+
+    @abstractmethod
+    def _apply_few_shot_prompt(
+        self, examples: dict, few_shot_examples: list[dict]
+    ) -> dict:
+        """Apply a few-shot prompt to the examples.
+
+        Args:
+            examples (dict):
+                The examples to apply the prompt to.
+            few_shot_examples (list of dict):
+                The examples to be included in the few-shot prompt.
+
+        Returns:
+            dict:
+                The examples with the few-shot prompt applied.
+        """
+        pass
+
+    @abstractmethod
     def _extract_labels_from_generation(
         self,
         input_batch: dict[str, list],
@@ -523,27 +552,5 @@ class BenchmarkDataset(ABC):
         Returns:
             list:
                 The predicted labels.
-        """
-        pass
-
-    @abstractmethod
-    def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[list, list],
-        id2label: list[str],
-    ) -> dict[str, float]:
-        """Compute the metrics needed for evaluation.
-
-        Args:
-            model_outputs_and_labels (pair of sequences):
-                The first sequence contains the model outputs and the second sequence
-                contains the true labels.
-            id2label (list of str):
-                Conversion of indices to labels.
-
-        Returns:
-            dict:
-                A dictionary with the names of the metrics as keys and the metric
-                values as values.
         """
         pass
