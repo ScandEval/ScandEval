@@ -229,6 +229,13 @@ class BenchmarkDataset(ABC):
         else:
             max_seq_length = -1
 
+        # If the model is a generative model then we have subtracted the generation
+        # length from the maximum length to allow it to keep generating. But for the
+        # model metadata we want to know the maximum length, so we add the generation
+        # length back on here
+        if model_is_generative(model=model):
+            max_seq_length += self.dataset_config.max_generated_tokens
+
         if hasattr(model.config, "vocab_size"):
             vocab_size = getattr(model.config, "vocab_size")
         elif hasattr(tokenizer, "vocab_size"):
