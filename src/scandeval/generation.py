@@ -2,6 +2,7 @@
 
 import itertools as it
 import logging
+import re
 import warnings
 from collections import defaultdict
 from typing import Any, Callable
@@ -213,7 +214,6 @@ def generate_single_iteration(
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             inputs = batch["input_ids"].to(model.device)
-
             with torch.no_grad():
                 model_output: ModelOutput = model.generate(
                     inputs=inputs, generation_config=generation_config
@@ -280,11 +280,13 @@ def extract_raw_predictions(
     try:
         pred_idx = dataset_config.num_few_shot_examples + 1
         return [
-            tokenizer.decode(completion_ids_list)
-            .split("\n\n")[pred_idx]
-            .split("\n")[-1]
-            .split(":")[-1]
-            .strip()
+            re.sub(
+                pattern=r"^.*?:",
+                repl="",
+                string=tokenizer.decode(completion_ids_list)
+                .split("\n\n")[pred_idx]
+                .split("\n")[-1],
+            ).strip()
             for completion_ids_list in completion_ids_lists
         ]
     except IndexError:
