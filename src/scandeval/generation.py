@@ -189,9 +189,8 @@ def generate_single_iteration(
 
     # Sort the dataset by the length of the text, to minimise the amount of padding
     # that needs to be added, speeding up generation
-    sort_column = "text" if "text" in prepared_dataset.column_names else "context"
     prepared_dataset = prepared_dataset.add_column(
-        name="length", column=[len(x) for x in prepared_dataset[sort_column]]
+        name="length", column=[len(x) for x in prepared_dataset["text"]]
     )
     prepared_dataset = prepared_dataset.sort("length", reverse=True)
 
