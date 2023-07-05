@@ -326,8 +326,7 @@ class OpenAIModel:
                 else:
                     raise e
             except (RateLimitError, ServiceUnavailableError, APIError):
-                logger.debug("Service unavailable, trying again in a few seconds...")
-                sleep(10)
+                sleep(1)
                 continue
 
     def generate(
@@ -432,8 +431,7 @@ class OpenAIModel:
                 break
 
             except (RateLimitError, ServiceUnavailableError, APIError):
-                logger.debug("Service unavailable, trying again in a few seconds...")
-                sleep(10)
+                sleep(1)
                 continue
 
         if multiple_inputs:
