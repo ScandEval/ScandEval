@@ -512,11 +512,19 @@ class NamedEntityRecognition(BenchmarkDataset):
 
             prompt_label_mapping = self.dataset_config.prompt_label_mapping
             for prompt_tag_name, named_entities in prediction_dict.items():
-                tag_name = [
-                    tag[2:]
-                    for tag, prompt_tag in prompt_label_mapping.items()
-                    if prompt_tag == prompt_tag_name
-                ][0]
+                try:
+                    tag_name = [
+                        tag[2:]
+                        for tag, prompt_tag in prompt_label_mapping.items()
+                        if prompt_tag == prompt_tag_name
+                    ][0]
+                except IndexError:
+                    logger.debug(
+                        "The model produced an invalid prompt tag name, "
+                        f"{prompt_tag_name}. Skipping."
+                    )
+                    continue
+
                 for named_entity in named_entities:
                     for ne_idx, named_entity_word in enumerate(named_entity.split()):
                         for token_idx, token in enumerate(tokens[idx]):
