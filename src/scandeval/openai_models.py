@@ -32,6 +32,8 @@ class OpenAITokenizer:
             The model configuration.
         hf_model_config (PretrainedConfig):
             The Hugging Face model configuration.
+        dataset_config (DatasetConfig):
+            The dataset configuration.
 
     Attributes:
         model_config (ModelConfig):
@@ -49,10 +51,14 @@ class OpenAITokenizer:
     is_fast = False
 
     def __init__(
-        self, model_config: ModelConfig, hf_model_config: PretrainedConfig
+        self,
+        model_config: ModelConfig,
+        hf_model_config: PretrainedConfig,
+        dataset_config: DatasetConfig,
     ) -> None:
         self.model_config = model_config
         self.hf_model_config = hf_model_config
+        self.dataset_config = dataset_config
 
         self.bos_token_id: int = self.hf_model_config.bos_token_id or -1
         self.cls_token_id: int = self.bos_token_id
@@ -91,7 +97,7 @@ class OpenAITokenizer:
                             self.sep_token,
                             self.pad_token,
                         },
-                    )
+                    )[-self.model_max_length :]
                 )
             )
             for text in text_list
@@ -303,6 +309,27 @@ class OpenAIModel:
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
 
+        # Determine whether the model is a chat model
+        while True:
+            try:
+                openai.Completion.create(
+                    model=self.model_config.model_id,
+                    prompt="Test",
+                    max_tokens=1,
+                )
+                self.is_chat_model = False
+                break
+            except InvalidRequestError as e:
+                if "This is a chat model" in str(e):
+                    self.is_chat_model = True
+                    break
+                else:
+                    raise e
+            except (RateLimitError, ServiceUnavailableError, APIError):
+                logger.debug("Service unavailable, trying again in a few seconds...")
+                sleep(10)
+                continue
+
     def generate(
         self,
         inputs: Tensor,
@@ -350,31 +377,10 @@ class OpenAIModel:
                 if token_id != self.config.pad_token_id
             ]
 
-        # Check if the model is a chat model
-        while True:
-            try:
-                openai.Completion.create(
-                    model=self.model_config.model_id,
-                    prompt="Test",
-                    max_tokens=1,
-                )
-                is_chat_model = False
-                break
-            except InvalidRequestError as e:
-                if "This is a chat model" in str(e):
-                    is_chat_model = True
-                    break
-                else:
-                    raise e
-            except (RateLimitError, ServiceUnavailableError, APIError):
-                logger.debug("Service unavailable, trying again in a few seconds...")
-                sleep(10)
-                continue
-
         while True:
             try:
                 completion_ids_list: list[list[int]]
-                if not is_chat_model:
+                if not self.is_chat_model:
                     generation_output = openai.Completion.create(
                         model=self.model_config.model_id,
                         prompt=inputs_list,

@@ -160,10 +160,12 @@ class OpenAIModelSetup:
         ]
         hf_model_config.vocab_size = vocab_sizes[0] if vocab_sizes else 100_256
 
+        # We subtract the maximum generation length, as that counts towards the total
+        # amount of tokens that the model needs to process.
         model_lengths = [
-            model_length
+            model_length - dataset_config.max_generated_tokens  # - 7
             for pattern, model_length in MODEL_MAX_LENGTH_MAPPING.items()
-            if re.match(pattern=pattern, string=model_config.model_id)
+            if re.match(pattern=f"^{pattern}$", string=model_config.model_id)
         ]
         hf_model_config.model_max_length = model_lengths[0] if model_lengths else -1
 
@@ -195,7 +197,9 @@ class OpenAIModelSetup:
             )
 
         tokenizer = OpenAITokenizer(
-            model_config=model_config, hf_model_config=hf_model_config
+            model_config=model_config,
+            hf_model_config=hf_model_config,
+            dataset_config=dataset_config,
         )
         model = OpenAIModel(
             model_config=model_config,
@@ -204,4 +208,12 @@ class OpenAIModelSetup:
             benchmark_config=self.benchmark_config,
             tokenizer=tokenizer,
         )
+
+        # If the model is a chat model then we need to reduce the maximum context
+        # length by 7 tokens, as these are used in the chat prompt
+        if model.is_chat_model:
+            hf_model_config.model_max_length -= 7
+            tokenizer.hf_model_config = hf_model_config
+            model.config = hf_model_config
+
         return tokenizer, model
