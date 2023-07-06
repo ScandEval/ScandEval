@@ -83,6 +83,9 @@ class OpenAITokenizer:
             dict[str, LongTensor]:
                 The tokenized text.
         """
+        truncation = kwargs.get("truncation", False)
+        start_idx = -self.model_max_length if truncation else 0
+
         encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         text_list = [text] if isinstance(text, str) else text
         encoded_inputs = [
@@ -97,7 +100,7 @@ class OpenAITokenizer:
                             self.sep_token,
                             self.pad_token,
                         },
-                    )[-self.model_max_length :]
+                    )[start_idx:]
                 )
             )
             for text in text_list
