@@ -190,7 +190,7 @@ def generate_single_iteration(
     prepared_dataset = prepared_dataset.add_column(
         name="length", column=[len(x) for x in prepared_dataset["text"]]
     )
-    prepared_dataset = prepared_dataset.sort("length", reverse=True)
+    prepared_dataset = prepared_dataset.sort("length", reverse=False)
 
     # Enable batching by building a dataloader. The dataloader cannot deal with
     # text columns, so we create a copy of the dataset without these
