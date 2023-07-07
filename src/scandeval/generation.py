@@ -1,7 +1,6 @@
 """Functions related to text generation of models."""
 
 import logging
-import re
 import warnings
 from collections import defaultdict
 from typing import Any, Callable
@@ -276,23 +275,24 @@ def extract_raw_predictions(
         for completion_ids in generated_sequences
     ]
 
-    # For some models the generated tokens also includes the input tokens, so
-    # we need to deal with both cases when extracting the predicted labels
+    # For some models the generated tokens also includes the input tokens, so we need
+    # to deal with both cases when extracting the predicted labels
     try:
-        pred_idx = dataset_config.num_few_shot_examples + 1
+        prompt_prefix_exists = dataset_config.prompt_prefix != ""
+        pred_idx = dataset_config.num_few_shot_examples + int(prompt_prefix_exists)
         return [
-            re.sub(
-                pattern=r"^.*?:",
-                repl="",
-                string=tokenizer.decode(completion_ids_list)
+            dataset_config.answer_extraction_fn(
+                tokenizer.decode(completion_ids_list)
                 .split("\n\n")[pred_idx]
-                .split("\n")[-1],
+                .split("\n")[-1]
             ).strip()
             for completion_ids_list in completion_ids_lists
         ]
     except IndexError:
         return [
-            tokenizer.decode(completion_ids_list).strip()
+            dataset_config.answer_extraction_fn(
+                tokenizer.decode(completion_ids_list)
+            ).strip()
             for completion_ids_list in completion_ids_lists
         ]
 
