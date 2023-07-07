@@ -199,12 +199,10 @@ class OpenAIModelSetup:
         tokenizer = OpenAITokenizer(
             model_config=model_config,
             hf_model_config=hf_model_config,
-            dataset_config=dataset_config,
         )
         model = OpenAIModel(
             model_config=model_config,
             hf_model_config=hf_model_config,
-            dataset_config=dataset_config,
             benchmark_config=self.benchmark_config,
             tokenizer=tokenizer,
         )

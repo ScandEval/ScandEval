@@ -18,7 +18,7 @@ from tqdm.auto import tqdm
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 from transformers.modeling_utils import ModelOutput
 
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .config import BenchmarkConfig, ModelConfig
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 logger = logging.getLogger(__package__)
@@ -32,8 +32,6 @@ class OpenAITokenizer:
             The model configuration.
         hf_model_config (PretrainedConfig):
             The Hugging Face model configuration.
-        dataset_config (DatasetConfig):
-            The dataset configuration.
 
     Attributes:
         model_config (ModelConfig):
@@ -51,14 +49,10 @@ class OpenAITokenizer:
     is_fast = False
 
     def __init__(
-        self,
-        model_config: ModelConfig,
-        hf_model_config: PretrainedConfig,
-        dataset_config: DatasetConfig,
+        self, model_config: ModelConfig, hf_model_config: PretrainedConfig
     ) -> None:
         self.model_config = model_config
         self.hf_model_config = hf_model_config
-        self.dataset_config = dataset_config
 
         self.bos_token_id: int = self.hf_model_config.bos_token_id or -1
         self.cls_token_id: int = self.bos_token_id
@@ -275,8 +269,6 @@ class OpenAIModel:
             The model configuration.
         hf_model_config (PretrainedConfig):
             The Hugging Face model configuration.
-        dataset_config (DatasetConfig):
-            The dataset configuration.
         benchmark_config (BenchmarkConfig):
             The benchmark configuration.
         tokenizer (OpenAITokenizer):
@@ -287,8 +279,6 @@ class OpenAIModel:
             The model configuration.
         config (PretrainedConfig):
             The Hugging Face model configuration.
-        dataset_config (DatasetConfig):
-            The dataset configuration.
         benchmark_config (BenchmarkConfig):
             The benchmark configuration.
         tokenizer (OpenAITokenizer):
@@ -301,13 +291,11 @@ class OpenAIModel:
         self,
         model_config: ModelConfig,
         hf_model_config: PretrainedConfig,
-        dataset_config: DatasetConfig,
         benchmark_config: BenchmarkConfig,
         tokenizer: OpenAITokenizer,
     ) -> None:
         self.model_config = model_config
         self.config = hf_model_config
-        self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
