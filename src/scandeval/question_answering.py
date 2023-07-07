@@ -298,26 +298,41 @@ class QuestionAnswering(BenchmarkDataset):
                 str:
                     The valid answer.
             """
-
+            # If the prediction is empty, return it
             if not prediction:
                 return prediction
-            valid_answers: list[str] = list()
-            output_words = [
+
+            # Split up the generated prediction into tokens
+            output_tokens = [
                 tokenizer.decode([token_id])
                 for token_id in tokenizer([prediction])["input_ids"][0]
             ]
-            output_words = [token for token in output_words if token != ""]
-            word = output_words[0]
-            if word in context:
+            output_tokens = [token for token in output_tokens if token != ""]
+            first_generated_token = output_tokens[0]
+
+            # We assume that the first generated token appears in the context, but
+            # sometimes this is not the case, in which case we simply return the entire
+            # prediction
+            valid_answers: list[str] = list()
+            if first_generated_token in context:
+                # Find all the character indices of where the first generated token
+                # appears in the context
                 word_spans = [
                     match_obj.span()
                     for match_obj in re.finditer(
-                        pattern=re.escape(word), string=context
+                        pattern=re.escape(first_generated_token), string=context
                     )
                 ]
+
                 for word_span in word_spans:
                     ctx_start, ctx_end = word_span
-                    for other_word in output_words[1:]:
+
+                    # Check if the following generated tokens also appear in the
+                    # context. If so, then we add them to the valid answer. We record
+                    # the character indices of the beginning and end of the entire
+                    # valid answer, to be able to extract the answer verbatim from the
+                    # context
+                    for other_word in output_tokens[1:]:
                         ctx_potentially_containing_other_word = context[
                             ctx_end : ctx_end + len(other_word) + 5
                         ]
@@ -333,8 +348,12 @@ class QuestionAnswering(BenchmarkDataset):
                         if len(potential_ctx_ends) == 0:
                             break
                         ctx_end = potential_ctx_ends[0]
+
                     valid_answer = context[ctx_start:ctx_end]
                     valid_answers.append(valid_answer)
+
+            # Remove duplicates from the valid answers, and choose the longest one
+            # as the final prediction
             valid_answers = list(set(valid_answers))
             if valid_answers:
                 pred_answer = sorted(valid_answers, key=lambda x: len(x), reverse=True)[
@@ -351,13 +370,16 @@ class QuestionAnswering(BenchmarkDataset):
 
         # TEMP
         num_inputs = len(input_batch["input_ids"][0])
+        question = input_batch["question"][0]
         model_output = (
             tokenizer.decode(model_output.sequences[0]).replace("<pad>", "").strip()
         )
         raw_prediction = raw_predictions[0]
         valid_prediction = valid_predictions[0]
         answer = input_batch["label"][0]["answers"]["text"][0]
+        print()
         logger.debug(f"{num_inputs:,} tokens")
+        logger.debug(f"{question=}")
         logger.debug(f"{model_output=}")
         logger.debug(f"{raw_prediction=}")
         logger.debug(f"{valid_prediction=}")
