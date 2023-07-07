@@ -283,6 +283,22 @@ class QuestionAnswering(BenchmarkDataset):
         )
 
         def extract_valid_answer(prediction: str, context: str) -> str:
+            """Extracts a valid answer from the prediction.
+
+            A valid answer is an answer that appears in the context.
+
+            Args:
+                prediction (str):
+                    The predicted answer, which we assume starts with the actual
+                    answer, potentially followed by some explanatory noise.
+                context (str):
+                    The context in which the answer should appear.
+
+            Returns:
+                str:
+                    The valid answer.
+            """
+
             if not prediction:
                 return prediction
             valid_answers: list[str] = list()
@@ -335,7 +351,9 @@ class QuestionAnswering(BenchmarkDataset):
 
         # TEMP
         num_inputs = len(input_batch["input_ids"][0])
-        model_output = tokenizer.decode(model_output.sequences[0])
+        model_output = (
+            tokenizer.decode(model_output.sequences[0]).replace("<pad>", "").strip()
+        )
         raw_prediction = raw_predictions[0]
         valid_prediction = valid_predictions[0]
         answer = input_batch["label"][0]["answers"]["text"][0]
