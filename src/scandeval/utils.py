@@ -509,6 +509,8 @@ def get_huggingface_model_lists(
 
 
 class HiddenPrints:
+    """Context manager which removes all terminal output."""
+
     def __enter__(self):
         self._original_stdout = sys.stdout
         sys.stdout = open(os.devnull, "w")
