@@ -277,24 +277,19 @@ def extract_raw_predictions(
 
     # For some models the generated tokens also includes the input tokens, so we need
     # to deal with both cases when extracting the predicted labels
-    try:
-        prompt_prefix_exists = dataset_config.prompt_prefix != ""
-        pred_idx = dataset_config.num_few_shot_examples + int(prompt_prefix_exists)
-        return [
-            dataset_config.answer_extraction_fn(
-                tokenizer.decode(completion_ids_list)
-                .split("\n\n")[pred_idx]
-                .split("\n")[-1]
-            ).strip()
-            for completion_ids_list in completion_ids_lists
-        ]
-    except IndexError:
-        return [
-            dataset_config.answer_extraction_fn(
-                tokenizer.decode(completion_ids_list)
-            ).strip()
-            for completion_ids_list in completion_ids_lists
-        ]
+    prompt_prefix_exists = dataset_config.prompt_prefix != ""
+    pred_idx = dataset_config.num_few_shot_examples + int(prompt_prefix_exists)
+    raw_predictions: list[str] = list()
+    for completion_ids_list in completion_ids_lists:
+        decoded = tokenizer.decode(completion_ids_list)
+        few_shots = decoded.split("\n\n")
+        answer_exists = len(few_shots) > pred_idx
+        answer = few_shots[pred_idx] if answer_exists else few_shots[-1]
+        answer = answer.split("\n")[-1]
+        answer = dataset_config.answer_extraction_fn(answer)
+        answer = answer.strip()
+        raw_predictions.append(answer)
+    return raw_predictions
 
 
 def get_generation_stopping_criteria(
@@ -312,85 +307,52 @@ def get_generation_stopping_criteria(
             the model type.
 
     Returns:
-        list[torch.Tensor]:
-            A list of tensors containing the stop words to use for generation.
+        list of StoppingCriteria:
+            The stopping criteria for generation.
     """
     if isinstance(model, OpenAIModel):
         return list()
 
-    stop_word_ids: list[torch.Tensor] = list()
+    double_newline_ids: list[int] = tokenizer(
+        text=["\n\n"], add_special_tokens=False
+    ).input_ids[0]
+    single_newline_ids: list[int] = tokenizer(
+        text=["\n"], add_special_tokens=False
+    ).input_ids[0]
+    bos_token_ids: list[int] = tokenizer(
+        text=[tokenizer.bos_token], add_special_tokens=False
+    ).input_ids[0]
+    eos_token_ids: list[int] = tokenizer(
+        text=[tokenizer.eos_token], add_special_tokens=False
+    ).input_ids[0]
 
-    double_newline_ids: torch.Tensor = (
-        tokenizer(
-            text=["\n\n"],
-            add_special_tokens=False,
-            return_tensors="pt",
-        )
-        .input_ids[0]
-        .to(model.device)
-    )
-    single_newline_ids: torch.Tensor = (
-        tokenizer(
-            text=["\n"],
-            add_special_tokens=False,
-            return_tensors="pt",
-        )
-        .input_ids[0]
-        .to(model.device)
-    )
-    bos_token_ids: torch.Tensor = (
-        tokenizer(
-            text=[tokenizer.bos_token],
-            add_special_tokens=False,
-            return_tensors="pt",
-        )
-        .input_ids[0]
-        .to(model.device)
-    )
-    eos_token_ids: torch.Tensor = (
-        tokenizer(
-            text=[tokenizer.eos_token],
-            add_special_tokens=False,
-            return_tensors="pt",
-        )
-        .input_ids[0]
-        .to(model.device)
-    )
+    def remove_empty_tokens(token_id_list: list[int]) -> list[int]:
+        return [
+            token_id for token_id in token_id_list if tokenizer.decode([token_id]) != ""
+        ]
 
-    double_newline_ids = double_newline_ids[
-        [tokenizer.decode(tok) != "" for tok in double_newline_ids]
-    ]
-    single_newline_ids = single_newline_ids[
-        [tokenizer.decode(tok) != "" for tok in single_newline_ids]
-    ]
-    bos_token_ids = bos_token_ids[
-        [tokenizer.decode(tok) != "" for tok in bos_token_ids]
-    ]
-    eos_token_ids = eos_token_ids[
-        [tokenizer.decode(tok) != "" for tok in eos_token_ids]
-    ]
+    double_newline_ids = remove_empty_tokens(double_newline_ids)
+    single_newline_ids = remove_empty_tokens(single_newline_ids)
+    bos_token_ids = remove_empty_tokens(bos_token_ids)
+    eos_token_ids = remove_empty_tokens(eos_token_ids)
 
-    two_single_newline_ids = torch.cat([single_newline_ids, single_newline_ids], dim=0)
-
-    stop_word_ids = [
+    stop_word_id_lists = [
         double_newline_ids,
-        two_single_newline_ids,
+        single_newline_ids + single_newline_ids,
         bos_token_ids,
         eos_token_ids,
     ]
 
-    return [StopWordCriteria(stop_word_ids=stop_word_ids)]
+    return [StopWordCriteria(stop_word_id_lists=stop_word_id_lists)]
 
 
 class StopWordCriteria(StoppingCriteria):
-    def __init__(self, stop_word_ids: list[torch.Tensor]):
+    def __init__(self, stop_word_id_lists: list[list[int]]):
         super().__init__()
-        self.stop_word_ids = stop_word_ids
+        self.stop_word_id_lists = stop_word_id_lists
 
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> bool:
-        for stop_word_tensor in self.stop_word_ids:
-            if torch.all(
-                (stop_word_tensor == input_ids[0][-len(stop_word_tensor) :])
-            ).item():
+        for stop_word_id_list in self.stop_word_id_lists:
+            if stop_word_id_list == input_ids[0][-len(stop_word_id_list) :].tolist():
                 return True
         return False
