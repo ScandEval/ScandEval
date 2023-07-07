@@ -49,17 +49,21 @@ def log_scores(
         test_score, test_se = agg_scores["test"]
         test_score, test_score_str = metric_cfg.postprocessing_fn(test_score)
         test_se, test_se_str = metric_cfg.postprocessing_fn(test_se)
-        msg = f"{metric_cfg.pretty_name}:\n  - Test: {test_score_str} ± {test_se_str}"
+        msg = f"{metric_cfg.pretty_name}:"
 
         if "train" in agg_scores.keys():
             train_score, train_se = agg_scores["train"]
             train_score, train_score_str = metric_cfg.postprocessing_fn(train_score)
             train_se, train_se_str = metric_cfg.postprocessing_fn(train_se)
+            msg += f"\n  - Test: {test_score_str} ± {test_se_str}"
             msg += f"\n  - Train: {train_score_str} ± {train_se_str}"
 
             # Store the aggregated train scores
             total_dict[f"train_{metric_cfg.name}"] = train_score
             total_dict[f"train_{metric_cfg.name}_se"] = train_se
+
+        else:
+            msg += f" {test_score_str} ± {test_se_str}"
 
         # Store the aggregated test scores
         total_dict[f"test_{metric_cfg.name}"] = test_score
