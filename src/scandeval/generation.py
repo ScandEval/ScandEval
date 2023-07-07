@@ -1,13 +1,11 @@
 """Functions related to text generation of models."""
 
-import itertools as it
 import logging
 import re
 import warnings
 from collections import defaultdict
 from typing import Any, Callable
 
-import pandas as pd
 import torch
 from datasets import Dataset
 from torch.utils.data import DataLoader
@@ -382,28 +380,6 @@ def get_generation_stopping_criteria(
     ]
 
     return [StopWordCriteria(stop_word_ids=stop_word_ids)]
-
-
-def extract_few_shot_examples(
-    shuffled_train: Dataset,
-    dataset_config: DatasetConfig,
-) -> list[dict]:
-    supertask = dataset_config.task.supertask
-    num_few_shots = dataset_config.num_few_shot_examples
-    if supertask == "sequence-classification":
-        labels = it.cycle(dataset_config.task.labels)
-        few_shot_examples: list[dict] = list()
-        while len(few_shot_examples) < num_few_shots:
-            label = next(labels)
-            examples = shuffled_train.filter(
-                lambda x: x["labels"].lower() == label.lower()
-            ).select(range(1))
-            few_shot_examples.append(examples[0])
-    else:
-        examples_df = shuffled_train.select(range(num_few_shots)).to_pandas()
-        assert isinstance(examples_df, pd.DataFrame)
-        few_shot_examples = examples_df.to_dict("records")
-    return few_shot_examples
 
 
 class StopWordCriteria(StoppingCriteria):
