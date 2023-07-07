@@ -1,5 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
+import re
+
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED
 from .languages import DA, FO, IS, NB, NN, SV, get_all_languages
@@ -51,7 +53,7 @@ SWEREC_CONFIG = DatasetConfig(
     languages=[SV],
     prompt_prefix="Följande är recensioner och deras sentiment, som kan vara "
     "'positiv', 'neutral' eller 'negativ'.",
-    prompt_template="Recension: {text}\n\nSentiment: {label}",
+    prompt_template="Recension: {text}\nSentiment: {label}",
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
@@ -337,9 +339,8 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     task=QA,
     languages=[DA],
     prompt_prefix="",
-    prompt_template="{text}\n\nSpørgsmål: {question}\nSvar: {label}",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=0,  # Only works with zero-shot
+    prompt_template="{text}\nSpørgsmål: {question}\nSvar: {label}",
+    num_few_shot_examples=2,
     max_generated_tokens=32,
 )
 
@@ -351,9 +352,8 @@ SCANDIQA_NO_CONFIG = DatasetConfig(
     task=QA,
     languages=[NB, NN],
     prompt_prefix="",
-    prompt_template="{text}\n\nSpørsmål: {question}\nSvar: {label}",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=0,  # Only works with zero-shot
+    prompt_template="{text}\nSpørsmål: {question}\nSvar: {label}",
+    num_few_shot_examples=2,
     max_generated_tokens=32,
 )
 
@@ -364,10 +364,11 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-sv-mini",
     task=QA,
     languages=[SV],
-    prompt_prefix="",
-    prompt_template="{text}\n\nFråga: {question}\nSvar: {label}",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=0,  # Only works with zero-shot
+    prompt_template="{text}\nFråga: {question}\nSvar: Svaret är {label}",
+    answer_extraction_fn=lambda doc: re.sub(r"^Svar: Svaret är", "", doc).strip(
+        " \n.\"'"
+    ),
+    num_few_shot_examples=2,
     max_generated_tokens=32,
 )
 
@@ -378,10 +379,8 @@ NQII_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/nqii-mini",  # TODO: Needs to be uploaded
     task=QA,
     languages=[IS],
-    prompt_prefix="",
-    prompt_template="{text}\n\nSpurning: {question}\nSvar: {label}",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=0,  # Only works with zero-shot
+    prompt_template="{text}\nSpurning: {question}\nSvar: {label}",
+    num_few_shot_examples=2,
     max_generated_tokens=32,
 )
 
@@ -392,9 +391,6 @@ SPEED_CONFIG = DatasetConfig(
     huggingface_id="",
     task=SPEED,
     languages=list(get_all_languages().values()),
-    prompt_prefix="",
     prompt_template="",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=0,  # Only works with zero-shot
     max_generated_tokens=1,
 )
