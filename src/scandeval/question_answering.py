@@ -204,7 +204,14 @@ class QuestionAnswering(BenchmarkDataset):
             list[dict[str, Any]]:
                 The few-shot examples.
         """
-        return list()
+        num_few_shots = self.dataset_config.num_few_shot_examples
+        train_with_short_examples = train_dataset.filter(
+            lambda example: len(example["context"]) < 512
+        )
+        shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
+        selected_train = shuffled_train.select(range(num_few_shots))
+        few_shot_examples = [dict(example) for example in selected_train]
+        return few_shot_examples
 
     def _apply_few_shot_prompt(
         self, examples: dict, few_shot_examples: list[dict]
@@ -221,18 +228,30 @@ class QuestionAnswering(BenchmarkDataset):
             dict:
                 The examples with the few-shot prompt applied.
         """
+        # Build the few-shot part of the prompt
+        few_shot_prompts = [
+            self.dataset_config.prompt_template.format(
+                text=example["context"].replace("\n", " ").strip(),
+                question=example["question"].strip(),
+                label=example["answers"]["text"][0],
+            )
+            for example in few_shot_examples
+        ]
         prompt_prefix = ""
         if self.dataset_config.prompt_prefix:
             prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
 
         # Add the texts from the examples to the prompts
         new_prompts = [
             self.dataset_config.prompt_template.format(
-                text=re.sub(r"\n+", "\n", context), question=question, label=""
+                text=context.replace("\n", " ").strip(), question=question, label=""
             )
             for context, question in zip(examples["context"], examples["question"])
         ]
-        examples["text"] = [prompt_prefix + new_prompt for new_prompt in new_prompts]
+        examples["text"] = [
+            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
+        ]
 
         return examples
 
@@ -263,13 +282,76 @@ class QuestionAnswering(BenchmarkDataset):
             dataset_config=self.dataset_config,
         )
 
+        def extract_valid_answer(prediction: str, context: str) -> str:
+            if not prediction:
+                return prediction
+            valid_answers: list[str] = list()
+            output_words = [
+                tokenizer.decode([token_id])
+                for token_id in tokenizer([prediction])["input_ids"][0]
+            ]
+            output_words = [token for token in output_words if token != ""]
+            word = output_words[0]
+            if word in context:
+                word_spans = [
+                    match_obj.span()
+                    for match_obj in re.finditer(
+                        pattern=re.escape(word), string=context
+                    )
+                ]
+                for word_span in word_spans:
+                    ctx_start, ctx_end = word_span
+                    for other_word in output_words[1:]:
+                        ctx_potentially_containing_other_word = context[
+                            ctx_end : ctx_end + len(other_word) + 5
+                        ]
+                        if other_word not in ctx_potentially_containing_other_word:
+                            break
+                        potential_ctx_ends = [
+                            ctx_end + match_obj.span()[1]
+                            for match_obj in re.finditer(
+                                pattern=re.escape(other_word),
+                                string=ctx_potentially_containing_other_word,
+                            )
+                        ]
+                        if len(potential_ctx_ends) == 0:
+                            break
+                        ctx_end = potential_ctx_ends[0]
+                    valid_answer = context[ctx_start:ctx_end]
+                    valid_answers.append(valid_answer)
+            valid_answers = list(set(valid_answers))
+            if valid_answers:
+                pred_answer = sorted(valid_answers, key=lambda x: len(x), reverse=True)[
+                    0
+                ]
+            else:
+                pred_answer = prediction
+            return pred_answer
+
+        valid_predictions = [
+            extract_valid_answer(prediction, context)
+            for prediction, context in zip(raw_predictions, input_batch["context"])
+        ]
+
+        # TEMP
+        num_inputs = len(input_batch["input_ids"][0])
+        model_output = tokenizer.decode(model_output.sequences[0])
+        raw_prediction = raw_predictions[0]
+        valid_prediction = valid_predictions[0]
+        answer = input_batch["label"][0]["answers"]["text"][0]
+        logger.debug(f"{num_inputs:,} tokens")
+        logger.debug(f"{model_output=}")
+        logger.debug(f"{raw_prediction=}")
+        logger.debug(f"{valid_prediction=}")
+        logger.debug(f"{answer=}")
+
         predictions = [
             dict(
                 id=id,
                 prediction_text=predicted_answer,
                 no_answer_probability=0.0,
             )
-            for id, predicted_answer in zip(input_batch["id"], raw_predictions)
+            for id, predicted_answer in zip(input_batch["id"], valid_predictions)
         ]
 
         return predictions
