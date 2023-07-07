@@ -1,5 +1,6 @@
 """Configuration classes used throughout the project."""
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -168,21 +169,25 @@ class DatasetConfig:
             The mapping from label to ID.
         num_labels (int):
             The number of labels in the dataset.
-        prompt_prefix (str):
-            The prefix to use in the few-shot prompt.
         prompt_template (str):
             The template for the prompt to use when benchmarking the dataset using
             few-shot evaluation.
-        prompt_label_mapping (dict of str to str):
-            A mapping from the labels to another phrase which is used as a substitute
-            for the label in few-shot evaluation.
-        num_few_shot_examples (int):
-            The number of examples to use when benchmarking the dataset using few-shot
-            evaluation. For a classification task, these will be drawn evenly from
-            each label.
         max_generated_tokens (int):
             The maximum number of tokens to generate when benchmarking the dataset
             using few-shot evaluation.
+        prompt_prefix (str, optional):
+            The prefix to use in the few-shot prompt. Defaults to an empty string.
+        num_few_shot_examples (int, optional):
+            The number of examples to use when benchmarking the dataset using few-shot
+            evaluation. For a classification task, these will be drawn evenly from
+            each label. Defaults to 0.
+        prompt_label_mapping (dict of str to str, optional):
+            A mapping from the labels to another phrase which is used as a substitute
+            for the label in few-shot evaluation. Defaults to an empty dictionary.
+        answer_extraction_fn (callable, optional):
+            A function to extract the answer from the last line of the model output
+            when benchmarking the dataset using few-shot evaluation. Defaults to
+            removing all characters up to and including the first colon.
     """
 
     name: str
@@ -190,11 +195,14 @@ class DatasetConfig:
     huggingface_id: str
     task: DatasetTask
     languages: list[Language]
-    prompt_prefix: str
     prompt_template: str
-    prompt_label_mapping: dict[str, str]
-    num_few_shot_examples: int
     max_generated_tokens: int
+    prompt_prefix: str = ""
+    num_few_shot_examples: int = 0
+    prompt_label_mapping: dict[str, str] = field(default_factory=dict)
+    answer_extraction_fn: Callable[[str], str] = field(
+        default_factory=lambda: lambda doc: re.sub(r"^.*?:", "", doc).strip()
+    )
 
     @property
     def id2label(self) -> list[str]:
