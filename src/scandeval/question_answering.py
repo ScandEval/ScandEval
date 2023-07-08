@@ -208,9 +208,13 @@ class QuestionAnswering(BenchmarkDataset):
         )
         shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
         num_few_shots = self.dataset_config.num_few_shot_examples
-        few_shot_examples: list[dict[str, Any]] = [
-            example for example in shuffled_train.select(range(num_few_shots))
-        ]
+        few_shot_examples: list[dict[str, Any]] = list()
+        while len(few_shot_examples) < num_few_shots:
+            example = shuffled_train.select(range(1))[0]
+            few_shot_examples.append(example)
+            shuffled_train = shuffled_train.filter(
+                lambda x: x["context"] != example["context"]
+            )
         return few_shot_examples
 
     def _apply_few_shot_prompt(
