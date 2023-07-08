@@ -1,6 +1,5 @@
 """Configuration classes used throughout the project."""
 
-import re
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -184,10 +183,6 @@ class DatasetConfig:
         prompt_label_mapping (dict of str to str, optional):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
-        answer_extraction_fn (callable, optional):
-            A function to extract the answer from the last line of the model output
-            when benchmarking the dataset using few-shot evaluation. Defaults to
-            removing all characters up to and including the first colon.
     """
 
     name: str
@@ -200,9 +195,6 @@ class DatasetConfig:
     prompt_prefix: str = ""
     num_few_shot_examples: int = 0
     prompt_label_mapping: dict[str, str] = field(default_factory=dict)
-    answer_extraction_fn: Callable[[str], str] = field(
-        default_factory=lambda: lambda doc: re.sub(r"^.*?:", "", doc).strip()
-    )
 
     @property
     def id2label(self) -> list[str]:

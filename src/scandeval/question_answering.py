@@ -1,7 +1,6 @@
 """Question-answering benchmark dataset."""
 
 import logging
-import re
 from functools import partial
 from typing import Any, Callable
 
@@ -204,13 +203,14 @@ class QuestionAnswering(BenchmarkDataset):
             list[dict[str, Any]]:
                 The few-shot examples.
         """
-        num_few_shots = self.dataset_config.num_few_shot_examples
         train_with_short_examples = train_dataset.filter(
             lambda example: len(example["context"]) < 512
         )
         shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
-        selected_train = shuffled_train.select(range(num_few_shots))
-        few_shot_examples = [dict(example) for example in selected_train]
+        num_few_shots = self.dataset_config.num_few_shot_examples
+        few_shot_examples: list[dict[str, Any]] = [
+            example for example in shuffled_train.select(range(num_few_shots))
+        ]
         return few_shot_examples
 
     def _apply_few_shot_prompt(
@@ -282,116 +282,13 @@ class QuestionAnswering(BenchmarkDataset):
             dataset_config=self.dataset_config,
         )
 
-        def extract_valid_answer(prediction: str, context: str) -> str:
-            """Extracts a valid answer from the prediction.
-
-            A valid answer is an answer that appears in the context.
-
-            Args:
-                prediction (str):
-                    The predicted answer, which we assume starts with the actual
-                    answer, potentially followed by some explanatory noise.
-                context (str):
-                    The context in which the answer should appear.
-
-            Returns:
-                str:
-                    The valid answer.
-            """
-            # If the prediction is empty, return it
-            if not prediction:
-                return prediction
-
-            # Split up the generated prediction into tokens
-            output_tokens = [
-                tokenizer.decode([token_id])
-                for token_id in tokenizer([prediction])["input_ids"][0]
-            ]
-            output_tokens = [token for token in output_tokens if token != ""]
-            first_generated_token = output_tokens[0]
-
-            # We assume that the first generated token appears in the context, but
-            # sometimes this is not the case, in which case we simply return the entire
-            # prediction
-            valid_answers: list[str] = list()
-            if first_generated_token in context:
-                # Find all the character indices of where the first generated token
-                # appears in the context
-                word_spans = [
-                    match_obj.span()
-                    for match_obj in re.finditer(
-                        pattern=re.escape(first_generated_token), string=context
-                    )
-                ]
-
-                for word_span in word_spans:
-                    ctx_start, ctx_end = word_span
-
-                    # Check if the following generated tokens also appear in the
-                    # context. If so, then we add them to the valid answer. We record
-                    # the character indices of the beginning and end of the entire
-                    # valid answer, to be able to extract the answer verbatim from the
-                    # context
-                    for other_word in output_tokens[1:]:
-                        ctx_potentially_containing_other_word = context[
-                            ctx_end : ctx_end + len(other_word) + 5
-                        ]
-                        if other_word not in ctx_potentially_containing_other_word:
-                            break
-                        potential_ctx_ends = [
-                            ctx_end + match_obj.span()[1]
-                            for match_obj in re.finditer(
-                                pattern=re.escape(other_word),
-                                string=ctx_potentially_containing_other_word,
-                            )
-                        ]
-                        if len(potential_ctx_ends) == 0:
-                            break
-                        ctx_end = potential_ctx_ends[0]
-
-                    valid_answer = context[ctx_start:ctx_end]
-                    valid_answers.append(valid_answer)
-
-            # Remove duplicates from the valid answers, and choose the longest one
-            # as the final prediction
-            valid_answers = list(set(valid_answers))
-            if valid_answers:
-                pred_answer = sorted(valid_answers, key=lambda x: len(x), reverse=True)[
-                    0
-                ]
-            else:
-                pred_answer = prediction
-            return pred_answer
-
-        valid_predictions = [
-            extract_valid_answer(prediction, context)
-            for prediction, context in zip(raw_predictions, input_batch["context"])
-        ]
-
-        # TEMP
-        num_inputs = len(input_batch["input_ids"][0])
-        question = input_batch["question"][0]
-        model_output = (
-            tokenizer.decode(model_output.sequences[0]).replace("<pad>", "").strip()
-        )
-        raw_prediction = raw_predictions[0]
-        valid_prediction = valid_predictions[0]
-        answer = input_batch["label"][0]["answers"]["text"][0]
-        print()
-        logger.debug(f"{num_inputs:,} tokens")
-        logger.debug(f"{question=}")
-        logger.debug(f"{model_output=}")
-        logger.debug(f"{raw_prediction=}")
-        logger.debug(f"{valid_prediction=}")
-        logger.debug(f"{answer=}")
-
         predictions = [
             dict(
                 id=id,
-                prediction_text=predicted_answer,
+                prediction_text=predicted_answer.lower(),
                 no_answer_probability=0.0,
             )
-            for id, predicted_answer in zip(input_batch["id"], valid_predictions)
+            for id, predicted_answer in zip(input_batch["id"], raw_predictions)
         ]
 
         return predictions
@@ -638,7 +535,13 @@ def prepare_examples_for_generation(
     """
     tokenized_examples = tokenizer(text=examples["text"], truncation=True)
     tokenized_examples["label"] = [
-        dict(id=id, answers=answer_dct)
+        dict(
+            id=id,
+            answers=dict(
+                answer_start=answer_dct["answer_start"],
+                text=[answer_text.lower() for answer_text in answer_dct["text"]],
+            ),
+        )
         for id, answer_dct in zip(examples["id"], examples["answers"])
     ]
     return tokenized_examples

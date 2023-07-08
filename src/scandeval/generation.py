@@ -286,7 +286,6 @@ def extract_raw_predictions(
         answer_exists = len(few_shots) > pred_idx
         answer = few_shots[pred_idx] if answer_exists else few_shots[-1]
         answer = answer.split("\n")[-1]
-        answer = dataset_config.answer_extraction_fn(answer)
         answer = answer.strip()
         raw_predictions.append(answer)
     return raw_predictions

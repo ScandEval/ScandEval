@@ -1,7 +1,5 @@
 """All dataset configurations used in ScandEval."""
 
-import re
-
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED
 from .languages import DA, FO, IS, NB, NN, SV, get_all_languages
@@ -57,7 +55,7 @@ SWEREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    num_few_shot_examples=6,
+    num_few_shot_examples=3,
     max_generated_tokens=3,
 )
 
@@ -74,7 +72,7 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    num_few_shot_examples=30,
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -115,7 +113,7 @@ SUC3_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=16,
+    num_few_shot_examples=12,
     max_generated_tokens=128,
 )
 
@@ -139,7 +137,7 @@ DANE_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=8,
+    num_few_shot_examples=12,
     max_generated_tokens=128,
 )
 
@@ -163,7 +161,7 @@ NORNE_NB_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=8,
+    num_few_shot_examples=12,
     max_generated_tokens=128,
 )
 
@@ -187,7 +185,7 @@ NORNE_NN_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=8,
+    num_few_shot_examples=12,
     max_generated_tokens=128,
 )
 
@@ -211,7 +209,7 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
         "b-misc": "ýmislegt",
         "i-misc": "ýmislegt",
     },
-    num_few_shot_examples=8,
+    num_few_shot_examples=12,
     max_generated_tokens=128,
 )
 
@@ -225,7 +223,7 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="",  # TODO
     prompt_label_mapping=dict(),
-    num_few_shot_examples=8,
+    num_few_shot_examples=12,
     max_generated_tokens=128,
 )
 
@@ -239,7 +237,7 @@ FONE_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="",  # TODO
     prompt_label_mapping=dict(),
-    num_few_shot_examples=8,
+    num_few_shot_examples=12,
     max_generated_tokens=128,
 )
 
@@ -338,9 +336,8 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-da-mini",
     task=QA,
     languages=[DA],
-    prompt_prefix="",
-    prompt_template="{text}\nSpørgsmål: {question}\nSvar: {label}",
-    num_few_shot_examples=2,
+    prompt_template="{text}\nSpørgsmål: {question}\nSvar med maks. 3 ord: {label}",
+    num_few_shot_examples=4,
     max_generated_tokens=32,
 )
 
@@ -351,9 +348,8 @@ SCANDIQA_NO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-no-mini",
     task=QA,
     languages=[NB, NN],
-    prompt_prefix="",
-    prompt_template="{text}\nSpørsmål: {question}\nSvar: {label}",
-    num_few_shot_examples=2,
+    prompt_template="{text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
+    num_few_shot_examples=4,
     max_generated_tokens=32,
 )
 
@@ -364,11 +360,8 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-sv-mini",
     task=QA,
     languages=[SV],
-    prompt_template="{text}\nFråga: {question}\nSvar: Svaret är {label}",
-    answer_extraction_fn=lambda doc: re.sub(r"^Svar: Svaret är", "", doc).strip(
-        " \n.\"'"
-    ),
-    num_few_shot_examples=2,
+    prompt_template="{text}\nFråga: {question}\nSvar på max 3 ord: {label}",
+    num_few_shot_examples=4,
     max_generated_tokens=32,
 )
 
@@ -379,8 +372,8 @@ NQII_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/nqii-mini",  # TODO: Needs to be uploaded
     task=QA,
     languages=[IS],
-    prompt_template="{text}\nSpurning: {question}\nSvar: {label}",
-    num_few_shot_examples=2,
+    prompt_template="{text}\nSpurning: {question}\nSvar að hámarki 3 orð: {label}",
+    num_few_shot_examples=4,
     max_generated_tokens=32,
 )
 
