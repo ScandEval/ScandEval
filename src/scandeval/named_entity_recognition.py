@@ -573,9 +573,6 @@ class NamedEntityRecognition(BenchmarkDataset):
                     raise ValueError("The output is not a dictionary.")
                 prediction_dict: dict[str, list[str]] = json_output
             except (json.decoder.JSONDecodeError, ValueError):
-                # TEMP
-                logger.debug("The generated model output is not valid JSON. Skipping.")
-
                 continue
 
             prompt_label_mapping = self.dataset_config.prompt_label_mapping
