@@ -373,7 +373,9 @@ def get_closest_word_edit_labels(
         dataset_config=dataset_config,
     )
 
-    candidate_labels = dataset_config.id2label
+    candidate_labels = [
+        dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
+    ]
     new_predicted_labels: list[str] = list()
     for predicted_label in raw_predictions:
         edit_distances = [
