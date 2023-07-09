@@ -47,10 +47,7 @@ class HFModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         self.benchmark_config = benchmark_config
 
     def model_exists(self, model_id: str) -> bool:
@@ -221,7 +218,7 @@ class HFModelSetup:
             "revision": model_config.revision,
             "token": self.benchmark_config.token,
             "cache_dir": self.benchmark_config.cache_dir,
-            "trust_remote_code": True,  # TODO: Make this an argument
+            "trust_remote_code": self.benchmark_config.trust_remote_code,
         }
 
         while True:
