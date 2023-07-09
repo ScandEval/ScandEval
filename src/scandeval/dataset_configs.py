@@ -55,7 +55,7 @@ SWEREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    num_few_shot_examples=3,
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -89,7 +89,7 @@ NOREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="nøytral", negative="negativ"
     ),
-    num_few_shot_examples=3,
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -113,7 +113,7 @@ SUC3_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=12,
+    num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
@@ -137,7 +137,7 @@ DANE_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=12,
+    num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
@@ -161,7 +161,7 @@ NORNE_NB_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=12,
+    num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
@@ -185,7 +185,7 @@ NORNE_NN_CONFIG = DatasetConfig(
         "b-misc": "diverse",
         "i-misc": "diverse",
     },
-    num_few_shot_examples=12,
+    num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
@@ -209,7 +209,7 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
         "b-misc": "ýmislegt",
         "i-misc": "ýmislegt",
     },
-    num_few_shot_examples=12,
+    num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
@@ -223,7 +223,7 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="",  # TODO
     prompt_label_mapping=dict(),
-    num_few_shot_examples=12,
+    num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
@@ -237,7 +237,7 @@ FONE_CONFIG = DatasetConfig(
     prompt_prefix="",  # TODO
     prompt_template="",  # TODO
     prompt_label_mapping=dict(),
-    num_few_shot_examples=12,
+    num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
@@ -251,7 +251,7 @@ SCALA_SV_CONFIG = DatasetConfig(
     prompt_prefix="Följande är meningar och huruvida de är grammatiskt korrekta.",
     prompt_template="Mening: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
-    num_few_shot_examples=4,
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -265,7 +265,7 @@ SCALA_DA_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er sætninger og om de er grammatisk korrekte.",
     prompt_template="Sætning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
-    num_few_shot_examples=4,
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -276,11 +276,10 @@ SCALA_NB_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-nb",
     task=LA,
     languages=[NB],
-    prompt_prefix="",
-    prompt_template="{text}\nSpørsmål: Er denne setningen grammatisk korrekt "
-    "(ja eller nei)?\nSvar: {label}",
+    prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
+    prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
-    num_few_shot_examples=4,
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -291,11 +290,10 @@ SCALA_NN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-nn",
     task=LA,
     languages=[NN],
-    prompt_prefix="The following are documents and whether they are grammatically "
-    "correct or not, indicated by 'correct' or 'incorrect'.",
-    prompt_template="Text: {text}\nGrammatically correct: {label}",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=4,
+    prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
+    prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nei"),
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -306,11 +304,10 @@ SCALA_IS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-is",
     task=LA,
     languages=[IS],
-    prompt_prefix="The following are documents and whether they are grammatically "
-    "correct or not, indicated by 'correct' or 'incorrect'.",
-    prompt_template="Text: {text}\nGrammatically correct: {label}",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=4,
+    prompt_prefix="Eftirfarandi eru setningar og hvort þær séu málfræðilega réttar.",
+    prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
+    prompt_label_mapping=dict(correct="já", incorrect="nei"),
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
@@ -321,11 +318,10 @@ SCALA_FO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-fo",
     task=LA,
     languages=[FO],
-    prompt_prefix="The following are documents and whether they are grammatically "
-    "correct or not, indicated by 'correct' or 'incorrect'.",
-    prompt_template="Text: {text}\nGrammatically correct: {label}",
-    prompt_label_mapping=dict(),
-    num_few_shot_examples=4,
+    prompt_prefix="Etta eru setningar og um teir eru grammatiskt rætt.",
+    prompt_template="Setning: {text}\nGrammatiskt rætt: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nei"),
+    num_few_shot_examples=12,
     max_generated_tokens=3,
 )
 
