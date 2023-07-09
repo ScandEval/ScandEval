@@ -10,12 +10,9 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
-- Support for evaluation of decoder and encoder-decoder models on the Hugging Face Hub.
-  This performs finetuning for smaller models, as with the encoder models, and
-  parameter-efficient finetuning (PEFT) for larger models.
-- Support for few-shot evaluation of decoder and encoder-decoder models, both
-  from the Hugging Face Hub and OpenAI models. This can be enabled using the
-  `--few-shot` flag.
+- Support for few-shot evaluation of decoder models, both from the Hugging Face Hub and
+  OpenAI models. This currently happens automatically when specifying a generative
+  model from the Hugging Face Hub, and with all OpenAI models.
 
 ### Changed
 - Now only supports Python 3.10 and above.
