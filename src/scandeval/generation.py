@@ -211,7 +211,7 @@ def generate_single_iteration(
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             inputs = batch["input_ids"].to(model.device)
-            with torch.no_grad():
+            with torch.inference_mode():
                 model_output: ModelOutput = model.generate(
                     inputs=inputs, generation_config=generation_config
                 )

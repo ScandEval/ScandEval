@@ -299,14 +299,16 @@ def finetune_single_iteration(
             trainer.train()
 
         if benchmark_config.evaluate_train:
-            train_scores = trainer.evaluate(
-                eval_dataset=prepared_train, metric_key_prefix="train"
-            )
+            with torch.inference_mode():
+                train_scores = trainer.evaluate(
+                    eval_dataset=prepared_train, metric_key_prefix="train"
+                )
             scores["train"] = train_scores
 
-        test_scores = trainer.evaluate(
-            eval_dataset=prepared_test, metric_key_prefix="test"
-        )
+        with torch.inference_mode():
+            test_scores = trainer.evaluate(
+                eval_dataset=prepared_test, metric_key_prefix="test"
+            )
         scores["test"] = test_scores
 
         # Return the scores
