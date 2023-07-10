@@ -11,6 +11,7 @@ from openai.error import (
     InvalidRequestError,
     RateLimitError,
     ServiceUnavailableError,
+    Timeout,
 )
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
@@ -316,7 +317,7 @@ class OpenAIModel:
                     break
                 else:
                     raise e
-            except (RateLimitError, ServiceUnavailableError, APIError):
+            except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                 sleep(1)
                 continue
 
@@ -421,7 +422,7 @@ class OpenAIModel:
                         completion_ids_list.append(completion_ids)
                 break
 
-            except (RateLimitError, ServiceUnavailableError, APIError):
+            except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                 sleep(1)
                 continue
 
