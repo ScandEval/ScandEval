@@ -117,10 +117,17 @@ SPEED = DatasetTask(
     metrics=[
         MetricConfig(
             name="speed",
-            pretty_name="Inferences per second",
+            pretty_name="Tokens per second",
             huggingface_id="",
             results_key="speed",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}"),
+            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:,.0f}"),
+        ),
+        MetricConfig(
+            name="speed_short",
+            pretty_name="Tokens per second on short documents",
+            huggingface_id="",
+            results_key="speed",
+            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:,.0f}"),
         ),
     ],
     labels=[],
