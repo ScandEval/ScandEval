@@ -294,7 +294,6 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
     )
 
 
-# TODO: Cache this
 def get_huggingface_model_lists(
     languages: list[Language] | None,
     token: bool | str,
