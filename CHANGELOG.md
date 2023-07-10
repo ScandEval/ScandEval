@@ -16,6 +16,11 @@ and this project adheres to
 
 ### Changed
 - Now only supports Python 3.10 and above.
+- Changed the variation in the speed benchmark. Rather than using a fixed length
+  document and computing iterations per second, it now uses varied length documents and
+  computes tokens per second. This also has the added benefit of being able to better
+  compare models with varying level of maximum sequence lengths. Further, it now uses
+  GPU rather than CPU to accomodate 4-bit models, as these cannot be run on CPU.
 
 
 ## [v7.1.1] - 2023-07-01
