@@ -5,8 +5,11 @@ from collections import defaultdict
 import pyinfer
 import torch
 from tqdm.auto import tqdm
-from transformers.modeling_utils import PreTrainedModel
+from transformers.modeling_utils import GenerationConfig, PreTrainedModel
 from transformers.tokenization_utils import PreTrainedTokenizer
+
+from scandeval.model_setups.base import GenerativeModel, Tokenizer
+from scandeval.utils import model_is_generative
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
@@ -44,11 +47,12 @@ def benchmark_speed(
     # Initialise the `scores` dictionary
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
-    for _ in itr:
+    for itr_idx in itr:
         # Run the speed benchmark
         itr_scores = benchmark_speed_single_iteration(
             tokenizer=tokenizer,
             model=model,
+            itr_idx=itr_idx,
             model_config=model_config,
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
@@ -70,8 +74,9 @@ def benchmark_speed(
 
 
 def benchmark_speed_single_iteration(
-    tokenizer: PreTrainedTokenizer,
-    model: PreTrainedModel,
+    tokenizer: Tokenizer,
+    model: PreTrainedModel | GenerativeModel,
+    itr_idx: int,
     model_config: ModelConfig,
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
@@ -83,6 +88,8 @@ def benchmark_speed_single_iteration(
             The tokenizer to use in the benchmark.
         model (PreTrainedModel):
             The model to use in the benchmark.
+        itr_idx (int):
+            The index of the iteration.
         model_config (ModelConfig):
             The model configuration.
         dataset_config (DatasetConfig):
@@ -96,6 +103,8 @@ def benchmark_speed_single_iteration(
             `train` and `test`. If an exception is raised, then the exception is
             returned.
     """
+    is_generative = model_is_generative(model=model)
+
     scores: dict[str, dict[str, float]] = dict()
     try:
         # Reinitialise a new model
@@ -106,13 +115,7 @@ def benchmark_speed_single_iteration(
                 benchmark_config=benchmark_config,
             )
 
-        # Ensure that the model is on the CPU
-        model.cpu()
-
-        # Create a dummy document
-        doc = "This is a dummy document. " * 100
-
-        def predict(docs: list[str]) -> None:
+        def predict(doc: str) -> None:
             """Function used to benchmark inference speed of the model."""
 
             # Raise an error if the tokenizer or model is undefined
@@ -121,38 +124,57 @@ def benchmark_speed_single_iteration(
 
             # Tokenize the document
             inputs = tokenizer(
-                docs,
+                doc,
                 padding=True,
                 truncation=True,
                 return_tensors="pt",
             )
 
-            # Run inference with the model
-            with torch.no_grad():
-                model(**inputs)
+            inputs = {name: tensor.to(model.device) for name, tensor in inputs.items()}
 
-        # Do a warmup run
-        pyinfer.InferenceReport(model=predict, inputs=doc, n_iterations=10).run(
+            # Run inference with the model
+            with torch.inference_mode():
+                if is_generative:
+                    model.generate(
+                        inputs=inputs["input_ids"],
+                        generation_config=GenerationConfig(
+                            max_new_tokens=1, temperature=0.0, do_sample=False
+                        ),
+                    )
+                else:
+                    assert isinstance(model, PreTrainedModel)
+                    model(**inputs)
+
+        base_doc = "Document which contains roughly 10 tokens. "
+        multiplier = 10 * (1 + itr_idx)
+        doc = base_doc * multiplier
+        short_multiplier = 2.5 * (1 + itr_idx)
+        short_doc = base_doc * int(short_multiplier)
+
+        # Do a warmup run, as the first run is always slower
+        pyinfer.InferenceReport(model=predict, inputs=base_doc, n_seconds=1).run(
             print_report=False
         )
 
-        # Initialise the speed benchmark
-        speed_benchmark = pyinfer.InferenceReport(
-            model=predict,
-            inputs=doc,
-            n_iterations=100,
+        speed_scores = pyinfer.InferenceReport(
+            model=predict, inputs=doc, n_seconds=3
+        ).run(print_report=False)
+        num_tokens = len(tokenizer(doc, truncation=True)["input_ids"])
+        tokens_per_second = speed_scores["Infer(p/sec)"] * num_tokens
+
+        speed_scores_short = pyinfer.InferenceReport(
+            model=predict, inputs=short_doc, n_seconds=3
+        ).run(print_report=False)
+        num_tokens_short = len(tokenizer(short_doc, truncation=True)["input_ids"])
+        tokens_per_second_short = speed_scores_short["Infer(p/sec)"] * num_tokens_short
+
+        scores["test"] = dict(
+            test_speed=tokens_per_second, test_speed_short=tokens_per_second_short
         )
-
-        # Run the speed benchmark
-        speed_scores = speed_benchmark.run(print_report=False)
-
-        # Close the speed benchmark
-        del speed_benchmark
-
-        # Store the scores
-        scores["test"] = {"test_speed": speed_scores["Infer(p/sec)"]}
         if benchmark_config.evaluate_train:
-            scores["train"] = {"train_speed": speed_scores["Infer(p/sec)"]}
+            scores["train"] = dict(
+                train_speed=tokens_per_second, train_speed_short=tokens_per_second_short
+            )
 
         # Return the scores
         return scores
