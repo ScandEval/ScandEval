@@ -368,10 +368,10 @@ class OpenAIModel:
                 if token_id != self.config.pad_token_id
             ]
 
-        while True:
-            try:
-                completion_ids_list: list[list[int]]
-                if not self.is_chat_model:
+        completion_ids_list: list[list[int]]
+        if not self.is_chat_model:
+            while True:
+                try:
                     generation_output = openai.Completion.create(
                         model=self.model_config.model_id,
                         prompt=inputs_list,
@@ -390,10 +390,15 @@ class OpenAIModel:
                         self.tokenizer(choice.text.strip())["input_ids"][0].tolist()
                         for choice in generation_output.choices
                     ]
+                    break
+                except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
+                    sleep(1)
 
-                else:
-                    completion_ids_list = list()
-                    for input_ids in tqdm(inputs_list, leave=False):
+        else:
+            completion_ids_list = list()
+            for input_ids in tqdm(inputs_list, leave=False):
+                while True:
+                    try:
                         single_output = openai.ChatCompletion.create(
                             model=self.model_config.model_id,
                             messages=[
@@ -420,11 +425,10 @@ class OpenAIModel:
                             single_output.choices[0].message.content.strip()
                         )["input_ids"][0].tolist()
                         completion_ids_list.append(completion_ids)
-                break
+                        break
 
-            except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                sleep(1)
-                continue
+                    except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
+                        sleep(1)
 
         if multiple_inputs:
             output = pad_sequence(
