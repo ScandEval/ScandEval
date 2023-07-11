@@ -321,6 +321,8 @@ class OpenAIModel:
                 sleep(1)
                 continue
 
+    # TODO: Consider caching the generations. This will remove a small amount of noise
+    # of course, but it will reduce the amount of API calls drastically
     def generate(
         self,
         inputs: Tensor,
