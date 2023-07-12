@@ -1,7 +1,6 @@
 """Benchmarking model inference speed."""
 
 from collections import defaultdict
-from functools import cache
 from typing import Dict, List, Union
 
 import pyinfer
@@ -15,7 +14,6 @@ from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_loading import load_model
 from .types import SCORE_DICT
-
 from .utils import create_model_cache_dir
 
 
@@ -51,7 +49,6 @@ def benchmark_speed(
     scores: Dict[str, List[Dict[str, float]]] = defaultdict(list)
 
     for _ in itr:
-
         # Run the speed benchmark
         itr_scores = benchmark_speed_single_iteration(
             tokenizer=tokenizer,
@@ -115,7 +112,6 @@ def benchmark_speed_single_iteration(
         cache_dir=benchmark_config.cache_dir, model_id=model_config.model_id
     )
     try:
-
         # Reinitialise a new model
         if tokenizer is None or model is None:
             tokenizer, model = load_model(

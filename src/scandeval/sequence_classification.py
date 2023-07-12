@@ -57,7 +57,6 @@ class SequenceClassification(BenchmarkDataset):
         sep_token = special_token_metadata["sep_token"]
 
         def tokenise(examples: dict) -> BatchEncoding:
-
             # If the tokenizer is not adding special tokens, then we add them manually
             if (
                 not has_cls_token

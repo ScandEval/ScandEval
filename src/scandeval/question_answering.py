@@ -207,7 +207,6 @@ def prepare_train_examples(
     tokenized_examples["end_positions"] = list()
 
     for i, offsets in enumerate(offset_mapping):
-
         # Get the input IDs for the current example
         input_ids = tokenized_examples.input_ids[i]
 
@@ -342,7 +341,6 @@ def prepare_test_examples(
     tokenized_examples["id"] = list()
 
     for i in range(len(tokenized_examples.input_ids)):
-
         # Grab the sequence corresponding to that example (to know what is the context
         # and what is the question).
         sequence_ids = tokenized_examples.sequence_ids(i)
