@@ -532,9 +532,6 @@ class BenchmarkDataset(ABC):
                 `train` and `test`. If an exception is raised, then the exception is
                 returned.
         """
-        model_cache_dir = create_model_cache_dir(
-            cache_dir=self.benchmark_config.cache_dir, model_id=model_config.model_id
-        )
         scores: Dict[str, Dict[str, float]] = dict()
         try:
             # Set random seeds to enforce reproducibility of the randomly initialised
@@ -554,7 +551,7 @@ class BenchmarkDataset(ABC):
                     id2label=self.dataset_config.id2label,
                     from_flax=model_config.framework == "jax",
                     use_auth_token=self.benchmark_config.use_auth_token,
-                    cache_dir=model_cache_dir,
+                    cache_dir=training_args.output_dir,
                     raise_errors=self.benchmark_config.raise_errors,
                 )
 
