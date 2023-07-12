@@ -18,6 +18,7 @@ from .types import SCORE_DICT
 
 from .utils import create_model_cache_dir
 
+
 def benchmark_speed(
     itr: tqdm,
     tokenizer: PreTrainedTokenizer,
@@ -110,7 +111,9 @@ def benchmark_speed_single_iteration(
             returned.
     """
     scores: Dict[str, Dict[str, float]] = dict()
-    model_cache_dir = create_model_cache_dir(cache_dir=benchmark_config.cache_dir, model_id=model_config.model_id)
+    model_cache_dir = create_model_cache_dir(
+        cache_dir=benchmark_config.cache_dir, model_id=model_config.model_id
+    )
     try:
 
         # Reinitialise a new model
