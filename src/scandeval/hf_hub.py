@@ -64,7 +64,6 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
 
     # Attempt to fetch model data from the Hugging Face Hub
     try:
-
         # Define the API object
         api: HfApi = HfApi()
 
@@ -167,7 +166,6 @@ def get_model_lists(
         }:
             language_string = "all"
         else:
-
             # Remove generic 'Norwegian' from the list of languages if both 'Bokmål'
             # and 'Nynorsk' already exist in the list
             if all([lang in language_list for lang in [NO, NB, NN]]):
@@ -195,7 +193,6 @@ def get_model_lists(
         language_itr = deepcopy(language_list)
 
     for language in language_itr:
-
         # Extract the language code
         language_str: Optional[str]
         if language is not None:
