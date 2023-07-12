@@ -37,6 +37,6 @@ jobs:
           poetry install
 
       - name: Test with pytest
-        run: poetry run pytest --dist no -n 0
+        run: poetry run pytest
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
