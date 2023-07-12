@@ -28,15 +28,15 @@ class NamedEntityRecognition(BenchmarkDataset):
     """Named entity recognition benchmark dataset.
 
     Args:
-        dataset_config (DatasetConfig):
+        dataset_config:
             The dataset configuration.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
 
     Attributes:
-        dataset_config (DatasetConfig):
+        dataset_config:
             The configuration of the dataset.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The configuration of the benchmark.
     """
 
@@ -44,7 +44,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Process the data.
 
         Args:
-            dataset_dict (DatasetDict):
+            dataset_dict:
                 The dataset dictionary.
 
         Returns:
@@ -71,7 +71,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Compute the metrics needed for evaluation.
 
         Args:
-            predictions_and_labels (pair of arrays):
+            predictions_and_labels:
                 The first array contains the probability predictions and the second
                 array contains the true labels.
             id2label (list of str):
@@ -173,9 +173,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Tokenise all texts and align the labels with them.
 
         Args:
-            examples (dict):
+            examples:
                 The examples to be tokenised.
-            tokenizer (Tokenizer):
+            tokenizer:
                 A pretrained tokenizer.
             label2id (dict):
                 A dictionary that converts NER tags to IDs.
@@ -314,11 +314,11 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Replace unknown tokens in the tokens with the corresponding word.
 
         Args:
-            tokenizer (Tokenizer):
+            tokenizer:
                 The tokenizer used to tokenize the words.
-            tokens (list of str):
+            tokens:
                 The list of tokens.
-            words (list of str):
+            words:
                 The list of words.
 
         Returns:
@@ -373,7 +373,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
-            dataset (Hugging Face dataset):
+            dataset:
                 The dataset to preprocess.
             kwargs:
                 Extra keyword arguments containing objects used in preprocessing the
@@ -423,10 +423,10 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Tokenizer or None, optional):
+            tokenizer:
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
-            model (PreTrainedModel or GenerativeModel or None, optional):
+            model:
                 A pretrained model. Can be None if the model is not used in the
                 initialisation of the data collator. Defaults to None.
 
@@ -447,9 +447,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Extract few-shot examples from the training dataset.
 
         Args:
-            train_dataset (Hugging Face dataset):
+            train_dataset:
                 The training dataset.
-            random_seed (int):
+            random_seed:
                 The random seed to use when extracting the few-shot examples.
 
         Returns:
@@ -485,9 +485,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Apply a few-shot prompt to the examples.
 
         Args:
-            examples (dict):
+            examples:
                 The examples to apply the prompt to.
-            few_shot_examples (list of dict):
+            few_shot_examples:
                 The examples to be included in the few-shot prompt.
 
         Returns:
@@ -544,12 +544,12 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Extract the predicted labels from the generated output.
 
         Args:
-            input_batch (dict):
+            input_batch:
                 The input batch, where the keys are the feature names and the values
                 are lists with the feature values.
-            model_output (ModelOutput):
+            model_output:
                 The raw generated output of the model.
-            tokenizer (Tokenizer):
+            tokenizer:
                 The tokenizer used together with the model.
 
         Returns:
@@ -572,7 +572,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 if not isinstance(json_output, dict):
                     raise ValueError("The output is not a dictionary.")
                 prediction_dict: dict[str, list[str]] = json_output
-            except (json.decoder.JSONDecodeError, ValueError):
+            except json.JSONDecodeError:
                 continue
 
             prompt_label_mapping = self.dataset_config.prompt_label_mapping

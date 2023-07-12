@@ -21,68 +21,68 @@ class Benchmarker:
     """Benchmarking all the Scandinavian language models.
 
     Args:
-        progress_bar (bool, optional):
+        progress_bar:
             Whether progress bars should be shown. Defaults to True.
-        save_results (bool, optional):
+        save_results:
             Whether to save the benchmark results to
             'scandeval_benchmark_results.jsonl'. Defaults to False.
-        language (str or list of str, optional):
+        language:
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
             'all' if all languages (also non-Scandinavian) should be considered.
             Defaults to ['da', 'sv', 'no'].
-        model_language (None, str or list of str, optional):
+        model_language:
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages. Defaults
             to None.
-        framework (None, str or list of str, optional):
+        framework:
             The model framework to use. Only relevant if `model-id` refers to a local
             path. Otherwise, the framework will be set automatically. Defaults to None.
-        dataset_language (None, str or list of str, optional):
+        dataset_language:
             The language codes of the languages to include for datasets. If specified
             then this overrides the `language` parameter for dataset languages.
             Defaults to None.
-        dataset_task (str or list of str, optional):
+        dataset_task:
             The tasks to include for dataset. If "all" then datasets will not be
             filtered based on their task. Defaults to "all".
-        batch_size (int, optional):
+        batch_size:
             The batch size to use. Defaults to 32.
-        evaluate_train (bool, optional):
+        evaluate_train:
             Whether to evaluate the training set as well. Defaults to False.
-        raise_errors (bool, optional):
+        raise_errors:
             Whether to raise errors instead of skipping the model evaluation. Defaults
             to False.
-        cache_dir (str, optional):
+        cache_dir:
             Directory to store cached models. Defaults to '.scandeval_cache'.
-        token (bool or str, optional):
+        token:
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token. Defaults to False.
-        openai_api_key (str or None, optional):
+        openai_api_key:
             The OpenAI API key to use for authentication. If None, then no OpenAI
             models will be evaluated. Defaults to None.
-        ignore_duplicates (bool, optional):
+        ignore_duplicates:
             Whether to skip evaluation of models which have already been evaluated,
             with scores lying in the 'scandeval_benchmark_results.jsonl' file. Defaults
             to True.
-        verbose (bool, optional):
+        verbose:
             Whether to output additional output. Defaults to False.
-        trust_remote_code (bool, optional):
+        trust_remote_code:
             Whether to trust remote code when loading models. Defaults to False.
         load_in_4bit (bool or None, optional):
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model. Defaults to None.
 
     Attributes:
-        progress_bar (bool): Whether progress bars should be shown.
-        save_results (bool): Whether to save the benchmark results.
-        language (str or list of str): The languages to include in the list.
-        dataset_task (str or list of str): The dataset tasks to include.
-        evaluate_train (bool): Whether to evaluate the training set as well.
-        verbose (bool): Whether to output additional output.
-        token (str or bool): The authentication token for the Hugging Face Hub.
-        benchmark_results (dict): The benchmark results.
+        progress_bar: Whether progress bars should be shown.
+        save_results: Whether to save the benchmark results.
+        language: The languages to include in the list.
+        dataset_task: The dataset tasks to include.
+        evaluate_train: Whether to evaluate the training set as well.
+        verbose: Whether to output additional output.
+        token: The authentication token for the Hugging Face Hub.
+        benchmark_results: The benchmark results.
     """
 
     def __init__(
@@ -162,13 +162,13 @@ class Benchmarker:
         """Benchmarks models on datasets.
 
         Args:
-            model_id (str, list of str or None, optional):
+            model_id:
                 The full Hugging Face Hub path(s) to the pretrained transformer model.
                 The specific model version to use can be added after the suffix '@':
                 "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id,
                 and defaults to the latest version if not specified. If None then all
                 relevant model IDs will be benchmarked. Defaults to None.
-            dataset (str, list of str or None, optional):
+            dataset:
                 The datasets to benchmark on. If None then all datasets will be
                 benchmarked. Defaults to None.
 
@@ -229,9 +229,9 @@ class Benchmarker:
         """Checks whether a model has already been benchmarked on a dataset.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
-            dataset (str):
+            dataset:
                 The dataset.
 
         Returns:
@@ -250,7 +250,7 @@ class Benchmarker:
         """Prepare the model ID(s) to be benchmarked.
 
         Args:
-            model_id (str, list of str or None):
+            model_id:
                 The model ID(s) of the models to benchmark. If None then all model IDs
                 will be retrieved.
 
@@ -291,7 +291,7 @@ class Benchmarker:
         """Prepare the dataset configuration(s) to be benchmarked.
 
         Args:
-            dataset (str, list of str or None, optional):
+            dataset:
                 The datasets to benchmark on. If None then all datasets will be
                 benchmarked. Defaults to None.
 
@@ -328,9 +328,9 @@ class Benchmarker:
         """Benchmark a single model on a single dataset.
 
         Args:
-            dataset_config (DatasetConfig):
+            dataset_config:
                 The dataset configuration to use.
-            model_id (str):
+            model_id:
                 The model ID to use.
 
         Returns:
@@ -399,7 +399,7 @@ class Benchmarker:
         """Get list of model IDs from the Hugging Face Hub.
 
         Args:
-            languages (list of Language objects):
+            languages:
                 The languages of the models to fetch.
 
         Returns:

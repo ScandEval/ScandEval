@@ -20,14 +20,14 @@ def log_scores(
     """Log the scores.
 
     Args:
-        dataset_name (str):
+        dataset_name:
             Name of the dataset.
-        metric_configs (sequence of MetricConfig objects):
+        metric_configs:
             List of metrics to log.
-        scores (dict):
+        scores:
             The scores that are to be logged. This is a dict with keys 'train' and
             'test', with values being lists of dictionaries full of scores.
-        model_id (str):
+        model_id:
             The full Hugging Face Hub path to the pretrained transformer model.
 
     Returns:
@@ -86,10 +86,10 @@ def aggregate_scores(
     """Helper function to compute the mean with confidence intervals.
 
     Args:
-        scores (dict):
+        scores:
             Dictionary with the names of the metrics as keys, of the form
             "<split>_<metric_name>", such as "val_f1", and values the metric values.
-        metric_config (MetricConfig):
+        metric_config:
             The configuration of the metric, which is used to collect the correct
             metric from `scores`.
 

@@ -12,11 +12,11 @@ class DatasetFactory:
     """Factory which produces datasets from a configuration.
 
     Args:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration to be used in all datasets constructed.
 
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration to be used in all datasets constructed.
     """
 
@@ -27,7 +27,7 @@ class DatasetFactory:
         """Build a dataset from a configuration or a name.
 
         Args:
-            dataset (str or DatasetConfig):
+            dataset:
                 The name of the dataset, or the dataset configuration.
 
         Returns:

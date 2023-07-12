@@ -130,7 +130,7 @@ def join_tokens(tokens: List[str]) -> str:
     """Joins a list of tokens into a string.
 
     Args:
-        tokens (list of str):
+        tokens:
             The list of tokens to join.
 
     Returns:
@@ -171,9 +171,9 @@ def delete(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
     adverb.
 
     Args:
-        tokens (list of str):
+        tokens:
             The list of tokens to delete from.
-        pos_tags (list of str):
+        pos_tags:
             The list of POS tags for the tokens.
 
     Returns:
@@ -225,9 +225,9 @@ def flip_neighbours(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
     resulting sentence grammatically incorrect, such as flipping two adjectives.
 
     Args:
-        tokens (list of str):
+        tokens:
             The list of tokens to flip.
-        pos_tags (list of str):
+        pos_tags:
             The list of POS tags for the tokens.
 
     Returns:
@@ -303,11 +303,11 @@ def corrupt(
     This randomly either flips two neighbouring tokens or deletes a random token.
 
     Args:
-        tokens (list of str):
+        tokens:
             The list of tokens to corrupt.
-        pos_tags (list of str):
+        pos_tags:
             The list of POS tags for the tokens.
-        num_corruptions (int, optional):
+        num_corruptions:
             The number of corruptions to perform. Defaults to 1.
 
     Returns:
@@ -338,9 +338,9 @@ def prepare_df(df: pd.DataFrame, split: str) -> Dataset:
     """Prepare a dataframe by adding an equal number of corruptions to it.
 
     Args:
-        df (Pandas DataFrame):
+        df:
             The dataframe to prepare.
-        split (str):
+        split:
             The split to prepare the dataframe for.
 
     Returns:

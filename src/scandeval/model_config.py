@@ -9,9 +9,9 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
     """Fetches configuration for a model.
 
     Args:
-        model_id (str):
+        model_id:
             The model ID.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The configuration of the benchmark.
 
     Returns:

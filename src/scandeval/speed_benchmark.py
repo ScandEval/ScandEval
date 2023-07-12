@@ -27,17 +27,17 @@ def benchmark_speed(
     """Benchmark model inference speed.
 
     Args:
-        itr (tqdm):
+        itr:
             tqdm iterator.
-        tokenizer (PreTrainedTokenizer):
+        tokenizer:
             Tokenizer to use.
-        model (PreTrainedModel):
+        model:
             Model to use.
-        model_config (ModelConfig):
+        model_config:
             Model configuration.
-        dataset_config (DatasetConfig):
+        dataset_config:
             Dataset configuration.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             Benchmark configuration.
 
     Returns:
@@ -84,17 +84,17 @@ def benchmark_speed_single_iteration(
     """Run a single iteration of the speed benchmark.
 
     Args:
-        tokenizer (PreTrainedTokenizer):
+        tokenizer:
             The tokenizer to use in the benchmark.
-        model (PreTrainedModel):
+        model:
             The model to use in the benchmark.
-        itr_idx (int):
+        itr_idx:
             The index of the iteration.
-        model_config (ModelConfig):
+        model_config:
             The model configuration.
-        dataset_config (DatasetConfig):
+        dataset_config:
             The dataset configuration.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
 
     Returns:

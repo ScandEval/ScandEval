@@ -13,20 +13,20 @@ class MetricConfig:
     """Configuration for a metric.
 
     Attributes:
-        name (str):
+        name:
             The name of the metric.
-        pretty_name (str):
+        pretty_name:
             A longer prettier name for the metric, which allows cases and spaces. Used
             for logging.
-        huggingface_id (str):
+        huggingface_id:
             The Hugging Face ID of the metric.
-        results_key (str):
+        results_key:
             The name of the key used to extract the metric scores from the results
             dictionary.
-        compute_kwargs (dict, optional):
+        compute_kwargs:
             Keyword arguments to pass to the metric's compute function. Defaults to
             an empty dictionary.
-        postprocessing_fn (callable, optional):
+        postprocessing_fn:
             A function to apply to the metric scores after they are computed, taking
             the score to the postprocessed score along with its string representation.
             Defaults to x -> (100 * x, f"{x:.2%}").
@@ -47,13 +47,13 @@ class DatasetTask:
     """A dataset task.
 
     Attributes:
-        name (str):
+        name:
             The name of the task.
-        supertask (str):
+        supertask:
             The supertask of the task, describing the overall type of task.
-        metrics (list of MetricConfig objects):
+        metrics:
             The metrics used to evaluate the task.
-        labels (list of str):
+        labels:
             The labels used in the task.
     """
 
@@ -68,9 +68,9 @@ class Language:
     """A benchmarkable language.
 
     Attributes:
-        code (str):
+        code:
             The ISO 639-1 language code of the language.
-        name (str):
+        name:
             The name of the language.
     """
 
@@ -83,47 +83,47 @@ class BenchmarkConfig:
     """General benchmarking configuration, across datasets and models.
 
     Attributes:
-        model_languages (list of Language objects):
+        model_languages:
             The languages of the models to benchmark.
-        framework (Framework or None):
+        framework:
             The framework of the models to benchmark. If None then the framework will
             be inferred.
-        dataset_languages (list of Language objects):
+        dataset_languages:
             The languages of the datasets in the benchmark.
-        dataset_tasks (list of DatasetTask):
+        dataset_tasks:
             The tasks to benchmark.
-        batch_size (int):
+        batch_size:
             The batch size to use.
-        raise_errors (bool):
+        raise_errors:
             Whether to raise errors instead of skipping them.
-        cache_dir (str):
+        cache_dir:
             Directory to store cached models and datasets.
-        evaluate_train (bool):
+        evaluate_train:
             Whether to evaluate on the training set.
-        token (bool or str):
+        token:
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token. Defaults to False.
-        openai_api_key (str or None):
+        openai_api_key:
             The API key for the OpenAI API. If None then OpenAI models will not be
             benchmarked.
-        progress_bar (bool):
+        progress_bar:
             Whether to show a progress bar.
-        save_results (bool):
+        save_results:
             Whether to save the benchmark results to
             'scandeval_benchmark_results.json'.
-        device (torch.device):
+        device:
             The device to use for benchmarking.
-        verbose (bool):
+        verbose:
             Whether to print verbose output.
-        trust_remote_code (bool):
+        trust_remote_code:
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
         load_in_4bit (bool or None):
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model. Defaults to None.
-        testing (bool, optional):
+        testing:
             Whether a unit test is being run. Defaults to False.
     """
 
@@ -151,36 +151,36 @@ class DatasetConfig:
     """Configuration for a dataset.
 
     Attributes:
-        name (str):
+        name:
             The name of the dataset. Must be lower case with no spaces.
-        pretty_name (str):
+        pretty_name:
             A longer prettier name for the dataset, which allows cases and spaces. Used
             for logging.
-        huggingface_id (str):
+        huggingface_id:
             The Hugging Face ID of the dataset.
-        task (DatasetTask):
+        task:
             The task of the dataset.
-        languages (sequence of Language objects):
+        languages:
             The ISO 639-1 language codes of the entries in the dataset.
         id2label (list of str):
             The mapping from ID to label.
         label2id (dict of str to int):
             The mapping from label to ID.
-        num_labels (int):
+        num_labels:
             The number of labels in the dataset.
-        prompt_template (str):
+        prompt_template:
             The template for the prompt to use when benchmarking the dataset using
             few-shot evaluation.
-        max_generated_tokens (int):
+        max_generated_tokens:
             The maximum number of tokens to generate when benchmarking the dataset
             using few-shot evaluation.
-        prompt_prefix (str, optional):
+        prompt_prefix:
             The prefix to use in the few-shot prompt. Defaults to an empty string.
-        num_few_shot_examples (int, optional):
+        num_few_shot_examples:
             The number of examples to use when benchmarking the dataset using few-shot
             evaluation. For a classification task, these will be drawn evenly from
             each label. Defaults to 0.
-        prompt_label_mapping (dict of str to str, optional):
+        prompt_label_mapping:
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
     """
@@ -214,17 +214,17 @@ class ModelConfig:
     """Configuration for a model.
 
     Attributes:
-        model_id (str):
+        model_id:
             The ID of the model.
-        revision (str):
+        revision:
             The revision of the model.
-        framework (Framework):
+        framework:
             The framework of the model.
-        task (str):
+        task:
             The task that the model was trained on.
-        languages (sequence of Language objects):
+        languages:
             The languages of the model.
-        model_type (ModelType):
+        model_type:
             The type of the model.
     """
 

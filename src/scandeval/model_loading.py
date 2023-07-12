@@ -24,11 +24,11 @@ def load_model(
     """Load a model.
 
     Args:
-        model_config (ModelConfig):
+        model_config:
             The model configuration.
-        dataset_config (DatasetConfig):
+        dataset_config:
             The dataset configuration.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
 
     Returns:

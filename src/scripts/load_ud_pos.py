@@ -160,11 +160,11 @@ def load_ud_pos(
     """Load the part-of-speech part of a Universal Dependencies treebank.
 
     Args:
-        train_url (str):
+        train_url:
             The URL of the training data.
-        val_url (str):
+        val_url:
             The URL of the validation data.
-        test_url (str):
+        test_url:
             The URL of the test data.
 
 
@@ -182,7 +182,6 @@ def load_ud_pos(
     # Iterate over the data splits
     dfs = dict()
     for split, lines in data.items():
-
         # Initialise the records, data dictionary and document
         records = list()
         data_dict: Dict[str, List[Union[int, str]]] = defaultdict(list)
@@ -190,7 +189,6 @@ def load_ud_pos(
 
         # Iterate over the data for the given split
         for line in lines:
-
             # If we are at the first line of an entry then extract the document
             if line.startswith("# text = "):
                 doc = re.sub("# text = ", "", line)

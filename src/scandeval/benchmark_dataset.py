@@ -36,15 +36,15 @@ class BenchmarkDataset(ABC):
     """Abstract benchmarking dataset class.
 
     Args:
-        dataset_config (DatasetConfig):
+        dataset_config:
             The configuration of the dataset.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The configuration of the benchmark.
 
     Attributes:
-        dataset_config (DatasetConfig):
+        dataset_config:
             The configuration of the dataset.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The configuration of the benchmark.
     """
 
@@ -54,9 +54,9 @@ class BenchmarkDataset(ABC):
         """Initialise the dataset.
 
         Args:
-            dataset_config (DatasetConfig):
+            dataset_config:
                 The configuration for the dataset.
-            benchmark_config (BenchmarkConfig):
+            benchmark_config:
                 The configuration for the benchmark.
         """
         self.dataset_config = dataset_config
@@ -79,7 +79,7 @@ class BenchmarkDataset(ABC):
         """Benchmark a model.
 
         Args:
-            model_id (str):
+            model_id:
                 The full Hugging Face Hub path to the pretrained transformer model. The
                 specific model version to use can be added after the suffix '@':
                 "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id,
@@ -205,9 +205,9 @@ class BenchmarkDataset(ABC):
         """Get metadata about the model.
 
         Args:
-            model (PreTrainedModel or GenerativeModel):
+            model:
                 The model to get metadata about.
-            tokenizer (Tokenizer):
+            tokenizer:
                 The tokenizer to get metadata about.
 
         Returns:
@@ -282,9 +282,9 @@ class BenchmarkDataset(ABC):
         """Load the raw bootstrapped datasets.
 
         Args:
-            num_iter (int):
+            num_iter:
                 The number of iterations to run.
-            rng (np.random.Generator):
+            rng:
                 The random number generator to use.
 
         Returns:
@@ -350,19 +350,19 @@ class BenchmarkDataset(ABC):
         """Load the data and prepare it for training.
 
         Args:
-            train (Dataset):
+            train:
                 The raw training dataset.
-            val (Dataset):
+            val:
                 The raw validation dataset.
-            tests (list[Dataset]):
+            tests:
                 The raw bootstrapped test datasets.
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
-            hf_model_config (PretrainedConfig):
+            hf_model_config:
                 The Hugging Face model configuration.
-            tokenizer (Tokenizer):
+            tokenizer:
                 The tokenizer.
-            generative_model (bool):
+            generative_model:
                 Whether the model is a generative model.
 
         Returns:
@@ -429,7 +429,7 @@ class BenchmarkDataset(ABC):
         """Process the data.
 
         Args:
-            dataset_dict (DatasetDict):
+            dataset_dict:
                 The dataset dictionary.
 
         Returns:
@@ -443,7 +443,7 @@ class BenchmarkDataset(ABC):
         """Preprocess a dataset.
 
         Args:
-            dataset (Hugging Face dataset):
+            dataset:
                 The dataset to preprocess.
             kwargs:
                 Extra keyword arguments containing objects used in preprocessing the
@@ -464,10 +464,10 @@ class BenchmarkDataset(ABC):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Tokenizer or None, optional):
+            tokenizer:
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
-            model (PreTrainedModel or GenerativeModel or None, optional):
+            model:
                 A pretrained model. Can be None if the model is not used in the
                 initialisation of the data collator. Defaults to None.
 
@@ -486,7 +486,7 @@ class BenchmarkDataset(ABC):
         """Compute the metrics needed for evaluation.
 
         Args:
-            model_outputs_and_labels (pair of sequences):
+            model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
             id2label (list of str):
@@ -506,9 +506,9 @@ class BenchmarkDataset(ABC):
         """Extract few-shot examples from the training dataset.
 
         Args:
-            train_dataset (Hugging Face dataset):
+            train_dataset:
                 The training dataset.
-            random_seed (int):
+            random_seed:
                 The random seed to use when extracting the few-shot examples.
 
         Returns:
@@ -524,9 +524,9 @@ class BenchmarkDataset(ABC):
         """Apply a few-shot prompt to the examples.
 
         Args:
-            examples (dict):
+            examples:
                 The examples to apply the prompt to.
-            few_shot_examples (list of dict):
+            few_shot_examples:
                 The examples to be included in the few-shot prompt.
 
         Returns:
@@ -545,12 +545,12 @@ class BenchmarkDataset(ABC):
         """Extract the predicted labels from the generated output.
 
         Args:
-            input_batch (dict):
+            input_batch:
                 The input batch, where the keys are the feature names and the values
                 are lists with the feature values.
-            model_output (ModelOutput):
+            model_output:
                 The raw generated output of the model.
-            tokenizer (Tokenizer):
+            tokenizer:
                 The tokenizer used together with the model.
 
         Returns:

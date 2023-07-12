@@ -21,7 +21,7 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
     """Get the dataset configuration for a dataset.
 
     Args:
-        dataset_name (str):
+        dataset_name:
             The name of the dataset.
 
     Returns:

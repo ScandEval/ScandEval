@@ -9,7 +9,7 @@ def is_list_of_int(x: Any) -> TypeGuard[list[int]]:
     """Check if an object is a list of integers.
 
     Args:
-        x (Any):
+        x:
             The object to check.
 
     Returns:
@@ -23,7 +23,7 @@ def is_list_of_list_of_int(x: Any) -> TypeGuard[list[list[int]]]:
     """Check if an object is a list of list of integers.
 
     Args:
-        x (Any):
+        x:
             The object to check.
 
     Returns:
@@ -41,7 +41,7 @@ def is_list_of_str(x: Any) -> TypeGuard[list[str]]:
     """Check if an object is a list of integers.
 
     Args:
-        x (Any):
+        x:
             The object to check.
 
     Returns:

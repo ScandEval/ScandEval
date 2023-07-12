@@ -31,55 +31,55 @@ def build_benchmark_config(
     """Create a benchmark configuration.
 
     Args:
-        language (str or list of str):
+        language:
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
             to 'all' if all languages (also non-Scandinavian) should be considered.
-        model_language (str, list of str, or None):
+        model_language:
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages.
-        dataset_language (str, list of str, or None):
+        dataset_language:
             The language codes of the languages to include for datasets. If
             specified then this overrides the `language` parameter for dataset
             languages.
-        dataset_task (str, list of str, or None):
+        dataset_task:
             The tasks to include for dataset. If None then datasets will not be
             filtered based on their task.
-        batch_size (int):
+        batch_size:
             The batch size to use.
-        raise_errors (bool):
+        raise_errors:
             Whether to raise errore instead of skipping them.
-        cache_dir (str):
+        cache_dir:
             Directory to store cached models.
-        evaluate_train (bool):
+        evaluate_train:
             Whether to evaluate the training set as well.
-        token (bool or str):
+        token:
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token.
-        openai_api_key (str or None):
+        openai_api_key:
             The OpenAI API key to use for authentication. If None, then None will be
             returned.
-        progress_bar (bool):
+        progress_bar:
             Whether progress bars should be shown.
-        save_results (bool):
+        save_results:
             Whether to save the benchmark results to local JSON file.
-        verbose (bool):
+        verbose:
             Whether to output additional output.
-        framework (Framework or None):
+        framework:
             The model framework to use. If None then the framework will be set
             automatically. Only relevant if `model_id` refers to a local model.
-        device (Device or None):
+        device:
             The device to use for running the models. If None then the device will be
             set automatically.
-        trust_remote_code (bool):
+        trust_remote_code:
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
         load_in_4bit (bool or None):
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model. Defaults to None.
-        testing (bool, optional):
+        testing:
             Whether to run the benchmark in testing mode. Defaults to False.
     """
     languages = prepare_languages(language=language)
@@ -122,7 +122,7 @@ def prepare_languages(language: str | list[str]) -> list[str]:
     """Prepare language(s) for benchmarking.
 
     Args:
-        language (str or list of str):
+        language:
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
             to 'all' if all languages (also non-Scandinavian) should be considered.
@@ -159,10 +159,10 @@ def prepare_model_languages(
     """Prepare model language(s) for benchmarking.
 
     Args:
-        model_language (None, str or list of str):
+        model_language:
             The language codes of the languages to include for models. If specified
             then this overrides the `language` parameter for model languages.
-        languages (list of str):
+        languages:
             The default language codes of the languages to include.
 
     Returns:
@@ -199,11 +199,11 @@ def prepare_dataset_languages(
     """Prepare dataset language(s) for benchmarking.
 
     Args:
-        model_language (None, str or list of str):
+        model_language:
             The language codes of the languages to include for datasets. If
             specified then this overrides the `language` parameter for dataset
             languages.
-        languages (list of str):
+        languages:
             The default language codes of the languages to include.
 
     Returns:
@@ -237,7 +237,7 @@ def prepare_dataset_tasks(dataset_task: str | list[str] | None) -> list[DatasetT
     """Prepare dataset task(s) for benchmarking.
 
     Args:
-        dataset_task (str or list of str or None):
+        dataset_task:
             The tasks to include for dataset. If None then datasets will not be
             filtered based on their task.
 
@@ -264,7 +264,7 @@ def prepare_device(device: Device | None) -> torch.device:
     """Prepare device for benchmarking.
 
     Args:
-        device (Device or None):
+        device:
             The device to use for running the models. If None then the device will be
             set automatically.
 

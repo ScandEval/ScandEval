@@ -56,33 +56,33 @@ def finetune(
     """Evaluate a model on a dataset through finetuning.
 
     Args:
-        itr (tqdm.tqdm):
+        itr:
             The progress bar iterator.
-        train (Dataset):
+        train:
             The training dataset.
-        val (Dataset):
+        val:
             The validation dataset.
-        tests (list[Dataset]):
+        tests:
             The bootstrapped test datasets.
-        prepared_train (Dataset):
+        prepared_train:
             The prepared training dataset.
-        prepared_val (Dataset):
+        prepared_val:
             The prepared validation dataset.
-        prepared_tests (list[Dataset]):
+        prepared_tests:
             The prepared bootstrapped test datasets.
-        model (PreTrainedModel):
+        model:
             The model to evaluate.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer to use.
-        model_config (ModelConfig):
+        model_config:
             The configuration of the model.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
-        dataset_config (DatasetConfig):
+        dataset_config:
             The dataset configuration.
-        compute_metrics (Callable):
+        compute_metrics:
             The function used to compute the metrics.
-        data_collator (DataCollator):
+        data_collator:
             The data collator to use.
 
     Returns:
@@ -204,34 +204,34 @@ def finetune_single_iteration(
     """Run a single iteration of a benchmark.
 
     Args:
-        iteration_idx (int):
+        iteration_idx:
             The index of the iteration.
-        model_config (ModelConfig):
+        model_config:
             The model configuration.
-        train (Dataset):
+        train:
             The original training dataset.
-        test (Dataset):
+        test:
             The original test dataset.
-        prepared_train (Dataset):
+        prepared_train:
             The prepared training dataset.
-        prepared_val (Dataset):
+        prepared_val:
             The prepared validation dataset.
-        prepared_test (Dataset):
+        prepared_test:
             The prepared test dataset.
-        training_args (TrainingArguments):
+        training_args:
             The training arguments.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
-        dataset_config (DatasetConfig):
+        dataset_config:
             The dataset configuration.
-        data_collator (DataCollator):
+        data_collator:
             The data collator.
-        compute_metrics (Callable):
+        compute_metrics:
             The function to compute the metrics.
-        tokenizer (Tokenizer or None):
+        tokenizer:
             The tokenizer to use in the benchmark. If None then a new tokenizer
             will be loaded.
-        model (PreTrainedModel or None):
+        model:
             The model to use in the benchmark. If None then a new model will be
             loaded.
 
@@ -333,9 +333,9 @@ def get_training_args(
     """Get the training arguments for the current iteration.
 
     Args:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
-        iteration_idx (int):
+        iteration_idx:
             The index of the current iteration. This is only used to generate a
             unique random seed for the current iteration.
 
@@ -398,21 +398,21 @@ def get_trainer(
     """Get a Trainer object.
 
     Args:
-        model (PreTrainedModel or GenerativeModel):
+        model:
             The model to finetune.
-        args (TrainingArguments):
+        args:
             The training arguments.
-        train_dataset (Dataset):
+        train_dataset:
             The training dataset.
-        eval_dataset (Dataset):
+        eval_dataset:
             The evaluation dataset.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer.
-        compute_metrics (Callable):
+        compute_metrics:
             The function used to compute the metrics.
-        data_collator (DataCollator):
+        data_collator:
             The data collator.
-        callbacks (list of TrainerCallback):
+        callbacks:
             The callbacks to use.
 
     Returns:

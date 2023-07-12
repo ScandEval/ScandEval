@@ -40,38 +40,38 @@ def generate(
     """Evaluate a model on a dataset through generation.
 
     Args:
-        itr (tqdm.tqdm):
+        itr:
             The progress bar iterator.
-        train (Dataset):
+        train:
             The training dataset.
-        val (Dataset):
+        val:
             The validation dataset.
-        tests (list[Dataset]):
+        tests:
             The bootstrapped test datasets.
-        prepared_train (Dataset):
+        prepared_train:
             The prepared training dataset.
-        prepared_val (Dataset):
+        prepared_val:
             The prepared validation dataset.
-        prepared_tests (list[Dataset]):
+        prepared_tests:
             The prepared bootstrapped test datasets.
-        num_iter (int):
+        num_iter:
             The number of iterations to run.
-        rng (np.random.Generator):
+        rng:
             The random number generator.
-        model (GenerativeModel):
+        model:
             The model to evaluate.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer to use for the model. If `None` then the model's
             tokenizer will be used.
-        data_collator (DataCollator):
+        data_collator:
             The data collator to use for the model.
-        compute_metrics (Callable):
+        compute_metrics:
             The function to use to compute the metrics.
-        extract_labels_fn (Callable):
+        extract_labels_fn:
             The function to use to extract the labels from the model output.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The configuration of the benchmark.
-        dataset_config (DatasetConfig):
+        dataset_config:
             The configuration of the dataset.
 
     Returns:
@@ -110,6 +110,10 @@ def generate(
                     raise InvalidBenchmark(str(e))
                 clear_memory()
                 benchmark_config.batch_size //= 2
+                if benchmark_config.batch_size < 1:
+                    raise InvalidBenchmark(
+                        "GPU out of memory, even with a batch size of 1!"
+                    )
 
         logger.debug(f"Test scores for iteration {idx}: {test_scores}")
         scores["test"].append(test_scores)
@@ -146,21 +150,21 @@ def generate_single_iteration(
     """Evaluate a model on a dataset in a single iteration through generation.
 
     Args:
-        prepared_dataset (Dataset):
+        prepared_dataset:
             The dataset to evaluate on.
-        model (GenerativeModel):
+        model:
             The model to evaluate.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer to use for the model.
-        data_collator (DataCollator):
+        data_collator:
             The data collator to use for the model.
-        compute_metrics (Callable):
+        compute_metrics:
             The function to use to compute the metrics.
-        extract_labels_fn (Callable):
+        extract_labels_fn:
             The function to use to extract the labels from the dataset.
-        dataset_config (DatasetConfig):
+        dataset_config:
             The configuration of the dataset.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The configuration of the benchmark.
 
     Returns:
@@ -198,9 +202,10 @@ def generate_single_iteration(
     )
     all_preds: list[str | list[str]] = list()
 
+    batch_size = 1 if isinstance(model, OpenAIModel) else benchmark_config.batch_size
     dataloader = DataLoader(
         dataset=torch_dataset,
-        batch_size=benchmark_config.batch_size,
+        batch_size=batch_size,
         shuffle=False,
         num_workers=4,
         collate_fn=data_collator,
@@ -216,8 +221,8 @@ def generate_single_iteration(
                     inputs=inputs, generation_config=generation_config
                 )
 
-        batch_start = batch_idx * benchmark_config.batch_size
-        batch_end = (batch_idx + 1) * benchmark_config.batch_size
+        batch_start = batch_idx * batch_size
+        batch_end = (batch_idx + 1) * batch_size
         input_batch = prepared_dataset[batch_start:batch_end]
         extracted_labels: list = extract_labels_fn(
             input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
@@ -251,13 +256,13 @@ def extract_raw_predictions(
     """Get the raw predictions from the generated sequences.
 
     Args:
-        generated_sequences (list of list of int):
+        generated_sequences:
             The generated sequences from the model. The outer-most list is the
             batch dimension, the inner-most list is the sequence dimension,
             consisting of token IDs.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer used to generate the tokens.
-        dataset_config (DatasetConfig):
+        dataset_config:
             The dataset config.
 
     Returns:
@@ -298,9 +303,9 @@ def get_generation_stopping_criteria(
     """Get the stopping criteria for generation.
 
     Args:
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer used to tokenize the stop words.
-        model (GenerativeModel):
+        model:
             The generative model, which we use to ensure the tensors are on the
             same device, and also determine whether stop words are needed, based on
             the model type.

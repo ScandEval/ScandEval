@@ -28,15 +28,15 @@ class QuestionAnswering(BenchmarkDataset):
     """Question-answering benchmark dataset.
 
     Args:
-        dataset_config (DatasetConfig):
+        dataset_config:
             The dataset configuration.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
 
     Attributes:
-        dataset_config (DatasetConfig):
+        dataset_config:
             The configuration of the dataset.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The configuration of the benchmark.
     """
 
@@ -44,7 +44,7 @@ class QuestionAnswering(BenchmarkDataset):
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
-            dataset (Hugging Face dataset):
+            dataset:
                 The dataset to preprocess.
             kwargs:
                 Extra keyword arguments containing objects used in preprocessing the
@@ -135,10 +135,10 @@ class QuestionAnswering(BenchmarkDataset):
         """Load the data collator used to prepare samples during finetuning.
 
         Args:
-            tokenizer (Tokenizer or None, optional):
+            tokenizer:
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
-            model (PreTrainedModel or GenerativeModel or None, optional):
+            model:
                 A pretrained model. Can be None if the model is not used in the
                 initialisation of the data collator. Defaults to None.
 
@@ -156,7 +156,7 @@ class QuestionAnswering(BenchmarkDataset):
         """Compute the metrics needed for evaluation.
 
         Args:
-            model_outputs_and_labels (pair of sequences):
+            model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
             id2label (list of str):
@@ -194,9 +194,9 @@ class QuestionAnswering(BenchmarkDataset):
         """Extract few-shot examples from the training dataset.
 
         Args:
-            train_dataset (Hugging Face dataset):
+            train_dataset:
                 The training dataset.
-            random_seed (int):
+            random_seed:
                 The random seed to use when extracting the few-shot examples.
 
         Returns:
@@ -223,9 +223,9 @@ class QuestionAnswering(BenchmarkDataset):
         """Apply a few-shot prompt to the examples.
 
         Args:
-            examples (dict):
+            examples:
                 The examples to apply the prompt to.
-            few_shot_examples (list of dict):
+            few_shot_examples:
                 The examples to be included in the few-shot prompt.
 
         Returns:
@@ -268,12 +268,12 @@ class QuestionAnswering(BenchmarkDataset):
         """Extract the predicted labels from the generated output.
 
         Args:
-            input_batch (dict):
+            input_batch:
                 The input batch, where the keys are the feature names and the values
                 are lists with the feature values.
-            model_output (ModelOutput):
+            model_output:
                 The raw generated output of the model.
-            tokenizer (Tokenizer):
+            tokenizer:
                 The tokenizer used together with the model.
 
         Returns:
@@ -305,9 +305,9 @@ def prepare_train_examples(
     """Prepare the features for training.
 
     Args:
-        examples (BatchEncoding):
+        examples:
             The examples to prepare.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer to use to prepare the examples.
 
     Returns:
@@ -446,9 +446,9 @@ def prepare_test_examples(
     """Prepare test examples.
 
     Args:
-        examples (BatchEncoding):
+        examples:
             Dictionary of test examples.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer used to preprocess the examples.
 
     Returns:
@@ -528,9 +528,9 @@ def prepare_examples_for_generation(
     """Prepare test examples.
 
     Args:
-        examples (BatchEncoding):
+        examples:
             Dictionary of test examples.
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer used to preprocess the examples.
 
     Returns:

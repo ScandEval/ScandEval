@@ -89,13 +89,13 @@ def postprocess_predictions_and_labels(
     """Postprocess the predictions and labels, to allow easier metric computation.
 
     Args:
-        predictions (list):
+        predictions:
             The predictions to postprocess.
-        dataset (Dataset):
+        dataset:
             The dataset containing the examples.
-        prepared_dataset (Dataset):
+        prepared_dataset:
             The dataset containing the prepared examples.
-        cls_token_index (int):
+        cls_token_index:
             The index of the CLS token.
 
     Returns:
@@ -174,23 +174,23 @@ def find_best_answer(
     """Find the best answer for a given example.
 
     Args:
-        all_start_logits (NumPy array):
+        all_start_logits:
             The start logits for all the features.
-        all_end_logits (NumPy array):
+        all_end_logits:
             The end logits for all the features.
-        prepared_dataset (Dataset):
+        prepared_dataset:
             The dataset containing the prepared examples.
-        feature_indices (list of int):
+        feature_indices:
             The indices of the features associated with the current example.
-        context (str):
+        context:
             The context of the example.
-        max_answer_length (int):
+        max_answer_length:
             The maximum length of the answer.
-        num_best_logits (int):
+        num_best_logits:
             The number of best logits to consider.
-        min_null_score (float):
+        min_null_score:
             The minimum score an answer can have.
-        cls_token_index (int):
+        cls_token_index:
             The index of the CLS token.
 
     Returns:
@@ -248,19 +248,19 @@ def find_valid_answers(
     """Find the valid answers from the start and end indexes.
 
     Args:
-        start_logits (NumPy array):
+        start_logits:
             The logits for the start of the answer.
-        end_logits (NumPy array):
+        end_logits:
             The logits for the end of the answer.
-        offset_mapping (list of pairs of int):
+        offset_mapping:
             The offset mapping, being a list of pairs of integers for each token index,
             containing the start and end character index in the original context.
-        max_answer_length (int):
+        max_answer_length:
             The maximum length of the answer.
-        num_best_logits (int):
+        num_best_logits:
             The number of best logits to consider. Note that this function will run in
             O(`num_best_logits` ^ 2) time.
-        min_null_score (float):
+        min_null_score:
             The minimum score an answer can have.
 
     Returns:

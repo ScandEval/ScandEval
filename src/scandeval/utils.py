@@ -48,9 +48,9 @@ def enforce_reproducibility(framework: Framework | str, seed: int = 4242):
     """Ensures reproducibility of experiments.
 
     Args:
-        framework (Framework):
+        framework:
             The framework used for the benchmarking.
-        seed (int):
+        seed:
             Seed for the random number generator.
     """
     random.seed(seed)
@@ -74,7 +74,7 @@ def is_module_installed(module: str) -> bool:
     Python packages.
 
     Args:
-        module (str):
+        module:
             The name of the module.
 
     Returns:
@@ -134,12 +134,12 @@ def get_class_by_name(
     """Get a class by its name.
 
     Args:
-        class_name (str or list of str):
+        class_name:
             The name of the class, written in kebab-case. The corresponding class name
             must be the same, but written in PascalCase, and lying in a module with the
             same name, but written in snake_case. If a list of strings is passed, the
             first class that is found is returned.
-        module_name (str, optional):
+        module_name:
             The name of the module where the class is located. If None then the module
             name is assumed to be the same as the class name, but written in
             snake_case. Defaults to None.
@@ -185,7 +185,7 @@ def kebab_to_pascal(kebab_string: str) -> str:
     """Converts a kebab-case string to PascalCase.
 
     Args:
-        kebab_string (str):
+        kebab_string:
             The kebab-case string.
 
     Returns:
@@ -203,11 +203,11 @@ def handle_error(
     """Handle an error that occurred during the benchmarking process.
 
     Args:
-        e (Exception):
+        e:
             The exception that was raised.
-        per_device_train_batch_size (int):
+        per_device_train_batch_size:
             The batch size used for training.
-        gradient_accumulation_steps (int):
+        gradient_accumulation_steps:
             The number of gradient accumulation steps.
 
     Returns:
@@ -245,7 +245,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
     """Get the special token metadata for a tokenizer.
 
     Args:
-        tokenizer (Tokenizer):
+        tokenizer:
             The tokenizer.
 
     Returns:
@@ -301,10 +301,10 @@ def get_huggingface_model_lists(
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
     Args:
-        languages (None or sequence of Language objects):
+        languages:
             The language codes of the language to consider. If None then the models
             will not be filtered on language.
-        token (bool or str):
+        token:
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
@@ -523,7 +523,7 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
     """Check if a model is generative or not.
 
     Args:
-        model (PreTrainedModel or GenerativeModel):
+        model:
             The model to check.
 
     Returns:
