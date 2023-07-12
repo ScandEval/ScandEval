@@ -16,7 +16,7 @@ repository = "https://github.com/saattrupdan/ScandEval"
 python = ">=3.10,<3.12"
 tqdm = "^4.62.0"
 huggingface-hub = ">=0.7.0,<1.0.0"
-transformers = "^4.30.0"
+transformers = {git = "https://github.com/huggingface/transformers"}
 torch = "^1.13.1"
 datasets = "^2.7.0"
 click = "^8.1.3"
@@ -37,8 +37,8 @@ accelerate = ">=0.20.3,<1.0.0"
 openai = ">=0.27.8,<1.0.0"
 tiktoken = ">=0.4.0,<1.0.0"
 levenshtein = ">=0.21.1,<1.0.0"
-bitsandbytes = ">=0.39.0,<1.0.0"
 einops = ">=0.6.0,<1.0.0"
+bitsandbytes = ">=0.40.0.post4,<1.0.0"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^7.1.1"
