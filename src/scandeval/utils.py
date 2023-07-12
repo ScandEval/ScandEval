@@ -7,6 +7,7 @@ import os
 import random
 import re
 import warnings
+from pathlib import Path
 from typing import Optional, Sequence, Tuple, Type, Union
 
 import numpy as np
@@ -25,9 +26,9 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
     """Create cache directory for a model.
 
     Args:
-        cache_dir: 
+        cache_dir:
             The cache directory.
-        model_id: 
+        model_id:
             The model ID.
 
     Returns:
@@ -35,7 +36,8 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
     """
     # to avoid nesting due to models name containing '/'
     _model_id = model_id.replace("/", "--")
-    return os.path.join(cache_dir, "model_cache", _model_id)
+    cache_dir_path = Path(cache_dir) / "model_cache" / _model_id
+    return str(cache_dir_path)
 
 
 def clear_memory():
