@@ -21,6 +21,21 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 from .exceptions import InvalidBenchmark
 
 
+def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
+    """Create cache directory for a model.
+
+    Args:
+        cache_dir: The cache directory.
+        model_id: The model ID.
+
+    Returns:
+        The path to the cache directory.
+    """
+    # to avoid nesting due to models name containing '/'
+    _model_id = model_id.replace("/", "--")
+    return os.path.join(cache_dir, "model_cache", _model_id)
+
+
 def clear_memory():
     """Clears the memory of unused items."""
 

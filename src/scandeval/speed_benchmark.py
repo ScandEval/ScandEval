@@ -1,6 +1,7 @@
 """Benchmarking model inference speed."""
 
 from collections import defaultdict
+from functools import cache
 from typing import Dict, List, Union
 
 import pyinfer
@@ -15,6 +16,7 @@ from .exceptions import InvalidBenchmark
 from .model_loading import load_model
 from .types import SCORE_DICT
 
+from .utils import create_model_cache_dir
 
 def benchmark_speed(
     itr: tqdm,
@@ -108,6 +110,7 @@ def benchmark_speed_single_iteration(
             returned.
     """
     scores: Dict[str, Dict[str, float]] = dict()
+    model_cache_dir = create_model_cache_dir(cache_dir=benchmark_config.cache_dir, model_id=model_config.model_id)
     try:
 
         # Reinitialise a new model
@@ -122,7 +125,7 @@ def benchmark_speed_single_iteration(
                 id2label=dataset_config.id2label,
                 from_flax=model_config.framework == "jax",
                 use_auth_token=benchmark_config.use_auth_token,
-                cache_dir=benchmark_config.cache_dir,
+                cache_dir=model_cache_dir,
                 raise_errors=benchmark_config.raise_errors,
             )
 
