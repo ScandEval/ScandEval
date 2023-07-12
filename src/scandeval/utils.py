@@ -25,8 +25,10 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
     """Create cache directory for a model.
 
     Args:
-        cache_dir: The cache directory.
-        model_id: The model ID.
+        cache_dir: 
+            The cache directory.
+        model_id: 
+            The model ID.
 
     Returns:
         The path to the cache directory.
