@@ -31,10 +31,9 @@ def log_scores(
             The full Hugging Face Hub path to the pretrained transformer model.
 
     Returns:
-        dict:
-            A dictionary with keys 'raw_scores' and 'total', with 'raw_scores' being
-            identical to `scores` and 'total' being a dictionary with the aggregated
-            scores (means and standard errors).
+        A dictionary with keys 'raw_scores' and 'total', with 'raw_scores' being
+        identical to `scores` and 'total' being a dictionary with the aggregated scores
+        (means and standard errors).
     """
     # Initial logging message
     msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
@@ -94,10 +93,9 @@ def aggregate_scores(
             metric from `scores`.
 
     Returns:
-        dict:
-            Dictionary with keys among 'train' and 'test', with corresponding values
-            being a pair of floats, containing the score and the radius of its 95%
-            confidence interval.
+        Dictionary with keys among 'train' and 'test', with corresponding values being
+        a pair of floats, containing the score and the radius of its 95% confidence
+        interval.
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

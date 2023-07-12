@@ -78,8 +78,7 @@ def is_module_installed(module: str) -> bool:
             The name of the module.
 
     Returns:
-        bool:
-            Whether the module is installed or not.
+        Whether the module is installed or not.
     """
     # Get list of all modules, including their versions
     installed_modules_with_versions = list(pkg_resources.working_set)
@@ -145,8 +144,7 @@ def get_class_by_name(
             snake_case. Defaults to None.
 
     Returns:
-        type or None:
-            The class. If the class is not found, None is returned.
+        The class. If the class is not found, None is returned.
     """
     # Ensure that `class_name` is a sequence
     if isinstance(class_name, str):
@@ -189,8 +187,7 @@ def kebab_to_pascal(kebab_string: str) -> str:
             The kebab-case string.
 
     Returns:
-        str:
-            The PascalCase string.
+        The PascalCase string.
     """
     return "".join(word.title() for word in kebab_string.split("-"))
 
@@ -211,8 +208,7 @@ def handle_error(
             The number of gradient accumulation steps.
 
     Returns:
-        pair of int:
-            The batch size and gradient accumulation steps to use.
+        The batch size and gradient accumulation steps to use.
     """
     # We assume that all these errors are caused by insufficient GPU memory
     gpu_errors = ["CUDA out of memory", "CUDA error", "MPS backend out of memory"]
@@ -231,8 +227,7 @@ def internet_connection_available() -> bool:
     """Checks if internet connection is available by pinging google.com.
 
     Returns:
-            bool:
-                Whether or not internet connection is available.
+        Whether or not internet connection is available.
     """
     try:
         requests.get("https://www.google.com")
@@ -249,8 +244,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
             The tokenizer.
 
     Returns:
-        dict:
-            The special token metadata.
+        The special token metadata.
     """
     # Create some test input IDs, to check if the tokenizer is adding special tokens
     test_input_ids = tokenizer("Test").input_ids
@@ -311,10 +305,8 @@ def get_huggingface_model_lists(
             specified then it will be used as the token. Defaults to False.
 
     Returns:
-        dict:
-            The keys are filterings of the list, which includes all language codes,
-            including 'multilingual', as well as 'all'. The values are lists
-            of model IDs.
+        The keys are filterings of the list, which includes all language codes,
+        including 'multilingual', as well as 'all'. The values are lists of model IDs.
     """
     # Get list of all languages
     all_languages = list(get_all_languages().values())
@@ -527,8 +519,7 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
             The model to check.
 
     Returns:
-        bool:
-            Whether the model is generative or not.
+        Whether the model is generative or not.
     """
     try:
         dummy_inputs = torch.tensor([[0]], device=model.device, dtype=torch.long)

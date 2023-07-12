@@ -128,8 +128,7 @@ def prepare_languages(language: str | list[str]) -> list[str]:
             to 'all' if all languages (also non-Scandinavian) should be considered.
 
     Returns:
-        list of str:
-            The prepared languages.
+        The prepared languages.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
@@ -166,8 +165,7 @@ def prepare_model_languages(
             The default language codes of the languages to include.
 
     Returns:
-        list of Language objects:
-            The prepared model languages.
+        The prepared model languages.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
@@ -207,8 +205,7 @@ def prepare_dataset_languages(
             The default language codes of the languages to include.
 
     Returns:
-        list of Language objects:
-            The prepared dataset languages.
+        The prepared dataset languages.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
@@ -242,8 +239,7 @@ def prepare_dataset_tasks(dataset_task: str | list[str] | None) -> list[DatasetT
             filtered based on their task.
 
     Returns:
-        list of DatasetTask:
-            The prepared dataset tasks.
+        The prepared dataset tasks.
     """
     # Create a dictionary that maps benchmark tasks to their associated benchmark
     # task objects
@@ -269,8 +265,7 @@ def prepare_device(device: Device | None) -> torch.device:
             set automatically.
 
     Returns:
-        torch.device:
-            The prepared device.
+        The prepared device.
     """
     device_mapping = {
         Device.CPU: torch.device("cpu"),

@@ -13,8 +13,7 @@ def is_list_of_int(x: Any) -> TypeGuard[list[int]]:
             The object to check.
 
     Returns:
-        TypeGuard[list[int]]:
-            Whether the object is a list of integers.
+        Whether the object is a list of integers.
     """
     return isinstance(x, list) and all(isinstance(i, int) for i in x)
 
@@ -27,8 +26,7 @@ def is_list_of_list_of_int(x: Any) -> TypeGuard[list[list[int]]]:
             The object to check.
 
     Returns:
-        TypeGuard[list[int]]:
-            Whether the object is a list of list of integers.
+        Whether the object is a list of list of integers.
     """
     return (
         isinstance(x, list)
@@ -45,7 +43,6 @@ def is_list_of_str(x: Any) -> TypeGuard[list[str]]:
             The object to check.
 
     Returns:
-        TypeGuard[list[str]]:
-            Whether the object is a list of strings.
+        Whether the object is a list of strings.
     """
     return isinstance(x, list) and all(isinstance(i, str) for i in x)

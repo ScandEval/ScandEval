@@ -99,8 +99,7 @@ def postprocess_predictions_and_labels(
             The index of the CLS token.
 
     Returns:
-        pair of list of dicts:
-            The postprocessed predictions and labels.
+        The postprocessed predictions and labels.
     """
     # Extract the logits from the predictions
     all_start_logits = predictions[0]
@@ -194,8 +193,7 @@ def find_best_answer(
             The index of the CLS token.
 
     Returns:
-        str:
-            The best answer for the example.
+        The best answer for the example.
     """
     # Loop through all the features associated to the current example
     valid_answers = list()
@@ -264,9 +262,8 @@ def find_valid_answers(
             The minimum score an answer can have.
 
     Returns:
-        list of dicts:
-            A list of the valid answers, each being a dictionary with keys "text" and
-            "score", the score being the sum of the start and end logits.
+        A list of the valid answers, each being a dictionary with keys "text" and
+        "score", the score being the sum of the start and end logits.
     """
     # Fetch the top-k predictions for the start- and end token indices
     start_indexes = np.argsort(start_logits)[-1 : -num_best_logits - 1 : -1].tolist()

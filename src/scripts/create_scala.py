@@ -134,7 +134,7 @@ def join_tokens(tokens: List[str]) -> str:
             The list of tokens to join.
 
     Returns:
-        str: The joined string.
+        The joined string.
     """
     # Form document
     doc = " ".join(tokens)
@@ -177,8 +177,7 @@ def delete(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
             The list of POS tags for the tokens.
 
     Returns:
-        str or None:
-            The deleted token, or None if no token could be deleted.
+        The deleted token, or None if no token could be deleted.
     """
     # Copy the token list
     new_tokens = tokens.copy()
@@ -231,8 +230,7 @@ def flip_neighbours(tokens: List[str], pos_tags: List[str]) -> Union[str, None]:
             The list of POS tags for the tokens.
 
     Returns:
-        str or None:
-            The flipped string, or None if no flip was possible.
+        The flipped string, or None if no flip was possible.
     """
     # Copy the token list
     new_tokens = tokens.copy()
@@ -311,8 +309,7 @@ def corrupt(
             The number of corruptions to perform. Defaults to 1.
 
     Returns:
-        list of tuples of str:
-            The list of (corrupted_string, corruption_type)
+        The list of (corrupted_string, corruption_type)
     """
     # Define the list of corruptions
     corruptions: List[Tuple[str, str]] = list()
@@ -344,8 +341,7 @@ def prepare_df(df: pd.DataFrame, split: str) -> Dataset:
             The split to prepare the dataframe for.
 
     Returns:
-        Dataset:
-            The prepared dataset.
+        The prepared dataset.
     """
     # Reset the index of the dataframe
     df.reset_index(drop=True, inplace=True)

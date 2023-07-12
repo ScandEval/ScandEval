@@ -7,8 +7,7 @@ def get_all_dataset_tasks() -> dict[str, DatasetTask]:
     """Get a list of all the dataset tasks.
 
     Returns:
-        dict:
-            A mapping between names of dataset tasks and their configurations.
+        A mapping between names of dataset tasks and their configurations.
     """
     return {cfg.name: cfg for cfg in globals().values() if isinstance(cfg, DatasetTask)}
 

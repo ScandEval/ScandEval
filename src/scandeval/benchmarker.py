@@ -173,11 +173,9 @@ class Benchmarker:
                 benchmarked. Defaults to None.
 
         Returns:
-            list of dict:
-                The benchmark results, where each result is a dictionary with the keys
-                'dataset', 'task', 'dataset_languages', 'model', 'num_model_parameters'
-                and 'scores'. If an error occured then the dictionary will only contain
-                the key 'error', with the associated value being the error message.
+            'dataset', 'task', 'dataset_languages', 'model', 'num_model_parameters' and
+            'scores'. If an error occured then the dictionary will only contain the key
+            'error', with the associated value being the error message.
         """
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
@@ -235,8 +233,7 @@ class Benchmarker:
                 The dataset.
 
         Returns:
-            bool:
-                Whether the model has already been evaluated on the dataset.
+            Whether the model has already been evaluated on the dataset.
         """
         for record in self.benchmark_results:
             if record["model"] == model_id and record["dataset"] == dataset:
@@ -255,8 +252,7 @@ class Benchmarker:
                 will be retrieved.
 
         Returns:
-            list of str:
-                The prepared list of model IDs.
+            The prepared list of model IDs.
         """
         model_ids: list[str]
 
@@ -296,8 +292,7 @@ class Benchmarker:
                 benchmarked. Defaults to None.
 
         Returns:
-            list of str:
-                The prepared list of model IDs.
+            The prepared list of model IDs.
         """
         if dataset is None:
             dataset_configs = [
@@ -334,11 +329,10 @@ class Benchmarker:
                 The model ID to use.
 
         Returns:
-            dict:
-                The benchmark results, being a dictionary with the keys 'dataset',
-                'task', 'dataset_languages', 'model', 'num_model_parameters' and
-                'scores'. If an error occured then the dictionary will only contain the
-                key 'error', with the associated value being the error message.
+            The benchmark results, being a dictionary with the keys 'dataset', 'task',
+            'dataset_languages', 'model', 'num_model_parameters' and 'scores'. If an
+            error occured then the dictionary will only contain the key 'error', with
+            the associated value being the error message.
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
         while True:
@@ -403,8 +397,7 @@ class Benchmarker:
                 The languages of the models to fetch.
 
         Returns:
-            list of str:
-                List of model IDs.
+            List of model IDs.
         """
         # Specify boolean variables determining whether the input variables are new
         new_languages = self._model_lists is not None and any(

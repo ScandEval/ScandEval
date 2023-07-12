@@ -1,6 +1,8 @@
 """Model and tokenizer wrapper for OpenAI models."""
 
+import json
 import logging
+from pathlib import Path
 from time import sleep
 
 import openai
@@ -15,7 +17,6 @@ from openai.error import (
 )
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
-from tqdm.auto import tqdm
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 from transformers.modeling_utils import ModelOutput
 
@@ -29,17 +30,17 @@ class OpenAITokenizer:
     """An OpenAI tokenizer.
 
     Args:
-        model_config (ModelConfig):
+        model_config:
             The model configuration.
-        hf_model_config (PretrainedConfig):
+        hf_model_config:
             The Hugging Face model configuration.
 
     Attributes:
-        model_config (ModelConfig):
+        model_config:
             The model configuration.
-        hf_model_config (PretrainedConfig):
+        hf_model_config:
             The Hugging Face model configuration.
-        encoding (Encoding):
+        encoding:
             The encoding.
     """
 
@@ -71,12 +72,11 @@ class OpenAITokenizer:
         """Tokenize text.
 
         Args:
-            text (str):
+            text:
                 The text to tokenize.
 
         Returns:
-            dict[str, LongTensor]:
-                The tokenized text.
+            The tokenized text.
         """
         truncation = kwargs.get("truncation", False)
         start_idx = -self.model_max_length if truncation else 0
@@ -106,12 +106,11 @@ class OpenAITokenizer:
         """Decode token IDs.
 
         Args:
-            token_ids (list of int):
+            token_ids:
                 The token IDs to decode.
 
         Returns:
-            str:
-                The decoded text.
+            The decoded text.
         """
         encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         token_ids = [
@@ -123,12 +122,11 @@ class OpenAITokenizer:
         """Encode text.
 
         Args:
-            text (str or list of str or list of int):
+            text:
                 The text to encode.
 
         Returns:
-            list of int:
-                The encoded text.
+            The encoded text.
         """
         if is_list_of_int(text):
             return text
@@ -142,8 +140,7 @@ class OpenAITokenizer:
         """A mapping of special tokens to their values.
 
         Returns:
-            dict[str, str or list of str]:
-                The mapping of special tokens to their values.
+            The mapping of special tokens to their values.
         """
         return dict(
             bos_token=self.bos_token,
@@ -158,8 +155,7 @@ class OpenAITokenizer:
         """The maximum length of a sequence for this model.
 
         Returns:
-            int:
-                The maximum length of a sequence for this model.
+            The maximum length of a sequence for this model.
         """
         return self.hf_model_config.model_max_length
 
@@ -169,11 +165,11 @@ class OpenAITokenizer:
         """Convert token IDs to tokens.
 
         Args:
-            ids (int or list of int):
+            ids:
+                The token IDs to convert.
 
         Returns:
-            str or list of str:
-                The tokens.
+            The tokens.
         """
         ids_list = [ids] if isinstance(ids, int) else ids
         tokens = [self.decode(token_ids=[i]) for i in ids_list]
@@ -191,12 +187,11 @@ class OpenAITokenizer:
         """Convert tokens to token IDs.
 
         Args:
-            tokens (str or list of str):
+            tokens:
                 The tokens to convert.
 
         Returns:
-            int or list of int:
-                The token IDs.
+            The token IDs.
         """
         if isinstance(tokens, str):
             tokens = [tokens]
@@ -217,7 +212,7 @@ class OpenAITokenizer:
         """Pad encoded inputs.
 
         Args:
-            encoded_inputs (BatchEncoding, list or dict):
+            encoded_inputs:
                 Tokenized inputs. Can represent one input (BatchEncoding or Dict[str,
                 List[int]]) or a batch of tokenized inputs (list of BatchEncoding,
                 Dict[str, List[List[int]]] or List[Dict[str, List[int]]]) so you can
@@ -266,26 +261,28 @@ class OpenAIModel:
     """An OpenAI model.
 
     Args:
-        model_config (ModelConfig):
+        model_config:
             The model configuration.
-        hf_model_config (PretrainedConfig):
+        hf_model_config:
             The Hugging Face model configuration.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
-        tokenizer (OpenAITokenizer):
+        tokenizer:
             The tokenizer.
 
     Attributes:
-        model_config (ModelConfig):
+        model_config:
             The model configuration.
-        config (PretrainedConfig):
+        config:
             The Hugging Face model configuration.
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
-        tokenizer (OpenAITokenizer):
+        tokenizer:
             The tokenizer.
-        device (torch.device):
+        device:
             The device to use, is always CPU.
+        cache:
+            A cache for the model's outputs.
     """
 
     def __init__(
@@ -301,13 +298,16 @@ class OpenAIModel:
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
 
+        self.cache_path = Path(benchmark_config.cache_dir) / "openai.json"
+        self.cache_path.touch(exist_ok=True)
+        with self.cache_path.open() as f:
+            self.cache: dict[dict, list[int]] = json.load(f)
+
         # Determine whether the model is a chat model
         while True:
             try:
                 openai.Completion.create(
-                    model=self.model_config.model_id,
-                    prompt="Test",
-                    max_tokens=1,
+                    model=self.model_config.model_id, prompt="Test", max_tokens=1
                 )
                 self.is_chat_model = False
                 break
@@ -321,8 +321,6 @@ class OpenAIModel:
                 sleep(1)
                 continue
 
-    # TODO: Consider caching the generations. This will remove a small amount of noise
-    # of course, but it will reduce the amount of API calls drastically
     def generate(
         self,
         inputs: Tensor,
@@ -332,9 +330,9 @@ class OpenAIModel:
         """Generate text using the model.
 
         Args:
-            inputs (Tensor):
+            inputs:
                 The input IDs.
-            generation_config (GenerationConfig or None, optional):
+            generation_config:
                 The generation configuration. If None then a default GenerationConfig
                 will be used. Defaults to None.
             **generation_kwargs:
@@ -342,8 +340,7 @@ class OpenAIModel:
                 generation configuration.
 
         Returns:
-            Tensor or ModelOutput:
-                The model output.
+            The model output.
         """
         if generation_config is None:
             generation_config = GenerationConfig(**generation_kwargs)
@@ -352,94 +349,85 @@ class OpenAIModel:
                 setattr(generation_config, key, value)
 
         multiple_inputs = inputs.dim() == 2
+        if multiple_inputs:
+            raise ValueError(
+                "OpenAI models do not support multiple inputs. Please use a batch "
+                "size of 1."
+            )
 
         # Remove padding tokens
-        if multiple_inputs:
-            inputs_list = [
-                [
-                    token_id
-                    for token_id in token_ids
-                    if token_id != self.config.pad_token_id
-                ]
-                for token_ids in inputs.tolist()
-            ]
-        else:
-            inputs_list = [
-                token_id
-                for token_id in inputs.tolist()
-                if token_id != self.config.pad_token_id
-            ]
+        inputs_list = [
+            token_id
+            for token_id in inputs.tolist()
+            if token_id != self.config.pad_token_id
+        ]
 
-        completion_ids_list: list[list[int]]
-        if not self.is_chat_model:
-            while True:
-                try:
-                    generation_output = openai.Completion.create(
-                        model=self.model_config.model_id,
-                        prompt=inputs_list,
-                        max_tokens=generation_config.max_new_tokens,
-                        temperature=generation_config.temperature,
-                        top_p=generation_config.top_p,
-                        n=generation_config.num_return_sequences,
-                        frequency_penalty=generation_config.repetition_penalty - 1.0,
-                        stop=[
-                            "\n\n",
-                            self.tokenizer.eos_token,
-                            self.tokenizer.pad_token,
-                        ],
-                    )
-                    completion_ids_list = [
-                        self.tokenizer(choice.text.strip())["input_ids"][0].tolist()
-                        for choice in generation_output.choices
-                    ]
-                    break
-                except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                    sleep(1)
+        generation_kwargs = dict(
+            model=self.model_config.model_id,
+            max_tokens=generation_config.max_new_tokens,
+            temperature=generation_config.temperature,
+            top_p=generation_config.top_p,
+            n=generation_config.num_return_sequences,
+            frequency_penalty=generation_config.repetition_penalty - 1.0,
+            stop=[
+                "\n\n",
+                self.tokenizer.eos_token,
+                self.tokenizer.pad_token,
+            ],
+        )
+
+        # Use cache if possible
+        inputs_key = dict(
+            model=generation_kwargs["model"],
+            max_tokens=int(generation_kwargs["max_tokens"]),
+            inputs=tuple(inputs_list),
+        )
+        if inputs_key in self.cache:
+            completion_ids = self.cache[inputs_key]
 
         else:
-            completion_ids_list = list()
-            for input_ids in tqdm(inputs_list, leave=False):
+            if not self.is_chat_model:
                 while True:
                     try:
-                        single_output = openai.ChatCompletion.create(
-                            model=self.model_config.model_id,
+                        model_output = openai.Completion.create(
+                            prompt=inputs_list,
+                            **generation_kwargs,
+                        )
+                        generation_output: str = model_output.choices[0].text.strip()
+                        completion_ids = (
+                            self.tokenizer([generation_output]).input_ids[0].tolist()
+                        )
+                        self.cache[inputs_key] = completion_ids
+                        break
+                    except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
+                        sleep(1)
+            else:
+                while True:
+                    try:
+                        model_output = openai.ChatCompletion.create(
                             messages=[
                                 dict(
                                     role="user",
-                                    content=self.tokenizer.decode(input_ids),
-                                ),
+                                    content=self.tokenizer.decode(inputs_list),
+                                )
                             ],
-                            max_tokens=generation_config.max_new_tokens,
-                            temperature=generation_config.temperature,
-                            top_p=generation_config.top_p,
-                            n=generation_config.num_return_sequences,
-                            frequency_penalty=(
-                                generation_config.repetition_penalty - 1.0
-                            ),
-                            stop=[
-                                "\n\n",
-                                self.tokenizer.eos_token,
-                                self.tokenizer.pad_token,
-                            ],
+                            **generation_kwargs,
                         )
-
-                        completion_ids: list[int] = self.tokenizer(
-                            single_output.choices[0].message.content.strip()
-                        )["input_ids"][0].tolist()
-                        completion_ids_list.append(completion_ids)
+                        generation_output = model_output.choices[
+                            0
+                        ].message.content.strip()
+                        completion_ids = self.tokenizer([generation_output])[
+                            "input_ids"
+                        ][0].tolist()
+                        self.cache[inputs_key] = completion_ids
                         break
-
                     except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                         sleep(1)
 
-        if multiple_inputs:
-            output = pad_sequence(
-                sequences=list(map(Tensor, completion_ids_list)),
-                batch_first=True,
-                padding_value=self.tokenizer.pad_token_id,
-            ).long()
-        else:
-            output = LongTensor(completion_ids_list)
+        with self.cache_path.open("w") as f:
+            json.dump(self.cache, f)
+
+        output = LongTensor(completion_ids)
 
         if generation_config.return_dict_in_generate:
             output = ModelOutput(dict(sequences=output))

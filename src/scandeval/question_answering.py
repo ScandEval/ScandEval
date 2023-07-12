@@ -51,7 +51,7 @@ class QuestionAnswering(BenchmarkDataset):
                 dataset.
 
         Returns:
-            Hugging Face dataset: The preprocessed dataset.
+            The preprocessed dataset.
         """
         split: str = kwargs.pop("split")
         tokenizer: Tokenizer = kwargs.pop("tokenizer")
@@ -143,8 +143,7 @@ class QuestionAnswering(BenchmarkDataset):
                 initialisation of the data collator. Defaults to None.
 
         Returns:
-            Hugging Face data collator:
-                The data collator.
+            The data collator.
         """
         return DataCollatorWithPadding(tokenizer=tokenizer)
 
@@ -163,9 +162,8 @@ class QuestionAnswering(BenchmarkDataset):
                 Conversion of indices to labels.
 
         Returns:
-            dict:
-                A dictionary with the names of the metrics as keys and the metric
-                values as values.
+            A dictionary with the names of the metrics as keys and the metric values as
+            values.
         """
         model_outputs, labels = model_outputs_and_labels
 
@@ -200,8 +198,7 @@ class QuestionAnswering(BenchmarkDataset):
                 The random seed to use when extracting the few-shot examples.
 
         Returns:
-            list[dict[str, Any]]:
-                The few-shot examples.
+            The few-shot examples.
         """
         train_with_short_examples = train_dataset.filter(
             lambda example: len(example["context"]) < 512
@@ -229,8 +226,7 @@ class QuestionAnswering(BenchmarkDataset):
                 The examples to be included in the few-shot prompt.
 
         Returns:
-            dict:
-                The examples with the few-shot prompt applied.
+            The examples with the few-shot prompt applied.
         """
         # Build the few-shot part of the prompt
         few_shot_prompts = [
@@ -277,8 +273,7 @@ class QuestionAnswering(BenchmarkDataset):
                 The tokenizer used together with the model.
 
         Returns:
-            list:
-                The predicted labels.
+            The predicted labels.
         """
         raw_predictions = extract_raw_predictions(
             generated_sequences=model_output["sequences"],
@@ -311,8 +306,7 @@ def prepare_train_examples(
             The tokenizer to use to prepare the examples.
 
     Returns:
-        BatchEncoding:
-            The prepared examples.
+        The prepared examples.
     """
     # Some of the questions have lots of whitespace on the left, which is not useful
     # and will make the truncation of the context fail (the tokenized question will
@@ -452,8 +446,7 @@ def prepare_test_examples(
             The tokenizer used to preprocess the examples.
 
     Returns:
-        BatchEncoding:
-            The prepared test examples.
+        The prepared test examples.
     """
     # Some of the questions have lots of whitespace on the left, which is not useful
     # and will make the truncation of the context fail (the tokenized question will
@@ -534,8 +527,7 @@ def prepare_examples_for_generation(
             The tokenizer used to preprocess the examples.
 
     Returns:
-        BatchEncoding:
-            The prepared test examples.
+        The prepared test examples.
     """
     tokenized_examples = tokenizer(text=examples["text"], truncation=True)
     tokenized_examples["label"] = [

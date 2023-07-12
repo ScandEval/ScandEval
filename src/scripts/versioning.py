@@ -75,8 +75,7 @@ def get_current_version() -> Tuple[int, int, int]:
     """Fetch the current version of the package.
 
     Returns:
-        triple of ints:
-            The current version, separated into major, minor and patch versions.
+        The current version, separated into major, minor and patch versions.
     """
     # Get all the version candidates from pyproject.toml
     version_candidates = re.search(

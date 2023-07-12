@@ -86,10 +86,9 @@ def finetune(
             The data collator to use.
 
     Returns:
-        dict[str, list[dict[str, float]]]:
-            A dictionary containing the scores, with keys "test" and maybe "train",
-            with values being lists of dicts containing the scores for each metric
-            for each iteration.
+        A dictionary containing the scores, with keys "test" and maybe "train", with
+        values being lists of dicts containing the scores for each metric for each
+        iteration.
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
@@ -236,10 +235,8 @@ def finetune_single_iteration(
             loaded.
 
     Returns:
-        dict or Exception:
-            A dictionary containing the scores for the current iteration, with keys
-            `train` and `test`. If an exception is raised, then the exception is
-            returned.
+        A dictionary containing the scores for the current iteration, with keys `train`
+        and `test`. If an exception is raised, then the exception is returned.
     """
     scores: dict[str, dict[str, float]] = dict()
     try:
@@ -340,8 +337,7 @@ def get_training_args(
             unique random seed for the current iteration.
 
     Returns:
-        TrainingArguments:
-            The training arguments for the current iteration.
+        The training arguments for the current iteration.
     """
     # Set the logging strategy
     if benchmark_config.verbose:
@@ -416,8 +412,7 @@ def get_trainer(
             The callbacks to use.
 
     Returns:
-        Trainer:
-            The Trainer object.
+        The Trainer object.
     """
     return Trainer(
         model=model,

@@ -41,8 +41,7 @@ def benchmark_speed(
             Benchmark configuration.
 
     Returns:
-        SCORE_DICT:
-            Dictionary of scores.
+        Dictionary of scores.
     """
     # Initialise the `scores` dictionary
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
@@ -98,10 +97,8 @@ def benchmark_speed_single_iteration(
             The benchmark configuration.
 
     Returns:
-        dict or Exception:
-            A dictionary containing the scores for the current iteration, with keys
-            `train` and `test`. If an exception is raised, then the exception is
-            returned.
+        A dictionary containing the scores for the current iteration, with keys `train`
+        and `test`. If an exception is raised, then the exception is returned.
     """
     is_generative = model_is_generative(model=model)
 

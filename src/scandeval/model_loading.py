@@ -32,8 +32,7 @@ def load_model(
             The benchmark configuration.
 
     Returns:
-        pair of (tokenizer, model):
-            The tokenizer and model.
+        The tokenizer and model.
     """
     model_type_to_model_setup_mapping: dict[str, Type[ModelSetup]] = dict(
         fresh=FreshModelSetup,

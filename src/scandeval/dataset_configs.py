@@ -9,8 +9,7 @@ def get_all_dataset_configs() -> dict[str, DatasetConfig]:
     """Get a mapping of all the dataset configurations.
 
     Returns:
-        dict:
-            A mapping between names of datasets and their configurations.
+        A mapping between names of datasets and their configurations.
     """
     return {
         cfg.name: cfg for cfg in globals().values() if isinstance(cfg, DatasetConfig)
@@ -25,8 +24,7 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
             The name of the dataset.
 
     Returns:
-        DatasetConfig:
-            The dataset configuration.
+        The dataset configuration.
 
     Raises:
         ValueError:

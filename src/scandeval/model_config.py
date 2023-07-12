@@ -15,8 +15,7 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
             The configuration of the benchmark.
 
     Returns:
-        ModelConfig:
-            The model configuration.
+        The model configuration.
 
     Raises:
         RuntimeError:

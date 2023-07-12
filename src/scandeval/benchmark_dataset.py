@@ -86,14 +86,13 @@ class BenchmarkDataset(ABC):
                 and defaults to the latest version if not specified.
 
         Returns:
-            pair of dicts:
-                A pair (scores, metadata_dict), with `scores` being a dictionary
-                containing the scores, and `metadata_dict` being a dictionary
-                containing various model metadata, such as the number of model
-                parameters, the model's maximum sequence length and the size of the
-                model's vocabulary. The keys in `score_dict` are 'raw' and 'total',
-                with all the raw scores in the first dictionary and the aggregated
-                scores in the second.
+            A pair (scores, metadata_dict), with `scores` being a dictionary
+            containing the scores, and `metadata_dict` being a dictionary
+            containing various model metadata, such as the number of model
+            parameters, the model's maximum sequence length and the size of the
+            model's vocabulary. The keys in `score_dict` are 'raw' and 'total',
+            with all the raw scores in the first dictionary and the aggregated
+            scores in the second.
 
         Raises:
             RuntimeError:
@@ -211,9 +210,8 @@ class BenchmarkDataset(ABC):
                 The tokenizer to get metadata about.
 
         Returns:
-            dict[str, int]:
-                A dictionary containing metadata about the model, with the keys being
-                the metadata names and the values being the metadata values.
+            A dictionary containing metadata about the model, with the keys being the
+            metadata names and the values being the metadata values.
         """
         if hasattr(model.config, "num_params"):
             num_params = model.config.num_params
@@ -288,8 +286,7 @@ class BenchmarkDataset(ABC):
                 The random number generator to use.
 
         Returns:
-            tuple[Dataset, Dataset, list[Dataset]]:
-                A tuple containing the training, validation and test datasets.
+            A tuple containing the training, validation and test datasets.
         """
         # Download dataset from the HF Hub
         try:
@@ -366,8 +363,7 @@ class BenchmarkDataset(ABC):
                 Whether the model is a generative model.
 
         Returns:
-            tuple[Dataset, Dataset, list[Dataset]]:
-                A tuple containing the prepared training, validation and test datasets.
+            A tuple containing the prepared training, validation and test datasets.
         """
         # Set up the preprocessing parameters
         preprocess_params: dict[str, Any] = dict(
@@ -433,8 +429,7 @@ class BenchmarkDataset(ABC):
                 The dataset dictionary.
 
         Returns:
-            DatasetDict:
-                The processed dataset dictionary.
+            The processed dataset dictionary.
         """
         return dataset_dict
 
@@ -450,8 +445,7 @@ class BenchmarkDataset(ABC):
                 dataset.
 
         Returns:
-            Hugging Face dataset:
-                The preprocessed dataset.
+            The preprocessed dataset.
         """
         pass
 
@@ -472,8 +466,7 @@ class BenchmarkDataset(ABC):
                 initialisation of the data collator. Defaults to None.
 
         Returns:
-            Hugging Face data collator:
-                The data collator.
+            The data collator.
         """
         pass
 
@@ -493,9 +486,8 @@ class BenchmarkDataset(ABC):
                 Conversion of indices to labels.
 
         Returns:
-            dict:
-                A dictionary with the names of the metrics as keys and the metric
-                values as values.
+            A dictionary with the names of the metrics as keys and the metric values as
+            values.
         """
         pass
 
@@ -512,8 +504,7 @@ class BenchmarkDataset(ABC):
                 The random seed to use when extracting the few-shot examples.
 
         Returns:
-            list[dict[str, Any]]:
-                The few-shot examples.
+            The few-shot examples.
         """
         pass
 
@@ -530,8 +521,7 @@ class BenchmarkDataset(ABC):
                 The examples to be included in the few-shot prompt.
 
         Returns:
-            dict:
-                The examples with the few-shot prompt applied.
+            The examples with the few-shot prompt applied.
         """
         pass
 
@@ -554,7 +544,6 @@ class BenchmarkDataset(ABC):
                 The tokenizer used together with the model.
 
         Returns:
-            list:
-                The predicted labels.
+            The predicted labels.
         """
         pass

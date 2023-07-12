@@ -4,6 +4,7 @@ Taken from https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 
 Last updated 19 June 2022.
 """
+
 from .config import Language
 
 
@@ -11,8 +12,7 @@ def get_all_languages() -> dict[str, Language]:
     """Get a list of all the languages.
 
     Returns:
-        dict:
-            A mapping between language codes and their configurations.
+        A mapping between language codes and their configurations.
     """
     return {cfg.code: cfg for cfg in globals().values() if isinstance(cfg, Language)}
 

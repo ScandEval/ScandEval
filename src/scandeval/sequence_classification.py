@@ -51,8 +51,7 @@ class SequenceClassification(BenchmarkDataset):
                 dataset.
 
         Returns:
-            Hugging Face dataset:
-                The preprocessed dataset.
+            The preprocessed dataset.
         """
         tokenizer: Tokenizer = kwargs["tokenizer"]
 
@@ -119,8 +118,7 @@ class SequenceClassification(BenchmarkDataset):
                 initialisation of the data collator. Defaults to None.
 
         Returns:
-            Hugging Face data collator:
-                The data collator.
+            The data collator.
         """
         return DataCollatorWithPadding(tokenizer, padding="longest")
 
@@ -139,9 +137,8 @@ class SequenceClassification(BenchmarkDataset):
                 Conversion of indices to labels.
 
         Returns:
-            dict:
-                A dictionary with the names of the metrics as keys and the metric
-                values as values.
+            A dictionary with the names of the metrics as keys and the metric values as
+            values.
         """
         model_outputs, labels = model_outputs_and_labels
 
@@ -192,8 +189,7 @@ class SequenceClassification(BenchmarkDataset):
                 The random seed to use when extracting the few-shot examples.
 
         Returns:
-            list[dict[str, Any]]:
-                The few-shot examples.
+            The few-shot examples.
         """
         shuffled_train = train_dataset.shuffle(seed=random_seed)
         num_few_shots = self.dataset_config.num_few_shot_examples
@@ -224,8 +220,7 @@ class SequenceClassification(BenchmarkDataset):
                 The examples to be included in the few-shot prompt.
 
         Returns:
-            dict:
-                The examples with the few-shot prompt applied.
+            The examples with the few-shot prompt applied.
         """
         # Build the few-shot part of the prompt
         label_mapping = self.dataset_config.prompt_label_mapping
@@ -275,8 +270,7 @@ class SequenceClassification(BenchmarkDataset):
                 The tokenizer used together with the model.
 
         Returns:
-            list:
-                The predicted labels.
+            The predicted labels.
         """
         if "scores" in model_output:
             return get_closest_logprobs_labels(
@@ -315,8 +309,7 @@ def get_closest_logprobs_labels(
             The configuration of the benchmark.
 
     Returns:
-        list[str]:
-            The predicted labels.
+        The predicted labels.
     """
     candidate_labels = [
         dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
@@ -363,9 +356,7 @@ def get_closest_word_edit_labels(
             The configuration of the dataset.
 
     Returns:
-        list of str:
-            The candidate labels with the smallest edit distance to the predicted
-            labels.
+        The candidate labels with the smallest edit distance to the predicted labels.
     """
     raw_predictions = extract_raw_predictions(
         generated_sequences=generated_sequences,

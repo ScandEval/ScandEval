@@ -48,8 +48,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 The dataset dictionary.
 
         Returns:
-            DatasetDict:
-                The processed dataset dictionary.
+            The processed dataset dictionary.
         """
         # Check what labels are present in the dataset, and store if MISC tags are not
         # present
@@ -78,9 +77,8 @@ class NamedEntityRecognition(BenchmarkDataset):
                 Conversion of indices to labels.
 
         Returns:
-            dict:
-                A dictionary with the names of the metrics as keys and the metric
-                values as values.
+            A dictionary with the names of the metrics as keys and the metric values as
+            values.
         """
         # Get the predictions from the model
         model_outputs, labels = model_outputs_and_labels
@@ -181,8 +179,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 A dictionary that converts NER tags to IDs.
 
         Returns:
-            BatchEncoding:
-                A dictionary containing the tokenized data as well as labels.
+            A dictionary containing the tokenized data as well as labels.
         """
         # Tokenize the texts. We use the `is_split_into_words` argument here because
         # the texts in our dataset are lists of words (with a label for each word)
@@ -322,9 +319,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 The list of words.
 
         Returns:
-            list of str:
-                The list of tokens with unknown tokens replaced by the corresponding
-                word.
+            The list of tokens with unknown tokens replaced by the corresponding word.
         """
         # Locate the token indices of the unknown tokens
         token_unk_idxs = [
@@ -380,7 +375,8 @@ class NamedEntityRecognition(BenchmarkDataset):
                 dataset.
 
         Returns:
-            Hugging Face dataset: The preprocessed dataset.
+            Hugging Face dataset:
+                The preprocessed dataset.
         """
         if kwargs["model_config"].task == "text-generation":
             if "few_shot_examples" in kwargs:

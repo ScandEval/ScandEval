@@ -12,8 +12,7 @@ def load_ddt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Danish Dependency Treebank.
 
     Returns:
-        dict:
-            The dataframes, stored in the keys `train`, `val` and `test`.
+        The dataframes, stored in the keys `train`, `val` and `test`.
     """
     # Define download URLs
     base_url = (
@@ -31,8 +30,7 @@ def load_fdt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Faroese Dependency Treebank.
 
     Returns:
-        dict:
-            The dataframes, stored in the keys `train`, `val` and `test`.
+        The dataframes, stored in the keys `train`, `val` and `test`.
     """
     # Define download URLs
     base_url = (
@@ -50,8 +48,7 @@ def load_idt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Icelandic Dependency Treebank.
 
     Returns:
-        dict:
-            The dataframes, stored in the keys `train`, `val` and `test`.
+        The dataframes, stored in the keys `train`, `val` and `test`.
     """
     # Define download URLs
     base_url = (
@@ -69,8 +66,7 @@ def load_ndt_nb_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Norwegian Bokmål Dependency Treebank.
 
     Returns:
-        dict:
-            The dataframes, stored in the keys `train`, `val` and `test`.
+        The dataframes, stored in the keys `train`, `val` and `test`.
     """
     # Define download URLs
     base_url = (
@@ -88,8 +84,7 @@ def load_ndt_nn_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Norwegian Nynorsk Dependency Treebank.
 
     Returns:
-        dict:
-            The dataframes, stored in the keys `train`, `val` and `test`.
+        The dataframes, stored in the keys `train`, `val` and `test`.
     """
     # Define download URLs
     base_url = (
@@ -107,8 +102,7 @@ def load_sdt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Swedish Dependency Treebank.
 
     Returns:
-        dict:
-            The dataframes, stored in the keys `train`, `val` and `test`.
+        The dataframes, stored in the keys `train`, `val` and `test`.
     """
     # Define download URLs
     base_url = (
@@ -169,8 +163,7 @@ def load_ud_pos(
 
 
     Returns:
-        dict:
-            The dataframes, stored in the keys `train`, `val` and `test`.
+        The dataframes, stored in the keys `train`, `val` and `test`.
     """
     # Download the data
     data = dict(

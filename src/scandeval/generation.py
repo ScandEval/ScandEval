@@ -75,10 +75,9 @@ def generate(
             The configuration of the dataset.
 
     Returns:
-        dict[str, list[dict[str, float]]]:
-            A dictionary containing the scores, with keys "test" and maybe "train",
-            with values being lists of dicts containing the scores for each metric
-            for each iteration.
+        A dictionary containing the scores, with keys "test" and maybe "train", with
+        values being lists of dicts containing the scores for each metric for each
+        iteration.
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
@@ -168,8 +167,7 @@ def generate_single_iteration(
             The configuration of the benchmark.
 
     Returns:
-        list[dict[str, float]]:
-            A list of dictionaries containing the scores for each metric.
+        A list of dictionaries containing the scores for each metric.
     """
     # Tokens used in generation to know when generation is finished
     stopping_criteria = get_generation_stopping_criteria(
@@ -266,9 +264,7 @@ def extract_raw_predictions(
             The dataset config.
 
     Returns:
-        list of str:
-            The candidate labels with the smallest edit distance to the predicted
-            labels.
+        The candidate labels with the smallest edit distance to the predicted labels.
     """
 
     completion_ids_lists = [
@@ -311,8 +307,7 @@ def get_generation_stopping_criteria(
             the model type.
 
     Returns:
-        list of StoppingCriteria:
-            The stopping criteria for generation.
+        The stopping criteria for generation.
     """
     if isinstance(model, OpenAIModel):
         return list()
