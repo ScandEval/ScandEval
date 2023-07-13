@@ -85,13 +85,13 @@ class BenchmarkConfig:
     Attributes:
         model_languages:
             The languages of the models to benchmark.
-        framework:
-            The framework of the models to benchmark. If None then the framework will
-            be inferred.
         dataset_languages:
             The languages of the datasets in the benchmark.
         dataset_tasks:
             The tasks to benchmark.
+        framework:
+            The framework of the models to benchmark. If None then the framework will
+            be inferred.
         batch_size:
             The batch size to use.
         raise_errors:
@@ -120,7 +120,7 @@ class BenchmarkConfig:
         trust_remote_code:
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
-        load_in_4bit (bool or None):
+        load_in_4bit:
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model. Defaults to None.
         testing:
@@ -128,9 +128,9 @@ class BenchmarkConfig:
     """
 
     model_languages: list[Language]
-    framework: Framework | str | None
     dataset_languages: list[Language]
     dataset_tasks: list[DatasetTask]
+    framework: Framework | str | None
     batch_size: int
     raise_errors: bool
     cache_dir: str
@@ -162,9 +162,9 @@ class DatasetConfig:
             The task of the dataset.
         languages:
             The ISO 639-1 language codes of the entries in the dataset.
-        id2label (list of str):
+        id2label:
             The mapping from ID to label.
-        label2id (dict of str to int):
+        label2id:
             The mapping from label to ID.
         num_labels:
             The number of labels in the dataset.
@@ -174,13 +174,13 @@ class DatasetConfig:
         max_generated_tokens:
             The maximum number of tokens to generate when benchmarking the dataset
             using few-shot evaluation.
-        prompt_prefix:
+        prompt_prefix (optional):
             The prefix to use in the few-shot prompt. Defaults to an empty string.
-        num_few_shot_examples:
+        num_few_shot_examples (optional):
             The number of examples to use when benchmarking the dataset using few-shot
             evaluation. For a classification task, these will be drawn evenly from
             each label. Defaults to 0.
-        prompt_label_mapping:
+        prompt_label_mapping (optional):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
     """

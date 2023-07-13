@@ -18,5 +18,15 @@ class TestGetAllDatasetTasks:
         for dataset_task in dataset_tasks.values():
             assert isinstance(dataset_task, DatasetTask)
 
-    def test_get_ner_dataset_task(self, dataset_tasks):
-        assert "named-entity-recognition" in dataset_tasks
+    @pytest.mark.parametrize(
+        "dataset_task_name",
+        [
+            "linguistic-acceptability",
+            "named-entity-recognition",
+            "question-answering",
+            "sentiment-classification",
+            "speed",
+        ],
+    )
+    def test_get_task(self, dataset_tasks, dataset_task_name):
+        assert dataset_task_name in dataset_tasks

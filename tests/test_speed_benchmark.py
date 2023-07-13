@@ -5,7 +5,7 @@ from tqdm.auto import tqdm
 from transformers.models.auto import AutoModelForSequenceClassification, AutoTokenizer
 
 from scandeval.dataset_configs import SPEED_CONFIG
-from scandeval.hf_hub import get_model_config
+from scandeval.model_setups import HFModelSetup
 from scandeval.speed_benchmark import benchmark_speed
 
 
@@ -21,7 +21,8 @@ def model(model_id):
 
 @pytest.fixture(scope="module")
 def model_config(model_id, benchmark_config):
-    return get_model_config(model_id=model_id, benchmark_config=benchmark_config)
+    model_setup = HFModelSetup(benchmark_config=benchmark_config)
+    return model_setup.get_model_config(model_id=model_id)
 
 
 @pytest.fixture(scope="module")
@@ -51,39 +52,21 @@ class TestBenchmarkSpeed:
         assert isinstance(scores, dict)
 
     def test_scores_keys(self, scores):
-        assert set(scores.keys()) == {"raw", "total"}
-
-    def test_raw_scores_is_dict(self, scores):
-        assert isinstance(scores["raw"], dict)
-
-    def test_raw_scores_keys(self, scores, benchmark_config):
-        if benchmark_config.evaluate_train:
-            assert set(scores["raw"].keys()) == {"test", "train"}
-        else:
-            assert set(scores["raw"].keys()) == {"test"}
+        assert set(scores.keys()) == {"test"}
 
     def test_test_scores_is_list(self, scores):
-        assert isinstance(scores["raw"]["test"], list)
+        assert isinstance(scores["test"], list)
 
     def test_test_scores_contain_dicts(self, scores):
-        assert all(isinstance(x, dict) for x in scores["raw"]["test"])
+        assert all(isinstance(x, dict) for x in scores["test"])
 
-    def test_test_scores_dicts_keys_dtypes(self, scores):
+    def test_test_scores_dicts_keys(self, scores):
         assert all(
-            all(isinstance(key, str) for key in x.keys()) for x in scores["raw"]["test"]
+            set(x.keys()) == {"test_speed", "test_speed_short"} for x in scores["test"]
         )
 
     def test_test_scores_dicts_values_dtypes(self, scores):
         assert all(
             all(isinstance(value, float) for value in x.values())
-            for x in scores["raw"]["test"]
+            for x in scores["test"]
         )
-
-    def test_total_scores_is_dict(self, scores):
-        assert isinstance(scores["total"], dict)
-
-    def test_total_scores_keys_dtypes(self, scores):
-        assert all(isinstance(key, str) for key in scores["total"].keys())
-
-    def test_total_scores_values_dtypes(self, scores):
-        assert all(isinstance(value, float) for value in scores["total"].values())

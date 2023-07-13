@@ -33,6 +33,13 @@ from .model_setups import GenerativeModel, Tokenizer
 logger = logging.getLogger(__package__)
 
 
+GENERATIVE_MODEL_TASKS = [
+    "text-generation",
+    "conversational",
+    "text2text-generation",
+]
+
+
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
     """Create cache directory for a model.
 
@@ -395,14 +402,8 @@ def get_huggingface_model_lists(
             for model in models
             if model.pipeline_tag is None
             or model.pipeline_tag
-            in {
-                "fill-mask",
-                "sentence-similarity",
-                "feature-extraction",
-                "text-generation",
-                "text2text-generation",
-                "conversational",
-            }
+            in {"fill-mask", "sentence-similarity", "feature-extraction"}
+            | set(GENERATIVE_MODEL_TASKS)
         ]
 
         # Extract the model IDs

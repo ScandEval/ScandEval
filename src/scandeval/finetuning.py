@@ -4,7 +4,7 @@ import logging
 import warnings
 from collections import defaultdict
 from functools import partial
-from typing import Callable
+from typing import Any, Callable, Type
 
 import torch
 from datasets import Dataset
@@ -51,6 +51,8 @@ def finetune(
     dataset_config: DatasetConfig,
     compute_metrics: Callable,
     data_collator: DataCollator,
+    trainer_class: Type[Trainer],
+    evaluate_inputs_fn: Callable[..., dict[str, Any]],
 ) -> dict[str, list[dict[str, float]]]:
     """Evaluate a model on a dataset through finetuning.
 
@@ -83,6 +85,11 @@ def finetune(
             The function used to compute the metrics.
         data_collator:
             The data collator to use.
+        trainer_class:
+            The Trainer class to use.
+        evaluate_inputs_fn:
+            A function that generates the appropriate inputs for the `Trainer.evaluate`
+            method.
 
     Returns:
         A dictionary containing the scores, with keys "test" and maybe "train", with
@@ -95,7 +102,7 @@ def finetune(
     ga: int = 32 // bs
     for idx in itr:
         # Set variable that tracks whether we need to initialize new models in
-        # the `finetune_single_iteration` call
+        # the single iteration call
         model_already_initialized = idx == 0
 
         # Clear memory after first iteration
@@ -146,14 +153,16 @@ def finetune(
                 compute_metrics=compute_metrics,
                 tokenizer=tokenizer if model_already_initialized else None,
                 model=model if model_already_initialized else None,
+                trainer_class=trainer_class,
+                evaluate_inputs_fn=evaluate_inputs_fn,
             )
 
             # If the iteration was successful then break the loop
             if isinstance(itr_scores, dict):
                 break
 
-            # Otherwise we encountered an error, so we have to deal with it and
-            # try again
+            # Otherwise we encountered an error, so we have to deal with it and try
+            # again
             else:
                 bs = training_args.per_device_train_batch_size
                 ga = training_args.gradient_accumulation_steps
@@ -200,6 +209,8 @@ def finetune_single_iteration(
     compute_metrics: Callable,
     tokenizer: Tokenizer | None,
     model: PreTrainedModel | None,
+    trainer_class: Type[Trainer],
+    evaluate_inputs_fn: Callable[..., dict[str, Any]],
 ) -> dict[str, dict[str, float]] | Exception:
     """Run a single iteration of a benchmark.
 
@@ -234,6 +245,11 @@ def finetune_single_iteration(
         model:
             The model to use in the benchmark. If None then a new model will be
             loaded.
+        trainer_class:
+            The trainer class to use.
+        evaluate_inputs_fn:
+            A function that generates the appropriate inputs for the `Trainer.evaluate`
+            method.
 
     Returns:
         A dictionary containing the scores for the current iteration, with keys `train`
@@ -262,7 +278,7 @@ def finetune_single_iteration(
         early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
 
         # Initialise trainer
-        trainer = get_trainer(
+        trainer = trainer_class(
             model=model,
             args=training_args,
             train_dataset=prepared_train,
@@ -298,15 +314,21 @@ def finetune_single_iteration(
 
         if benchmark_config.evaluate_train:
             with torch.inference_mode():
-                train_scores = trainer.evaluate(
-                    eval_dataset=prepared_train, metric_key_prefix="train"
+                evaluate_inputs = evaluate_inputs_fn(
+                    dataset=train,
+                    prepared_dataset=prepared_train,
+                    metric_key_prefix="train",
                 )
+                train_scores = trainer.evaluate(**evaluate_inputs)
             scores["train"] = train_scores
 
         with torch.inference_mode():
-            test_scores = trainer.evaluate(
-                eval_dataset=prepared_test, metric_key_prefix="test"
+            evaluate_inputs = evaluate_inputs_fn(
+                dataset=test,
+                prepared_dataset=prepared_test,
+                metric_key_prefix="test",
             )
+            test_scores = trainer.evaluate(**evaluate_inputs)
         scores["test"] = test_scores
 
         # Return the scores

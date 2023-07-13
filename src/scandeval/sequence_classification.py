@@ -19,7 +19,7 @@ from .config import DatasetConfig
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .model_setups import GenerativeModel, Tokenizer
-from .utils import get_special_token_metadata
+from .utils import GENERATIVE_MODEL_TASKS, get_special_token_metadata
 
 logger = logging.getLogger(__package__)
 
@@ -71,7 +71,7 @@ class SequenceClassification(BenchmarkDataset):
                 and not has_sep_token
                 and cls_token is not None
                 and sep_token is not None
-                and kwargs["model_config"].task != "text-generation"
+                and kwargs["model_config"].task not in GENERATIVE_MODEL_TASKS
             ):
                 examples["text"] = [
                     f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
@@ -81,7 +81,7 @@ class SequenceClassification(BenchmarkDataset):
 
         tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
 
-        if kwargs["model_config"].task != "text-generation":
+        if kwargs["model_config"].task not in GENERATIVE_MODEL_TASKS:
             numericalise = partial(
                 self._create_numerical_labels,
                 label2id=kwargs["hf_model_config"].label2id,

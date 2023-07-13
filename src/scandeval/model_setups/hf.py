@@ -16,6 +16,7 @@ from ..enums import Framework, ModelType
 from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
 from ..languages import get_all_languages
 from ..utils import (
+    GENERATIVE_MODEL_TASKS,
     HiddenPrints,
     block_terminal_output,
     create_model_cache_dir,
@@ -79,7 +80,6 @@ class HFModelSetup:
             hf_api.model_info(repo_id=model_id, revision=revision, token=token)
             return True
 
-        # If the repository was not found on Hugging Face Hub then raise that error
         except RepositoryNotFoundError:
             return False
 
@@ -119,7 +119,6 @@ class HFModelSetup:
 
         # Attempt to fetch model data from the Hugging Face Hub
         try:
-            # Define the API object
             api: HfApi = HfApi()
 
             # Fetch the model metadata
@@ -139,10 +138,8 @@ class HFModelSetup:
                     f"The model {model_id} does not exist on the Hugging Face Hub."
                 )
 
-            # Fetch the model tags
             tags: list[str] = models[0].tags
 
-            # Extract the framework, which defaults to PyTorch
             framework = Framework.PYTORCH
             if "pytorch" in tags:
                 pass
@@ -153,16 +150,13 @@ class HFModelSetup:
             elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
                 raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
 
-            # Extract the model task, which defaults to 'fill-mask'
             model_task: str | None = models[0].pipeline_tag
             if model_task is None:
                 model_task = "fill-mask"
 
-            # Get list of all language codes
             language_mapping = get_all_languages()
             language_codes = list(language_mapping.keys())
 
-            # Construct the model config
             model_config = ModelConfig(
                 model_id=models[0].modelId,
                 framework=framework,
@@ -215,7 +209,7 @@ class HFModelSetup:
             load_in_4bit = self.benchmark_config.load_in_4bit
         else:
             load_in_4bit = (
-                model_config.task == "text-generation"
+                model_config.task in GENERATIVE_MODEL_TASKS
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
@@ -245,7 +239,7 @@ class HFModelSetup:
                     )
 
                 # Get the model class associated with the supertask
-                if model_config.task == "text-generation":
+                if model_config.task in GENERATIVE_MODEL_TASKS:
                     model_cls_supertask = "causal-l-m"
                 else:
                     model_cls_supertask = supertask
@@ -267,7 +261,6 @@ class HFModelSetup:
                 if config.model_type == "deberta-v2":
                     config.pooler_hidden_size = config.hidden_size
 
-                # Load the model
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=UserWarning)
                     with HiddenPrints():
@@ -304,13 +297,11 @@ class HFModelSetup:
 
                 self._handle_loading_exception(exception=e, model_id=model_id)
 
-        # Set up the model for question answering
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
         tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
-        # Align the model and the tokenizer
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,

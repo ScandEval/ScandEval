@@ -4,6 +4,7 @@ import os
 from typing import Generator
 
 import pytest
+import torch
 
 from scandeval.config import BenchmarkConfig
 from scandeval.dataset_tasks import LA, NER, QA, SENT
@@ -23,15 +24,20 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         model_languages=[DA, SV, NO],
         dataset_languages=[DA, SV, NO],
         dataset_tasks=[NER, QA, SENT, LA],
+        framework=None,
+        batch_size=32,
         raise_errors=False,
         cache_dir=".scandeval_cache",
         evaluate_train=False,
-        use_auth_token=auth,
+        token=auth,
+        openai_api_key=None,
         progress_bar=False,
         save_results=False,
+        device=torch.device("cpu"),
         verbose=False,
+        trust_remote_code=False,
+        load_in_4bit=None,
         testing=True,
-        batch_size=32,
     )
 
 

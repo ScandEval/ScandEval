@@ -1,6 +1,7 @@
 """Unit tests for the `config` module."""
 
 import pytest
+import torch
 
 from scandeval.config import (
     BenchmarkConfig,
@@ -10,6 +11,7 @@ from scandeval.config import (
     MetricConfig,
     ModelConfig,
 )
+from scandeval.enums import ModelType
 
 
 @pytest.fixture(scope="module")
@@ -50,6 +52,21 @@ class TestMetricConfig:
     def test_default_value_of_compute_kwargs(self, metric_config):
         assert metric_config.compute_kwargs == dict()
 
+    @pytest.mark.parametrize(
+        "inputs,expected",
+        [
+            (0.5, (50.0, "50.00%")),
+            (0.123456, (12.3456, "12.35%")),
+            (0.0, (0.0, "0.00%")),
+            (1.0, (100.0, "100.00%")),
+            (0.999999, (99.9999, "100.00%")),
+            (2.0, (200.0, "200.00%")),
+            (-1.0, (-100.0, "-100.00%")),
+        ],
+    )
+    def test_default_value_of_postprocessing_fn(self, metric_config, inputs, expected):
+        assert metric_config.postprocessing_fn(inputs) == expected
+
 
 class TestDatasetTask:
     def test_dataset_task_is_object(self, dataset_task):
@@ -76,16 +93,22 @@ class TestBenchmarkConfig:
     def benchmark_config(self, language, dataset_task):
         yield BenchmarkConfig(
             model_languages=[language],
+            framework=None,
             dataset_languages=[language],
             dataset_tasks=[dataset_task],
+            batch_size=32,
             raise_errors=True,
             cache_dir="cache_dir",
             evaluate_train=True,
-            use_auth_token=True,
-            progress_bar=True,
-            save_results=True,
-            verbose=True,
-            batch_size=32,
+            token=True,
+            openai_api_key=None,
+            progress_bar=False,
+            save_results=False,
+            device=torch.device("cpu"),
+            verbose=False,
+            trust_remote_code=False,
+            load_in_4bit=None,
+            testing=True,
         )
 
     def test_benchmark_config_is_object(self, benchmark_config):
@@ -95,15 +118,22 @@ class TestBenchmarkConfig:
         self, benchmark_config, language, dataset_task
     ):
         assert benchmark_config.model_languages == [language]
+        assert benchmark_config.framework is None
         assert benchmark_config.dataset_languages == [language]
         assert benchmark_config.dataset_tasks == [dataset_task]
+        assert benchmark_config.batch_size == 32
         assert benchmark_config.raise_errors is True
         assert benchmark_config.cache_dir == "cache_dir"
         assert benchmark_config.evaluate_train is True
-        assert benchmark_config.use_auth_token is True
-        assert benchmark_config.progress_bar is True
-        assert benchmark_config.save_results is True
-        assert benchmark_config.verbose is True
+        assert benchmark_config.token is True
+        assert benchmark_config.openai_api_key is None
+        assert benchmark_config.progress_bar is False
+        assert benchmark_config.save_results is False
+        assert benchmark_config.device == torch.device("cpu")
+        assert benchmark_config.verbose is False
+        assert benchmark_config.trust_remote_code is False
+        assert benchmark_config.load_in_4bit is None
+        assert benchmark_config.testing is True
 
 
 class TestDatasetConfig:
@@ -115,6 +145,8 @@ class TestDatasetConfig:
             huggingface_id="dataset_id",
             task=dataset_task,
             languages=[language],
+            prompt_template="{text}\n{label}",
+            max_generated_tokens=1,
         )
 
     def test_dataset_config_is_object(self, dataset_config):
@@ -128,6 +160,8 @@ class TestDatasetConfig:
         assert dataset_config.huggingface_id == "dataset_id"
         assert dataset_config.task == dataset_task
         assert dataset_config.languages == [language]
+        assert dataset_config.prompt_template == "{text}\n{label}"
+        assert dataset_config.max_generated_tokens == 1
 
     def test_id2label(self, dataset_config):
         assert dataset_config.id2label == ["label"]
@@ -137,6 +171,9 @@ class TestDatasetConfig:
 
     def test_num_labels(self, dataset_config):
         assert dataset_config.num_labels == 1
+
+    def test_default_value_of_prompt_label_mapping(self, dataset_config):
+        assert dataset_config.prompt_label_mapping == dict()
 
 
 class TestModelConfig:
@@ -148,6 +185,8 @@ class TestModelConfig:
             framework="framework",
             task="task",
             languages=[language],
+            model_type=ModelType.FRESH,
+            model_cache_dir="cache_dir",
         )
 
     def test_model_config_is_object(self, model_config):
@@ -159,3 +198,5 @@ class TestModelConfig:
         assert model_config.framework == "framework"
         assert model_config.task == "task"
         assert model_config.languages == [language]
+        assert model_config.model_type == ModelType.FRESH
+        assert model_config.model_cache_dir == "cache_dir"

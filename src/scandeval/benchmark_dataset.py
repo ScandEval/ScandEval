@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any
+from typing import Any, Type
 
 import evaluate
 import numpy as np
@@ -12,7 +12,7 @@ from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from huggingface_hub.utils._errors import HfHubHTTPError
 from tqdm.auto import tqdm
-from transformers import PretrainedConfig
+from transformers import PretrainedConfig, Trainer
 from transformers.modeling_utils import ModelOutput, PreTrainedModel
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
@@ -27,7 +27,7 @@ from .openai_models import OpenAIModel
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT
-from .utils import enforce_reproducibility, model_is_generative
+from .utils import GENERATIVE_MODEL_TASKS, enforce_reproducibility, model_is_generative
 
 logger = logging.getLogger(__package__)
 
@@ -115,7 +115,7 @@ class BenchmarkDataset(ABC):
         # This happens when a local model is used, as we cannot fetch the model metadata
         if model_config.task == "unknown":
             if model_is_generative(model=model):
-                model_config.task = "text-generation"
+                model_config.task = GENERATIVE_MODEL_TASKS[0]
             else:
                 model_config.task = "fill-mask"
 
@@ -187,6 +187,8 @@ class BenchmarkDataset(ABC):
                 benchmark_config=self.benchmark_config,
                 compute_metrics=self._compute_metrics,
                 data_collator=data_collator,
+                trainer_class=self._get_trainer_class(),
+                evaluate_inputs_fn=self._get_evaluate_inputs,
             )
 
         all_scores = log_scores(
@@ -434,6 +436,25 @@ class BenchmarkDataset(ABC):
             The processed dataset dictionary.
         """
         return dataset_dict
+
+    def _get_trainer_class(self) -> Type[Trainer]:
+        """Returns the trainer class to use."""
+        return Trainer
+
+    def _get_evaluate_inputs(
+        self, dataset: Dataset, prepared_dataset: Dataset, metric_key_prefix: str
+    ) -> dict[str, Any]:
+        """Returns the inputs to the `Trainer.evaluate` method.
+
+        Args:
+            dataset:
+                The raw dataset.
+            prepared_dataset:
+                The prepared dataset.
+            metric_key_prefix:
+                The prefix to use for the metric keys.
+        """
+        return dict(eval_dataset=prepared_dataset, metric_key_prefix=metric_key_prefix)
 
     @abstractmethod
     def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:

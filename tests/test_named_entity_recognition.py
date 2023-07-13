@@ -1,4 +1,4 @@
-"""Unit tests for the `ner` module."""
+"""Unit tests for the `named_entity_recognition` module."""
 
 import warnings
 

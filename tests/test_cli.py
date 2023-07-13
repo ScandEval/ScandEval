@@ -18,7 +18,6 @@ def test_cli_param_names(params):
         "dataset",
         "language",
         "model_language",
-        "model_framework",
         "dataset_language",
         "dataset_task",
         "batch_size",
@@ -28,9 +27,13 @@ def test_cli_param_names(params):
         "verbose",
         "save_results",
         "cache_dir",
-        "auth_token",
-        "use_auth_token",
+        "token",
+        "use_token",
         "ignore_duplicates",
+        "framework",
+        "device",
+        "trust_remote_code",
+        "load_in_4bit",
         "help",
     }
 
@@ -49,7 +52,11 @@ def test_cli_param_types(params):
     assert params["verbose"] == BOOL
     assert params["save_results"] == BOOL
     assert params["cache_dir"] == STRING
-    assert params["auth_token"] == STRING
-    assert params["use_auth_token"] == BOOL
+    assert params["token"] == STRING
+    assert params["use_token"] == BOOL
     assert params["ignore_duplicates"] == BOOL
+    assert isinstance(params["framework"], Choice)
+    assert isinstance(params["device"], Choice)
+    assert params["trust_remote_code"] == BOOL
+    assert params["load_in_4bit"] == BOOL
     assert params["help"] == BOOL

@@ -21,6 +21,8 @@ def dataset_config():
         huggingface_id="test_dataset",
         task=SENT,
         languages=[DA, IS],
+        prompt_template="{text}\n{label}",
+        max_generated_tokens=1,
     )
 
 

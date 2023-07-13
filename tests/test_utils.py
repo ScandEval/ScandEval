@@ -48,7 +48,7 @@ class TestEnforceReproducibility:
 
 class TestIsModuleInstalled:
     def test_module_is_installed(self):
-        assert is_module_installed("transformers")
+        assert is_module_installed("torch")
 
     def test_module_is_not_installed(self):
         assert not is_module_installed("non_existent_module")

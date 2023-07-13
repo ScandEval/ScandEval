@@ -17,12 +17,12 @@ from scandeval.sequence_classification import SequenceClassification
 @pytest.mark.parametrize(
     argnames=["dataset", "correct_scores"],
     argvalues=[
-        (ANGRY_TWEETS_CONFIG, (-0.38, 22.13)),
-        (SWEREC_CONFIG, (2.31, 24.83)),
-        (NOREC_CONFIG, (1.70, 24.07)),
-        (SCALA_DA_CONFIG, (3.48, 37.04)),
-        (SCALA_SV_CONFIG, (-0.69, 33.62)),
-        (SCALA_NB_CONFIG, (0.00, 30.71)),
+        (ANGRY_TWEETS_CONFIG, (5.32, 27.37)),
+        (SWEREC_CONFIG, (0.00, 23.07)),
+        (NOREC_CONFIG, (2.32, 25.12)),
+        (SCALA_DA_CONFIG, (3.69, 36.61)),
+        (SCALA_SV_CONFIG, (9.36, 42.31)),
+        (SCALA_NB_CONFIG, (4.70, 33.04)),
         (SCALA_NN_CONFIG, (0.00, 33.39)),
     ],
     ids=[

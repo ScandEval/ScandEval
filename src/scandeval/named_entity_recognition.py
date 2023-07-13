@@ -19,7 +19,7 @@ from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .model_setups import GenerativeModel, Tokenizer
-from .utils import model_is_generative
+from .utils import GENERATIVE_MODEL_TASKS, model_is_generative
 
 logger = logging.getLogger(__package__)
 
@@ -73,7 +73,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             predictions_and_labels:
                 The first array contains the probability predictions and the second
                 array contains the true labels.
-            id2label (list of str):
+            id2label:
                 Conversion of indices to labels.
 
         Returns:
@@ -102,11 +102,13 @@ class NamedEntityRecognition(BenchmarkDataset):
             ]
             labels = [
                 [
-                    id2label[lbl_id] if isinstance(lbl_id, int) else lbl_id
-                    for _, lbl_id in zip(pred, label)  # type: ignore[call-overload]
+                    id2label[lbl_id]
+                    if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
+                    else lbl_id
+                    for lbl_id in label  # type: ignore[call-overload]
                     if lbl_id != -100
                 ]
-                for pred, label in zip(raw_predictions, labels)
+                for label in labels
             ]
 
         else:
@@ -378,7 +380,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             Hugging Face dataset:
                 The preprocessed dataset.
         """
-        if kwargs["model_config"].task == "text-generation":
+        if kwargs["model_config"].task in GENERATIVE_MODEL_TASKS:
             if "few_shot_examples" in kwargs:
                 few_shot_examples = kwargs["few_shot_examples"]
                 few_shot_fn = partial(

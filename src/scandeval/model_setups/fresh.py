@@ -150,7 +150,6 @@ class FreshModelSetup:
         )
         model = model_cls(config)
 
-        # Set up the model for question answering
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
@@ -175,7 +174,6 @@ class FreshModelSetup:
                     f"Could not load tokenizer for model {model_id!r}."
                 )
 
-        # Align the model and the tokenizer
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,

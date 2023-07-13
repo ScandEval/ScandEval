@@ -2,7 +2,7 @@
 
 import logging
 from functools import partial
-from typing import Any, Callable
+from typing import Any, Type
 
 import numpy as np
 from datasets.arrow_dataset import Dataset
@@ -10,8 +10,6 @@ from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.modeling_utils import ModelOutput, PreTrainedModel
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
-from transformers.trainer_callback import TrainerCallback
-from transformers.training_args import TrainingArguments
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
@@ -20,7 +18,6 @@ from .model_setups import GenerativeModel, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
 from .utils import get_special_token_metadata
 
-# Set up logger
 logger = logging.getLogger(__package__)
 
 
@@ -79,12 +76,14 @@ class QuestionAnswering(BenchmarkDataset):
                 preprocess_fn,
                 batched=True,
                 batch_size=10,
+                remove_columns=[col for col in dataset.column_names if col != "text"],
             )
+
         except NotImplementedError as e:
             raise InvalidBenchmark(str(e))
 
         # The Trainer hides the columns that are not used by the model (here `id` and
-        # `offset_mapping` which we will need for our post-processing), so we set them
+        # `offset_mapping` which we will need for our post-processing), so we put them
         # back
         preprocessed.set_format(
             type=preprocessed.format["type"],
@@ -94,34 +93,13 @@ class QuestionAnswering(BenchmarkDataset):
         # Return the preprocessed dataset
         return preprocessed
 
-    def _get_trainer(
-        self,
-        model: PreTrainedModel | GenerativeModel,
-        args: TrainingArguments,
-        train_dataset: Dataset,
-        eval_dataset: Dataset,
-        tokenizer: Tokenizer,
-        compute_metrics: Callable,
-        callbacks: list[TrainerCallback],
-    ) -> Trainer:
-        return QuestionAnsweringTrainer(
-            model=model,
-            args=args,
-            train_dataset=train_dataset,
-            eval_dataset=eval_dataset,
-            tokenizer=tokenizer,
-            compute_metrics=compute_metrics,
-            callbacks=callbacks,
-        )
+    def _get_trainer_class(self) -> Type[Trainer]:
+        return QuestionAnsweringTrainer
 
-    def _evaluate_dataset(
-        self,
-        trainer: QuestionAnsweringTrainer,
-        dataset: Dataset,
-        prepared_dataset: Dataset,
-        metric_key_prefix: str,
+    def _get_evaluate_inputs(
+        self, dataset: Dataset, prepared_dataset: Dataset, metric_key_prefix: str
     ):
-        return trainer.evaluate(
+        return dict(
             orig_eval_dataset=dataset,
             eval_dataset=prepared_dataset,
             metric_key_prefix=metric_key_prefix,
