@@ -40,6 +40,7 @@ from .types import SCORE_DICT
 from .utils import (
     block_terminal_output,
     clear_memory,
+    create_model_cache_dir,
     enforce_reproducibility,
     handle_error,
 )
@@ -181,6 +182,10 @@ class BenchmarkDataset(ABC):
             model_id=model_id, benchmark_config=self.benchmark_config
         )
 
+        model_cache_dir = create_model_cache_dir(
+            cache_dir=self.benchmark_config.cache_dir, model_id=model_id
+        )
+
         # Set random seeds to enforce reproducibility of the randomly initialised
         # weights
         rng = enforce_reproducibility(framework=model_config.framework)
@@ -196,7 +201,7 @@ class BenchmarkDataset(ABC):
             label2id=self.dataset_config.label2id,
             from_flax=model_config.framework == "jax",
             use_auth_token=self.benchmark_config.use_auth_token,
-            cache_dir=self.benchmark_config.cache_dir,
+            cache_dir=model_cache_dir,
             raise_errors=self.benchmark_config.raise_errors,
         )
 
@@ -295,7 +300,9 @@ class BenchmarkDataset(ABC):
                 block_terminal_output()
 
                 # Get the training arguments
-                training_args = self._get_training_args(iteration_idx=idx)
+                training_args = self._get_training_args(
+                    iteration_idx=idx, cache_dir=model_cache_dir
+                )
 
                 # Set the correct batch size and gradient accumulation
                 training_args.per_device_train_batch_size = bs
@@ -386,7 +393,9 @@ class BenchmarkDataset(ABC):
 
         return metadata_dict
 
-    def _get_training_args(self, iteration_idx: int) -> TrainingArguments:
+    def _get_training_args(
+        self, iteration_idx: int, cache_dir: str
+    ) -> TrainingArguments:
         # Set the logging strategy
         if self.benchmark_config.verbose:
             logging_strategy = IntervalStrategy.STEPS
@@ -400,7 +409,7 @@ class BenchmarkDataset(ABC):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             training_args = TrainingArguments(
-                output_dir=self.benchmark_config.cache_dir,
+                output_dir=cache_dir,
                 evaluation_strategy=IntervalStrategy.STEPS,
                 logging_strategy=logging_strategy,
                 save_strategy=IntervalStrategy.STEPS,
@@ -542,7 +551,7 @@ class BenchmarkDataset(ABC):
                     id2label=self.dataset_config.id2label,
                     from_flax=model_config.framework == "jax",
                     use_auth_token=self.benchmark_config.use_auth_token,
-                    cache_dir=self.benchmark_config.cache_dir,
+                    cache_dir=training_args.output_dir,
                     raise_errors=self.benchmark_config.raise_errors,
                 )
 

@@ -7,6 +7,7 @@ import os
 import random
 import re
 import warnings
+from pathlib import Path
 from typing import Optional, Sequence, Tuple, Type, Union
 
 import numpy as np
@@ -19,6 +20,24 @@ from transformers import logging as tf_logging
 from transformers.tokenization_utils import PreTrainedTokenizer
 
 from .exceptions import InvalidBenchmark
+
+
+def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
+    """Create cache directory for a model.
+
+    Args:
+        cache_dir:
+            The cache directory.
+        model_id:
+            The model ID.
+
+    Returns:
+        The path to the cache directory.
+    """
+    # to avoid nesting due to models name containing '/'
+    _model_id = model_id.replace("/", "--")
+    cache_dir_path = Path(cache_dir) / "model_cache" / _model_id
+    return str(cache_dir_path)
 
 
 def clear_memory():

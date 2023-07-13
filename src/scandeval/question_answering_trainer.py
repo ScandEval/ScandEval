@@ -72,7 +72,10 @@ class QuestionAnsweringTrainer(Trainer):
             self.log(output.metrics)
 
         self.control = self.callback_handler.on_evaluate(
-            self.args, self.state, self.control, output.metrics  # type: ignore[has-type]
+            self.args,
+            self.state,
+            self.control,  # type: ignore[has-type]
+            output.metrics,
         )
         return output.metrics
 
@@ -117,7 +120,6 @@ def postprocess_predictions_and_labels(
     predictions = list()
     labels = list()
     for example_index, example in enumerate(dataset):
-
         # Extract the best valid answer associated with the current example
         best_answer = find_best_answer(
             all_start_logits=all_start_logits,
@@ -198,7 +200,6 @@ def find_best_answer(
     # Loop through all the features associated to the current example
     valid_answers = list()
     for feature_index in feature_indices:
-
         # Get the features associated with the current example
         features = prepared_dataset[feature_index]
 
@@ -275,7 +276,6 @@ def find_valid_answers(
     valid_answers = list()
     for start_index in start_indexes:
         for end_index in end_indexes:
-
             # If the starting or ending index is out-of-scope, meaning that they are
             # either out of bounds or correspond to part of the input_ids that are not
             # in the context, then we skip this index
