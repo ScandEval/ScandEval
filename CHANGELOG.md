@@ -13,6 +13,17 @@ and this project adheres to
 - Support for few-shot evaluation of decoder models, both from the Hugging Face Hub and
   OpenAI models. This currently happens automatically when specifying a generative
   model from the Hugging Face Hub, and with all OpenAI models.
+- Now stores model caches in separate directories, enabling parallel evaluations.
+  Thanks to @KennethEnevoldsen for this contribution! :tada:
+- Added `--device` argument to the CLI, which can be used to overwrite the automatic
+  detection of device (CPU, CUDA GPU, MPS GPU, TPU) to use.
+- Added `--trust-remote-code/--no-trust-remote-code` argument to the CLI, as some
+  models require this flag to be loaded. It defaults to `False` for security reasons,
+  however.
+- Added `--load-in-4bit/--no-load-in-4bit` argument to the CLI, which can be used to
+  overwrite the automatic 4bit loading of models. By default only generative models
+  will be loaded in 4bit, and only if a CUDA GPU is available, as this is required by
+  the underlying `bitsandbytes` package.
 
 ### Changed
 - Now only supports Python 3.10 and above.
@@ -21,6 +32,13 @@ and this project adheres to
   computes tokens per second. This also has the added benefit of being able to better
   compare models with varying level of maximum sequence lengths. Further, it now uses
   GPU rather than CPU to accomodate 4-bit models, as these cannot be run on CPU.
+- Changed the `--model-framework` argument to `--framework`.
+- Changed the `--use-auth-token` and `--auth-token` arguments to `--use-token` and
+  `--token`, reflecting the same change in the `transformers` package.
+
+### Removed
+- Previously generative models had their maximum sequence length altered by subtracting
+  their padding token ID. This is not needed anymore and have been removed.
 
 
 ## [v7.1.1] - 2023-07-01
