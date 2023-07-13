@@ -4,7 +4,6 @@ from collections import defaultdict
 
 import numpy as np
 from datasets.arrow_dataset import Dataset
-from transformers import TrainerControl
 from transformers.trainer import Trainer
 
 from .utils import get_special_token_metadata
@@ -71,11 +70,11 @@ class QuestionAnsweringTrainer(Trainer):
         if self.args.should_log:
             self.log(output.metrics)
 
-        self.control: TrainerControl = self.callback_handler.on_evaluate(
-            args=self.args,
-            state=self.state,
-            control=self.control,
-            metrics=output.metrics,
+        self.control = self.callback_handler.on_evaluate(
+            self.args,
+            self.state,
+            self.control,  # type: ignore[has-type]
+            output.metrics,
         )
         return output.metrics
 

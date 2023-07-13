@@ -37,7 +37,6 @@ def main() -> None:
 
     with tqdm(lines, desc="Adding metadata to records") as pbar:
         for line in pbar:
-
             # Skip line if it is empty
             if line.strip() == "":
                 continue
@@ -59,7 +58,6 @@ def main() -> None:
 
             # Check if the record has missing metadata
             if any([key not in record for key in metadata]):
-
                 # Load metadata from cache if possible
                 if record["model"] in cache:
                     cached_metadata = cache[record["model"]]
@@ -72,6 +70,7 @@ def main() -> None:
                         model_id=record["model"],
                         revision="main",
                         supertask=dataset_config.task.supertask,
+                        language=dataset_config.languages[0].code,
                         num_labels=dataset_config.num_labels,
                         id2label=dataset_config.id2label,
                         label2id=dataset_config.label2id,

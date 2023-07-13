@@ -8,6 +8,7 @@ from transformers import AutoConfig, PreTrainedModel
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark
+from ..utils import create_model_cache_dir
 from .base import GenerativeModel, Tokenizer
 from .hf import HFModelSetup
 
@@ -115,6 +116,10 @@ class LocalModelSetup:
             task=task,
             languages=list(),
             model_type=ModelType.LOCAL,
+            model_cache_dir=create_model_cache_dir(
+                cache_dir=self.benchmark_config.cache_dir,
+                model_id=model_id,
+            ),
         )
         return model_config
 

@@ -10,6 +10,7 @@ import sys
 import warnings
 from collections import defaultdict
 from copy import deepcopy
+from pathlib import Path
 from typing import Type
 
 import numpy as np
@@ -30,6 +31,24 @@ from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .model_setups import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__package__)
+
+
+def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
+    """Create cache directory for a model.
+
+    Args:
+        cache_dir:
+            The cache directory.
+        model_id:
+            The model ID.
+
+    Returns:
+        The path to the cache directory.
+    """
+    # to avoid nesting due to models name containing '/'
+    _model_id = model_id.replace("/", "--")
+    cache_dir_path = Path(cache_dir) / "model_cache" / _model_id
+    return str(cache_dir_path)
 
 
 def clear_memory():

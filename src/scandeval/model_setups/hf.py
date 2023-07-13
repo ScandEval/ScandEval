@@ -18,6 +18,7 @@ from ..languages import get_all_languages
 from ..utils import (
     HiddenPrints,
     block_terminal_output,
+    create_model_cache_dir,
     get_class_by_name,
     internet_connection_available,
     model_is_generative,
@@ -171,6 +172,10 @@ class HFModelSetup:
                 ],
                 revision=revision,
                 model_type=ModelType.HF,
+                model_cache_dir=create_model_cache_dir(
+                    cache_dir=self.benchmark_config.cache_dir,
+                    model_id=model_id,
+                ),
             )
 
         # If fetching from the Hugging Face Hub failed then throw a reasonable
@@ -217,7 +222,7 @@ class HFModelSetup:
         loading_kwargs: LoadingArguments = {
             "revision": model_config.revision,
             "token": self.benchmark_config.token,
-            "cache_dir": self.benchmark_config.cache_dir,
+            "cache_dir": model_config.model_cache_dir,
             "trust_remote_code": self.benchmark_config.trust_remote_code,
         }
 

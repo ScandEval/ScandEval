@@ -21,7 +21,7 @@ from transformers import (
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark
-from ..utils import block_terminal_output
+from ..utils import block_terminal_output, create_model_cache_dir
 from .base import GenerativeModel, Tokenizer
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
@@ -84,6 +84,10 @@ class FreshModelSetup:
             languages=list(),
             revision="main",
             model_type=ModelType.FRESH,
+            model_cache_dir=create_model_cache_dir(
+                cache_dir=self.benchmark_config.cache_dir,
+                model_id=model_id,
+            ),
         )
 
     def load_model(
@@ -142,7 +146,7 @@ class FreshModelSetup:
             num_labels=dataset_config.num_labels,
             id2label=dataset_config.id2label,
             label2id=dataset_config.label2id,
-            cache_dir=self.benchmark_config.cache_dir,
+            cache_dir=model_config.model_cache_dir,
         )
         model = model_cls(config)
 
@@ -162,7 +166,7 @@ class FreshModelSetup:
                     revision=model_config.revision,
                     token=self.benchmark_config.token,
                     add_prefix_space=prefix,
-                    cache_dir=self.benchmark_config.cache_dir,
+                    cache_dir=model_config.model_cache_dir,
                     use_fast=True,
                     verbose=False,
                 )

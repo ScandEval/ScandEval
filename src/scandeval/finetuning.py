@@ -22,10 +22,9 @@ from transformers import (
 )
 from transformers.trainer import OptimizerNames
 
-from scandeval.callbacks import NeverLeaveProgressCallback
-from scandeval.model_loading import load_model
-
+from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .model_loading import load_model
 from .model_setups import Tokenizer
 from .utils import (
     block_terminal_output,
@@ -122,7 +121,9 @@ def finetune(
             block_terminal_output()
 
             training_args = get_training_args(
-                benchmark_config=benchmark_config, iteration_idx=idx
+                benchmark_config=benchmark_config,
+                model_config=model_config,
+                iteration_idx=idx,
             )
 
             # Set the correct batch size and gradient accumulation
@@ -325,13 +326,17 @@ def finetune_single_iteration(
 
 
 def get_training_args(
-    benchmark_config: BenchmarkConfig, iteration_idx: int
+    benchmark_config: BenchmarkConfig,
+    model_config: ModelConfig,
+    iteration_idx: int,
 ) -> TrainingArguments:
     """Get the training arguments for the current iteration.
 
     Args:
         benchmark_config:
             The benchmark configuration.
+        model_config:
+            The model configuration.
         iteration_idx:
             The index of the current iteration. This is only used to generate a
             unique random seed for the current iteration.
@@ -352,7 +357,7 @@ def get_training_args(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
         training_args = TrainingArguments(
-            output_dir=benchmark_config.cache_dir,
+            output_dir=model_config.model_cache_dir,
             evaluation_strategy=IntervalStrategy.STEPS,
             logging_strategy=logging_strategy,
             save_strategy=IntervalStrategy.STEPS,

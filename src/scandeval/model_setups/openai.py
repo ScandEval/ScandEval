@@ -11,6 +11,7 @@ from transformers import PretrainedConfig, PreTrainedModel
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
 from ..openai_models import OpenAIModel, OpenAITokenizer
+from ..utils import create_model_cache_dir
 from .base import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__package__)
@@ -136,6 +137,10 @@ class OpenAIModelSetup:
             task="text-generation",
             languages=list(),
             model_type=ModelType.OPENAI,
+            model_cache_dir=create_model_cache_dir(
+                cache_dir=self.benchmark_config.cache_dir,
+                model_id=model_id,
+            ),
         )
 
     def load_model(

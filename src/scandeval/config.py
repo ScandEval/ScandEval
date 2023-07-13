@@ -226,6 +226,8 @@ class ModelConfig:
             The languages of the model.
         model_type:
             The type of the model.
+        model_cache_dir:
+            The directory to cache the model in.
     """
 
     model_id: str
@@ -234,3 +236,4 @@ class ModelConfig:
     task: str
     languages: list[Language]
     model_type: ModelType | str
+    model_cache_dir: str

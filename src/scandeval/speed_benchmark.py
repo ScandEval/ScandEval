@@ -8,12 +8,11 @@ from tqdm.auto import tqdm
 from transformers.modeling_utils import GenerationConfig, PreTrainedModel
 from transformers.tokenization_utils import PreTrainedTokenizer
 
-from scandeval.model_setups.base import GenerativeModel, Tokenizer
-from scandeval.utils import model_is_generative
-
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_loading import load_model
+from .model_setups import GenerativeModel, Tokenizer
+from .utils import model_is_generative
 
 
 def benchmark_speed(

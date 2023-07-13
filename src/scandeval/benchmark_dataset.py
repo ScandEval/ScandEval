@@ -102,6 +102,8 @@ class BenchmarkDataset(ABC):
             model_id=model_id, benchmark_config=self.benchmark_config
         )
 
+        # Set random seeds to enforce reproducibility of the randomly initialised
+        # weights
         rng = enforce_reproducibility(framework=model_config.framework)
 
         tokenizer, model = load_model(

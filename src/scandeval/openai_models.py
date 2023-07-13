@@ -299,12 +299,12 @@ class OpenAIModel:
         self.device = torch.device("cpu")
         self.is_chat_model = self._is_chat_model()
 
-        self.cache_path = Path(benchmark_config.cache_dir) / "openai.json"
+        self.cache_path = Path(model_config.model_cache_dir) / "model_outputs.json"
         if not self.cache_path.exists():
             with self.cache_path.open("w") as f:
                 json.dump(dict(), f)
         with self.cache_path.open() as f:
-            self.cache: dict[str, dict[str, dict[str, str]]] = json.load(f)
+            self.cache: dict[str, dict[str, str]] = json.load(f)
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""
@@ -385,14 +385,12 @@ class OpenAIModel:
         )
 
         max_tokens_str = str(max_tokens)
-        if model_id not in self.cache:
-            self.cache[model_id] = dict()
-        if max_tokens_str not in self.cache[model_id]:
-            self.cache[model_id][max_tokens_str] = dict()
+        if max_tokens_str not in self.cache:
+            self.cache[max_tokens_str] = dict()
 
         # Use cache if possible
-        if prompt in self.cache[model_id][max_tokens_str]:
-            generation_output = self.cache[model_id][max_tokens_str][prompt]
+        if prompt in self.cache[max_tokens_str]:
+            generation_output = self.cache[max_tokens_str][prompt]
         else:
             while True:
                 try:
@@ -413,7 +411,7 @@ class OpenAIModel:
                 except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                     sleep(1)
 
-            self.cache[model_id][max_tokens_str][prompt] = generation_output
+            self.cache[max_tokens_str][prompt] = generation_output
             with self.cache_path.open("w") as f:
                 json.dump(self.cache, f, indent=4)
 
