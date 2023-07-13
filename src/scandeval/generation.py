@@ -247,7 +247,7 @@ def generate_single_iteration(
 
 
 def extract_raw_predictions(
-    generated_sequences: list[list[int]],
+    generated_sequences: torch.Tensor,
     tokenizer: Tokenizer,
     dataset_config: DatasetConfig,
 ) -> list[str]:
@@ -266,7 +266,6 @@ def extract_raw_predictions(
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
-
     completion_ids_lists = [
         [
             token_id

@@ -339,7 +339,7 @@ def get_closest_logprobs_labels(
 
 
 def get_closest_word_edit_labels(
-    generated_sequences: list[list[int]],
+    generated_sequences: torch.Tensor,
     tokenizer: Tokenizer,
     dataset_config: DatasetConfig,
 ) -> list[str]:
