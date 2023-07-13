@@ -281,6 +281,10 @@ class OpenAIModel:
             The tokenizer.
         device:
             The device to use, is always CPU.
+        is_chat_model:
+            Whether the model is a chat model.
+        cache_path:
+            The path to the cache.
         cache:
             A cache for the model's outputs.
     """
@@ -299,7 +303,9 @@ class OpenAIModel:
         self.device = torch.device("cpu")
         self.is_chat_model = self._is_chat_model()
 
-        self.cache_path = Path(model_config.model_cache_dir) / "model_outputs.json"
+        model_cache_dir = Path(model_config.model_cache_dir)
+        model_cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_path = model_cache_dir / "model_outputs.json"
         if not self.cache_path.exists():
             with self.cache_path.open("w") as f:
                 json.dump(dict(), f)
