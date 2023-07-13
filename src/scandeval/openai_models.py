@@ -297,29 +297,30 @@ class OpenAIModel:
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
+        self.is_chat_model = self._is_chat_model()
 
         self.cache_path = Path(benchmark_config.cache_dir) / "openai.json"
-        self.cache_path.touch(exist_ok=True)
+        if not self.cache_path.exists():
+            with self.cache_path.open("w") as f:
+                json.dump(dict(), f)
         with self.cache_path.open() as f:
-            self.cache: dict[dict, list[int]] = json.load(f)
+            self.cache: dict[str, dict[str, dict[str, str]]] = json.load(f)
 
-        # Determine whether the model is a chat model
+    def _is_chat_model(self) -> bool:
+        """Returns whether the model is a chat model."""
         while True:
             try:
                 openai.Completion.create(
                     model=self.model_config.model_id, prompt="Test", max_tokens=1
                 )
-                self.is_chat_model = False
-                break
+                return False
             except InvalidRequestError as e:
                 if "This is a chat model" in str(e):
-                    self.is_chat_model = True
-                    break
+                    return True
                 else:
                     raise e
             except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                 sleep(1)
-                continue
 
     def generate(
         self,
@@ -331,7 +332,7 @@ class OpenAIModel:
 
         Args:
             inputs:
-                The input IDs.
+                The input IDs, of shape (batch_size, sequence_length).
             generation_config:
                 The generation configuration. If None then a default GenerationConfig
                 will be used. Defaults to None.
@@ -348,23 +349,30 @@ class OpenAIModel:
             for key, value in generation_kwargs.items():
                 setattr(generation_config, key, value)
 
-        multiple_inputs = inputs.dim() == 2
+        multiple_inputs = inputs.size(dim=0) > 1
         if multiple_inputs:
             raise ValueError(
                 "OpenAI models do not support multiple inputs. Please use a batch "
                 "size of 1."
             )
 
-        # Remove padding tokens
-        inputs_list = [
-            token_id
-            for token_id in inputs.tolist()
-            if token_id != self.config.pad_token_id
-        ]
+        two_dimensional_input = len(inputs.size()) == 2
+        if two_dimensional_input:
+            inputs = inputs[0]
 
+        prompt = self.tokenizer.decode(
+            [
+                token_id
+                for token_id in inputs.tolist()
+                if token_id != self.config.pad_token_id
+            ]
+        )
+
+        model_id = self.model_config.model_id
+        max_tokens: int = generation_config.max_new_tokens or 1
         generation_kwargs = dict(
-            model=self.model_config.model_id,
-            max_tokens=generation_config.max_new_tokens,
+            model=model_id,
+            max_tokens=max_tokens,
             temperature=generation_config.temperature,
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
@@ -376,57 +384,40 @@ class OpenAIModel:
             ],
         )
 
-        # Use cache if possible
-        inputs_key = dict(
-            model=generation_kwargs["model"],
-            max_tokens=int(generation_kwargs["max_tokens"]),
-            inputs=tuple(inputs_list),
-        )
-        if inputs_key in self.cache:
-            completion_ids = self.cache[inputs_key]
+        max_tokens_str = str(max_tokens)
+        if model_id not in self.cache:
+            self.cache[model_id] = dict()
+        if max_tokens_str not in self.cache[model_id]:
+            self.cache[model_id][max_tokens_str] = dict()
 
+        # Use cache if possible
+        if prompt in self.cache[model_id][max_tokens_str]:
+            generation_output = self.cache[model_id][max_tokens_str][prompt]
         else:
-            if not self.is_chat_model:
-                while True:
-                    try:
+            while True:
+                try:
+                    if not self.is_chat_model:
                         model_output = openai.Completion.create(
-                            prompt=inputs_list,
-                            **generation_kwargs,
+                            prompt=prompt, **generation_kwargs
                         )
-                        generation_output: str = model_output.choices[0].text.strip()
-                        completion_ids = (
-                            self.tokenizer([generation_output]).input_ids[0].tolist()
-                        )
-                        self.cache[inputs_key] = completion_ids
-                        break
-                    except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                        sleep(1)
-            else:
-                while True:
-                    try:
+                        generation_output = model_output.choices[0].text.strip()
+                    else:
                         model_output = openai.ChatCompletion.create(
-                            messages=[
-                                dict(
-                                    role="user",
-                                    content=self.tokenizer.decode(inputs_list),
-                                )
-                            ],
+                            messages=[dict(role="user", content=prompt)],
                             **generation_kwargs,
                         )
                         generation_output = model_output.choices[
                             0
                         ].message.content.strip()
-                        completion_ids = self.tokenizer([generation_output])[
-                            "input_ids"
-                        ][0].tolist()
-                        self.cache[inputs_key] = completion_ids
-                        break
-                    except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                        sleep(1)
+                    break
+                except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
+                    sleep(1)
 
-        with self.cache_path.open("w") as f:
-            json.dump(self.cache, f)
+            self.cache[model_id][max_tokens_str][prompt] = generation_output
+            with self.cache_path.open("w") as f:
+                json.dump(self.cache, f, indent=4)
 
+        completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
 
         if generation_config.return_dict_in_generate:
