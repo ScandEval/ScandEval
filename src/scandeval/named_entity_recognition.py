@@ -568,7 +568,11 @@ class NamedEntityRecognition(BenchmarkDataset):
             try:
                 json_output = json.loads(raw_prediction)
                 if not isinstance(json_output, dict):
-                    raise ValueError("The output is not a dictionary.")
+                    logger.debug(
+                        "The model output is not a JSON dictionary, so cannot parse "
+                        f"it. Skipping. Here is the output: {raw_prediction}"
+                    )
+                    continue
                 prediction_dict: dict[str, list[str]] = json_output
             except json.JSONDecodeError:
                 continue
