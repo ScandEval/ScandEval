@@ -218,9 +218,9 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/wikiann-fo-mini",
     task=NER,
     languages=[FO],
-    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nøvnum, sum "
-    "eru í setningunum.",
-    prompt_template="Setningur: {text}\nNøvn: {label}",  # TODO: Maybe change "Nøvn"
+    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nevndar "
+    "eindir, sum eru í setningunum.",
+    prompt_template="Setningur: {text}\nNevndar eindir: {label}",
     prompt_label_mapping={
         "b-per": "persónur",
         "i-per": "persónur",
@@ -242,9 +242,9 @@ FONE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/fone-mini",  # TODO: Needs to be uploaded
     task=NER,
     languages=[FO],
-    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nøvnum, sum "
-    "eru í setningunum.",
-    prompt_template="Setningur: {text}\nNøvn: {label}",  # TODO: Maybe change "Nøvn"
+    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nevndar "
+    "eindir, sum eru í setningunum.",
+    prompt_template="Setningur: {text}\nNevndar eindir: {label}",
     prompt_label_mapping={
         "b-per": "persónur",
         "i-per": "persónur",
@@ -387,6 +387,19 @@ NQII_CONFIG = DatasetConfig(
     task=QA,
     languages=[IS],
     prompt_template="{text}\nSpurning: {question}\nSvar að hámarki 3 orð: {label}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
+
+
+FOQA_CONFIG = DatasetConfig(
+    name="foqa",
+    pretty_name="Faroese Question Answering",
+    huggingface_id="ScandEval/foqa-mini",  # TODO: Needs to be uploaded
+    task=QA,
+    languages=[FO],
+    prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
+    "orðum: {label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
