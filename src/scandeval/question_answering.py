@@ -76,7 +76,9 @@ class QuestionAnswering(BenchmarkDataset):
                 preprocess_fn,
                 batched=True,
                 batch_size=10,
-                remove_columns=[col for col in dataset.column_names if col != "text"],
+                remove_columns=[
+                    col for col in dataset.column_names if col not in ["id", "text"]
+                ],
             )
 
         except NotImplementedError as e:
