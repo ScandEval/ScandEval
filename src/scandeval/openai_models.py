@@ -20,6 +20,8 @@ from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 from transformers.modeling_utils import ModelOutput
 
+from scandeval.exceptions import InvalidBenchmark
+
 from .config import BenchmarkConfig, ModelConfig
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
@@ -314,7 +316,7 @@ class OpenAIModel:
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""
-        while True:
+        for _ in range(60):
             try:
                 openai.Completion.create(
                     model=self.model_config.model_id, prompt="Test", max_tokens=1
@@ -327,6 +329,8 @@ class OpenAIModel:
                     raise e
             except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                 sleep(1)
+        else:
+            raise InvalidBenchmark("OpenAI API is not available")
 
     def generate(
         self,
@@ -398,7 +402,7 @@ class OpenAIModel:
         if prompt in self.cache[max_tokens_str]:
             generation_output = self.cache[max_tokens_str][prompt]
         else:
-            while True:
+            for _ in range(60):
                 try:
                     if not self.is_chat_model:
                         model_output = openai.Completion.create(
@@ -416,6 +420,8 @@ class OpenAIModel:
                     break
                 except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                     sleep(1)
+            else:
+                raise InvalidBenchmark("OpenAI API is not available")
 
             self.cache[max_tokens_str][prompt] = generation_output
             with self.cache_path.open("w") as f:
