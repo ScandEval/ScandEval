@@ -573,6 +573,20 @@ class NamedEntityRecognition(BenchmarkDataset):
                         f"it. Skipping. Here is the output: {raw_prediction}"
                     )
                     continue
+                elif not all(isinstance(key, str) for key in json_output.keys()):
+                    logger.debug(
+                        "The model output is not a JSON dictionary with string keys, "
+                        "so cannot parse it. Skipping. Here is the output: "
+                        f"{raw_prediction}"
+                    )
+                    continue
+                elif not all(isinstance(value, list) for value in json_output.values()):
+                    logger.debug(
+                        "The model output is not a JSON dictionary with list values, "
+                        "so cannot parse it. Skipping. Here is the output: "
+                        f"{raw_prediction}"
+                    )
+                    continue
                 prediction_dict: dict[str, list[str]] = json_output
             except json.JSONDecodeError:
                 continue
@@ -592,6 +606,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                     )
                     continue
 
+                named_entities = [str(named_entity) for named_entity in named_entities]
                 for named_entity in named_entities:
                     for ne_idx, named_entity_word in enumerate(named_entity.split()):
                         for token_idx, token in enumerate(tokens[idx]):
