@@ -20,9 +20,8 @@ from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 from transformers.modeling_utils import ModelOutput
 
-from scandeval.exceptions import InvalidBenchmark
-
 from .config import BenchmarkConfig, ModelConfig
+from .exceptions import InvalidBenchmark
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 logger = logging.getLogger(__package__)
