@@ -122,8 +122,8 @@ DANE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/dane-mini",
     task=NER,
     languages=[DA],
-    prompt_prefix="Det følgende er dokumenter og deres navngivne enheder, som kan være "
-    "'person', 'sted', 'organisation' og 'diverse':",
+    prompt_prefix="Følgende er sætninger og JSON-ordbøger med de navngivne enheder, "
+    "som forekommer i den givne sætning.",
     prompt_template="Dokument: {text}\nNavngivne enheder: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -146,8 +146,8 @@ NORNE_NB_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nb-mini",
     task=NER,
     languages=[NB],
-    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være "
-    "'person', 'sted', 'organisasjon' og 'diverse':",
+    prompt_prefix="Følgende er fraser og JSON-ordbøker med de navngitte enhetene "
+    "som forekommer i den gitte frasen.",
     prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -170,8 +170,8 @@ NORNE_NN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norne-nn-mini",
     task=NER,
     languages=[NN],
-    prompt_prefix="Følgende er dokumenter og deres navngitte enheter, som kan være "
-    "'person', 'sted', 'organisasjon' og 'diverse':",
+    prompt_prefix="Følgende er fraser og JSON-ordbøker med de navngitte enhetene "
+    "som forekommer i den gitte frasen.",
     prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -194,8 +194,8 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mim-gold-ner-mini",
     task=NER,
     languages=[IS],
-    prompt_prefix="Eftirfarandi eru skjöl og nafngreindir aðilar þeirra, sem geta "
-    "verið 'persóna', 'staðsetning', 'stofnun' og 'ýmislegt':",
+    prompt_prefix="Eftirfarandi eru setningar og JSON orðabækur með nefndum einingum "
+    "sem koma fyrir í tiltekinni setningu.",
     prompt_template="Dokument: {text}\nNafngreindir aðilar: {label}",
     prompt_label_mapping={
         "b-per": "persóna",
