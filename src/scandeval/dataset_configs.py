@@ -124,7 +124,7 @@ DANE_CONFIG = DatasetConfig(
     languages=[DA],
     prompt_prefix="Følgende er sætninger og JSON-ordbøger med de navngivne enheder, "
     "som forekommer i den givne sætning.",
-    prompt_template="Dokument: {text}\nNavngivne enheder: {label}",
+    prompt_template="Sætning: {text}\nNavngivne enheder: {label}",
     prompt_label_mapping={
         "b-per": "person",
         "i-per": "person",
@@ -148,7 +148,7 @@ NORNE_NB_CONFIG = DatasetConfig(
     languages=[NB],
     prompt_prefix="Følgende er fraser og JSON-ordbøker med de navngitte enhetene "
     "som forekommer i den gitte frasen.",
-    prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
+    prompt_template="Frase: {text}\nNavngitte enheter: {label}",
     prompt_label_mapping={
         "b-per": "person",
         "i-per": "person",
@@ -172,7 +172,7 @@ NORNE_NN_CONFIG = DatasetConfig(
     languages=[NN],
     prompt_prefix="Følgende er fraser og JSON-ordbøker med de navngitte enhetene "
     "som forekommer i den gitte frasen.",
-    prompt_template="Dokument: {text}\nNavngitte enheter: {label}",
+    prompt_template="Frase: {text}\nNavngitte enheter: {label}",
     prompt_label_mapping={
         "b-per": "person",
         "i-per": "person",
@@ -196,7 +196,7 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     languages=[IS],
     prompt_prefix="Eftirfarandi eru setningar og JSON orðabækur með nefndum einingum "
     "sem koma fyrir í tiltekinni setningu.",
-    prompt_template="Dokument: {text}\nNafngreindir aðilar: {label}",
+    prompt_template="Setning: {text}\nNafngreindir aðilar: {label}",
     prompt_label_mapping={
         "b-per": "persóna",
         "i-per": "persóna",
@@ -218,9 +218,19 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/wikiann-fo-mini",
     task=NER,
     languages=[FO],
-    prompt_prefix="",  # TODO
-    prompt_template="",  # TODO
-    prompt_label_mapping=dict(),
+    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nøvnum, sum "
+    "eru í setningunum.",
+    prompt_template="Setningur: {text}\nNøvn: {label}",  # TODO: Maybe change "Nøvn"
+    prompt_label_mapping={
+        "b-per": "persónur",
+        "i-per": "persónur",
+        "b-loc": "staður",
+        "i-loc": "staður",
+        "b-org": "felagsskapur",
+        "i-org": "felagsskapur",
+        "b-misc": "ymiskt",
+        "i-misc": "ymiskt",
+    },
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -232,9 +242,19 @@ FONE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/fone-mini",  # TODO: Needs to be uploaded
     task=NER,
     languages=[FO],
-    prompt_prefix="",  # TODO
-    prompt_template="",  # TODO
-    prompt_label_mapping=dict(),
+    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nøvnum, sum "
+    "eru í setningunum.",
+    prompt_template="Setningur: {text}\nNøvn: {label}",  # TODO: Maybe change "Nøvn"
+    prompt_label_mapping={
+        "b-per": "persónur",
+        "i-per": "persónur",
+        "b-loc": "staður",
+        "i-loc": "staður",
+        "b-org": "felagsskapur",
+        "i-org": "felagsskapur",
+        "b-misc": "ymiskt",
+        "i-misc": "ymiskt",
+    },
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -316,8 +336,8 @@ SCALA_FO_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-fo",
     task=LA,
     languages=[FO],
-    prompt_prefix="Etta eru setningar og um teir eru grammatiskt rætt.",
-    prompt_template="Setning: {text}\nGrammatiskt rætt: {label}",
+    prompt_prefix="Hetta eru nakrir setningar og um teir eru mállæruliga rættir.",
+    prompt_template="Setningur: {text}\nMállæruliga rættur: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
     max_generated_tokens=3,
