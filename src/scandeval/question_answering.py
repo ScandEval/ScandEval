@@ -168,7 +168,7 @@ def prepare_train_examples(
 
     # If the tokenizer has no special clss token, then we add it manually
     if cls_token is None:
-        cls_token = '<CLS'
+        cls_token = '<CLS>'
     if cls_token_id is None:
         tokenizer.add_special_tokens({'cls_token': cls_token})
         cls_token_id = tokenizer.convert_tokens_to_ids(cls_token)
