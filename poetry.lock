@@ -3317,8 +3317,8 @@ vision = ["Pillow (<10.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/huggingface/transformers"
-reference = "f1732e1374a082bf8e43bd0e4aa8a2da21a32a21"
-resolved_reference = "f1732e1374a082bf8e43bd0e4aa8a2da21a32a21"
+reference = "HEAD"
+resolved_reference = "9ef5256dfb28f5419649af8ea94e82573a6b2e77"
 
 [[package]]
 name = "triton"
@@ -3639,4 +3639,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "b4b975c179f20602600141ad3c1399081b0615a30143a8d4044b77204c8a7583"
+content-hash = "d83512ec39dee082673aa82a9e943cdb461fa1a574c3af1d1bee81e768c58d27"
