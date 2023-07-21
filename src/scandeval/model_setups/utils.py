@@ -151,6 +151,24 @@ def align_model_and_tokenizer(
     else:
         tokenizer.model_max_length = 512
 
+    # Manually check that this model max length is valid for the model, and adjust
+    # otherwise
+    initial_max_length = tokenizer.model_max_length
+    for max_length in range(initial_max_length, 0, -1):
+        try:
+            tokenizer.model_max_length = max_length
+            dummy_inputs = torch.zeros(
+                1,
+                max_length,
+                dtype=torch.long,
+                device=model.device,
+            )
+            with torch.inference_mode():
+                model(dummy_inputs)
+            break
+        except IndexError:
+            continue
+
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
     if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
