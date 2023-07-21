@@ -42,11 +42,9 @@ def benchmark_speed(
     Returns:
         Dictionary of scores.
     """
-    # Initialise the `scores` dictionary
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
     for itr_idx in itr:
-        # Run the speed benchmark
         itr_scores = benchmark_speed_single_iteration(
             tokenizer=tokenizer,
             model=model,
@@ -56,11 +54,8 @@ def benchmark_speed(
             benchmark_config=benchmark_config,
         )
 
-        # If the iteration was unsuccessful then raise an error
         if isinstance(itr_scores, Exception):
             raise InvalidBenchmark(f"Speed benchmark failed with error: {itr_scores!r}")
-
-        # Otherwise, append the scores to the list and log the result
         else:
             scores["test"].append(itr_scores["test"])
             if benchmark_config.evaluate_train:
@@ -113,7 +108,6 @@ def benchmark_speed_single_iteration(
 
         def predict(doc: str) -> None:
             """Function used to benchmark inference speed of the model."""
-
             # Raise an error if the tokenizer or model is undefined
             if tokenizer is None or model is None:
                 raise ValueError("Tokenizer and model must not be None.")
