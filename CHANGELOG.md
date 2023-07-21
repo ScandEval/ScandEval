@@ -24,6 +24,8 @@ and this project adheres to
   overwrite the automatic 4bit loading of models. By default only generative models
   will be loaded in 4bit, and only if a CUDA GPU is available, as this is required by
   the underlying `bitsandbytes` package.
+- Now manually adjusts the maximum sequence length of a model to ensure that the
+  reported maximum length is correct.
 
 ### Changed
 - Now only supports Python 3.10 and above.
