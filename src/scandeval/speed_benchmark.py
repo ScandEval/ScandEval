@@ -138,8 +138,8 @@ def benchmark_speed_single_iteration(
         base_doc = "Document which contains roughly 10 tokens. "
         multiplier = 10 * (1 + itr_idx)
         doc = base_doc * multiplier
-        short_multiplier = 2.5 * (1 + itr_idx)
-        short_doc = base_doc * int(short_multiplier)
+        short_multiplier = 1.25 * (1 + itr_idx)
+        short_doc = base_doc * round(short_multiplier)
 
         # Do a warmup run, as the first run is always slower
         pyinfer.InferenceReport(model=predict, inputs=base_doc, n_seconds=1).run(
