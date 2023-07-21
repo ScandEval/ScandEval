@@ -398,7 +398,7 @@ def get_training_args(
             optim=OptimizerNames.ADAMW_TORCH,
             seed=seed,
             use_mps_device=torch.backends.mps.is_available(),
-            fp16=False,
+            fp16=torch.cuda.is_available(),
         )
 
     # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
