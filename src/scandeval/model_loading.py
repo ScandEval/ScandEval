@@ -45,4 +45,7 @@ def load_model(
     tokenizer, model = setup.load_model(
         model_config=model_config, dataset_config=dataset_config
     )
+
+    # TODO: XMOD model setup: https://huggingface.co/facebook/xmod-base#input-language
+
     return tokenizer, model
