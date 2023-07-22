@@ -239,8 +239,10 @@ class HFModelSetup:
                     )
 
                 # Get the model class associated with the supertask
-                if model_config.task in GENERATIVE_MODEL_TASKS:
+                if model_config.task in ["text-generation", "conversational"]:
                     model_cls_supertask = "causal-l-m"
+                elif model_config.task == "text2text-generation":
+                    model_cls_supertask = "seq-2-seq-l-m"
                 else:
                     model_cls_supertask = supertask
                 model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(

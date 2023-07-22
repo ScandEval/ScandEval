@@ -155,19 +155,30 @@ def align_model_and_tokenizer(
     # otherwise
     initial_max_length = tokenizer.model_max_length
     for max_length in range(initial_max_length, 0, -1):
-        try:
-            tokenizer.model_max_length = max_length
-            dummy_inputs = torch.zeros(
-                1,
-                max_length,
-                dtype=torch.long,
-                device=model.device,
-            )
-            with torch.inference_mode():
+        tokenizer.model_max_length = max_length
+        dummy_inputs = torch.zeros(
+            1,
+            max_length,
+            dtype=torch.long,
+            device=model.device,
+        )
+        with torch.inference_mode():
+            try:
                 model(dummy_inputs)
-            break
-        except IndexError:
-            continue
+                break
+
+            # This handles the case where the model is a sequence-to-sequence model, as
+            # they require text labels to be passed in
+            except ValueError as e:
+                if "decoder_input_ids" not in str(e):
+                    raise e
+                with torch.inference_mode():
+                    model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long())
+                break
+
+            # This happens if `max_length` is too large
+            except IndexError:
+                continue
 
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
