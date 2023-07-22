@@ -112,7 +112,9 @@ class BenchmarkDataset(ABC):
             benchmark_config=self.benchmark_config,
         )
 
-        # This happens when a local model is used, as we cannot fetch the model metadata
+        # This happens when a local model is used, as we cannot fetch the model
+        # metadata. Note that this is only the case if the model type is not any of the
+        # ones hardcoded in `local.py`
         if model_config.task == "unknown":
             if model_is_generative(model=model):
                 model_config.task = GENERATIVE_MODEL_TASKS[0]
