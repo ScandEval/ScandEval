@@ -276,7 +276,7 @@ class HFModelSetup:
                                 # bnb_4bit_use_double_quant=load_in_4bit,  # TEMP?
                                 **loading_kwargs,
                             )
-                        except KeyError as e:
+                        except (KeyError, RuntimeError) as e:
                             if not ignore_mismatched_sizes:
                                 ignore_mismatched_sizes = True
                                 continue
