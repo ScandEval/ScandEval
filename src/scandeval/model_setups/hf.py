@@ -351,7 +351,7 @@ class HFModelSetup:
                     padding_side=padding_side,
                     truncation_side=padding_side,
                 )
-            except (JSONDecodeError, OSError):
+            except (JSONDecodeError, OSError, TypeError):
                 raise InvalidBenchmark(
                     f"Could not load tokenizer for model {model_id!r}."
                 )
