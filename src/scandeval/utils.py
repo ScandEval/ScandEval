@@ -409,14 +409,6 @@ def get_huggingface_model_lists(
         # Extract the model IDs
         model_ids: list[str] = [model.modelId for model in models if model.modelId]
 
-        # Remove models that are too large, and thus needs to be specified manually
-        large_regex = re.compile(r"(-|_)(x+l(arge)?|[1-9.]+[Bb])")
-        model_ids = [
-            model_id
-            for model_id in model_ids
-            if re.search(large_regex, model_id) is None
-        ]
-
         # Remove models that have "finetuned" in their name
         model_ids = [
             model_id for model_id in model_ids if "finetuned" not in model_id.lower()
