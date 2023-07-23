@@ -453,7 +453,7 @@ def get_huggingface_model_lists(
     model_lists["all"].extend(multi_models)
 
     # Add fresh models
-    fresh_models = ["fresh-xlmr-base", "fresh-electra-small"]
+    fresh_models = ["fresh-xlm-roberta-base", "fresh-electra-small"]
     model_lists["fresh"].extend(fresh_models)
     model_lists["all"].extend(fresh_models)
 
