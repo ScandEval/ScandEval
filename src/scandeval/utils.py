@@ -500,6 +500,7 @@ def get_huggingface_model_lists(
     BANNED_MODELS = [
         r"TransQuest/siamesetransquest-da.*",
         r"M-CLIP/.*",
+        r".*/.*CTRL.*",
     ]
     for lang, model_list in model_lists.items():
         model_lists[lang] = [
