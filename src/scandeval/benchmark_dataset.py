@@ -258,6 +258,7 @@ class BenchmarkDataset(ABC):
             num_model_parameters=num_params,
             max_sequence_length=max_seq_length,
             vocabulary_size=vocab_size,
+            few_shot=model_is_generative(model=model),
         )
 
         # Log the metadata

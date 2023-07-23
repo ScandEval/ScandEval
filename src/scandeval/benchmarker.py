@@ -339,6 +339,8 @@ class Benchmarker:
             try:
                 dataset = self.dataset_factory.build_dataset(dataset_config)
                 results, metadata_dict = dataset(model_id)
+                if metadata_dict["few_shot"]:
+                    model_id += " (few-shot)"
                 record: dict[str, str | int | list[str] | SCORE_DICT] = dict(
                     dataset=dataset_config.name,
                     task=dataset_config.task.name,
