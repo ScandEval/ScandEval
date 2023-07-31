@@ -92,6 +92,40 @@ NOREC_CONFIG = DatasetConfig(
 )
 
 
+ISREC_CONFIG = DatasetConfig(
+    name="isrec",
+    pretty_name="the truncated version of IsReC",
+    huggingface_id="ScandEval/isrec-mini",  # TODO: Needs to be uploaded
+    task=SENT,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru yfirferðir ásamt lyndisgildi þeirra, sem getur "
+    "verið 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
+    prompt_template="Yfirferð: {text}\nLyndi: {label}",
+    prompt_label_mapping=dict(
+        positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
+    ),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+
+FOREC_CONFIG = DatasetConfig(
+    name="forec",
+    pretty_name="the truncated version of FoReC",
+    huggingface_id="ScandEval/forec-mini",  # TODO: Needs to be uploaded
+    task=SENT,
+    languages=[FO],
+    prompt_prefix="Her koma nøkur ummæli og teirra kensluliga sjónarmið, sum kunnu "
+    "vera 'positivur', 'neutralur' ella 'negativur'.",
+    prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
+    prompt_label_mapping=dict(
+        positive="positivur", neutral="neutralur", negative="negativur"
+    ),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+
 SUC3_CONFIG = DatasetConfig(
     name="suc3",
     pretty_name="the truncated version of SUC 3.0",
@@ -194,12 +228,12 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mim-gold-ner-mini",
     task=NER,
     languages=[IS],
-    prompt_prefix="Eftirfarandi eru setningar og JSON orðabækur með nefndum einingum "
-    "sem koma fyrir í tiltekinni setningu.",
-    prompt_template="Setning: {text}\nNafngreindir aðilar: {label}",
+    prompt_prefix="Eftirfarandi eru setningar ásamt JSON lyklum með nefndum einingum "
+    "sem koma fyrir í setningunum.",
+    prompt_template="Setning: {text}\nNefndar einingar: {label}",
     prompt_label_mapping={
-        "b-per": "persóna",
-        "i-per": "persóna",
+        "b-per": "einstaklingur",
+        "i-per": "einstaklingur",
         "b-loc": "staðsetning",
         "i-loc": "staðsetning",
         "b-org": "stofnun",
@@ -322,7 +356,7 @@ SCALA_IS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-is",
     task=LA,
     languages=[IS],
-    prompt_prefix="Eftirfarandi eru setningar og hvort þær séu málfræðilega réttar.",
+    prompt_prefix="Eftirfarandi eru setningar og hvort þær eru málfræðilega réttar.",
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     num_few_shot_examples=12,
@@ -386,7 +420,8 @@ NQII_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/nqii-mini",  # TODO: Needs to be uploaded
     task=QA,
     languages=[IS],
-    prompt_template="{text}\nSpurning: {question}\nSvar að hámarki 3 orð: {label}",
+    prompt_template="{text}\nSpurning: {question}\nSvaraðu með að hámarki 3 orðum: "
+    "{label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
