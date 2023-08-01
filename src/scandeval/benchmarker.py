@@ -235,8 +235,15 @@ class Benchmarker:
         Returns:
             Whether the model has already been evaluated on the dataset.
         """
+
+        def preprocess_model_id(raw_model_id: str) -> str:
+            return raw_model_id.replace("(few-shot)", "").rstrip(" /")
+
+        model_id = preprocess_model_id(model_id)
         for record in self.benchmark_results:
-            if record["model"] == model_id and record["dataset"] == dataset:
+            assert isinstance(record["model"], str)
+            record_model_id = preprocess_model_id(record["model"])
+            if record_model_id == model_id and record["dataset"] == dataset:
                 return True
         return False
 
