@@ -185,6 +185,7 @@ class Benchmarker:
 
         # Iterate over all the models and datasets
         for m_id in model_ids:
+            m_id = m_id.rstrip(" /")
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
                 # `ignore_duplicates` is set
