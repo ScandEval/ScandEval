@@ -186,6 +186,8 @@ class Benchmarker:
         # Iterate over all the models and datasets
         for m_id in model_ids:
             m_id = m_id.rstrip(" /")
+            # TODO: Add " (few-shot)" if relevant
+
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
                 # `ignore_duplicates` is set
@@ -237,7 +239,12 @@ class Benchmarker:
             Whether the model has already been evaluated on the dataset.
         """
         for record in self.benchmark_results:
-            if record["model"] == model_id and record["dataset"] == dataset:
+            correct_dataset = record["dataset"] == dataset
+            correct_model = (
+                record["model"] == model_id
+                or record["model"] == f"{model_id} (few-shot)"
+            )
+            if correct_dataset and correct_model:
                 return True
         return False
 
@@ -340,8 +347,6 @@ class Benchmarker:
             try:
                 dataset = self.dataset_factory.build_dataset(dataset_config)
                 results, metadata_dict = dataset(model_id)
-                if metadata_dict["few_shot"]:
-                    model_id += " (few-shot)"
                 record: dict[str, str | int | list[str] | SCORE_DICT] = dict(
                     dataset=dataset_config.name,
                     task=dataset_config.task.name,
