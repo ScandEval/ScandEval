@@ -381,22 +381,36 @@ class BenchmarkDataset(ABC):
         )
 
         # Prepare the train and validation datasets
-        try:
-            with tqdm(total=12, desc="Preprocessing data splits", leave=False) as pbar:
+        with tqdm(total=12, desc="Preprocessing data splits", leave=False) as pbar:
+            # When evaluating generative models we only need the test split, so
+            # there's no need to prepare the train split
+            try:
                 prepared_train = train
                 if not generative_model:
                     prepared_train = self._preprocess_data(
                         train, split="train", **preprocess_params
                     )
                 pbar.update(1)
+            except ValueError:
+                raise InvalidBenchmark(
+                    "Preprocessing of the training dataset could not be done."
+                )
 
+            # When evaluating generative models we only need the test split, so
+            # there's no need to prepare the validation split
+            try:
                 prepared_val = val
                 if not generative_model:
                     prepared_val = self._preprocess_data(
                         val, split="val", **preprocess_params
                     )
                 pbar.update(1)
+            except ValueError:
+                raise InvalidBenchmark(
+                    "Preprocessing of the validation dataset could not be done."
+                )
 
+            try:
                 prepared_tests: list[Dataset] = list()
                 for itr_idx, test in enumerate(tests):
                     if generative_model:
@@ -415,13 +429,11 @@ class BenchmarkDataset(ABC):
                         test, split="test", **preprocess_params
                     )
                     prepared_tests.append(prepared_test)
-
                     pbar.update(1)
-        except ValueError:
-            raise InvalidBenchmark(
-                "Preprocessing of the training and validation datasets could not be "
-                "done."
-            )
+            except ValueError:
+                raise InvalidBenchmark(
+                    "Preprocessing of the test dataset could not be done."
+                )
 
         return prepared_train, prepared_val, prepared_tests
 
