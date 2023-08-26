@@ -72,13 +72,17 @@ class QuestionAnswering(BenchmarkDataset):
 
         # Preprocess the data and return it
         try:
+            if generative_model:
+                cols_to_remove = [
+                    col for col in dataset.column_names if col not in ["id", "text"]
+                ]
+            else:
+                cols_to_remove = dataset.column_names
             preprocessed = dataset.map(
                 preprocess_fn,
                 batched=True,
                 batch_size=10,
-                remove_columns=[
-                    col for col in dataset.column_names if col not in ["id", "text"]
-                ],
+                remove_columns=cols_to_remove,
             )
 
         except NotImplementedError as e:
@@ -274,8 +278,7 @@ class QuestionAnswering(BenchmarkDataset):
 
 
 def prepare_train_examples(
-    examples: BatchEncoding,
-    tokenizer: Tokenizer,
+    examples: BatchEncoding, tokenizer: Tokenizer
 ) -> BatchEncoding:
     """Prepare the features for training.
 
@@ -317,7 +320,7 @@ def prepare_train_examples(
     # context is long, each of those features having a context that overlaps a bit the
     # context of the previous feature.
     tokenized_examples = tokenizer(
-        examples["question"],
+        text=examples["question"],
         text_pair=examples["context"],
         truncation="only_second",
         max_length=max_length,
@@ -456,7 +459,7 @@ def prepare_test_examples(
     # a context is long, each of those features having a context that overlaps a bit
     # the context of the previous feature.
     tokenized_examples = tokenizer(
-        examples["question"],
+        text=examples["question"],
         text_pair=examples["context"],
         truncation="only_second",
         max_length=max_length,
