@@ -192,23 +192,22 @@ def align_model_and_tokenizer(
                 )
             model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size + 1)
 
-    # If the tokenizer does not have a padding token (e.g. GPT-2), we use find a
-    # suitable padding token and set it
-    if tokenizer.pad_token is None:
+    # For generative models, the `transformers` package requires the pad token to be
+    # identical to the eos token, if the latter exists. Otherwise, if both the pad and
+    # eos token are not defined, then we attempt to set the padding token to the sep
+    # token. If a sep token doesn't exist either, we raise an error.
+    if model_is_generative(model=model):
+        tokenizer.padding_side = "left"
         if tokenizer.eos_token is not None:
-            tokenizer.padding_side = "left"
             tokenizer.pad_token = tokenizer.eos_token
-            tokenizer.pad_token_id = tokenizer.eos_token_id
-            model.config.pad_token_id = tokenizer.pad_token_id
-        elif tokenizer.sep_token is not None:
-            tokenizer.padding_side = "left"
-            tokenizer.pad_token = tokenizer.sep_token
-            tokenizer.pad_token_id = tokenizer.sep_token_id
-            model.config.pad_token_id = tokenizer.pad_token_id
-        else:
-            raise InvalidBenchmark(
-                "The tokenizer does not have a padding token and does not have a "
-                "SEP token or EOS token to use as a padding token."
-            )
+        elif tokenizer.pad_token is None:
+            if tokenizer.sep_token is not None:
+                tokenizer.pad_token = tokenizer.sep_token
+            else:
+                raise InvalidBenchmark(
+                    "The tokenizer does not have a padding token and does not have a "
+                    "SEP token or EOS token to use as a padding token."
+                )
+        model.config.pad_token_id = tokenizer.pad_token_id
 
     return model, tokenizer
