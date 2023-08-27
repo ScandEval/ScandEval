@@ -26,6 +26,8 @@ and this project adheres to
   the underlying `bitsandbytes` package.
 - Now manually adjusts the maximum sequence length of a model to ensure that the
   reported maximum length is correct.
+- Now uses `eval_accumulation_steps=1`, which helps to prevent out-of-memory issues
+  during evaluation. This also means that evaluation is a bit slower.
 
 ### Changed
 - Now only supports Python 3.10 and above.
@@ -41,6 +43,13 @@ and this project adheres to
 ### Removed
 - Previously generative models had their maximum sequence length altered by subtracting
   their padding token ID. This is not needed anymore and have been removed.
+
+### Fixed
+- Handles timeouts better now, when fetching models from the Hugging Face Hub. Instead
+  of simply throwing the error, cancelling the benchmarking process, it simply tries
+  again until the connection is up again.
+- Some models output both logits and hidden states, which caused an error during
+  evaluation. This has now been fixed.
 
 
 ## [v7.1.1] - 2023-07-01
