@@ -142,6 +142,15 @@ class SequenceClassification(BenchmarkDataset):
         """
         model_outputs, labels = model_outputs_and_labels
 
+        # Some models output (logits, hidden_states) and what we need is just the
+        # logits
+        if (
+            isinstance(model_outputs, tuple)
+            and isinstance(model_outputs[0], np.ndarray)
+            and model_outputs[0].shape[0] == len(labels)
+        ):
+            model_outputs = model_outputs[0]
+
         model_output_dtype = np.asarray(model_outputs).dtype
         if model_output_dtype in [np.float16, np.float32, np.float64]:
             predictions = np.asarray(model_outputs).argmax(axis=-1)
