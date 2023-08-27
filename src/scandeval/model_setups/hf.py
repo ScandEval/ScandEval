@@ -3,13 +3,15 @@
 import logging
 import warnings
 from json import JSONDecodeError
-from typing import Type, TypedDict
+from time import sleep
+from typing import Type
 
 import torch
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import RepositoryNotFoundError
-from requests import RequestException
+from requests.exceptions import RequestException
 from transformers import AutoConfig, AutoTokenizer, PretrainedConfig, PreTrainedModel
+from urllib3.exceptions import RequestError
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
@@ -28,13 +30,6 @@ from .base import GenerativeModel, Tokenizer
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 logger = logging.getLogger(__package__)
-
-
-class LoadingArguments(TypedDict):
-    revision: str
-    token: str | bool
-    cache_dir: str
-    trust_remote_code: bool
 
 
 class HFModelSetup:
@@ -213,31 +208,17 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
-        loading_kwargs: LoadingArguments = {
-            "revision": model_config.revision,
-            "token": self.benchmark_config.token,
-            "cache_dir": model_config.model_cache_dir,
-            "trust_remote_code": self.benchmark_config.trust_remote_code,
-        }
+        config = self._load_hf_model_config(
+            model_id=model_id,
+            num_labels=dataset_config.num_labels,
+            id2label=dataset_config.id2label,
+            label2id=dataset_config.label2id,
+            revision=model_config.revision,
+            model_cache_dir=model_config.model_cache_dir,
+        )
 
         while True:
             try:
-                try:
-                    config = AutoConfig.from_pretrained(
-                        model_id,
-                        num_labels=dataset_config.num_labels,
-                        id2label=dataset_config.id2label,
-                        label2id=dataset_config.label2id,
-                        **loading_kwargs,
-                    )
-                except KeyError as e:
-                    key = e.args[0]
-                    raise InvalidBenchmark(
-                        f"The model config for the model {model_id!r} could not "
-                        f"be loaded, as the key {key!r} was not found in the "
-                        "config."
-                    )
-
                 # Get the model class associated with the supertask
                 if model_config.task in ["text-generation", "conversational"]:
                     model_cls_supertask = "causal-l-m"
@@ -273,8 +254,12 @@ class HFModelSetup:
                                 from_flax=from_flax,
                                 ignore_mismatched_sizes=ignore_mismatched_sizes,
                                 load_in_4bit=load_in_4bit,
-                                # bnb_4bit_use_double_quant=load_in_4bit,  # TEMP?
-                                **loading_kwargs,
+                                revision=model_config.revision,
+                                token=self.benchmark_config.token,
+                                cache_dir=model_config.model_cache_dir,
+                                trust_remote_code=(
+                                    self.benchmark_config.trust_remote_code
+                                ),
                             )
                         except (KeyError, RuntimeError) as e:
                             if not ignore_mismatched_sizes:
@@ -282,6 +267,12 @@ class HFModelSetup:
                                 continue
                             else:
                                 raise InvalidBenchmark(str(e))
+                        except (TimeoutError, RequestError):
+                            logger.info(
+                                f"Couldn't load the model {model_id!r}. Retrying."
+                            )
+                            sleep(5)
+                            continue
                 if isinstance(model_or_tuple, tuple):
                     model = model_or_tuple[0]
                 else:
@@ -317,6 +308,57 @@ class HFModelSetup:
 
         return tokenizer, model
 
+    def _load_hf_model_config(
+        self,
+        model_id: str,
+        num_labels: int,
+        id2label: dict[int, str] | list[str],
+        label2id: dict[str, int],
+        revision: str,
+        model_cache_dir: str,
+    ) -> PretrainedConfig:
+        """Load the Hugging Face model configuration.
+
+        Args:
+            model_id:
+                The Hugging Face model ID.
+            num_labels:
+                The number of labels in the dataset.
+            id2label:
+                The mapping from label IDs to labels.
+            label2id:
+                The mapping from labels to label IDs.
+            revision:
+                The revision of the model.
+            model_cache_dir:
+                The directory to cache the model in.
+
+        Returns:
+            The Hugging Face model configuration.
+        """
+        while True:
+            try:
+                return AutoConfig.from_pretrained(
+                    model_id,
+                    num_labels=num_labels,
+                    id2label=id2label,
+                    label2id=label2id,
+                    revision=revision,
+                    cache_dir=model_cache_dir,
+                    token=self.benchmark_config.token,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
+                )
+            except KeyError as e:
+                key = e.args[0]
+                raise InvalidBenchmark(
+                    f"The model config for the model {model_id!r} could not be "
+                    f"loaded, as the key {key!r} was not found in the config."
+                )
+            except (TimeoutError, RequestError):
+                logger.info(f"Couldn't load model config for {model_id!r}. Retrying.")
+                sleep(5)
+                continue
+
     def _load_tokenizer(
         self,
         model: PreTrainedModel | GenerativeModel,
@@ -342,19 +384,24 @@ class HFModelSetup:
         padding_side = "left" if model_is_generative(model=model) else "right"
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            try:
-                return AutoTokenizer.from_pretrained(
-                    model_id,
-                    add_prefix_space=prefix,
-                    use_fast=True,
-                    verbose=False,
-                    padding_side=padding_side,
-                    truncation_side=padding_side,
-                )
-            except (JSONDecodeError, OSError, TypeError):
-                raise InvalidBenchmark(
-                    f"Could not load tokenizer for model {model_id!r}."
-                )
+            while True:
+                try:
+                    return AutoTokenizer.from_pretrained(
+                        model_id,
+                        add_prefix_space=prefix,
+                        use_fast=True,
+                        verbose=False,
+                        padding_side=padding_side,
+                        truncation_side=padding_side,
+                    )
+                except (JSONDecodeError, OSError, TypeError):
+                    raise InvalidBenchmark(
+                        f"Could not load tokenizer for model {model_id!r}."
+                    )
+                except (TimeoutError, RequestError):
+                    logger.info(f"Couldn't load tokenizer for {model_id!r}. Retrying.")
+                    sleep(5)
+                    continue
 
     @staticmethod
     def _handle_loading_exception(exception: Exception, model_id: str) -> None:
