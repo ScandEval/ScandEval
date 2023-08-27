@@ -17,7 +17,6 @@ from transformers import (
     PrinterCallback,
     ProgressCallback,
     Trainer,
-    TrainerCallback,
     TrainingArguments,
 )
 from transformers.trainer import OptimizerNames
@@ -53,6 +52,7 @@ def finetune(
     data_collator: DataCollator,
     trainer_class: Type[Trainer],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],
+    preprocess_logits_for_metrics: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
 ) -> dict[str, list[dict[str, float]]]:
     """Evaluate a model on a dataset through finetuning.
 
@@ -90,6 +90,10 @@ def finetune(
         evaluate_inputs_fn:
             A function that generates the appropriate inputs for the `Trainer.evaluate`
             method.
+        preprocess_logits_for_metrics:
+            A function that preprocesses the logits before they are passed to the
+            `compute_metrics` function. This helps prevent memory issues during
+            evaluation.
 
     Returns:
         A dictionary containing the scores, with keys "test" and maybe "train", with
@@ -155,6 +159,7 @@ def finetune(
                 model=model if model_already_initialized else None,
                 trainer_class=trainer_class,
                 evaluate_inputs_fn=evaluate_inputs_fn,
+                preprocess_logits_for_metrics=preprocess_logits_for_metrics,
             )
 
             # If the iteration was successful then break the loop
@@ -164,11 +169,11 @@ def finetune(
             # Otherwise we encountered an error, so we have to deal with it and try
             # again
             else:
+                exception = itr_scores
                 bs = training_args.per_device_train_batch_size
                 ga = training_args.gradient_accumulation_steps
-
                 bs, ga = handle_error(
-                    e=itr_scores,
+                    e=exception,
                     per_device_train_batch_size=bs,
                     gradient_accumulation_steps=ga,
                 )
@@ -211,6 +216,7 @@ def finetune_single_iteration(
     model: PreTrainedModel | None,
     trainer_class: Type[Trainer],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],
+    preprocess_logits_for_metrics: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
 ) -> dict[str, dict[str, float]] | Exception:
     """Run a single iteration of a benchmark.
 
@@ -250,64 +256,65 @@ def finetune_single_iteration(
         evaluate_inputs_fn:
             A function that generates the appropriate inputs for the `Trainer.evaluate`
             method.
+        preprocess_logits_for_metrics:
+            A function that preprocesses the logits before they are passed to the
+            `compute_metrics` function. This helps prevent memory issues during
+            evaluation.
 
     Returns:
         A dictionary containing the scores for the current iteration, with keys `train`
         and `test`. If an exception is raised, then the exception is returned.
     """
     scores: dict[str, dict[str, float]] = dict()
-    try:
-        # Set random seeds to enforce reproducibility of the randomly initialised
-        # weights
-        seed = 4242 + iteration_idx
-        enforce_reproducibility(framework=model_config.framework, seed=seed)
 
-        if tokenizer is None or model is None:
-            tokenizer, model_or_generative_model = load_model(
-                model_config=model_config,
-                dataset_config=dataset_config,
-                benchmark_config=benchmark_config,
-            )
-            assert isinstance(model_or_generative_model, PreTrainedModel)
-            model = model_or_generative_model
+    # Set random seeds to enforce reproducibility of the randomly initialised
+    # weights
+    seed = 4242 + iteration_idx
+    enforce_reproducibility(framework=model_config.framework, seed=seed)
 
-        # Initialise compute_metrics function
-        compute_metrics = partial(compute_metrics, id2label=dataset_config.id2label)
-
-        # Initialise early stopping callback
-        early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
-
-        # Initialise trainer
-        trainer = trainer_class(
-            model=model,
-            args=training_args,
-            train_dataset=prepared_train,
-            eval_dataset=prepared_val,
-            tokenizer=tokenizer,
-            compute_metrics=compute_metrics,
-            callbacks=[early_stopping],
-            data_collator=data_collator,
+    if tokenizer is None or model is None:
+        tokenizer, model_or_generative_model = load_model(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
         )
+        assert isinstance(model_or_generative_model, PreTrainedModel)
+        model = model_or_generative_model
 
-        if not benchmark_config.verbose:
+    compute_metrics = partial(compute_metrics, id2label=dataset_config.id2label)
+    early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
+    trainer = trainer_class(
+        model=model,
+        args=training_args,
+        train_dataset=prepared_train,
+        eval_dataset=prepared_val,
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics,
+        callbacks=[early_stopping],
+        data_collator=data_collator,
+        preprocess_logits_for_metrics=preprocess_logits_for_metrics,
+    )
 
-            def no_logging(logs: dict[str, float]) -> None:
-                return
+    if not benchmark_config.verbose:
 
-            trainer.log = no_logging
+        def no_logging(logs: dict[str, float]) -> None:
+            return
 
-        # Re-block terminal output, as it gets unblocked by the `transformers`
-        # package before training
-        block_terminal_output()
+        trainer.log = no_logging
 
-        # Sort out callbacks. We remove the callbacks that are producing unnecessary
-        # output, to avoid cluttering the terminal output
-        if not benchmark_config.verbose:
-            trainer.remove_callback(PrinterCallback)
-        trainer.remove_callback(ProgressCallback)
-        if benchmark_config.progress_bar:
-            trainer.add_callback(NeverLeaveProgressCallback)
+    # Re-block terminal output, as it gets unblocked by the `transformers`
+    # package before training
+    block_terminal_output()
 
+    # Sort out callbacks. We remove the callbacks that are producing unnecessary
+    # output, to avoid cluttering the terminal output
+    if not benchmark_config.verbose:
+        trainer.remove_callback(PrinterCallback)
+    trainer.remove_callback(ProgressCallback)
+    if benchmark_config.progress_bar:
+        trainer.add_callback(NeverLeaveProgressCallback)
+
+    try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             trainer.train()
@@ -331,7 +338,6 @@ def finetune_single_iteration(
             test_scores = trainer.evaluate(**evaluate_inputs)
         scores["test"] = test_scores
 
-        # Return the scores
         return scores
 
     except (RuntimeError, ValueError, IndexError) as e:
@@ -391,7 +397,6 @@ def get_training_args(
             save_total_limit=1,
             per_device_train_batch_size=benchmark_config.batch_size,
             per_device_eval_batch_size=benchmark_config.batch_size,
-            eval_accumulation_steps=1,
             learning_rate=2e-5,
             warmup_ratio=0.01,
             gradient_accumulation_steps=1,
@@ -407,48 +412,3 @@ def get_training_args(
         training_args.disable_tqdm = False
 
     return training_args
-
-
-def get_trainer(
-    model: PreTrainedModel,
-    args: TrainingArguments,
-    train_dataset: Dataset,
-    eval_dataset: Dataset,
-    tokenizer: Tokenizer,
-    compute_metrics: Callable,
-    data_collator: DataCollator,
-    callbacks: list[TrainerCallback],
-) -> Trainer:
-    """Get a Trainer object.
-
-    Args:
-        model:
-            The model to finetune.
-        args:
-            The training arguments.
-        train_dataset:
-            The training dataset.
-        eval_dataset:
-            The evaluation dataset.
-        tokenizer:
-            The tokenizer.
-        compute_metrics:
-            The function used to compute the metrics.
-        data_collator:
-            The data collator.
-        callbacks:
-            The callbacks to use.
-
-    Returns:
-        The Trainer object.
-    """
-    return Trainer(
-        model=model,
-        args=args,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
-        callbacks=callbacks,
-        data_collator=data_collator,
-    )

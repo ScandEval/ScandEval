@@ -7,6 +7,7 @@ from typing import Any, Type
 
 import evaluate
 import numpy as np
+import torch
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
@@ -191,6 +192,7 @@ class BenchmarkDataset(ABC):
                 data_collator=data_collator,
                 trainer_class=self._get_trainer_class(),
                 evaluate_inputs_fn=self._get_evaluate_inputs,
+                preprocess_logits_for_metrics=self._preprocess_logits_for_metrics,
             )
 
         all_scores = log_scores(
@@ -436,6 +438,38 @@ class BenchmarkDataset(ABC):
                 )
 
         return prepared_train, prepared_val, prepared_tests
+
+    def _preprocess_logits_for_metrics(
+        self,
+        model_outputs: torch.Tensor | tuple,
+        labels: torch.Tensor,
+    ) -> torch.Tensor | tuple:
+        """Ensure that only the logits are returned from the model.
+
+        This is to avoid memory issues when the model returns hidden states as well.
+
+        Args:
+            logits:
+                The model logits.
+            labels:
+                The ground truth labels.
+
+        Returns:
+            The preprocessed logits.
+        """
+        if isinstance(model_outputs, tuple) and isinstance(
+            model_outputs[0], torch.Tensor
+        ):
+            model_output_tensors = [
+                model_output
+                for model_output in model_outputs
+                if isinstance(model_output, torch.Tensor)
+            ]
+            if len(model_output_tensors) == 1:
+                return model_output_tensors[0]
+            return tuple(model_output_tensors)
+        else:
+            return model_outputs
 
     def __call__(self, *args, **kwargs):
         return self.benchmark(*args, **kwargs)

@@ -89,7 +89,7 @@ def postprocess_predictions_and_labels(
 
     Args:
         predictions:
-            The predictions to postprocess.
+            A pair of (start_logits, end_logits) predictions.
         dataset:
             The dataset containing the examples.
         prepared_dataset:
