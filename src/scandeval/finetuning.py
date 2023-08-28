@@ -21,16 +21,13 @@ from transformers import (
 )
 from transformers.trainer import OptimizerNames
 
+from scandeval.exceptions import InvalidBenchmark
+
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .model_loading import load_model
 from .model_setups import Tokenizer
-from .utils import (
-    block_terminal_output,
-    clear_memory,
-    enforce_reproducibility,
-    handle_error,
-)
+from .utils import block_terminal_output, clear_memory, enforce_reproducibility
 
 logger = logging.getLogger(__package__)
 
@@ -103,7 +100,6 @@ def finetune(
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
     bs: int = benchmark_config.batch_size
-    ga: int = 32 // bs
     for idx in itr:
         # Set variable that tracks whether we need to initialize new models in
         # the single iteration call
@@ -121,74 +117,41 @@ def finetune(
                 pass
             clear_memory()
 
-        while True:
-            test = tests[idx]
-            prepared_test = prepared_tests[idx]
-            assert isinstance(test, Dataset)
-            assert isinstance(prepared_test, Dataset)
+        test = tests[idx]
+        prepared_test = prepared_tests[idx]
+        assert isinstance(test, Dataset)
+        assert isinstance(prepared_test, Dataset)
 
-            # Re-block terminal output, as it gets unblocked by the
-            # `transformers` package before training
-            block_terminal_output()
+        # Re-block terminal output, as it gets unblocked by the
+        # `transformers` package before training
+        block_terminal_output()
 
-            training_args = get_training_args(
-                benchmark_config=benchmark_config,
-                model_config=model_config,
-                iteration_idx=idx,
-            )
+        training_args = get_training_args(
+            benchmark_config=benchmark_config,
+            model_config=model_config,
+            iteration_idx=idx,
+            batch_size=bs,
+        )
 
-            # Set the correct batch size and gradient accumulation
-            training_args.per_device_train_batch_size = bs
-            training_args.per_device_eval_batch_size = bs
-            training_args.gradient_accumulation_steps = ga
-
-            itr_scores = finetune_single_iteration(
-                iteration_idx=idx,
-                model_config=model_config,
-                train=train,
-                prepared_train=prepared_train,
-                prepared_val=prepared_val,
-                test=test,
-                prepared_test=prepared_test,
-                training_args=training_args,
-                benchmark_config=benchmark_config,
-                dataset_config=dataset_config,
-                data_collator=data_collator,
-                compute_metrics=compute_metrics,
-                tokenizer=tokenizer if model_already_initialized else None,
-                model=model if model_already_initialized else None,
-                trainer_class=trainer_class,
-                evaluate_inputs_fn=evaluate_inputs_fn,
-                preprocess_logits_for_metrics=preprocess_logits_for_metrics,
-            )
-
-            # If the iteration was successful then break the loop
-            if isinstance(itr_scores, dict):
-                break
-
-            # Otherwise we encountered an error, so we have to deal with it and try
-            # again
-            else:
-                exception = itr_scores
-                bs = training_args.per_device_train_batch_size
-                ga = training_args.gradient_accumulation_steps
-                bs, ga = handle_error(
-                    e=exception,
-                    per_device_train_batch_size=bs,
-                    gradient_accumulation_steps=ga,
-                )
-
-                # Clear memory, to avoid memory issues
-                try:
-                    del model
-                except UnboundLocalError:
-                    pass
-                try:
-                    del tokenizer
-                except UnboundLocalError:
-                    pass
-                clear_memory()
-                model_already_initialized = False
+        itr_scores = finetune_single_iteration(
+            iteration_idx=idx,
+            model_config=model_config,
+            train=train,
+            prepared_train=prepared_train,
+            prepared_val=prepared_val,
+            test=test,
+            prepared_test=prepared_test,
+            training_args=training_args,
+            benchmark_config=benchmark_config,
+            dataset_config=dataset_config,
+            data_collator=data_collator,
+            compute_metrics=compute_metrics,
+            tokenizer=tokenizer if model_already_initialized else None,
+            model=model if model_already_initialized else None,
+            trainer_class=trainer_class,
+            evaluate_inputs_fn=evaluate_inputs_fn,
+            preprocess_logits_for_metrics=preprocess_logits_for_metrics,
+        )
 
         if "train" in itr_scores:
             logger.debug(f"Train scores for iteration {idx}: {itr_scores['train']}")
@@ -217,7 +180,7 @@ def finetune_single_iteration(
     trainer_class: Type[Trainer],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],
     preprocess_logits_for_metrics: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
-) -> dict[str, dict[str, float]] | Exception:
+) -> dict[str, dict[str, float]]:
     """Run a single iteration of a benchmark.
 
     Args:
@@ -263,7 +226,7 @@ def finetune_single_iteration(
 
     Returns:
         A dictionary containing the scores for the current iteration, with keys `train`
-        and `test`. If an exception is raised, then the exception is returned.
+        and `test`.
     """
     scores: dict[str, dict[str, float]] = dict()
 
@@ -341,22 +304,14 @@ def finetune_single_iteration(
         return scores
 
     except (RuntimeError, ValueError, IndexError) as e:
-        try:
-            del model
-        except UnboundLocalError:
-            pass
-        try:
-            del tokenizer
-        except UnboundLocalError:
-            pass
-        clear_memory()
-        return e
+        raise InvalidBenchmark(str(e))
 
 
 def get_training_args(
     benchmark_config: BenchmarkConfig,
     model_config: ModelConfig,
     iteration_idx: int,
+    batch_size: int | None = None,
 ) -> TrainingArguments:
     """Get the training arguments for the current iteration.
 
@@ -368,6 +323,9 @@ def get_training_args(
         iteration_idx:
             The index of the current iteration. This is only used to generate a
             unique random seed for the current iteration.
+        batch_size:
+            The batch size to use for the current iteration, or None if the batch size
+            in the benchmark config should be used.
 
     Returns:
         The training arguments for the current iteration.
@@ -381,7 +339,9 @@ def get_training_args(
     # Set seed variable
     seed = 4242 + iteration_idx
 
-    # Initialise training arguments
+    if batch_size is None:
+        batch_size = benchmark_config.batch_size
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
         training_args = TrainingArguments(
@@ -395,20 +355,18 @@ def get_training_args(
             max_steps=10_000 if not benchmark_config.testing else 10,
             report_to=[],
             save_total_limit=1,
-            per_device_train_batch_size=benchmark_config.batch_size,
-            per_device_eval_batch_size=benchmark_config.batch_size,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
             learning_rate=2e-5,
             warmup_ratio=0.01,
-            gradient_accumulation_steps=1,
+            gradient_accumulation_steps=32 // batch_size,
             load_best_model_at_end=True,
             optim=OptimizerNames.ADAMW_TORCH,
             seed=seed,
             use_mps_device=torch.backends.mps.is_available(),
             fp16=torch.cuda.is_available(),
+            auto_find_batch_size=True,
+            disable_tqdm=not benchmark_config.progress_bar,
         )
-
-    # Manually set `disable_tqdm` to `False` if `progress_bar` is `True`
-    if benchmark_config.progress_bar:
-        training_args.disable_tqdm = False
 
     return training_args
