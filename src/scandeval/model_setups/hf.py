@@ -254,6 +254,7 @@ class HFModelSetup:
                                 from_flax=from_flax,
                                 ignore_mismatched_sizes=ignore_mismatched_sizes,
                                 load_in_4bit=load_in_4bit,
+                                bnb_4bit_compute_type=torch.float16,
                                 revision=model_config.revision,
                                 token=self.benchmark_config.token,
                                 cache_dir=model_config.model_cache_dir,
