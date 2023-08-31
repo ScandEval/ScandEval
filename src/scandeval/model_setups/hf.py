@@ -255,10 +255,14 @@ class HFModelSetup:
                     warnings.filterwarnings("ignore", category=FutureWarning)
                     with HiddenPrints():
                         try:
-                            bnb_config = BitsAndBytesConfig(
-                                load_in_4bit=load_in_4bit,
-                                bnb_4bit_compute_type=torch.float16,
-                                bnb_4bit_use_double_quant=True,
+                            bnb_config = (
+                                BitsAndBytesConfig(
+                                    load_in_4bit=load_in_4bit,
+                                    bnb_4bit_compute_type=torch.float16,
+                                    bnb_4bit_use_double_quant=True,
+                                )
+                                if load_in_4bit
+                                else None
                             )
                             model_or_tuple = model_cls_or_none.from_pretrained(
                                 model_config.model_id,
