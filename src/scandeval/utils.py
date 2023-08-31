@@ -503,7 +503,7 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
         Whether the model is generative or not.
     """
     try:
-        dummy_inputs = torch.LongTensor([[1]], device=model.device)
+        dummy_inputs = torch.tensor([[1]], device=model.device, dtype=torch.long)
         generation_config = GenerationConfig(max_new_tokens=1)
         model.generate(inputs=dummy_inputs, generation_config=generation_config)
         return True
