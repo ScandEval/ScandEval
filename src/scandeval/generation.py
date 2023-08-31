@@ -176,7 +176,6 @@ def generate_single_iteration(
 
     generation_config = GenerationConfig(
         max_new_tokens=dataset_config.max_generated_tokens,
-        temperature=0.0,
         do_sample=False,
         stopping_criteria=stopping_criteria,
         output_scores=True,

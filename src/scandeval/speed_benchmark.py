@@ -128,7 +128,7 @@ def benchmark_speed_single_iteration(
                     model.generate(
                         inputs=inputs["input_ids"],
                         generation_config=GenerationConfig(
-                            max_new_tokens=1, temperature=0.0, do_sample=False
+                            max_new_tokens=1, do_sample=False
                         ),
                     )
                 else:
