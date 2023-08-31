@@ -51,6 +51,7 @@ and this project adheres to
 - Some models output both logits and hidden states, which caused unnecessary
   out-of-memory issues. This is now handled using the `preprocess_logits_for_metrics`
   argument in `Trainer`.
+- Now catches errors while loading model configurations.
 
 
 ## [v7.1.1] - 2023-07-01

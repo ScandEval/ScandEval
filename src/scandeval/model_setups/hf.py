@@ -208,17 +208,17 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
-        config = self._load_hf_model_config(
-            model_id=model_id,
-            num_labels=dataset_config.num_labels,
-            id2label=dataset_config.id2label,
-            label2id=dataset_config.label2id,
-            revision=model_config.revision,
-            model_cache_dir=model_config.model_cache_dir,
-        )
-
         while True:
             try:
+                config = self._load_hf_model_config(
+                    model_id=model_id,
+                    num_labels=dataset_config.num_labels,
+                    id2label=dataset_config.id2label,
+                    label2id=dataset_config.label2id,
+                    revision=model_config.revision,
+                    model_cache_dir=model_config.model_cache_dir,
+                )
+
                 # Get the model class associated with the supertask
                 if model_config.task in ["text-generation", "conversational"]:
                     model_cls_supertask = "causal-l-m"
