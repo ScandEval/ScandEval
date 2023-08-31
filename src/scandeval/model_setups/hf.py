@@ -10,7 +10,13 @@ import torch
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from requests.exceptions import RequestException
-from transformers import AutoConfig, AutoTokenizer, PretrainedConfig, PreTrainedModel
+from transformers import (
+    AutoConfig,
+    AutoTokenizer,
+    BitsAndBytesConfig,
+    PretrainedConfig,
+    PreTrainedModel,
+)
 from urllib3.exceptions import RequestError
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
@@ -246,21 +252,26 @@ class HFModelSetup:
 
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=UserWarning)
+                    warnings.filterwarnings("ignore", category=FutureWarning)
                     with HiddenPrints():
                         try:
+                            bnb_config = BitsAndBytesConfig(
+                                load_in_4bit=load_in_4bit,
+                                bnb_4bit_compute_type=torch.float16,
+                                bnb_4bit_use_double_quant=True,
+                            )
                             model_or_tuple = model_cls_or_none.from_pretrained(
                                 model_config.model_id,
                                 config=config,
                                 from_flax=from_flax,
                                 ignore_mismatched_sizes=ignore_mismatched_sizes,
-                                load_in_4bit=load_in_4bit,
-                                bnb_4bit_compute_type=torch.float16,
                                 revision=model_config.revision,
                                 token=self.benchmark_config.token,
                                 cache_dir=model_config.model_cache_dir,
                                 trust_remote_code=(
                                     self.benchmark_config.trust_remote_code
                                 ),
+                                quantization_config=bnb_config,
                             )
                         except (KeyError, RuntimeError) as e:
                             if not ignore_mismatched_sizes:
