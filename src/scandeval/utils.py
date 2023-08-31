@@ -21,7 +21,7 @@ from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
 from requests.exceptions import RequestException
-from transformers import PreTrainedModel
+from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
 
 from .config import Language
@@ -503,8 +503,9 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
         Whether the model is generative or not.
     """
     try:
-        dummy_inputs = torch.tensor([[1]], device=model.device, dtype=torch.long)
-        model.generate(inputs=dummy_inputs, max_new_tokens=1)
+        dummy_inputs = torch.LongTensor([[1]], device=model.device)
+        generation_config = GenerationConfig(max_new_tokens=1)
+        model.generate(inputs=dummy_inputs, generation_config=generation_config)
         return True
     except (NotImplementedError, TypeError):
         return False
