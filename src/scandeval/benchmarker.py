@@ -2,8 +2,11 @@
 
 import json
 import logging
+import re
 from pathlib import Path
 from time import sleep
+
+from pydantic import BaseModel
 
 from .benchmark_config_factory import build_benchmark_config
 from .config import DatasetConfig, Language
@@ -15,6 +18,28 @@ from .types import SCORE_DICT
 from .utils import get_huggingface_model_lists
 
 logger = logging.getLogger(__package__)
+
+
+class BenchmarkResult(BaseModel):
+    dataset: str
+    task: str
+    dataset_languages: list[str]
+    model: str
+    results: SCORE_DICT
+    num_model_parameters: int
+    max_sequence_length: int
+    vocabulary_size: int
+    few_shot: bool
+
+    @classmethod
+    def from_dict(cls, config: dict) -> "BenchmarkResult":
+        few_shot = False
+        if re.search(r"\(.*few-shot.*\)$", config["model"]) is not None:
+            few_shot = True
+            config["model"] = re.sub(r"\(.*few-shot.*\)$", "", config["model"]).strip()
+        if "few_shot" not in config:
+            config["few_shot"] = few_shot
+        return cls(**config)
 
 
 class Benchmarker:
@@ -138,11 +163,13 @@ class Benchmarker:
         # Set up the benchmark results variable, which will be populated with the
         # contents of the results file if it exists. If not, then it will be an empty
         # list
-        self.benchmark_results: list[dict[str, str | int | list[str] | SCORE_DICT]]
+        self.benchmark_results: list[BenchmarkResult] = list()
         if self.results_path.exists():
             with self.results_path.open() as f:
                 self.benchmark_results = [
-                    json.loads(line) for line in f if line.strip()
+                    BenchmarkResult.from_dict(json.loads(line))
+                    for line in f
+                    if line.strip()
                 ]
         else:
             self.benchmark_results = list()
@@ -158,7 +185,7 @@ class Benchmarker:
         self,
         model_id: list[str] | str | None = None,
         dataset: list[str] | str | None = None,
-    ) -> list[dict[str, str | int | list[str] | SCORE_DICT]]:
+    ) -> list[BenchmarkResult]:
         """Benchmarks models on datasets.
 
         Args:
@@ -173,9 +200,7 @@ class Benchmarker:
                 benchmarked. Defaults to None.
 
         Returns:
-            'dataset', 'task', 'dataset_languages', 'model', 'num_model_parameters' and
-            'scores'. If an error occured then the dictionary will only contain the key
-            'error', with the associated value being the error message.
+            A list of benchmark results.
         """
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
@@ -186,7 +211,6 @@ class Benchmarker:
         # Iterate over all the models and datasets
         for m_id in model_ids:
             m_id = m_id.rstrip(" /")
-            # TODO: Add " (few-shot)" if relevant
 
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
@@ -207,7 +231,7 @@ class Benchmarker:
                 )
 
                 # If the benchmark was unsuccessful then skip
-                if "error" in record:
+                if isinstance(record, dict) and "error" in record:
                     error_msg = record["error"]
                     logger.info(
                         f"{m_id} could not be benchmarked on "
@@ -217,12 +241,13 @@ class Benchmarker:
                     continue
 
                 # Add the record to the benchmark results
+                assert isinstance(record, BenchmarkResult)
                 self.benchmark_results.append(record)
 
                 # Save the benchmark results
                 if self.benchmark_config.save_results:
                     with self.results_path.open("a") as f:
-                        f.write("\n" + json.dumps(record))
+                        f.write("\n" + record.json())
 
         return self.benchmark_results
 
@@ -239,12 +264,7 @@ class Benchmarker:
             Whether the model has already been evaluated on the dataset.
         """
         for record in self.benchmark_results:
-            correct_dataset = record["dataset"] == dataset
-            correct_model = (
-                record["model"] == model_id
-                or record["model"] == f"{model_id} (few-shot)"
-            )
-            if correct_dataset and correct_model:
+            if record.model == model_id and record.dataset == dataset:
                 return True
         return False
 
@@ -280,7 +300,10 @@ class Benchmarker:
 
         # Reorder the `model_ids` list to include the ones present in the benchmark
         # results first
-        benchmarked_model_ids = [record["model"] for record in self.benchmark_results]
+        benchmarked_model_ids = [
+            re.sub(r"\(.+\)", "", record.model).strip()
+            for record in self.benchmark_results
+        ]
         model_ids_sorted = [m_id for m_id in model_ids if m_id in benchmarked_model_ids]
         model_ids_sorted += [
             m_id for m_id in model_ids if m_id not in benchmarked_model_ids
@@ -327,7 +350,7 @@ class Benchmarker:
         self,
         dataset_config: DatasetConfig,
         model_id: str,
-    ) -> dict[str, str | int | list[str] | SCORE_DICT]:
+    ) -> BenchmarkResult | dict[str, str]:
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -337,17 +360,14 @@ class Benchmarker:
                 The model ID to use.
 
         Returns:
-            The benchmark results, being a dictionary with the keys 'dataset', 'task',
-            'dataset_languages', 'model', 'num_model_parameters' and 'scores'. If an
-            error occured then the dictionary will only contain the key 'error', with
-            the associated value being the error message.
+            The benchmark result, or a dictionary containing an error message.
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
         while True:
             try:
                 dataset = self.dataset_factory.build_dataset(dataset_config)
                 results, metadata_dict = dataset(model_id)
-                record: dict[str, str | int | list[str] | SCORE_DICT] = dict(
+                record = BenchmarkResult(
                     dataset=dataset_config.name,
                     task=dataset_config.task.name,
                     dataset_languages=[
@@ -392,9 +412,7 @@ class Benchmarker:
                         raise e
                     return dict(error=str(e))
 
-    def __call__(
-        self, *args, **kwargs
-    ) -> list[dict[str, str | int | list[str] | SCORE_DICT]]:
+    def __call__(self, *args, **kwargs) -> list[BenchmarkResult]:
         return self.benchmark(*args, **kwargs)
 
     def _get_model_ids(self, languages: list[Language]) -> list[str]:
