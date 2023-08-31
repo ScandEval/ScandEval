@@ -76,7 +76,7 @@ class BenchmarkDataset(ABC):
         logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
         logger.setLevel(logging_level)
 
-    def benchmark(self, model_id: str) -> tuple[SCORE_DICT, dict[str, int]]:
+    def benchmark(self, model_id: str) -> tuple[SCORE_DICT, dict[str, bool | int]]:
         """Benchmark a model.
 
         Args:
