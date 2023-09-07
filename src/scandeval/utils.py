@@ -504,7 +504,11 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
     """
     try:
         dummy_inputs = torch.tensor([[1]], device=model.device, dtype=torch.long)
-        generation_config = GenerationConfig(max_new_tokens=1)
+        generation_config = GenerationConfig(
+            max_new_tokens=1,
+            pad_token_id=model.config.pad_token_id,
+            eos_token_id=model.config.eos_token_id,
+        )
         model.generate(inputs=dummy_inputs, generation_config=generation_config)
         return True
     except (NotImplementedError, TypeError):

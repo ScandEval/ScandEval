@@ -356,7 +356,7 @@ class HFModelSetup:
         """
         while True:
             try:
-                return AutoConfig.from_pretrained(
+                config = AutoConfig.from_pretrained(
                     model_id,
                     num_labels=num_labels,
                     id2label=id2label,
@@ -366,6 +366,9 @@ class HFModelSetup:
                     token=self.benchmark_config.token,
                     trust_remote_code=self.benchmark_config.trust_remote_code,
                 )
+                if config.eos_token_id is not None and config.pad_token_id is None:
+                    config.pad_token_id = config.eos_token_id
+                return config
             except KeyError as e:
                 key = e.args[0]
                 raise InvalidBenchmark(
