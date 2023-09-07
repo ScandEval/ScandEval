@@ -9,7 +9,7 @@ ______________________________________________________________________
 [![Paper](https://img.shields.io/badge/arXiv-2304.00906-b31b1b.svg)](https://arxiv.org/abs/2304.00906)
 [![License](https://img.shields.io/github/license/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/saattrupdan/ScandEval)](https://github.com/saattrupdan/ScandEval/commits/main)
-[![Code Coverage](https://img.shields.io/badge/Coverage-61%25-yellow.svg)](https://github.com/saattrupdan/ScandEval/tree/main/tests)
+[![Code Coverage](https://img.shields.io/badge/Coverage-64%25-yellow.svg)](https://github.com/saattrupdan/ScandEval/tree/main/tests)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](https://github.com/saattrupdan/ScandEval/blob/main/CODE_OF_CONDUCT.md)
 
 
