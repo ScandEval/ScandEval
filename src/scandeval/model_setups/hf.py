@@ -309,7 +309,9 @@ class HFModelSetup:
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
-        tokenizer = self._load_tokenizer(model=model, model_id=model_id)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
