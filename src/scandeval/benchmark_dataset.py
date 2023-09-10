@@ -224,7 +224,7 @@ class BenchmarkDataset(ABC):
         if hasattr(model.config, "num_params"):
             num_params = model.config.num_params
         elif isinstance(model, PreTrainedModel):
-            num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            num_params = sum(p.numel() for p in model.parameters())
         else:
             num_params = -1
 
