@@ -128,7 +128,10 @@ def benchmark_speed_single_iteration(
                     model.generate(
                         inputs=inputs["input_ids"],
                         generation_config=GenerationConfig(
-                            max_new_tokens=1, do_sample=False
+                            max_new_tokens=1,
+                            pad_token_id=model.config.pad_token_id,
+                            eos_token_id=model.config.eos_token_id,
+                            do_sample=False,
                         ),
                     )
                 else:
