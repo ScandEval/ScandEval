@@ -37,9 +37,16 @@ openai = ">=0.27.8,<1.0.0"
 tiktoken = ">=0.4.0,<1.0.0"
 levenshtein = ">=0.21.1,<1.0.0"
 einops = ">=0.6.0,<1.0.0"
-bitsandbytes = ">=0.40.0.post4,<1.0.0"
+bitsandbytes = [
+    {platform = "linux", version = ">=0.40.0.post4,<1.0.0"},
+    {platform = "windows", version = ">=0.40.0.post4,<1.0.0"},
+]
 requests = "^2.31.0"
-torch = "2.0.0"
+torch = [
+    {platform = "linux", version = "2.0.1"},
+    {platform = "windows", version = "2.0.1"},
+    {platform = "darwin", version = "2.2.0dev20230922"},
+]
 pydantic = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
