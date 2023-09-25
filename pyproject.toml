@@ -38,8 +38,7 @@ tiktoken = ">=0.4.0,<1.0.0"
 levenshtein = ">=0.21.1,<1.0.0"
 einops = ">=0.6.0,<1.0.0"
 bitsandbytes = [
-    {platform = "linux", version = ">=0.40.0.post4,<1.0.0"},
-    {platform = "windows", version = ">=0.40.0.post4,<1.0.0"},
+    {markers="sys_platform != 'darwin'", version = ">=0.40.0.post4,<1.0.0"},
 ]
 requests = "^2.31.0"
 torch = [
