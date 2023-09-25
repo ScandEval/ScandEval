@@ -45,9 +45,14 @@ requests = "^2.31.0"
 torch = [
     {platform = "linux", version = "2.0.1"},
     {platform = "windows", version = "2.0.1"},
-    {platform = "darwin", version = "2.2.0dev20230922"},
+    {platform = "darwin", version = "2.2.0dev20230922", source = "torch-nightly-cpu"},
 ]
 pydantic = "^2.3.0"
+
+[[tool.poetry.source]]
+name = "torch-nightly-cpu"
+url = "https://download.pytorch.org/whl/nightly/cpu"
+priority = "explicit"
 
 [tool.poetry.group.dev.dependencies]
 pdoc = "^14.0.0"
