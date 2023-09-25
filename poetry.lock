@@ -3080,38 +3080,11 @@ opt-einsum = ["opt-einsum (>=3.3)"]
 
 [[package]]
 name = "torch"
-version = "2.2.0.dev20230922+cpu"
+version = "2.2.0.dev20230922"
 description = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
 optional = false
-python-versions = ">=3.8.0"
-files = [
-    {file = "torch-2.2.0.dev20230922+cpu-cp310-cp310-linux_x86_64.whl", hash = "sha256:7f853d333aaa2c8d2475113bc7286f5ffd5ff58a8fe6634e4600f3c1ea4e976e"},
-    {file = "torch-2.2.0.dev20230922+cpu-cp310-cp310-win_amd64.whl", hash = "sha256:1f7836f53d44a964cf0f71254fc40b1db5939de9f5da5f0309a1be10f6d612b7"},
-    {file = "torch-2.2.0.dev20230922+cpu-cp311-cp311-linux_x86_64.whl", hash = "sha256:bec102e11f9ab491c300972e6516624d28a91cce56a4dfb303d7836487f40f18"},
-    {file = "torch-2.2.0.dev20230922+cpu-cp311-cp311-win_amd64.whl", hash = "sha256:1fa487ccba691078e7b545206427b73ff456af786258973f6d669042fc973b63"},
-    {file = "torch-2.2.0.dev20230922+cpu-cp38-cp38-linux_x86_64.whl", hash = "sha256:8b2d9035621dcec3fc0ab1346a7f22004e085de0bced2728a591cf7b4b55c612"},
-    {file = "torch-2.2.0.dev20230922+cpu-cp38-cp38-win_amd64.whl", hash = "sha256:29d52ed1fd92ff562fa70a7322f8c83b2cbd5d64b2a9b1bb814d2bcc2ccb5cfe"},
-    {file = "torch-2.2.0.dev20230922+cpu-cp39-cp39-linux_x86_64.whl", hash = "sha256:8eac92ab4d5ecde3c8f35f3b3637a2b6a042322450c72c80049c6e389615636d"},
-    {file = "torch-2.2.0.dev20230922+cpu-cp39-cp39-win_amd64.whl", hash = "sha256:d646ed9174ba595a31d68e87333fc6c199a8e9a0230833f7b5b7a5d43518f07b"},
-]
-
-[package.dependencies]
-filelock = "*"
-fsspec = "*"
-jinja2 = "*"
-networkx = "*"
-sympy = "*"
-typing-extensions = "*"
-
-[package.extras]
-dynamo = ["jinja2"]
-opt-einsum = ["opt-einsum (>=3.3)"]
-optree = ["optree (>=0.9.1)"]
-
-[package.source]
-type = "legacy"
-url = "https://download.pytorch.org/whl/nightly/cpu"
-reference = "torch-nightly-cpu"
+python-versions = "*"
+files = []
 
 [[package]]
 name = "tqdm"
@@ -3449,4 +3422,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "5b3f7c18d50ea75bb37bbd247e9674ae5921cbea8010e3af9f4c5a65e2b4e53b"
+content-hash = "4377655edec0b9513f016e7671ab9e8a150704e694d8aaf5ffe984af945023e1"
