@@ -37,15 +37,9 @@ openai = ">=0.27.8,<1.0.0"
 tiktoken = ">=0.4.0,<1.0.0"
 levenshtein = ">=0.21.1,<1.0.0"
 einops = ">=0.6.0,<1.0.0"
-bitsandbytes = [
-    {markers="sys_platform != 'darwin'", version = ">=0.40.0.post4,<1.0.0"},
-]
+bitsandbytes = {markers="sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.40.0.post4,<1.0.0"}
 requests = "^2.31.0"
-torch = [
-    {markers="sys_platform != 'darwin' or platform_machine != 'arm64'", version = "2.0.0"},
-    {markers="sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.10'", url = "https://download.pytorch.org/whl/nightly/cpu/torch-2.2.0.dev20230922-cp310-none-macosx_11_0_arm64.whl"},
-    {markers="sys_platform == 'darwin' and platform_machine == 'arm64' and python_version == '3.11'", url = "https://download.pytorch.org/whl/nightly/cpu/torch-2.2.0.dev20230922-cp311-none-macosx_11_0_arm64.whl"},
-]
+torch = "^2.1.0"
 pydantic = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
