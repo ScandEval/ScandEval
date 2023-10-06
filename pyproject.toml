@@ -13,7 +13,7 @@ homepage = "https://scandeval.github.io"
 repository = "https://github.com/saattrupdan/ScandEval"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
+python = ">=3.10,<4.0"
 tqdm = "^4.62.0"
 huggingface-hub = ">=0.7.0,<1.0.0"
 datasets = "^2.7.0"
