@@ -14,7 +14,7 @@ from scandeval.question_answering import QuestionAnswering
     argnames=["dataset", "correct_scores"],
     argvalues=[
         (SCANDIQA_DA_CONFIG, (0.00, 4.18)),
-        (SCANDIQA_NO_CONFIG, (0.00, 4.05)),
+        (SCANDIQA_NO_CONFIG, (0.00, 4.15)),
         (SCANDIQA_SV_CONFIG, (0.00, 4.44)),
     ],
     ids=[

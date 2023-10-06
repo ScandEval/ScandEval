@@ -363,7 +363,6 @@ def get_training_args(
             load_best_model_at_end=True,
             optim=OptimizerNames.ADAMW_TORCH,
             seed=seed,
-            use_mps_device=torch.backends.mps.is_available(),
             fp16=torch.cuda.is_available(),
             auto_find_batch_size=True,
             disable_tqdm=not benchmark_config.progress_bar,
