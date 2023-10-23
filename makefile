@@ -78,13 +78,14 @@ install-pipx:
 				(*) installCmd='python3 -m pip install --upgrade --user pipx'; ;; \
 			esac; \
 			$${installCmd}; \
-		pipx ensurepath --force; \
+		$(shell $HOME/.local/bin/pipx ensurepath); \
 		echo "Installed pipx."; \
 	fi
 
 install-poetry:
 	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.5.1)" ]; then \
 		pipx install --force poetry==1.5.1; \
+		pipx ensurepath --force; \
 		echo "Installed Poetry."; \
 	fi
 
