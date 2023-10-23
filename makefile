@@ -23,7 +23,8 @@ include .env
 export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
 export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
-export PATH := $(shell pwd)/.local/bin:$(PATH)
+SHELL := /bin/bash
+export PATH := ${HOME}/.local/bin:$(PATH)
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
