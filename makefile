@@ -23,8 +23,9 @@ include .env
 export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
 export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
-# Ensure that `pipx` and `poetry` will be able to run, since `pip` puts these in the following folder on Unix systems
-export PATH := ${HOME}/.local/bin:$(PATH)
+# Ensure that `pipx` and `poetry` will be able to run, since `pip` and `brew` put these
+# in the following folders on Unix systems
+export PATH := ${HOME}/.local/bin:/opt/homebrew/bin:$(PATH)
 
 # Prevent DBusErrorResponse during `poetry install` (see https://stackoverflow.com/a/75098703)
 export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
