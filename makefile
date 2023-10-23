@@ -27,7 +27,8 @@ export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 # in the following folders on Unix systems
 export PATH := ${HOME}/.local/bin:/opt/homebrew/bin:$(PATH)
 
-# Prevent DBusErrorResponse during `poetry install` (see https://stackoverflow.com/a/75098703)
+# Prevent DBusErrorResponse during `poetry install`
+# (see https://stackoverflow.com/a/75098703 for more information)
 export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
 
 help:
