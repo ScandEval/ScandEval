@@ -78,7 +78,6 @@ install-pipx:
 				(*) installCmd='python3 -m pip install --upgrade --user pipx'; ;; \
 			esac; \
 			$${installCmd}; \
-		$(shell ${HOME}/.local/bin/pipx ensurepath); \
 		echo "Installed pipx."; \
 	fi
 
