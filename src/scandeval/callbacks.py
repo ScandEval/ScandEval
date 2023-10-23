@@ -14,7 +14,6 @@ class NeverLeaveProgressCallback(ProgressCallback):
         self.testing = testing
 
     def on_train_begin(self, args, state, control, **kwargs):
-        print(state)
         if state.is_local_process_zero:
             desc = "Finetuning model"
             self.training_bar = tqdm(

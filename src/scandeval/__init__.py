@@ -11,6 +11,7 @@ from termcolor import colored
 
 from .benchmarker import Benchmarker
 from .utils import block_terminal_output
+from .cli import benchmark
 
 # Fetches the version of the package as defined in pyproject.toml
 __version__ = importlib.metadata.version(__package__)
@@ -35,3 +36,8 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Enable MPS fallback
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
+
+# Set amount of threads per GPU - this is the default and is only set to prevent a
+# warning from showing
+os.environ["OMP_NUM_THREADS"] = "1"

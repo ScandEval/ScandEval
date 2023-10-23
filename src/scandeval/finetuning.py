@@ -366,6 +366,7 @@ def get_training_args(
             fp16=torch.cuda.is_available(),
             auto_find_batch_size=True,
             disable_tqdm=not benchmark_config.progress_bar,
+            ddp_find_unused_parameters=False,
         )
 
     return training_args
