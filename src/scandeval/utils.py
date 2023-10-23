@@ -135,12 +135,14 @@ def block_terminal_output():
         "scalars; will instead unsqueeze and return a vector.",
     )
     warnings.filterwarnings("ignore", module="seqeval*")
+    warnings.filterwarnings("ignore", module="seqeval*")
 
     # Up the logging level, to disable outputs
     logging.getLogger("filelock").setLevel(logging.ERROR)
     logging.getLogger("absl").setLevel(logging.ERROR)
     logging.getLogger("datasets").setLevel(logging.ERROR)
     logging.getLogger("openai").setLevel(logging.ERROR)
+    logging.getLogger("torch.distributed").setLevel(logging.ERROR)
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
@@ -324,7 +326,7 @@ def get_huggingface_model_lists(
                 language_list = [lang for lang in language_list if lang != NO]
 
             language_string = (
-                f"{', '.join(l.name for l in language_list[:-1])} and "
+                f"{', '.join(lang.name for lang in language_list[:-1])} and "
                 f"{language_list[-1].name}"
             )
 
