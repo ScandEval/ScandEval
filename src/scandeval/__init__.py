@@ -11,7 +11,6 @@ from termcolor import colored
 
 from .benchmarker import Benchmarker
 from .utils import block_terminal_output
-from .cli import benchmark
 
 # Fetches the version of the package as defined in pyproject.toml
 __version__ = importlib.metadata.version(__package__)

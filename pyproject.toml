@@ -49,7 +49,7 @@ pytest-cov = "^4.1.0"
 readme-coverage-badger = ">=0.1.2,<1.0.0"
 
 [tool.poetry.scripts]
-scandeval = "torchrun scandeval.cli:benchmark"
+scandeval = "scandeval.cli:benchmark"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
