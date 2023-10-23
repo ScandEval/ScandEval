@@ -23,9 +23,11 @@ include .env
 export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
 export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
-.ONESHELL:
-SHELL := /bin/bash
+# Ensure that `pipx` and `poetry` will be able to run, since `pip` puts these in the following folder on Unix systems
 export PATH := ${HOME}/.local/bin:$(PATH)
+
+# Prevent DBusErrorResponse during `poetry install` (see https://stackoverflow.com/a/75098703)
+export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
