@@ -84,6 +84,7 @@ install-pipx:
 install-poetry:
 	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.5.1)" ]; then \
+		python3 -m pip uninstall -y poetry poetry-core poetry-plugin-export; \
 		pipx install --force poetry==1.5.1; \
 		pipx ensurepath --force; \
 		echo "Installed Poetry."; \
