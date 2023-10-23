@@ -23,6 +23,8 @@ include .env
 export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
 export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
+export PATH := $(shell pwd)/.local/bin:$(PATH)
+
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
@@ -70,7 +72,6 @@ generate-gpg-key:
 	fi
 
 install-pipx:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@if [ "$(shell which pipx)" = "" ]; then \
 		uname=$$(uname); \
 			case $${uname} in \
@@ -84,7 +85,6 @@ install-pipx:
 	fi
 
 install-poetry:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.5.1)" ]; then \
 		python3 -m pip uninstall -y poetry poetry-core poetry-plugin-export; \
 		pipx install --force poetry==1.5.1; \
@@ -92,19 +92,15 @@ install-poetry:
 	fi
 
 setup-poetry:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry env use python3.10 && poetry install
 
 setup-environment-variables:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry run python src/scripts/fix_dot_env_file.py
 
 setup-environment-variables-non-interactive:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry run python src/scripts/fix_dot_env_file.py --non-interactive
 
 setup-git:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@git config --global init.defaultBranch main
 	@git init
 	@git config --local user.name ${GIT_NAME}
@@ -131,7 +127,6 @@ add-repo-to-git:
 	fi
 
 docs:  ## Generate documentation
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry run pdoc --docformat google src/scandeval -o docs
 	@echo "Saved documentation."
 
@@ -147,29 +142,24 @@ view-docs:  ## View documentation
 		"$${openCmd}" docs/{{ cookiecutter.project_name }}.html
 
 test:  ## Run tests
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry run pytest && poetry run readme-cov
 
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .
 
 bump-major:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry run python -m src.scripts.versioning --major
 	@echo "Bumped major version!"
 
 bump-minor:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry run python -m src.scripts.versioning --minor
 	@echo "Bumped minor version!"
 
 bump-patch:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@poetry run python -m src.scripts.versioning --patch
 	@echo "Bumped patch version!"
 
 publish:
-	$(eval export PATH := ${HOME}/.local/bin:$(PATH))
 	@if [ ${PYPI_API_TOKEN} = "" ]; then \
 		echo "No PyPI API token specified in the '.env' file, so cannot publish."; \
 	else \
