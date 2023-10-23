@@ -23,6 +23,7 @@ include .env
 export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
 export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
+.ONESHELL:
 SHELL := /bin/bash
 export PATH := ${HOME}/.local/bin:$(PATH)
 
