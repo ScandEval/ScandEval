@@ -401,6 +401,7 @@ def get_training_args(
             logging_steps=30,
             save_steps=30,
             max_steps=10_000 if not benchmark_config.testing else 10,
+            use_cpu=benchmark_config.testing,
             report_to=[],
             save_total_limit=1,
             per_device_train_batch_size=batch_size,
