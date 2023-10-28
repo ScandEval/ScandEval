@@ -154,23 +154,8 @@ def block_terminal_output():
 
     # Disable `deepspeed` logging
     try:
-        logging.getLogger("deepspeed.utils.logging").setLevel(logging.ERROR)
-        logging.getLogger("deepspeed.utils").setLevel(logging.ERROR)
-        logging.getLogger("deepspeed").setLevel(logging.ERROR)
-        logging.getLogger("accelerator").setLevel(logging.ERROR)
-        logging.getLogger("accelerator.real_accelerator").setLevel(logging.ERROR)
-
         import deepspeed
 
-        deepspeed.utils.logging.logger.setLevel(logging.CRITICAL)
-        deepspeed.utils.logging.LoggerFactory.create_logger = (
-            lambda *args, **kwargs: logging.getLogger("deepspeed").setLevel(
-                logging.CRITICAL
-            )
-        )
-        # deepspeed.runtime.zero.partition_parameters.print_rank_0 = (
-        #    lambda *args, **kwargs: None
-        # )
         deepspeed.runtime.zero.parameter_offload.print_rank_0 = (
             lambda *args, **kwargs: None
         )
