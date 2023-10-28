@@ -175,14 +175,24 @@ def finetune(
                 if "CUDA" not in str(e):
                     raise e
 
+                if bs <= 1:
+                    raise InvalidBenchmark(
+                        "Could not benchmark the model, even with a batch size of 1!"
+                    )
+
+                if os.getenv("WORLD_SIZE") is not None:
+                    raise InvalidBenchmark(
+                        "The benchmark failed due to an out-of-memory error. Since "
+                        "you're running this in a distributed (multi-GPU) setting, "
+                        "you have to manually reduce the batch size. You're currently "
+                        f"using a batch size of {bs}, and you can reduce it with the "
+                        "`--batch-size` option - try setting it to {bs // 2}."
+                    )
+
                 model_already_initialized = False
 
                 # Half batch size, and raise error if we've reached 0
                 bs //= 2
-                if bs < 1:
-                    raise InvalidBenchmark(
-                        "Could not benchmark the model, even with a batch size of 1!"
-                    )
                 if benchmark_config.is_main_process:
                     logger.debug(f"Reduced batch size to {bs}")
 
