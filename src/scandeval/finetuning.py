@@ -172,7 +172,8 @@ def finetune(
                 break
 
             except Exception as e:
-                print(e)
+                if "CUDA" not in str(e):
+                    breakpoint()
                 print("REDUCING BATCH SIZE")
                 if "model" in locals():
                     del model
