@@ -9,15 +9,28 @@ import os
 from dotenv import load_dotenv
 from termcolor import colored
 
-from .benchmarker import Benchmarker
-from .utils import block_terminal_output
+
+# Disable parallelisation when tokenizing, as that can lead to errors
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+
+# Enable MPS fallback
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
+
+# Single GPU setup if we are not in a distributed environment
+if os.getenv("WORLD_SIZE") is None:
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+
+# Import submodules after setting environment variables since the modules import
+# `torch`, which needs to be imported after setting the environment variables
+from .benchmarker import Benchmarker  # noqa: E402
+from .utils import block_terminal_output  # noqa: E402
+
 
 # Fetches the version of the package as defined in pyproject.toml
 __version__ = importlib.metadata.version(__package__)
-
-
-# Block unwanted terminal outputs
-block_terminal_output()
 
 
 # Loads environment variables
@@ -29,14 +42,5 @@ fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "g
 logging.basicConfig(level=logging.INFO, format=fmt, datefmt="%Y-%m-%d %H:%M:%S")
 
 
-# Disable parallelisation when tokenizing, as that can lead to errors
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-
-# Enable MPS fallback
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-
-
-# Set amount of threads per GPU - this is the default and is only set to prevent a
-# warning from showing
-os.environ["OMP_NUM_THREADS"] = "1"
+# Block unwanted terminal outputs
+block_terminal_output()
