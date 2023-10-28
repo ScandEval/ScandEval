@@ -564,24 +564,27 @@ class NamedEntityRecognition(BenchmarkDataset):
             try:
                 json_output = json.loads(raw_prediction)
                 if not isinstance(json_output, dict):
-                    logger.debug(
-                        "The model output is not a JSON dictionary, so cannot parse "
-                        f"it. Skipping. Here is the output: {raw_prediction}"
-                    )
+                    if self.benchmark_config.is_main_process:
+                        logger.debug(
+                            "The model output is not a JSON dictionary, so cannot "
+                            f"parse it. Skipping. Here is the output: {raw_prediction}"
+                        )
                     continue
                 elif not all(isinstance(key, str) for key in json_output.keys()):
-                    logger.debug(
-                        "The model output is not a JSON dictionary with string keys, "
-                        "so cannot parse it. Skipping. Here is the output: "
-                        f"{raw_prediction}"
-                    )
+                    if self.benchmark_config.is_main_process:
+                        logger.debug(
+                            "The model output is not a JSON dictionary with string "
+                            "keys, so cannot parse it. Skipping. Here is the output: "
+                            f"{raw_prediction}"
+                        )
                     continue
                 elif not all(isinstance(value, list) for value in json_output.values()):
-                    logger.debug(
-                        "The model output is not a JSON dictionary with list values, "
-                        "so cannot parse it. Skipping. Here is the output: "
-                        f"{raw_prediction}"
-                    )
+                    if self.benchmark_config.is_main_process:
+                        logger.debug(
+                            "The model output is not a JSON dictionary with list "
+                            "values, so cannot parse it. Skipping. Here is the output: "
+                            f"{raw_prediction}"
+                        )
                     continue
                 prediction_dict: dict[str, list[str]] = json_output
             except json.JSONDecodeError:
@@ -596,10 +599,11 @@ class NamedEntityRecognition(BenchmarkDataset):
                         if prompt_tag == prompt_tag_name
                     ][0]
                 except IndexError:
-                    logger.debug(
-                        "The model produced an invalid prompt tag name, "
-                        f"{prompt_tag_name}. Skipping."
-                    )
+                    if self.benchmark_config.is_main_process:
+                        logger.debug(
+                            "The model produced an invalid prompt tag name, "
+                            f"{prompt_tag_name}. Skipping."
+                        )
                     continue
 
                 named_entities = [str(named_entity) for named_entity in named_entities]

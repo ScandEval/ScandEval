@@ -287,6 +287,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 def get_huggingface_model_lists(
     languages: list[Language] | None,
     token: bool | str,
+    is_main_process: bool,
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -299,6 +300,8 @@ def get_huggingface_model_lists(
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
             specified then it will be used as the token. Defaults to False.
+        is_main_process:
+            Whether this is the main process. Only relevant for distributed training.
 
     Returns:
         The keys are filterings of the list, which includes all language codes,
@@ -331,7 +334,10 @@ def get_huggingface_model_lists(
             )
 
     # Log fetching message
-    logger.info(f"Fetching list of {language_string} models from the Hugging Face Hub.")
+    if is_main_process:
+        logger.info(
+            f"Fetching list of {language_string} models from the Hugging Face Hub."
+        )
 
     # Initialise the API
     api: HfApi = HfApi()

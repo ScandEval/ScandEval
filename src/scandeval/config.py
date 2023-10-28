@@ -123,6 +123,9 @@ class BenchmarkConfig:
         load_in_4bit:
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model. Defaults to None.
+        is_main_process:
+            Whether the current process is the main process. Only relevant when
+            running in a distributed setting. Defaults to True.
         testing:
             Whether a unit test is being run. Defaults to False.
     """
@@ -143,6 +146,7 @@ class BenchmarkConfig:
     verbose: bool
     trust_remote_code: bool
     load_in_4bit: bool | None
+    is_main_process: bool = True
     testing: bool = False
 
 

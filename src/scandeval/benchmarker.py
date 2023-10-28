@@ -175,7 +175,12 @@ class Benchmarker:
             self.benchmark_results = list()
 
         # Set logging level based on verbosity
-        logging_level = logging.DEBUG if verbose else logging.INFO
+        if not self.benchmark_config.is_main_process:
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
         logger.setLevel(logging_level)
 
         # Initialise a dataset factory
@@ -435,6 +440,7 @@ class Benchmarker:
             self._model_lists = get_huggingface_model_lists(
                 languages=languages,
                 token=self.benchmark_config.token,
+                is_main_process=self.benchmark_config.is_main_process,
             )
 
         # Extract all the model IDs from the model lists, for the chosen languages

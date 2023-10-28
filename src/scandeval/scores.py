@@ -16,6 +16,7 @@ def log_scores(
     metric_configs: list[MetricConfig],
     scores: dict[str, list[dict[str, float]]],
     model_id: str,
+    is_main_process: bool,
 ) -> SCORE_DICT:
     """Log the scores.
 
@@ -29,6 +30,8 @@ def log_scores(
             'test', with values being lists of dictionaries full of scores.
         model_id:
             The full Hugging Face Hub path to the pretrained transformer model.
+        is_main_process:
+            Whether this is the main process. Only relevant for distributed training.
 
     Returns:
         A dictionary with keys 'raw_scores' and 'total', with 'raw_scores' being
@@ -36,8 +39,9 @@ def log_scores(
         (means and standard errors).
     """
     # Initial logging message
-    msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
-    logger.info(msg)
+    if is_main_process:
+        msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
+        logger.info(msg)
 
     # Initialise the total dict
     total_dict: dict[str, float] = dict()
@@ -69,7 +73,8 @@ def log_scores(
         total_dict[f"test_{metric_cfg.name}_se"] = test_se
 
         # Log the scores
-        logger.info(msg)
+        if is_main_process:
+            logger.info(msg)
 
     # Define a dict with both the raw scores and the aggregated scores
     all_scores: dict[str, dict[str, float] | dict[str, list[dict[str, float]]]]

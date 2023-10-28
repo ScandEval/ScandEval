@@ -154,10 +154,12 @@ def finetune(
         )
 
         if "train" in itr_scores:
-            logger.debug(f"Train scores for iteration {idx}: {itr_scores['train']}")
+            if benchmark_config.is_main_process:
+                logger.debug(f"Train scores for iteration {idx}: {itr_scores['train']}")
             scores["train"].append(itr_scores["train"])
         scores["test"].append(itr_scores["test"])
-        logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
+        if benchmark_config.is_main_process:
+            logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
 
     return scores
 

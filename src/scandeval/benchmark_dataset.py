@@ -72,8 +72,14 @@ class BenchmarkDataset(ABC):
             for metric_cfg in dataset_config.task.metrics
         }
 
-        # Set logging level based on verbosity
-        logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
+        # Set logging level based on verbosity and whether the current process is the
+        # main process
+        if not self.benchmark_config.is_main_process:
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
         logger.setLevel(logging_level)
 
     def benchmark(self, model_id: str) -> tuple[SCORE_DICT, dict[str, bool | int]]:
@@ -200,6 +206,7 @@ class BenchmarkDataset(ABC):
             metric_configs=self.dataset_config.task.metrics,
             scores=scores,
             model_id=model_config.model_id,
+            is_main_process=self.benchmark_config.is_main_process,
         )
 
         return all_scores, metadata_dict

@@ -1,6 +1,7 @@
 """Factory class for creating dataset configurations."""
 
 import torch
+import os
 
 from .config import BenchmarkConfig, DatasetTask, Language
 from .dataset_tasks import get_all_dataset_tasks
@@ -96,6 +97,8 @@ def build_benchmark_config(
 
     torch_device = prepare_device(device=device)
 
+    is_main_process = os.getenv("LOCAL_RANK", "0") == "0"
+
     # Build benchmark config and return it
     return BenchmarkConfig(
         model_languages=model_languages,
@@ -114,6 +117,7 @@ def build_benchmark_config(
         device=torch_device,
         trust_remote_code=trust_remote_code,
         load_in_4bit=load_in_4bit,
+        is_main_process=is_main_process,
         testing=testing,
     )
 

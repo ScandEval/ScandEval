@@ -114,7 +114,8 @@ def generate(
                         "GPU out of memory, even with a batch size of 1!"
                     )
 
-        logger.debug(f"Test scores for iteration {idx}: {test_scores}")
+        if benchmark_config.is_main_process:
+            logger.debug(f"Test scores for iteration {idx}: {test_scores}")
         scores["test"].append(test_scores)
         clear_memory()
 
@@ -129,7 +130,8 @@ def generate(
                 benchmark_config=benchmark_config,
                 dataset_config=dataset_config,
             )
-            logger.debug(f"Train scores for iteration {idx}: {train_scores}")
+            if benchmark_config.is_main_process:
+                logger.debug(f"Train scores for iteration {idx}: {train_scores}")
             scores["train"].append(train_scores)
             clear_memory()
 
