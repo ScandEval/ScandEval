@@ -156,10 +156,10 @@ def block_terminal_output():
     try:
         import deepspeed
 
-        deepspeed.logging.logger.setLevel(logging.CRITICAL)
-        deepspeed.logging.LoggerFactory.create_logger = lambda _: logging.getLogger(
-            "deepspeed"
-        ).setLevel(logging.CRITICAL)
+        deepspeed.utils.logging.logger.setLevel(logging.CRITICAL)
+        deepspeed.utils.logging.LoggerFactory.create_logger = (
+            lambda _: logging.getLogger("deepspeed").setLevel(logging.CRITICAL)
+        )
     except ImportError:
         pass
 
