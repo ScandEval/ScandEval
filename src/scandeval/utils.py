@@ -156,6 +156,12 @@ def block_terminal_output():
     try:
         import deepspeed
 
+        deepspeed.utils.logging.logger.setLevel(logging.CRITICAL)
+        deepspeed.utils.logging.LoggerFactory.create_logger = (
+            lambda *args, **kwargs: logging.getLogger("deepspeed").setLevel(
+                logging.CRITICAL
+            )
+        )
         deepspeed.runtime.zero.parameter_offload.print_rank_0 = (
             lambda *args, **kwargs: None
         )
