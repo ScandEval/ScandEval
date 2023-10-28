@@ -175,11 +175,16 @@ def finetune(
                 if "CUDA" not in str(e):
                     breakpoint()
                 print("REDUCING BATCH SIZE")
-                if "model" in locals():
+                try:
                     del model
-                if "tokenizer" in locals():
+                except UnboundLocalError:
+                    pass
+                try:
                     del tokenizer
+                except UnboundLocalError:
+                    pass
                 clear_memory()
+                model_already_initialized = False
                 bs //= 2
                 if bs < 1:
                     raise InvalidBenchmark(
