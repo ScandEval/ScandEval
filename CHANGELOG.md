@@ -26,6 +26,8 @@ and this project adheres to
   the underlying `bitsandbytes` package.
 - Now manually adjusts the maximum sequence length of a model to ensure that the
   reported maximum length is correct.
+- Added support for benchmarking in a distributed (multi-GPU) setting. See the updated
+  readme for more information.
 
 ### Changed
 - Now only supports Python 3.10 and above.
