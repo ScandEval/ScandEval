@@ -106,20 +106,20 @@ def finetune(
         # the single iteration call
         model_already_initialized = idx == 0
 
-        # Clear memory after first iteration
-        if not model_already_initialized:
-            try:
-                del model
-            except UnboundLocalError:
-                pass
-            try:
-                del tokenizer
-            except UnboundLocalError:
-                pass
-            clear_memory()
-
         # Run a loop here to deal with automatic reduction of batch size
         while True:
+            # Clear GPU memory
+            if not model_already_initialized:
+                try:
+                    del model
+                except UnboundLocalError:
+                    pass
+                try:
+                    del tokenizer
+                except UnboundLocalError:
+                    pass
+                clear_memory()
+
             try:
                 test = tests[idx]
                 prepared_test = prepared_tests[idx]
@@ -128,7 +128,7 @@ def finetune(
 
                 # Re-block terminal output, as it gets unblocked by the `transformers`
                 # package before training
-                block_terminal_output()
+                # block_terminal_output()
 
                 training_args = get_training_args(
                     benchmark_config=benchmark_config,
@@ -174,17 +174,6 @@ def finetune(
             except Exception as e:
                 if "CUDA" not in str(e):
                     raise e
-
-                # Clear GPU memory
-                try:
-                    del model
-                except UnboundLocalError:
-                    pass
-                try:
-                    del tokenizer
-                except UnboundLocalError:
-                    pass
-                clear_memory()
 
                 model_already_initialized = False
 
