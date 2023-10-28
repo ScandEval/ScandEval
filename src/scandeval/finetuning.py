@@ -118,49 +118,72 @@ def finetune(
                 pass
             clear_memory()
 
-        test = tests[idx]
-        prepared_test = prepared_tests[idx]
-        assert isinstance(test, Dataset)
-        assert isinstance(prepared_test, Dataset)
+        # Run a loop here to deal with automatic reduction of batch size
+        while True:
+            try:
+                test = tests[idx]
+                prepared_test = prepared_tests[idx]
+                assert isinstance(test, Dataset)
+                assert isinstance(prepared_test, Dataset)
 
-        # Re-block terminal output, as it gets unblocked by the `transformers` package
-        # before training
-        block_terminal_output()
+                # Re-block terminal output, as it gets unblocked by the `transformers`
+                # package before training
+                block_terminal_output()
 
-        training_args = get_training_args(
-            benchmark_config=benchmark_config,
-            model_config=model_config,
-            iteration_idx=idx,
-            batch_size=bs,
-        )
+                training_args = get_training_args(
+                    benchmark_config=benchmark_config,
+                    model_config=model_config,
+                    iteration_idx=idx,
+                    batch_size=bs,
+                )
 
-        itr_scores = finetune_single_iteration(
-            iteration_idx=idx,
-            model_config=model_config,
-            train=train,
-            prepared_train=prepared_train,
-            prepared_val=prepared_val,
-            test=test,
-            prepared_test=prepared_test,
-            training_args=training_args,
-            benchmark_config=benchmark_config,
-            dataset_config=dataset_config,
-            data_collator=data_collator,
-            compute_metrics=compute_metrics,
-            tokenizer=tokenizer if model_already_initialized else None,
-            model=model if model_already_initialized else None,
-            trainer_class=trainer_class,
-            evaluate_inputs_fn=evaluate_inputs_fn,
-            preprocess_logits_for_metrics=preprocess_logits_for_metrics,
-        )
+                itr_scores = finetune_single_iteration(
+                    iteration_idx=idx,
+                    model_config=model_config,
+                    train=train,
+                    prepared_train=prepared_train,
+                    prepared_val=prepared_val,
+                    test=test,
+                    prepared_test=prepared_test,
+                    training_args=training_args,
+                    benchmark_config=benchmark_config,
+                    dataset_config=dataset_config,
+                    data_collator=data_collator,
+                    compute_metrics=compute_metrics,
+                    tokenizer=tokenizer if model_already_initialized else None,
+                    model=model if model_already_initialized else None,
+                    trainer_class=trainer_class,
+                    evaluate_inputs_fn=evaluate_inputs_fn,
+                    preprocess_logits_for_metrics=preprocess_logits_for_metrics,
+                )
 
-        if "train" in itr_scores:
-            if benchmark_config.is_main_process:
-                logger.debug(f"Train scores for iteration {idx}: {itr_scores['train']}")
-            scores["train"].append(itr_scores["train"])
-        scores["test"].append(itr_scores["test"])
-        if benchmark_config.is_main_process:
-            logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
+                if "train" in itr_scores:
+                    if benchmark_config.is_main_process:
+                        logger.debug(
+                            f"Train scores for iteration {idx}: {itr_scores['train']}"
+                        )
+                    scores["train"].append(itr_scores["train"])
+                scores["test"].append(itr_scores["test"])
+                if benchmark_config.is_main_process:
+                    logger.debug(
+                        f"Test scores for iteration {idx}: {itr_scores['test']}"
+                    )
+
+                break
+
+            except Exception:
+                try:
+                    del model
+                except UnboundLocalError:
+                    pass
+                try:
+                    del tokenizer
+                except UnboundLocalError:
+                    pass
+                clear_memory()
+                bs //= 2
+                if benchmark_config.is_main_process:
+                    logger.info(f"Reduced batch size to {bs}")
 
     return scores
 
@@ -378,7 +401,6 @@ def get_training_args(
             optim=optimizer,
             seed=seed,
             fp16=torch.cuda.is_available(),
-            # auto_find_batch_size=True,
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )
