@@ -135,6 +135,7 @@ def block_terminal_output():
         "scalars; will instead unsqueeze and return a vector.",
     )
     warnings.filterwarnings("ignore", module="seqeval*")
+    warnings.filterwarnings("ignore", module="torch*")
 
     # Up the logging level, to disable outputs
     logging.getLogger("filelock").setLevel(logging.ERROR)
