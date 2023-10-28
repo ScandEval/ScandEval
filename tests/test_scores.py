@@ -111,6 +111,7 @@ class TestLogScores:
             metric_configs=[metric_config],
             scores=scores,
             model_id="model_id",
+            is_main_process=True,
         )
 
     def test_is_correct_type(self, logged_scores):
