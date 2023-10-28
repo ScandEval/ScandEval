@@ -10,7 +10,7 @@ from scandeval.callbacks import NeverLeaveProgressCallback
 
 @dataclass
 class FakeState:
-    is_local_process_zero: bool = True
+    is_world_process_zero: bool = True
 
 
 @dataclass
@@ -28,7 +28,7 @@ class TestNeverLeaveProgressCallback:
 
     @pytest.fixture(scope="class")
     def state(self):
-        yield FakeState(is_local_process_zero=True)
+        yield FakeState(is_world_process_zero=True)
 
     @pytest.fixture(scope="class")
     def eval_dataloader(self):
