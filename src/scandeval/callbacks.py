@@ -24,6 +24,11 @@ class NeverLeaveProgressCallback(ProgressCallback):
             )
         self.current_step = 0
 
+    def on_step_begin(self, args, state, control, **kwargs):
+        print(f"Global step: {state.global_step}")
+        print(f"Current step: {state.current_step}")
+        return super().on_step_begin(args, state, control, **kwargs)
+
     def on_step_end(self, args, state, control, **kwargs):
         print(f"Global step: {state.global_step}")
         print(f"Current step: {state.current_step}")
