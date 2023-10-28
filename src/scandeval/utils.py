@@ -135,7 +135,6 @@ def block_terminal_output():
         "scalars; will instead unsqueeze and return a vector.",
     )
     warnings.filterwarnings("ignore", module="seqeval*")
-    warnings.filterwarnings("ignore", module="torch*")
 
     # Up the logging level, to disable outputs
     logging.getLogger("filelock").setLevel(logging.ERROR)
@@ -144,7 +143,6 @@ def block_terminal_output():
     logging.getLogger("openai").setLevel(logging.ERROR)
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
-    logging.getLogger("torch.distributed.run").setLevel(logging.ERROR)
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
