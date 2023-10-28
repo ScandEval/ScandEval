@@ -173,7 +173,9 @@ def finetune(
 
             except Exception as e:
                 if "CUDA" not in str(e):
-                    breakpoint()
+                    raise e
+
+                # Clear GPU memory
                 try:
                     del model
                 except UnboundLocalError:
@@ -183,13 +185,15 @@ def finetune(
                 except UnboundLocalError:
                     pass
                 clear_memory()
+
                 model_already_initialized = False
+
+                # Half batch size, and raise error if we've reached 0
                 bs //= 2
                 if bs < 1:
                     raise InvalidBenchmark(
                         "Could not benchmark the model, even with a batch size of 1!"
                     )
-                breakpoint()
                 if benchmark_config.is_main_process:
                     logger.info(f"Reduced batch size to {bs}")
 
