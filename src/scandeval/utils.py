@@ -17,13 +17,10 @@ import numpy as np
 import pkg_resources
 import requests
 import torch
-from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
-from transformers import logging as tf_logging
-from accelerate.logging import logging as acc_logging
 
 from .config import Language
 from .enums import Framework
@@ -129,30 +126,30 @@ def block_terminal_output():
     """
 
     # Ignore miscellaneous warnings
-    warnings.filterwarnings(
-        "ignore",
-        module="torch.nn.parallel*",
-        message="Was asked to gather along dimension 0, but all input tensors were "
-        "scalars; will instead unsqueeze and return a vector.",
-    )
-    warnings.filterwarnings("ignore", module="seqeval*")
+    # warnings.filterwarnings(
+    #    "ignore",
+    #    module="torch.nn.parallel*",
+    #    message="Was asked to gather along dimension 0, but all input tensors were "
+    #    "scalars; will instead unsqueeze and return a vector.",
+    # )
+    # warnings.filterwarnings("ignore", module="seqeval*")
 
-    # Up the logging level, to disable outputs
-    logging.getLogger("filelock").setLevel(logging.ERROR)
-    logging.getLogger("absl").setLevel(logging.ERROR)
-    logging.getLogger("datasets").setLevel(logging.ERROR)
-    logging.getLogger("openai").setLevel(logging.ERROR)
-    logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
-    logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
+    ## Up the logging level, to disable outputs
+    # logging.getLogger("filelock").setLevel(logging.ERROR)
+    # logging.getLogger("absl").setLevel(logging.ERROR)
+    # logging.getLogger("datasets").setLevel(logging.ERROR)
+    # logging.getLogger("openai").setLevel(logging.ERROR)
+    # logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
+    # logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
 
-    # Disable the tokeniser progress bars
-    disable_progress_bar()
+    ## Disable the tokeniser progress bars
+    # disable_progress_bar()
 
-    # Disable most of the `transformers` logging
-    tf_logging._default_log_level = logging.CRITICAL
-    tf_logging.set_verbosity(logging.CRITICAL)
-    acc_logging.disable(logging.CRITICAL)
-    logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
+    ## Disable most of the `transformers` logging
+    # tf_logging._default_log_level = logging.CRITICAL
+    # tf_logging.set_verbosity(logging.CRITICAL)
+    # acc_logging.disable(logging.CRITICAL)
+    # logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
 
 
 def get_class_by_name(
