@@ -165,6 +165,9 @@ def block_terminal_output():
         deepspeed.runtime.zero.partition_parameters.print_rank_0 = (
             lambda *args, **kwargs: None
         )
+        deepspeed.runtime.zero.parameter_offload.print_rank_0 = (
+            lambda *args, **kwargs: None
+        )
     except ImportError:
         pass
 
