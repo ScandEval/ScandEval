@@ -174,14 +174,10 @@ def finetune(
             except Exception as e:
                 print(e)
                 print("REDUCING BATCH SIZE")
-                try:
+                if "model" in locals():
                     del model
-                except UnboundLocalError:
-                    pass
-                try:
+                if "tokenizer" in locals():
                     del tokenizer
-                except UnboundLocalError:
-                    pass
                 clear_memory()
                 bs //= 2
                 if bs < 1:
