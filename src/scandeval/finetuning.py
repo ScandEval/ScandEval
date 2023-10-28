@@ -363,10 +363,10 @@ def get_training_args(
             warmup_ratio=0.01,
             gradient_accumulation_steps=32 // batch_size,
             load_best_model_at_end=True,
-            optim=OptimizerNames.ADAMW_TORCH_FUSED,
+            optim=OptimizerNames.ADAMW_8BIT,
             seed=seed,
             fp16=torch.cuda.is_available(),
-            auto_find_batch_size=True,
+            # auto_find_batch_size=True,
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )
