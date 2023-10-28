@@ -172,6 +172,7 @@ def finetune(
                 break
 
             except Exception:
+                print("REDUCING BATCH SIZE")
                 try:
                     del model
                 except UnboundLocalError:
