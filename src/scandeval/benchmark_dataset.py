@@ -146,11 +146,11 @@ class BenchmarkDataset(ABC):
             )
 
         # Set up progress bar
-        itr = tqdm(
-            iterable=range(num_iter),
-            desc="Benchmarking",
-            disable=not self.benchmark_config.progress_bar,
+        no_pbar = (
+            not self.benchmark_config.progress_bar
+            or not self.benchmark_config.is_main_process
         )
+        itr = tqdm(iterable=range(num_iter), desc="Benchmarking", disable=no_pbar)
 
         data_collator = self._load_data_collator(tokenizer=tokenizer, model=model)
 
@@ -390,7 +390,10 @@ class BenchmarkDataset(ABC):
         )
 
         # Prepare the train and validation datasets
-        no_pbar = not self.benchmark_config.is_main_process
+        no_pbar = (
+            not self.benchmark_config.progress_bar
+            or not self.benchmark_config.is_main_process
+        )
         with tqdm(
             total=12, desc="Preprocessing data splits", leave=False, disable=no_pbar
         ) as pbar:
