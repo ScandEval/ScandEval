@@ -39,8 +39,6 @@ and this project adheres to
 - Changed the `--model-framework` argument to `--framework`.
 - Changed the `--use-auth-token` and `--auth-token` arguments to `--use-token` and
   `--token`, reflecting the same change in the `transformers` package.
-- Now uses the new `auto_find_batch_size` argument in `TrainingArguments`, rather than
-  manually doing this, as the underlying `accelerate` built-in version is more robust.
 - Now reports all model parameters, rather than just the trainable ones.
 
 ### Removed
