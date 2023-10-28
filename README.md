@@ -90,7 +90,7 @@ all the Nynorsk models on Nynorsk datasets:
 To benchmark models using multiple GPUs you have to run `scandeval` from the command
 line. Furthermore, you have to use the following slightly different command:
 ```
-$ accelerate launch --module scandeval.cli --model-id <model-id>
+$ accelerate launch --module scandeval --model-id <model-id>
 ```
 
 

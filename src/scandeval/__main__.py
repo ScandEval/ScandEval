@@ -1,3 +1,5 @@
+"""Module used when benchmarking in a distributed setting."""
+
 from .cli import benchmark
 
 

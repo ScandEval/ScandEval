@@ -293,7 +293,7 @@ def prepare_device(device: Device | None) -> torch.device:
         logger.info(
             "Benchmarking using a single GPU. If you have more GPUs available and "
             "intended to use more than one, then use `accelerate launch --module "
-            "scandeval.cli` instead of `scandeval` from the terminal."
+            "scandeval` instead of `scandeval` from the terminal."
         )
 
     return torch_device

@@ -234,7 +234,3 @@ def benchmark(
 
     # Perform the benchmark evaluation
     benchmarker(model_id=model_ids, dataset=datasets)
-
-
-if __name__ == "__main__":
-    benchmark()
