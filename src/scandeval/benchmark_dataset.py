@@ -390,7 +390,10 @@ class BenchmarkDataset(ABC):
         )
 
         # Prepare the train and validation datasets
-        with tqdm(total=12, desc="Preprocessing data splits", leave=False) as pbar:
+        no_pbar = not self.benchmark_config.is_main_process
+        with tqdm(
+            total=12, desc="Preprocessing data splits", leave=False, disable=no_pbar
+        ) as pbar:
             # When evaluating generative models we only need the test split, so
             # there's no need to prepare the train split
             try:
