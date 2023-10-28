@@ -40,7 +40,12 @@ if os.getenv("WORLD_SIZE") is None:
 # `torch`, which needs to be imported after setting the environment variables
 from .benchmarker import Benchmarker  # noqa: E402
 from .utils import block_terminal_output  # noqa: E402
+from .cli import benchmark  # noqa: E402
 
 
 # Block unwanted terminal outputs
 block_terminal_output()
+
+
+if __name__ == "__main__":
+    benchmark()
