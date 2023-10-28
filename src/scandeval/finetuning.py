@@ -338,11 +338,15 @@ def get_training_args(
     else:
         logging_strategy = IntervalStrategy.NO
 
-    # Set seed variable
     seed = 4242 + iteration_idx
 
     if batch_size is None:
         batch_size = benchmark_config.batch_size
+
+    if benchmark_config.device == torch.device("cuda"):
+        optimizer = OptimizerNames.ADAMW_8BIT
+    else:
+        optimizer = OptimizerNames.ADAMW_TORCH
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
@@ -363,7 +367,7 @@ def get_training_args(
             warmup_ratio=0.01,
             gradient_accumulation_steps=32 // batch_size,
             load_best_model_at_end=True,
-            optim=OptimizerNames.ADAMW_TORCH,
+            optim=optimizer,
             seed=seed,
             fp16=torch.cuda.is_available(),
             # auto_find_batch_size=True,
