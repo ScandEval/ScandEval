@@ -40,6 +40,6 @@ jobs:
         run: poetry add "torch==2.0.0"
 
       - name: Test with pytest
-        run: PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 poetry run pytest
+        run: poetry run pytest
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
