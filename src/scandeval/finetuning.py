@@ -128,7 +128,7 @@ def finetune(
 
                 # Re-block terminal output, as it gets unblocked by the `transformers`
                 # package before training
-                # block_terminal_output()
+                block_terminal_output()
 
                 training_args = get_training_args(
                     benchmark_config=benchmark_config,
