@@ -143,7 +143,6 @@ def block_terminal_output():
     logging.getLogger("openai").setLevel(logging.ERROR)
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
-    logging.getLogger("deepspeed").setLevel(logging.ERROR)
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
@@ -152,6 +151,17 @@ def block_terminal_output():
     tf_logging._default_log_level = logging.CRITICAL
     tf_logging.set_verbosity(logging.CRITICAL)
     logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
+
+    # Disable `deepspeed` logging
+    try:
+        import deepspeed
+
+        deepspeed.logging.logger.setLevel(logging.CRITICAL)
+        deepspeed.logging.LoggerFactory.create_logger = lambda _: logging.getLogger(
+            "deepspeed"
+        ).setLevel(logging.CRITICAL)
+    except ImportError:
+        pass
 
 
 def get_class_by_name(
