@@ -5,6 +5,7 @@ import warnings
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Type
+import os
 
 import torch
 from datasets import Dataset
@@ -122,8 +123,8 @@ def finetune(
         assert isinstance(test, Dataset)
         assert isinstance(prepared_test, Dataset)
 
-        # Re-block terminal output, as it gets unblocked by the
-        # `transformers` package before training
+        # Re-block terminal output, as it gets unblocked by the `transformers` package
+        # before training
         block_terminal_output()
 
         training_args = get_training_args(
@@ -342,6 +343,13 @@ def get_training_args(
 
     if batch_size is None:
         batch_size = benchmark_config.batch_size
+
+    # If we are in a distributed setting, then we lower the batch size per device until
+    # the total batch size is less than 32, to maintain a better consistency with a
+    # non-distributed setting
+    world_size = int(os.getenv("WORLD_SIZE", 1))
+    while world_size > 1 and batch_size * world_size > 32:
+        batch_size //= 2
 
     if benchmark_config.device == torch.device("cuda"):
         optimizer = OptimizerNames.ADAMW_8BIT
