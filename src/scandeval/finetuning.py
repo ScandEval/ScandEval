@@ -186,7 +186,7 @@ def finetune(
                         "you're running this in a distributed (multi-GPU) setting, "
                         "you have to manually reduce the batch size. You're currently "
                         f"using a batch size of {bs}, and you can reduce it with the "
-                        "`--batch-size` option - try setting it to {bs // 2}."
+                        f"`--batch-size` option - try setting it to {bs // 2}."
                     )
 
                 model_already_initialized = False
