@@ -168,7 +168,7 @@ def block_terminal_output():
         deepspeed.runtime.zero.parameter_offload.print_rank_0 = (
             lambda *args, **kwargs: None
         )
-        deepspeed.accelerator.real_accelerator.accel_logger.setLevel(logging.CRITICAL)
+        deepspeed.accelerator.real_accelerator.accel_logger = None
     except ImportError:
         pass
 
