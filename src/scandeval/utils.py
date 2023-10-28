@@ -155,7 +155,10 @@ def block_terminal_output():
     # Disable `deepspeed` logging
     try:
         print("Disabling deepspeed logging")
-        import deepspeed
+        import deepspeed.accelerator.real_accelerator
+
+        print("Disabling accel_logger")
+        deepspeed.accelerator.real_accelerator.accel_logger = None
 
         deepspeed.utils.logging.logger.setLevel(logging.CRITICAL)
         deepspeed.utils.logging.LoggerFactory.create_logger = (
@@ -169,8 +172,6 @@ def block_terminal_output():
         deepspeed.runtime.zero.parameter_offload.print_rank_0 = (
             lambda *args, **kwargs: None
         )
-        print("Disabling accel_logger")
-        deepspeed.accelerator.real_accelerator.accel_logger = None
     except ImportError:
         pass
 
