@@ -292,8 +292,8 @@ def prepare_device(device: Device | None) -> torch.device:
     if torch_device == torch.device("cuda") and os.getenv("WORLD_SIZE") is None:
         logger.info(
             "Benchmarking using a single GPU. If you have more GPUs available and "
-            "intended to use more than one, then use `accelerate launch --module "
-            "scandeval` instead of `scandeval` from the terminal."
+            "intended to use more than one, then use `accelerate launch -m scandeval` "
+            "instead of `scandeval` from the terminal."
         )
 
     return torch_device
