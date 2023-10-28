@@ -90,7 +90,14 @@ all the Nynorsk models on Nynorsk datasets:
 To benchmark models using multiple GPUs you have to run `scandeval` from the command
 line. Furthermore, you have to use the following slightly different command:
 ```
-$ accelerate launch --module scandeval --model-id <model-id>
+$ accelerate launch -m scandeval --model-id <model-id>
+```
+
+If you want to reduce your memory usage even more, for instance to benchmark really
+large models, you can install `deepspeed` with `pip install deepspeed` and then run the
+following:
+```
+$ accelerate launch --use_deepspeed --zero_stage 3 -m scandeval --model-id <model-id>
 ```
 
 
