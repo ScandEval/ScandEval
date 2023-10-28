@@ -155,10 +155,10 @@ def block_terminal_output():
     # Disable `deepspeed` logging
     try:
         print("Disabling deepspeed logging")
-        import deepspeed.utils.logging
+        from deepspeed.utils.logging import LoggerFactory
 
         print("Disabling accel_logger")
-        logger.setLevel(logging.CRITICAL)
+        LoggerFactory.create_logger = lambda *args, **kwargs: None
 
         import deepspeed
 
