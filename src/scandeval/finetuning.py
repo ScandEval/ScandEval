@@ -174,7 +174,6 @@ def finetune(
             except Exception as e:
                 if "CUDA" not in str(e):
                     breakpoint()
-                print("REDUCING BATCH SIZE")
                 try:
                     del model
                 except UnboundLocalError:
