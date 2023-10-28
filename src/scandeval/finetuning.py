@@ -172,7 +172,7 @@ def finetune(
                 break
 
             except Exception as e:
-                if "CUDA" not in str(e):
+                if "CUDA" not in str(e) and "out of memory" not in str(e):
                     raise e
 
                 if bs <= 1:
