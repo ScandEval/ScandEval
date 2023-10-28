@@ -158,9 +158,13 @@ def block_terminal_output():
 
         deepspeed.utils.logging.logger.setLevel(logging.CRITICAL)
         deepspeed.utils.logging.LoggerFactory.create_logger = (
-            lambda _: logging.getLogger("deepspeed").setLevel(logging.CRITICAL)
+            lambda *args, **kwargs: logging.getLogger("deepspeed").setLevel(
+                logging.CRITICAL
+            )
         )
-        deepspeed.runtime.zero.partition_parameters.print_rank_0 = lambda _: None
+        deepspeed.runtime.zero.partition_parameters.print_rank_0 = (
+            lambda *args, **kwargs: None
+        )
     except ImportError:
         pass
 
