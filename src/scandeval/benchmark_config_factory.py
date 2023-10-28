@@ -2,11 +2,15 @@
 
 import torch
 import os
+import logging
 
 from .config import BenchmarkConfig, DatasetTask, Language
 from .dataset_tasks import get_all_dataset_tasks
 from .enums import Device, Framework
 from .languages import get_all_languages
+
+
+logger = logging.getLogger(__package__)
 
 
 def build_benchmark_config(
@@ -271,17 +275,25 @@ def prepare_device(device: Device | None) -> torch.device:
     Returns:
         The prepared device.
     """
-    device_mapping = {
-        Device.CPU: torch.device("cpu"),
-        Device.CUDA: torch.device("cuda"),
-        Device.MPS: torch.device("mps"),
-    }
     if isinstance(device, Device):
-        return device_mapping[device]
-
-    if torch.cuda.is_available():
-        return torch.device("cuda")
+        device_mapping = {
+            Device.CPU: torch.device("cpu"),
+            Device.CUDA: torch.device("cuda"),
+            Device.MPS: torch.device("mps"),
+        }
+        torch_device = device_mapping[device]
+    elif torch.cuda.is_available():
+        torch_device = torch.device("cuda")
     elif torch.backends.mps.is_available():
-        return torch.device("mps")
+        torch_device = torch.device("mps")
     else:
-        return torch.device("cpu")
+        torch_device = torch.device("cpu")
+
+    if torch_device == torch.device("cuda") and os.getenv("WORLD_SIZE") is None:
+        logger.info(
+            "Benchmarking using a single GPU. If you have more GPUs available and "
+            "intended to use more than one, then use `accelerate launch --module "
+            "scandeval.cli` instead of `scandeval` from the terminal."
+        )
+
+    return torch_device
