@@ -194,8 +194,6 @@ def finetune(
                     raise InvalidBenchmark(
                         "Could not benchmark the model, even with a batch size of 1!"
                     )
-                if benchmark_config.is_main_process:
-                    logger.info(f"Reduced batch size to {bs}")
 
     return scores
 
