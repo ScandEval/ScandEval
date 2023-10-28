@@ -143,6 +143,10 @@ def block_terminal_output():
     logging.getLogger("openai").setLevel(logging.ERROR)
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
+    logging.getLogger("real_accelerator.py:158:get_accelerator").setLevel(logging.ERROR)
+    logging.getLogger("real_accelerator.py").setLevel(logging.ERROR)
+    logging.getLogger("real_accelerator").setLevel(logging.ERROR)
+    logging.getLogger("real_accelerator.get_accelerator").setLevel(logging.ERROR)
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
