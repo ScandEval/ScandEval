@@ -23,6 +23,7 @@ from huggingface_hub.hf_api import ModelInfo
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
+from accelerate.logging import logging as acc_logging
 
 from .config import Language
 from .enums import Framework
@@ -143,7 +144,6 @@ def block_terminal_output():
     logging.getLogger("openai").setLevel(logging.ERROR)
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
-    logging.getLogger("deepspeed").setLevel(logging.ERROR)
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
@@ -151,6 +151,7 @@ def block_terminal_output():
     # Disable most of the `transformers` logging
     tf_logging._default_log_level = logging.CRITICAL
     tf_logging.set_verbosity(logging.CRITICAL)
+    acc_logging.disable(logging.CRITICAL)
     logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
 
 
