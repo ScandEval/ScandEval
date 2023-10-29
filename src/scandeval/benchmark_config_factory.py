@@ -292,6 +292,7 @@ def prepare_device(device: Device | None) -> torch.device:
     else:
         torch_device = torch.device("cpu")
 
+    breakpoint()
     if torch_device == torch.device("cuda") and os.getenv("WORLD_SIZE") is None:
         logger.info(
             "Benchmarking using a single GPU. If you have more GPUs available and "
