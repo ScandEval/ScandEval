@@ -220,8 +220,7 @@ def generate_single_iteration(
     no_pbar = (
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
-    pbar = tqdm(range(len(dataloader)), leave=False, disable=no_pbar)
-    for batch_idx, batch in enumerate(dataloader):
+    for batch_idx, batch in enumerate(tqdm(dataloader, leave=False, disable=no_pbar)):
         inputs = batch["input_ids"].to(model.device)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
@@ -237,8 +236,6 @@ def generate_single_iteration(
             input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
         )
         all_preds.extend(extracted_labels)
-
-        pbar.update(1)
 
     if "label" in prepared_dataset.column_names:
         true_labels = [
