@@ -5,6 +5,7 @@ import warnings
 from collections import defaultdict
 from typing import Any, Callable
 
+from accelerate import Accelerator
 import torch
 from datasets import Dataset
 from torch.utils.data import DataLoader
@@ -209,6 +210,11 @@ def generate_single_iteration(
         num_workers=4,
         collate_fn=data_collator,
     )
+
+    # Handle distributed training
+    if not isinstance(model, OpenAIModel):
+        accelerator = Accelerator()
+        dataloader, model = accelerator.prepare(dataloader, model)
 
     no_pbar = not benchmark_config.progress_bar or not benchmark_config.is_main_process
     for batch_idx, batch in enumerate(tqdm(dataloader, leave=False, disable=no_pbar)):
