@@ -212,13 +212,13 @@ def generate_single_iteration(
             self.model = model
 
         def forward(self, *args, **kwargs):
-            return self.model.module.generate(*args, **kwargs)
+            return self.model.generate(*args, **kwargs)
 
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
         accelerator = Accelerator()
         new_model, dataloader = accelerator.prepare(
-            dataloader, GenerationModelWrapper(model)
+            dataloader, GenerationModelWrapper(model=model.module)  # type: ignore
         )
 
     # Generate all the completions
