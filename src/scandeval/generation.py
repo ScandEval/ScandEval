@@ -209,7 +209,7 @@ def generate_single_iteration(
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
         accelerator = Accelerator()
-        model, dataloader = accelerator.prepare(model, dataloader)
+        dataloader = accelerator.prepare(dataloader)
 
     # Generate all the completions
     no_pbar = (
