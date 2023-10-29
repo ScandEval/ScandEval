@@ -104,7 +104,7 @@ def build_benchmark_config(
     # When running in a distributed setting, the main process is the one with rank 0.
     # We need this for logging. In case we are not running in a distributed setting,
     # we assume that the current process is the main process.
-    is_main_process = os.getenv("WORLD_SIZE") is None or os.getenv("RANK", "0") == "0"
+    is_main_process = os.getenv("RANK", "0") == "0"
 
     # Build benchmark config and return it
     return BenchmarkConfig(
