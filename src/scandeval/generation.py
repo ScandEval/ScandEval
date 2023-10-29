@@ -224,10 +224,10 @@ def generate_single_iteration(
         # Generate the completions of the documents in the batch
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
-            inputs = batch["input_ids"].to(model.device)
+            # inputs = batch["input_ids"].to(model.device)
             with torch.inference_mode():
                 model_output: ModelOutput = model.generate(
-                    inputs=inputs, generation_config=generation_config
+                    inputs=batch["input_ids"], generation_config=generation_config
                 )
 
         batch_start = batch_idx * batch_size
