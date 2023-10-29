@@ -218,7 +218,7 @@ def generate_single_iteration(
     if not isinstance(model, OpenAIModel):
         accelerator = Accelerator()
         new_model, dataloader = accelerator.prepare(
-            dataloader, GenerationModelWrapper(module=model.module)  # type: ignore
+            dataloader, GenerationModelWrapper(module=model)  # type: ignore
         )
 
     # Generate all the completions
