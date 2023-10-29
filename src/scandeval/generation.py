@@ -5,7 +5,6 @@ import warnings
 from collections import defaultdict
 from typing import Any, Callable
 
-from accelerate import Accelerator
 import torch
 from datasets import Dataset
 from torch.utils.data import DataLoader
@@ -207,9 +206,7 @@ def generate_single_iteration(
     )
 
     # Handle distributed training
-    if not isinstance(model, OpenAIModel):
-        accelerator = Accelerator()
-        model, dataloader = accelerator.prepare(model, dataloader)
+    # accelerator = Accelerator()
 
     # Generate all the completions
     no_pbar = (
