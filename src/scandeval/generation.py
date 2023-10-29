@@ -219,7 +219,11 @@ def generate_single_iteration(
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
-                model_output = model.generate(
+                try:
+                    generate_fn = model.generate
+                except AttributeError:
+                    generate_fn = model.module.generate  # type: ignore[attr-defined]
+                model_output = generate_fn(
                     inputs=batch["input_ids"], generation_config=generation_config
                 )
 
