@@ -208,7 +208,7 @@ def generate_single_iteration(
 
     class GenerationModelWrapper(torch.nn.Module):
         def __init__(self, model) -> None:
-            self.model
+            self.model = model
 
         def forward(self, *args, **kwargs):
             return self.model.generate(*args, **kwargs)
