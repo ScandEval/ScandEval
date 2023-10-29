@@ -213,6 +213,7 @@ def generate_single_iteration(
 
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
+        breakpoint()
         accelerator = Accelerator()
         dataloader, model = accelerator.prepare(dataloader, model)
 
