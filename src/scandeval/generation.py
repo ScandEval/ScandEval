@@ -207,9 +207,9 @@ def generate_single_iteration(
     )
 
     class GenerationModelWrapper(torch.nn.Module):
-        def __init__(self, model) -> None:
+        def __init__(self, module: torch.nn.Module) -> None:
             super().__init__()
-            self.model = model
+            self.model = module
 
         def forward(self, *args, **kwargs):
             return self.model.generate(*args, **kwargs)
@@ -218,7 +218,7 @@ def generate_single_iteration(
     if not isinstance(model, OpenAIModel):
         accelerator = Accelerator()
         new_model, dataloader = accelerator.prepare(
-            dataloader, GenerationModelWrapper(model=model.module)  # type: ignore
+            dataloader, GenerationModelWrapper(module=model.module)  # type: ignore
         )
 
     # Generate all the completions
