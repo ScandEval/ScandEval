@@ -209,10 +209,10 @@ def generate_single_iteration(
     class GenerationModelWrapper(torch.nn.Module):
         def __init__(self, module: torch.nn.Module) -> None:
             super().__init__()
-            self.model = module
+            self.module = module
 
         def forward(self, *args, **kwargs):
-            return self.model.generate(*args, **kwargs)
+            return self.module.generate(*args, **kwargs)
 
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
