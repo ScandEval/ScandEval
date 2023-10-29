@@ -99,6 +99,7 @@ def generate(
                 )
                 break
             except Exception as e:
+                breakpoint()
                 if "CUDA" not in str(e) and "out of memory" not in str(e):
                     raise InvalidBenchmark(str(e))
 
@@ -214,7 +215,7 @@ def generate_single_iteration(
     no_pbar = (
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
-    pbar = tqdm(range(len(prepared_dataset)), leave=False, disable=no_pbar)
+    pbar = tqdm(range(len(dataloader)), leave=False, disable=no_pbar)
     for batch in dataloader:
         inputs = batch["input_ids"].to(model.device)
         with warnings.catch_warnings():
