@@ -206,10 +206,19 @@ def generate_single_iteration(
         collate_fn=data_collator,
     )
 
+    class GenerationModelWrapper(torch.nn.Module):
+        def __init__(self, model) -> None:
+            self.model
+
+        def forward(self, *args, **kwargs):
+            return self.model.generate(*args, **kwargs)
+
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
         accelerator = Accelerator()
-        dataloader = accelerator.prepare(dataloader)
+        new_model, dataloader = accelerator.prepare(
+            dataloader, GenerationModelWrapper(model)
+        )
 
     # Generate all the completions
     no_pbar = (
@@ -219,11 +228,7 @@ def generate_single_iteration(
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
-                try:
-                    generate_fn = model.generate
-                except AttributeError:
-                    generate_fn = model.module.generate  # type: ignore[attr-defined]
-                model_output = generate_fn(
+                model_output = new_model(
                     inputs=batch["input_ids"], generation_config=generation_config
                 )
 
