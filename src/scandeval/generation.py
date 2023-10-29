@@ -216,7 +216,9 @@ def generate_single_iteration(
         accelerator = Accelerator()
         dataloader, model = accelerator.prepare(dataloader, model)
 
-    no_pbar = not benchmark_config.progress_bar or not benchmark_config.is_main_process
+    no_pbar = (
+        not benchmark_config.progress_bar
+    )  # or not benchmark_config.is_main_process
     for batch_idx, batch in enumerate(tqdm(dataloader, leave=False, disable=no_pbar)):
         # Generate the completions of the documents in the batch
         with warnings.catch_warnings():
