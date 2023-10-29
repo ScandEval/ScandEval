@@ -99,7 +99,7 @@ def generate(
                 )
                 break
             except Exception as e:
-                breakpoint()
+                print(f"Encountered error: {e}")
                 if "CUDA" not in str(e) and "out of memory" not in str(e):
                     raise InvalidBenchmark(str(e))
 
