@@ -99,15 +99,9 @@ def generate(
                 )
                 break
             except Exception as e:
-                breakpoint()
-                oom_error = [
-                    "CUDA out of memory",
-                    "CUDA error",
-                    "MPS backend out of memory",
-                    "Too many parallel completions requested.",  # OpenAI specific
-                ]
-                if all(error not in str(e) for error in oom_error):
+                if "CUDA" not in str(e) and "out of memory" not in str(e):
                     raise InvalidBenchmark(str(e))
+
                 clear_memory()
                 benchmark_config.batch_size //= 2
                 if benchmark_config.batch_size < 1:
@@ -214,7 +208,7 @@ def generate_single_iteration(
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
         accelerator = Accelerator()
-        dataloader, model = accelerator.prepare(dataloader, model)
+        dataloader = accelerator.prepare(dataloader)
 
     # Generate all the completions
     no_pbar = (
