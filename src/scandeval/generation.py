@@ -11,7 +11,6 @@ from datasets import Dataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import DataCollator, GenerationConfig, StoppingCriteria
-from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig
 from .exceptions import InvalidBenchmark
@@ -217,27 +216,26 @@ def generate_single_iteration(
         accelerator = Accelerator()
         dataloader, model = accelerator.prepare(dataloader, model)
 
+    # Generate all the completions
     no_pbar = (
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
     pbar = tqdm(range(len(prepared_dataset)), leave=False, disable=no_pbar)
     for batch_idx, batch in enumerate(dataloader):
-        # Generate the completions of the documents in the batch
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
-            # inputs = batch["input_ids"].to(model.device)
             with torch.inference_mode():
-                model_output: ModelOutput = model.generate(
+                model.generate(
                     inputs=batch["input_ids"], generation_config=generation_config
                 )
 
-        batch_start = batch_idx * batch_size
-        batch_end = (batch_idx + 1) * batch_size
-        input_batch = prepared_dataset[batch_start:batch_end]
-        extracted_labels: list = extract_labels_fn(
-            input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
-        )
-        all_preds.extend(extracted_labels)
+        # batch_start = batch_idx * batch_size
+        # batch_end = (batch_idx + 1) * batch_size
+        # input_batch = prepared_dataset[batch_start:batch_end]
+        # extracted_labels: list = extract_labels_fn(
+        #    input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+        # )
+        # all_preds.extend(extracted_labels)
 
         pbar.update(1)
 
