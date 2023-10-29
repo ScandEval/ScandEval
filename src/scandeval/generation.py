@@ -208,7 +208,7 @@ def generate_single_iteration(
 
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
-        accelerator = Accelerator(mixed_precision="fp8")
+        accelerator = Accelerator()
         model, dataloader = accelerator.prepare(model, dataloader)
 
     # Generate all the completions
