@@ -212,7 +212,7 @@ def generate_single_iteration(
             self.model = model
 
         def forward(self, *args, **kwargs):
-            return self.model.generate(*args, **kwargs)
+            return self.model.module.generate(*args, **kwargs)
 
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
