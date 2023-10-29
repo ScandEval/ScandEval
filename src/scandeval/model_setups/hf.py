@@ -255,7 +255,7 @@ class HFModelSetup:
                     warnings.filterwarnings("ignore", category=FutureWarning)
                     with HiddenPrints():
                         try:
-                            (
+                            bnb_config = (
                                 BitsAndBytesConfig(
                                     load_in_4bit=load_in_4bit,
                                     bnb_4bit_compute_type=torch.float16,
@@ -276,7 +276,7 @@ class HFModelSetup:
                                     self.benchmark_config.trust_remote_code
                                 ),
                                 # device_map="auto",
-                                # quantization_config=bnb_config,
+                                quantization_config=bnb_config,
                             )
                         except (KeyError, RuntimeError) as e:
                             if not ignore_mismatched_sizes:

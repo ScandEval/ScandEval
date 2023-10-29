@@ -210,7 +210,7 @@ def generate_single_iteration(
     if not isinstance(model, OpenAIModel):
         accelerator = Accelerator()
         model = accelerator.prepare_model(
-            model=model, device_placement=False, evaluation_mode=True
+            model=model, device_placement=True, evaluation_mode=True
         )
         dataloader = accelerator.prepare_data_loader(
             data_loader=dataloader, device_placement=True
