@@ -4,6 +4,7 @@ import logging
 import warnings
 from collections import defaultdict
 from typing import Any, Callable
+from accelerate import Accelerator
 
 import torch
 from datasets import Dataset
@@ -206,27 +207,29 @@ def generate_single_iteration(
     )
 
     # Handle distributed training
-    # accelerator = Accelerator()
+    Accelerator()
 
     # Generate all the completions
     no_pbar = (
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
     pbar = tqdm(range(len(dataloader)), leave=False, disable=no_pbar)
-    for batch in dataloader:
+    for batch_idx, batch in enumerate(dataloader):
         inputs = batch["input_ids"].to(model.device)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
-                model.generate(inputs=inputs, generation_config=generation_config)
+                model_output = model.generate(
+                    inputs=inputs, generation_config=generation_config
+                )
 
-        # batch_start = batch_idx * batch_size
-        # batch_end = (batch_idx + 1) * batch_size
-        # input_batch = prepared_dataset[batch_start:batch_end]
-        # extracted_labels: list = extract_labels_fn(
-        #    input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
-        # )
-        # all_preds.extend(extracted_labels)
+        batch_start = batch_idx * batch_size
+        batch_end = (batch_idx + 1) * batch_size
+        input_batch = prepared_dataset[batch_start:batch_end]
+        extracted_labels: list = extract_labels_fn(
+            input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+        )
+        all_preds.extend(extracted_labels)
 
         pbar.update(1)
 
