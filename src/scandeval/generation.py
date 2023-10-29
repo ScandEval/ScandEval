@@ -99,6 +99,7 @@ def generate(
                 )
                 break
             except Exception as e:
+                breakpoint()
                 oom_error = [
                     "CUDA out of memory",
                     "CUDA error",
