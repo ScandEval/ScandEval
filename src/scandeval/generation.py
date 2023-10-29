@@ -220,7 +220,7 @@ def generate_single_iteration(
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
     pbar = tqdm(range(len(prepared_dataset)), leave=False, disable=no_pbar)
-    for batch_idx, batch in enumerate(dataloader):
+    for batch in dataloader:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
