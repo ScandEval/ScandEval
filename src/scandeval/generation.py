@@ -207,8 +207,8 @@ def generate_single_iteration(
 
     # Handle distributed training
     if not isinstance(model, OpenAIModel):
-        accelerator = Accelerator()
-        dataloader = accelerator.prepare(dataloader)
+        accelerator = Accelerator(device_placement=False)
+        model, dataloader = accelerator.prepare(model, dataloader)
 
     # Generate all the completions
     no_pbar = (
@@ -216,12 +216,11 @@ def generate_single_iteration(
     )  # or not benchmark_config.is_main_process
     pbar = tqdm(range(len(prepared_dataset)), leave=False, disable=no_pbar)
     for batch in dataloader:
+        inputs = batch["input_ids"].to(model.device)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
-                model.generate(
-                    inputs=batch["input_ids"], generation_config=generation_config
-                )
+                model.generate(inputs=inputs, generation_config=generation_config)
 
         # batch_start = batch_idx * batch_size
         # batch_end = (batch_idx + 1) * batch_size
