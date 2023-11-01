@@ -11,6 +11,7 @@ from datasets import Dataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import DataCollator, GenerationConfig, StoppingCriteria
+from transformers.utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig
 from .exceptions import InvalidBenchmark
@@ -195,7 +196,6 @@ def generate_single_iteration(
     torch_dataset = prepared_dataset.with_format("torch").remove_columns(
         [column for column in prepared_dataset.column_names if column != "input_ids"]
     )
-    all_preds: list[str | list[str]] = list()
 
     batch_size = 1 if isinstance(model, OpenAIModel) else benchmark_config.batch_size
     dataloader = DataLoader(
@@ -225,15 +225,15 @@ def generate_single_iteration(
     no_pbar = (
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
-    pbar = tqdm(range(len(dataloader)), leave=False, disable=no_pbar)
-    for batch_idx, batch in enumerate(dataloader):
+    all_preds: list[str | list[str]] = list()
+    for batch_idx, batch in enumerate(tqdm(dataloader, leave=False, disable=no_pbar)):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
                 model_output = new_model(
                     inputs=batch["input_ids"], generation_config=generation_config
                 )
-        pbar.update(1)
+                scores = model_output.scores
 
         batch_start = batch_idx * batch_size
         batch_end = (batch_idx + 1) * batch_size
@@ -246,7 +246,13 @@ def generate_single_iteration(
     # Collect the predictions across all processes
     if not isinstance(model, OpenAIModel):
         accelerator.wait_for_everyone()
-        all_preds = accelerator.gather(all_preds).cpu().tolist()
+        scores = accelerator.gather(tensor=scores).cpu().tolist()
+        extracted_labels = extract_labels_fn(
+            input_batch=dict(),
+            model_output=ModelOutput(scores=scores),
+            tokenizer=tokenizer,
+        )
+        all_preds = extracted_labels
 
     if "label" in prepared_dataset.column_names:
         true_labels = [
