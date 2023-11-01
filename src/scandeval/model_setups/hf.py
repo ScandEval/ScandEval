@@ -275,7 +275,7 @@ class HFModelSetup:
                                 trust_remote_code=(
                                     self.benchmark_config.trust_remote_code
                                 ),
-                                device_map={"": torch.cuda.current_device()},
+                                # device_map={"": torch.cuda.current_device()},
                                 quantization_config=bnb_config,
                             )
                         except (KeyError, RuntimeError) as e:
@@ -322,7 +322,7 @@ class HFModelSetup:
         )
 
         model.eval()
-        if not load_in_4bit:
+        if not load_in_4bit and False:  # TEMP
             model.to(self.benchmark_config.device)
 
         return tokenizer, model
