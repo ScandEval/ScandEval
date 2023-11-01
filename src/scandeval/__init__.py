@@ -33,7 +33,10 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 # Single GPU setup if we are not in a distributed environment
 if os.getenv("WORLD_SIZE") is None:
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    if os.getenv("CUDA_VISIBLE_DEVICES") is None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    else:
+        os.environ["CUDA_VISIBLE_DEVICES"] = os.environ["CUDA_VISIBLE_DEVICES"][0]
 
 
 # Import submodules after setting environment variables since the modules import
