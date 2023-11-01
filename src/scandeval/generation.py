@@ -225,13 +225,15 @@ def generate_single_iteration(
     no_pbar = (
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
-    for batch_idx, batch in enumerate(tqdm(dataloader, leave=False, disable=no_pbar)):
+    pbar = tqdm(range(len(dataloader)), leave=False, disable=no_pbar)
+    for batch_idx, batch in enumerate(dataloader):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
                 model_output = new_model(
                     inputs=batch["input_ids"], generation_config=generation_config
                 )
+        pbar.update(1)
 
         batch_start = batch_idx * batch_size
         batch_end = (batch_idx + 1) * batch_size
