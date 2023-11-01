@@ -4,7 +4,6 @@ import logging
 import warnings
 from collections import defaultdict
 from typing import Any, Callable
-from accelerate import Accelerator
 
 import torch
 from datasets import Dataset
@@ -206,20 +205,20 @@ def generate_single_iteration(
         collate_fn=data_collator,
     )
 
-    class GenerationModelWrapper(torch.nn.Module):
-        def __init__(self, module: torch.nn.Module) -> None:
-            super().__init__()
-            self.module = module
+    # class GenerationModelWrapper(torch.nn.Module):
+    #    def __init__(self, module: torch.nn.Module) -> None:
+    #        super().__init__()
+    #        self.module = module
 
-        def forward(self, *args, **kwargs):
-            return self.module.generate(*args, **kwargs)
+    #    def forward(self, *args, **kwargs):
+    #        return self.module.generate(*args, **kwargs)
 
     # Handle distributed training
-    if not isinstance(model, OpenAIModel):
-        accelerator = Accelerator()
-        new_model, dataloader = accelerator.prepare(
-            dataloader, GenerationModelWrapper(module=model)  # type: ignore
-        )
+    # if not isinstance(model, OpenAIModel):
+    #    accelerator = Accelerator()
+    #    new_model, dataloader = accelerator.prepare(
+    #        dataloader, GenerationModelWrapper(module=model)  # type: ignore
+    #    )
 
     # Generate all the completions
     no_pbar = (
@@ -229,7 +228,7 @@ def generate_single_iteration(
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             with torch.inference_mode():
-                model_output = new_model(
+                model_output = model.generate(
                     inputs=batch["input_ids"], generation_config=generation_config
                 )
 
