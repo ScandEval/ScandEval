@@ -275,7 +275,7 @@ class HFModelSetup:
                                 trust_remote_code=(
                                     self.benchmark_config.trust_remote_code
                                 ),
-                                # device_map="auto",
+                                device_map="auto",
                                 quantization_config=bnb_config,
                             )
                         except (KeyError, RuntimeError) as e:

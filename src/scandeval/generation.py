@@ -1,6 +1,7 @@
 """Functions related to text generation of models."""
 
 import logging
+import warnings
 from collections import defaultdict
 from typing import Any, Callable
 from accelerate import Accelerator
@@ -225,18 +226,20 @@ def generate_single_iteration(
         not benchmark_config.progress_bar
     )  # or not benchmark_config.is_main_process
     for batch_idx, batch in enumerate(tqdm(dataloader, leave=False, disable=no_pbar)):
-        # with warnings.catch_warnings():
-        #    warnings.simplefilter("ignore", category=UserWarning)
-        #    with torch.inference_mode():
-        new_model(inputs=batch["input_ids"], generation_config=generation_config)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            with torch.inference_mode():
+                model_output = new_model(
+                    inputs=batch["input_ids"], generation_config=generation_config
+                )
 
-        # batch_start = batch_idx * batch_size
-        # batch_end = (batch_idx + 1) * batch_size
-        # input_batch = prepared_dataset[batch_start:batch_end]
-        # extracted_labels: list = extract_labels_fn(
-        #    input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
-        # )
-        # all_preds.extend(extracted_labels)
+        batch_start = batch_idx * batch_size
+        batch_end = (batch_idx + 1) * batch_size
+        input_batch = prepared_dataset[batch_start:batch_end]
+        extracted_labels: list = extract_labels_fn(
+            input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+        )
+        all_preds.extend(extracted_labels)
 
     if "label" in prepared_dataset.column_names:
         true_labels = [
