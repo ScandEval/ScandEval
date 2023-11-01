@@ -1,10 +1,12 @@
 """Model setup for Hugging Face Hub models."""
 
 import logging
+import os
 import warnings
 from json import JSONDecodeError
 from time import sleep
 from typing import Type
+from accelerate import Accelerator
 
 import torch
 from huggingface_hub import HfApi, ModelFilter
@@ -255,6 +257,15 @@ class HFModelSetup:
                     warnings.filterwarnings("ignore", category=FutureWarning)
                     with HiddenPrints():
                         try:
+                            # TODO
+                            device_map: str | dict[str, int] | None
+                            if load_in_4bit:
+                                if os.getenv("WORLD_SIZE") is not None:
+                                    device_map = {"": Accelerator().process_index}
+                                else:
+                                    device_map = "auto"
+                            else:
+                                device_map = None
                             bnb_config = (
                                 BitsAndBytesConfig(
                                     load_in_4bit=load_in_4bit,
@@ -275,7 +286,7 @@ class HFModelSetup:
                                 trust_remote_code=(
                                     self.benchmark_config.trust_remote_code
                                 ),
-                                # device_map={"": torch.cuda.current_device()},
+                                device_map=device_map,
                                 quantization_config=bnb_config,
                             )
                         except (KeyError, RuntimeError) as e:
