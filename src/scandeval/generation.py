@@ -243,6 +243,11 @@ def generate_single_iteration(
         )
         all_preds.extend(extracted_labels)
 
+    # Collect the predictions across all processes
+    if not isinstance(model, OpenAIModel):
+        accelerator.wait_for_everyone()
+        all_preds = accelerator.gather(all_preds).cpu().tolist()
+
     if "label" in prepared_dataset.column_names:
         true_labels = [
             label.lower() if isinstance(label, str) else label
