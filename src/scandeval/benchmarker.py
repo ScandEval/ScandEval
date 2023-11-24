@@ -404,7 +404,9 @@ class Benchmarker:
 
                 # Otherwise, if the error is due to the MPS fallback not being enabled,
                 # then raise an error asking the user to enable it
-                elif "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
+                elif "PYTORCH_ENABLE_MPS_FALLBACK" in str(
+                    e
+                ) or "MPS does not support" in str(e):
                     raise RuntimeError(
                         "The benchmark failed because the environment variable "
                         "`PYTORCH_ENABLE_MPS_FALLBACK` is not set. Please set this "
