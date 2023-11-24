@@ -266,7 +266,9 @@ def generate_single_iteration(
     # Collect the predictions across all processes
     if not isinstance(model, OpenAIModel):
         accelerator.wait_for_everyone()
-        scores = accelerator.gather(tensor=scores).cpu().tolist()
+        scores = accelerator.gather(tensor=scores)
+        breakpoint()
+        scores = scores.cpu().tolist()
         extracted_labels = extract_labels_fn(
             input_batch=dict(),
             model_output=ModelOutput(scores=scores),
