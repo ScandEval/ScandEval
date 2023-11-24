@@ -195,9 +195,17 @@ def generate_single_iteration(
 
     # Enable batching by building a dataloader. The dataloader cannot deal with
     # text columns, so we create a copy of the dataset without these
-    torch_dataset = prepared_dataset.with_format("torch").remove_columns(
-        [column for column in prepared_dataset.column_names if column != "input_ids"]
-    )
+    torch_dataset = (
+        prepared_dataset.with_format("torch")
+        .remove_columns(
+            [
+                column
+                for column in prepared_dataset.column_names
+                if column != "input_ids"
+            ]
+        )
+        .select(range(8))
+    )  # TEMP
 
     batch_size = 1 if isinstance(model, OpenAIModel) else benchmark_config.batch_size
     dataloader = DataLoader(
@@ -224,26 +232,29 @@ def generate_single_iteration(
         )
 
     # Generate all the completions
-    no_pbar = (
-        not benchmark_config.progress_bar
-    )  # or not benchmark_config.is_main_process
+    no_pbar = not benchmark_config.progress_bar or not benchmark_config.is_main_process
     all_preds: list[str | list[str]] = list()
-    for batch_idx, batch in enumerate(tqdm(dataloader, leave=False, disable=no_pbar)):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            with torch.inference_mode():
-                model_output = new_model(
-                    inputs=batch["input_ids"], generation_config=generation_config
-                )
-                scores = model_output.scores
+    num_devices = torch.cuda.device_count() if torch.cuda.is_available() else 1
+    with tqdm(
+        total=len(dataloader) * num_devices, leave=False, disable=no_pbar
+    ) as pbar:
+        for batch_idx, batch in dataloader:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                with torch.inference_mode():
+                    model_output = new_model(
+                        inputs=batch["input_ids"], generation_config=generation_config
+                    )
+                    scores = model_output.scores
 
-        batch_start = batch_idx * batch_size
-        batch_end = (batch_idx + 1) * batch_size
-        input_batch = prepared_dataset[batch_start:batch_end]
-        extracted_labels: list = extract_labels_fn(
-            input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
-        )
-        all_preds.extend(extracted_labels)
+            batch_start = batch_idx * batch_size
+            batch_end = (batch_idx + 1) * batch_size
+            input_batch = prepared_dataset[batch_start:batch_end]
+            extracted_labels: list = extract_labels_fn(
+                input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+            )
+            all_preds.extend(extracted_labels)
+            pbar.update(num_devices)
 
     # Collect the predictions across all processes
     if not isinstance(model, OpenAIModel):
