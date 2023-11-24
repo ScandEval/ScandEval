@@ -101,7 +101,7 @@ def generate(
                 break
             except Exception as e:
                 # TEMP
-                print(f"Encountered error: {e}")
+                raise e
 
                 if "CUDA" not in str(e) and "out of memory" not in str(e):
                     raise InvalidBenchmark(str(e))
