@@ -217,6 +217,13 @@ def generate_single_iteration(
     )
 
     class GenerationModelWrapper(torch.nn.Module):
+        """Wrapper to enable distributed generation.
+
+        Args:
+            module:
+                The PyTorch module to wrap. Must have a `generate` method.
+        """
+
         def __init__(self, module: torch.nn.Module) -> None:
             super().__init__()
             self.module = module
