@@ -232,9 +232,9 @@ def generate_single_iteration(
             return self.module.generate(*args, **kwargs)
 
     # Handle distributed training
-    if not isinstance(model, OpenAIModel):
+    if not isinstance(model, OpenAIModel):  # TODO: Only call if distributed
         accelerator = Accelerator()
-        new_model, dataloader = accelerator.prepare(
+        new_model, dataloader = accelerator.prepare(  # TODO: Should not be new_model
             GenerationModelWrapper(module=model), dataloader  # type: ignore
         )
 
@@ -264,9 +264,9 @@ def generate_single_iteration(
             pbar.update(num_devices)
 
     # Collect the predictions across all processes
-    if not isinstance(model, OpenAIModel):
+    if not isinstance(model, OpenAIModel):  # TODO: Only call if distributed
         accelerator.wait_for_everyone()
-        scores = accelerator.gather(tensor=scores)
+        scores = accelerator.gather(scores)
         breakpoint()
         scores = scores.cpu().tolist()
         extracted_labels = extract_labels_fn(
