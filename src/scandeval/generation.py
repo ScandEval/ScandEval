@@ -245,7 +245,7 @@ def generate_single_iteration(
     with tqdm(
         total=len(dataloader) * num_devices, leave=False, disable=no_pbar
     ) as pbar:
-        for batch_idx, batch in dataloader:
+        for batch_idx, batch in enumerate(dataloader):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 with torch.inference_mode():
