@@ -192,6 +192,9 @@ def generate_single_iteration(
     )
     prepared_dataset = prepared_dataset.sort("length", reverse=False)
 
+    # TEMP
+    prepared_dataset = prepared_dataset.select(range(8))
+
     # Enable batching by building a dataloader. The dataloader cannot deal with
     # text columns, so we create a copy of the dataset without these
     torch_dataset = prepared_dataset.with_format("torch").remove_columns(
@@ -227,18 +230,24 @@ def generate_single_iteration(
         all_preds.extend(extracted_labels)
 
     if "label" in prepared_dataset.column_names:
-        true_labels = [
+        ground_truth = [
             label.lower() if isinstance(label, str) else label
             for label in prepared_dataset["label"]
         ]
-    else:
-        true_labels = [
+    elif "labels" in prepared_dataset.column_names:
+        ground_truth = [
             [label.lower() if isinstance(label, str) else label for label in label_list]
             for label_list in prepared_dataset["labels"]
         ]
+    elif "target_text" in prepared_dataset.column_names:
+        ground_truth = prepared_dataset["target_text"]
+    else:
+        raise ValueError(
+            "The dataset must have either a 'label', 'labels', or 'target_text' column"
+        )
 
     itr_scores: dict[str, float] = compute_metrics(
-        model_outputs_and_labels=(all_preds, true_labels),
+        model_outputs_and_labels=(all_preds, ground_truth),
         id2label=dataset_config.id2label,
     )
 

@@ -14,9 +14,7 @@ def main():
     dataset = load_dataset(dataset_id, token=True)
     assert isinstance(dataset, DatasetDict)
 
-    dataset = dataset.rename_columns(
-        column_mapping=dict(text="input_text", summary="target_text")
-    )
+    dataset = dataset.rename_columns(column_mapping=dict(summary="target_text"))
 
     train_df = dataset["train"].to_pandas()
     val_df = dataset["val"].to_pandas()
@@ -48,7 +46,7 @@ def main():
     )
 
     # Create dataset ID
-    mini_dataset_id = "ScandEval/nordjylland-news-summarization-mini"
+    mini_dataset_id = "ScandEval/nordjylland-news-mini"
 
     # Remove the dataset from Hugging Face Hub if it already exists
     try:

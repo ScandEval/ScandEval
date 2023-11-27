@@ -132,10 +132,16 @@ MULTIPLE_CHOICE = DatasetTask(
 )
 
 
-TEXT_GENERATION = DatasetTask(
-    name="text-generation",
-    supertask="text-generation",  # Not sure
+TEXT_TO_TEXT = DatasetTask(
+    name="text-to-text",
+    supertask="text-to-text",  # Not sure
     metrics=[
+        MetricConfig(
+            name="rouge-1",
+            pretty_name="ROUGE-1",
+            huggingface_id="rouge",
+            results_key="rouge1",
+        ),
         MetricConfig(
             name="bleu",
             pretty_name="BLEU",
