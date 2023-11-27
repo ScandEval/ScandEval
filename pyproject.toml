@@ -33,10 +33,12 @@ einops = ">=0.6.0,<1.0.0"
 bitsandbytes = {markers="sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.40.0.post4,<1.0.0"}
 requests = "^2.31.0"
 pydantic = "^2.3.0"
-torch = "2.0.0"
+torch = "^2.0.0"
 transformers = "^4.34.0"
 accelerate = ">=0.23.0,<1.0.0"
 evaluate = ">=0.4.0,<1.0.0"
+nltk = "^3.8.1"
+rouge-score = ">=0.1.2,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pdoc = "^14.0.0"
