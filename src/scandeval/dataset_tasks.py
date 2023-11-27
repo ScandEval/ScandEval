@@ -110,6 +110,58 @@ SENT = DatasetTask(
 )
 
 
+MULTIPLE_CHOICE = DatasetTask(
+    name="multiple-choice",
+    supertask="multiple-choice",  # Not sure
+    metrics=[  # Not sure
+        MetricConfig(
+            name="mcc",
+            pretty_name="Matthew's Correlation Coefficient",
+            huggingface_id="matthews_correlation",
+            results_key="matthews_correlation",
+        ),
+        MetricConfig(
+            name="macro_f1",
+            pretty_name="Macro-average F1-score",
+            huggingface_id="f1",
+            results_key="f1",
+            compute_kwargs=dict(average="macro"),
+        ),
+    ],
+    labels=[],  # Maybe add?
+)
+
+
+TEXT_GENERATION = DatasetTask(
+    name="text-generation",
+    supertask="text-generation",  # Not sure
+    metrics=[
+        MetricConfig(
+            name="bleu",
+            pretty_name="BLEU",
+            huggingface_id="bleu",
+            results_key="bleu",
+        ),
+    ],
+    labels=[],
+)
+
+
+RAW_TEXT = DatasetTask(
+    name="raw-text",
+    supertask="raw-text",  # Not sure
+    metrics=[
+        MetricConfig(
+            name="perplexity",
+            pretty_name="Perplexity",
+            huggingface_id="perplexity",
+            results_key="mean_perplexity",
+        ),
+    ],
+    labels=[],
+)
+
+
 SPEED = DatasetTask(
     name="speed",
     supertask="sequence-classification",
