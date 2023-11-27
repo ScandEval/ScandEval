@@ -116,7 +116,6 @@ class TextToText(BenchmarkDataset):
             values.
         """
         model_outputs, labels = model_outputs_and_labels
-        breakpoint()
 
         model_output_dtype = np.asarray(model_outputs).dtype
         if model_output_dtype in [np.float16, np.float32, np.float64]:

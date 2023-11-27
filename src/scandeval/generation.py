@@ -192,9 +192,6 @@ def generate_single_iteration(
     )
     prepared_dataset = prepared_dataset.sort("length", reverse=False)
 
-    # TEMP
-    prepared_dataset = prepared_dataset.select(range(8))
-
     # Enable batching by building a dataloader. The dataloader cannot deal with
     # text columns, so we create a copy of the dataset without these
     torch_dataset = prepared_dataset.with_format("torch").remove_columns(

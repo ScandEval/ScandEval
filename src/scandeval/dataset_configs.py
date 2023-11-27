@@ -447,7 +447,7 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     task=TEXT_TO_TEXT,
     languages=[DA],
     prompt_template="{text}\nOpsummering: {target_text}",
-    num_few_shot_examples=4,
+    num_few_shot_examples=2,
     max_generated_tokens=128,
 )
 
