@@ -276,6 +276,8 @@ class HFModelSetup:
                                     self.benchmark_config.trust_remote_code
                                 ),
                                 quantization_config=bnb_config,
+                                torch_dtype="auto",
+                                use_flash_attention_2=True,
                             )
                         except (KeyError, RuntimeError) as e:
                             if not ignore_mismatched_sizes:
