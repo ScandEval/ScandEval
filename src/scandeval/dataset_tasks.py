@@ -142,7 +142,7 @@ TEXT_TO_TEXT = DatasetTask(
             huggingface_id="bertscore",
             results_key="f1",
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
-            compute_kwargs=dict(model_type="microsoft/deberta-v3-base", device="cpu"),
+            compute_kwargs=dict(model_type="microsoft/mdeberta-v3-base", device="cpu"),
         ),
         MetricConfig(
             name="rouge-l",
