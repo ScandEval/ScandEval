@@ -326,9 +326,6 @@ class BenchmarkDataset(ABC):
         val = dataset_dict["val"]
         test = dataset_dict["test"]
 
-        # TEMP
-        test = val
-
         # Remove empty examples from the datasets
         for text_feature in ["tokens", "text"]:
             if text_feature in train.features:
