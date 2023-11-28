@@ -16,6 +16,9 @@ def main():
 
     dataset = dataset.rename_columns(column_mapping=dict(target="target_text"))
 
+    # Remove the references column since the dataset has mismatched types in this column
+    dataset = dataset.remove_columns(column_names=["references"])
+
     train_df = dataset["train"].to_pandas()
     val_df = dataset["validation"].to_pandas()
     test_df = dataset["test"].to_pandas()
