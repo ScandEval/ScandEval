@@ -38,6 +38,8 @@ and this project adheres to
 - Changed the `--use-auth-token` and `--auth-token` arguments to `--use-token` and
   `--token`, reflecting the same change in the `transformers` package.
 - Now reports all model parameters, rather than just the trainable ones.
+- Now uses 8-bit AdamW optimizer when CUDA is available rather than the default AdamW,
+  to save memory when working with larger models.
 
 ### Removed
 - Previously generative models had their maximum sequence length altered by subtracting
