@@ -281,6 +281,23 @@ jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
+name = "cer"
+version = "1.2.0"
+description = "Translation Edit Rate on the character level"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cer-1.2.0-py3-none-any.whl", hash = "sha256:a978a7a178bc369b0d32084ef5768b9636fd4e400fa7bbad1452f7f013a5107f"},
+    {file = "cer-1.2.0.tar.gz", hash = "sha256:485cb7ea2e6cbafcaed2147905bd06c3a5453cba8e598fe5b5976c625ba5904e"},
+]
+
+[package.dependencies]
+Levenshtein = "*"
+
+[package.extras]
+dev = ["black", "flake8", "isort (>=5.5.4)", "pytest"]
+
+[[package]]
 name = "certifi"
 version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -4242,4 +4259,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "dcfd1382e8f5c919282ecb1bfc2dcc3abe17955147869030c4a572ef0b04c9da"
+content-hash = "d67426d3c71d54ebf0f24b6031055847ca179250e0337ecac75edb71596272d5"
