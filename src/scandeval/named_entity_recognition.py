@@ -18,7 +18,7 @@ from transformers.modeling_utils import ModelOutput
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .utils import GENERATIVE_MODEL_TASKS, model_is_generative
 
 logger = logging.getLogger(__package__)

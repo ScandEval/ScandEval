@@ -14,7 +14,7 @@ from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig
 from .exceptions import InvalidBenchmark
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .openai_models import OpenAIModel
 from .utils import clear_memory
 

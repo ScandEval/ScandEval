@@ -14,7 +14,7 @@ from transformers.trainer import Trainer
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
 from .utils import get_special_token_metadata
 

@@ -23,7 +23,7 @@ from .finetuning import finetune
 from .generation import generate
 from .model_config import get_model_config
 from .model_loading import load_model
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .openai_models import OpenAIModel
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
@@ -325,6 +325,9 @@ class BenchmarkDataset(ABC):
         train = dataset_dict["train"]
         val = dataset_dict["val"]
         test = dataset_dict["test"]
+
+        # TEMP
+        test = val
 
         # Remove empty examples from the datasets
         for text_feature in ["tokens", "text"]:

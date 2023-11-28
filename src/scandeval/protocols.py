@@ -1,7 +1,6 @@
-"""Base class for a model setup."""
+"""Protocols used throughout the project."""
 
 from typing import Protocol, runtime_checkable
-
 import torch
 from transformers import (
     BatchEncoding,
@@ -9,8 +8,7 @@ from transformers import (
     PretrainedConfig,
     PreTrainedModel,
 )
-
-from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 
 
 @runtime_checkable

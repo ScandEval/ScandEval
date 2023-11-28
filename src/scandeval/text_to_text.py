@@ -12,7 +12,7 @@ from transformers.utils import ModelOutput
 
 from .generation import extract_raw_predictions
 from .benchmark_dataset import BenchmarkDataset
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .utils import GENERATIVE_MODEL_TASKS, get_special_token_metadata
 
 logger = logging.getLogger(__package__)
