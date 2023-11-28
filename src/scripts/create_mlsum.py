@@ -17,7 +17,7 @@ def main():
     dataset = dataset.rename_columns(column_mapping=dict(target="target_text"))
 
     train_df = dataset["train"].to_pandas()
-    val_df = dataset["val"].to_pandas()
+    val_df = dataset["validation"].to_pandas()
     test_df = dataset["test"].to_pandas()
     assert isinstance(train_df, pd.DataFrame)
     assert isinstance(val_df, pd.DataFrame)
