@@ -173,13 +173,6 @@ TEXT_TO_TEXT = DatasetTask(
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
         ),
         MetricConfig(
-            name="meteor",
-            pretty_name="METEOR",
-            huggingface_id="meteor",
-            results_key="meteor",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
-        ),
-        MetricConfig(
             name="chrf++",
             pretty_name="chrF++",
             huggingface_id="chrf",
