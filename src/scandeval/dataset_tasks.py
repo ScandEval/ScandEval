@@ -184,7 +184,7 @@ TEXT_TO_TEXT = DatasetTask(
             name="character",
             pretty_name="CharacTER",
             huggingface_id="character",
-            results_key="mean",
+            results_key="cer_score",
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
         ),
     ],
