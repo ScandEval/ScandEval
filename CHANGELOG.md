@@ -40,6 +40,8 @@ and this project adheres to
 - Now uses the new `auto_find_batch_size` argument in `TrainingArguments`, rather than
   manually doing this, as the underlying `accelerate` built-in version is more robust.
 - Now reports all model parameters, rather than just the trainable ones.
+- Now uses 8-bit AdamW optimizer when CUDA is available rather than the default AdamW,
+  to save memory when working with larger models.
 
 ### Removed
 - Previously generative models had their maximum sequence length altered by subtracting
