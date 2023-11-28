@@ -112,7 +112,7 @@ SENT = DatasetTask(
 
 MULTIPLE_CHOICE = DatasetTask(
     name="multiple-choice",
-    supertask="multiple-choice",  # Not sure
+    supertask="multiple-choice",
     metrics=[  # Not sure
         MetricConfig(
             name="mcc",
@@ -134,20 +134,21 @@ MULTIPLE_CHOICE = DatasetTask(
 
 TEXT_TO_TEXT = DatasetTask(
     name="text-to-text",
-    supertask="text-to-text",  # Not sure
+    supertask="text-to-text",
     metrics=[
         MetricConfig(
-            name="rouge-1",
-            pretty_name="ROUGE-1",
-            huggingface_id="rouge",
-            results_key="rouge1",
+            name="bertscore",
+            pretty_name="BERTScore",
+            huggingface_id="bertscore",
+            results_key="f1",
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
+            compute_kwargs=dict(model_type="microsoft/deberta-v3-base", device="cpu"),
         ),
         MetricConfig(
-            name="bleu",
-            pretty_name="BLEU",
-            huggingface_id="bleu",
-            results_key="bleu",
+            name="rouge-l",
+            pretty_name="ROUGE-L",
+            huggingface_id="rouge",
+            results_key="rougeL",
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
         ),
     ],
@@ -157,7 +158,7 @@ TEXT_TO_TEXT = DatasetTask(
 
 RAW_TEXT = DatasetTask(
     name="raw-text",
-    supertask="raw-text",  # Not sure
+    supertask="raw-text",
     metrics=[
         MetricConfig(
             name="perplexity",
