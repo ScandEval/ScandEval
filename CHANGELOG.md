@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v8.0.0] - 2023-11-29
 ### Added
 - Support for few-shot evaluation of decoder models, both from the Hugging Face Hub and
   OpenAI models. This currently happens automatically when specifying a generative
