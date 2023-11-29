@@ -452,6 +452,18 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
 )
 
 
+NO_SAMMENDRAG_CONFIG = DatasetConfig(
+    name="no-sammendrag",
+    pretty_name="the truncated version of the Norwegian Sammendrag dataset",
+    huggingface_id="ScandEval/no-sammendrag-mini",
+    task=TEXT_TO_TEXT,
+    languages=[NB, NN],
+    prompt_template="{text}\nSammendrag: {target_text}",
+    num_few_shot_examples=2,
+    max_generated_tokens=128,
+)
+
+
 SPEED_CONFIG = DatasetConfig(
     name="speed",
     pretty_name="the speed estimation benchmark",
