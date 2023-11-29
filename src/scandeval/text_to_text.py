@@ -137,12 +137,18 @@ class TextToText(BenchmarkDataset):
         shuffled_train = train_dataset.shuffle(seed=random_seed)
         num_few_shots = self.dataset_config.num_few_shot_examples
         few_shot_examples: list[dict[str, Any]] = list()
+
+        # We pick the few-shot examples one at a time rather than all at once since
+        # we're working with a bootstrapped training dataset, meaning that it will have
+        # duplicates. This ensures that we don't have any duplicates in the few-shot
+        # examples
         while len(few_shot_examples) < num_few_shots:
             example = shuffled_train.select(range(1))[0]
             few_shot_examples.append(example)
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]
             )
+
         random.seed(random_seed)
         random.shuffle(few_shot_examples)
         return few_shot_examples
