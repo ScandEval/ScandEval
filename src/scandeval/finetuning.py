@@ -26,7 +26,7 @@ from scandeval.exceptions import InvalidBenchmark
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .model_loading import load_model
-from .model_setups import Tokenizer
+from .protocols import Tokenizer
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
 
 logger = logging.getLogger(__package__)

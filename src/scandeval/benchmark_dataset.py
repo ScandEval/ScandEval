@@ -23,7 +23,7 @@ from .finetuning import finetune
 from .generation import generate
 from .model_config import get_model_config
 from .model_loading import load_model
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .openai_models import OpenAIModel
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
@@ -31,6 +31,10 @@ from .types import SCORE_DICT
 from .utils import GENERATIVE_MODEL_TASKS, enforce_reproducibility, model_is_generative
 
 logger = logging.getLogger(__package__)
+
+
+Predictions = Type[np.ndarray]
+Labels = Type[np.ndarray]
 
 
 class BenchmarkDataset(ABC):
@@ -545,7 +549,7 @@ class BenchmarkDataset(ABC):
     @abstractmethod
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[list, list],
+        model_outputs_and_labels: tuple[Predictions, Labels],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
@@ -554,7 +558,7 @@ class BenchmarkDataset(ABC):
             model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
-            id2label (list of str):
+            id2label:
                 Conversion of indices to labels.
 
         Returns:

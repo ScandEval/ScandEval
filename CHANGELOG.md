@@ -8,7 +8,14 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [Unreleased]
+### Added
+- Now added support for text-to-text tasks, which include tasks such as abstractive
+  summarization, abstractive question-answering and translation. These can only be
+  benchmarked with generative models. In this release, this includes the following
+  datasets:
+    - `nordjylland-news`, a Danish summarization dataset based on news articles.
+
 ### Changed
 - Now uses 8-bit AdamW whenever CUDA is available, as opposed to regular AdamW.
   Experiments shows that this does not affect benchmarking performance, but reduces
