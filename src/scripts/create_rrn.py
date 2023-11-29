@@ -21,21 +21,24 @@ def main():
     df = dataset.to_pandas()
     assert isinstance(df, pd.DataFrame)
 
+    df.dropna(subset=["text", "target_text"], inplace=True)
+
     # Create validation split
     val_size = 256
     val_df = df.sample(n=val_size, random_state=4242)
-    val_df = val_df.reset_index(drop=True)
 
     # Create test split
-    test_size = 2048
+    test_size = 1024
     df_filtered = df[~df.index.isin(val_df.index)]
     test_df = df_filtered.sample(n=test_size, random_state=4242)
-    test_df = test_df.reset_index(drop=True)
 
     # Create train split
     train_size = 1024
     df_filtered = df_filtered[~df_filtered.index.isin(test_df.index)]
     train_df = df_filtered.sample(n=train_size, random_state=4242)
+
+    val_df = val_df.reset_index(drop=True)
+    test_df = test_df.reset_index(drop=True)
     train_df = train_df.reset_index(drop=True)
 
     # Collect datasets in a dataset dictionary
