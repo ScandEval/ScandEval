@@ -13,7 +13,7 @@ from requests.exceptions import HTTPError
 def main() -> None:
     """Create the ScandiQA-mini datasets and upload them to the HF Hub."""
 
-    dataset_id = "alexandrainst/scandiqa"
+    dataset_id = "alexandrainst/scandi-qa"
 
     # Iterate over the Danish, Norwegian and Swedish languages
     for language in ["da", "no", "sv"]:
