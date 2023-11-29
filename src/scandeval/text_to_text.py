@@ -89,8 +89,8 @@ class TextToText(BenchmarkDataset):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
             model:
-                A pretrained model. Can be None if the model is not used in the
-                initialisation of the data collator. Defaults to None.
+                A pretrained model. Can be None if the model is not used. Defaults to
+                None.
 
         Returns:
             The data collator.
