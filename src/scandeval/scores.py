@@ -35,9 +35,7 @@ def log_scores(
         identical to `scores` and 'total' being a dictionary with the aggregated scores
         (means and standard errors).
     """
-    # Initial logging message
-    msg = f"Finished finetuning and evaluation of {model_id} on {dataset_name}."
-    logger.info(msg)
+    logger.info(f"Finished evaluation of {model_id} on {dataset_name}.")
 
     # Initialise the total dict
     total_dict: dict[str, float] = dict()
