@@ -33,6 +33,10 @@ from .utils import GENERATIVE_MODEL_TASKS, enforce_reproducibility, model_is_gen
 logger = logging.getLogger(__package__)
 
 
+Predictions = Type[np.ndarray]
+Labels = Type[np.ndarray]
+
+
 class BenchmarkDataset(ABC):
     """Abstract benchmarking dataset class.
 
@@ -545,7 +549,7 @@ class BenchmarkDataset(ABC):
     @abstractmethod
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[list, list],
+        model_outputs_and_labels: tuple[Predictions, Labels],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
@@ -554,7 +558,7 @@ class BenchmarkDataset(ABC):
             model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
-            id2label (list of str):
+            id2label:
                 Conversion of indices to labels.
 
         Returns:

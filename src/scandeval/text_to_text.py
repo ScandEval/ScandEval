@@ -11,7 +11,7 @@ from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.utils import ModelOutput
 
 from .generation import extract_raw_predictions
-from .benchmark_dataset import BenchmarkDataset
+from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .protocols import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__package__)
@@ -77,7 +77,7 @@ class TextToText(BenchmarkDataset):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
+        model_outputs_and_labels: tuple[Predictions, Labels],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
