@@ -165,8 +165,13 @@ class QuestionAnswering(BenchmarkDataset):
                 references=labels,
                 **cfg.compute_kwargs,
             )
+
+            # The metric returns None if we are running on multi-GPU and the current
+            # process is not the main process
             if score_dict is not None:
                 scores = score_dict[cfg.results_key]
+                if isinstance(scores, list):
+                    scores = sum(scores) / len(scores)
                 results[cfg.name] = scores
         return results
 
