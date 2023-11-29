@@ -27,7 +27,7 @@ from transformers import logging as tf_logging
 from .config import Language
 from .enums import Framework
 from .languages import DA, NB, NN, NO, SV, get_all_languages
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__package__)
 
@@ -36,6 +36,13 @@ GENERATIVE_MODEL_TASKS = [
     "text-generation",
     "conversational",
     "text2text-generation",
+]
+
+
+GENERATIVE_DATASET_TASKS = [
+    "multiple-choice",
+    "text-to-text",
+    "raw-text",
 ]
 
 

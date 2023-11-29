@@ -27,7 +27,7 @@ from scandeval.exceptions import InvalidBenchmark
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .model_loading import load_model
-from .model_setups import Tokenizer
+from .protocols import Tokenizer
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
 
 logger = logging.getLogger(__package__)
@@ -412,7 +412,7 @@ def get_training_args(
             load_best_model_at_end=True,
             optim=optimizer,
             seed=seed,
-            fp16=torch.cuda.is_available(),
+            fp16=benchmark_config.device == torch.device("cuda"),
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )

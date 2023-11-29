@@ -18,7 +18,7 @@ from transformers.modeling_utils import ModelOutput
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .utils import GENERATIVE_MODEL_TASKS, model_is_generative
 
 logger = logging.getLogger(__package__)
@@ -460,6 +460,11 @@ class NamedEntityRecognition(BenchmarkDataset):
             ]
         )
         few_shot_examples: list[dict[str, Any]] = list()
+
+        # We pick the few-shot examples one at a time rather than all at once since
+        # we're working with a bootstrapped training dataset, meaning that it will have
+        # duplicates. This ensures that we don't have any duplicates in the few-shot
+        # examples
         while len(few_shot_examples) < num_few_shots:
             label = next(labels)
             example = shuffled_train.filter(
@@ -469,6 +474,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]
             )
+
         random.seed(random_seed)
         random.shuffle(few_shot_examples)
         return few_shot_examples

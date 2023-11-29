@@ -36,9 +36,6 @@ jobs:
           poetry env use "${{ matrix.python-version }}"
           poetry install
 
-      - name: Fix PyTorch bug
-        run: poetry add "torch==2.0.0"
-
       - name: Test with pytest
         run: poetry run pytest
         env:
