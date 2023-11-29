@@ -11,7 +11,7 @@ def main():
 
     dataset_id = "norkart/no-sammendrag"
 
-    dataset = load_dataset(dataset_id, token=True)
+    dataset = load_dataset(dataset_id, split="train", token=True)
     assert isinstance(dataset, Dataset)
 
     dataset = dataset.rename_columns(
