@@ -13,7 +13,6 @@ from transformers.utils import ModelOutput
 from .generation import extract_raw_predictions
 from .benchmark_dataset import BenchmarkDataset
 from .protocols import GenerativeModel, Tokenizer
-from .utils import GENERATIVE_MODEL_TASKS, get_special_token_metadata
 
 logger = logging.getLogger(__package__)
 
@@ -49,28 +48,7 @@ class TextToText(BenchmarkDataset):
         """
         tokenizer: Tokenizer = kwargs["tokenizer"]
 
-        # Extract special token metadata from the tokenizer
-        special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
-        has_cls_token = special_token_metadata["has_cls_token"]
-        has_sep_token = special_token_metadata["has_sep_token"]
-        cls_token = special_token_metadata["cls_token"]
-        sep_token = special_token_metadata["sep_token"]
-
         def tokenise(examples: dict) -> BatchEncoding:
-            # If the tokenizer is not adding special tokens, then we add them manually.
-            # We don't need this when performing few-shot evaluations, so in that case
-            # we don't add the special tokens.
-            if (
-                not has_cls_token
-                and not has_sep_token
-                and cls_token is not None
-                and sep_token is not None
-                and kwargs["model_config"].task not in GENERATIVE_MODEL_TASKS
-            ):
-                examples["text"] = [
-                    f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
-                ]
-
             return tokenizer(text=examples["text"], truncation=True, padding=False)
 
         tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
