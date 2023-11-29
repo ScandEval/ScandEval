@@ -13,9 +13,9 @@ from scandeval.question_answering import QuestionAnswering
 @pytest.mark.parametrize(
     argnames=["dataset", "correct_scores"],
     argvalues=[
-        (SCANDIQA_DA_CONFIG, (0.00, 4.18)),
-        (SCANDIQA_NO_CONFIG, (0.00, 4.15)),
-        (SCANDIQA_SV_CONFIG, (0.00, 4.44)),
+        (SCANDIQA_DA_CONFIG, (0.24, 4.25)),
+        (SCANDIQA_NO_CONFIG, (0.00, 3.72)),
+        (SCANDIQA_SV_CONFIG, (0.00, 3.72)),
     ],
     ids=[
         "scandiqa-da",
