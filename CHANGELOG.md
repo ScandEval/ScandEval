@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Now uses 8-bit AdamW whenever CUDA is available, as opposed to regular AdamW.
+  Experiments shows that this does not affect benchmarking performance, but reduces
+  memory usage and thus allows benchmarking of larger models
+
+
 ## [v8.0.0] - 2023-11-29
 ### Added
 - Support for few-shot evaluation of decoder models, both from the Hugging Face Hub and
