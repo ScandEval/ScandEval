@@ -12,7 +12,7 @@ from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
 from ..openai_models import OpenAIModel, OpenAITokenizer
 from ..utils import create_model_cache_dir
-from .base import GenerativeModel, Tokenizer
+from ..protocols import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__package__)
 

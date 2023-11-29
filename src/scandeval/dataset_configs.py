@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .config import DatasetConfig
-from .dataset_tasks import LA, NER, QA, SENT, SPEED
+from .dataset_tasks import LA, NER, QA, SENT, SPEED, TEXT_TO_TEXT
 from .languages import DA, FO, IS, NB, NN, SV, get_all_languages
 
 
@@ -437,6 +437,18 @@ FOQA_CONFIG = DatasetConfig(
     "orðum: {label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
+)
+
+
+NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
+    name="nordjylland-news",
+    pretty_name="the truncated version of Nordjylland News",
+    huggingface_id="ScandEval/nordjylland-news-mini",
+    task=TEXT_TO_TEXT,
+    languages=[DA],
+    prompt_template="{text}\nOpsummering: {target_text}",
+    num_few_shot_examples=2,
+    max_generated_tokens=128,
 )
 
 

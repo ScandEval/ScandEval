@@ -11,7 +11,7 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_loading import load_model
-from .model_setups import GenerativeModel, Tokenizer
+from .protocols import GenerativeModel, Tokenizer
 from .utils import model_is_generative
 
 

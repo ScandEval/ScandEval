@@ -32,7 +32,7 @@ from ..utils import (
     internet_connection_available,
     model_is_generative,
 )
-from .base import GenerativeModel, Tokenizer
+from ..protocols import GenerativeModel, Tokenizer
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 logger = logging.getLogger(__package__)
