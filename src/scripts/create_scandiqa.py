@@ -18,9 +18,9 @@ def main() -> None:
     # Iterate over the Danish, Norwegian and Swedish languages
     for language in ["da", "no", "sv"]:
         # Load the datasets from the `alexandrainst` organisation
-        train = load_dataset(dataset_id, language, split="train", use_auth_token=True)
-        val = load_dataset(dataset_id, language, split="val", use_auth_token=True)
-        test = load_dataset(dataset_id, language, split="test", use_auth_token=True)
+        train = load_dataset(dataset_id, language, split="train", token=True)
+        val = load_dataset(dataset_id, language, split="val", token=True)
+        test = load_dataset(dataset_id, language, split="test", token=True)
 
         # Ensure that the datasets are indeed datasets
         assert isinstance(train, Dataset)
