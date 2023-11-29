@@ -172,8 +172,13 @@ class SequenceClassification(BenchmarkDataset):
                 references=labels,
                 **cfg.compute_kwargs,
             )
+
+            # The metric returns None if we are running on multi-GPU and the current
+            # process is not the main process
             if score_dict is not None:
                 scores = score_dict[cfg.results_key]
+                if isinstance(scores, list):
+                    scores = sum(scores) / len(scores)
                 results[cfg.name] = scores
         return results
 
@@ -195,6 +200,11 @@ class SequenceClassification(BenchmarkDataset):
         num_few_shots = self.dataset_config.num_few_shot_examples
         labels = it.cycle(self.dataset_config.task.labels)
         few_shot_examples: list[dict[str, Any]] = list()
+
+        # We pick the few-shot examples one at a time rather than all at once since
+        # we're working with a bootstrapped training dataset, meaning that it will have
+        # duplicates. This ensures that we don't have any duplicates in the few-shot
+        # examples
         while len(few_shot_examples) < num_few_shots:
             label = next(labels)
             example = shuffled_train.filter(
@@ -204,6 +214,7 @@ class SequenceClassification(BenchmarkDataset):
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]
             )
+
         random.seed(random_seed)
         random.shuffle(few_shot_examples)
         return few_shot_examples

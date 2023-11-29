@@ -10,6 +10,15 @@ and this project adheres to
 
 ## [Unreleased]
 ### Added
+- Now added support for text-to-text tasks, which include tasks such as abstractive
+  summarization, abstractive question-answering and translation. These can only be
+  benchmarked with generative models. In this release, this includes the following
+  datasets:
+    - `nordjylland-news`, a Danish summarization dataset based on news articles.
+
+
+## [v8.0.0] - 2023-11-29
+### Added
 - Support for few-shot evaluation of decoder models, both from the Hugging Face Hub and
   OpenAI models. This currently happens automatically when specifying a generative
   model from the Hugging Face Hub, and with all OpenAI models.
@@ -37,8 +46,6 @@ and this project adheres to
 - Changed the `--model-framework` argument to `--framework`.
 - Changed the `--use-auth-token` and `--auth-token` arguments to `--use-token` and
   `--token`, reflecting the same change in the `transformers` package.
-- Now uses the new `auto_find_batch_size` argument in `TrainingArguments`, rather than
-  manually doing this, as the underlying `accelerate` built-in version is more robust.
 - Now reports all model parameters, rather than just the trainable ones.
 
 ### Removed

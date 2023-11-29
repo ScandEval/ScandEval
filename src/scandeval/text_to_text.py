@@ -11,9 +11,8 @@ from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.utils import ModelOutput
 
 from .generation import extract_raw_predictions
-from .benchmark_dataset import BenchmarkDataset
+from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import GENERATIVE_MODEL_TASKS, get_special_token_metadata
 
 logger = logging.getLogger(__package__)
 
@@ -49,28 +48,7 @@ class TextToText(BenchmarkDataset):
         """
         tokenizer: Tokenizer = kwargs["tokenizer"]
 
-        # Extract special token metadata from the tokenizer
-        special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
-        has_cls_token = special_token_metadata["has_cls_token"]
-        has_sep_token = special_token_metadata["has_sep_token"]
-        cls_token = special_token_metadata["cls_token"]
-        sep_token = special_token_metadata["sep_token"]
-
         def tokenise(examples: dict) -> BatchEncoding:
-            # If the tokenizer is not adding special tokens, then we add them manually.
-            # We don't need this when performing few-shot evaluations, so in that case
-            # we don't add the special tokens.
-            if (
-                not has_cls_token
-                and not has_sep_token
-                and cls_token is not None
-                and sep_token is not None
-                and kwargs["model_config"].task not in GENERATIVE_MODEL_TASKS
-            ):
-                examples["text"] = [
-                    f"{cls_token}{doc}{sep_token}" for doc in examples["text"]
-                ]
-
             return tokenizer(text=examples["text"], truncation=True, padding=False)
 
         tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
@@ -89,8 +67,8 @@ class TextToText(BenchmarkDataset):
                 A pretrained tokenizer. Can be None if the tokenizer is not used in the
                 initialisation of the data collator. Defaults to None.
             model:
-                A pretrained model. Can be None if the model is not used in the
-                initialisation of the data collator. Defaults to None.
+                A pretrained model. Can be None if the model is not used. Defaults to
+                None.
 
         Returns:
             The data collator.
@@ -99,7 +77,7 @@ class TextToText(BenchmarkDataset):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
+        model_outputs_and_labels: tuple[Predictions, Labels],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
@@ -108,7 +86,7 @@ class TextToText(BenchmarkDataset):
             model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
-            id2label (list of str):
+            id2label:
                 Conversion of indices to labels.
 
         Returns:
@@ -118,7 +96,8 @@ class TextToText(BenchmarkDataset):
         model_outputs, labels = model_outputs_and_labels
 
         model_output_dtype = np.asarray(model_outputs).dtype
-        if model_output_dtype in [np.float16, np.float32, np.float64]:
+        output_is_prob = model_output_dtype in [np.float16, np.float32, np.float64]
+        if output_is_prob:
             predictions = np.asarray(model_outputs).argmax(axis=-1)
         else:
             predictions = model_outputs
@@ -131,6 +110,9 @@ class TextToText(BenchmarkDataset):
                 references=labels,
                 **cfg.compute_kwargs,
             )
+
+            # The metric returns None if we are running on multi-GPU and the current
+            # process is not the main process
             if score_dict is not None:
                 scores = score_dict[cfg.results_key]
                 if isinstance(scores, list):
@@ -155,12 +137,18 @@ class TextToText(BenchmarkDataset):
         shuffled_train = train_dataset.shuffle(seed=random_seed)
         num_few_shots = self.dataset_config.num_few_shot_examples
         few_shot_examples: list[dict[str, Any]] = list()
+
+        # We pick the few-shot examples one at a time rather than all at once since
+        # we're working with a bootstrapped training dataset, meaning that it will have
+        # duplicates. This ensures that we don't have any duplicates in the few-shot
+        # examples
         while len(few_shot_examples) < num_few_shots:
             example = shuffled_train.select(range(1))[0]
             few_shot_examples.append(example)
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]
             )
+
         random.seed(random_seed)
         random.shuffle(few_shot_examples)
         return few_shot_examples

@@ -192,9 +192,9 @@ TEXT_TO_TEXT = DatasetTask(
 )
 
 
-RAW_TEXT = DatasetTask(
-    name="raw-text",
-    supertask="raw-text",
+TEXT_MODELLING = DatasetTask(
+    name="text-modelling",
+    supertask="text-modelling",
     metrics=[
         MetricConfig(
             name="perplexity",
