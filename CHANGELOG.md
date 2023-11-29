@@ -22,6 +22,10 @@ and this project adheres to
   Experiments shows that this does not affect benchmarking performance, but reduces
   memory usage and thus allows benchmarking of larger models
 
+### Fixed
+- A bug was removed which caused some overlap between the dataset splits of the
+  ScandiQA datasets.
+
 
 ## [v8.0.0] - 2023-11-29
 ### Added
