@@ -108,7 +108,7 @@ class TextToText(BenchmarkDataset):
             model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
-            id2label (list of str):
+            id2label:
                 Conversion of indices to labels.
 
         Returns:
