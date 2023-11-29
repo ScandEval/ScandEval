@@ -15,6 +15,7 @@ and this project adheres to
   benchmarked with generative models. In this release, this includes the following
   datasets:
     - `nordjylland-news`, a Danish summarization dataset based on news articles.
+    - `rnn`, an Icelandic summarization dataset based on news articles.
 
 
 ## [v8.0.0] - 2023-11-29

@@ -452,6 +452,18 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
 )
 
 
+RRN_CONFIG = DatasetConfig(
+    name="rrn",
+    pretty_name="the truncated version of RÚV Radio News",
+    huggingface_id="ScandEval/rrn-mini",
+    task=TEXT_TO_TEXT,
+    languages=[IS],
+    prompt_template="{text}\nSamantekt: {target_text}",
+    num_few_shot_examples=2,
+    max_generated_tokens=128,
+)
+
+
 SPEED_CONFIG = DatasetConfig(
     name="speed",
     pretty_name="the speed estimation benchmark",
