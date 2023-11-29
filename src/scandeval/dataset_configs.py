@@ -2,7 +2,7 @@
 
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED, TEXT_TO_TEXT
-from .languages import DA, FO, IS, NB, NN, SV, get_all_languages
+from .languages import DA, FO, IS, NB, NL, NN, SV, get_all_languages
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:
@@ -447,6 +447,18 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     task=TEXT_TO_TEXT,
     languages=[DA],
     prompt_template="{text}\nOpsummering: {target_text}",
+    num_few_shot_examples=2,
+    max_generated_tokens=128,
+)
+
+
+WIKI_LINGUA_NL_CONFIG = DatasetConfig(
+    name="wiki-lingua-nl",
+    pretty_name="the Dutch part of the truncated version of WikiLingua",
+    huggingface_id="ScandEval/wiki-lingua-nl-mini",
+    task=TEXT_TO_TEXT,
+    languages=[NL],
+    prompt_template="{text}\nSamenvatting: {target_text}",
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
