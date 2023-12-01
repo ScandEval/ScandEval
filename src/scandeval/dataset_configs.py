@@ -463,7 +463,7 @@ MLSUM_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-  
+
 RRN_CONFIG = DatasetConfig(
     name="rrn",
     pretty_name="the truncated version of RÚV Radio News",
@@ -474,8 +474,8 @@ RRN_CONFIG = DatasetConfig(
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
-  
-  
+
+
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
     name="no-sammendrag",
     pretty_name="the truncated version of the Norwegian Sammendrag dataset",
@@ -486,8 +486,8 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
-  
-  
+
+
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
     pretty_name="the Dutch part of the truncated version of WikiLingua",
