@@ -15,6 +15,7 @@ and this project adheres to
   benchmarked with generative models. In this release, this includes the following
   datasets:
     - `nordjylland-news`, a Danish summarization dataset based on news articles.
+    - `rnn`, an Icelandic summarization dataset based on news articles.
     - `no-sammendrag`, a Norwegian summarization dataset based on news articles.
     - `wiki-lingua-nl`, a Dutch summarization dataset based on WikiHow articles.
 
