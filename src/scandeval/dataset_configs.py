@@ -452,6 +452,15 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
 )
 
 
+NO_SAMMENDRAG_CONFIG = DatasetConfig(
+    name="no-sammendrag",
+    pretty_name="the truncated version of the Norwegian Sammendrag dataset",
+    huggingface_id="ScandEval/no-sammendrag-mini",
+    task=TEXT_TO_TEXT,
+    languages=[NB, NN],
+    prompt_template="{text}\nSammendrag: {target_text}",
+
+  
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
     pretty_name="the Dutch part of the truncated version of WikiLingua",
