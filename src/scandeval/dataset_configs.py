@@ -2,7 +2,7 @@
 
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED, TEXT_TO_TEXT
-from .languages import DA, FO, IS, NB, NL, NN, SV, get_all_languages
+from .languages import DA, DE, NL, FO, IS, NB, NN, SV, get_all_languages
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:
@@ -452,6 +452,18 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
 )
 
 
+MLSUM_CONFIG = DatasetConfig(
+    name="mlsum",
+    pretty_name="the truncated version of MLSum",
+    huggingface_id="ScandEval/mlsum-mini",
+    task=TEXT_TO_TEXT,
+    languages=[DE],
+    prompt_template="{text}\nZusammenfassung: {target_text}",
+    num_few_shot_examples=2,
+    max_generated_tokens=128,
+)
+
+
 RRN_CONFIG = DatasetConfig(
     name="rrn",
     pretty_name="the truncated version of RÚV Radio News",
@@ -462,7 +474,8 @@ RRN_CONFIG = DatasetConfig(
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
-  
+
+
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
     name="no-sammendrag",
     pretty_name="the truncated version of the Norwegian Sammendrag dataset",
@@ -473,7 +486,8 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
-  
+
+
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
     pretty_name="the Dutch part of the truncated version of WikiLingua",
