@@ -16,6 +16,16 @@ and this project adheres to
   datasets:
     - `nordjylland-news`, a Danish summarization dataset based on news articles.
     - `no-sammendrag`, a Norwegian summarization dataset based on news articles.
+    - `wiki-lingua-nl`, a Dutch summarization dataset based on WikiHow articles.
+
+### Changed
+- Now uses 8-bit AdamW whenever CUDA is available, as opposed to regular AdamW.
+  Experiments shows that this does not affect benchmarking performance, but reduces
+  memory usage and thus allows benchmarking of larger models
+
+### Fixed
+- A bug was removed which caused some overlap between the dataset splits of the
+  ScandiQA datasets.
 
 
 ## [v8.0.0] - 2023-11-29
@@ -48,6 +58,8 @@ and this project adheres to
 - Changed the `--use-auth-token` and `--auth-token` arguments to `--use-token` and
   `--token`, reflecting the same change in the `transformers` package.
 - Now reports all model parameters, rather than just the trainable ones.
+- Now uses 8-bit AdamW optimizer when CUDA is available rather than the default AdamW,
+  to save memory when working with larger models.
 
 ### Removed
 - Previously generative models had their maximum sequence length altered by subtracting
