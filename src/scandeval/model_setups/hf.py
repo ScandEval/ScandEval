@@ -25,6 +25,7 @@ from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnect
 from ..languages import get_all_languages
 from ..utils import (
     GENERATIVE_MODEL_TASKS,
+    HiddenPrints,
     block_terminal_output,
     create_model_cache_dir,
     get_class_by_name,
@@ -223,6 +224,10 @@ class HFModelSetup:
             else None
         )
 
+        use_flash_attention = (
+            self.benchmark_config.use_flash_attention or "mistral" in model_id.lower()
+        )
+
         config = self._load_hf_model_config(
             model_id=model_id,
             num_labels=dataset_config.num_labels,
@@ -242,7 +247,7 @@ class HFModelSetup:
             trust_remote_code=self.benchmark_config.trust_remote_code,
             quantization_config=bnb_config,
             torch_dtype="auto",
-            use_flash_attention_2=True,
+            use_flash_attention_2=use_flash_attention,
         )
 
         while True:
@@ -275,26 +280,23 @@ class HFModelSetup:
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=UserWarning)
                     warnings.filterwarnings("ignore", category=FutureWarning)
-                    # with HiddenPrints():
-                    try:
-                        model_or_tuple = model_cls_or_none.from_pretrained(
-                            model_config.model_id, **model_kwargs
-                        )
-                    except Exception as e:
-                        if "flash-attention-needed" in str(e):
-                            model_kwargs["use_flash_attention_2"] = True
+                    with HiddenPrints():
+                        try:
+                            model_or_tuple = model_cls_or_none.from_pretrained(
+                                model_config.model_id, **model_kwargs
+                            )
+                        except (KeyError, RuntimeError) as e:
+                            if not ignore_mismatched_sizes:
+                                ignore_mismatched_sizes = True
+                                continue
+                            else:
+                                raise InvalidBenchmark(str(e))
+                        except (TimeoutError, RequestError):
+                            logger.info(
+                                f"Couldn't load the model {model_id!r}. Retrying."
+                            )
+                            sleep(5)
                             continue
-                        raise e
-                    except (KeyError, RuntimeError) as e:
-                        if not ignore_mismatched_sizes:
-                            ignore_mismatched_sizes = True
-                            continue
-                        else:
-                            raise InvalidBenchmark(str(e))
-                    except (TimeoutError, RequestError):
-                        logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
-                        sleep(5)
-                        continue
                 if isinstance(model_or_tuple, tuple):
                     model = model_or_tuple[0]
                 else:

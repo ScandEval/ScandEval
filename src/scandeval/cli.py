@@ -176,6 +176,12 @@ from .languages import get_all_languages
     show_default=True,
     help="Whether to load the model in 4-bit precision.",
 )
+@click.option(
+    "--use-flash-attention/--no-use-flash-attention",
+    default=False,
+    show_default=True,
+    help="Whether to use Flash Attention.",
+)
 def benchmark(
     model_id: tuple[str],
     dataset: tuple[str],
@@ -197,6 +203,7 @@ def benchmark(
     device: str | None,
     trust_remote_code: bool,
     load_in_4bit: bool | None,
+    use_flash_attention: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
 
@@ -230,6 +237,7 @@ def benchmark(
         device=device,
         trust_remote_code=trust_remote_code,
         load_in_4bit=load_in_4bit,
+        use_flash_attention=use_flash_attention,
     )
 
     # Perform the benchmark evaluation
