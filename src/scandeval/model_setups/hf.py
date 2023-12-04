@@ -280,9 +280,8 @@ class HFModelSetup:
                         model_or_tuple = model_cls_or_none.from_pretrained(
                             model_config.model_id, **model_kwargs
                         )
-                    except Exception as e:
-                        breakpoint()
-                        if "flash-attention-2-needed-error" in str(e):  # TEMP
+                    except ValueError as e:
+                        if "does not support Flash Attention 2.0" in str(e):
                             model_kwargs["use_flash_attention_2"] = False
                             continue
                         raise e
