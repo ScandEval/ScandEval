@@ -290,8 +290,8 @@ class HFModelSetup:
                                 raise InvalidBenchmark(
                                     "The model you are trying to load requires Flash "
                                     "Attention. To use Flash Attention, please install "
-                                    "the `flash-attention` package, which can be done "
-                                    "by running `pip install --no-build-isolation -U "
+                                    "the `flash-attn` package, which can be done by "
+                                    "running `pip install --no-build-isolation -U "
                                     "flash-attn`."
                                 )
                         except (KeyError, RuntimeError) as e:
