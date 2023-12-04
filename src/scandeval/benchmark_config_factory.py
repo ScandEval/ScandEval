@@ -26,6 +26,7 @@ def build_benchmark_config(
     device: Device | None,
     trust_remote_code: bool,
     load_in_4bit: bool | None,
+    use_flash_attention: bool,
     testing: bool = False,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
@@ -76,9 +77,11 @@ def build_benchmark_config(
         trust_remote_code:
             Whether to trust remote code when loading models from the Hugging Face
             Hub.
-        load_in_4bit (bool or None):
+        load_in_4bit:
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model. Defaults to None.
+        use_flash_attention:
+            Whether to use Flash Attention.
         testing:
             Whether to run the benchmark in testing mode. Defaults to False.
     """
@@ -114,6 +117,7 @@ def build_benchmark_config(
         device=torch_device,
         trust_remote_code=trust_remote_code,
         load_in_4bit=load_in_4bit,
+        use_flash_attention=use_flash_attention,
         testing=testing,
     )
 

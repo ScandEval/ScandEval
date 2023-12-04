@@ -104,7 +104,7 @@ class BenchmarkConfig:
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token. Defaults to False.
+            specified then it will be used as the token.
         openai_api_key:
             The API key for the OpenAI API. If None then OpenAI models will not be
             benchmarked.
@@ -122,7 +122,9 @@ class BenchmarkConfig:
             Hub.
         load_in_4bit:
             Whether to load models in 4-bit precision. If None then this will be done
-            if CUDA is available and the model is a decoder model. Defaults to None.
+            if CUDA is available and the model is a decoder model.
+        use_flash_attention:
+            Whether to use Flash Attention.
         testing:
             Whether a unit test is being run. Defaults to False.
     """
@@ -143,6 +145,7 @@ class BenchmarkConfig:
     verbose: bool
     trust_remote_code: bool
     load_in_4bit: bool | None
+    use_flash_attention: bool
     testing: bool = False
 
 

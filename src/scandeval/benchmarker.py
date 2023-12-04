@@ -95,9 +95,11 @@ class Benchmarker:
             Whether to output additional output. Defaults to False.
         trust_remote_code:
             Whether to trust remote code when loading models. Defaults to False.
-        load_in_4bit (bool or None, optional):
+        load_in_4bit:
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model. Defaults to None.
+        use_flash_attention:
+            Whether to use Flash Attention. Defaults to False.
 
     Attributes:
         progress_bar: Whether progress bars should be shown.
@@ -130,6 +132,7 @@ class Benchmarker:
         verbose: bool = False,
         trust_remote_code: bool = False,
         load_in_4bit: bool | None = None,
+        use_flash_attention: bool = False,
     ) -> None:
         self.benchmark_config = build_benchmark_config(
             language=language,
@@ -149,6 +152,7 @@ class Benchmarker:
             device=device,
             trust_remote_code=trust_remote_code,
             load_in_4bit=load_in_4bit,
+            use_flash_attention=use_flash_attention,
         )
 
         # Set attributes from arguments
@@ -235,9 +239,9 @@ class Benchmarker:
                     error_msg = record["error"]
                     logger.info(
                         f"{m_id} could not be benchmarked on "
-                        f"{dataset_config.pretty_name}. Skipping."
+                        f"{dataset_config.pretty_name}. Skipping. The error message "
+                        f"raise dwas {error_msg!r}."
                     )
-                    logger.debug(f"The error message was {error_msg!r}.")
                     continue
 
                 # Add the record to the benchmark results

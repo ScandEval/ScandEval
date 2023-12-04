@@ -20,6 +20,12 @@ and this project adheres to
     - `rrn`, an Icelandic summarization dataset based on news articles.
     - `mlsum`, a German summarization dataset based on news articles.
     - `wiki-lingua-nl`, a Dutch summarization dataset based on WikiHow articles.
+  These are all of the task `summarization`, meaning that they can also all be run
+  using `scandeval --dataset-task summarization --model-id <model_id>`.
+- A `--use-flash-attention` flag has been added, which enables Flash Attention 2.0,
+  which is required by some models, such as Mistral-based ones. If `flash-attn` has not
+  been installed then an informative error message will be raised. Thanks to @peter-sk
+  for this contribution!
 
 ### Changed
 - Now uses 8-bit AdamW whenever CUDA is available, as opposed to regular AdamW.
@@ -29,6 +35,8 @@ and this project adheres to
 ### Fixed
 - A bug was removed which caused some overlap between the dataset splits of the
   ScandiQA datasets.
+- Now allows loading in models in the data type that they were trained in, which
+  previously caused errors if they weren't trained in float32.
 
 
 ## [v8.0.0] - 2023-11-29

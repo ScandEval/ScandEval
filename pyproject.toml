@@ -1,18 +1,22 @@
 [tool.poetry]
 name = "ScandEval"
 version = "8.0.0"
-description = "Evaluation of pretrained language models on mono- or multilingual Scandinavian language tasks."
-authors = ["Dan Saattrup Nielsen <saattrupdan@gmail.com>"]
+description = "Evaluation of pretrained language models on mono- or multilingual language tasks."
+authors = ["Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>"]
+maintainers = [
+    "Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>",
+    "Kenneth Enevoldsen <kenneth.enevoldsen@cas.au.dk>",
+]
 readme = "README.md"
 license = "MIT"
 homepage = "https://scandeval.github.io"
-repository = "https://github.com/saattrupdan/ScandEval"
+repository = "https://github.com/ScandEval/ScandEval"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 tqdm = "^4.62.0"
 huggingface-hub = ">=0.7.0,<1.0.0"
-datasets = "^2.7.0"
+datasets = "^2.15.0"
 click = "^8.1.3"
 termcolor = "^2.0.0"
 numpy = "^1.23.0"
@@ -34,14 +38,14 @@ bitsandbytes = {markers="sys_platform != 'darwin' or platform_machine != 'arm64'
 requests = "^2.31.0"
 pydantic = "^2.3.0"
 torch = "^2.1.1"
-transformers = "^4.34.0"
+transformers = "^4.35.0"
 accelerate = ">=0.23.0,<1.0.0"
-evaluate = ">=0.4.0,<1.0.0"
 nltk = "^3.8.1"
 rouge-score = ">=0.1.2,<1.0.0"
 bert-score = ">=0.3.13,<1.0.0"
 sacrebleu = "^2.3.2"
 cer = "^1.2.0"
+evaluate = ">=0.4.1,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pdoc = "^14.0.0"
@@ -49,9 +53,10 @@ pytest = "^7.4.0"
 pre-commit = "^3.3.3"
 black = "^23.7.0"
 lxml = "^4.9.3"
-isort = "^5.12.0"
 pytest-cov = "^4.1.0"
 readme-coverage-badger = ">=0.1.2,<1.0.0"
+ruff = ">=0.1.6,<1.0.0"
+mypy = "^1.7.1"
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"
