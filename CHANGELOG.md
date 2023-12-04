@@ -20,6 +20,9 @@ and this project adheres to
     - `rrn`, an Icelandic summarization dataset based on news articles.
     - `mlsum`, a German summarization dataset based on news articles.
     - `wiki-lingua-nl`, a Dutch summarization dataset based on WikiHow articles.
+- A `--use-flash-attention` flag has been added, which enables Flash Attention 2.0,
+  which is required by some models, such as Mistral-based ones. If `flash-attn` has not
+  been installed then an informative error message will be raised.
 
 ### Changed
 - Now uses 8-bit AdamW whenever CUDA is available, as opposed to regular AdamW.
@@ -27,8 +30,6 @@ and this project adheres to
   memory usage and thus allows benchmarking of larger models
 
 ### Fixed
-- Now uses FlashAttention2 when required by the model. Previously this caused errors
-  when benchmarking models requiring this, such as the Mistral models.
 - A bug was removed which caused some overlap between the dataset splits of the
   ScandiQA datasets.
 - Now allows loading in models in the data type that they were trained in, which
