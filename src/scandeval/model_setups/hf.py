@@ -214,7 +214,6 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
-        breakpoint()
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
