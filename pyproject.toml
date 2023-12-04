@@ -49,9 +49,9 @@ pytest = "^7.4.0"
 pre-commit = "^3.3.3"
 black = "^23.7.0"
 lxml = "^4.9.3"
-isort = "^5.12.0"
 pytest-cov = "^4.1.0"
 readme-coverage-badger = ">=0.1.2,<1.0.0"
+ruff = ">=0.1.6,<1.0.0"
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"
