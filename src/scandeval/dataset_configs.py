@@ -500,6 +500,18 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
 )
 
 
+SWEDN_CONFIG = DatasetConfig(
+    name="swedn",
+    pretty_name="the truncated version of SweDN",
+    huggingface_id="ScandEval/swedn-mini",
+    task=TEXT_TO_TEXT,
+    languages=[SV],
+    prompt_template="{text}\nSammanfattning: {target_text}",
+    num_few_shot_examples=2,
+    max_generated_tokens=128,
+)
+
+
 SPEED_CONFIG = DatasetConfig(
     name="speed",
     pretty_name="the speed estimation benchmark",

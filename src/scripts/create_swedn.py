@@ -1,4 +1,4 @@
-"""Create the WikiLingua-NL-mini summarisation dataset."""
+"""Create the SweDN-mini summarisation dataset."""
 
 from huggingface_hub import HfApi
 import pandas as pd
@@ -7,15 +7,15 @@ from requests import HTTPError
 
 
 def main():
-    """Create the WikiLingua-NL-mini summarisation dataset and upload to HF Hub."""
+    """Create the SweDN-mini summarisation dataset and upload to HF Hub."""
 
-    dataset_id = "GEM/wiki_lingua"
+    dataset_id = "sbx/superlim-2"
 
-    dataset = load_dataset(dataset_id, "nl", token=True)
+    dataset = load_dataset(dataset_id, "swedn", token=True)
     assert isinstance(dataset, DatasetDict)
 
     dataset = dataset.rename_columns(
-        column_mapping=dict(source="text", target="target_text")
+        column_mapping=dict(article="text", summary="target_text")
     )
 
     train_df = dataset["train"].to_pandas()
@@ -49,7 +49,7 @@ def main():
     )
 
     # Create dataset ID
-    mini_dataset_id = "ScandEval/wiki-lingua-nl-mini"
+    mini_dataset_id = "ScandEval/swedn-mini"
 
     # Remove the dataset from Hugging Face Hub if it already exists
     try:
