@@ -116,7 +116,6 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── LICENSE
 ├── README.md
 ├── docs
-│   └── search.js
 ├── gfx
 │   └── scandeval.png
 ├── makefile

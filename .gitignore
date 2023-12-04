@@ -106,6 +106,7 @@ docs/scandeval/
 docs/index.html
 docs/scandeval.html
 docs/search.json
+docs/search.js
 
 # Experiments
 gai-experiments.xlsx
