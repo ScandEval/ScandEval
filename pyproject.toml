@@ -2,11 +2,15 @@
 name = "ScandEval"
 version = "8.0.0"
 description = "Evaluation of pretrained language models on mono- or multilingual language tasks."
-authors = ["Dan Saattrup Nielsen <saattrupdan@gmail.com>"]
+authors = ["Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>"]
+maintainers = [
+    "Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>",
+    "Kenneth Enevoldsen <kenneth.enevoldsen@cas.au.dk>",
+]
 readme = "README.md"
 license = "MIT"
 homepage = "https://scandeval.github.io"
-repository = "https://github.com/saattrupdan/ScandEval"
+repository = "https://github.com/ScandEval/ScandEval"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
