@@ -24,7 +24,8 @@ and this project adheres to
   using `scandeval --dataset-task summarization --model-id <model_id>`.
 - A `--use-flash-attention` flag has been added, which enables Flash Attention 2.0,
   which is required by some models, such as Mistral-based ones. If `flash-attn` has not
-  been installed then an informative error message will be raised.
+  been installed then an informative error message will be raised. Thanks to @peter-sk
+  for this contribution!
 
 ### Changed
 - Now uses 8-bit AdamW whenever CUDA is available, as opposed to regular AdamW.
