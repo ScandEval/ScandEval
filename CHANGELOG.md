@@ -17,7 +17,7 @@ and this project adheres to
     - `nordjylland-news`, a Danish summarization dataset based on news articles.
     - `swedn`, a Swedish summarization dataset based on news articles.
     - `no-sammendrag`, a Norwegian summarization dataset based on news articles.
-    - `rnn`, an Icelandic summarization dataset based on news articles.
+    - `rrn`, an Icelandic summarization dataset based on news articles.
     - `mlsum`, a German summarization dataset based on news articles.
     - `wiki-lingua-nl`, a Dutch summarization dataset based on WikiHow articles.
 
