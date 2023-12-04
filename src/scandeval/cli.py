@@ -198,7 +198,7 @@ def benchmark(
     trust_remote_code: bool,
     load_in_4bit: bool | None,
 ) -> None:
-    """Benchmark pretrained language models on Scandinavian language tasks."""
+    """Benchmark pretrained language models on language tasks."""
 
     # Set up language variables
     model_ids = None if len(model_id) == 0 else list(model_id)
