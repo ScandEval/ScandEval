@@ -242,7 +242,7 @@ class HFModelSetup:
             trust_remote_code=self.benchmark_config.trust_remote_code,
             quantization_config=bnb_config,
             torch_dtype="auto",
-            use_flash_attention_2=False,
+            use_flash_attention_2=True,
         )
 
         while True:
