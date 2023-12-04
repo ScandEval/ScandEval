@@ -242,7 +242,7 @@ class HFModelSetup:
             trust_remote_code=self.benchmark_config.trust_remote_code,
             quantization_config=bnb_config,
             torch_dtype="auto",
-            use_flash_attention_2=True,
+            use_flash_attention_2=False,
         )
 
         while True:
@@ -280,9 +280,9 @@ class HFModelSetup:
                         model_or_tuple = model_cls_or_none.from_pretrained(
                             model_config.model_id, **model_kwargs
                         )
-                    except ValueError as e:
-                        if "does not support Flash Attention 2.0" in str(e):
-                            model_kwargs["use_flash_attention_2"] = False
+                    except Exception as e:
+                        if "flash-attention-needed" in str(e):
+                            model_kwargs["use_flash_attention_2"] = True
                             continue
                         raise e
                     except (KeyError, RuntimeError) as e:
