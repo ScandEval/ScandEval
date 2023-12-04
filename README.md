@@ -125,7 +125,6 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── src
 │   ├── scandeval
 │   │   ├── __init__.py
-│   │   ├── __pycache__
 │   │   ├── benchmark_config_factory.py
 │   │   ├── benchmark_dataset.py
 │   │   ├── benchmarker.py
@@ -144,7 +143,6 @@ World](https://satwcomic.com/) team. Go check them out!
 │   │   ├── model_loading.py
 │   │   ├── model_setups
 │   │   │   ├── __init__.py
-│   │   │   ├── __pycache__
 │   │   │   ├── fresh.py
 │   │   │   ├── hf.py
 │   │   │   ├── local.py
@@ -162,7 +160,6 @@ World](https://satwcomic.com/) team. Go check them out!
 │   │   ├── types.py
 │   │   └── utils.py
 │   └── scripts
-│       ├── __pycache__
 │       ├── create_angry_tweets.py
 │       ├── create_dane.py
 │       ├── create_mim_gold_ner.py
@@ -185,7 +182,6 @@ World](https://satwcomic.com/) team. Go check them out!
 │       └── versioning.py
 └── tests
     ├── __init__.py
-    ├── __pycache__
     ├── conftest.py
     ├── test_benchmark_config_factory.py
     ├── test_benchmark_dataset.py
