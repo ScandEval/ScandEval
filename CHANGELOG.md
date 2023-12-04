@@ -27,8 +27,12 @@ and this project adheres to
   memory usage and thus allows benchmarking of larger models
 
 ### Fixed
+- Now uses FlashAttention2 when required by the model. Previously this caused errors
+  when benchmarking models requiring this, such as the Mistral models.
 - A bug was removed which caused some overlap between the dataset splits of the
   ScandiQA datasets.
+- Now allows loading in models in the data type that they were trained in, which
+  previously caused errors if they weren't trained in float32.
 
 
 ## [v8.0.0] - 2023-11-29
