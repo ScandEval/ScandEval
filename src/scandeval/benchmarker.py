@@ -239,9 +239,9 @@ class Benchmarker:
                     error_msg = record["error"]
                     logger.info(
                         f"{m_id} could not be benchmarked on "
-                        f"{dataset_config.pretty_name}. Skipping."
+                        f"{dataset_config.pretty_name}. Skipping. The error message "
+                        f"raise dwas {error_msg!r}."
                     )
-                    logger.debug(f"The error message was {error_msg!r}.")
                     continue
 
                 # Add the record to the benchmark results
