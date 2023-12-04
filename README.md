@@ -2,7 +2,7 @@
 <img src="https://raw.githubusercontent.com/saattrupdan/ScandEval/main/gfx/scandeval.png" width="517" height="217">
 </div>
 
-### Evaluation of pretrained language models on mono- or multilingual Scandinavian language tasks.
+### Evaluation of pretrained language models on mono- or multilingual language tasks.
 
 ______________________________________________________________________
 [![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://pypi.org/project/scandeval/)
@@ -107,7 +107,6 @@ World](https://satwcomic.com/) team. Go check them out!
 ## Project structure
 ```
 .
-├── .flake8
 ├── .github
 │   └── workflows
 │       └── ci.yaml
@@ -116,14 +115,18 @@ World](https://satwcomic.com/) team. Go check them out!
 ├── CHANGELOG.md
 ├── LICENSE
 ├── README.md
+├── docs
+│   └── search.js
 ├── gfx
 │   └── scandeval.png
 ├── makefile
+├── poetry.lock
 ├── poetry.toml
 ├── pyproject.toml
 ├── src
 │   ├── scandeval
 │   │   ├── __init__.py
+│   │   ├── __pycache__
 │   │   ├── benchmark_config_factory.py
 │   │   ├── benchmark_dataset.py
 │   │   ├── benchmarker.py
@@ -133,28 +136,49 @@ World](https://satwcomic.com/) team. Go check them out!
 │   │   ├── dataset_configs.py
 │   │   ├── dataset_factory.py
 │   │   ├── dataset_tasks.py
+│   │   ├── enums.py
 │   │   ├── exceptions.py
-│   │   ├── hf_hub.py
+│   │   ├── finetuning.py
+│   │   ├── generation.py
 │   │   ├── languages.py
+│   │   ├── model_config.py
 │   │   ├── model_loading.py
+│   │   ├── model_setups
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   ├── fresh.py
+│   │   │   ├── hf.py
+│   │   │   ├── local.py
+│   │   │   ├── openai.py
+│   │   │   └── utils.py
 │   │   ├── named_entity_recognition.py
+│   │   ├── openai_models.py
+│   │   ├── protocols.py
 │   │   ├── question_answering.py
 │   │   ├── question_answering_trainer.py
 │   │   ├── scores.py
 │   │   ├── sequence_classification.py
 │   │   ├── speed_benchmark.py
+│   │   ├── text_to_text.py
 │   │   ├── types.py
 │   │   └── utils.py
 │   └── scripts
+│       ├── __pycache__
 │       ├── create_angry_tweets.py
 │       ├── create_dane.py
 │       ├── create_mim_gold_ner.py
+│       ├── create_mlsum.py
+│       ├── create_no_sammendrag.py
+│       ├── create_nordjylland_news.py
 │       ├── create_norec.py
 │       ├── create_norne.py
+│       ├── create_rrn.py
 │       ├── create_scala.py
 │       ├── create_scandiqa.py
 │       ├── create_suc3.py
+│       ├── create_swedn.py
 │       ├── create_swerec.py
+│       ├── create_wiki_lingua_nl.py
 │       ├── create_wikiann_fo.py
 │       ├── fill_in_missing_model_metadata.py
 │       ├── fix_dot_env_file.py
@@ -162,6 +186,7 @@ World](https://satwcomic.com/) team. Go check them out!
 │       └── versioning.py
 └── tests
     ├── __init__.py
+    ├── __pycache__
     ├── conftest.py
     ├── test_benchmark_config_factory.py
     ├── test_benchmark_dataset.py
@@ -172,11 +197,13 @@ World](https://satwcomic.com/) team. Go check them out!
     ├── test_dataset_configs.py
     ├── test_dataset_factory.py
     ├── test_dataset_tasks.py
+    ├── test_enums.py
     ├── test_exceptions.py
-    ├── test_hf_hub.py
     ├── test_languages.py
+    ├── test_model_config.py
     ├── test_model_loading.py
     ├── test_named_entity_recognition.py
+    ├── test_openai_models.py
     ├── test_question_answering.py
     ├── test_question_answering_trainer.py
     ├── test_scores.py

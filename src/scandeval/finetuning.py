@@ -26,7 +26,7 @@ from scandeval.exceptions import InvalidBenchmark
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .model_loading import load_model
-from .model_setups import Tokenizer
+from .protocols import Tokenizer
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
 
 logger = logging.getLogger(__package__)
@@ -105,59 +105,81 @@ def finetune(
         # the single iteration call
         model_already_initialized = idx == 0
 
-        # Clear memory after first iteration
-        if not model_already_initialized:
+        # Run a loop here to deal with automatic reduction of batch size
+        while True:
+            # Clear GPU memory
+            if not model_already_initialized:
+                try:
+                    del model
+                except UnboundLocalError:
+                    pass
+                try:
+                    del tokenizer
+                except UnboundLocalError:
+                    pass
+                clear_memory()
+
             try:
-                del model
-            except UnboundLocalError:
-                pass
-            try:
-                del tokenizer
-            except UnboundLocalError:
-                pass
-            clear_memory()
+                test = tests[idx]
+                prepared_test = prepared_tests[idx]
+                assert isinstance(test, Dataset)
+                assert isinstance(prepared_test, Dataset)
 
-        test = tests[idx]
-        prepared_test = prepared_tests[idx]
-        assert isinstance(test, Dataset)
-        assert isinstance(prepared_test, Dataset)
+                # Re-block terminal output, as it gets unblocked by the `transformers`
+                # package before training
+                block_terminal_output()
 
-        # Re-block terminal output, as it gets unblocked by the
-        # `transformers` package before training
-        block_terminal_output()
+                training_args = get_training_args(
+                    benchmark_config=benchmark_config,
+                    model_config=model_config,
+                    iteration_idx=idx,
+                    batch_size=bs,
+                )
 
-        training_args = get_training_args(
-            benchmark_config=benchmark_config,
-            model_config=model_config,
-            iteration_idx=idx,
-            batch_size=bs,
-        )
+                itr_scores = finetune_single_iteration(
+                    iteration_idx=idx,
+                    model_config=model_config,
+                    train=train,
+                    prepared_train=prepared_train,
+                    prepared_val=prepared_val,
+                    test=test,
+                    prepared_test=prepared_test,
+                    training_args=training_args,
+                    benchmark_config=benchmark_config,
+                    dataset_config=dataset_config,
+                    data_collator=data_collator,
+                    compute_metrics=compute_metrics,
+                    tokenizer=tokenizer if model_already_initialized else None,
+                    model=model if model_already_initialized else None,
+                    trainer_class=trainer_class,
+                    evaluate_inputs_fn=evaluate_inputs_fn,
+                    preprocess_logits_for_metrics=preprocess_logits_for_metrics,
+                )
 
-        itr_scores = finetune_single_iteration(
-            iteration_idx=idx,
-            model_config=model_config,
-            train=train,
-            prepared_train=prepared_train,
-            prepared_val=prepared_val,
-            test=test,
-            prepared_test=prepared_test,
-            training_args=training_args,
-            benchmark_config=benchmark_config,
-            dataset_config=dataset_config,
-            data_collator=data_collator,
-            compute_metrics=compute_metrics,
-            tokenizer=tokenizer if model_already_initialized else None,
-            model=model if model_already_initialized else None,
-            trainer_class=trainer_class,
-            evaluate_inputs_fn=evaluate_inputs_fn,
-            preprocess_logits_for_metrics=preprocess_logits_for_metrics,
-        )
+                if "train" in itr_scores:
+                    logger.debug(
+                        f"Train scores for iteration {idx}: {itr_scores['train']}"
+                    )
+                    scores["train"].append(itr_scores["train"])
+                scores["test"].append(itr_scores["test"])
+                logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
 
-        if "train" in itr_scores:
-            logger.debug(f"Train scores for iteration {idx}: {itr_scores['train']}")
-            scores["train"].append(itr_scores["train"])
-        scores["test"].append(itr_scores["test"])
-        logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
+                break
+
+            except Exception as e:
+                if "CUDA" not in str(e) and "out of memory" not in str(e):
+                    raise InvalidBenchmark(str(e))
+
+                if bs <= 1:
+                    raise InvalidBenchmark(
+                        "Could not benchmark the model, even with a batch size of 1!"
+                    )
+
+                model_already_initialized = False
+
+                # Half batch size, and raise error if we've reached 0
+                bs //= 2
+                logger.debug(f"Reduced batch size to {bs}")
 
     return scores
 
@@ -342,6 +364,11 @@ def get_training_args(
     if batch_size is None:
         batch_size = benchmark_config.batch_size
 
+    if benchmark_config.device == torch.device("cuda"):
+        optimizer = OptimizerNames.ADAMW_8BIT
+    else:
+        optimizer = OptimizerNames.ADAMW_TORCH
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
         training_args = TrainingArguments(
@@ -353,6 +380,7 @@ def get_training_args(
             logging_steps=30,
             save_steps=30,
             max_steps=10_000 if not benchmark_config.testing else 10,
+            use_cpu=benchmark_config.testing,
             report_to=[],
             save_total_limit=1,
             per_device_train_batch_size=batch_size,
@@ -361,10 +389,9 @@ def get_training_args(
             warmup_ratio=0.01,
             gradient_accumulation_steps=32 // batch_size,
             load_best_model_at_end=True,
-            optim=OptimizerNames.ADAMW_TORCH,
+            optim=optimizer,
             seed=seed,
-            fp16=torch.cuda.is_available(),
-            auto_find_batch_size=True,
+            fp16=benchmark_config.device == torch.device("cuda"),
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )

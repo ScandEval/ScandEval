@@ -32,7 +32,7 @@ from ..utils import (
     internet_connection_available,
     model_is_generative,
 )
-from .base import GenerativeModel, Tokenizer
+from ..protocols import GenerativeModel, Tokenizer
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 logger = logging.getLogger(__package__)
@@ -313,6 +313,7 @@ class HFModelSetup:
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
+            warnings.filterwarnings("ignore", category=FutureWarning)
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         model, tokenizer = align_model_and_tokenizer(
@@ -358,16 +359,19 @@ class HFModelSetup:
         """
         while True:
             try:
-                config = AutoConfig.from_pretrained(
-                    model_id,
-                    num_labels=num_labels,
-                    id2label=id2label,
-                    label2id=label2id,
-                    revision=revision,
-                    cache_dir=model_cache_dir,
-                    token=self.benchmark_config.token,
-                    trust_remote_code=self.benchmark_config.trust_remote_code,
-                )
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=UserWarning)
+                    warnings.filterwarnings("ignore", category=FutureWarning)
+                    config = AutoConfig.from_pretrained(
+                        model_id,
+                        num_labels=num_labels,
+                        id2label=id2label,
+                        label2id=label2id,
+                        revision=revision,
+                        cache_dir=model_cache_dir,
+                        token=self.benchmark_config.token,
+                        trust_remote_code=self.benchmark_config.trust_remote_code,
+                    )
                 if config.eos_token_id is not None and config.pad_token_id is None:
                     config.pad_token_id = config.eos_token_id
                 return config
@@ -407,6 +411,7 @@ class HFModelSetup:
         padding_side = "left" if model_is_generative(model=model) else "right"
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
+            warnings.filterwarnings("ignore", category=FutureWarning)
             while True:
                 try:
                     return AutoTokenizer.from_pretrained(

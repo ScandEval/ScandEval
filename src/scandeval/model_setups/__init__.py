@@ -2,7 +2,7 @@
 
 from typing import Type
 
-from .base import GenerativeModel, ModelSetup, Tokenizer
+from ..protocols import ModelSetup
 from .fresh import FreshModelSetup
 from .hf import HFModelSetup
 from .local import LocalModelSetup
