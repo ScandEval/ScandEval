@@ -108,6 +108,7 @@ class TestBenchmarkConfig:
             verbose=False,
             trust_remote_code=False,
             load_in_4bit=None,
+            use_flash_attention=False,
             testing=True,
         )
 
@@ -133,6 +134,7 @@ class TestBenchmarkConfig:
         assert benchmark_config.verbose is False
         assert benchmark_config.trust_remote_code is False
         assert benchmark_config.load_in_4bit is None
+        assert benchmark_config.use_flash_attention is False
         assert benchmark_config.testing is True
 
 
