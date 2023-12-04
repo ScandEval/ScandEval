@@ -25,7 +25,6 @@ from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnect
 from ..languages import get_all_languages
 from ..utils import (
     GENERATIVE_MODEL_TASKS,
-    HiddenPrints,
     block_terminal_output,
     create_model_cache_dir,
     get_class_by_name,
@@ -276,29 +275,27 @@ class HFModelSetup:
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=UserWarning)
                     warnings.filterwarnings("ignore", category=FutureWarning)
-                    with HiddenPrints():
-                        try:
-                            model_or_tuple = model_cls_or_none.from_pretrained(
-                                model_config.model_id, **model_kwargs
-                            )
-                        except Exception as e:
-                            breakpoint()
-                            if "flash-attention-2-needed-error" in str(e):  # TEMP
-                                model_kwargs["use_flash_attention_2"] = True
-                                continue
-                            raise e
-                        except (KeyError, RuntimeError) as e:
-                            if not ignore_mismatched_sizes:
-                                ignore_mismatched_sizes = True
-                                continue
-                            else:
-                                raise InvalidBenchmark(str(e))
-                        except (TimeoutError, RequestError):
-                            logger.info(
-                                f"Couldn't load the model {model_id!r}. Retrying."
-                            )
-                            sleep(5)
+                    # with HiddenPrints():
+                    try:
+                        model_or_tuple = model_cls_or_none.from_pretrained(
+                            model_config.model_id, **model_kwargs
+                        )
+                    except Exception as e:
+                        breakpoint()
+                        if "flash-attention-2-needed-error" in str(e):  # TEMP
+                            model_kwargs["use_flash_attention_2"] = False
                             continue
+                        raise e
+                    except (KeyError, RuntimeError) as e:
+                        if not ignore_mismatched_sizes:
+                            ignore_mismatched_sizes = True
+                            continue
+                        else:
+                            raise InvalidBenchmark(str(e))
+                    except (TimeoutError, RequestError):
+                        logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
+                        sleep(5)
+                        continue
                 if isinstance(model_or_tuple, tuple):
                     model = model_or_tuple[0]
                 else:
