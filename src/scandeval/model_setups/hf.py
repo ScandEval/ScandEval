@@ -282,6 +282,7 @@ class HFModelSetup:
                                 model_config.model_id, **model_kwargs
                             )
                         except Exception as e:
+                            breakpoint()
                             if "flash-attention-2-needed-error" in str(e):  # TEMP
                                 model_kwargs["use_flash_attention_2"] = True
                                 continue
