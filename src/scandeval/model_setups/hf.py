@@ -285,6 +285,15 @@ class HFModelSetup:
                             model_or_tuple = model_cls_or_none.from_pretrained(
                                 model_config.model_id, **model_kwargs
                             )
+                        except ImportError as e:
+                            if "flash attention" in str(e).lower():
+                                raise InvalidBenchmark(
+                                    "The model you are trying to load requires Flash "
+                                    "Attention. To use Flash Attention, please install "
+                                    "the `flash-attention` package, which can be done "
+                                    "by running `pip install --no-build-isolation "
+                                    "flash-attn`."
+                                )
                         except (KeyError, RuntimeError) as e:
                             if not ignore_mismatched_sizes:
                                 ignore_mismatched_sizes = True
