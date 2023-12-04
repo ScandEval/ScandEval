@@ -28,16 +28,17 @@ def main():
     # Create validation split
     val_size = 256
     val_df = val_df.sample(n=val_size, random_state=4242)
-    val_df = val_df.reset_index(drop=True)
 
     # Create test split
     test_size = 2048
     test_df = test_df.sample(n=test_size, random_state=4242)
-    test_df = test_df.reset_index(drop=True)
 
     # Create train split
     train_size = 1024
     train_df = train_df.sample(n=train_size, random_state=4242)
+
+    val_df = val_df.reset_index(drop=True)
+    test_df = test_df.reset_index(drop=True)
     train_df = train_df.reset_index(drop=True)
 
     # Collect datasets in a dataset dictionary
