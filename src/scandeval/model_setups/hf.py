@@ -216,17 +216,55 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
+        bnb_config = (
+            BitsAndBytesConfig(
+                load_in_4bit=load_in_4bit,
+                bnb_4bit_compute_type=torch.float16,
+                bnb_4bit_use_double_quant=True,
+            )
+            if load_in_4bit
+            else None
+        )
+
+        # TODO: Maybe remove this
+        device_map: str | dict[str, int] | None
+        if load_in_4bit:
+            if os.getenv("WORLD_SIZE") is not None:
+                device_map = {"": Accelerator().process_index}
+            else:
+                device_map = "auto"
+        else:
+            device_map = None
+
+        use_flash_attention = (
+            self.benchmark_config.use_flash_attention or "mistral" in model_id.lower()
+        )
+
+        config = self._load_hf_model_config(
+            model_id=model_id,
+            num_labels=dataset_config.num_labels,
+            id2label=dataset_config.id2label,
+            label2id=dataset_config.label2id,
+            revision=model_config.revision,
+            model_cache_dir=model_config.model_cache_dir,
+        )
+
+        model_kwargs = dict(
+            config=config,
+            from_flax=from_flax,
+            ignore_mismatched_sizes=ignore_mismatched_sizes,
+            revision=model_config.revision,
+            token=self.benchmark_config.token,
+            cache_dir=model_config.model_cache_dir,
+            trust_remote_code=self.benchmark_config.trust_remote_code,
+            device_map=device_map,
+            quantization_config=bnb_config,
+            torch_dtype="auto",
+            use_flash_attention_2=use_flash_attention,
+        )
+
         while True:
             try:
-                config = self._load_hf_model_config(
-                    model_id=model_id,
-                    num_labels=dataset_config.num_labels,
-                    id2label=dataset_config.id2label,
-                    label2id=dataset_config.label2id,
-                    revision=model_config.revision,
-                    model_cache_dir=model_config.model_cache_dir,
-                )
-
                 # Get the model class associated with the supertask
                 if model_config.task in ["text-generation", "conversational"]:
                     model_cls_supertask = "causal-l-m"
@@ -257,38 +295,18 @@ class HFModelSetup:
                     warnings.filterwarnings("ignore", category=FutureWarning)
                     with HiddenPrints():
                         try:
-                            # TODO
-                            device_map: str | dict[str, int] | None
-                            if load_in_4bit:
-                                if os.getenv("WORLD_SIZE") is not None:
-                                    device_map = {"": Accelerator().process_index}
-                                else:
-                                    device_map = "auto"
-                            else:
-                                device_map = None
-                            bnb_config = (
-                                BitsAndBytesConfig(
-                                    load_in_4bit=load_in_4bit,
-                                    bnb_4bit_compute_type=torch.float16,
-                                    bnb_4bit_use_double_quant=True,
-                                )
-                                if load_in_4bit
-                                else None
-                            )
                             model_or_tuple = model_cls_or_none.from_pretrained(
-                                model_config.model_id,
-                                config=config,
-                                from_flax=from_flax,
-                                ignore_mismatched_sizes=ignore_mismatched_sizes,
-                                revision=model_config.revision,
-                                token=self.benchmark_config.token,
-                                cache_dir=model_config.model_cache_dir,
-                                trust_remote_code=(
-                                    self.benchmark_config.trust_remote_code
-                                ),
-                                device_map=device_map,
-                                quantization_config=bnb_config,
+                                model_config.model_id, **model_kwargs
                             )
+                        except ImportError as e:
+                            if "flash attention" in str(e).lower():
+                                raise InvalidBenchmark(
+                                    "The model you are trying to load requires Flash "
+                                    "Attention. To use Flash Attention, please install "
+                                    "the `flash-attn` package, which can be done by "
+                                    "running `pip install --no-build-isolation -U "
+                                    "flash-attn`."
+                                )
                         except (KeyError, RuntimeError) as e:
                             if not ignore_mismatched_sizes:
                                 ignore_mismatched_sizes = True
@@ -323,6 +341,7 @@ class HFModelSetup:
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
+            warnings.filterwarnings("ignore", category=FutureWarning)
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         model, tokenizer = align_model_and_tokenizer(
@@ -368,16 +387,19 @@ class HFModelSetup:
         """
         while True:
             try:
-                config = AutoConfig.from_pretrained(
-                    model_id,
-                    num_labels=num_labels,
-                    id2label=id2label,
-                    label2id=label2id,
-                    revision=revision,
-                    cache_dir=model_cache_dir,
-                    token=self.benchmark_config.token,
-                    trust_remote_code=self.benchmark_config.trust_remote_code,
-                )
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=UserWarning)
+                    warnings.filterwarnings("ignore", category=FutureWarning)
+                    config = AutoConfig.from_pretrained(
+                        model_id,
+                        num_labels=num_labels,
+                        id2label=id2label,
+                        label2id=label2id,
+                        revision=revision,
+                        cache_dir=model_cache_dir,
+                        token=self.benchmark_config.token,
+                        trust_remote_code=self.benchmark_config.trust_remote_code,
+                    )
                 if config.eos_token_id is not None and config.pad_token_id is None:
                     config.pad_token_id = config.eos_token_id
                 return config
@@ -417,6 +439,7 @@ class HFModelSetup:
         padding_side = "left" if model_is_generative(model=model) else "right"
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
+            warnings.filterwarnings("ignore", category=FutureWarning)
             while True:
                 try:
                     return AutoTokenizer.from_pretrained(

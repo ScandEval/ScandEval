@@ -37,6 +37,7 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         verbose=False,
         trust_remote_code=False,
         load_in_4bit=None,
+        use_flash_attention=False,
         testing=True,
     )
 

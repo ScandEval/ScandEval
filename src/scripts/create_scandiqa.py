@@ -13,14 +13,14 @@ from requests.exceptions import HTTPError
 def main() -> None:
     """Create the ScandiQA-mini datasets and upload them to the HF Hub."""
 
-    dataset_id = "alexandrainst/scandiqa"
+    dataset_id = "alexandrainst/scandi-qa"
 
     # Iterate over the Danish, Norwegian and Swedish languages
     for language in ["da", "no", "sv"]:
         # Load the datasets from the `alexandrainst` organisation
-        train = load_dataset(dataset_id, language, split="train", use_auth_token=True)
-        val = load_dataset(dataset_id, language, split="val", use_auth_token=True)
-        test = load_dataset(dataset_id, language, split="test", use_auth_token=True)
+        train = load_dataset(dataset_id, language, split="train", token=True)
+        val = load_dataset(dataset_id, language, split="val", token=True)
+        test = load_dataset(dataset_id, language, split="test", token=True)
 
         # Ensure that the datasets are indeed datasets
         assert isinstance(train, Dataset)
@@ -42,7 +42,6 @@ def main() -> None:
         # Create validation split
         val_size = 256
         val_df = df_with_answer.sample(n=val_size, random_state=4242)
-        val_df = val_df.reset_index(drop=True)
 
         # Create test split
         test_size = 2048
@@ -50,7 +49,6 @@ def main() -> None:
             ~df_with_answer.index.isin(val_df.index)
         ]
         test_df = df_with_answer_filtered.sample(n=test_size, random_state=4242)
-        test_df = test_df.reset_index(drop=True)
 
         # Create train split
         train_size = 1024
@@ -58,6 +56,9 @@ def main() -> None:
             ~df_with_answer_filtered.index.isin(test_df.index)
         ]
         train_df = full_train_df_with_answer.sample(n=train_size, random_state=4242)
+
+        val_df = val_df.reset_index(drop=True)
+        test_df = test_df.reset_index(drop=True)
         train_df = train_df.reset_index(drop=True)
 
         # Collect datasets in a dataset dictionary

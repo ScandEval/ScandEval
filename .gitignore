@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+**/__pycache__/
 *.py[cod]
 
 # C extensions
@@ -89,6 +89,9 @@ target/
 # pytest cache
 .pytest_cache/
 
+# Ruff cache
+.ruff_cache/
+
 # Checkpoints
 checkpoint-*
 
@@ -103,6 +106,7 @@ docs/scandeval/
 docs/index.html
 docs/scandeval.html
 docs/search.json
+docs/search.js
 
 # Experiments
 gai-experiments.xlsx

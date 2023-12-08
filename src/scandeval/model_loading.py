@@ -5,7 +5,7 @@ from typing import Type
 from transformers import PreTrainedModel
 
 from .exceptions import InvalidBenchmark
-from .utils import GENERATIVE_DATASET_TASKS
+from .utils import GENERATIVE_DATASET_SUPERTASKS
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .protocols import GenerativeModel, Tokenizer, ModelSetup
 from .model_setups import (
@@ -58,8 +58,9 @@ def load_model(
         error_to_raise = e
 
     # Refuse to benchmark non-generative models on generative tasks
-    if dataset_config.task.name in GENERATIVE_DATASET_TASKS and not isinstance(
-        model, GenerativeModel
+    if (
+        dataset_config.task.supertask in GENERATIVE_DATASET_SUPERTASKS
+        and not isinstance(model, GenerativeModel)
     ):
         raise InvalidBenchmark(error_message)
     elif error_to_raise is not None:
