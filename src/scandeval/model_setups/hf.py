@@ -1,12 +1,10 @@
 """Model setup for Hugging Face Hub models."""
 
 import logging
-import os
 import warnings
 from json import JSONDecodeError
 from time import sleep
 from typing import Type
-from accelerate import Accelerator
 
 import torch
 from huggingface_hub import HfApi, ModelFilter
@@ -226,16 +224,6 @@ class HFModelSetup:
             else None
         )
 
-        # TODO: Maybe remove this
-        device_map: str | dict[str, int] | None
-        if load_in_4bit:
-            if os.getenv("WORLD_SIZE") is not None:
-                device_map = {"": Accelerator().process_index}
-            else:
-                device_map = "auto"
-        else:
-            device_map = None
-
         use_flash_attention = (
             self.benchmark_config.use_flash_attention or "mistral" in model_id.lower()
         )
@@ -257,7 +245,6 @@ class HFModelSetup:
             token=self.benchmark_config.token,
             cache_dir=model_config.model_cache_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
-            device_map=device_map,
             quantization_config=bnb_config,
             torch_dtype="auto",
             use_flash_attention_2=use_flash_attention,
