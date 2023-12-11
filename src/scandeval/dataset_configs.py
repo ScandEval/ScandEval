@@ -41,6 +41,8 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
     return dataset_configs[dataset_name]
 
 
+### SENTIMENT DATASETS ###
+
 SWEREC_CONFIG = DatasetConfig(
     name="swerec",
     pretty_name="the truncated version of SweReC",
@@ -125,6 +127,8 @@ FOREC_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+
+### NAMED ENTITY RECOGNITION DATASETS ###
 
 SUC3_CONFIG = DatasetConfig(
     name="suc3",
@@ -294,6 +298,8 @@ FONE_CONFIG = DatasetConfig(
 )
 
 
+### LINGUISTIC ACCEPTABILITY DATASETS ###
+
 SCALA_SV_CONFIG = DatasetConfig(
     name="scala-sv",
     pretty_name="The Swedish part of ScaLA",
@@ -378,6 +384,8 @@ SCALA_FO_CONFIG = DatasetConfig(
 )
 
 
+### EXTRACTIVE QUESTION ANSWERING DATASETS ###
+
 SCANDIQA_DA_CONFIG = DatasetConfig(
     name="scandiqa-da",
     pretty_name="the Danish part of the truncated version of ScandiQA",
@@ -439,6 +447,8 @@ FOQA_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+
+### SUMMARIZATION DATASETS ###
 
 NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     name="nordjylland-news",
@@ -511,6 +521,8 @@ SWEDN_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
+
+### SPEED ESTIMATION DATASETS ###
 
 SPEED_CONFIG = DatasetConfig(
     name="speed",
