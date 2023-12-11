@@ -383,6 +383,32 @@ SCALA_FO_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+SCALA_DE_CONFIG = DatasetConfig(
+    name="scala-de",
+    pretty_name="the German part of ScaLA",
+    huggingface_id="ScandEval/scala-de",
+    task=LA,
+    languages=[DE],
+    prompt_prefix="Die folgenden Sätze und ob sie grammatikalisch korrekt sind.",
+    prompt_template="Satz: {text}\nGrammatikalisch richtig: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nein"),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+SCALA_NL_CONFIG = DatasetConfig(
+    name="scala-nl",
+    pretty_name="the Dutch part of ScaLA",
+    huggingface_id="ScandEval/scala-nl",
+    task=LA,
+    languages=[NL],
+    prompt_prefix="Hieronder staan zinnen en of ze grammaticaal correct zijn.",
+    prompt_template="Zin: {text}\nGrammaticaal correct: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nee"),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
 
 ### EXTRACTIVE QUESTION ANSWERING DATASETS ###
 
