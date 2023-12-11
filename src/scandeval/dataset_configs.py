@@ -332,6 +332,54 @@ FONE_CONFIG = DatasetConfig(
 )
 
 
+GERMEVAL_CONFIG = DatasetConfig(
+    name="germeval",
+    pretty_name="the truncated version of GermEval",
+    huggingface_id="ScandEval/germeval-mini",
+    task=NER,
+    languages=[DE],
+    prompt_prefix="Es folgen Sätze und JSON-Wörterbücher mit den benannten "
+    "Entitäten, die in der angegebenen Phrase vorkommen.",
+    prompt_template="Satz: {text}\nBenannte Entitäten: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "ort",
+        "i-loc": "ort",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "verschiedenes",
+        "i-misc": "verschiedenes",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
+
+CONLL_NL_CONFIG = DatasetConfig(
+    name="conll-nl",
+    pretty_name="the Dutch part of the truncated version of CoNLL 2002",
+    huggingface_id="ScandEval/conll-nl-mini",
+    task=NER,
+    languages=[NL],
+    prompt_prefix="Hieronder staan zinnen en JSON woordenboeken met de genoemde "
+    "entiteiten die voorkomen in de gegeven zin.",
+    prompt_template="Zin: {text}\nGenoemde entiteiten: {label}",
+    prompt_label_mapping={
+        "b-per": "persoon",
+        "i-per": "persoon",
+        "b-loc": "locatie",
+        "i-loc": "locatie",
+        "b-org": "organisatie",
+        "i-org": "organisatie",
+        "b-misc": "diversen",
+        "i-misc": "diversen",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
+
 ### LINGUISTIC ACCEPTABILITY DATASETS ###
 
 SCALA_SV_CONFIG = DatasetConfig(
@@ -519,6 +567,8 @@ GERMANQUAD_CONFIG = DatasetConfig(
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
+
+# Missing: Dutch Question Answering
 
 
 ### SUMMARIZATION DATASETS ###
