@@ -45,3 +45,8 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
 @pytest.fixture(scope="session")
 def model_id():
     yield "jonfd/electra-small-nordic"
+
+
+@pytest.fixture(scope="session")
+def generative_model_id():
+    yield "AI-Sweden-Models/gpt-sw3-126m"

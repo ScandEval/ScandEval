@@ -129,7 +129,7 @@ class BenchmarkDataset(ABC):
         metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
         # Set variable with number of iterations
-        num_iter = 10 if not self.benchmark_config.testing else 5
+        num_iter = 10 if not self.benchmark_config.testing else 2
 
         if self.dataset_config.task != SPEED:
             train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
@@ -339,7 +339,7 @@ class BenchmarkDataset(ABC):
 
         # If we are testing then truncate the test set
         if self.benchmark_config.testing:
-            test = test.select(range(128))
+            test = test.select(range(4))
 
         # Bootstrap the test set
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))

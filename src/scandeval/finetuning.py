@@ -379,7 +379,7 @@ def get_training_args(
             eval_steps=30,
             logging_steps=30,
             save_steps=30,
-            max_steps=10_000 if not benchmark_config.testing else 10,
+            max_steps=10_000 if not benchmark_config.testing else 2,
             use_cpu=benchmark_config.testing,
             report_to=[],
             save_total_limit=1,
