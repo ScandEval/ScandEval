@@ -308,30 +308,6 @@ WIKIANN_FO_CONFIG = DatasetConfig(
 )
 
 
-FONE_CONFIG = DatasetConfig(
-    name="fone",
-    pretty_name="the truncated version of the FoNE dataset",
-    huggingface_id="ScandEval/fone-mini",  # TODO: Needs to be uploaded
-    task=NER,
-    languages=[FO],
-    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nevndar "
-    "eindir, sum eru í setningunum.",
-    prompt_template="Setningur: {text}\nNevndar eindir: {label}",
-    prompt_label_mapping={
-        "b-per": "persónur",
-        "i-per": "persónur",
-        "b-loc": "staður",
-        "i-loc": "staður",
-        "b-org": "felagsskapur",
-        "i-org": "felagsskapur",
-        "b-misc": "ymiskt",
-        "i-misc": "ymiskt",
-    },
-    num_few_shot_examples=8,
-    max_generated_tokens=128,
-)
-
-
 GERMEVAL_CONFIG = DatasetConfig(
     name="germeval",
     pretty_name="the truncated version of GermEval",
