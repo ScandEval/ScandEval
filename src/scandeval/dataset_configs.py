@@ -128,6 +128,40 @@ FOREC_CONFIG = DatasetConfig(
 )
 
 
+SB10K_CONFIG = DatasetConfig(
+    name="sb10k",
+    pretty_name="the truncated version of SB10k",
+    huggingface_id="ScandEval/sb10k-mini",
+    task=SENT,
+    languages=[DE],
+    prompt_prefix="Im Folgenden sind Tweets und ihre Stimmung aufgeführt, die "
+    "'positiv', 'neutral' oder 'negativ' sein kann.",
+    prompt_template="Tweet: {text}\nStimmungslage: {label}",
+    prompt_label_mapping=dict(
+        positive="positiv", neutral="neutral", negative="negativ"
+    ),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+
+DUTCH_SOCIAL_CONFIG = DatasetConfig(
+    name="dutch-social",
+    pretty_name="the truncated version of Dutch Social",
+    huggingface_id="ScandEval/dutch-social-mini",
+    task=SENT,
+    languages=[NL],
+    prompt_prefix="Hieronder staan tweets en hun sentiment, dat 'positief', "
+    "'neutraal' of 'negatief' kan zijn.",
+    prompt_template="Tweet: {text}\nSentiment: {label}",
+    prompt_label_mapping=dict(
+        positive="positief", neutral="neutraal", negative="negatief"
+    ),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+
 ### NAMED ENTITY RECOGNITION DATASETS ###
 
 SUC3_CONFIG = DatasetConfig(
