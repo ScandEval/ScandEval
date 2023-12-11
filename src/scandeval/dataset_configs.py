@@ -474,6 +474,19 @@ FOQA_CONFIG = DatasetConfig(
 )
 
 
+GERMANQUAD_CONFIG = DatasetConfig(
+    name="germanquad",
+    pretty_name="GermanQuAD",
+    huggingface_id="ScandEval/germanquad-mini",
+    task=QA,
+    languages=[DE],
+    prompt_template="{text}\nFragen: {question}\nFragen Antwort in maximal 3 "
+    "Wörtern: {label}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
+
+
 ### SUMMARIZATION DATASETS ###
 
 NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
