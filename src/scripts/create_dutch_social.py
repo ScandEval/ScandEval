@@ -24,6 +24,25 @@ def main() -> None:
     assert isinstance(val_df, pd.DataFrame)
     assert isinstance(test_df, pd.DataFrame)
 
+    # Drop all columns except for `full_text` and `label`
+    columns_to_drop = [
+        col for col in train_df.columns if col not in ["full_text", "label"]
+    ]
+    train_df.drop(columns=columns_to_drop, inplace=True)
+    val_df.drop(columns=columns_to_drop, inplace=True)
+    test_df.drop(columns=columns_to_drop, inplace=True)
+
+    # Rename `full_text` to `text`
+    train_df.rename(columns={"full_text": "text"}, inplace=True)
+    val_df.rename(columns={"full_text": "text"}, inplace=True)
+    test_df.rename(columns={"full_text": "text"}, inplace=True)
+
+    # Create the label column
+    label_mapping = {0: "negative", 1: "neutral", 2: "positive"}
+    train_df["label"] = train_df["label"].map(label_mapping)
+    val_df["label"] = val_df["label"].map(label_mapping)
+    test_df["label"] = test_df["label"].map(label_mapping)
+
     # Create validation split
     val_size = 256
     val_df = val_df.sample(n=val_size, random_state=4242)

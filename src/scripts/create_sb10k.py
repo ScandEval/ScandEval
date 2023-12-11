@@ -27,6 +27,9 @@ def main() -> None:
     # Concatenate the splits
     df = pd.concat([train_df, val_df, test_df], ignore_index=True)
 
+    # Create the label column
+    df["label"] = df["label"].map({0: "negative", 1: "neutral", 2: "positive"})
+
     # Remove duplicates
     df = df.drop_duplicates().reset_index(drop=True)
 
