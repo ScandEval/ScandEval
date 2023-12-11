@@ -37,6 +37,11 @@ def main():
     val_df["text"] = val_df["tokens"].map(lambda tokens: " ".join(tokens))
     test_df["text"] = test_df["tokens"].map(lambda tokens: " ".join(tokens))
 
+    # Rename `ner_tags` to `labels`
+    train_df.rename(columns={"ner_tags": "labels"}, inplace=True)
+    val_df.rename(columns={"ner_tags": "labels"}, inplace=True)
+    test_df.rename(columns={"ner_tags": "labels"}, inplace=True)
+
     # Convert the NER tags from IDs to strings
     ner_conversion_dict = {
         0: "O",
@@ -49,13 +54,13 @@ def main():
         7: "B-MISC",
         8: "I-MISC",
     }
-    train_df["ner_tags"] = train_df["ner_tags"].map(
+    train_df["labels"] = train_df["labels"].map(
         lambda ner_tags: [ner_conversion_dict[ner_tag] for ner_tag in ner_tags]
     )
-    val_df["ner_tags"] = val_df["ner_tags"].map(
+    val_df["labels"] = val_df["labels"].map(
         lambda ner_tags: [ner_conversion_dict[ner_tag] for ner_tag in ner_tags]
     )
-    test_df["ner_tags"] = test_df["ner_tags"].map(
+    test_df["labels"] = test_df["labels"].map(
         lambda ner_tags: [ner_conversion_dict[ner_tag] for ner_tag in ner_tags]
     )
 
