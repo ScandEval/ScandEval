@@ -3,6 +3,8 @@
 import pytest
 
 from scandeval.dataset_configs import (
+    GERMANQUAD_CONFIG,
+    NQII_CONFIG,
     SCANDIQA_DA_CONFIG,
     SCANDIQA_NO_CONFIG,
     SCANDIQA_SV_CONFIG,
@@ -16,11 +18,15 @@ from scandeval.question_answering import QuestionAnswering
         (SCANDIQA_DA_CONFIG, (0.24, 4.25)),
         (SCANDIQA_NO_CONFIG, (0.00, 3.72)),
         (SCANDIQA_SV_CONFIG, (0.00, 3.72)),
+        (NQII_CONFIG, (-1000, -1000)),
+        (GERMANQUAD_CONFIG, (-1000, -1000)),
     ],
     ids=[
         "scandiqa-da",
         "scandiqa-no",
         "scandiqa-sv",
+        "nqii",
+        "germanquad",
     ],
     scope="class",
 )

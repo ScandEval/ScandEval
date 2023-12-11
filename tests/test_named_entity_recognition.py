@@ -6,10 +6,14 @@ import pytest
 from sklearn.exceptions import UndefinedMetricWarning
 
 from scandeval.dataset_configs import (
+    CONLL_NL_CONFIG,
     DANE_CONFIG,
+    GERMEVAL_CONFIG,
+    MIM_GOLD_NER_CONFIG,
     NORNE_NB_CONFIG,
     NORNE_NN_CONFIG,
     SUC3_CONFIG,
+    WIKIANN_FO_CONFIG,
 )
 from scandeval.named_entity_recognition import NamedEntityRecognition
 
@@ -21,12 +25,20 @@ from scandeval.named_entity_recognition import NamedEntityRecognition
         (SUC3_CONFIG, (1.86, 2.26)),
         (NORNE_NB_CONFIG, (1.83, 1.94)),
         (NORNE_NN_CONFIG, (1.14, 1.20)),
+        (MIM_GOLD_NER_CONFIG, (-1000, -1000)),
+        (WIKIANN_FO_CONFIG, (-1000, -1000)),
+        (GERMEVAL_CONFIG, (-1000, -1000)),
+        (CONLL_NL_CONFIG, (-1000, -1000)),
     ],
     ids=[
         "dane",
         "suc3",
         "norne_nb",
         "norne_nn",
+        "mim-gold-ner",
+        "wikiann-fo",
+        "germeval",
+        "conll-nl",
     ],
     scope="class",
 )

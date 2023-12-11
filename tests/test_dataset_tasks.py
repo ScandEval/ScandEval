@@ -25,6 +25,7 @@ class TestGetAllDatasetTasks:
             "named-entity-recognition",
             "question-answering",
             "sentiment-classification",
+            "summarization",
             "speed",
         ],
     )
