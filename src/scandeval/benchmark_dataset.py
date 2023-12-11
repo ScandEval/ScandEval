@@ -339,7 +339,7 @@ class BenchmarkDataset(ABC):
 
         # If we are testing then truncate the test set
         if self.benchmark_config.testing:
-            test = test.select(range(4))
+            test = test.select(range(2))
 
         # Bootstrap the test set
         test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
