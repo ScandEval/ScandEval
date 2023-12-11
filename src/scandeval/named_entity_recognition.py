@@ -145,12 +145,35 @@ class NamedEntityRecognition(BenchmarkDataset):
                     labels_no_misc[i][j] = "o"  # type: ignore[call-overload]
 
         # Compute the metrics
-        results = self._metrics["micro_f1"].compute(
-            predictions=predictions, references=labels
+        predictions_all_zero = all(
+            all(ner_tag == "o" for ner_tag in prediction_list)
+            for prediction_list in predictions
         )
-        results_no_misc = self._metrics["micro_f1_no_misc"].compute(
-            predictions=predictions_no_misc, references=labels_no_misc
+        labels_all_zero = all(
+            all(ner_tag == "o" for ner_tag in label_list) for label_list in labels
         )
+        if predictions_all_zero and labels_all_zero:
+            results = dict(overall_f1=1.0)
+        else:
+            results = self._metrics["micro_f1"].compute(
+                predictions=predictions, references=labels
+            )
+
+        # Compute the metrics without MISC tags
+        predictions_no_misc_all_zero = all(
+            all(ner_tag == "o" for ner_tag in prediction_list)
+            for prediction_list in predictions_no_misc
+        )
+        labels_no_misc_all_zero = all(
+            all(ner_tag == "o" for ner_tag in label_list)
+            for label_list in labels_no_misc
+        )
+        if predictions_no_misc_all_zero and labels_no_misc_all_zero:
+            results_no_misc = dict(overall_f1=1.0)
+        else:
+            results_no_misc = self._metrics["micro_f1_no_misc"].compute(
+                predictions=predictions_no_misc, references=labels_no_misc
+            )
 
         # Raise error if the metrics are invalid
         if results is None or results_no_misc is None:
