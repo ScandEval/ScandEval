@@ -23,9 +23,11 @@ and this project adheres to
 ### Fixed
 - Fixed bug with question answering benchmarking when the answer was a proper subset of
   the first token in the context, causing errors when benchmarking some models.
-- Some models use an implementation of layer normalisation which is incompatible with
-  mixed precision (fp16), preventing benchmarking. When running these models, fp16 will
-  now be disabled.
+- Some models have been stored in mixed precision as well as containing an
+  implementation of layer normalisation which is incompatible with such mixed
+  precision. When loading models we now only load in mixed precision if `torch_dtype`
+  has been specified in the Hugging Face model configuration (as with the Mistral
+  model, for instance).
 
 
 ## [v8.1.0] - 2023-12-04
