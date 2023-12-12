@@ -32,6 +32,9 @@ and this project adheres to
   previously required that the samples are stratified with respect to the labels. This
   caused an issue if the dataset did not contain all labels, so now we only stratify
   with respect to the labels present in the dataset.
+- When few-shot benchmarking on question answering datasets we previously only used the
+  samples whose contexts were at most 512 characters long. This turns out to be too few
+  for `germeval`, so this has been upped to 1024.
 
 
 ## [v8.1.0] - 2023-12-04
