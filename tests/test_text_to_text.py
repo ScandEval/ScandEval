@@ -1,10 +1,10 @@
 """Unit tests for the `text_to_text` module."""
 
-from typing import Generator
 from contextlib import nullcontext as does_not_raise
+from typing import Generator
+
 import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
-
 from scandeval.dataset_configs import (
     MLSUM_CONFIG,
     NO_SAMMENDRAG_CONFIG,

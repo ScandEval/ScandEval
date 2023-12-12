@@ -21,8 +21,8 @@ from transformers import (
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark
-from ..utils import block_terminal_output, create_model_cache_dir
 from ..protocols import GenerativeModel, Tokenizer
+from ..utils import block_terminal_output, create_model_cache_dir
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 FRESH_MODELS: list[str] = [

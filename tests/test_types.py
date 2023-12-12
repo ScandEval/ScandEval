@@ -4,7 +4,6 @@ import typing
 from typing import Any, Generator
 
 import pytest
-
 import scandeval.types as types
 
 

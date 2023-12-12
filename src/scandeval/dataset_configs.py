@@ -2,7 +2,7 @@
 
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED, SUMMARIZATION
-from .languages import DA, DE, NL, FO, IS, NB, NN, SV, get_all_languages
+from .languages import DA, DE, FO, IS, NB, NL, NN, SV, get_all_languages
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:

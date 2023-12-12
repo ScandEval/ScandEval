@@ -3,7 +3,6 @@
 from copy import deepcopy
 
 import pytest
-
 from scandeval.config import DatasetConfig
 from scandeval.dataset_factory import DatasetFactory
 from scandeval.dataset_tasks import LA, NER, QA, SENT

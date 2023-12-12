@@ -23,8 +23,8 @@ from .finetuning import finetune
 from .generation import generate
 from .model_config import get_model_config
 from .model_loading import load_model
-from .protocols import GenerativeModel, Tokenizer
 from .openai_models import OpenAIModel
+from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .types import SCORE_DICT

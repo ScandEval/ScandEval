@@ -4,7 +4,6 @@ import random
 
 import numpy as np
 import torch
-
 from scandeval.utils import enforce_reproducibility, is_module_installed
 
 

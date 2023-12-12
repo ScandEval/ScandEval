@@ -4,7 +4,6 @@ from collections.abc import Sized
 from dataclasses import dataclass
 
 import pytest
-
 from scandeval.callbacks import NeverLeaveProgressCallback
 
 

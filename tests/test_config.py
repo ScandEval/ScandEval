@@ -2,7 +2,6 @@
 
 import pytest
 import torch
-
 from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,

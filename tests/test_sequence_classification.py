@@ -1,8 +1,9 @@
 """Unit tests for the `sequence_classification` module."""
 
-from typing import Generator
-import pytest
 from contextlib import nullcontext as does_not_raise
+from typing import Generator
+
+import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,

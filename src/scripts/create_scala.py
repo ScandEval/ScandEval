@@ -11,19 +11,18 @@ from datasets.dataset_dict import DatasetDict
 from huggingface_hub.hf_api import HfApi
 from load_ud_pos import (
     load_dadt_pos,
+    load_dedt_pos,
     load_fodt_pos,
     load_isdt_pos,
+    load_nldt_pos,
     load_nodt_nb_pos,
     load_nodt_nn_pos,
     load_svdt_pos,
-    load_dedt_pos,
-    load_nldt_pos,
 )
 from pandas.errors import SettingWithCopyWarning
 from requests.exceptions import HTTPError
-from tqdm.auto import tqdm
-
 from scandeval.utils import block_terminal_output
+from tqdm.auto import tqdm
 
 
 def main():

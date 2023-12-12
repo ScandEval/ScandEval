@@ -97,6 +97,8 @@ exclude = '''
 
 [tool.ruff]
 target-version = "py311"
+extend-select = ["I"]
+
 
 [tool.ruff.extend-per-file-ignores]
 "__init__.py" = ["F401"]

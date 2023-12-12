@@ -5,7 +5,6 @@ from typing import Generator
 
 import pytest
 import torch
-
 from scandeval.config import BenchmarkConfig
 from scandeval.dataset_tasks import LA, NER, QA, SENT
 from scandeval.languages import DA, NO, SV

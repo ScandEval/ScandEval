@@ -1,8 +1,8 @@
 """Create the SB10k-mini sentiment dataset and upload it to the HF Hub."""
 
+import pandas as pd
 from datasets import Dataset, DatasetDict, load_dataset
 from huggingface_hub import HfApi
-import pandas as pd
 from requests import HTTPError
 
 
