@@ -545,6 +545,8 @@ GERMANQUAD_CONFIG = DatasetConfig(
 )
 
 
+# TODO: Icelandic Question Answering
+# TODO: Faroese Question Answering
 # TODO: Dutch Question Answering
 
 
@@ -620,6 +622,8 @@ SWEDN_CONFIG = DatasetConfig(
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
+
+# TODO: Faroese summarization
 
 
 ### SPEED ESTIMATION DATASETS ###
