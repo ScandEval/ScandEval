@@ -10,6 +10,8 @@ and this project adheres to
 
 ## [Unreleased]
 ### Fixed
+- Fixed bug with question answering benchmarking when the answer was a proper subset of
+  the first token in the context, causing errors when benchmarking some models.
 - Some models use an implementation of layer normalisation which is incompatible with
   mixed precision (fp16), preventing benchmarking. When running these models, fp16 will
   now be disabled.
