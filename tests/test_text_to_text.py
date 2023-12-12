@@ -44,11 +44,6 @@ def benchmark_dataset(
     )
 
 
-def test_encoder_sequence_classification(benchmark_dataset, model_id):
-    with does_not_raise():
-        benchmark_dataset.benchmark(model_id)
-
-
 def test_decoder_sequence_classification(benchmark_dataset, generative_model_id):
     with does_not_raise():
         benchmark_dataset.benchmark(generative_model_id)
