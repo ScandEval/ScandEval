@@ -29,6 +29,9 @@ def main() -> None:
     # Ensure that `df` is indeed a Pandas DataFrame
     assert isinstance(df, pd.DataFrame)
 
+    # Ensure that the `id` column is a string
+    df["id"] = df["id"].astype(str)
+
     # Extract information on which examples contain an answer
     has_answer: pd.Series = df.answers.map(lambda dct: dct["text"][0] != "")
 
