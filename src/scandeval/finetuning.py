@@ -100,7 +100,6 @@ def finetune(
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
     bs: int = benchmark_config.batch_size
-    use_fp16 = benchmark_config.device == torch.device("cuda")
     for idx in itr:
         # Set variable that tracks whether we need to initialize new models in
         # the single iteration call
@@ -134,7 +133,6 @@ def finetune(
                     benchmark_config=benchmark_config,
                     model_config=model_config,
                     iteration_idx=idx,
-                    use_fp16=use_fp16,
                     batch_size=bs,
                 )
 
@@ -167,11 +165,6 @@ def finetune(
                 logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
 
                 break
-
-            except RuntimeError as e:
-                if "\"LayerNormKernelImpl\" not implemented for 'Half'" not in str(e):
-                    raise InvalidBenchmark(str(e))
-                use_fp16 = False
 
             except Exception as e:
                 if "CUDA" not in str(e) and "out of memory" not in str(e):
@@ -340,7 +333,6 @@ def get_training_args(
     benchmark_config: BenchmarkConfig,
     model_config: ModelConfig,
     iteration_idx: int,
-    use_fp16: bool,
     batch_size: int | None = None,
 ) -> TrainingArguments:
     """Get the training arguments for the current iteration.
@@ -399,7 +391,7 @@ def get_training_args(
             load_best_model_at_end=True,
             optim=optimizer,
             seed=seed,
-            fp16=use_fp16,
+            fp16=benchmark_config.device == torch.device("cuda"),
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )
