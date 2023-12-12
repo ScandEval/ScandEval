@@ -8,6 +8,12 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## Unreleased
+### Fixed
+- Fixed bug with question answering benchmarking when the answer was a proper subset of
+  the first token in the context, causing errors when benchmarking some models.
+
+
 ## [v8.1.0] - 2023-12-04
 ### Added
 - Now added support for text-to-text tasks, which include tasks such as abstractive
