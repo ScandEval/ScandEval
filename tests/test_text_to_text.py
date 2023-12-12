@@ -1,6 +1,8 @@
 """Unit tests for the `text_to_text` module."""
 
+from typing import Generator
 import pytest
+from scandeval.benchmark_dataset import BenchmarkDataset
 
 from scandeval.dataset_configs import (
     MLSUM_CONFIG,
@@ -13,15 +15,15 @@ from scandeval.dataset_configs import (
 from scandeval.text_to_text import TextToText
 
 
-@pytest.mark.parametrize(
-    argnames=["dataset", "correct_scores"],
-    argvalues=[
-        (NORDJYLLAND_NEWS_CONFIG, (-1000, -1000)),
-        (SWEDN_CONFIG, (-1000, -1000)),
-        (NO_SAMMENDRAG_CONFIG, (-1000, -1000)),
-        (RRN_CONFIG, (-1000, -1000)),
-        (MLSUM_CONFIG, (-1000, -1000)),
-        (WIKI_LINGUA_NL_CONFIG, (-1000, -1000)),
+@pytest.fixture(
+    scope="module",
+    params=[
+        NORDJYLLAND_NEWS_CONFIG,
+        SWEDN_CONFIG,
+        NO_SAMMENDRAG_CONFIG,
+        RRN_CONFIG,
+        MLSUM_CONFIG,
+        WIKI_LINGUA_NL_CONFIG,
     ],
     ids=[
         "nordjylland-news",
@@ -31,23 +33,19 @@ from scandeval.text_to_text import TextToText
         "mlsum",
         "wiki-lingua-nl",
     ],
-    scope="class",
 )
-class TestGenerativeScores:
-    @pytest.fixture(scope="class")
-    def scores(self, benchmark_config, generative_model_id, dataset):
-        benchmark = TextToText(
-            dataset_config=dataset,
-            benchmark_config=benchmark_config,
-        )
-        yield benchmark.benchmark(generative_model_id)[0]["total"]
+def benchmark_dataset(
+    benchmark_config, request
+) -> Generator[BenchmarkDataset, None, None]:
+    yield TextToText(
+        dataset_config=request.param,
+        benchmark_config=benchmark_config,
+    )
 
-    def test_mcc_is_correct(self, scores, correct_scores):
-        min_score = scores["test_bertscore"] - scores["test_bertscore_se"]
-        max_score = scores["test_bertscore"] + scores["test_bertscore_se"]
-        assert min_score <= correct_scores[0] <= max_score
 
-    def test_macro_f1_is_correct(self, scores, correct_scores):
-        min_score = scores["test_rouge_l"] - scores["test_rouge_l_se"]
-        max_score = scores["test_rouge_l"] + scores["test_rouge_l_se"]
-        assert min_score <= correct_scores[1] <= max_score
+def test_encoder_sequence_classification(benchmark_dataset, model_id):
+    benchmark_dataset.benchmark(model_id)
+
+
+def test_decoder_sequence_classification(benchmark_dataset, generative_model_id):
+    benchmark_dataset.benchmark(generative_model_id)

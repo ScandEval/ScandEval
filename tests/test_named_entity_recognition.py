@@ -1,9 +1,9 @@
 """Unit tests for the `named_entity_recognition` module."""
 
-import warnings
+from typing import Generator
 
 import pytest
-from sklearn.exceptions import UndefinedMetricWarning
+from scandeval.benchmark_dataset import BenchmarkDataset
 
 from scandeval.dataset_configs import (
     CONLL_NL_CONFIG,
@@ -18,17 +18,17 @@ from scandeval.dataset_configs import (
 from scandeval.named_entity_recognition import NamedEntityRecognition
 
 
-@pytest.mark.parametrize(
-    argnames=["dataset", "correct_scores"],
-    argvalues=[
-        (DANE_CONFIG, (-1000, -1000)),
-        (SUC3_CONFIG, (-1000, -1000)),
-        (NORNE_NB_CONFIG, (-1000, -1000)),
-        (NORNE_NN_CONFIG, (-1000, -1000)),
-        (MIM_GOLD_NER_CONFIG, (-1000, -1000)),
-        (WIKIANN_FO_CONFIG, (-1000, -1000)),
-        (GERMEVAL_CONFIG, (-1000, -1000)),
-        (CONLL_NL_CONFIG, (-1000, -1000)),
+@pytest.fixture(
+    scope="module",
+    params=[
+        DANE_CONFIG,
+        SUC3_CONFIG,
+        NORNE_NB_CONFIG,
+        NORNE_NN_CONFIG,
+        MIM_GOLD_NER_CONFIG,
+        WIKIANN_FO_CONFIG,
+        GERMEVAL_CONFIG,
+        CONLL_NL_CONFIG,
     ],
     ids=[
         "dane",
@@ -40,71 +40,19 @@ from scandeval.named_entity_recognition import NamedEntityRecognition
         "germeval",
         "conll-nl",
     ],
-    scope="class",
 )
-class TestScores:
-    @pytest.fixture(scope="class")
-    def scores(self, benchmark_config, model_id, dataset):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UndefinedMetricWarning)
-            benchmark = NamedEntityRecognition(
-                dataset_config=dataset,
-                benchmark_config=benchmark_config,
-            )
-            yield benchmark.benchmark(model_id)[0]["total"]
-
-    def test_micro_f1_is_correct(self, scores, correct_scores):
-        min_score = scores["test_micro_f1"] - scores["test_micro_f1_se"]
-        max_score = scores["test_micro_f1"] + scores["test_micro_f1_se"]
-        assert min_score <= correct_scores[0] <= max_score
-
-    def test_micro_f1_no_misc_is_correct(self, scores, correct_scores):
-        min_score = scores["test_micro_f1_no_misc"] - scores["test_micro_f1_no_misc_se"]
-        max_score = scores["test_micro_f1_no_misc"] + scores["test_micro_f1_no_misc_se"]
-        assert min_score <= correct_scores[1] <= max_score
+def benchmark_dataset(
+    benchmark_config, request
+) -> Generator[BenchmarkDataset, None, None]:
+    yield NamedEntityRecognition(
+        dataset_config=request.param,
+        benchmark_config=benchmark_config,
+    )
 
 
-@pytest.mark.parametrize(
-    argnames=["dataset", "correct_scores"],
-    argvalues=[
-        (DANE_CONFIG, (-1000, -1000)),
-        (SUC3_CONFIG, (-1000, -1000)),
-        (NORNE_NB_CONFIG, (-1000, -1000)),
-        (NORNE_NN_CONFIG, (-1000, -1000)),
-        (MIM_GOLD_NER_CONFIG, (-1000, -1000)),
-        (WIKIANN_FO_CONFIG, (-1000, -1000)),
-        (GERMEVAL_CONFIG, (-1000, -1000)),
-        (CONLL_NL_CONFIG, (-1000, -1000)),
-    ],
-    ids=[
-        "dane",
-        "suc3",
-        "norne_nb",
-        "norne_nn",
-        "mim-gold-ner",
-        "wikiann-fo",
-        "germeval",
-        "conll-nl",
-    ],
-    scope="class",
-)
-class TestGenerativeScores:
-    @pytest.fixture(scope="class")
-    def scores(self, benchmark_config, generative_model_id, dataset):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UndefinedMetricWarning)
-            benchmark = NamedEntityRecognition(
-                dataset_config=dataset,
-                benchmark_config=benchmark_config,
-            )
-            yield benchmark.benchmark(generative_model_id)[0]["total"]
+def test_encoder_sequence_classification(benchmark_dataset, model_id):
+    benchmark_dataset.benchmark(model_id)
 
-    def test_micro_f1_is_correct(self, scores, correct_scores):
-        min_score = scores["test_micro_f1"] - scores["test_micro_f1_se"]
-        max_score = scores["test_micro_f1"] + scores["test_micro_f1_se"]
-        assert min_score <= correct_scores[0] <= max_score
 
-    def test_micro_f1_no_misc_is_correct(self, scores, correct_scores):
-        min_score = scores["test_micro_f1_no_misc"] - scores["test_micro_f1_no_misc_se"]
-        max_score = scores["test_micro_f1_no_misc"] + scores["test_micro_f1_no_misc_se"]
-        assert min_score <= correct_scores[1] <= max_score
+def test_decoder_sequence_classification(benchmark_dataset, generative_model_id):
+    benchmark_dataset.benchmark(generative_model_id)
