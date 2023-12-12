@@ -240,7 +240,7 @@ class Benchmarker:
                     logger.info(
                         f"{m_id} could not be benchmarked on "
                         f"{dataset_config.pretty_name}. Skipping. The error message "
-                        f"raise dwas {error_msg!r}."
+                        f"raised was {error_msg!r}."
                     )
                     continue
 
