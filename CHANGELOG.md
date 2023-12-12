@@ -28,6 +28,10 @@ and this project adheres to
   precision. When loading models we now only load in mixed precision if `torch_dtype`
   has been specified in the Hugging Face model configuration (as with the Mistral
   model, for instance).
+- When sampling examples to use in few-shot prompts in a sequence classification, we
+  previously required that the samples are stratified with respect to the labels. This
+  caused an issue if the dataset did not contain all labels, so now we only stratify
+  with respect to the labels present in the dataset.
 
 
 ## [v8.1.0] - 2023-12-04

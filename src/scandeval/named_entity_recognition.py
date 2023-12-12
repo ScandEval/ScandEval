@@ -490,9 +490,12 @@ class NamedEntityRecognition(BenchmarkDataset):
         # examples
         while len(few_shot_examples) < num_few_shots:
             label = next(labels)
-            example = shuffled_train.filter(
+            possible_examples = shuffled_train.filter(
                 lambda x: label in [tag.lower() for tag in x["labels"]]
-            ).select(range(1))[0]
+            )
+            if len(possible_examples) == 0:
+                continue
+            example = possible_examples.select(range(1))[0]
             few_shot_examples.append(example)
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]
