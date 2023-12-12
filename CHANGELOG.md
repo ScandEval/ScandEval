@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Some models use an implementation of layer normalisation which is incompatible with
+  mixed precision (fp16), preventing benchmarking. When running these models, fp16 will
+  now be disabled.
+
+
 ## [v8.1.0] - 2023-12-04
 ### Added
 - Now added support for text-to-text tasks, which include tasks such as abstractive
