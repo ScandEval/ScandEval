@@ -1,6 +1,7 @@
 """Unit tests for the `text_to_text` module."""
 
 from typing import Generator
+from contextlib import nullcontext as does_not_raise
 import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 
@@ -44,8 +45,10 @@ def benchmark_dataset(
 
 
 def test_encoder_sequence_classification(benchmark_dataset, model_id):
-    benchmark_dataset.benchmark(model_id)
+    with does_not_raise():
+        benchmark_dataset.benchmark(model_id)
 
 
 def test_decoder_sequence_classification(benchmark_dataset, generative_model_id):
-    benchmark_dataset.benchmark(generative_model_id)
+    with does_not_raise():
+        benchmark_dataset.benchmark(generative_model_id)

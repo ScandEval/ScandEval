@@ -2,6 +2,7 @@
 
 from typing import Generator
 import pytest
+from contextlib import nullcontext as does_not_raise
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     GERMANQUAD_CONFIG,
@@ -40,8 +41,10 @@ def benchmark_dataset(
 
 
 def test_encoder_sequence_classification(benchmark_dataset, model_id):
-    benchmark_dataset.benchmark(model_id)
+    with does_not_raise():
+        benchmark_dataset.benchmark(model_id)
 
 
 def test_decoder_sequence_classification(benchmark_dataset, generative_model_id):
-    benchmark_dataset.benchmark(generative_model_id)
+    with does_not_raise():
+        benchmark_dataset.benchmark(generative_model_id)
