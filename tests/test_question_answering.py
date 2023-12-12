@@ -12,7 +12,8 @@ from scandeval.dataset_configs import (
     SCANDIQA_NO_CONFIG,
     SCANDIQA_SV_CONFIG,
 )
-from scandeval.question_answering import QuestionAnswering
+from scandeval.question_answering import QuestionAnswering, prepare_train_examples
+from transformers import AutoTokenizer
 
 
 @pytest.fixture(
@@ -49,3 +50,41 @@ def test_encoder_sequence_classification(benchmark_dataset, model_id):
 def test_decoder_sequence_classification(benchmark_dataset, generative_model_id):
     with does_not_raise():
         benchmark_dataset.benchmark(generative_model_id)
+
+
+@pytest.mark.parametrize(
+    argnames="tokenizer_model_id",
+    argvalues=[
+        "jonfd/electra-small-nordic",
+        "flax-community/swe-roberta-wiki-oscar",
+    ],
+)
+@pytest.mark.parametrize(
+    argnames="examples",
+    argvalues=[
+        dict(
+            question=["Hvad er hovedstaden i Sverige?"],
+            context=["Sveriges hovedstad er Stockholm."],
+            answers=[dict(text=["Stockholm"], answer_start=[22])],
+        ),
+        dict(
+            question=["Hvad er hovedstaden i Sverige?"],
+            context=["Sveriges hovedstad er Stockholm." * 100],
+            answers=[dict(text=["Sverige"], answer_start=[0])],
+        ),
+        dict(
+            question=["Hvad er hovedstaden i Danmark?"],
+            context=["Danmarks hovedstad er København. " * 100],
+            answers=[dict(text=["Da"], answer_start=[0])],
+        ),
+    ],
+)
+def test_prepare_train_examples(examples, tokenizer_model_id):
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_id)
+    if (
+        hasattr(tokenizer, "model_max_length")
+        and tokenizer.model_max_length > 100_000_000
+    ):
+        tokenizer.model_max_length = 512
+    with does_not_raise():
+        prepare_train_examples(examples=examples, tokenizer=tokenizer)
