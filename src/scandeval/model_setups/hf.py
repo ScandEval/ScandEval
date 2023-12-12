@@ -246,7 +246,7 @@ class HFModelSetup:
             cache_dir=model_config.model_cache_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             quantization_config=bnb_config,
-            torch_dtype="auto",
+            torch_dtype=None if config.to_dict().get("torch_dtype") is None else "auto",
             use_flash_attention_2=use_flash_attention,
         )
 
