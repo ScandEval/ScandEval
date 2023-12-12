@@ -23,7 +23,7 @@ class FakeEvalDataloader:
 class TestNeverLeaveProgressCallback:
     @pytest.fixture(scope="class")
     def callback(self):
-        yield NeverLeaveProgressCallback(testing=True)
+        yield NeverLeaveProgressCallback()
 
     @pytest.fixture(scope="class")
     def state(self):

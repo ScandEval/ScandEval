@@ -1,6 +1,7 @@
 """Functions related to the finetuning of models."""
 
 import logging
+import sys
 import warnings
 from collections import defaultdict
 from functools import partial
@@ -379,8 +380,8 @@ def get_training_args(
             eval_steps=30,
             logging_steps=30,
             save_steps=30,
-            max_steps=10_000 if not benchmark_config.testing else 2,
-            use_cpu=benchmark_config.testing,
+            max_steps=2 if hasattr(sys, "_called_from_test") else 10_000,
+            use_cpu=hasattr(sys, "_called_from_test"),
             report_to=[],
             save_total_limit=1,
             per_device_train_batch_size=batch_size,

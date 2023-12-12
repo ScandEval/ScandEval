@@ -1,6 +1,7 @@
 """Abstract benchmarking dataset class."""
 
 import logging
+import sys
 from abc import ABC, abstractmethod
 from functools import partial
 from typing import Any, Type
@@ -129,7 +130,7 @@ class BenchmarkDataset(ABC):
         metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
 
         # Set variable with number of iterations
-        num_iter = 10 if not self.benchmark_config.testing else 2
+        num_iter = 2 if hasattr(sys, "_called_from_test") else 10
 
         if self.dataset_config.task != SPEED:
             train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
@@ -338,7 +339,7 @@ class BenchmarkDataset(ABC):
                 test = test.filter(lambda x: len(x[text_feature]) > 0)
 
         # If we are testing then truncate the test set
-        if self.benchmark_config.testing:
+        if hasattr(sys, "_called_from_test"):
             test = test.select(range(2))
 
         # Bootstrap the test set

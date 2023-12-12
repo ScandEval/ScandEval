@@ -5,6 +5,7 @@
 import importlib.metadata
 import logging
 import os
+import sys
 
 from dotenv import load_dotenv
 from termcolor import colored
@@ -26,7 +27,11 @@ load_dotenv()
 
 # Set up logging
 fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
-logging.basicConfig(level=logging.INFO, format=fmt, datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.CRITICAL if hasattr(sys, "_called_from_test") else logging.INFO,
+    format=fmt,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 # Disable parallelisation when tokenizing, as that can lead to errors
