@@ -420,9 +420,13 @@ def prepare_train_examples(
                 ):
                     token_start_index += 1
                 tokenized_examples.start_positions.append(token_start_index - 1)
-                while token_end_index > 0 and offsets[token_end_index][1] >= end_char:
+                while (
+                    token_end_index > token_start_index
+                    and offsets[token_end_index][1] >= end_char
+                ):
                     token_end_index -= 1
                 tokenized_examples.end_positions.append(token_end_index + 1)
+                assert token_end_index >= token_start_index
 
     return tokenized_examples
 
