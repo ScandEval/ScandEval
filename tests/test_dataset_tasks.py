@@ -1,7 +1,6 @@
 """Unit tests for the `dataset_tasks` module."""
 
 import pytest
-
 from scandeval.config import DatasetTask
 from scandeval.dataset_tasks import get_all_dataset_tasks
 
@@ -25,6 +24,7 @@ class TestGetAllDatasetTasks:
             "named-entity-recognition",
             "question-answering",
             "sentiment-classification",
+            "summarization",
             "speed",
         ],
     )

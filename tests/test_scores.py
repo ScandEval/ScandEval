@@ -4,7 +4,6 @@ from copy import deepcopy
 
 import numpy as np
 import pytest
-
 from scandeval.config import MetricConfig
 from scandeval.scores import aggregate_scores, log_scores
 

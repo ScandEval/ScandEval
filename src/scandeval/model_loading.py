@@ -4,16 +4,16 @@ from typing import Type
 
 from transformers import PreTrainedModel
 
-from .exceptions import InvalidBenchmark
-from .utils import GENERATIVE_DATASET_SUPERTASKS
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .protocols import GenerativeModel, Tokenizer, ModelSetup
+from .exceptions import InvalidBenchmark
 from .model_setups import (
     FreshModelSetup,
     HFModelSetup,
     LocalModelSetup,
     OpenAIModelSetup,
 )
+from .protocols import GenerativeModel, ModelSetup, Tokenizer
+from .utils import GENERATIVE_DATASET_SUPERTASKS
 
 
 def load_model(

@@ -2,7 +2,7 @@
 
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED, SUMMARIZATION
-from .languages import DA, DE, NL, FO, IS, NB, NN, SV, get_all_languages
+from .languages import DA, DE, FO, IS, NB, NL, NN, SV, get_all_languages
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:
@@ -40,6 +40,8 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
     # Otherwise, return the dataset configuration
     return dataset_configs[dataset_name]
 
+
+### SENTIMENT DATASETS ###
 
 SWEREC_CONFIG = DatasetConfig(
     name="swerec",
@@ -125,6 +127,42 @@ FOREC_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+
+SB10K_CONFIG = DatasetConfig(
+    name="sb10k",
+    pretty_name="the truncated version of SB10k",
+    huggingface_id="ScandEval/sb10k-mini",
+    task=SENT,
+    languages=[DE],
+    prompt_prefix="Im Folgenden sind Tweets und ihre Stimmung aufgeführt, die "
+    "'positiv', 'neutral' oder 'negativ' sein kann.",
+    prompt_template="Tweet: {text}\nStimmungslage: {label}",
+    prompt_label_mapping=dict(
+        positive="positiv", neutral="neutral", negative="negativ"
+    ),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+
+DUTCH_SOCIAL_CONFIG = DatasetConfig(
+    name="dutch-social",
+    pretty_name="the truncated version of Dutch Social",
+    huggingface_id="ScandEval/dutch-social-mini",
+    task=SENT,
+    languages=[NL],
+    prompt_prefix="Hieronder staan tweets en hun sentiment, dat 'positief', "
+    "'neutraal' of 'negatief' kan zijn.",
+    prompt_template="Tweet: {text}\nSentiment: {label}",
+    prompt_label_mapping=dict(
+        positive="positief", neutral="neutraal", negative="negatief"
+    ),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+
+### NAMED ENTITY RECOGNITION DATASETS ###
 
 SUC3_CONFIG = DatasetConfig(
     name="suc3",
@@ -270,29 +308,55 @@ WIKIANN_FO_CONFIG = DatasetConfig(
 )
 
 
-FONE_CONFIG = DatasetConfig(
-    name="fone",
-    pretty_name="the truncated version of the FoNE dataset",
-    huggingface_id="ScandEval/fone-mini",  # TODO: Needs to be uploaded
+GERMEVAL_CONFIG = DatasetConfig(
+    name="germeval",
+    pretty_name="the truncated version of GermEval",
+    huggingface_id="ScandEval/germeval-mini",
     task=NER,
-    languages=[FO],
-    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nevndar "
-    "eindir, sum eru í setningunum.",
-    prompt_template="Setningur: {text}\nNevndar eindir: {label}",
+    languages=[DE],
+    prompt_prefix="Es folgen Sätze und JSON-Wörterbücher mit den benannten "
+    "Entitäten, die in der angegebenen Phrase vorkommen.",
+    prompt_template="Satz: {text}\nBenannte Entitäten: {label}",
     prompt_label_mapping={
-        "b-per": "persónur",
-        "i-per": "persónur",
-        "b-loc": "staður",
-        "i-loc": "staður",
-        "b-org": "felagsskapur",
-        "i-org": "felagsskapur",
-        "b-misc": "ymiskt",
-        "i-misc": "ymiskt",
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "ort",
+        "i-loc": "ort",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "verschiedenes",
+        "i-misc": "verschiedenes",
     },
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
 
+
+CONLL_NL_CONFIG = DatasetConfig(
+    name="conll-nl",
+    pretty_name="the Dutch part of the truncated version of CoNLL 2002",
+    huggingface_id="ScandEval/conll-nl-mini",
+    task=NER,
+    languages=[NL],
+    prompt_prefix="Hieronder staan zinnen en JSON woordenboeken met de genoemde "
+    "entiteiten die voorkomen in de gegeven zin.",
+    prompt_template="Zin: {text}\nGenoemde entiteiten: {label}",
+    prompt_label_mapping={
+        "b-per": "persoon",
+        "i-per": "persoon",
+        "b-loc": "locatie",
+        "i-loc": "locatie",
+        "b-org": "organisatie",
+        "i-org": "organisatie",
+        "b-misc": "diversen",
+        "i-misc": "diversen",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
+
+### LINGUISTIC ACCEPTABILITY DATASETS ###
 
 SCALA_SV_CONFIG = DatasetConfig(
     name="scala-sv",
@@ -377,6 +441,34 @@ SCALA_FO_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+SCALA_DE_CONFIG = DatasetConfig(
+    name="scala-de",
+    pretty_name="the German part of ScaLA",
+    huggingface_id="ScandEval/scala-de",
+    task=LA,
+    languages=[DE],
+    prompt_prefix="Die folgenden Sätze und ob sie grammatikalisch korrekt sind.",
+    prompt_template="Satz: {text}\nGrammatikalisch richtig: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nein"),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+SCALA_NL_CONFIG = DatasetConfig(
+    name="scala-nl",
+    pretty_name="the Dutch part of ScaLA",
+    huggingface_id="ScandEval/scala-nl",
+    task=LA,
+    languages=[NL],
+    prompt_prefix="Hieronder staan zinnen en of ze grammaticaal correct zijn.",
+    prompt_template="Zin: {text}\nGrammaticaal correct: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nee"),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+
+### EXTRACTIVE QUESTION ANSWERING DATASETS ###
 
 SCANDIQA_DA_CONFIG = DatasetConfig(
     name="scandiqa-da",
@@ -417,7 +509,7 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
 NQII_CONFIG = DatasetConfig(
     name="nqii",
     pretty_name="Natural Questions in Icelandic",
-    huggingface_id="ScandEval/nqii-mini",  # TODO: Needs to be uploaded
+    huggingface_id="ScandEval/nqii-mini",
     task=QA,
     languages=[IS],
     prompt_template="{text}\nSpurning: {question}\nSvaraðu með að hámarki 3 orðum: "
@@ -439,6 +531,26 @@ FOQA_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+
+GERMANQUAD_CONFIG = DatasetConfig(
+    name="germanquad",
+    pretty_name="GermanQuAD",
+    huggingface_id="ScandEval/germanquad-mini",
+    task=QA,
+    languages=[DE],
+    prompt_template="{text}\nFragen: {question}\nFragen Antwort in maximal 3 "
+    "Wörtern: {label}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
+
+
+# TODO: Icelandic Question Answering
+# TODO: Faroese Question Answering
+# TODO: Dutch Question Answering
+
+
+### SUMMARIZATION DATASETS ###
 
 NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     name="nordjylland-news",
@@ -511,6 +623,10 @@ SWEDN_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
+# TODO: Faroese summarization
+
+
+### SPEED ESTIMATION DATASETS ###
 
 SPEED_CONFIG = DatasetConfig(
     name="speed",

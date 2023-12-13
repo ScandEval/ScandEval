@@ -145,12 +145,41 @@ class NamedEntityRecognition(BenchmarkDataset):
                     labels_no_misc[i][j] = "o"  # type: ignore[call-overload]
 
         # Compute the metrics
-        results = self._metrics["micro_f1"].compute(
-            predictions=predictions, references=labels
+        # We manually set the F1 metric to be 100% if both the labels and the models
+        # have no NER tags in them, since this causes an error with the `compute`
+        # method otherwise
+        predictions_all_zero = all(
+            all(ner_tag == "o" for ner_tag in prediction_list)
+            for prediction_list in predictions
         )
-        results_no_misc = self._metrics["micro_f1_no_misc"].compute(
-            predictions=predictions_no_misc, references=labels_no_misc
+        labels_all_zero = all(
+            all(ner_tag == "o" for ner_tag in label_list) for label_list in labels
         )
+        if predictions_all_zero and labels_all_zero:
+            results = dict(overall_f1=1.0)
+        else:
+            results = self._metrics["micro_f1"].compute(
+                predictions=predictions, references=labels
+            )
+
+        # Compute the metrics without MISC tags
+        # We manually set the F1 metric to be 100% if both the labels and the models
+        # have no NER tags in them, since this causes an error with the `compute`
+        # method otherwise
+        predictions_no_misc_all_zero = all(
+            all(ner_tag == "o" for ner_tag in prediction_list)
+            for prediction_list in predictions_no_misc
+        )
+        labels_no_misc_all_zero = all(
+            all(ner_tag == "o" for ner_tag in label_list)
+            for label_list in labels_no_misc
+        )
+        if predictions_no_misc_all_zero and labels_no_misc_all_zero:
+            results_no_misc = dict(overall_f1=1.0)
+        else:
+            results_no_misc = self._metrics["micro_f1_no_misc"].compute(
+                predictions=predictions_no_misc, references=labels_no_misc
+            )
 
         # Raise error if the metrics are invalid
         if results is None or results_no_misc is None:
@@ -467,9 +496,12 @@ class NamedEntityRecognition(BenchmarkDataset):
         # examples
         while len(few_shot_examples) < num_few_shots:
             label = next(labels)
-            example = shuffled_train.filter(
+            possible_examples = shuffled_train.filter(
                 lambda x: label in [tag.lower() for tag in x["labels"]]
-            ).select(range(1))[0]
+            )
+            if len(possible_examples) == 0:
+                continue
+            example = possible_examples.select(range(1))[0]
             few_shot_examples.append(example)
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]

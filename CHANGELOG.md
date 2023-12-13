@@ -9,12 +9,32 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- Added the following new datasets:
+    - `sb10k`, a German sentiment classification dataset.
+    - `dutch-social`, a Dutch sentiment classification dataset.
+    - `germeval`, a German NER dataset.
+    - `conll-nl`, a Dutch NER dataset.
+    - `scala-de`, a German linguistic acceptability dataset.
+    - `scala-nl`, a Dutch linguistic acceptability dataset.
+    - `nqii`, an Icelandic extractive question answering dataset.
+    - `germanquad`, a German extractive question answering dataset.
+
 ### Fixed
 - Fixed bug with question answering benchmarking when the answer was a proper subset of
   the first token in the context, causing errors when benchmarking some models.
-- Some models use an implementation of layer normalisation which is incompatible with
-  mixed precision (fp16), preventing benchmarking. When running these models, fp16 will
-  now be disabled.
+- Some models have been stored in mixed precision as well as containing an
+  implementation of layer normalisation which is incompatible with such mixed
+  precision. When loading models we now only load in mixed precision if `torch_dtype`
+  has been specified in the Hugging Face model configuration (as with the Mistral
+  model, for instance).
+- When sampling examples to use in few-shot prompts in a sequence classification, we
+  previously required that the samples are stratified with respect to the labels. This
+  caused an issue if the dataset did not contain all labels, so now we only stratify
+  with respect to the labels present in the dataset.
+- When few-shot benchmarking on question answering datasets we previously only used the
+  samples whose contexts were at most 512 characters long. This turns out to be too few
+  for `germeval`, so this has been upped to 1024.
 
 
 ## [v8.1.0] - 2023-12-04

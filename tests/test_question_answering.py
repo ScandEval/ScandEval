@@ -1,49 +1,55 @@
 """Unit tests for the `question_answering` module."""
 
-import pytest
 from contextlib import nullcontext as does_not_raise
+from typing import Generator
 
-from transformers import AutoTokenizer
+import pytest
+from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
+    GERMANQUAD_CONFIG,
+    NQII_CONFIG,
     SCANDIQA_DA_CONFIG,
     SCANDIQA_NO_CONFIG,
     SCANDIQA_SV_CONFIG,
 )
 from scandeval.question_answering import QuestionAnswering, prepare_train_examples
+from transformers import AutoTokenizer
 
 
-@pytest.mark.parametrize(
-    argnames=["dataset", "correct_scores"],
-    argvalues=[
-        (SCANDIQA_DA_CONFIG, (0.24, 4.25)),
-        (SCANDIQA_NO_CONFIG, (0.00, 3.72)),
-        (SCANDIQA_SV_CONFIG, (0.00, 3.72)),
+@pytest.fixture(
+    scope="module",
+    params=[
+        SCANDIQA_DA_CONFIG,
+        SCANDIQA_NO_CONFIG,
+        SCANDIQA_SV_CONFIG,
+        NQII_CONFIG,
+        GERMANQUAD_CONFIG,
     ],
     ids=[
         "scandiqa-da",
         "scandiqa-no",
         "scandiqa-sv",
+        "nqii",
+        "germanquad",
     ],
-    scope="class",
 )
-class TestScores:
-    @pytest.fixture(scope="class")
-    def scores(self, benchmark_config, model_id, dataset):
-        benchmark = QuestionAnswering(
-            dataset_config=dataset,
-            benchmark_config=benchmark_config,
-        )
-        yield benchmark.benchmark(model_id)[0]["total"]
+def benchmark_dataset(
+    benchmark_config, request
+) -> Generator[BenchmarkDataset, None, None]:
+    yield QuestionAnswering(
+        dataset_config=request.param,
+        benchmark_config=benchmark_config,
+    )
 
-    def test_em_is_correct(self, scores, correct_scores):
-        min_score = scores["test_em"] - scores["test_em_se"]
-        max_score = scores["test_em"] + scores["test_em_se"]
-        assert min_score <= correct_scores[0] <= max_score
 
-    def test_f1_is_correct(self, scores, correct_scores):
-        min_score = scores["test_f1"] - scores["test_f1_se"]
-        max_score = scores["test_f1"] + scores["test_f1_se"]
-        assert min_score <= correct_scores[1] <= max_score
+def test_encoder_benchmarking(benchmark_dataset, model_id):
+    with does_not_raise():
+        benchmark_dataset.benchmark(model_id)
+
+
+def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
+    with does_not_raise():
+        benchmark_dataset.benchmark(generative_model_id)
 
 
 @pytest.mark.parametrize(

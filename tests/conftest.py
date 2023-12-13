@@ -1,14 +1,24 @@
 """General fixtures used throughout test modules."""
 
 import os
+import sys
 from typing import Generator
 
 import pytest
 import torch
-
 from scandeval.config import BenchmarkConfig
 from scandeval.dataset_tasks import LA, NER, QA, SENT
 from scandeval.languages import DA, NO, SV
+
+
+def pytest_configure() -> None:
+    """Set a global flag when `pytest` is being run."""
+    setattr(sys, "_called_from_test", True)
+
+
+def pytest_unconfigure() -> None:
+    """Unset the global flag when `pytest` is finished."""
+    delattr(sys, "_called_from_test")
 
 
 @pytest.fixture(scope="session")
@@ -38,10 +48,14 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         trust_remote_code=False,
         load_in_4bit=None,
         use_flash_attention=False,
-        testing=True,
     )
 
 
 @pytest.fixture(scope="session")
 def model_id():
     yield "jonfd/electra-small-nordic"
+
+
+@pytest.fixture(scope="session")
+def generative_model_id():
+    yield "AI-Sweden-Models/gpt-sw3-126m"

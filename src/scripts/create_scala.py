@@ -10,18 +10,19 @@ from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from huggingface_hub.hf_api import HfApi
 from load_ud_pos import (
-    load_ddt_pos,
-    load_fdt_pos,
-    load_idt_pos,
-    load_ndt_nb_pos,
-    load_ndt_nn_pos,
-    load_sdt_pos,
+    load_dadt_pos,
+    load_dedt_pos,
+    load_fodt_pos,
+    load_isdt_pos,
+    load_nldt_pos,
+    load_nodt_nb_pos,
+    load_nodt_nn_pos,
+    load_svdt_pos,
 )
 from pandas.errors import SettingWithCopyWarning
 from requests.exceptions import HTTPError
-from tqdm.auto import tqdm
-
 from scandeval.utils import block_terminal_output
+from tqdm.auto import tqdm
 
 
 def main():
@@ -32,12 +33,14 @@ def main():
 
     # Set up the POS dataset loaders
     pos_datasets = {
-        "da": load_ddt_pos,
-        "nb": load_ndt_nb_pos,
-        "nn": load_ndt_nn_pos,
-        "sv": load_sdt_pos,
-        "is": load_idt_pos,
-        "fo": load_fdt_pos,
+        "da": load_dadt_pos,
+        "nb": load_nodt_nb_pos,
+        "nn": load_nodt_nn_pos,
+        "sv": load_svdt_pos,
+        "is": load_isdt_pos,
+        "fo": load_fodt_pos,
+        "de": load_dedt_pos,
+        "nl": load_nldt_pos,
     }
 
     # Set up the progress bar and iterate over the languages
@@ -54,7 +57,7 @@ def main():
             df = pd.concat(pos_dataset.values(), ignore_index=True)
 
             # Drop the duplicates
-            df = df.drop_duplicates().reset_index(drop=True)
+            df = df.drop_duplicates(subset="doc").reset_index(drop=True)
 
             # Remove samples with five or fewer tokens
             df = df[df.tokens.map(lambda lst: len(lst) > 5)]

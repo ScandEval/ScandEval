@@ -1,12 +1,11 @@
 """Unit tests for the `speed_benchmark` module."""
 
 import pytest
-from tqdm.auto import tqdm
-from transformers.models.auto import AutoModelForSequenceClassification, AutoTokenizer
-
 from scandeval.dataset_configs import SPEED_CONFIG
 from scandeval.model_setups import HFModelSetup
 from scandeval.speed_benchmark import benchmark_speed
+from tqdm.auto import tqdm
+from transformers.models.auto import AutoModelForSequenceClassification, AutoTokenizer
 
 
 @pytest.fixture(scope="module")

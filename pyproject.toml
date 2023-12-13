@@ -40,11 +40,8 @@ pydantic = "^2.3.0"
 torch = "^2.1.1"
 transformers = "^4.35.0"
 accelerate = ">=0.23.0,<1.0.0"
-nltk = "^3.8.1"
 rouge-score = ">=0.1.2,<1.0.0"
 bert-score = ">=0.3.13,<1.0.0"
-sacrebleu = "^2.3.2"
-cer = "^1.2.0"
 evaluate = ">=0.4.1,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
@@ -100,6 +97,8 @@ exclude = '''
 
 [tool.ruff]
 target-version = "py311"
+extend-select = ["I"]
+
 
 [tool.ruff.extend-per-file-ignores]
 "__init__.py" = ["F401"]

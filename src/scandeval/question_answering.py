@@ -190,7 +190,7 @@ class QuestionAnswering(BenchmarkDataset):
             The few-shot examples.
         """
         train_with_short_examples = train_dataset.filter(
-            lambda example: len(example["context"]) < 512
+            lambda example: len(example["context"]) < 1024
         )
         shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
         num_few_shots = self.dataset_config.num_few_shot_examples

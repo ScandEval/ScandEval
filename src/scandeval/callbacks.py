@@ -1,5 +1,6 @@
 """Callbacks for the Hugging Face Trainer."""
 
+import sys
 from collections.abc import Sized
 
 from tqdm.auto import tqdm
@@ -9,9 +10,8 @@ from transformers.trainer_callback import ProgressCallback
 class NeverLeaveProgressCallback(ProgressCallback):
     """Progress callback which never leaves the progress bar"""
 
-    def __init__(self, *args, testing: bool = False, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.testing = testing
 
     def on_train_begin(self, args, state, control, **kwargs):
         if state.is_local_process_zero:
@@ -20,7 +20,7 @@ class NeverLeaveProgressCallback(ProgressCallback):
                 total=None,
                 leave=False,
                 desc=desc,
-                disable=self.testing,
+                disable=hasattr(sys, "_called_from_test"),
             )
         self.current_step = 0
 
@@ -40,6 +40,6 @@ class NeverLeaveProgressCallback(ProgressCallback):
                     total=len(eval_dataloader),
                     leave=False,
                     desc=desc,
-                    disable=self.testing,
+                    disable=hasattr(sys, "_called_from_test"),
                 )
             self.prediction_bar.update(1)

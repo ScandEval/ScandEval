@@ -4,7 +4,6 @@ from collections.abc import Sized
 from dataclasses import dataclass
 
 import pytest
-
 from scandeval.callbacks import NeverLeaveProgressCallback
 
 
@@ -24,7 +23,7 @@ class FakeEvalDataloader:
 class TestNeverLeaveProgressCallback:
     @pytest.fixture(scope="class")
     def callback(self):
-        yield NeverLeaveProgressCallback(testing=True)
+        yield NeverLeaveProgressCallback()
 
     @pytest.fixture(scope="class")
     def state(self):

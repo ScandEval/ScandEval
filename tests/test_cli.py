@@ -2,7 +2,6 @@
 
 import pytest
 from click.types import BOOL, STRING, Choice
-
 from scandeval.cli import benchmark
 
 

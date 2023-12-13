@@ -125,8 +125,6 @@ class BenchmarkConfig:
             if CUDA is available and the model is a decoder model.
         use_flash_attention:
             Whether to use Flash Attention.
-        testing:
-            Whether a unit test is being run. Defaults to False.
     """
 
     model_languages: list[Language]
@@ -146,7 +144,6 @@ class BenchmarkConfig:
     trust_remote_code: bool
     load_in_4bit: bool | None
     use_flash_attention: bool
-    testing: bool = False
 
 
 @dataclass

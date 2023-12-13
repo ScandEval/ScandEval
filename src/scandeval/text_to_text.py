@@ -10,8 +10,8 @@ from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.utils import ModelOutput
 
-from .generation import extract_raw_predictions
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
+from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__package__)
