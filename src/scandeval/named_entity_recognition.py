@@ -145,6 +145,9 @@ class NamedEntityRecognition(BenchmarkDataset):
                     labels_no_misc[i][j] = "o"  # type: ignore[call-overload]
 
         # Compute the metrics
+        # We manually set the F1 metric to be 100% if both the labels and the models
+        # have no NER tags in them, since this causes an error with the `compute`
+        # method otherwise
         predictions_all_zero = all(
             all(ner_tag == "o" for ner_tag in prediction_list)
             for prediction_list in predictions
@@ -160,6 +163,9 @@ class NamedEntityRecognition(BenchmarkDataset):
             )
 
         # Compute the metrics without MISC tags
+        # We manually set the F1 metric to be 100% if both the labels and the models
+        # have no NER tags in them, since this causes an error with the `compute`
+        # method otherwise
         predictions_no_misc_all_zero = all(
             all(ner_tag == "o" for ner_tag in prediction_list)
             for prediction_list in predictions_no_misc
