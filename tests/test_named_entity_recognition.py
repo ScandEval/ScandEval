@@ -6,6 +6,7 @@ from typing import Generator
 import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
+    CONLL_EN_CONFIG,
     CONLL_NL_CONFIG,
     DANE_CONFIG,
     GERMEVAL_CONFIG,
@@ -29,6 +30,7 @@ from scandeval.named_entity_recognition import NamedEntityRecognition
         WIKIANN_FO_CONFIG,
         GERMEVAL_CONFIG,
         CONLL_NL_CONFIG,
+        CONLL_EN_CONFIG,
     ],
     ids=[
         "dane",
@@ -39,6 +41,7 @@ from scandeval.named_entity_recognition import NamedEntityRecognition
         "wikiann-fo",
         "germeval",
         "conll-nl",
+        "conll-en",
     ],
 )
 def benchmark_dataset(

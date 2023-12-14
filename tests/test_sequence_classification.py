@@ -12,12 +12,14 @@ from scandeval.dataset_configs import (
     SB10K_CONFIG,
     SCALA_DA_CONFIG,
     SCALA_DE_CONFIG,
+    SCALA_EN_CONFIG,
     SCALA_FO_CONFIG,
     SCALA_IS_CONFIG,
     SCALA_NB_CONFIG,
     SCALA_NL_CONFIG,
     SCALA_NN_CONFIG,
     SCALA_SV_CONFIG,
+    SST5_CONFIG,
     SWEREC_CONFIG,
 )
 from scandeval.sequence_classification import SequenceClassification
@@ -31,6 +33,7 @@ from scandeval.sequence_classification import SequenceClassification
         NOREC_CONFIG,
         SB10K_CONFIG,
         DUTCH_SOCIAL_CONFIG,
+        SST5_CONFIG,
         SCALA_DA_CONFIG,
         SCALA_SV_CONFIG,
         SCALA_NB_CONFIG,
@@ -39,6 +42,7 @@ from scandeval.sequence_classification import SequenceClassification
         SCALA_FO_CONFIG,
         SCALA_DE_CONFIG,
         SCALA_NL_CONFIG,
+        SCALA_EN_CONFIG,
     ],
     ids=[
         "angry-tweets",
@@ -46,6 +50,7 @@ from scandeval.sequence_classification import SequenceClassification
         "norec",
         "sb10k",
         "dutch-social",
+        "sst5",
         "scala-da",
         "scala-sv",
         "scala-nb",
@@ -54,6 +59,7 @@ from scandeval.sequence_classification import SequenceClassification
         "scala-fo",
         "scala-de",
         "scala-nl",
+        "scala-en",
     ],
 )
 def benchmark_dataset(
