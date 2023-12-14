@@ -366,7 +366,7 @@ CONLL_EN_CONFIG = DatasetConfig(
     pretty_name="the truncated version of CoNLL 2003",
     huggingface_id="ScandEval/conll-en-mini",
     task=NER,
-    languages=[NL],
+    languages=[EN],
     prompt_prefix="Below are sentences and JSON dictionaries with the named "
     "entities that occur in the given sentence.",
     prompt_template="Sentence: {text}\nNamed entities: {label}",
