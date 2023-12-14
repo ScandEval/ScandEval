@@ -12,6 +12,7 @@ from huggingface_hub.hf_api import HfApi
 from load_ud_pos import (
     load_dadt_pos,
     load_dedt_pos,
+    load_endt_pos,
     load_fodt_pos,
     load_isdt_pos,
     load_nldt_pos,
@@ -41,6 +42,7 @@ def main():
         "fo": load_fodt_pos,
         "de": load_dedt_pos,
         "nl": load_nldt_pos,
+        "en": load_endt_pos,
     }
 
     # Set up the progress bar and iterate over the languages

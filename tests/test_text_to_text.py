@@ -6,6 +6,7 @@ from typing import Generator
 import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
+    CNN_DAILYMAIL_CONFIG,
     MLSUM_CONFIG,
     NO_SAMMENDRAG_CONFIG,
     NORDJYLLAND_NEWS_CONFIG,
@@ -25,6 +26,7 @@ from scandeval.text_to_text import TextToText
         RRN_CONFIG,
         MLSUM_CONFIG,
         WIKI_LINGUA_NL_CONFIG,
+        CNN_DAILYMAIL_CONFIG,
     ],
     ids=[
         "nordjylland-news",
@@ -33,6 +35,7 @@ from scandeval.text_to_text import TextToText
         "rrn",
         "mlsum",
         "wiki-lingua-nl",
+        "cnn-dailymail",
     ],
 )
 def benchmark_dataset(

@@ -2,7 +2,7 @@
 
 from .config import DatasetConfig
 from .dataset_tasks import LA, NER, QA, SENT, SPEED, SUMMARIZATION
-from .languages import DA, DE, FO, IS, NB, NL, NN, SV, get_all_languages
+from .languages import DA, DE, EN, FO, IS, NB, NL, NN, SV, get_all_languages
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:
@@ -59,7 +59,6 @@ SWEREC_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-
 ANGRY_TWEETS_CONFIG = DatasetConfig(
     name="angry-tweets",
     pretty_name="the truncated version of AngryTweets",
@@ -75,7 +74,6 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     num_few_shot_examples=12,
     max_generated_tokens=3,
 )
-
 
 NOREC_CONFIG = DatasetConfig(
     name="norec",
@@ -93,7 +91,6 @@ NOREC_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-
 ISREC_CONFIG = DatasetConfig(
     name="isrec",
     pretty_name="the truncated version of IsReC",
@@ -109,7 +106,6 @@ ISREC_CONFIG = DatasetConfig(
     num_few_shot_examples=12,
     max_generated_tokens=3,
 )
-
 
 FOREC_CONFIG = DatasetConfig(
     name="forec",
@@ -127,7 +123,6 @@ FOREC_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-
 SB10K_CONFIG = DatasetConfig(
     name="sb10k",
     pretty_name="the truncated version of SB10k",
@@ -144,7 +139,6 @@ SB10K_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-
 DUTCH_SOCIAL_CONFIG = DatasetConfig(
     name="dutch-social",
     pretty_name="the truncated version of Dutch Social",
@@ -160,6 +154,25 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
     num_few_shot_examples=12,
     max_generated_tokens=3,
 )
+
+SST5_CONFIG = DatasetConfig(
+    name="sst5",
+    pretty_name="the truncated version of SST5",
+    huggingface_id="ScandEval/sst5-mini",
+    task=SENT,
+    languages=[EN],
+    prompt_prefix="The following are tweets are their sentiment, which can be "
+    "'positive', 'neutral' or 'negative'.",
+    prompt_template="Tweet: {text}\nSentiment: {label}",
+    prompt_label_mapping=dict(
+        positive="positive", neutral="neutral", negative="negative"
+    ),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
+# TODO: Icelandic Sentiment Classification
+# TODO: Faroese Sentiment Classification
 
 
 ### NAMED ENTITY RECOGNITION DATASETS ###
@@ -187,7 +200,6 @@ SUC3_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-
 DANE_CONFIG = DatasetConfig(
     name="dane",
     pretty_name="the truncated version of DaNE",
@@ -210,7 +222,6 @@ DANE_CONFIG = DatasetConfig(
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
-
 
 NORNE_NB_CONFIG = DatasetConfig(
     name="norne-nb",
@@ -235,7 +246,6 @@ NORNE_NB_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-
 NORNE_NN_CONFIG = DatasetConfig(
     name="norne-nn",
     pretty_name="the truncated version of the Nynorsk part of NorNE",
@@ -258,7 +268,6 @@ NORNE_NN_CONFIG = DatasetConfig(
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
-
 
 MIM_GOLD_NER_CONFIG = DatasetConfig(
     name="mim-gold-ner",
@@ -283,7 +292,6 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-
 WIKIANN_FO_CONFIG = DatasetConfig(
     name="wikiann-fo",
     pretty_name="the truncated version of the Faroese part of WikiANN",
@@ -306,7 +314,6 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
-
 
 GERMEVAL_CONFIG = DatasetConfig(
     name="germeval",
@@ -331,7 +338,6 @@ GERMEVAL_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-
 CONLL_NL_CONFIG = DatasetConfig(
     name="conll-nl",
     pretty_name="the Dutch part of the truncated version of CoNLL 2002",
@@ -355,6 +361,29 @@ CONLL_NL_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
+CONLL_EN_CONFIG = DatasetConfig(
+    name="conll-en",
+    pretty_name="the truncated version of CoNLL 2003",
+    huggingface_id="ScandEval/conll-en-mini",
+    task=NER,
+    languages=[EN],
+    prompt_prefix="Below are sentences and JSON dictionaries with the named "
+    "entities that occur in the given sentence.",
+    prompt_template="Sentence: {text}\nNamed entities: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "location",
+        "i-loc": "location",
+        "b-org": "organization",
+        "i-org": "organization",
+        "b-misc": "miscellaneous",
+        "i-misc": "miscellaneous",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
 
 ### LINGUISTIC ACCEPTABILITY DATASETS ###
 
@@ -371,7 +400,6 @@ SCALA_SV_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-
 SCALA_DA_CONFIG = DatasetConfig(
     name="scala-da",
     pretty_name="the Danish part of ScaLA",
@@ -384,7 +412,6 @@ SCALA_DA_CONFIG = DatasetConfig(
     num_few_shot_examples=12,
     max_generated_tokens=3,
 )
-
 
 SCALA_NB_CONFIG = DatasetConfig(
     name="scala-nb",
@@ -399,7 +426,6 @@ SCALA_NB_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-
 SCALA_NN_CONFIG = DatasetConfig(
     name="scala-nn",
     pretty_name="the Nynorsk part of ScaLA",
@@ -412,7 +438,6 @@ SCALA_NN_CONFIG = DatasetConfig(
     num_few_shot_examples=12,
     max_generated_tokens=3,
 )
-
 
 SCALA_IS_CONFIG = DatasetConfig(
     name="scala-is",
@@ -467,6 +492,19 @@ SCALA_NL_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+SCALA_EN_CONFIG = DatasetConfig(
+    name="scala-en",
+    pretty_name="the English part of ScaLA",
+    huggingface_id="ScandEval/scala-en",
+    task=LA,
+    languages=[EN],
+    prompt_prefix="The following are sentences and whether they are grammatically correct.",
+    prompt_template="Sentence: {text}\nGrammatically correct: {label}",
+    prompt_label_mapping=dict(correct="yes", incorrect="no"),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+)
+
 
 ### EXTRACTIVE QUESTION ANSWERING DATASETS ###
 
@@ -481,7 +519,6 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-
 SCANDIQA_NO_CONFIG = DatasetConfig(
     name="scandiqa-no",
     pretty_name="the Norwegian part of truncated version of ScandiQA",
@@ -493,7 +530,6 @@ SCANDIQA_NO_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-
 SCANDIQA_SV_CONFIG = DatasetConfig(
     name="scandiqa-sv",
     pretty_name="the Swedish part of the truncated version of ScandiQA",
@@ -504,7 +540,6 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
-
 
 NQII_CONFIG = DatasetConfig(
     name="nqii",
@@ -518,7 +553,6 @@ NQII_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-
 FOQA_CONFIG = DatasetConfig(
     name="foqa",
     pretty_name="Faroese Question Answering",
@@ -530,7 +564,6 @@ FOQA_CONFIG = DatasetConfig(
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
-
 
 GERMANQUAD_CONFIG = DatasetConfig(
     name="germanquad",
@@ -544,8 +577,17 @@ GERMANQUAD_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+SQUAD_CONFIG = DatasetConfig(
+    name="squad",
+    pretty_name="SQuAD",
+    huggingface_id="ScandEval/squad-mini",
+    task=QA,
+    languages=[EN],
+    prompt_template="{text}\nQuestion: {question}\nAnswer in max 3 words: {label}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
 
-# TODO: Icelandic Question Answering
 # TODO: Faroese Question Answering
 # TODO: Dutch Question Answering
 
@@ -563,7 +605,6 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-
 MLSUM_CONFIG = DatasetConfig(
     name="mlsum",
     pretty_name="the truncated version of MLSum",
@@ -574,7 +615,6 @@ MLSUM_CONFIG = DatasetConfig(
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
-
 
 RRN_CONFIG = DatasetConfig(
     name="rrn",
@@ -587,7 +627,6 @@ RRN_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
     name="no-sammendrag",
     pretty_name="the truncated version of the Norwegian Sammendrag dataset",
@@ -598,7 +637,6 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
-
 
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
@@ -611,7 +649,6 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-
 SWEDN_CONFIG = DatasetConfig(
     name="swedn",
     pretty_name="the truncated version of SweDN",
@@ -619,6 +656,17 @@ SWEDN_CONFIG = DatasetConfig(
     task=SUMMARIZATION,
     languages=[SV],
     prompt_template="{text}\nSammanfattning: {target_text}",
+    num_few_shot_examples=2,
+    max_generated_tokens=128,
+)
+
+CNN_DAILYMAIL_CONFIG = DatasetConfig(
+    name="cnn-dailymail",
+    pretty_name="the truncated version of CNN-DailyMail",
+    huggingface_id="ScandEval/cnn-dailymail-mini",
+    task=SUMMARIZATION,
+    languages=[EN],
+    prompt_template="{text}\nSummary: {target_text}",
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
