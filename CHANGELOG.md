@@ -13,12 +13,17 @@ and this project adheres to
 - Added the following new datasets:
     - `sb10k`, a German sentiment classification dataset.
     - `dutch-social`, a Dutch sentiment classification dataset.
+    - `sst5`, an English sentiment classification dataset.
     - `germeval`, a German NER dataset.
     - `conll-nl`, a Dutch NER dataset.
+    - `conll-en`, an English NER dataset.
     - `scala-de`, a German linguistic acceptability dataset.
     - `scala-nl`, a Dutch linguistic acceptability dataset.
+    - `scala-en`, an English linguistic acceptability dataset.
     - `nqii`, an Icelandic extractive question answering dataset.
     - `germanquad`, a German extractive question answering dataset.
+    - `squad`, an English extractive question answering dataset.
+    - `cnn-dailymail`, an English summarization dataset.
 
 ### Fixed
 - Fixed bug with question answering benchmarking when the answer was a proper subset of
