@@ -8,6 +8,11 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Removed the non-existent IsReC, FoReC and FoQA datasets.
+
+
 ## [v8.2.0] - 2023-12-20
 ### Added
 - Added the following new datasets:
