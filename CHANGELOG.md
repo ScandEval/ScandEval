@@ -8,6 +8,13 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Removed `text2text-generation` temporarily from the tags defining generative models,
+  since we do not support the benchmarking of these yet. This will be added back in as
+  soon as we support them.
+
+
 ## [v8.2.1] - 2023-12-20
 ### Fixed
 - Removed the non-existent IsReC, FoReC and FoQA datasets.
