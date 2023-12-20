@@ -91,37 +91,37 @@ NOREC_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-ISREC_CONFIG = DatasetConfig(
-    name="isrec",
-    pretty_name="the truncated version of IsReC",
-    huggingface_id="ScandEval/isrec-mini",  # TODO: Needs to be uploaded
-    task=SENT,
-    languages=[IS],
-    prompt_prefix="Eftirfarandi eru yfirferðir ásamt lyndisgildi þeirra, sem getur "
-    "verið 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
-    prompt_template="Yfirferð: {text}\nLyndi: {label}",
-    prompt_label_mapping=dict(
-        positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
-    ),
-    num_few_shot_examples=12,
-    max_generated_tokens=3,
-)
+# ISREC_CONFIG = DatasetConfig(
+#     name="isrec",
+#     pretty_name="the truncated version of IsReC",
+#     huggingface_id="ScandEval/isrec-mini",  # TODO: Needs to be uploaded
+#     task=SENT,
+#     languages=[IS],
+#     prompt_prefix="Eftirfarandi eru yfirferðir ásamt lyndisgildi þeirra, sem getur "
+#     "verið 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
+#     prompt_template="Yfirferð: {text}\nLyndi: {label}",
+#     prompt_label_mapping=dict(
+#         positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
+#     ),
+#     num_few_shot_examples=12,
+#     max_generated_tokens=3,
+# )
 
-FOREC_CONFIG = DatasetConfig(
-    name="forec",
-    pretty_name="the truncated version of FoReC",
-    huggingface_id="ScandEval/forec-mini",  # TODO: Needs to be uploaded
-    task=SENT,
-    languages=[FO],
-    prompt_prefix="Her koma nøkur ummæli og teirra kensluliga sjónarmið, sum kunnu "
-    "vera 'positivur', 'neutralur' ella 'negativur'.",
-    prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
-    prompt_label_mapping=dict(
-        positive="positivur", neutral="neutralur", negative="negativur"
-    ),
-    num_few_shot_examples=12,
-    max_generated_tokens=3,
-)
+# FOREC_CONFIG = DatasetConfig(
+#     name="forec",
+#     pretty_name="the truncated version of FoReC",
+#     huggingface_id="ScandEval/forec-mini",  # TODO: Needs to be uploaded
+#     task=SENT,
+#     languages=[FO],
+#     prompt_prefix="Her koma nøkur ummæli og teirra kensluliga sjónarmið, sum kunnu "
+#     "vera 'positivur', 'neutralur' ella 'negativur'.",
+#     prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
+#     prompt_label_mapping=dict(
+#         positive="positivur", neutral="neutralur", negative="negativur"
+#     ),
+#     num_few_shot_examples=12,
+#     max_generated_tokens=3,
+# )
 
 SB10K_CONFIG = DatasetConfig(
     name="sb10k",
@@ -553,17 +553,17 @@ NQII_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-FOQA_CONFIG = DatasetConfig(
-    name="foqa",
-    pretty_name="Faroese Question Answering",
-    huggingface_id="ScandEval/foqa-mini",  # TODO: Needs to be uploaded
-    task=QA,
-    languages=[FO],
-    prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
-    "orðum: {label}",
-    num_few_shot_examples=4,
-    max_generated_tokens=32,
-)
+# FOQA_CONFIG = DatasetConfig(
+#     name="foqa",
+#     pretty_name="Faroese Question Answering",
+#     huggingface_id="ScandEval/foqa-mini",  # TODO: Needs to be uploaded
+#     task=QA,
+#     languages=[FO],
+#     prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
+#     "orðum: {label}",
+#     num_few_shot_examples=4,
+#     max_generated_tokens=32,
+# )
 
 GERMANQUAD_CONFIG = DatasetConfig(
     name="germanquad",
