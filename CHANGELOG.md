@@ -8,7 +8,7 @@ and this project adheres to
 [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v8.2.0] - 2023-12-20
 ### Added
 - Added the following new datasets:
     - `sb10k`, a German sentiment classification dataset.
