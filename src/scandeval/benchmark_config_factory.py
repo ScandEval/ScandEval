@@ -27,6 +27,7 @@ def build_benchmark_config(
     trust_remote_code: bool,
     load_in_4bit: bool | None,
     use_flash_attention: bool,
+    clear_model_cache: bool,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -81,6 +82,8 @@ def build_benchmark_config(
             if CUDA is available and the model is a decoder model. Defaults to None.
         use_flash_attention:
             Whether to use Flash Attention.
+        clear_model_cache:
+            Whether to clear the model cache after benchmarking each model.
     """
     languages = prepare_languages(language=language)
     model_languages = prepare_model_languages(
@@ -115,6 +118,7 @@ def build_benchmark_config(
         trust_remote_code=trust_remote_code,
         load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
+        clear_model_cache=clear_model_cache,
     )
 
 

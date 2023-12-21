@@ -182,6 +182,12 @@ from .languages import get_all_languages
     show_default=True,
     help="Whether to use Flash Attention.",
 )
+@click.option(
+    "--clear-model-cache/--no-clear-model-cache",
+    default=False,
+    show_default=True,
+    help="Whether to clear the model cache after benchmarking each model.",
+)
 def benchmark(
     model_id: tuple[str],
     dataset: tuple[str],
@@ -204,6 +210,7 @@ def benchmark(
     trust_remote_code: bool,
     load_in_4bit: bool | None,
     use_flash_attention: bool,
+    clear_model_cache: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
 
@@ -238,6 +245,7 @@ def benchmark(
         trust_remote_code=trust_remote_code,
         load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
+        clear_model_cache=clear_model_cache,
     )
 
     # Perform the benchmark evaluation

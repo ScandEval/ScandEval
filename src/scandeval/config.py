@@ -125,6 +125,8 @@ class BenchmarkConfig:
             if CUDA is available and the model is a decoder model.
         use_flash_attention:
             Whether to use Flash Attention.
+        clear_model_cache:
+            Whether to clear the model cache after benchmarking each model.
     """
 
     model_languages: list[Language]
@@ -144,6 +146,7 @@ class BenchmarkConfig:
     trust_remote_code: bool
     load_in_4bit: bool | None
     use_flash_attention: bool
+    clear_model_cache: bool
 
 
 @dataclass
