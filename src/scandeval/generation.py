@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sys
 import warnings
 from collections import defaultdict
 from dataclasses import asdict, dataclass
@@ -201,9 +202,10 @@ def generate_single_iteration(
     with cache_path.open() as f:
         json_cache = json.load(f)
         cache: dict[str, dict[str, CachedModelOutput]] = defaultdict(dict)
-        for key in json_cache:
-            for sub_key in json_cache[key]:
-                cache[key][sub_key] = CachedModelOutput(**json_cache[key][sub_key])
+        if not hasattr(sys, "_called_from_test"):
+            for key in json_cache:
+                for sub_key in json_cache[key]:
+                    cache[key][sub_key] = CachedModelOutput(**json_cache[key][sub_key])
 
     # Initialise the cache for the current max tokens, if it doesn't exist already
     max_tokens_str = str(dataset_config.max_generated_tokens)
@@ -327,13 +329,14 @@ def generate_single_iteration(
             all_preds.extend(extracted_labels)
 
         # Save the cache to disk
-        with cache_path.open("w") as f:
-            dumpable_cache: dict[str, dict[str, dict]] = defaultdict(dict)
-            for key, value in cache.items():
-                for sub_key, sub_value in value.items():
-                    dumpable_cache[key][sub_key] = asdict(sub_value)
-            json.dump(dumpable_cache, f, indent=4)
-            del dumpable_cache
+        if not hasattr(sys, "_called_from_test"):
+            with cache_path.open("w") as f:
+                dumpable_cache: dict[str, dict[str, dict]] = defaultdict(dict)
+                for key, value in cache.items():
+                    for sub_key, sub_value in value.items():
+                        dumpable_cache[key][sub_key] = asdict(sub_value)
+                json.dump(dumpable_cache, f, indent=4)
+                del dumpable_cache
 
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
