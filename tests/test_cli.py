@@ -34,6 +34,7 @@ def test_cli_param_names(params):
         "trust_remote_code",
         "load_in_4bit",
         "use_flash_attention",
+        "clear_model_cache",
         "help",
     }
 
@@ -60,4 +61,5 @@ def test_cli_param_types(params):
     assert params["trust_remote_code"] == BOOL
     assert params["load_in_4bit"] == BOOL
     assert params["use_flash_attention"] == BOOL
+    assert params["clear_model_cache"] == BOOL
     assert params["help"] == BOOL
