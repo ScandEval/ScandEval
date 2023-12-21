@@ -172,6 +172,7 @@ class BenchmarkDataset(ABC):
                 prepared_val=prepared_val,
                 prepared_tests=prepared_tests,
                 model=model,
+                model_config=model_config,
                 tokenizer=tokenizer,
                 data_collator=data_collator,
                 compute_metrics=self._compute_metrics,

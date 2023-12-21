@@ -298,7 +298,7 @@ class SequenceClassification(BenchmarkDataset):
 
 
 def get_closest_logprobs_labels(
-    generation_logprobs: tuple[torch.Tensor],
+    generation_logprobs: tuple[torch.Tensor] | torch.Tensor,
     tokenizer: Tokenizer,
     dataset_config: DatasetConfig,
 ) -> list[str]:
@@ -327,7 +327,10 @@ def get_closest_logprobs_labels(
     ]
 
     # Shape: [batch_size, num_generated_tokens, vocab_size]
-    all_logprobs = torch.stack(generation_logprobs, dim=1)
+    if isinstance(generation_logprobs, tuple):
+        all_logprobs = torch.stack(generation_logprobs, dim=1)
+    else:
+        all_logprobs = generation_logprobs
 
     # Shape: [batch_size, num_candidate_labels]
     pred_logprobs = torch.empty(
