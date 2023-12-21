@@ -273,6 +273,7 @@ class Benchmarker:
         """
         if self.benchmark_config.clear_model_cache:
             model_cache_path = Path(self.benchmark_config.cache_dir) / "model_cache"
+            model_cache_path.mkdir(parents=True, exist_ok=True)
             for model_dir in model_cache_path.iterdir():
                 if model_dir.is_dir():
                     for sub_model_dir in model_dir.iterdir():
