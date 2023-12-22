@@ -27,8 +27,7 @@ logger = logging.getLogger(__package__)
 
 @dataclass
 class GenerativeModelOutput:
-    completion: list[int]
-    completion_str: str
+    completion: str
     top_score_indices: list[list[int]] | None = None
     top_score_values: list[list[float]] | None = None
     vocab_size: int | None = None
@@ -291,8 +290,7 @@ def generate_single_iteration(
 
                 # Store the generated sequence in the cache
                 cached_model_output = GenerativeModelOutput(
-                    completion=generated_ids,
-                    completion_str=tokenizer.decode(
+                    completion=tokenizer.decode(
                         token_ids=generated_ids, skip_special_tokens=True
                     ),
                 )
@@ -324,7 +322,7 @@ def generate_single_iteration(
             cached_dataset=cached_dataset,
             cache=cache,
             max_tokens_str=max_tokens_str,
-            pad_token_id=tokenizer.pad_token_id,
+            tokenizer=tokenizer,
         )
         extracted_labels = extract_labels_fn(
             input_batch=cached_dataset,
@@ -444,7 +442,7 @@ def load_cached_model_outputs(
     cached_dataset: Dataset,
     cache: dict[str, dict[str, GenerativeModelOutput]],
     max_tokens_str: str,
-    pad_token_id: int,
+    tokenizer: Tokenizer,
 ) -> ModelOutput:
     """Load the cached model outputs.
 
@@ -455,8 +453,8 @@ def load_cached_model_outputs(
             The model output cache.
         max_tokens_str:
             The maximum number of tokens to generate. Used to index the cache.
-        pad_token_id:
-            The ID of the padding token.
+        tokenizer:
+            The tokenizer used to generate the tokens.
 
     Returns:
         The model output containing the cached sequences.
@@ -466,14 +464,21 @@ def load_cached_model_outputs(
         cache[max_tokens_str][example["text"]] for example in cached_dataset
     ]
 
+    # Tokenize the cached sequences
+    tokenized_cached_sequences: list[torch.Tensor] = [
+        tokenizer(
+            text=cached_model_output.completion,
+            add_special_tokens=False,
+            return_tensors="pt",
+        ).input_ids.squeeze(dim=0)
+        for cached_model_output in cached_model_outputs
+    ]
+
     # Pad the cached completions to the same length
     cached_sequences = torch.nn.utils.rnn.pad_sequence(
-        sequences=[
-            torch.tensor(cached_model_output.completion)
-            for cached_model_output in cached_model_outputs
-        ],
+        sequences=tokenized_cached_sequences,
         batch_first=True,
-        padding_value=pad_token_id,
+        padding_value=tokenizer.pad_token_id,
     )
 
     # If we do not have any cached scores, then wrap the padded cached sequences in a
