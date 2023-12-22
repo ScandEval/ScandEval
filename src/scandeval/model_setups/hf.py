@@ -396,6 +396,11 @@ class HFModelSetup:
                     f"The model config for the model {model_id!r} could not be "
                     f"loaded, as the key {key!r} was not found in the config."
                 )
+            except OSError as e:
+                raise InvalidBenchmark(
+                    f"Couldn't load model config for {model_id!r}. The error was "
+                    f"{e!r}. Skipping"
+                )
             except (TimeoutError, RequestError):
                 logger.info(f"Couldn't load model config for {model_id!r}. Retrying.")
                 sleep(5)

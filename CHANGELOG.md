@@ -28,6 +28,8 @@ and this project adheres to
 - Removed `text2text-generation` temporarily from the tags defining generative models,
   since we do not support the benchmarking of these yet. This will be added back in as
   soon as we support them.
+- Now catches `OSError`s when loading Hugging Face model configurations, which happen
+  when there is no `config.json` file in the model repo.
 
 
 ## [v8.2.1] - 2023-12-20
