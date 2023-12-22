@@ -26,7 +26,7 @@ logger = logging.getLogger(__package__)
 
 
 @dataclass
-class CachedModelOutput:
+class GenerativeModelOutput:
     completion: list[int]
     completion_str: str
     top_score_indices: list[list[int]] | None = None
@@ -201,11 +201,13 @@ def generate_single_iteration(
     # Load the model output cache
     with cache_path.open() as f:
         json_cache = json.load(f)
-        cache: dict[str, dict[str, CachedModelOutput]] = defaultdict(dict)
+        cache: dict[str, dict[str, GenerativeModelOutput]] = defaultdict(dict)
         if not hasattr(sys, "_called_from_test"):
             for key in json_cache:
                 for sub_key in json_cache[key]:
-                    cache[key][sub_key] = CachedModelOutput(**json_cache[key][sub_key])
+                    cache[key][sub_key] = GenerativeModelOutput(
+                        **json_cache[key][sub_key]
+                    )
 
     # Initialise the cache for the current max tokens, if it doesn't exist already
     max_tokens_str = str(dataset_config.max_generated_tokens)
@@ -300,7 +302,7 @@ def generate_single_iteration(
 
                 generated_ids = generated_ids.tolist()
 
-                cached_model_output = CachedModelOutput(
+                cached_model_output = GenerativeModelOutput(
                     completion=generated_ids,
                     completion_str=tokenizer.decode(
                         token_ids=generated_ids, skip_special_tokens=True
@@ -339,7 +341,7 @@ def generate_single_iteration(
 
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
-        cached_model_outputs: list[CachedModelOutput] = [
+        cached_model_outputs: list[GenerativeModelOutput] = [
             cache[max_tokens_str][example["text"]] for example in cached_dataset
         ]
         cached_sequences = torch.nn.utils.rnn.pad_sequence(
