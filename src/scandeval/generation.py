@@ -25,14 +25,6 @@ from .utils import clear_memory
 logger = logging.getLogger(__package__)
 
 
-@dataclass
-class GenerativeModelOutput:
-    completion: str
-    top_score_indices: list[list[int]] | None = None
-    top_score_values: list[list[float]] | None = None
-    vocab_size: int | None = None
-
-
 def generate(
     itr: tqdm,
     train: Dataset,
@@ -119,7 +111,7 @@ def generate(
                     extract_labels_fn=extract_labels_fn,
                     benchmark_config=benchmark_config,
                     dataset_config=dataset_config,
-                    cache_path=cache_path,
+                    model_cache_dir=Path(model_config.model_cache_dir),
                 )
                 break
             except Exception as e:
@@ -152,7 +144,7 @@ def generate(
                 extract_labels_fn=extract_labels_fn,
                 benchmark_config=benchmark_config,
                 dataset_config=dataset_config,
-                cache_path=cache_path,
+                model_cache_dir=Path(model_config.model_cache_dir),
             )
             logger.debug(f"Train scores for iteration {idx}: {train_scores}")
             scores["train"].append(train_scores)
@@ -170,7 +162,7 @@ def generate_single_iteration(
     extract_labels_fn: Callable[..., list[Any]],
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
-    cache_path: Path,
+    model_cache_dir: Path,
 ) -> dict[str, float]:
     """Evaluate a model on a dataset in a single iteration through generation.
 
@@ -191,25 +183,21 @@ def generate_single_iteration(
             The configuration of the dataset.
         benchmark_config:
             The configuration of the benchmark.
-        cache_path:
-            The path to the model output cache.
+        model_cache_dir:
+            The directory to store the model output cache in.
 
     Returns:
         A list of dictionaries containing the scores for each metric.
     """
-    cache = load_model_cache(cache_path=cache_path)
-
-    # Initialise the cache for the current max tokens, if it doesn't exist already
-    max_tokens_str = str(dataset_config.max_generated_tokens)
-    if max_tokens_str not in cache:
-        cache[max_tokens_str] = dict()
+    cache = ModelCache(
+        model_cache_dir=model_cache_dir,
+        max_tokens=dataset_config.max_generated_tokens,
+    )
 
     # Split up the prepared dataset into a cached and non-cached part
-    split_dataset = split_dataset_into_cached_and_non_cached(
-        dataset=prepared_dataset, cache=cache, max_tokens_str=max_tokens_str
+    cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
+        dataset=prepared_dataset, cache=cache
     )
-    cached_dataset = split_dataset["cached"]
-    non_cached_dataset = split_dataset["non_cached"]
 
     all_preds: list[str | list[str]] = list()
 
@@ -302,7 +290,7 @@ def generate_single_iteration(
                         sample_idx
                     ].tolist()
                     cached_model_output.vocab_size = int(scores.shape[-1])
-                cache[max_tokens_str][decoded_inputs] = cached_model_output
+                cache[decoded_inputs] = cached_model_output
 
             # Extract the labels from the model output and store them for metric
             # computation later
@@ -314,14 +302,13 @@ def generate_single_iteration(
             )
             all_preds.extend(extracted_labels)
 
-        store_cache_to_disk(cache=cache, cache_path=cache_path)
+        cache.save()
 
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
         model_output = load_cached_model_outputs(
             cached_dataset=cached_dataset,
             cache=cache,
-            max_tokens_str=max_tokens_str,
             tokenizer=tokenizer,
         )
         extracted_labels = extract_labels_fn(
@@ -356,55 +343,141 @@ def generate_single_iteration(
     return itr_scores
 
 
-def load_model_cache(cache_path: Path) -> dict[str, dict[str, GenerativeModelOutput]]:
-    """Load the model output cache.
+@dataclass
+class GenerativeModelOutput:
+    completion: str
+    top_score_indices: list[list[int]] | None = None
+    top_score_values: list[list[float]] | None = None
+    vocab_size: int | None = None
+
+
+class ModelCache:
+    """A cache for model outputs.
 
     Args:
+        model_cache_dir:
+            The directory to store the cache in.
+        cache_name:
+            The name of the cache file. Defaults to "model_outputs.json".
+        max_tokens:
+            The maximum number of tokens to generate. Used to index the cache. Defaults
+            to `None`.
+
+    Attributes:
+        model_cache_dir:
+            The directory to store the cache in.
         cache_path:
-            The path to the model output cache.
-
-    Returns:
-        The model output cache.
-    """
-    with cache_path.open() as f:
-        json_cache = json.load(f)
-
-    cache: dict[str, dict[str, GenerativeModelOutput]] = defaultdict(dict)
-    if not hasattr(sys, "_called_from_test"):
-        for key in json_cache:
-            for sub_key in json_cache[key]:
-                cache[key][sub_key] = GenerativeModelOutput(**json_cache[key][sub_key])
-    return cache
-
-
-def store_cache_to_disk(
-    cache: dict[str, dict[str, GenerativeModelOutput]], cache_path: Path
-) -> None:
-    """Store the model output cache to disk.
-
-    Args:
+            The path to the cache file.
         cache:
             The model output cache.
-        cache_path:
-            The path to the model output cache.
+        max_tokens:
+            The maximum number of tokens to generate. Used to index the cache.
     """
-    if hasattr(sys, "_called_from_test"):
-        return
 
-    dumpable_cache: dict[str, dict[str, dict]] = defaultdict(dict)
-    for key, value in cache.items():
-        for sub_key, sub_value in value.items():
-            dumpable_cache[key][sub_key] = asdict(sub_value)
+    def __init__(
+        self,
+        model_cache_dir: Path,
+        cache_name: str = "model_outputs.json",
+        max_tokens: int | None = None,
+    ):
+        self.model_cache_dir = model_cache_dir
+        self.model_cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_path = self.model_cache_dir / cache_name
+        self.cache: dict[tuple[str, int], GenerativeModelOutput] = self.load()
+        self.max_tokens: int | None = max_tokens
 
-    with cache_path.open("w") as f:
-        json.dump(dumpable_cache, f, indent=4)
+    def load(self) -> dict[tuple[str, int], GenerativeModelOutput]:
+        """Load and return the model output cache."""
+        if not self.cache_path.exists():
+            with self.cache_path.open("w") as f:
+                json.dump(dict(), f)
+
+        with self.cache_path.open() as f:
+            json_cache = json.load(f)
+
+        cache: dict[tuple[str, int], GenerativeModelOutput] = dict()
+        if not hasattr(sys, "_called_from_test"):
+            for key in json_cache:
+                cache[key] = GenerativeModelOutput(**json_cache[key])
+        return cache
+
+    def save(self) -> None:
+        """Save the model output cache to disk."""
+        if hasattr(sys, "_called_from_test"):
+            return
+
+        dumpable_cache: dict[tuple[str, int], dict] = defaultdict(dict)
+        for key, value in self.cache.items():
+            dumpable_cache[key] = asdict(value)
+
+        with self.cache_path.open("w") as f:
+            json.dump(dumpable_cache, f, indent=4)
+
+    def __getitem__(self, key: str | tuple[str, int]) -> GenerativeModelOutput:
+        """Get an item from the cache.
+
+        Args:
+            key:
+                The key to use to index the cache. If a string is passed, then the
+                maximum number of tokens must be set before fetching items from the
+                cache. Alternatively, use a tuple of the form `(text, max_tokens)` as
+                key.
+
+        Returns:
+            The model output.
+
+        Raises:
+            ValueError:
+                If the maximum number of tokens is not set and a string is passed as
+                key.
+        """
+        if isinstance(key, str):
+            if self.max_tokens is None:
+                raise ValueError(
+                    "The maximum number of tokens (`max_tokens`) must be set before "
+                    "fetching items from the cache. Alternatively, use a tuple of the "
+                    "form `(text, max_tokens)` as key."
+                )
+            key = (key, self.max_tokens)
+        return self.cache[key]
+
+    def __setitem__(
+        self, key: str | tuple[str, int], value: GenerativeModelOutput
+    ) -> None:
+        """Set an item in the cache.
+
+        Args:
+            key:
+                The key to use to index the cache. If a string is passed, then the
+                maximum number of tokens must be set before setting items in the
+                cache. Alternatively, use a tuple of the form `(text, max_tokens)` as
+                key.
+            value:
+                The value to set in the cache.
+
+        Raises:
+            ValueError:
+                If the maximum number of tokens is not set and a string is passed as
+                key.
+        """
+        if isinstance(key, str):
+            if self.max_tokens is None:
+                raise ValueError(
+                    "The maximum number of tokens (`max_tokens`) must be set before "
+                    "setting items in the cache. Alternatively, use a tuple of the "
+                    "form `(text, max_tokens)` as key."
+                )
+            key = (key, self.max_tokens)
+        self.cache[key] = value
+
+    def cached_texts(self) -> list[str]:
+        """Return the text inputs indexed in the cache."""
+        return [key[0] for key in self.cache.keys()]
 
 
 def split_dataset_into_cached_and_non_cached(
-    dataset: Dataset,
-    cache: dict[str, dict[str, GenerativeModelOutput]],
-    max_tokens_str: str,
-) -> dict[str, Dataset]:
+    dataset: Dataset, cache: ModelCache
+) -> tuple[Dataset, Dataset]:
     """Split a dataset into a cached and non-cached part.
 
     Args:
@@ -412,8 +485,6 @@ def split_dataset_into_cached_and_non_cached(
             The dataset to split.
         cache:
             The model output cache.
-        max_tokens_str:
-            The maximum number of tokens to generate. Used to index the cache.
 
     Returns:
         The cached and non-cached parts of the dataset.
@@ -422,7 +493,7 @@ def split_dataset_into_cached_and_non_cached(
     # to the "text" column
     unique_non_cached_ids: set[int] = set()
     for example_idx, example in enumerate(dataset):
-        cached_texts = list(cache[max_tokens_str].keys())
+        cached_texts = cache.cached_texts()
         cached_texts += dataset.select(unique_non_cached_ids)["text"]
         if example["text"] not in cached_texts:
             unique_non_cached_ids.add(example_idx)
@@ -432,16 +503,14 @@ def split_dataset_into_cached_and_non_cached(
     # will be put in the non-cached part, and the rest in the cached part.
     cached_ids = set(range(len(dataset))) - unique_non_cached_ids
 
-    return dict(
-        cached=dataset.select(cached_ids),
-        non_cached=dataset.select(unique_non_cached_ids),
-    )
+    cached = dataset.select(cached_ids)
+    non_cached = dataset.select(unique_non_cached_ids)
+    return cached, non_cached
 
 
 def load_cached_model_outputs(
     cached_dataset: Dataset,
-    cache: dict[str, dict[str, GenerativeModelOutput]],
-    max_tokens_str: str,
+    cache: ModelCache,
     tokenizer: Tokenizer,
 ) -> ModelOutput:
     """Load the cached model outputs.
@@ -451,8 +520,6 @@ def load_cached_model_outputs(
             The dataset containing the cached examples.
         cache:
             The model output cache.
-        max_tokens_str:
-            The maximum number of tokens to generate. Used to index the cache.
         tokenizer:
             The tokenizer used to generate the tokens.
 
@@ -461,7 +528,7 @@ def load_cached_model_outputs(
     """
     # Load the raw model outputs from the cache
     cached_model_outputs: list[GenerativeModelOutput] = [
-        cache[max_tokens_str][example["text"]] for example in cached_dataset
+        cache[example["text"]] for example in cached_dataset
     ]
 
     # Tokenize the cached sequences
