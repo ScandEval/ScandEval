@@ -273,13 +273,12 @@ def generate_single_iteration(
         # Generate the completions for the non-cached examples
         for batch_idx, batch in enumerate(tqdm(dataloader, leave=False)):
             # Generate the completions of the documents in the batch
-            with warnings.catch_warnings():
+            with warnings.catch_warnings(), torch.inference_mode():
                 warnings.simplefilter("ignore", category=UserWarning)
                 inputs = batch["input_ids"].to(model.device)
-                with torch.inference_mode():
-                    model_output: ModelOutput = model.generate(
-                        inputs=inputs, generation_config=generation_config
-                    )
+                model_output: ModelOutput = model.generate(
+                    inputs=inputs, generation_config=generation_config
+                )
 
             # Extract the scores from the model output, to be cached. We only store the
             # indices of the top 100 scores, to save space

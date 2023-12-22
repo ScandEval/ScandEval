@@ -277,35 +277,32 @@ class HFModelSetup:
                 if config.model_type == "deberta-v2":
                     config.pooler_hidden_size = config.hidden_size
 
-                with warnings.catch_warnings():
+                with warnings.catch_warnings(), HiddenPrints():
                     warnings.filterwarnings("ignore", category=UserWarning)
                     warnings.filterwarnings("ignore", category=FutureWarning)
-                    with HiddenPrints():
-                        try:
-                            model_or_tuple = model_cls_or_none.from_pretrained(
-                                model_config.model_id, **model_kwargs
+                    try:
+                        model_or_tuple = model_cls_or_none.from_pretrained(
+                            model_config.model_id, **model_kwargs
+                        )
+                    except ImportError as e:
+                        if "flash attention" in str(e).lower():
+                            raise InvalidBenchmark(
+                                "The model you are trying to load requires Flash "
+                                "Attention. To use Flash Attention, please install "
+                                "the `flash-attn` package, which can be done by "
+                                "running `pip install --no-build-isolation -U "
+                                "flash-attn`."
                             )
-                        except ImportError as e:
-                            if "flash attention" in str(e).lower():
-                                raise InvalidBenchmark(
-                                    "The model you are trying to load requires Flash "
-                                    "Attention. To use Flash Attention, please install "
-                                    "the `flash-attn` package, which can be done by "
-                                    "running `pip install --no-build-isolation -U "
-                                    "flash-attn`."
-                                )
-                        except (KeyError, RuntimeError) as e:
-                            if not ignore_mismatched_sizes:
-                                ignore_mismatched_sizes = True
-                                continue
-                            else:
-                                raise InvalidBenchmark(str(e))
-                        except (TimeoutError, RequestError):
-                            logger.info(
-                                f"Couldn't load the model {model_id!r}. Retrying."
-                            )
-                            sleep(5)
+                    except (KeyError, RuntimeError) as e:
+                        if not ignore_mismatched_sizes:
+                            ignore_mismatched_sizes = True
                             continue
+                        else:
+                            raise InvalidBenchmark(str(e))
+                    except (TimeoutError, RequestError):
+                        logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
+                        sleep(5)
+                        continue
                 if isinstance(model_or_tuple, tuple):
                     model = model_or_tuple[0]
                 else:
