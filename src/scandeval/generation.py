@@ -289,13 +289,13 @@ def generate_single_iteration(
 
                 generated_ids = generated_ids.tolist()
 
+                # Store the generated sequence in the cache
                 cached_model_output = GenerativeModelOutput(
                     completion=generated_ids,
                     completion_str=tokenizer.decode(
                         token_ids=generated_ids, skip_special_tokens=True
                     ),
                 )
-
                 if "scores" in model_output:
                     cached_model_output.top_score_indices = top_scores.indices[
                         sample_idx
@@ -316,60 +316,16 @@ def generate_single_iteration(
             )
             all_preds.extend(extracted_labels)
 
-        # Save the cache to disk
-        if not hasattr(sys, "_called_from_test"):
-            with cache_path.open("w") as f:
-                dumpable_cache: dict[str, dict[str, dict]] = defaultdict(dict)
-                for key, value in cache.items():
-                    for sub_key, sub_value in value.items():
-                        dumpable_cache[key][sub_key] = asdict(sub_value)
-                json.dump(dumpable_cache, f, indent=4)
-                del dumpable_cache
+        store_cache_to_disk(cache=cache, cache_path=cache_path)
 
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
-        cached_model_outputs: list[GenerativeModelOutput] = [
-            cache[max_tokens_str][example["text"]] for example in cached_dataset
-        ]
-        cached_sequences = torch.nn.utils.rnn.pad_sequence(
-            sequences=[
-                torch.tensor(cached_model_output.completion)
-                for cached_model_output in cached_model_outputs
-            ],
-            batch_first=True,
-            padding_value=tokenizer.pad_token_id,
+        model_output = load_cached_model_outputs(
+            cached_dataset=cached_dataset,
+            cache=cache,
+            max_tokens_str=max_tokens_str,
+            pad_token_id=tokenizer.pad_token_id,
         )
-        if (
-            cached_model_outputs[0].top_score_indices is not None
-            and cached_model_outputs[0].top_score_values is not None
-            and cached_model_outputs[0].vocab_size is not None
-        ):
-            cached_scores = torch.zeros(
-                len(cached_model_outputs),
-                len(cached_model_outputs[0].top_score_indices),
-                cached_model_outputs[0].vocab_size,
-            )
-            top_score_indices = torch.tensor(
-                [
-                    cached_model_output.top_score_indices
-                    for cached_model_output in cached_model_outputs
-                ]
-            )
-            top_score_values = torch.tensor(
-                [
-                    cached_model_output.top_score_values
-                    for cached_model_output in cached_model_outputs
-                ]
-            )
-            for batch_idx in range(cached_scores.shape[0]):
-                for sequence_idx in range(cached_scores.shape[1]):
-                    top_indices = top_score_indices[batch_idx, sequence_idx]
-                    top_values = top_score_values[batch_idx, sequence_idx]
-                    cached_scores[batch_idx, sequence_idx, top_indices] = top_values
-            model_output = ModelOutput(sequences=cached_sequences, scores=cached_scores)
-        else:
-            model_output = ModelOutput(sequences=cached_sequences)
-
         extracted_labels = extract_labels_fn(
             input_batch=cached_dataset,
             model_output=model_output,
@@ -423,6 +379,29 @@ def load_model_cache(cache_path: Path) -> dict[str, dict[str, GenerativeModelOut
     return cache
 
 
+def store_cache_to_disk(
+    cache: dict[str, dict[str, GenerativeModelOutput]], cache_path: Path
+) -> None:
+    """Store the model output cache to disk.
+
+    Args:
+        cache:
+            The model output cache.
+        cache_path:
+            The path to the model output cache.
+    """
+    if hasattr(sys, "_called_from_test"):
+        return
+
+    dumpable_cache: dict[str, dict[str, dict]] = defaultdict(dict)
+    for key, value in cache.items():
+        for sub_key, sub_value in value.items():
+            dumpable_cache[key][sub_key] = asdict(sub_value)
+
+    with cache_path.open("w") as f:
+        json.dump(dumpable_cache, f, indent=4)
+
+
 def split_dataset_into_cached_and_non_cached(
     dataset: Dataset,
     cache: dict[str, dict[str, GenerativeModelOutput]],
@@ -459,6 +438,79 @@ def split_dataset_into_cached_and_non_cached(
         cached=dataset.select(cached_ids),
         non_cached=dataset.select(unique_non_cached_ids),
     )
+
+
+def load_cached_model_outputs(
+    cached_dataset: Dataset,
+    cache: dict[str, dict[str, GenerativeModelOutput]],
+    max_tokens_str: str,
+    pad_token_id: int,
+) -> ModelOutput:
+    """Load the cached model outputs.
+
+    Args:
+        cached_dataset:
+            The dataset containing the cached examples.
+        cache:
+            The model output cache.
+        max_tokens_str:
+            The maximum number of tokens to generate. Used to index the cache.
+        pad_token_id:
+            The ID of the padding token.
+
+    Returns:
+        The model output containing the cached sequences.
+    """
+    # Load the raw model outputs from the cache
+    cached_model_outputs: list[GenerativeModelOutput] = [
+        cache[max_tokens_str][example["text"]] for example in cached_dataset
+    ]
+
+    # Pad the cached completions to the same length
+    cached_sequences = torch.nn.utils.rnn.pad_sequence(
+        sequences=[
+            torch.tensor(cached_model_output.completion)
+            for cached_model_output in cached_model_outputs
+        ],
+        batch_first=True,
+        padding_value=pad_token_id,
+    )
+
+    # If we do not have any cached scores, then wrap the padded cached sequences in a
+    # ModelOutput and return it
+    if (
+        cached_model_outputs[0].top_score_indices is None
+        or cached_model_outputs[0].top_score_values is None
+        or cached_model_outputs[0].vocab_size is None
+    ):
+        return ModelOutput(sequences=cached_sequences)
+
+    # Otherwise, we format the cached scores into a tensor of shape [batch_size,
+    # num_sequences, vocab_size], wrap it in a ModelOutput with the padded cached
+    # sequences, and return it
+    cached_scores = torch.zeros(
+        len(cached_model_outputs),
+        len(cached_model_outputs[0].top_score_indices),
+        cached_model_outputs[0].vocab_size,
+    )
+    top_score_indices = torch.tensor(
+        [
+            cached_model_output.top_score_indices
+            for cached_model_output in cached_model_outputs
+        ]
+    )
+    top_score_values = torch.tensor(
+        [
+            cached_model_output.top_score_values
+            for cached_model_output in cached_model_outputs
+        ]
+    )
+    for batch_idx in range(cached_scores.shape[0]):
+        for sequence_idx in range(cached_scores.shape[1]):
+            top_indices = top_score_indices[batch_idx, sequence_idx]
+            top_values = top_score_values[batch_idx, sequence_idx]
+            cached_scores[batch_idx, sequence_idx, top_indices] = top_values
+    return ModelOutput(sequences=cached_sequences, scores=cached_scores)
 
 
 def extract_raw_predictions(
