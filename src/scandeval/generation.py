@@ -198,16 +198,7 @@ def generate_single_iteration(
     Returns:
         A list of dictionaries containing the scores for each metric.
     """
-    # Load the model output cache
-    with cache_path.open() as f:
-        json_cache = json.load(f)
-        cache: dict[str, dict[str, GenerativeModelOutput]] = defaultdict(dict)
-        if not hasattr(sys, "_called_from_test"):
-            for key in json_cache:
-                for sub_key in json_cache[key]:
-                    cache[key][sub_key] = GenerativeModelOutput(
-                        **json_cache[key][sub_key]
-                    )
+    cache = load_model_cache(cache_path=cache_path)
 
     # Initialise the cache for the current max tokens, if it doesn't exist already
     max_tokens_str = str(dataset_config.max_generated_tokens)
@@ -215,15 +206,11 @@ def generate_single_iteration(
         cache[max_tokens_str] = dict()
 
     # Split up the prepared dataset into a cached and non-cached part
-    unique_non_cached_ids: set[int] = set()
-    for example_idx, example in enumerate(prepared_dataset):
-        cached_texts = list(cache[max_tokens_str].keys())
-        cached_texts += prepared_dataset.select(unique_non_cached_ids)["text"]
-        if example["text"] not in cached_texts:
-            unique_non_cached_ids.add(example_idx)
-    cached_ids = set(range(len(prepared_dataset))) - unique_non_cached_ids
-    non_cached_dataset = prepared_dataset.select(unique_non_cached_ids)
-    cached_dataset = prepared_dataset.select(cached_ids)
+    split_dataset = split_dataset_into_cached_and_non_cached(
+        dataset=prepared_dataset, cache=cache, max_tokens_str=max_tokens_str
+    )
+    cached_dataset = split_dataset["cached"]
+    non_cached_dataset = split_dataset["non_cached"]
 
     all_preds: list[str | list[str]] = list()
 
@@ -413,6 +400,65 @@ def generate_single_iteration(
     )
 
     return itr_scores
+
+
+def load_model_cache(cache_path: Path) -> dict[str, dict[str, GenerativeModelOutput]]:
+    """Load the model output cache.
+
+    Args:
+        cache_path:
+            The path to the model output cache.
+
+    Returns:
+        The model output cache.
+    """
+    with cache_path.open() as f:
+        json_cache = json.load(f)
+
+    cache: dict[str, dict[str, GenerativeModelOutput]] = defaultdict(dict)
+    if not hasattr(sys, "_called_from_test"):
+        for key in json_cache:
+            for sub_key in json_cache[key]:
+                cache[key][sub_key] = GenerativeModelOutput(**json_cache[key][sub_key])
+    return cache
+
+
+def split_dataset_into_cached_and_non_cached(
+    dataset: Dataset,
+    cache: dict[str, dict[str, GenerativeModelOutput]],
+    max_tokens_str: str,
+) -> dict[str, Dataset]:
+    """Split a dataset into a cached and non-cached part.
+
+    Args:
+        dataset:
+            The dataset to split.
+        cache:
+            The model output cache.
+        max_tokens_str:
+            The maximum number of tokens to generate. Used to index the cache.
+
+    Returns:
+        The cached and non-cached parts of the dataset.
+    """
+    # Get the sample indices of the non-cached examples, which are unique with respect
+    # to the "text" column
+    unique_non_cached_ids: set[int] = set()
+    for example_idx, example in enumerate(dataset):
+        cached_texts = list(cache[max_tokens_str].keys())
+        cached_texts += dataset.select(unique_non_cached_ids)["text"]
+        if example["text"] not in cached_texts:
+            unique_non_cached_ids.add(example_idx)
+
+    # The cached examples are the ones that are not in the non-cached examples. This
+    # means that if the dataset has duplicates, only a single copy of the duplicate
+    # will be put in the non-cached part, and the rest in the cached part.
+    cached_ids = set(range(len(dataset))) - unique_non_cached_ids
+
+    return dict(
+        cached=dataset.select(cached_ids),
+        non_cached=dataset.select(unique_non_cached_ids),
+    )
 
 
 def extract_raw_predictions(
