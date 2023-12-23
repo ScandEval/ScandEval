@@ -110,7 +110,7 @@ SENT = DatasetTask(
 )
 
 
-SUMMARIZATION = DatasetTask(
+SUMM = DatasetTask(
     name="summarization",
     supertask="text-to-text",
     metrics=[
