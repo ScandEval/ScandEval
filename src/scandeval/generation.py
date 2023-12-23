@@ -189,7 +189,16 @@ def generate_single_iteration(
     Returns:
         A list of dictionaries containing the scores for each metric.
     """
-    cache = ModelCache(model_cache_dir=model_cache_dir)
+    # If we are testing then we save the model outputs to a different cache and ensure
+    # that that cache is deleted before the next test, to ensure that the tests are
+    # independent of each other
+    if not hasattr(sys, "_called_from_test"):
+        cache_name = "model_outputs.json"
+    else:
+        cache_name = "model_outputs_test.json"
+        (model_cache_dir / cache_name).unlink(missing_ok=True)
+
+    cache = ModelCache(model_cache_dir=model_cache_dir, cache_name=cache_name)
 
     # Split up the prepared dataset into a cached and non-cached part
     cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
@@ -355,7 +364,7 @@ class ModelCache:
         model_cache_dir:
             The directory to store the cache in.
         cache_name:
-            The name of the cache file. Defaults to "model_outputs.json".
+            The name of the cache file.
 
     Attributes:
         model_cache_dir:
@@ -369,7 +378,7 @@ class ModelCache:
     def __init__(
         self,
         model_cache_dir: Path,
-        cache_name: str = "model_outputs.json",
+        cache_name: str,
     ):
         self.model_cache_dir = model_cache_dir
         self.model_cache_dir.mkdir(parents=True, exist_ok=True)
@@ -386,16 +395,12 @@ class ModelCache:
             json_cache = json.load(f)
 
         cache: dict[str, GenerativeModelOutput] = dict()
-        if not hasattr(sys, "_called_from_test"):
-            for key in json_cache:
-                cache[key] = GenerativeModelOutput(**json_cache[key])
+        for key in json_cache:
+            cache[key] = GenerativeModelOutput(**json_cache[key])
         return cache
 
     def save(self) -> None:
         """Save the model output cache to disk."""
-        if hasattr(sys, "_called_from_test"):
-            return
-
         dumpable_cache: dict[str, dict] = defaultdict(dict)
         for key, value in self.cache.items():
             dumpable_cache[key] = asdict(value)
@@ -428,7 +433,7 @@ class ModelCache:
 
     def cached_texts(self) -> list[str]:
         """Return the text inputs indexed in the cache."""
-        return [key[0] for key in self.cache.keys()]
+        return [key for key in self.cache.keys()]
 
 
 def split_dataset_into_cached_and_non_cached(
@@ -445,9 +450,6 @@ def split_dataset_into_cached_and_non_cached(
     Returns:
         The cached and non-cached parts of the dataset.
     """
-    if hasattr(sys, "_called_from_test"):
-        return dataset.select(range(0)), dataset
-
     # Get the sample indices of the non-cached examples, which are unique with respect
     # to the "text" column
     unique_non_cached_ids: set[int] = set()
@@ -492,7 +494,7 @@ def load_cached_model_outputs(
             text=tokenizer.decode(
                 tokenizer(
                     text=example["text"],
-                    add_special_tokens=False,
+                    truncation=True,
                     return_tensors="pt",
                 ).input_ids.squeeze(dim=0),
                 skip_special_tokens=True,
