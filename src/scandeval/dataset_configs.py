@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .config import DatasetConfig
-from .dataset_tasks import LA, NER, QA, SENT, SPEED, SUMMARIZATION
+from .dataset_tasks import LA, NER, QA, SENT, SPEED, SUMM
 from .languages import DA, DE, EN, FO, IS, NB, NL, NN, SV, get_all_languages
 
 
@@ -598,7 +598,7 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     name="nordjylland-news",
     pretty_name="the truncated version of Nordjylland News",
     huggingface_id="ScandEval/nordjylland-news-mini",
-    task=SUMMARIZATION,
+    task=SUMM,
     languages=[DA],
     prompt_template="{text}\nOpsummering: {target_text}",
     num_few_shot_examples=2,
@@ -609,7 +609,7 @@ MLSUM_CONFIG = DatasetConfig(
     name="mlsum",
     pretty_name="the truncated version of MLSum",
     huggingface_id="ScandEval/mlsum-mini",
-    task=SUMMARIZATION,
+    task=SUMM,
     languages=[DE],
     prompt_template="{text}\nZusammenfassung: {target_text}",
     num_few_shot_examples=2,
@@ -620,7 +620,7 @@ RRN_CONFIG = DatasetConfig(
     name="rrn",
     pretty_name="the truncated version of RÚV Radio News",
     huggingface_id="ScandEval/rrn-mini",
-    task=SUMMARIZATION,
+    task=SUMM,
     languages=[IS],
     prompt_template="{text}\nSamantekt: {target_text}",
     num_few_shot_examples=2,
@@ -631,7 +631,7 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     name="no-sammendrag",
     pretty_name="the truncated version of the Norwegian Sammendrag dataset",
     huggingface_id="ScandEval/no-sammendrag-mini",
-    task=SUMMARIZATION,
+    task=SUMM,
     languages=[NB, NN],
     prompt_template="{text}\nSammendrag: {target_text}",
     num_few_shot_examples=2,
@@ -642,7 +642,7 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
     pretty_name="the Dutch part of the truncated version of WikiLingua",
     huggingface_id="ScandEval/wiki-lingua-nl-mini",
-    task=SUMMARIZATION,
+    task=SUMM,
     languages=[NL],
     prompt_template="{text}\nSamenvatting: {target_text}",
     num_few_shot_examples=2,
@@ -653,7 +653,7 @@ SWEDN_CONFIG = DatasetConfig(
     name="swedn",
     pretty_name="the truncated version of SweDN",
     huggingface_id="ScandEval/swedn-mini",
-    task=SUMMARIZATION,
+    task=SUMM,
     languages=[SV],
     prompt_template="{text}\nSammanfattning: {target_text}",
     num_few_shot_examples=2,
@@ -664,7 +664,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     name="cnn-dailymail",
     pretty_name="the truncated version of CNN-DailyMail",
     huggingface_id="ScandEval/cnn-dailymail-mini",
-    task=SUMMARIZATION,
+    task=SUMM,
     languages=[EN],
     prompt_template="{text}\nSummary: {target_text}",
     num_few_shot_examples=2,

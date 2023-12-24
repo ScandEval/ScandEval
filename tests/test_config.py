@@ -108,6 +108,7 @@ class TestBenchmarkConfig:
             trust_remote_code=False,
             load_in_4bit=None,
             use_flash_attention=False,
+            clear_model_cache=False,
         )
 
     def test_benchmark_config_is_object(self, benchmark_config):
@@ -133,6 +134,7 @@ class TestBenchmarkConfig:
         assert benchmark_config.trust_remote_code is False
         assert benchmark_config.load_in_4bit is None
         assert benchmark_config.use_flash_attention is False
+        assert benchmark_config.clear_model_cache is False
 
 
 class TestDatasetConfig:

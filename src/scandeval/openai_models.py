@@ -1,8 +1,6 @@
 """Model and tokenizer wrapper for OpenAI models."""
 
-import json
 import logging
-from pathlib import Path
 from time import sleep
 
 import openai
@@ -103,7 +101,7 @@ class OpenAITokenizer:
         ]
         return self.pad(encoded_inputs=encoded_inputs)
 
-    def decode(self, token_ids: list[int]) -> str:
+    def decode(self, token_ids: list[int], **kwargs) -> str:
         """Decode token IDs.
 
         Args:
@@ -284,10 +282,6 @@ class OpenAIModel:
             The device to use, is always CPU.
         is_chat_model:
             Whether the model is a chat model.
-        cache_path:
-            The path to the cache.
-        cache:
-            A cache for the model's outputs.
     """
 
     def __init__(
@@ -303,15 +297,6 @@ class OpenAIModel:
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
         self.is_chat_model = self._is_chat_model()
-
-        model_cache_dir = Path(model_config.model_cache_dir)
-        model_cache_dir.mkdir(parents=True, exist_ok=True)
-        self.cache_path = model_cache_dir / "model_outputs.json"
-        if not self.cache_path.exists():
-            with self.cache_path.open("w") as f:
-                json.dump(dict(), f)
-        with self.cache_path.open() as f:
-            self.cache: dict[str, dict[str, str]] = json.load(f)
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""
@@ -393,38 +378,24 @@ class OpenAIModel:
             ],
         )
 
-        max_tokens_str = str(max_tokens)
-        if max_tokens_str not in self.cache:
-            self.cache[max_tokens_str] = dict()
-
-        # Use cache if possible
-        if prompt in self.cache[max_tokens_str]:
-            generation_output = self.cache[max_tokens_str][prompt]
+        for _ in range(60):
+            try:
+                if not self.is_chat_model:
+                    model_output = openai.Completion.create(
+                        prompt=prompt, **generation_kwargs
+                    )
+                    generation_output = model_output.choices[0].text.strip()
+                else:
+                    model_output = openai.ChatCompletion.create(
+                        messages=[dict(role="user", content=prompt)],
+                        **generation_kwargs,
+                    )
+                    generation_output = model_output.choices[0].message.content.strip()
+                break
+            except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
+                sleep(1)
         else:
-            for _ in range(60):
-                try:
-                    if not self.is_chat_model:
-                        model_output = openai.Completion.create(
-                            prompt=prompt, **generation_kwargs
-                        )
-                        generation_output = model_output.choices[0].text.strip()
-                    else:
-                        model_output = openai.ChatCompletion.create(
-                            messages=[dict(role="user", content=prompt)],
-                            **generation_kwargs,
-                        )
-                        generation_output = model_output.choices[
-                            0
-                        ].message.content.strip()
-                    break
-                except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                    sleep(1)
-            else:
-                raise InvalidBenchmark("OpenAI API is not available")
-
-            self.cache[max_tokens_str][prompt] = generation_output
-            with self.cache_path.open("w") as f:
-                json.dump(self.cache, f, indent=4)
+            raise InvalidBenchmark("OpenAI API is not available")
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)

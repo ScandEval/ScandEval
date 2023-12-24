@@ -9,7 +9,7 @@ ______________________________________________________________________
 [![Paper](https://img.shields.io/badge/arXiv-2304.00906-b31b1b.svg)](https://arxiv.org/abs/2304.00906)
 [![License](https://img.shields.io/github/license/ScandEval/ScandEval)](https://github.com/ScandEval/ScandEval/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/ScandEval/ScandEval)](https://github.com/ScandEval/ScandEval/commits/main)
-[![Code Coverage](https://img.shields.io/badge/Coverage-72%25-yellow.svg)](https://github.com/ScandEval/ScandEval/tree/main/tests)
+[![Code Coverage](https://img.shields.io/badge/Coverage-73%25-yellow.svg)](https://github.com/ScandEval/ScandEval/tree/main/tests)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](https://github.com/ScandEval/ScandEval/blob/main/CODE_OF_CONDUCT.md)
 
 
@@ -108,108 +108,3 @@ If you want to cite the framework then feel free to use this:
 ## Remarks
 The image used in the logo has been created by the amazing [Scandinavia and the
 World](https://satwcomic.com/) team. Go check them out!
-
-
-## Project structure
-```
-.
-├── .github
-│   └── workflows
-│       └── ci.yaml
-├── .gitignore
-├── .pre-commit-config.yaml
-├── CHANGELOG.md
-├── LICENSE
-├── README.md
-├── docs
-├── gfx
-│   └── scandeval.png
-├── makefile
-├── poetry.lock
-├── poetry.toml
-├── pyproject.toml
-├── src
-│   ├── scandeval
-│   │   ├── __init__.py
-│   │   ├── benchmark_config_factory.py
-│   │   ├── benchmark_dataset.py
-│   │   ├── benchmarker.py
-│   │   ├── callbacks.py
-│   │   ├── cli.py
-│   │   ├── config.py
-│   │   ├── dataset_configs.py
-│   │   ├── dataset_factory.py
-│   │   ├── dataset_tasks.py
-│   │   ├── enums.py
-│   │   ├── exceptions.py
-│   │   ├── finetuning.py
-│   │   ├── generation.py
-│   │   ├── languages.py
-│   │   ├── model_config.py
-│   │   ├── model_loading.py
-│   │   ├── model_setups
-│   │   │   ├── __init__.py
-│   │   │   ├── fresh.py
-│   │   │   ├── hf.py
-│   │   │   ├── local.py
-│   │   │   ├── openai.py
-│   │   │   └── utils.py
-│   │   ├── named_entity_recognition.py
-│   │   ├── openai_models.py
-│   │   ├── protocols.py
-│   │   ├── question_answering.py
-│   │   ├── question_answering_trainer.py
-│   │   ├── scores.py
-│   │   ├── sequence_classification.py
-│   │   ├── speed_benchmark.py
-│   │   ├── text_to_text.py
-│   │   ├── types.py
-│   │   └── utils.py
-│   └── scripts
-│       ├── create_angry_tweets.py
-│       ├── create_dane.py
-│       ├── create_mim_gold_ner.py
-│       ├── create_mlsum.py
-│       ├── create_no_sammendrag.py
-│       ├── create_nordjylland_news.py
-│       ├── create_norec.py
-│       ├── create_norne.py
-│       ├── create_rrn.py
-│       ├── create_scala.py
-│       ├── create_scandiqa.py
-│       ├── create_suc3.py
-│       ├── create_swedn.py
-│       ├── create_swerec.py
-│       ├── create_wiki_lingua_nl.py
-│       ├── create_wikiann_fo.py
-│       ├── fill_in_missing_model_metadata.py
-│       ├── fix_dot_env_file.py
-│       ├── load_ud_pos.py
-│       └── versioning.py
-└── tests
-    ├── __init__.py
-    ├── conftest.py
-    ├── test_benchmark_config_factory.py
-    ├── test_benchmark_dataset.py
-    ├── test_benchmarker.py
-    ├── test_callbacks.py
-    ├── test_cli.py
-    ├── test_config.py
-    ├── test_dataset_configs.py
-    ├── test_dataset_factory.py
-    ├── test_dataset_tasks.py
-    ├── test_enums.py
-    ├── test_exceptions.py
-    ├── test_languages.py
-    ├── test_model_config.py
-    ├── test_model_loading.py
-    ├── test_named_entity_recognition.py
-    ├── test_openai_models.py
-    ├── test_question_answering.py
-    ├── test_question_answering_trainer.py
-    ├── test_scores.py
-    ├── test_sequence_classification.py
-    ├── test_speed_benchmark.py
-    ├── test_types.py
-    └── test_utils.py
-```

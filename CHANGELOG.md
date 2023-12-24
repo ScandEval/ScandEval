@@ -9,10 +9,27 @@ and this project adheres to
 
 
 ## [Unreleased]
+### Added
+- Now caches the completions of open source generative models, which effectively makes
+  benchmarking of these 10x faster. We cannot store all logits for storage reasons (it
+  quickly gets >100GB in that case), so we instead store the top-100 logits. We thus
+  assume that (a) these are the only logits needed, and (b) that the generations don't
+  change. We argue that (a) is the case since we only use the logits in classification
+  tasks, in which case we only use the first token anyway. Further, since we're using
+  a temperature of 0 anyway, the generations will be as close to deterministic as
+  possible (up to small rounding fluctuations of logits, which is negligible). This is
+  a breaking change, since it is not compatible with the previous way we cached OpenAI
+  model outputs.
+- Added a new `--clear-model-cache` flag, which removes the cached models after
+  finishing the benchmarking of each model, to save disk space. This doesn't remove the
+  cached model outputs or datasets.
+
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
   since we do not support the benchmarking of these yet. This will be added back in as
   soon as we support them.
+- Now catches `OSError`s when loading Hugging Face model configurations, which happen
+  when there is no `config.json` file in the model repo.
 
 
 ## [v8.2.1] - 2023-12-20

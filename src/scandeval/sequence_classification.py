@@ -284,8 +284,12 @@ class SequenceClassification(BenchmarkDataset):
             The predicted labels.
         """
         if "scores" in model_output:
+            if isinstance(model_output["scores"], tuple):
+                all_logprobs = torch.stack(model_output["scores"], dim=1)
+            else:
+                all_logprobs = model_output["scores"]
             return get_closest_logprobs_labels(
-                generation_logprobs=model_output["scores"],
+                generation_logprobs=all_logprobs,
                 tokenizer=tokenizer,
                 dataset_config=self.dataset_config,
             )
@@ -298,7 +302,7 @@ class SequenceClassification(BenchmarkDataset):
 
 
 def get_closest_logprobs_labels(
-    generation_logprobs: tuple[torch.Tensor],
+    generation_logprobs: torch.Tensor,
     tokenizer: Tokenizer,
     dataset_config: DatasetConfig,
 ) -> list[str]:
@@ -326,12 +330,11 @@ def get_closest_logprobs_labels(
         dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
     ]
 
-    # Shape: [batch_size, num_generated_tokens, vocab_size]
-    all_logprobs = torch.stack(generation_logprobs, dim=1)
-
     # Shape: [batch_size, num_candidate_labels]
     pred_logprobs = torch.empty(
-        all_logprobs.shape[0], len(candidate_labels), device=all_logprobs.device
+        generation_logprobs.shape[0],
+        len(candidate_labels),
+        device=generation_logprobs.device,
     )
 
     for idx, candidate_label in enumerate(candidate_labels):
@@ -341,7 +344,7 @@ def get_closest_logprobs_labels(
             [candidate_label.lower()], add_special_tokens=False
         )["input_ids"]
         candidate_label_id: int = candidate_label_ids[0][0]
-        pred_logprobs[:, idx] = all_logprobs[:, 0, candidate_label_id]
+        pred_logprobs[:, idx] = generation_logprobs[:, 0, candidate_label_id]
 
     # Shape: [batch_size,]
     predicted_label_ids = pred_logprobs.argmax(dim=1)
