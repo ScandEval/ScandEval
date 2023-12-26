@@ -542,10 +542,10 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-SCANDIQA_NO_CONFIG = DatasetConfig(
-    name="scandiqa-no",
-    pretty_name="the Norwegian part of truncated version of ScandiQA",
-    huggingface_id="ScandEval/scandiqa-no-mini",
+NORQUAD_CONFIG = DatasetConfig(
+    name="norquad",
+    pretty_name="the truncated version of NorQuAD",
+    huggingface_id="ScandEval/norquad-mini",
     task=QA,
     languages=[NB, NN],
     prompt_template="{text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",

@@ -26,6 +26,8 @@ and this project adheres to
 - Added the following new datasets:
     - `fone`, a Faroese NER dataset, which replaces the previous `wikiann-fo` dataset.
     - `dansk`, a Danish NER dataset, which complements the previous `dane` dataset.
+    - `norquad`, a Norwegian question answering dataset, which replaces the previous
+      `scandiqa-no` dataset.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
