@@ -11,7 +11,7 @@ and this project adheres to
 ## [Unreleased]
 ### Added
 - Now caches the completions of open source generative models, which effectively makes
-  benchmarking of these 10x faster. We cannot store all logits for storage reasons (it
+  benchmarking of these ~33% faster. We cannot store all logits for storage reasons (it
   quickly gets >100GB in that case), so we instead store the top-100 logits. We thus
   assume that (a) these are the only logits needed, and (b) that the generations don't
   change. We argue that (a) is the case since we only use the logits in classification
@@ -23,6 +23,9 @@ and this project adheres to
 - Added a new `--clear-model-cache` flag, which removes the cached models after
   finishing the benchmarking of each model, to save disk space. This doesn't remove the
   cached model outputs or datasets.
+- Added the following new datasets:
+    - `fone`, a Faroese NER dataset, which replaces the previous `wikiann-fo` dataset.
+    - `dansk`, a Danish NER dataset, which complements the previous `dane` dataset.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,

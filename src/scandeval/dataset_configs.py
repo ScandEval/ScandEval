@@ -223,6 +223,29 @@ DANE_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
+DANSK_CONFIG = DatasetConfig(
+    name="dansk",
+    pretty_name="the truncated version of DANSK",
+    huggingface_id="ScandEval/dansk-mini",
+    task=NER,
+    languages=[DA],
+    prompt_prefix="Følgende er sætninger og JSON-ordbøger med de navngivne enheder, "
+    "som forekommer i den givne sætning.",
+    prompt_template="Sætning: {text}\nNavngivne enheder: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "sted",
+        "i-loc": "sted",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "diverse",
+        "i-misc": "diverse",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
 NORNE_NB_CONFIG = DatasetConfig(
     name="norne-nb",
     pretty_name="the truncated version of the Bokmål part of NorNE",
@@ -292,10 +315,10 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-WIKIANN_FO_CONFIG = DatasetConfig(
-    name="wikiann-fo",
-    pretty_name="the truncated version of the Faroese part of WikiANN",
-    huggingface_id="ScandEval/wikiann-fo-mini",
+FONE_CONFIG = DatasetConfig(
+    name="fone",
+    pretty_name="the truncated version of FoNE",
+    huggingface_id="ScandEval/fone-mini",
     task=NER,
     languages=[FO],
     prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nevndar "
