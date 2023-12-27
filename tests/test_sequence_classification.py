@@ -8,6 +8,7 @@ from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
     DUTCH_SOCIAL_CONFIG,
+    MMLU_DA_CONFIG,
     NOREC_CONFIG,
     SB10K_CONFIG,
     SCALA_DA_CONFIG,
@@ -43,6 +44,7 @@ from scandeval.sequence_classification import SequenceClassification
         SCALA_DE_CONFIG,
         SCALA_NL_CONFIG,
         SCALA_EN_CONFIG,
+        MMLU_DA_CONFIG,
     ],
     ids=[
         "angry-tweets",
@@ -60,6 +62,7 @@ from scandeval.sequence_classification import SequenceClassification
         "scala-de",
         "scala-nl",
         "scala-en",
+        "mmlu-da",
     ],
 )
 def benchmark_dataset(
