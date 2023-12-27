@@ -111,10 +111,10 @@ def benchmark_dataset(
 
 def test_encoder_benchmarking(benchmark_dataset, model_id):
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
-        with does_not_raise():
+        with pytest.raises(InvalidBenchmark):
             benchmark_dataset.benchmark(model_id)
     else:
-        with pytest.raises(InvalidBenchmark):
+        with does_not_raise():
             benchmark_dataset.benchmark(model_id)
 
 
