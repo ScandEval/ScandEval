@@ -78,8 +78,8 @@ def main():
                 ner_tag = ontonotes_tag_to_conll_tag_mapping[ontonotes_ner_tag]
                 if ner_tag != "O":
                     ner_tag = f"I-{ner_tag}" if in_a_named_entity else f"B-{ner_tag}"
+                    in_a_named_entity = True
                 ner_tag_list.append(ner_tag)
-                in_a_named_entity = True
             else:
                 ner_tag_list.append("O")
                 in_a_named_entity = False
