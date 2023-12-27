@@ -56,17 +56,33 @@ def main():
 
     # Create validation split
     val_size = 256
-    val_df = df.sample(n=val_size, random_state=4242)
+    val_df = df.sample(
+        n=val_size,
+        random_state=4242,
+        weights=[5.0 if len(set(labels)) > 1 else 1.0 for labels in df["labels"]],
+    )
 
     # Create test split
     test_size = 2048
     filtered_df = df[~df.index.isin(val_df.index)]
-    test_df = filtered_df.sample(n=test_size, random_state=4242)
+    test_df = filtered_df.sample(
+        n=test_size,
+        random_state=4242,
+        weights=[
+            5.0 if len(set(labels)) > 1 else 1.0 for labels in filtered_df["labels"]
+        ],
+    )
 
     # Create train split
     train_size = 1024
     filtered_df = filtered_df[~filtered_df.index.isin(test_df.index)]
-    train_df = filtered_df.sample(n=train_size, random_state=4242)
+    train_df = filtered_df.sample(
+        n=train_size,
+        random_state=4242,
+        weights=[
+            5.0 if len(set(labels)) > 1 else 1.0 for labels in filtered_df["labels"]
+        ],
+    )
 
     # Reset the index
     train_df = train_df.reset_index(drop=True)
