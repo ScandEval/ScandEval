@@ -31,6 +31,9 @@ and this project adheres to
     - `mmlu-da`, `mmlu-sv`, `mmlu-de`,  and `mmlu-nl`, being GPT-3.5-turbo translated
       versions of MMLU, the multiple choice dataset testing the knowledge of generative
       models.
+    - `hellaswag-da`, `hellaswag-sv`, `hellaswag-de`,  and `hellaswag-nl`, being
+      GPT-3.5-turbo translated versions of HellaSwag, the multiple choice dataset
+      testing the common sense reasoning of generative models.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,

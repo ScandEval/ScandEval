@@ -8,6 +8,10 @@ from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
     DUTCH_SOCIAL_CONFIG,
+    HELLASWAG_DA_CONFIG,
+    HELLASWAG_DE_CONFIG,
+    HELLASWAG_NL_CONFIG,
+    HELLASWAG_SV_CONFIG,
     MMLU_DA_CONFIG,
     MMLU_DE_CONFIG,
     MMLU_NL_CONFIG,
@@ -51,6 +55,10 @@ from scandeval.sequence_classification import SequenceClassification
         MMLU_SV_CONFIG,
         MMLU_DE_CONFIG,
         MMLU_NL_CONFIG,
+        HELLASWAG_DA_CONFIG,
+        HELLASWAG_SV_CONFIG,
+        HELLASWAG_DE_CONFIG,
+        HELLASWAG_NL_CONFIG,
     ],
     ids=[
         "angry-tweets",
@@ -72,6 +80,10 @@ from scandeval.sequence_classification import SequenceClassification
         "mmlu-sv",
         "mmlu-de",
         "mmlu-nl",
+        "hellaswag-da",
+        "hellaswag-sv",
+        "hellaswag-de",
+        "hellaswag-nl",
     ],
 )
 def benchmark_dataset(

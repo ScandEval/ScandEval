@@ -751,6 +751,58 @@ MMLU_NL_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+HELLASWAG_DA_CONFIG = DatasetConfig(
+    name="mmlu-da",
+    pretty_name="the Danish part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-da-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[DA],
+    prompt_prefix="",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
+HELLASWAG_SV_CONFIG = DatasetConfig(
+    name="mmlu-sv",
+    pretty_name="the Swedish part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-sv-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[SV],
+    prompt_prefix="",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
+HELLASWAG_DE_CONFIG = DatasetConfig(
+    name="mmlu-de",
+    pretty_name="the German part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-de-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[DE],
+    prompt_prefix="",
+    prompt_template="{text}\nAntwort: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
+HELLASWAG_NL_CONFIG = DatasetConfig(
+    name="mmlu-nl",
+    pretty_name="the Dutch part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-nl-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[NL],
+    prompt_prefix="",
+    prompt_template="{text}\nAntwoord: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
 # TODO: Norwegian multiple choice
 # TODO: Icelandic multiple choice
 # TODO: Faroese multiple choice
