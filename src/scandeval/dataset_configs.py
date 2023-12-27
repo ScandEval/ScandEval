@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .config import DatasetConfig
-from .dataset_tasks import LA, NER, QA, SENT, SPEED, SUMM
+from .dataset_tasks import KNOW, LA, NER, QA, SENT, SPEED, SUMM
 from .languages import DA, DE, EN, FO, IS, NB, NL, NN, SV, get_all_languages
 
 
@@ -695,6 +695,22 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
 )
 
 # TODO: Faroese summarization
+
+
+### KNOWLEDGE DATASETS ###
+
+MMLU_DA_CONFIG = DatasetConfig(
+    name="mmlu-da",
+    pretty_name="the Danish part of the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-da-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
 
 
 ### SPEED ESTIMATION DATASETS ###

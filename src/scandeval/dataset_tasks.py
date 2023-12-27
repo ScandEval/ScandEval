@@ -134,25 +134,24 @@ SUMM = DatasetTask(
 )
 
 
-MULTIPLE_CHOICE = DatasetTask(
-    name="multiple-choice",
-    supertask="multiple-choice",
-    metrics=[  # Not sure
+KNOW = DatasetTask(
+    name="knowledge",
+    supertask="sequence-classification",
+    metrics=[
+        MetricConfig(
+            name="accuracy",
+            pretty_name="Accuracy",
+            huggingface_id="accuracy",
+            results_key="accuracy",
+        ),
         MetricConfig(
             name="mcc",
             pretty_name="Matthew's Correlation Coefficient",
             huggingface_id="matthews_correlation",
             results_key="matthews_correlation",
         ),
-        MetricConfig(
-            name="macro_f1",
-            pretty_name="Macro-average F1-score",
-            huggingface_id="f1",
-            results_key="f1",
-            compute_kwargs=dict(average="macro"),
-        ),
     ],
-    labels=[],  # Maybe add?
+    labels=["a", "b", "c", "d"],
 )
 
 

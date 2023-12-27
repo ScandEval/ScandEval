@@ -13,7 +13,11 @@ from .model_setups import (
     OpenAIModelSetup,
 )
 from .protocols import GenerativeModel, ModelSetup, Tokenizer
-from .utils import GENERATIVE_DATASET_SUPERTASKS
+from .utils import (
+    GENERATIVE_DATASET_SUPERTASKS,
+    GENERATIVE_DATASET_TASKS,
+    model_is_generative,
+)
 
 
 def load_model(
@@ -43,28 +47,23 @@ def load_model(
     setup_class = model_type_to_model_setup_mapping[model_config.model_type]
     setup = setup_class(benchmark_config=benchmark_config)
 
-    error_message = (
-        f"Cannot benchmark non-generative model {model_config.model_id!r} on "
-        f"generative task {dataset_config.task.name!r}."
+    tokenizer, model = setup.load_model(
+        model_config=model_config, dataset_config=dataset_config
     )
-
-    error_to_raise = None
-    model = None
-    try:
-        tokenizer, model = setup.load_model(
-            model_config=model_config, dataset_config=dataset_config
-        )
-    except InvalidBenchmark as e:
-        error_to_raise = e
 
     # Refuse to benchmark non-generative models on generative tasks
     if (
-        dataset_config.task.supertask in GENERATIVE_DATASET_SUPERTASKS
-        and not isinstance(model, GenerativeModel)
+        (
+            dataset_config.task.supertask in GENERATIVE_DATASET_SUPERTASKS
+            or dataset_config.task.name in GENERATIVE_DATASET_TASKS
+        )
+        and model is not None
+        and not model_is_generative(model=model)
     ):
-        raise InvalidBenchmark(error_message)
-    elif error_to_raise is not None:
-        raise error_to_raise
+        raise InvalidBenchmark(
+            f"Cannot benchmark non-generative model {model_config.model_id!r} on "
+            f"generative task {dataset_config.task.name!r}."
+        )
 
     # TODO: XMOD model setup: https://huggingface.co/facebook/xmod-base#input-language
 
