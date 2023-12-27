@@ -28,6 +28,9 @@ and this project adheres to
     - `dansk`, a Danish NER dataset, which complements the previous `dane` dataset.
     - `norquad`, a Norwegian question answering dataset, which replaces the previous
       `scandiqa-no` dataset.
+    - `mmlu-da`, `mmlu-sv`, `mmlu-de`,  and `mmlu-nl`, being GPT-3.5-turbo translated
+      versions of MMLU, the multiple choice dataset testing the knowledge of generative
+      models.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
