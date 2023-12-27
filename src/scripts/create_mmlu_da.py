@@ -1,7 +1,7 @@
 """Create the MMLU-da-mini knowledge dataset and upload it to the HF Hub."""
 
 import pandas as pd
-from datasets import Dataset, DatasetDict, load_dataset
+from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
 from sklearn.model_selection import train_test_split
@@ -79,9 +79,9 @@ def main() -> None:
 
     # Collect datasets in a dataset dictionary
     dataset = DatasetDict(
-        train=Dataset.from_pandas(train_df, split="train"),
-        val=Dataset.from_pandas(val_df, split="val"),
-        test=Dataset.from_pandas(test_df, split="test"),
+        train=Dataset.from_pandas(train_df, split=Split.TRAIN),
+        val=Dataset.from_pandas(val_df, split=Split.VALIDATION),
+        test=Dataset.from_pandas(test_df, split=Split.TEST),
     )
 
     # Create dataset ID
