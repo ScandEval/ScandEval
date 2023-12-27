@@ -35,7 +35,6 @@ def main() -> None:
     df["category"] = df["id"].str.split("/").str[0]
 
     # Make a `text` column with all the options in it
-    # TODO: These newlines are being removed?
     df["text"] = [
         f"{row['instruction']}\n"
         "Svarmuligheder:\n"
