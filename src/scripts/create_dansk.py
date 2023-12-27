@@ -64,7 +64,7 @@ def main():
 
         token_list: list[str] = list()
         ner_tag_list: list[str] = list()
-        in_a_named_entity = False
+        in_named_entity = None
         for token in tokens:
             token_str = sample["text"][token.start : token.end]
             token_list.append(token_str)
@@ -77,18 +77,32 @@ def main():
                 ontonotes_ner_tag = matched_named_entities[0].label
                 ner_tag = ontonotes_tag_to_conll_tag_mapping[ontonotes_ner_tag]
                 if ner_tag != "O":
-                    ner_tag = f"I-{ner_tag}" if in_a_named_entity else f"B-{ner_tag}"
-                    in_a_named_entity = True
+                    ner_tag = (
+                        f"I-{ner_tag}" if in_named_entity == ner_tag else f"B-{ner_tag}"
+                    )
+                    in_named_entity = ner_tag
                 ner_tag_list.append(ner_tag)
             else:
                 ner_tag_list.append("O")
-                in_a_named_entity = False
+                in_named_entity = None
 
-        assert len(token_list) == len(ner_tag_list)
+        # Sanity checks
+        assert len(token_list) == len(
+            ner_tag_list
+        ), "The number of tokens and named entity tags are not equal."
+        invalid_i_ner_tags = [
+            ner_tag
+            for token_idx, ner_tag in enumerate(ner_tag_list)
+            if ner_tag.startswith("I-")
+            and ner_tag_list[token_idx - 1] not in {f"B-{ner_tag[2:]}", ner_tag}
+        ]
+        assert (
+            not invalid_i_ner_tags
+        ), f"The following I- tags are invalid: {invalid_i_ner_tags}"
 
         return dict(text=sample["text"], tokens=token_list, labels=ner_tag_list)
 
-    dataset = dataset.map(extract_tokens_and_ner_tags, num_proc=4)
+    dataset = dataset.map(extract_tokens_and_ner_tags, num_proc=1)
 
     # Convert the dataset to a dataframe
     train_df = dataset["train"].to_pandas()
