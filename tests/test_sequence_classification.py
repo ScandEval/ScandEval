@@ -9,6 +9,9 @@ from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
     DUTCH_SOCIAL_CONFIG,
     MMLU_DA_CONFIG,
+    MMLU_DE_CONFIG,
+    MMLU_NL_CONFIG,
+    MMLU_SV_CONFIG,
     NOREC_CONFIG,
     SB10K_CONFIG,
     SCALA_DA_CONFIG,
@@ -45,6 +48,9 @@ from scandeval.sequence_classification import SequenceClassification
         SCALA_NL_CONFIG,
         SCALA_EN_CONFIG,
         MMLU_DA_CONFIG,
+        MMLU_SV_CONFIG,
+        MMLU_DE_CONFIG,
+        MMLU_NL_CONFIG,
     ],
     ids=[
         "angry-tweets",
@@ -63,6 +69,9 @@ from scandeval.sequence_classification import SequenceClassification
         "scala-nl",
         "scala-en",
         "mmlu-da",
+        "mmlu-sv",
+        "mmlu-de",
+        "mmlu-nl",
     ],
 )
 def benchmark_dataset(
