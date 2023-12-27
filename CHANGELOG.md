@@ -44,6 +44,11 @@ and this project adheres to
   soon as we support them.
 - Now catches `OSError`s when loading Hugging Face model configurations, which happen
   when there is no `config.json` file in the model repo.
+- When sampling few-shot examples for question answering tasks we previously sampled
+  among examples with context length less than 1024 characters, to keep the prompt
+  short. This is too small for some datasets, so now we dynamically set this threshold
+  based on the dataset itself, starting from 512 and doubling until we have at least
+  the number of desired few-shot examples to choose from.
 
 
 ## [v8.2.1] - 2023-12-20
