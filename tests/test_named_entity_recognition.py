@@ -17,7 +17,9 @@ from scandeval.dataset_configs import (
     NORNE_NN_CONFIG,
     SUC3_CONFIG,
 )
+from scandeval.exceptions import InvalidBenchmark
 from scandeval.named_entity_recognition import NamedEntityRecognition
+from scandeval.utils import GENERATIVE_DATASET_TASKS
 
 
 @pytest.fixture(
@@ -57,8 +59,12 @@ def benchmark_dataset(
 
 
 def test_encoder_benchmarking(benchmark_dataset, model_id):
-    with does_not_raise():
-        benchmark_dataset.benchmark(model_id)
+    if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
+        with does_not_raise():
+            benchmark_dataset.benchmark(model_id)
+    else:
+        with pytest.raises(InvalidBenchmark):
+            benchmark_dataset.benchmark(model_id)
 
 
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
