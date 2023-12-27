@@ -31,6 +31,9 @@ and this project adheres to
     - `mmlu-da`, `mmlu-sv`, `mmlu-de`,  and `mmlu-nl`, being GPT-3.5-turbo translated
       versions of MMLU, the multiple choice dataset testing the knowledge of generative
       models.
+    - `arc-da`, `arc-sv`, `arc-de`,  and `arc-nl`, being GPT-3.5-turbo translated
+      versions of HellaSwag, the multiple choice dataset testing the knowledge of
+      grade-school science questions.
     - `hellaswag-da`, `hellaswag-sv`, `hellaswag-de`,  and `hellaswag-nl`, being
       GPT-3.5-turbo translated versions of HellaSwag, the multiple choice dataset
       testing the common sense reasoning of generative models.

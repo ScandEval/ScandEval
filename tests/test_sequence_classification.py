@@ -7,6 +7,10 @@ import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
+    ARC_DA_CONFIG,
+    ARC_DE_CONFIG,
+    ARC_NL_CONFIG,
+    ARC_SV_CONFIG,
     DUTCH_SOCIAL_CONFIG,
     HELLASWAG_DA_CONFIG,
     HELLASWAG_DE_CONFIG,
@@ -59,6 +63,10 @@ from scandeval.sequence_classification import SequenceClassification
         HELLASWAG_SV_CONFIG,
         HELLASWAG_DE_CONFIG,
         HELLASWAG_NL_CONFIG,
+        ARC_DA_CONFIG,
+        ARC_SV_CONFIG,
+        ARC_DE_CONFIG,
+        ARC_NL_CONFIG,
     ],
     ids=[
         "angry-tweets",
@@ -84,6 +92,10 @@ from scandeval.sequence_classification import SequenceClassification
         "hellaswag-sv",
         "hellaswag-de",
         "hellaswag-nl",
+        "arc-da",
+        "arc-sv",
+        "arc-de",
+        "arc-nl",
     ],
 )
 def benchmark_dataset(

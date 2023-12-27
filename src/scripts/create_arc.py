@@ -1,17 +1,16 @@
-"""Create the MMLU-mini datasets and upload them to the HF Hub."""
+"""Create the ARC-mini datasets and upload them to the HF Hub."""
 
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
-from sklearn.model_selection import train_test_split
 
 
 def main() -> None:
-    """Create the MMLU-mini datasets and upload them to the HF Hub."""
+    """Create the ARC-mini datasets and upload them to the HF Hub."""
 
     # Define the base download URL
-    repo_id = "alexandrainst/m_mmlu"
+    repo_id = "alexandrainst/m_arc"
 
     # Create a mapping with the word "Choices" in different languages
     choices_mapping = dict(
@@ -34,55 +33,69 @@ def main() -> None:
         assert isinstance(val_df, pd.DataFrame)
         assert isinstance(test_df, pd.DataFrame)
 
-        # Concatenate the splits
-        df = pd.concat([train_df, val_df, test_df], ignore_index=True)
-
         # Rename the columns
-        df.rename(columns=dict(answer="label"), inplace=True)
+        train_df.rename(columns=dict(answer="label"), inplace=True)
+        val_df.rename(columns=dict(answer="label"), inplace=True)
+        test_df.rename(columns=dict(answer="label"), inplace=True)
 
-        # Extract the category as a column
-        df["category"] = df["id"].str.split("/").str[0]
+        # Remove all samples with a non-null value of `option_e`
+        train_df = train_df[train_df["option_e"].isnull()]
+        val_df = val_df[val_df["option_e"].isnull()]
+        test_df = test_df[test_df["option_e"].isnull()]
 
         # Make a `text` column with all the options in it
-        df["text"] = [
+        train_df["text"] = [
             f"{row['instruction']}\n"
             f"{choices_mapping[language]}:\n"
             f"A: {row['option_a']}\n"
             f"B: {row['option_b']}\n"
             f"C: {row['option_c']}\n"
             f"D: {row['option_d']}"
-            for _, row in df.iterrows()
+            for _, row in train_df.iterrows()
+        ]
+        val_df["text"] = [
+            f"{row['instruction']}\n"
+            f"{choices_mapping[language]}:\n"
+            f"A: {row['option_a']}\n"
+            f"B: {row['option_b']}\n"
+            f"C: {row['option_c']}\n"
+            f"D: {row['option_d']}"
+            for _, row in val_df.iterrows()
+        ]
+        test_df["text"] = [
+            f"{row['instruction']}\n"
+            f"{choices_mapping[language]}:\n"
+            f"A: {row['option_a']}\n"
+            f"B: {row['option_b']}\n"
+            f"C: {row['option_c']}\n"
+            f"D: {row['option_d']}"
+            for _, row in test_df.iterrows()
         ]
 
-        # Only keep the `text`, `label` and `category` columns
-        df = df[["text", "label", "category"]]
+        # Only keep the `text` and `label` columns
+        train_df = train_df[["text", "label"]]
+        val_df = val_df[["text", "label"]]
+        test_df = test_df[["text", "label"]]
 
         # Remove duplicates
-        df.drop_duplicates(inplace=True)
-        df.reset_index(drop=True, inplace=True)
+        train_df.drop_duplicates(inplace=True)
+        train_df.reset_index(drop=True, inplace=True)
+        val_df.drop_duplicates(inplace=True)
+        val_df.reset_index(drop=True, inplace=True)
+        test_df.drop_duplicates(inplace=True)
+        test_df.reset_index(drop=True, inplace=True)
 
         # Create validation split
         val_size = 256
-        traintest_arr, val_arr = train_test_split(
-            df, test_size=val_size, random_state=4242, stratify=df.category
-        )
-        traintest_df = pd.DataFrame(traintest_arr, columns=df.columns)
-        val_df = pd.DataFrame(val_arr, columns=df.columns)
+        val_df = val_df.sample(n=val_size, random_state=4242)
 
         # Create test split
-        test_size = 2048
-        train_arr, test_arr = train_test_split(
-            traintest_df,
-            test_size=test_size,
-            random_state=4242,
-            stratify=traintest_df.category,
-        )
-        train_df = pd.DataFrame(train_arr, columns=df.columns)
-        test_df = pd.DataFrame(test_arr, columns=df.columns)
+        test_size = 1024
+        test_df = test_df.sample(n=test_size, random_state=4242)
 
         # Create train split
         train_size = 1024
-        train_df = train_df.sample(train_size, random_state=4242)
+        train_df = train_df.sample(n=train_size, random_state=4242)
 
         # Reset the index
         train_df = train_df.reset_index(drop=True)
@@ -97,7 +110,7 @@ def main() -> None:
         )
 
         # Create dataset ID
-        dataset_id = f"ScandEval/mmlu-{language}-mini"
+        dataset_id = f"ScandEval/arc-{language}-mini"
 
         # Remove the dataset from Hugging Face Hub if it already exists
         try:

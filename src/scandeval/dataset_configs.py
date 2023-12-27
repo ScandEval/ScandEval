@@ -803,9 +803,61 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-# TODO: Norwegian multiple choice
-# TODO: Icelandic multiple choice
-# TODO: Faroese multiple choice
+ARC_DA_CONFIG = DatasetConfig(
+    name="arc-da",
+    pretty_name="the Danish part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-da-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[DA],
+    prompt_prefix="",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+ARC_SV_CONFIG = DatasetConfig(
+    name="arc-sv",
+    pretty_name="the Swedish part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-sv-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[SV],
+    prompt_prefix="",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+ARC_DE_CONFIG = DatasetConfig(
+    name="arc-de",
+    pretty_name="the German part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-de-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[DE],
+    prompt_prefix="",
+    prompt_template="{text}\nAntwort: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+ARC_NL_CONFIG = DatasetConfig(
+    name="arc-nl",
+    pretty_name="the Dutch part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-nl-mini",
+    task=MULTIPLE_CHOICE,
+    languages=[NL],
+    prompt_prefix="",
+    prompt_template="{text}\nAntwoord: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+# TODO: Norwegian multiple choice datasets
+# TODO: Icelandic multiple choice datasets
+# TODO: Faroese multiple choice datasets
 
 
 ### SPEED ESTIMATION DATASETS ###
