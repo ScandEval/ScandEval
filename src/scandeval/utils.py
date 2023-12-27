@@ -40,7 +40,7 @@ GENERATIVE_MODEL_TASKS = [
 
 
 GENERATIVE_DATASET_TASKS = [
-    "knowledge",
+    "multiple-choice",
 ]
 
 

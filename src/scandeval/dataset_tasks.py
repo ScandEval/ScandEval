@@ -134,8 +134,8 @@ SUMM = DatasetTask(
 )
 
 
-KNOW = DatasetTask(
-    name="knowledge",
+MULTIPLE_CHOICE = DatasetTask(
+    name="multiple-choice",
     supertask="sequence-classification",
     metrics=[
         MetricConfig(
