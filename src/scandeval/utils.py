@@ -40,7 +40,8 @@ GENERATIVE_MODEL_TASKS = [
 
 
 GENERATIVE_DATASET_TASKS = [
-    "multiple-choice",
+    "knowledge",
+    "common-sense-reasoning",
 ]
 
 
