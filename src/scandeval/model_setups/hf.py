@@ -237,6 +237,11 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
+        # Set `torch_dtype` based on
+        using_cuda = self.benchmark_config.device != torch.device("cuda")
+        torch_dtype_is_set = config.to_dict().get("torch_dtype") is not None
+        torch_dtype = "auto" if using_cuda and not torch_dtype_is_set else None
+
         model_kwargs = dict(
             config=config,
             from_flax=from_flax,
@@ -246,7 +251,7 @@ class HFModelSetup:
             cache_dir=model_config.model_cache_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             quantization_config=bnb_config,
-            torch_dtype=None if config.to_dict().get("torch_dtype") is None else "auto",
+            torch_dtype=torch_dtype,
             use_flash_attention_2=use_flash_attention,
         )
 
