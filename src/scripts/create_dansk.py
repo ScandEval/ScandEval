@@ -71,7 +71,7 @@ def main():
             matched_named_entities = [
                 named_entity
                 for named_entity in named_entities
-                if named_entity.start == token.start and named_entity.end == token.end
+                if named_entity.start <= token.start and named_entity.end >= token.end
             ]
             if matched_named_entities:
                 ontonotes_ner_tag = matched_named_entities[0].label
@@ -80,7 +80,9 @@ def main():
                     ner_tag = (
                         f"I-{ner_tag}" if in_named_entity == ner_tag else f"B-{ner_tag}"
                     )
-                    in_named_entity = ner_tag
+                    in_named_entity = ner_tag[2:]
+                else:
+                    in_named_entity = None
                 ner_tag_list.append(ner_tag)
             else:
                 ner_tag_list.append("O")
