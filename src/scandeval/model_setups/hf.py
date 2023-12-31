@@ -42,11 +42,11 @@ class HFModelSetup:
     """Model setup for Hugging Face Hub models.
 
     Args:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
 
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
     """
 
@@ -57,12 +57,11 @@ class HFModelSetup:
         """Check if a model ID denotes an OpenAI model.
 
         Args:
-            model_id (str):
+            model_id :
                 The model ID.
 
         Returns:
-            bool:
-                Whether the model exists on OpenAI.
+            Whether the model exists on OpenAI.
         """
         # Extract the revision from the model_id, if present
         model_id, revision = (
@@ -96,12 +95,11 @@ class HFModelSetup:
         """Fetches configuration for an OpenAI model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID of the model.
 
         Returns:
-            ModelConfig:
-                The model configuration.
+            The model configuration.
         """
         # Extract the revision from the model ID, if it is specified
         if "@" in model_id:
@@ -189,14 +187,13 @@ class HFModelSetup:
         """Load an OpenAI model.
 
         Args:
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
-            dataset_config (DatasetConfig):
+            dataset_config:
                 The dataset configuration.
 
         Returns:
-            pair of (tokenizer, model):
-                The tokenizer and model.
+            The tokenizer and model.
         """
         config: PretrainedConfig
         block_terminal_output()
@@ -237,11 +234,6 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
-        # Set `torch_dtype` based on
-        using_cuda = self.benchmark_config.device != torch.device("cuda")
-        torch_dtype_is_set = config.to_dict().get("torch_dtype") is not None
-        torch_dtype = "auto" if using_cuda and not torch_dtype_is_set else None
-
         model_kwargs = dict(
             config=config,
             from_flax=from_flax,
@@ -251,7 +243,7 @@ class HFModelSetup:
             cache_dir=model_config.model_cache_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             quantization_config=bnb_config,
-            torch_dtype=torch_dtype,
+            torch_dtype=self._get_torch_dtype(config=config),
             use_flash_attention_2=use_flash_attention,
         )
 
@@ -345,6 +337,21 @@ class HFModelSetup:
             model.to(self.benchmark_config.device)
 
         return tokenizer, model
+
+    def _get_torch_dtype(self, config: PretrainedConfig) -> str | None:
+        """Get the torch dtype, used for loading the model.
+
+        Args:
+            config (PretrainedConfig):
+                The Hugging Face model configuration.
+
+        Returns:
+            The torch dtype.
+        """
+        using_cuda = self.benchmark_config.device == torch.device("cuda")
+        torch_dtype_is_set = config.to_dict().get("torch_dtype") is not None
+        torch_dtype = "auto" if using_cuda and torch_dtype_is_set else None
+        return torch_dtype
 
     def _load_hf_model_config(
         self,
