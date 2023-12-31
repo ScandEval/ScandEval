@@ -2,10 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on
-[Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-and this project adheres to
-[Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
 ## [Unreleased]
@@ -34,6 +32,10 @@ and this project adheres to
       GPT-3.5-turbo. Machine translation is not adequate, of course, so see this as a
       first version of these kinds of evaluations, to get some benchmarks going asap.
 
+### Changed
+- Now compatible with`transformers >= 4.36.2`, and this is required now as they have
+  changed their generation API in a breaking manner.
+
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
   since we do not support the benchmarking of these yet. This will be added back in as
@@ -45,6 +47,7 @@ and this project adheres to
   short. This is too small for some datasets, so now we dynamically set this threshold
   based on the dataset itself, starting from 512 and doubling until we have at least
   the number of desired few-shot examples to choose from.
+- Now only sets `torch_dtype` is CUDA is available, as otherwise errors are caused.
 
 
 ## [v8.2.1] - 2023-12-20
