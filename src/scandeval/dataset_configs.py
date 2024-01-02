@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .config import DatasetConfig
-from .dataset_tasks import LA, NER, QA, SENT, SPEED, SUMM
+from .dataset_tasks import COMMON_SENSE, KNOW, LA, NER, QA, SENT, SPEED, SUMM
 from .languages import DA, DE, EN, FO, IS, NB, NL, NN, SV, get_all_languages
 
 
@@ -223,6 +223,29 @@ DANE_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
+DANSK_CONFIG = DatasetConfig(
+    name="dansk",
+    pretty_name="the truncated version of DANSK",
+    huggingface_id="ScandEval/dansk-mini",
+    task=NER,
+    languages=[DA],
+    prompt_prefix="Følgende er sætninger og JSON-ordbøger med de navngivne enheder, "
+    "som forekommer i den givne sætning.",
+    prompt_template="Sætning: {text}\nNavngivne enheder: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "sted",
+        "i-loc": "sted",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "diverse",
+        "i-misc": "diverse",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
 NORNE_NB_CONFIG = DatasetConfig(
     name="norne-nb",
     pretty_name="the truncated version of the Bokmål part of NorNE",
@@ -292,10 +315,10 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-WIKIANN_FO_CONFIG = DatasetConfig(
-    name="wikiann-fo",
-    pretty_name="the truncated version of the Faroese part of WikiANN",
-    huggingface_id="ScandEval/wikiann-fo-mini",
+FONE_CONFIG = DatasetConfig(
+    name="fone",
+    pretty_name="the truncated version of FoNE",
+    huggingface_id="ScandEval/fone-mini",
     task=NER,
     languages=[FO],
     prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nevndar "
@@ -519,10 +542,10 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-SCANDIQA_NO_CONFIG = DatasetConfig(
-    name="scandiqa-no",
-    pretty_name="the Norwegian part of truncated version of ScandiQA",
-    huggingface_id="ScandEval/scandiqa-no-mini",
+NORQUAD_CONFIG = DatasetConfig(
+    name="norquad",
+    pretty_name="the truncated version of NorQuAD",
+    huggingface_id="ScandEval/norquad-mini",
     task=QA,
     languages=[NB, NN],
     prompt_template="{text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
@@ -672,6 +695,176 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
 )
 
 # TODO: Faroese summarization
+
+
+### KNOWLEDGE DATASETS ###
+
+MMLU_DA_CONFIG = DatasetConfig(
+    name="mmlu-da",
+    pretty_name="the Danish part of the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-da-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
+MMLU_SV_CONFIG = DatasetConfig(
+    name="mmlu-sv",
+    pretty_name="the Swedish part of the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-sv-mini",
+    task=KNOW,
+    languages=[SV],
+    prompt_prefix="Följande är flervalsfrågor (med svar).",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
+MMLU_DE_CONFIG = DatasetConfig(
+    name="mmlu-de",
+    pretty_name="the German part of the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-de-mini",
+    task=KNOW,
+    languages=[DE],
+    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
+    prompt_template="{text}\nAntwort: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
+MMLU_NL_CONFIG = DatasetConfig(
+    name="mmlu-nl",
+    pretty_name="the Dutch part of the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-nl-mini",
+    task=KNOW,
+    languages=[NL],
+    prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
+    prompt_template="{text}\nAntwoord: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
+ARC_DA_CONFIG = DatasetConfig(
+    name="arc-da",
+    pretty_name="the Danish part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-da-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+ARC_SV_CONFIG = DatasetConfig(
+    name="arc-sv",
+    pretty_name="the Swedish part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-sv-mini",
+    task=KNOW,
+    languages=[SV],
+    prompt_prefix="Följande är flervalsfrågor (med svar).",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+ARC_DE_CONFIG = DatasetConfig(
+    name="arc-de",
+    pretty_name="the German part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-de-mini",
+    task=KNOW,
+    languages=[DE],
+    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
+    prompt_template="{text}\nAntwort: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+ARC_NL_CONFIG = DatasetConfig(
+    name="arc-nl",
+    pretty_name="the Dutch part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-nl-mini",
+    task=KNOW,
+    languages=[NL],
+    prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
+    prompt_template="{text}\nAntwoord: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=25,
+    max_generated_tokens=3,
+)
+
+# TODO: Norwegian knowledge
+# TODO: Icelandic knowledge
+# TODO: Faroese knowledge
+
+
+### COMMON SENSE REASONING DATASETS ###
+
+HELLASWAG_DA_CONFIG = DatasetConfig(
+    name="mmlu-da",
+    pretty_name="the Danish part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-da-mini",
+    task=COMMON_SENSE,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
+HELLASWAG_SV_CONFIG = DatasetConfig(
+    name="mmlu-sv",
+    pretty_name="the Swedish part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-sv-mini",
+    task=COMMON_SENSE,
+    languages=[SV],
+    prompt_prefix="Följande är flervalsfrågor (med svar).",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
+HELLASWAG_DE_CONFIG = DatasetConfig(
+    name="mmlu-de",
+    pretty_name="the German part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-de-mini",
+    task=COMMON_SENSE,
+    languages=[DE],
+    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
+    prompt_template="{text}\nAntwort: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
+HELLASWAG_NL_CONFIG = DatasetConfig(
+    name="mmlu-nl",
+    pretty_name="the Dutch part of the truncated version of MMLU",
+    huggingface_id="ScandEval/hellaswag-nl-mini",
+    task=COMMON_SENSE,
+    languages=[NL],
+    prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
+    prompt_template="{text}\nAntwoord: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=10,
+    max_generated_tokens=3,
+)
+
+# TODO: Norwegian common sense reasoning
+# TODO: Icelandic common sense reasoning
+# TODO: Faroese common sense reasoning
 
 
 ### SPEED ESTIMATION DATASETS ###

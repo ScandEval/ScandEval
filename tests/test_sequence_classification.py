@@ -7,7 +7,19 @@ import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
+    ARC_DA_CONFIG,
+    ARC_DE_CONFIG,
+    ARC_NL_CONFIG,
+    ARC_SV_CONFIG,
     DUTCH_SOCIAL_CONFIG,
+    HELLASWAG_DA_CONFIG,
+    HELLASWAG_DE_CONFIG,
+    HELLASWAG_NL_CONFIG,
+    HELLASWAG_SV_CONFIG,
+    MMLU_DA_CONFIG,
+    MMLU_DE_CONFIG,
+    MMLU_NL_CONFIG,
+    MMLU_SV_CONFIG,
     NOREC_CONFIG,
     SB10K_CONFIG,
     SCALA_DA_CONFIG,
@@ -22,7 +34,9 @@ from scandeval.dataset_configs import (
     SST5_CONFIG,
     SWEREC_CONFIG,
 )
+from scandeval.exceptions import InvalidBenchmark
 from scandeval.sequence_classification import SequenceClassification
+from scandeval.utils import GENERATIVE_DATASET_TASKS
 
 
 @pytest.fixture(
@@ -43,6 +57,18 @@ from scandeval.sequence_classification import SequenceClassification
         SCALA_DE_CONFIG,
         SCALA_NL_CONFIG,
         SCALA_EN_CONFIG,
+        MMLU_DA_CONFIG,
+        MMLU_SV_CONFIG,
+        MMLU_DE_CONFIG,
+        MMLU_NL_CONFIG,
+        HELLASWAG_DA_CONFIG,
+        HELLASWAG_SV_CONFIG,
+        HELLASWAG_DE_CONFIG,
+        HELLASWAG_NL_CONFIG,
+        ARC_DA_CONFIG,
+        ARC_SV_CONFIG,
+        ARC_DE_CONFIG,
+        ARC_NL_CONFIG,
     ],
     ids=[
         "angry-tweets",
@@ -60,6 +86,18 @@ from scandeval.sequence_classification import SequenceClassification
         "scala-de",
         "scala-nl",
         "scala-en",
+        "mmlu-da",
+        "mmlu-sv",
+        "mmlu-de",
+        "mmlu-nl",
+        "hellaswag-da",
+        "hellaswag-sv",
+        "hellaswag-de",
+        "hellaswag-nl",
+        "arc-da",
+        "arc-sv",
+        "arc-de",
+        "arc-nl",
     ],
 )
 def benchmark_dataset(
@@ -72,8 +110,12 @@ def benchmark_dataset(
 
 
 def test_encoder_benchmarking(benchmark_dataset, model_id):
-    with does_not_raise():
-        benchmark_dataset.benchmark(model_id)
+    if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
+        with pytest.raises(InvalidBenchmark):
+            benchmark_dataset.benchmark(model_id)
+    else:
+        with does_not_raise():
+            benchmark_dataset.benchmark(model_id)
 
 
 def test_decoder_sequence_benchmarking(benchmark_dataset, generative_model_id):
