@@ -49,8 +49,8 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
 #     huggingface_id="ScandEval/dbrd-mini",
 #     task=SENT,
 #     languages=[NL],
-#     prompt_prefix="Hieronder staan tweets en hun sentiment, dat 'positief', "
-#     "'neutraal' of 'negatief' kan zijn.",
+#     prompt_prefix="Hieronder staan tweets en hun sentiment, dat 'positief' "
+#     of 'negatief' kan zijn.",
 #     prompt_template="Tweet: {text}\nSentiment: {label}",
 #     prompt_label_mapping=dict(
 #         positive="positief", negative="negatief"
