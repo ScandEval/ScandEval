@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
       These have been machine translated by the University of Oregon using
       GPT-3.5-turbo. Machine translation is not adequate, of course, so see this as a
       first version of these kinds of evaluations, to get some benchmarks going asap.
+    - `dbrd`, a Dutch SENT dataset, which replaces the previous `dutch_social` dataset.
 
 ### Changed
 - Now compatible with`transformers >= 4.36.2`, and this is required now as they have
