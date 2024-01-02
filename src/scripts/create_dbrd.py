@@ -43,14 +43,13 @@ def main():
     full_train_df, val_df = train_test_split(
         train_df, test_size=256, random_state=703, stratify=train_df.label
     )
-     _, train_df = train_test_split(
+    _, train_df = train_test_split(
         full_train_df, test_size=1024, random_state=703, stratify=full_train_df.label
     )
 
     _, test_df = train_test_split(
         test_df, test_size=2048, random_state=703, stratify=test_df.label
     )
-
 
     # Reset the index
     train_df = train_df.reset_index(drop=True)
