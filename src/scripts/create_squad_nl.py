@@ -18,6 +18,25 @@ def main() -> None:
     dataset = load_dataset(dataset_id, token=True)
     assert isinstance(dataset, DatasetDict)
 
+    def add_answer_start(example: dict) -> dict:
+        possible_answers: list[str] = example["answers"]["text"]
+        if possible_answers:
+            answers: list[str] = list()
+            answer_starts: list[int] = list()
+            for answer in possible_answers:
+                answer_start = example["context"].find(answer)
+                if answer_start >= 0:
+                    answers.append(answer)
+                    answer_starts.append(answer_start)
+            example["answers"]["text"] = answers
+            example["answers"]["answer_start"] = answer_starts
+        else:
+            example["answers"]["answer_start"] = []
+        return example
+
+    # Add `answer_start` key to `answers` column
+    dataset = dataset.map(function=add_answer_start)
+
     # Convert the dataset to a dataframe
     train_df = dataset["train"].to_pandas()
     valtest_df = dataset["validation"].to_pandas()
@@ -26,7 +45,7 @@ def main() -> None:
 
     # Extract information on which examples contain an answer
     def has_answer(example: dict) -> bool:
-        return len(example["text"]) > 0 and example["text"][0] != ""
+        return len(example["answer_start"]) > 0 and example["answer_start"][0] >= 0
 
     train_has_answer: pd.Series = train_df.answers.map(has_answer)
     valtest_has_answer: pd.Series = valtest_df.answers.map(has_answer)
@@ -53,6 +72,7 @@ def main() -> None:
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
     train_df = train_df.reset_index(drop=True)
+    breakpoint()
 
     # Collect datasets in a dataset dictionary
     dataset = DatasetDict(
