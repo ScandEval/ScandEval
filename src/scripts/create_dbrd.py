@@ -40,9 +40,11 @@ def main():
     train_df["label"] = train_df["label"].map(label_mapping)
     test_df["label"] = test_df["label"].map(label_mapping)
 
-    # Create new splits
-    _, train_df = train_test_split(
-        train_df, test_size=2048, random_state=703, stratify=train_df.label
+    full_train_df, val_df = train_test_split(
+        train_df, test_size=256, random_state=703, stratify=train_df.label
+    )
+     _, train_df = train_test_split(
+        full_train_df, test_size=1024, random_state=703, stratify=full_train_df.label
     )
 
     _, test_df = train_test_split(
