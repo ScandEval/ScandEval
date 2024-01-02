@@ -51,9 +51,6 @@ def main():
         test_df, test_size=2048, random_state=703, stratify=test_df.label
     )
 
-    test_df, val_df = train_test_split(
-        test_df, test_size=512, random_state=703, stratify=test_df.label
-    )
 
     # Reset the index
     train_df = train_df.reset_index(drop=True)
