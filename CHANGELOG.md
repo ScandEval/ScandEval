@@ -33,6 +33,10 @@ and this project adheres to
       These have been machine translated by the University of Oregon using
       GPT-3.5-turbo. Machine translation is not adequate, of course, so see this as a
       first version of these kinds of evaluations, to get some benchmarks going asap.
+    - `squad-nl`, a Dutch extract question answering dataset, which is a machine
+      translated version of SQuAD-v2. As with the datasets mentioned above, this is
+      meant as a first version of a Dutch QA dataset, until we have a better one
+      available.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
