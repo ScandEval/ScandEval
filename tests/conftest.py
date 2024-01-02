@@ -45,7 +45,7 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         save_results=False,
         device=torch.device("cpu"),
         verbose=False,
-        trust_remote_code=False,
+        trust_remote_code=True,
         load_in_4bit=None,
         use_flash_attention=False,
         clear_model_cache=False,

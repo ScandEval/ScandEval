@@ -216,7 +216,6 @@ def generate_single_iteration(
         generation_config = GenerationConfig(
             max_new_tokens=dataset_config.max_generated_tokens,
             do_sample=False,
-            stopping_criteria=stopping_criteria,
             output_scores=True,
             return_dict_in_generate=True,
             bos_token_id=tokenizer.bos_token_id,
@@ -259,7 +258,9 @@ def generate_single_iteration(
                 warnings.simplefilter("ignore", category=UserWarning)
                 inputs = batch["input_ids"].to(model.device)
                 model_output: ModelOutput = model.generate(
-                    inputs=inputs, generation_config=generation_config
+                    inputs=inputs,
+                    generation_config=generation_config,
+                    stopping_criteria=stopping_criteria,
                 )
 
             # Extract the scores from the model output, to be cached. We only store the
