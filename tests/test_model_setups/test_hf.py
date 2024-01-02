@@ -1,31 +1,53 @@
 """Unit tests for the `model_setups.hf` module."""
 
+import copy
+
 import pytest
 import torch
 from scandeval.model_setups.hf import HFModelSetup
 
 
 @pytest.mark.parametrize(
-    argnames=["model_id", "expected"],
+    argnames=["device", "model_id", "expected"],
     argvalues=[
-        ("microsoft/mdeberta-v3-base", None),
-        ("jonfd/electra-small-nordic", None),
-        ("mistralai/Mistral-7B-v0.1", torch.bfloat16),
+        ("cuda", "microsoft/mdeberta-v3-base", None),
+        ("cuda", "jonfd/electra-small-nordic", None),
+        ("cuda", "mistralai/Mistral-7B-v0.1", "auto"),
+        ("cuda", "microsoft/phi-2", "auto"),
+        ("mps", "microsoft/mdeberta-v3-base", None),
+        ("mps", "jonfd/electra-small-nordic", None),
+        ("mps", "mistralai/Mistral-7B-v0.1", None),
+        ("mps", "microsoft/phi-2", None),
+        ("cpu", "microsoft/mdeberta-v3-base", None),
+        ("cpu", "jonfd/electra-small-nordic", None),
+        ("cpu", "mistralai/Mistral-7B-v0.1", None),
+        ("cpu", "microsoft/phi-2", None),
     ],
     ids=[
-        "mdeberta-v3-base",
-        "electra-small-nordic",
-        "mistral-7b",
+        "cuda: mdeberta-v3-base",
+        "cuda: electra-small-nordic",
+        "cuda: mistral-7b",
+        "cuda: phi-2",
+        "mps: mdeberta-v3-base",
+        "mps: electra-small-nordic",
+        "mps: mistral-7b",
+        "mps: phi-2",
+        "cpu: mdeberta-v3-base",
+        "cpu: electra-small-nordic",
+        "cpu: mistral-7b",
+        "cpu: phi-2",
     ],
 )
-def test_torch_dtype_is_set_correctly(benchmark_config, model_id, expected):
-    model_setup = HFModelSetup(benchmark_config=benchmark_config)
+def test_torch_dtype_is_set_correctly(benchmark_config, device, model_id, expected):
+    benchmark_config_copy = copy.deepcopy(benchmark_config)
+    benchmark_config_copy.device = torch.device(device)
+    model_setup = HFModelSetup(benchmark_config=benchmark_config_copy)
     hf_model_config = model_setup._load_hf_model_config(
         model_id=model_id,
         num_labels=0,
         id2label=dict(),
         label2id=dict(),
         revision="main",
-        model_cache_dir=benchmark_config.cache_dir,
+        model_cache_dir=benchmark_config_copy.cache_dir,
     )
-    assert hf_model_config.torch_dtype == expected
+    assert model_setup._get_torch_dtype(config=hf_model_config) == expected
