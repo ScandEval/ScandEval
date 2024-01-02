@@ -48,7 +48,7 @@ def main():
     )
 
     _, test_df = train_test_split(
-        test_df, test_size=1024, random_state=703, stratify=test_df.label
+        test_df, test_size=2048, random_state=703, stratify=test_df.label
     )
 
     test_df, val_df = train_test_split(
