@@ -38,6 +38,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now removes all newlines from texts in the summarization task, where previously these
   were merely "squashed" to single newlines. This makes the separation of few-shot
   examples for generative models easier.
+- Also removes newlines from the NER task, where these were not removed at all
+  previously.
 - Now doesn't force ASCII characters in the NER task for generative models, making the
   target JSON dictionary more consistent with the input text.
 

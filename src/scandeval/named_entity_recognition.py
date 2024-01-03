@@ -546,7 +546,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         # Build the few-shot part of the prompt
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=" ".join(example["tokens"]),
+                text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                 label=create_label(example),
             )
             for example in few_shot_examples
@@ -558,7 +558,9 @@ class NamedEntityRecognition(BenchmarkDataset):
 
         # Add the texts from the examples to the prompts
         new_prompts = [
-            self.dataset_config.prompt_template.format(text=" ".join(tokens), label="")
+            self.dataset_config.prompt_template.format(
+                text=" ".join(tokens).replace("\n", " ").strip(), label=""
+            )
             for tokens in examples["tokens"]
         ]
         examples["text"] = [
@@ -622,6 +624,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                     continue
                 prediction_dict: dict[str, list[str]] = json_output
             except json.JSONDecodeError:
+                logger.debug(
+                    "The model output is not valid JSON, so cannot parse it. Skipping. "
+                    f"Here is the output: {raw_prediction!r}"
+                )
                 continue
 
             prompt_label_mapping = self.dataset_config.prompt_label_mapping
