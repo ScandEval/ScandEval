@@ -572,7 +572,6 @@ def load_cached_model_outputs(
 def extract_raw_predictions(
     generated_sequences: torch.Tensor,
     tokenizer: Tokenizer,
-    dataset_config: DatasetConfig,
 ) -> list[str]:
     """Get the raw predictions from the generated sequences.
 
@@ -583,30 +582,16 @@ def extract_raw_predictions(
             consisting of token IDs.
         tokenizer:
             The tokenizer used to generate the tokens.
-        dataset_config:
-            The dataset config.
 
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
-    completion_ids_lists = [
-        [int(token_id) for token_id in completion_ids]
+    raw_predictions: list[str] = [
+        tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True)
+        .split("\n\n")[0]
+        .strip("\n ")
         for completion_ids in generated_sequences
     ]
-
-    # For some models the generated tokens also includes the input tokens, so we need
-    # to deal with both cases when extracting the predicted labels
-    prompt_prefix_exists = dataset_config.prompt_prefix != ""
-    pred_idx = dataset_config.num_few_shot_examples + int(prompt_prefix_exists)
-    raw_predictions: list[str] = list()
-    for completion_ids_list in completion_ids_lists:
-        decoded = tokenizer.decode(completion_ids_list, skip_special_tokens=True)
-        few_shots = decoded.split("\n\n")
-        answer_exists = len(few_shots) > pred_idx
-        answer = few_shots[pred_idx] if answer_exists else few_shots[-1]
-        answer = answer.split("\n")[-1]
-        answer = answer.strip()
-        raw_predictions.append(answer)
     return raw_predictions
 
 
