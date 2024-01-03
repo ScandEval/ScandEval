@@ -286,7 +286,6 @@ class QuestionAnswering(BenchmarkDataset):
         raw_predictions = extract_raw_predictions(
             generated_sequences=model_output["sequences"],
             tokenizer=tokenizer,
-            dataset_config=self.dataset_config,
         )
 
         predictions = [

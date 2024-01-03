@@ -375,7 +375,6 @@ def get_closest_word_edit_labels(
     raw_predictions = extract_raw_predictions(
         generated_sequences=generated_sequences,
         tokenizer=tokenizer,
-        dataset_config=dataset_config,
     )
 
     candidate_labels = [
