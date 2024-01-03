@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
       These have been machine translated by the University of Oregon using
       GPT-3.5-turbo. Machine translation is not adequate, of course, so see this as a
       first version of these kinds of evaluations, to get some benchmarks going asap.
+    - `squad-nl`, a Dutch extract question answering dataset, which is a machine
+      translated version of SQuAD-v2. As with the datasets mentioned above, this is
+      meant as a first version of a Dutch QA dataset, until we have a better one
+      available.
 
 ### Changed
 - Now compatible with`transformers >= 4.36.2`, and this is required now as they have
@@ -48,6 +52,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   based on the dataset itself, starting from 512 and doubling until we have at least
   the number of desired few-shot examples to choose from.
 - Now only sets `torch_dtype` is CUDA is available, as otherwise errors are caused.
+- When benchmarking encoder models on QA tasks the contexts are split up if they exceed
+  the model's context length. The stride value used caused errors in rare cases where
+  the model's maximum context length was really small (128). This has been fixed now.
 
 
 ## [v8.2.1] - 2023-12-20

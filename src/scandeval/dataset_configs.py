@@ -611,8 +611,18 @@ SQUAD_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+SQUAD_NL_CONFIG = DatasetConfig(
+    name="squad-nl",
+    pretty_name="SQuAD-nl",
+    huggingface_id="ScandEval/squad-nl-mini",
+    task=QA,
+    languages=[NL],
+    prompt_template="{text}\nVraag: {question}\nAntwoord in max 3 woorden: {label}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
+
 # TODO: Faroese Question Answering
-# TODO: Dutch Question Answering
 
 
 ### SUMMARIZATION DATASETS ###
