@@ -42,11 +42,11 @@ class HFModelSetup:
     """Model setup for Hugging Face Hub models.
 
     Args:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
 
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
     """
 
@@ -57,12 +57,11 @@ class HFModelSetup:
         """Check if a model ID denotes an OpenAI model.
 
         Args:
-            model_id (str):
+            model_id :
                 The model ID.
 
         Returns:
-            bool:
-                Whether the model exists on OpenAI.
+            Whether the model exists on OpenAI.
         """
         # Extract the revision from the model_id, if present
         model_id, revision = (
@@ -96,12 +95,11 @@ class HFModelSetup:
         """Fetches configuration for an OpenAI model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID of the model.
 
         Returns:
-            ModelConfig:
-                The model configuration.
+            The model configuration.
         """
         # Extract the revision from the model ID, if it is specified
         if "@" in model_id:
@@ -189,14 +187,13 @@ class HFModelSetup:
         """Load an OpenAI model.
 
         Args:
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
-            dataset_config (DatasetConfig):
+            dataset_config:
                 The dataset configuration.
 
         Returns:
-            pair of (tokenizer, model):
-                The tokenizer and model.
+            The tokenizer and model.
         """
         config: PretrainedConfig
         block_terminal_output()
@@ -246,7 +243,7 @@ class HFModelSetup:
             cache_dir=model_config.model_cache_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             quantization_config=bnb_config,
-            torch_dtype=None if config.to_dict().get("torch_dtype") is None else "auto",
+            torch_dtype=self._get_torch_dtype(config=config),
             use_flash_attention_2=use_flash_attention,
         )
 
@@ -277,35 +274,32 @@ class HFModelSetup:
                 if config.model_type == "deberta-v2":
                     config.pooler_hidden_size = config.hidden_size
 
-                with warnings.catch_warnings():
+                with warnings.catch_warnings(), HiddenPrints():
                     warnings.filterwarnings("ignore", category=UserWarning)
                     warnings.filterwarnings("ignore", category=FutureWarning)
-                    with HiddenPrints():
-                        try:
-                            model_or_tuple = model_cls_or_none.from_pretrained(
-                                model_config.model_id, **model_kwargs
+                    try:
+                        model_or_tuple = model_cls_or_none.from_pretrained(
+                            model_config.model_id, **model_kwargs
+                        )
+                    except ImportError as e:
+                        if "flash attention" in str(e).lower():
+                            raise InvalidBenchmark(
+                                "The model you are trying to load requires Flash "
+                                "Attention. To use Flash Attention, please install "
+                                "the `flash-attn` package, which can be done by "
+                                "running `pip install --no-build-isolation -U "
+                                "flash-attn`."
                             )
-                        except ImportError as e:
-                            if "flash attention" in str(e).lower():
-                                raise InvalidBenchmark(
-                                    "The model you are trying to load requires Flash "
-                                    "Attention. To use Flash Attention, please install "
-                                    "the `flash-attn` package, which can be done by "
-                                    "running `pip install --no-build-isolation -U "
-                                    "flash-attn`."
-                                )
-                        except (KeyError, RuntimeError) as e:
-                            if not ignore_mismatched_sizes:
-                                ignore_mismatched_sizes = True
-                                continue
-                            else:
-                                raise InvalidBenchmark(str(e))
-                        except (TimeoutError, RequestError):
-                            logger.info(
-                                f"Couldn't load the model {model_id!r}. Retrying."
-                            )
-                            sleep(5)
+                    except (KeyError, RuntimeError) as e:
+                        if not ignore_mismatched_sizes:
+                            ignore_mismatched_sizes = True
                             continue
+                        else:
+                            raise InvalidBenchmark(str(e))
+                    except (TimeoutError, RequestError):
+                        logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
+                        sleep(5)
+                        continue
                 if isinstance(model_or_tuple, tuple):
                     model = model_or_tuple[0]
                 else:
@@ -343,6 +337,21 @@ class HFModelSetup:
             model.to(self.benchmark_config.device)
 
         return tokenizer, model
+
+    def _get_torch_dtype(self, config: PretrainedConfig) -> str | None:
+        """Get the torch dtype, used for loading the model.
+
+        Args:
+            config (PretrainedConfig):
+                The Hugging Face model configuration.
+
+        Returns:
+            The torch dtype.
+        """
+        using_cuda = self.benchmark_config.device == torch.device("cuda")
+        torch_dtype_is_set = config.to_dict().get("torch_dtype") is not None
+        torch_dtype = "auto" if using_cuda and torch_dtype_is_set else None
+        return torch_dtype
 
     def _load_hf_model_config(
         self,
@@ -395,6 +404,11 @@ class HFModelSetup:
                 raise InvalidBenchmark(
                     f"The model config for the model {model_id!r} could not be "
                     f"loaded, as the key {key!r} was not found in the config."
+                )
+            except OSError as e:
+                raise InvalidBenchmark(
+                    f"Couldn't load model config for {model_id!r}. The error was "
+                    f"{e!r}. Skipping"
                 )
             except (TimeoutError, RequestError):
                 logger.info(f"Couldn't load model config for {model_id!r}. Retrying.")

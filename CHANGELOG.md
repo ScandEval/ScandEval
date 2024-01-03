@@ -2,10 +2,52 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on
-[Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-and this project adheres to
-[Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+
+## [Unreleased]
+### Added
+- Now caches the completions of open source generative models, which effectively makes
+  benchmarking of these ~33% faster. We cannot store all logits for storage reasons (it
+  quickly gets >100GB in that case), so we instead store the top-100 logits. We thus
+  assume that (a) these are the only logits needed, and (b) that the generations don't
+  change. We argue that (a) is the case since we only use the logits in classification
+  tasks, in which case we only use the first token anyway. Further, since we're using
+  a temperature of 0 anyway, the generations will be as close to deterministic as
+  possible (up to small rounding fluctuations of logits, which is negligible). This is
+  a breaking change, since it is not compatible with the previous way we cached OpenAI
+  model outputs.
+- Added a new `--clear-model-cache` flag, which removes the cached models after
+  finishing the benchmarking of each model, to save disk space. This doesn't remove the
+  cached model outputs or datasets.
+- Added the following new datasets:
+    - `fone`, a Faroese NER dataset, which replaces the previous `wikiann-fo` dataset.
+    - `dansk`, a Danish NER dataset, which complements the previous `dane` dataset.
+    - `norquad`, a Norwegian question answering dataset, which replaces the previous
+      `scandiqa-no` dataset.
+    - Danish, Swedish, German and Dutch versions of the MMLU, ARC and HellaSwag
+      datasets, testing knowledge and common sense reasoning of generative models.
+      These have been machine translated by the University of Oregon using
+      GPT-3.5-turbo. Machine translation is not adequate, of course, so see this as a
+      first version of these kinds of evaluations, to get some benchmarks going asap.
+
+### Changed
+- Now compatible with`transformers >= 4.36.2`, and this is required now as they have
+  changed their generation API in a breaking manner.
+
+### Fixed
+- Removed `text2text-generation` temporarily from the tags defining generative models,
+  since we do not support the benchmarking of these yet. This will be added back in as
+  soon as we support them.
+- Now catches `OSError`s when loading Hugging Face model configurations, which happen
+  when there is no `config.json` file in the model repo.
+- When sampling few-shot examples for question answering tasks we previously sampled
+  among examples with context length less than 1024 characters, to keep the prompt
+  short. This is too small for some datasets, so now we dynamically set this threshold
+  based on the dataset itself, starting from 512 and doubling until we have at least
+  the number of desired few-shot examples to choose from.
+- Now only sets `torch_dtype` is CUDA is available, as otherwise errors are caused.
 
 
 ## [v8.2.1] - 2023-12-20

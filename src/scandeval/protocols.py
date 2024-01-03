@@ -34,7 +34,7 @@ class Tokenizer(Protocol):
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         ...
 
-    def decode(self, token_ids: list[int]) -> str:
+    def decode(self, token_ids: list[int], **kwargs) -> str:
         ...
 
     def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:

@@ -189,8 +189,21 @@ class QuestionAnswering(BenchmarkDataset):
         Returns:
             The few-shot examples.
         """
+        # Locate the maximum number of tokens that constitutes a short example. We
+        # start with 512 tokens and double it until there is at least `num_few_shots`
+        # many examples that are shorter than the maximum number of tokens.
+        max_num_tokens = 512
+        while True:
+            train_with_short_examples = train_dataset.filter(
+                lambda example: len(example["context"]) < max_num_tokens
+            )
+            num_short_examples = len(train_with_short_examples)
+            if num_short_examples >= self.dataset_config.num_few_shot_examples:
+                break
+            max_num_tokens *= 2
+
         train_with_short_examples = train_dataset.filter(
-            lambda example: len(example["context"]) < 1024
+            lambda example: len(example["context"]) < max_num_tokens
         )
         shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
         num_few_shots = self.dataset_config.num_few_shot_examples

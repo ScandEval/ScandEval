@@ -4,6 +4,7 @@ import json
 import logging
 import re
 from pathlib import Path
+from shutil import rmtree
 from time import sleep
 
 from pydantic import BaseModel
@@ -100,6 +101,9 @@ class Benchmarker:
             if CUDA is available and the model is a decoder model. Defaults to None.
         use_flash_attention:
             Whether to use Flash Attention. Defaults to False.
+        clear_model_cache:
+            Whether to clear the model cache after benchmarking each model. Defaults to
+            False.
 
     Attributes:
         progress_bar: Whether progress bars should be shown.
@@ -133,6 +137,7 @@ class Benchmarker:
         trust_remote_code: bool = False,
         load_in_4bit: bool | None = None,
         use_flash_attention: bool = False,
+        clear_model_cache: bool = False,
     ) -> None:
         self.benchmark_config = build_benchmark_config(
             language=language,
@@ -153,6 +158,7 @@ class Benchmarker:
             trust_remote_code=trust_remote_code,
             load_in_4bit=load_in_4bit,
             use_flash_attention=use_flash_attention,
+            clear_model_cache=clear_model_cache,
         )
 
         # Set attributes from arguments
@@ -206,6 +212,8 @@ class Benchmarker:
         Returns:
             A list of benchmark results.
         """
+        self.clear_model_cache()
+
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)
 
@@ -251,9 +259,26 @@ class Benchmarker:
                 # Save the benchmark results
                 if self.benchmark_config.save_results:
                     with self.results_path.open("a") as f:
-                        f.write("\n" + record.json())
+                        f.write("\n" + record.model_dump_json())
+
+            self.clear_model_cache()
 
         return self.benchmark_results
+
+    def clear_model_cache(self) -> None:
+        """Clear the model cache.
+
+        Note that this will not remove the stored completions, and it will only clear
+        the cache if `clear_model_cache` is set to True.
+        """
+        if self.benchmark_config.clear_model_cache:
+            model_cache_path = Path(self.benchmark_config.cache_dir) / "model_cache"
+            model_cache_path.mkdir(parents=True, exist_ok=True)
+            for model_dir in model_cache_path.iterdir():
+                if model_dir.is_dir():
+                    for sub_model_dir in model_dir.iterdir():
+                        if sub_model_dir.is_dir():
+                            rmtree(sub_model_dir)
 
     def _has_been_benchmarked(self, model_id: str, dataset: str) -> bool:
         """Checks whether a model has already been benchmarked on a dataset.

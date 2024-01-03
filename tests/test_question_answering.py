@@ -7,13 +7,15 @@ import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     GERMANQUAD_CONFIG,
+    NORQUAD_CONFIG,
     NQII_CONFIG,
     SCANDIQA_DA_CONFIG,
-    SCANDIQA_NO_CONFIG,
     SCANDIQA_SV_CONFIG,
     SQUAD_CONFIG,
 )
+from scandeval.exceptions import InvalidBenchmark
 from scandeval.question_answering import QuestionAnswering, prepare_train_examples
+from scandeval.utils import GENERATIVE_DATASET_TASKS
 from transformers import AutoTokenizer
 
 
@@ -21,16 +23,16 @@ from transformers import AutoTokenizer
     scope="module",
     params=[
         SCANDIQA_DA_CONFIG,
-        SCANDIQA_NO_CONFIG,
         SCANDIQA_SV_CONFIG,
+        NORQUAD_CONFIG,
         NQII_CONFIG,
         GERMANQUAD_CONFIG,
         SQUAD_CONFIG,
     ],
     ids=[
         "scandiqa-da",
-        "scandiqa-no",
         "scandiqa-sv",
+        "norquad",
         "nqii",
         "germanquad",
         "squad",
@@ -46,8 +48,12 @@ def benchmark_dataset(
 
 
 def test_encoder_benchmarking(benchmark_dataset, model_id):
-    with does_not_raise():
-        benchmark_dataset.benchmark(model_id)
+    if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
+        with pytest.raises(InvalidBenchmark):
+            benchmark_dataset.benchmark(model_id)
+    else:
+        with does_not_raise():
+            benchmark_dataset.benchmark(model_id)
 
 
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):

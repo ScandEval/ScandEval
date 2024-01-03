@@ -39,8 +39,13 @@ GENERATIVE_MODEL_TASKS = [
 ]
 
 
+GENERATIVE_DATASET_TASKS = [
+    "knowledge",
+    "common-sense-reasoning",
+]
+
+
 GENERATIVE_DATASET_SUPERTASKS = [
-    "multiple-choice",
     "text-to-text",
     "text-modelling",
 ]

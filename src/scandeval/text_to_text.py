@@ -2,6 +2,7 @@
 
 import logging
 import random
+import re
 from typing import Any
 
 import numpy as np
@@ -170,8 +171,8 @@ class TextToText(BenchmarkDataset):
         # Build the few-shot part of the prompt
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=example["text"].replace("\n", " ").strip(),
-                target_text=example["target_text"].replace("\n", " ").strip(),
+                text=re.sub(r"\n+", "\n", example["text"]).strip(),
+                target_text=re.sub(r"\n+", "\n", example["target_text"]).strip(),
             )
             for example in few_shot_examples
         ]
