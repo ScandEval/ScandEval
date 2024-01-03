@@ -257,10 +257,11 @@ def generate_single_iteration(
             with warnings.catch_warnings(), torch.inference_mode():
                 warnings.simplefilter("ignore", category=UserWarning)
                 inputs = batch["input_ids"].to(model.device)
+                stopping_criteria.clear()
                 model_output: ModelOutput = model.generate(
                     inputs=inputs,
                     generation_config=generation_config,
-                    stopping_criteria=stopping_criteria,
+                    stopping_criteria=[stopping_criteria],
                 )
 
             # Extract the scores from the model output, to be cached. We only store the
@@ -603,10 +604,33 @@ def extract_raw_predictions(
     return raw_predictions
 
 
+class StopWordCriteria(StoppingCriteria):
+    def __init__(self, stop_word_id_lists: list[list[int]]):
+        super().__init__()
+        self.stop_word_id_lists = stop_word_id_lists
+        self.indices_done: list[int] = list()
+
+    def clear(self) -> None:
+        self.indices_done = list()
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> bool:
+        for stop_word_id_list in self.stop_word_id_lists:
+            for batch_idx in range(input_ids.shape[0]):
+                inputs = input_ids[batch_idx].tolist()
+                sample_ends_with_stop_word = (
+                    inputs[-len(stop_word_id_list) :] == stop_word_id_list
+                )
+                if sample_ends_with_stop_word:
+                    self.indices_done.append(batch_idx)
+                if all(idx in self.indices_done for idx in range(input_ids.shape[0])):
+                    return True
+        return False
+
+
 def get_generation_stopping_criteria(
     tokenizer: Tokenizer,
     model: GenerativeModel,
-) -> list[StoppingCriteria]:
+) -> StopWordCriteria:
     """Get the stopping criteria for generation.
 
     Args:
@@ -621,7 +645,7 @@ def get_generation_stopping_criteria(
         The stopping criteria for generation.
     """
     if isinstance(model, OpenAIModel):
-        return list()
+        return StopWordCriteria(stop_word_id_lists=[])
 
     double_newline_ids: list[int] = tokenizer(
         text=["\n\n"], add_special_tokens=False
@@ -653,16 +677,4 @@ def get_generation_stopping_criteria(
         eos_token_ids,
     ]
 
-    return [StopWordCriteria(stop_word_id_lists=stop_word_id_lists)]
-
-
-class StopWordCriteria(StoppingCriteria):
-    def __init__(self, stop_word_id_lists: list[list[int]]):
-        super().__init__()
-        self.stop_word_id_lists = stop_word_id_lists
-
-    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> bool:
-        for stop_word_id_list in self.stop_word_id_lists:
-            if stop_word_id_list == input_ids[0][-len(stop_word_id_list) :].tolist():
-                return True
-        return False
+    return StopWordCriteria(stop_word_id_lists=stop_word_id_lists)

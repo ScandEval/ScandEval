@@ -48,6 +48,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   based on the dataset itself, starting from 512 and doubling until we have at least
   the number of desired few-shot examples to choose from.
 - Now only sets `torch_dtype` is CUDA is available, as otherwise errors are caused.
+- Previously text generation in a batch would be stopped if any of the samples in the
+  batch reached the stopping criteria, causing a lot of incomplete completions. Now
+  the model continues to generate text until the entire batch is complete, and the
+  excess generation is removed afterwards.
 
 
 ## [v8.2.1] - 2023-12-20
