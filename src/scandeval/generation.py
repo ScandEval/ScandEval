@@ -228,7 +228,7 @@ def generate_single_iteration(
         non_cached_dataset = non_cached_dataset.add_column(
             name="length", column=[len(x) for x in non_cached_dataset["text"]]
         )
-        non_cached_dataset = non_cached_dataset.sort("length", reverse=False)
+        non_cached_dataset = non_cached_dataset.sort("length", reverse=True)
 
         # Enable batching by building a dataloader. The dataloader cannot deal with
         # text columns, so we create a copy of the dataset without these
