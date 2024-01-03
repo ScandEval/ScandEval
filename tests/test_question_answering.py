@@ -12,6 +12,7 @@ from scandeval.dataset_configs import (
     SCANDIQA_DA_CONFIG,
     SCANDIQA_SV_CONFIG,
     SQUAD_CONFIG,
+    SQUAD_NL_CONFIG,
 )
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.question_answering import QuestionAnswering, prepare_train_examples
@@ -28,6 +29,7 @@ from transformers import AutoTokenizer
         NQII_CONFIG,
         GERMANQUAD_CONFIG,
         SQUAD_CONFIG,
+        SQUAD_NL_CONFIG,
     ],
     ids=[
         "scandiqa-da",
@@ -36,6 +38,7 @@ from transformers import AutoTokenizer
         "nqii",
         "germanquad",
         "squad",
+        "squad-nl",
     ],
 )
 def benchmark_dataset(
