@@ -541,7 +541,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                     labels[prompt_label].append(token)
                 elif label.startswith("i-"):
                     labels[prompt_label][-1] += " " + token
-            return json.dumps(labels)
+            return json.dumps(labels, ensure_ascii=False)
 
         # Build the few-shot part of the prompt
         few_shot_prompts = [
@@ -591,7 +591,6 @@ class NamedEntityRecognition(BenchmarkDataset):
         raw_predictions = extract_raw_predictions(
             generated_sequences=model_output["sequences"],
             tokenizer=tokenizer,
-            dataset_config=self.dataset_config,
         )
 
         tokens = input_batch["tokens"]
