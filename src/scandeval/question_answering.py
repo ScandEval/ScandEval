@@ -334,8 +334,15 @@ def prepare_train_examples(
         ]
         examples["context"] = [f"{c}{sep_token}" for c in examples["context"]]
 
-    # Compute the stride, being a quarter of the context length
+    # Set the stride used during tokenization, when the context is long enough to be
+    # split into several features. Since we are always keeping the question tokens, we
+    # need to make sure that the stride does not exceed the resulting maximum context
+    # length.
+    max_question_tokens = max(len(tokenizer(q).input_ids) for q in examples["question"])
+    num_special_tokens = int(has_cls_token) + int(has_sep_token)
     stride = tokenizer.model_max_length // 4
+    max_length = tokenizer.model_max_length - stride
+    stride = min(stride, max_length - max_question_tokens - num_special_tokens)
     max_length = tokenizer.model_max_length - stride
 
     # Tokenize our examples with truncation and padding, but keep the overflows using a
@@ -479,8 +486,15 @@ def prepare_test_examples(
         ]
         examples["context"] = [f"{c}{sep_token}" for c in examples["context"]]
 
-    # Compute the stride, being a quarter of the context length
+    # Set the stride used during tokenization, when the context is long enough to be
+    # split into several features. Since we are always keeping the question tokens, we
+    # need to make sure that the stride does not exceed the resulting maximum context
+    # length.
+    max_question_tokens = max(len(tokenizer(q).input_ids) for q in examples["question"])
+    num_special_tokens = int(has_cls_token) + int(has_sep_token)
     stride = tokenizer.model_max_length // 4
+    max_length = tokenizer.model_max_length - stride
+    stride = min(stride, max_length - max_question_tokens - num_special_tokens)
     max_length = tokenizer.model_max_length - stride
 
     # Tokenize our examples with truncation and maybe padding, but keep the overflows
