@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Now compatible with`transformers >= 4.36.2`, and this is required now as they have
   changed their generation API in a breaking manner.
+- Now removes all newlines from texts in the summarization task, where previously these
+  were merely "squashed" to single newlines. This makes the separation of few-shot
+  examples for generative models easier.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
