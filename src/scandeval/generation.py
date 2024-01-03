@@ -538,20 +538,28 @@ def load_cached_model_outputs(
     # sequences, and return it
     cached_scores = torch.zeros(
         len(cached_model_outputs),
-        len(cached_model_outputs[0].top_score_indices),
+        max(
+            len(cached_model_output.top_score_indices)
+            for cached_model_output in cached_model_outputs
+            if cached_model_output.top_score_indices is not None
+        ),
         cached_model_outputs[0].vocab_size,
     )
-    top_score_indices = torch.tensor(
-        [
-            cached_model_output.top_score_indices
+    top_score_indices = torch.nn.utils.rnn.pad_sequence(
+        sequences=[
+            torch.tensor(cached_model_output.top_score_indices)
             for cached_model_output in cached_model_outputs
-        ]
+        ],
+        batch_first=True,
+        padding_value=tokenizer.pad_token_id,
     )
-    top_score_values = torch.tensor(
-        [
-            cached_model_output.top_score_values
+    top_score_values = torch.nn.utils.rnn.pad_sequence(
+        sequences=[
+            torch.tensor(cached_model_output.top_score_values)
             for cached_model_output in cached_model_outputs
-        ]
+        ],
+        batch_first=True,
+        padding_value=0.0,
     )
     for batch_idx in range(cached_scores.shape[0]):
         for sequence_idx in range(cached_scores.shape[1]):
