@@ -264,6 +264,11 @@ def generate_single_iteration(
                     stopping_criteria=[stopping_criteria],
                 )
 
+            # Hugging Face models include the input in the generated sequence, so we
+            # need to remove it in that case
+            if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
+                model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
+
             # Extract the scores from the model output, to be cached. We only store the
             # indices of the top 100 scores, to save space
             if "scores" in model_output:
@@ -275,14 +280,7 @@ def generate_single_iteration(
                 decoded_inputs = tokenizer.decode(
                     token_ids=sample, skip_special_tokens=True
                 )
-                generated_ids = model_output.sequences[sample_idx]
-
-                # Hugging Face models include the input in the generated sequence, so we
-                # need to remove it in that case
-                if torch.equal(generated_ids[: sample.shape[0]], sample):
-                    generated_ids = generated_ids[sample.shape[0] :]
-
-                generated_ids = generated_ids.tolist()
+                generated_ids = model_output.sequences[sample_idx].tolist()
 
                 # Store the generated sequence in the cache
                 cached_model_output = GenerativeModelOutput(
