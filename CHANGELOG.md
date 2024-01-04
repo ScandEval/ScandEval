@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   cached model outputs or datasets.
 - Added the following new datasets:
     - `fone`, a Faroese NER dataset, which replaces the previous `wikiann-fo` dataset.
-    - `dansk`, a Danish NER dataset, which complements the previous `dane` dataset.
+    - `dansk`, a Danish NER dataset, which replaces the previous `dane` dataset.
     - `norquad`, a Norwegian question answering dataset, which replaces the previous
       `scandiqa-no` dataset.
     - Danish, Swedish, German and Dutch versions of the MMLU, ARC and HellaSwag
