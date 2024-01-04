@@ -8,7 +8,6 @@ from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     CONLL_EN_CONFIG,
     CONLL_NL_CONFIG,
-    DANE_CONFIG,
     DANSK_CONFIG,
     FONE_CONFIG,
     GERMEVAL_CONFIG,
@@ -25,7 +24,6 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
 @pytest.fixture(
     scope="module",
     params=[
-        DANE_CONFIG,
         DANSK_CONFIG,
         SUC3_CONFIG,
         NORNE_NB_CONFIG,
@@ -37,7 +35,6 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         CONLL_EN_CONFIG,
     ],
     ids=[
-        "dane",
         "dansk",
         "suc3",
         "norne_nb",
