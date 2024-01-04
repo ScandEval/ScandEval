@@ -14,7 +14,7 @@ from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
 
 
 @pytest.mark.parametrize(
-    argnames=["input_language", "expected_language"],
+    argnames=["input_language_codes", "expected_language_codes"],
     argvalues=[
         ("da", ["da"]),
         (["da"], ["da"]),
@@ -32,13 +32,17 @@ from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
         "all -> all languages",
     ],
 )
-def test_get_correct_language_codes(input_language, expected_language):
-    languages = get_correct_language_codes(language=input_language)
-    assert set(languages) == set(expected_language)
+def test_get_correct_language_codes(input_language_codes, expected_language_codes):
+    languages = get_correct_language_codes(language_codes=input_language_codes)
+    assert set(languages) == set(expected_language_codes)
 
 
 @pytest.mark.parametrize(
-    argnames=["input_language", "input_model_language", "expected_model_language"],
+    argnames=[
+        "input_language_codes",
+        "input_model_language",
+        "expected_model_language",
+    ],
     argvalues=[
         ("da", None, [DA]),
         (["da"], None, [DA]),
@@ -59,11 +63,13 @@ def test_get_correct_language_codes(input_language, expected_language):
     ],
 )
 def test_prepare_languages(
-    input_language, input_model_language, expected_model_language
+    input_language_codes, input_model_language, expected_model_language
 ):
-    prepared_languages = get_correct_language_codes(input_language)
+    prepared_language_codes = get_correct_language_codes(
+        language_codes=input_language_codes
+    )
     model_languages = prepare_languages(
-        model_language=input_model_language, languages=prepared_languages
+        language=input_model_language, language_codes=prepared_language_codes
     )
     model_languages = sorted(model_languages, key=lambda x: x.code)
     expected_model_language = sorted(expected_model_language, key=lambda x: x.code)
@@ -91,7 +97,7 @@ def test_prepare_dataset_tasks(input_task, expected_task):
 
 
 @pytest.mark.parametrize(
-    argnames=["device" "expected_device"],
+    argnames=["device", "expected_device"],
     argvalues=[
         (Device.CPU, torch.device("cpu")),
         (

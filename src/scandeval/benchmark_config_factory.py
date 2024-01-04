@@ -85,7 +85,7 @@ def build_benchmark_config(
         clear_model_cache:
             Whether to clear the model cache after benchmarking each model.
     """
-    language_codes = get_correct_language_codes(language=language)
+    language_codes = get_correct_language_codes(language_codes=language)
     model_languages = prepare_languages(
         language=model_language,
         language_codes=language_codes,
@@ -122,7 +122,7 @@ def build_benchmark_config(
     )
 
 
-def get_correct_language_codes(language: str | list[str]) -> list[str]:
+def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
     """Get correct language-code(s).
 
     Args:
@@ -138,12 +138,12 @@ def get_correct_language_codes(language: str | list[str]) -> list[str]:
     language_mapping = get_all_languages()
 
     # Create the list `languages`
-    if "all" in language:
+    if "all" in language_codes:
         languages = list(language_mapping.keys())
-    elif isinstance(language, str):
-        languages = [language]
+    elif isinstance(language_codes, str):
+        languages = [language_codes]
     else:
-        languages = language
+        languages = language_codes
 
     # If `languages` contains 'no' then also include 'nb' and 'nn'. Conversely, if
     # either 'nb' or 'nn' are specified then also include 'no'.
