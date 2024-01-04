@@ -270,8 +270,12 @@ def generate_single_iteration(
                 model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
 
             # Extract the scores from the model output, to be cached. We only store the
-            # indices of the top 100 scores, to save space
-            if "scores" in model_output:
+            # indices of the top 100 scores, to save space. Further, we only store the
+            # scores if the generated sequence is shorter than the maximum length
+            store_scores = (
+                "scores" in model_output and dataset_config.max_generated_tokens < 50
+            )
+            if store_scores:
                 scores = torch.stack(model_output.scores, dim=1)
                 top_scores = torch.topk(scores, k=100)
 
@@ -288,7 +292,7 @@ def generate_single_iteration(
                         token_ids=generated_ids, skip_special_tokens=True
                     ),
                 )
-                if "scores" in model_output:
+                if store_scores:
                     cached_model_output.top_score_indices = top_scores.indices[
                         sample_idx
                     ].tolist()

@@ -10,14 +10,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Now caches the completions of open source generative models, which effectively makes
   benchmarking of these ~33% faster. We cannot store all logits for storage reasons (it
-  quickly gets >100GB in that case), so we instead store the top-100 logits. We thus
-  assume that (a) these are the only logits needed, and (b) that the generations don't
-  change. We argue that (a) is the case since we only use the logits in classification
-  tasks, in which case we only use the first token anyway. Further, since we're using
-  a temperature of 0 anyway, the generations will be as close to deterministic as
-  possible (up to small rounding fluctuations of logits, which is negligible). This is
-  a breaking change, since it is not compatible with the previous way we cached OpenAI
-  model outputs.
+  quickly gets >100GB in that case), so we instead store the top-100 logits for each
+  generated token, but only if the generated sequence is shorter than 50 tokens. We
+  thus assume that (a) these are the only logits needed, and (b) that the generations
+  don't change. We argue that (a) is the case since we only use the logits in
+  classification tasks, in which case we only use the first token anyway. Further,
+  since we're using a temperature of 0 anyway, the generations will be as close to
+  deterministic as possible (up to small rounding fluctuations of logits, which is
+  negligible). This is a breaking change, since it is not compatible with the previous
+  way we cached OpenAI model outputs.
 - Added a new `--clear-model-cache` flag, which removes the cached models after
   finishing the benchmarking of each model, to save disk space. This doesn't remove the
   cached model outputs or datasets.
