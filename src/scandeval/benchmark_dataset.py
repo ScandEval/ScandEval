@@ -263,6 +263,7 @@ class BenchmarkDataset(ABC):
             max_sequence_length=max_seq_length,
             vocabulary_size=vocab_size,
             few_shot=model_is_generative(model=model),
+            validation_split=self.benchmark_config.only_validation_split,
         )
 
         # Log the metadata
@@ -327,6 +328,9 @@ class BenchmarkDataset(ABC):
         train = dataset_dict["train"]
         val = dataset_dict["val"]
         test = dataset_dict["test"]
+
+        if self.benchmark_config.only_validation_split:
+            test = val
 
         # Remove empty examples from the datasets
         for text_feature in ["tokens", "text"]:

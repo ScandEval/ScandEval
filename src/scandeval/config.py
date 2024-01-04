@@ -127,6 +127,8 @@ class BenchmarkConfig:
             Whether to use Flash Attention.
         clear_model_cache:
             Whether to clear the model cache after benchmarking each model.
+        only_validation_split:
+            Whether to only evaluate on the validation split.
     """
 
     model_languages: list[Language]
@@ -147,6 +149,7 @@ class BenchmarkConfig:
     load_in_4bit: bool | None
     use_flash_attention: bool
     clear_model_cache: bool
+    only_validation_split: bool
 
 
 @dataclass
