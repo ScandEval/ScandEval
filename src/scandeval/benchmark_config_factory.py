@@ -85,14 +85,14 @@ def build_benchmark_config(
         clear_model_cache:
             Whether to clear the model cache after benchmarking each model.
     """
-    languages = prepare_languages(language=language)
-    model_languages = prepare_model_languages(
-        model_language=model_language,
-        languages=languages,
+    language_codes = get_correct_language_codes(language=language)
+    model_languages = prepare_languages(
+        language=model_language,
+        language_codes=language_codes,
     )
-    dataset_languages = prepare_dataset_languages(
-        dataset_language=dataset_language,
-        languages=languages,
+    dataset_languages = prepare_languages(
+        language=dataset_language,
+        language_codes=language_codes,
     )
 
     dataset_tasks = prepare_dataset_tasks(dataset_task=dataset_task)
@@ -122,8 +122,8 @@ def build_benchmark_config(
     )
 
 
-def prepare_languages(language: str | list[str]) -> list[str]:
-    """Prepare language(s) for benchmarking.
+def get_correct_language_codes(language: str | list[str]) -> list[str]:
+    """Get correct language-code(s).
 
     Args:
         language:
@@ -132,7 +132,7 @@ def prepare_languages(language: str | list[str]) -> list[str]:
             to 'all' if all languages (also non-Scandinavian) should be considered.
 
     Returns:
-        The prepared languages.
+        The correct language-codes.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
@@ -155,17 +155,18 @@ def prepare_languages(language: str | list[str]) -> list[str]:
     return languages
 
 
-def prepare_model_languages(
-    model_language: str | list[str] | None,
-    languages: list[str],
+def prepare_languages(
+    language: str | list[str] | None,
+    language_codes: list[str],
 ) -> list[Language]:
-    """Prepare model language(s) for benchmarking.
+    """Prepare language(s) for benchmarking.
 
     Args:
-        model_language:
-            The language codes of the languages to include for models. If specified
-            then this overrides the `language` parameter for model languages.
-        languages:
+        language:
+            The language codes of the languages to include for models or datasets.
+            If specified then this overrides the `language` parameter for model or
+            dataset languages.
+        language_codes:
             The default language codes of the languages to include.
 
     Returns:
@@ -175,63 +176,21 @@ def prepare_model_languages(
     language_mapping = get_all_languages()
 
     # Create the list `model_languages`
-    model_languages_str: list[str]
-    if model_language is None:
-        model_languages_str = languages
-    elif isinstance(model_language, str):
-        model_languages_str = [model_language]
+    languages_str: list[str]
+    if language is None:
+        languages_str = language_codes
+    elif isinstance(language, str):
+        languages_str = [language]
     else:
-        model_languages_str = model_language
+        languages_str = language
 
     # Convert the model languages to language objects
-    if "all" in model_languages_str:
-        model_languages = list(language_mapping.values())
+    if "all" in languages_str:
+        prepared_languages = list(language_mapping.values())
     else:
-        model_languages = [
-            language_mapping[language] for language in model_languages_str
-        ]
+        prepared_languages = [language_mapping[language] for language in languages_str]
 
-    return model_languages
-
-
-def prepare_dataset_languages(
-    dataset_language: str | list[str] | None,
-    languages: list[str],
-) -> list[Language]:
-    """Prepare dataset language(s) for benchmarking.
-
-    Args:
-        model_language:
-            The language codes of the languages to include for datasets. If
-            specified then this overrides the `language` parameter for dataset
-            languages.
-        languages:
-            The default language codes of the languages to include.
-
-    Returns:
-        The prepared dataset languages.
-    """
-    # Create a dictionary that maps languages to their associated language objects
-    language_mapping = get_all_languages()
-
-    # Create the list `dataset_languages_str`
-    dataset_languages_str: list[str]
-    if dataset_language is None:
-        dataset_languages_str = languages
-    elif isinstance(dataset_language, str):
-        dataset_languages_str = [dataset_language]
-    else:
-        dataset_languages_str = dataset_language
-
-    # Convert the dataset languages to language objects
-    if "all" in dataset_languages_str:
-        dataset_languages = list(language_mapping.values())
-    else:
-        dataset_languages = [
-            language_mapping[language] for language in dataset_languages_str
-        ]
-
-    return dataset_languages
+    return prepared_languages
 
 
 def prepare_dataset_tasks(dataset_task: str | list[str] | None) -> list[DatasetTask]:
