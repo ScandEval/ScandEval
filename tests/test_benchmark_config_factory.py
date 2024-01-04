@@ -40,7 +40,7 @@ def test_get_correct_language_codes(input_language_codes, expected_language_code
 @pytest.mark.parametrize(
     argnames=[
         "input_language_codes",
-        "input_model_language",
+        "input_language",
         "expected_model_language",
     ],
     argvalues=[
