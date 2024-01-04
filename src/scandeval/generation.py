@@ -5,7 +5,6 @@ import logging
 import sys
 import warnings
 from collections import defaultdict
-from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable
 
@@ -18,6 +17,11 @@ from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
+from .model_cache import (
+    ModelCache,
+    load_cached_model_outputs,
+    split_dataset_into_cached_and_non_cached,
+)
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
 from .utils import clear_memory
@@ -27,18 +31,14 @@ logger = logging.getLogger(__package__)
 
 def generate(
     itr: tqdm,
-    train: Dataset,
-    val: Dataset,
-    tests: list[Dataset],
     prepared_train: Dataset,
-    prepared_val: Dataset,
     prepared_tests: list[Dataset],
     model: GenerativeModel,
     model_config: ModelConfig,
     tokenizer: Tokenizer,
     data_collator: DataCollator,
     compute_metrics: Callable,
-    extract_labels_fn: Callable[..., list[str]],
+    extract_labels_fn: Callable[..., list[Any]],
     benchmark_config: BenchmarkConfig,
     dataset_config: DatasetConfig,
 ) -> dict[str, list[dict[str, float]]]:
@@ -47,16 +47,8 @@ def generate(
     Args:
         itr:
             The progress bar iterator.
-        train:
-            The training dataset.
-        val:
-            The validation dataset.
-        tests:
-            The bootstrapped test datasets.
         prepared_train:
             The prepared training dataset.
-        prepared_val:
-            The prepared validation dataset.
         prepared_tests:
             The prepared bootstrapped test datasets.
         num_iter:
@@ -198,7 +190,11 @@ def generate_single_iteration(
         cache_name = "model_outputs_test.json"
         (model_cache_dir / cache_name).unlink(missing_ok=True)
 
-    cache = ModelCache(model_cache_dir=model_cache_dir, cache_name=cache_name)
+    cache = ModelCache(
+        model_cache_dir=model_cache_dir,
+        cache_name=cache_name,
+        max_generated_tokens=dataset_config.max_generated_tokens,
+    )
 
     # Split up the prepared dataset into a cached and non-cached part
     cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
@@ -253,65 +249,25 @@ def generate_single_iteration(
 
         # Generate the completions for the non-cached examples
         for batch_idx, batch in enumerate(tqdm(dataloader, leave=False)):
-            # Generate the completions of the documents in the batch
-            with warnings.catch_warnings(), torch.inference_mode():
-                warnings.simplefilter("ignore", category=UserWarning)
-                inputs = batch["input_ids"].to(model.device)
-                stopping_criteria.clear()
-                model_output: ModelOutput = model.generate(
-                    inputs=inputs,
-                    generation_config=generation_config,
-                    stopping_criteria=[stopping_criteria],
-                )
-
-            # Hugging Face models include the input in the generated sequence, so we
-            # need to remove it in that case
-            if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
-                model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
-
-            # Extract the scores from the model output, to be cached. We only store the
-            # indices of the top 100 scores, to save space. Further, we only store the
-            # scores if the generated sequence is shorter than the maximum length
-            store_scores = (
-                "scores" in model_output and dataset_config.max_generated_tokens < 50
+            model_output, extracted_labels = generate_batch(
+                batch=batch,
+                batch_idx=batch_idx,
+                batch_size=batch_size,
+                non_cached_dataset=non_cached_dataset,
+                model=model,
+                tokenizer=tokenizer,
+                stopping_criteria=stopping_criteria,
+                generation_config=generation_config,
+                extract_labels_fn=extract_labels_fn,
             )
-            if store_scores:
-                scores = torch.stack(model_output.scores, dim=1)
-                top_scores = torch.topk(scores, k=100)
-
-            # Store the generated sequences in the cache, one by one
-            for sample_idx, sample in enumerate(inputs):
-                decoded_inputs = tokenizer.decode(
-                    token_ids=sample, skip_special_tokens=True
-                )
-                generated_ids = model_output.sequences[sample_idx].tolist()
-
-                # Store the generated sequence in the cache
-                cached_model_output = GenerativeModelOutput(
-                    completion=tokenizer.decode(
-                        token_ids=generated_ids, skip_special_tokens=True
-                    ),
-                )
-                if store_scores:
-                    cached_model_output.top_score_indices = top_scores.indices[
-                        sample_idx
-                    ].tolist()
-                    cached_model_output.top_score_values = top_scores.values[
-                        sample_idx
-                    ].tolist()
-                    cached_model_output.vocab_size = int(scores.shape[-1])
-                cache[decoded_inputs] = cached_model_output
-
-            # Extract the labels from the model output and store them for metric
-            # computation later
-            batch_start = batch_idx * batch_size
-            batch_end = (batch_idx + 1) * batch_size
-            input_batch = non_cached_dataset[batch_start:batch_end]
-            extracted_labels: list = extract_labels_fn(
-                input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+            cache.add_to_cache(
+                model_input=batch["input_ids"],
+                model_output=model_output,
+                tokenizer=tokenizer,
             )
             all_preds.extend(extracted_labels)
 
+        # Store the cache to disk
         cache.save()
 
     # Fetch the cached predictions for the cached examples
@@ -353,224 +309,92 @@ def generate_single_iteration(
     return itr_scores
 
 
-@dataclass
-class GenerativeModelOutput:
-    completion: str
-    top_score_indices: list[list[int]] | None = None
-    top_score_values: list[list[float]] | None = None
-    vocab_size: int | None = None
+class StopWordCriteria(StoppingCriteria):
+    def __init__(self, stop_word_id_lists: list[list[int]]):
+        super().__init__()
+        self.stop_word_id_lists = stop_word_id_lists
+        self.indices_done: list[int] = list()
+
+    def clear(self) -> None:
+        self.indices_done = list()
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> bool:
+        for stop_word_id_list in self.stop_word_id_lists:
+            for batch_idx in range(input_ids.shape[0]):
+                inputs = input_ids[batch_idx].tolist()
+                sample_ends_with_stop_word = (
+                    inputs[-len(stop_word_id_list) :] == stop_word_id_list
+                )
+                if sample_ends_with_stop_word:
+                    self.indices_done.append(batch_idx)
+                if all(idx in self.indices_done for idx in range(input_ids.shape[0])):
+                    return True
+        return False
 
 
-class ModelCache:
-    """A cache for model outputs.
-
-    Args:
-        model_cache_dir:
-            The directory to store the cache in.
-        cache_name:
-            The name of the cache file.
-
-    Attributes:
-        model_cache_dir:
-            The directory to store the cache in.
-        cache_path:
-            The path to the cache file.
-        cache:
-            The model output cache.
-    """
-
-    def __init__(
-        self,
-        model_cache_dir: Path,
-        cache_name: str,
-    ):
-        self.model_cache_dir = model_cache_dir
-        self.model_cache_dir.mkdir(parents=True, exist_ok=True)
-        self.cache_path = self.model_cache_dir / cache_name
-        self.cache: dict[str, GenerativeModelOutput] = self.load()
-
-    def load(self) -> dict[str, GenerativeModelOutput]:
-        """Load and return the model output cache."""
-        if not self.cache_path.exists():
-            with self.cache_path.open("w") as f:
-                json.dump(dict(), f)
-
-        with self.cache_path.open() as f:
-            json_cache = json.load(f)
-
-        cache: dict[str, GenerativeModelOutput] = dict()
-        for key in json_cache:
-            cache[key] = GenerativeModelOutput(**json_cache[key])
-        return cache
-
-    def save(self) -> None:
-        """Save the model output cache to disk."""
-        dumpable_cache: dict[str, dict] = defaultdict(dict)
-        for key, value in self.cache.items():
-            dumpable_cache[key] = asdict(value)
-
-        with self.cache_path.open("w") as f:
-            json.dump(dumpable_cache, f, indent=4)
-
-    def __getitem__(self, key: str) -> GenerativeModelOutput:
-        """Get an item from the cache.
-
-        Args:
-            key:
-                The key to use to index the cache.
-
-        Returns:
-            The model output.
-        """
-        return self.cache[key]
-
-    def __setitem__(self, key: str, value: GenerativeModelOutput) -> None:
-        """Set an item in the cache.
-
-        Args:
-            key:
-                The key to use to index the cache.
-            value:
-                The value to set in the cache.
-        """
-        self.cache[key] = value
-
-    def cached_texts(self) -> list[str]:
-        """Return the text inputs indexed in the cache."""
-        return [key for key in self.cache.keys()]
-
-
-def split_dataset_into_cached_and_non_cached(
-    dataset: Dataset, cache: ModelCache
-) -> tuple[Dataset, Dataset]:
-    """Split a dataset into a cached and non-cached part.
-
-    Args:
-        dataset:
-            The dataset to split.
-        cache:
-            The model output cache.
-
-    Returns:
-        The cached and non-cached parts of the dataset.
-    """
-    # Get the sample indices of the non-cached examples, which are unique with respect
-    # to the "text" column
-    unique_non_cached_ids: set[int] = set()
-    for example_idx, example in enumerate(dataset):
-        cached_texts = cache.cached_texts()
-        cached_texts += dataset.select(unique_non_cached_ids)["text"]
-        if example["text"] not in cached_texts:
-            unique_non_cached_ids.add(example_idx)
-
-    # The cached examples are the ones that are not in the non-cached examples. This
-    # means that if the dataset has duplicates, only a single copy of the duplicate
-    # will be put in the non-cached part, and the rest in the cached part.
-    cached_ids = set(range(len(dataset))) - unique_non_cached_ids
-
-    cached = dataset.select(cached_ids)
-    non_cached = dataset.select(unique_non_cached_ids)
-    return cached, non_cached
-
-
-def load_cached_model_outputs(
-    cached_dataset: Dataset,
-    cache: ModelCache,
+def generate_batch(
+    batch: dict[str, torch.Tensor],
+    batch_idx: int,
+    batch_size: int,
+    non_cached_dataset: Dataset,
+    model: GenerativeModel,
     tokenizer: Tokenizer,
-) -> ModelOutput:
-    """Load the cached model outputs.
+    stopping_criteria: StopWordCriteria,
+    generation_config: GenerationConfig,
+    extract_labels_fn: Callable[..., list[str]],
+) -> tuple[ModelOutput, list[str | list[str]]]:
+    """Evaluate a model on a single batch of examples through generation.
 
     Args:
-        cached_dataset:
-            The dataset containing the cached examples.
-        cache:
-            The model output cache.
+        batch:
+            The batch of examples to evaluate on.
+        batch_idx:
+            The index of the batch.
+        batch_size:
+            The size of the batch.
+        non_cached_dataset:
+            The dataset to evaluate on.
+        model:
+            The model to evaluate.
         tokenizer:
-            The tokenizer used to generate the tokens.
+            The tokenizer used to encode the examples.
+        stopping_criteria:
+            The stopping criteria to use to stop generation.
+        generation_config:
+            The generation configuration to use.
+        extract_labels_fn:
+            The function to use to extract the labels from the model output.
 
     Returns:
-        The model output containing the cached sequences.
+        The predictions generated so far, with the predictions for the current batch
+        appended.
     """
-    # Encode and decode the samples in the cached dataset, to ensure that the cached
-    # sequences are tokenized in the same way as the model outputs
-    cached_dataset = cached_dataset.map(
-        lambda example: dict(
-            text=tokenizer.decode(
-                tokenizer(
-                    text=example["text"],
-                    truncation=True,
-                    return_tensors="pt",
-                ).input_ids.squeeze(dim=0),
-                skip_special_tokens=True,
-            )
-        ),
+    # Generate the completions of the documents in the batch
+    with warnings.catch_warnings(), torch.inference_mode():
+        warnings.simplefilter("ignore", category=UserWarning)
+        inputs = batch["input_ids"].to(model.device)
+        stopping_criteria.clear()
+        model_output: ModelOutput = model.generate(
+            inputs=inputs,
+            generation_config=generation_config,
+            stopping_criteria=[stopping_criteria],
+        )
+
+    # Hugging Face models include the input in the generated sequence, so we
+    # need to remove it in that case
+    if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
+        model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
+
+    # Extract the labels from the model output and store them for metric
+    # computation later
+    batch_start = batch_idx * batch_size
+    batch_end = (batch_idx + 1) * batch_size
+    input_batch = non_cached_dataset[batch_start:batch_end]
+    extracted_labels: list = extract_labels_fn(
+        input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
     )
 
-    # Load the raw model outputs from the cache
-    cached_model_outputs: list[GenerativeModelOutput] = [
-        cache[example["text"]] for example in cached_dataset
-    ]
-
-    # Tokenize the cached sequences
-    tokenized_cached_sequences: list[torch.Tensor] = [
-        tokenizer(
-            text=cached_model_output.completion,
-            add_special_tokens=False,
-            return_tensors="pt",
-        ).input_ids.squeeze(dim=0)
-        for cached_model_output in cached_model_outputs
-    ]
-
-    # Pad the cached completions to the same length
-    cached_sequences = torch.nn.utils.rnn.pad_sequence(
-        sequences=tokenized_cached_sequences,
-        batch_first=True,
-        padding_value=tokenizer.pad_token_id,
-    )
-
-    # If we do not have any cached scores, then wrap the padded cached sequences in a
-    # ModelOutput and return it
-    if (
-        cached_model_outputs[0].top_score_indices is None
-        or cached_model_outputs[0].top_score_values is None
-        or cached_model_outputs[0].vocab_size is None
-    ):
-        return ModelOutput(sequences=cached_sequences)
-
-    # Otherwise, we format the cached scores into a tensor of shape [batch_size,
-    # num_sequences, vocab_size], wrap it in a ModelOutput with the padded cached
-    # sequences, and return it
-    cached_scores = torch.zeros(
-        len(cached_model_outputs),
-        max(
-            len(cached_model_output.top_score_indices)
-            for cached_model_output in cached_model_outputs
-            if cached_model_output.top_score_indices is not None
-        ),
-        cached_model_outputs[0].vocab_size,
-    )
-    top_score_indices = torch.nn.utils.rnn.pad_sequence(
-        sequences=[
-            torch.tensor(cached_model_output.top_score_indices)
-            for cached_model_output in cached_model_outputs
-        ],
-        batch_first=True,
-        padding_value=tokenizer.pad_token_id,
-    )
-    top_score_values = torch.nn.utils.rnn.pad_sequence(
-        sequences=[
-            torch.tensor(cached_model_output.top_score_values)
-            for cached_model_output in cached_model_outputs
-        ],
-        batch_first=True,
-        padding_value=0.0,
-    )
-    for batch_idx in range(cached_scores.shape[0]):
-        for sequence_idx in range(cached_scores.shape[1]):
-            top_indices = top_score_indices[batch_idx, sequence_idx]
-            top_values = top_score_values[batch_idx, sequence_idx]
-            cached_scores[batch_idx, sequence_idx, top_indices] = top_values
-    return ModelOutput(sequences=cached_sequences, scores=cached_scores)
+    return model_output, extracted_labels
 
 
 def extract_raw_predictions(
@@ -597,29 +421,6 @@ def extract_raw_predictions(
         for completion_ids in generated_sequences
     ]
     return raw_predictions
-
-
-class StopWordCriteria(StoppingCriteria):
-    def __init__(self, stop_word_id_lists: list[list[int]]):
-        super().__init__()
-        self.stop_word_id_lists = stop_word_id_lists
-        self.indices_done: list[int] = list()
-
-    def clear(self) -> None:
-        self.indices_done = list()
-
-    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> bool:
-        for stop_word_id_list in self.stop_word_id_lists:
-            for batch_idx in range(input_ids.shape[0]):
-                inputs = input_ids[batch_idx].tolist()
-                sample_ends_with_stop_word = (
-                    inputs[-len(stop_word_id_list) :] == stop_word_id_list
-                )
-                if sample_ends_with_stop_word:
-                    self.indices_done.append(batch_idx)
-                if all(idx in self.indices_done for idx in range(input_ids.shape[0])):
-                    return True
-        return False
 
 
 def get_generation_stopping_criteria(
