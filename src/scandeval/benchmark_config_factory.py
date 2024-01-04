@@ -175,7 +175,7 @@ def prepare_languages(
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
 
-    # Create the list `model_languages`
+    # Create the list `languages_str` of language codes to use for models or datasets
     languages_str: list[str]
     if language_codes is None:
         languages_str = default_language_codes
