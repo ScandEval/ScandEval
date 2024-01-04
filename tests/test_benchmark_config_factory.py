@@ -3,8 +3,10 @@
 import pytest
 from scandeval.benchmark_config_factory import (
     get_correct_language_codes,
+    prepare_dataset_tasks,
     prepare_languages,
 )
+from scandeval.dataset_tasks import LA, NER, get_all_dataset_tasks
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
 
 
@@ -63,3 +65,23 @@ def test_prepare_languages(
     model_languages = sorted(model_languages, key=lambda x: x.code)
     expected_model_language = sorted(expected_model_language, key=lambda x: x.code)
     assert model_languages == expected_model_language
+
+
+@pytest.mark.parametrize(
+    argnames=["input_task", "expected_task"],
+    argvalues=[
+        (None, list(get_all_dataset_tasks.values())),
+        ("linguistic-acceptability", [LA]),
+        (["linguistic-acceptability"], [LA]),
+        (["linguistic-acceptability", "named-entity-recognition"], [LA, NER]),
+    ],
+    ids=[
+        "all tasks",
+        "single task",
+        "single task as list",
+        "multiple tasks",
+    ],
+)
+def test_prepare_dataset_tasks(input_task, expected_task):
+    prepared_tasks = prepare_dataset_tasks(dataset_task=input_task)
+    assert prepared_tasks == expected_task
