@@ -292,7 +292,7 @@ class HFModelSetup:
                             )
                     except (KeyError, RuntimeError) as e:
                         if not model_kwargs["ignore_mismatched_sizes"]:
-                            logger.warning(
+                            logger.debug(
                                 f"{type(e).__name__} occurred during the loading "
                                 f"of the {model_id!r} model. Retrying with "
                                 "`ignore_mismatched_sizes` set to True."
