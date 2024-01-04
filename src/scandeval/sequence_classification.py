@@ -3,6 +3,7 @@
 import itertools as it
 import logging
 import random
+import re
 from functools import partial
 from typing import Any
 
@@ -237,7 +238,7 @@ class SequenceClassification(BenchmarkDataset):
         label_mapping = self.dataset_config.prompt_label_mapping
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=example["text"].replace("\n", " ").strip(),
+                text=re.sub(r"\n+", "\n", example["text"]).strip(),
                 label=label_mapping[example["label"].lower()],
             )
             for example in few_shot_examples
@@ -252,7 +253,7 @@ class SequenceClassification(BenchmarkDataset):
         # from one another
         new_prompts = [
             self.dataset_config.prompt_template.format(
-                text=text.replace("\n", " ").strip(), label=""
+                text=re.sub(r"\n+", "\n", text).strip(), label=""
             ).strip()
             for text in examples["text"]
         ]
