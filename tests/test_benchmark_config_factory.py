@@ -73,7 +73,7 @@ def test_prepare_languages(
 @pytest.mark.parametrize(
     argnames=["input_task", "expected_task"],
     argvalues=[
-        (None, list(get_all_dataset_tasks.values())),
+        (None, list(get_all_dataset_tasks().values())),
         ("linguistic-acceptability", [LA]),
         (["linguistic-acceptability"], [LA]),
         (["linguistic-acceptability", "named-entity-recognition"], [LA, NER]),
