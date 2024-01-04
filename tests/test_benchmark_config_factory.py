@@ -9,7 +9,7 @@ from scandeval.benchmark_config_factory import (
     prepare_languages,
 )
 from scandeval.dataset_tasks import LA, NER, get_all_dataset_tasks
-from scandeval.enums import CPU
+from scandeval.enums import Device
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
 
 
@@ -93,7 +93,7 @@ def test_prepare_dataset_tasks(input_task, expected_task):
 @pytest.mark.parametrize(
     argnames=["device" "expected_device"],
     argvalues=[
-        (CPU, torch.device("cpu")),
+        (Device.CPU, torch.device("cpu")),
         (
             None,
             torch.device("cuda")
