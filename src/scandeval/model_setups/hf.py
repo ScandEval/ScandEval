@@ -291,8 +291,8 @@ class HFModelSetup:
                                 "flash-attn`."
                             )
                     except (KeyError, RuntimeError) as e:
-                        if not ignore_mismatched_sizes:
-                            ignore_mismatched_sizes = True
+                        if not model_kwargs["ignore_mismatched_sizes"]:
+                            model_kwargs["ignore_mismatched_sizes"] = True
                             continue
                         else:
                             raise InvalidBenchmark(str(e))
