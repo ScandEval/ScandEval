@@ -2,8 +2,8 @@
 
 import pytest
 from scandeval.benchmark_config_factory import (
+    get_correct_language_codes,
     prepare_languages,
-    prepare_model_languages,
 )
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
 
@@ -27,8 +27,8 @@ from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
         "all -> all languages",
     ],
 )
-def test_prepare_languages(input_language, expected_language):
-    languages = prepare_languages(language=input_language)
+def test_get_correct_language_codes(input_language, expected_language):
+    languages = get_correct_language_codes(language=input_language)
     assert set(languages) == set(expected_language)
 
 
@@ -53,11 +53,11 @@ def test_prepare_languages(input_language, expected_language):
         "all -> all languages",
     ],
 )
-def test_prepare_model_languages(
+def test_prepare_languages(
     input_language, input_model_language, expected_model_language
 ):
-    prepared_languages = prepare_languages(input_language)
-    model_languages = prepare_model_languages(
+    prepared_languages = get_correct_language_codes(input_language)
+    model_languages = prepare_languages(
         model_language=input_model_language, languages=prepared_languages
     )
     model_languages = sorted(model_languages, key=lambda x: x.code)
