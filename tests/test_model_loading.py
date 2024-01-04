@@ -47,3 +47,15 @@ def test_load_model_with_invalid_model_id(benchmark_config):
             dataset_config=SPEED_CONFIG,
             benchmark_config=benchmark_config,
         )
+
+
+def test_load_model_with_invalid_model_type(benchmark_config):
+    model_config = get_model_config(
+        model_id="invalid_model_type", benchmark_config=benchmark_config
+    )
+    with pytest.raises(InvalidBenchmark):
+        load_model(
+            model_config=model_config,
+            dataset_config=SPEED_CONFIG,
+            benchmark_config=benchmark_config,
+        )
