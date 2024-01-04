@@ -126,7 +126,7 @@ def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
     """Get correct language-code(s).
 
     Args:
-        language:
+        language_codes:
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
             to 'all' if all languages (also non-Scandinavian) should be considered.
@@ -162,15 +162,15 @@ def prepare_languages(
     """Prepare language(s) for benchmarking.
 
     Args:
-        language:
+        language_codes:
             The language codes of the languages to include for models or datasets.
             If specified then this overrides the `language` parameter for model or
             dataset languages.
-        language_codes:
+        default_language_codes:
             The default language codes of the languages to include.
 
     Returns:
-        The prepared model languages.
+        The prepared model or dataset languages.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
