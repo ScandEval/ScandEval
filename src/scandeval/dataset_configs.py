@@ -200,29 +200,6 @@ SUC3_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
-DANE_CONFIG = DatasetConfig(
-    name="dane",
-    pretty_name="the truncated version of DaNE",
-    huggingface_id="ScandEval/dane-mini",
-    task=NER,
-    languages=[DA],
-    prompt_prefix="Følgende er sætninger og JSON-ordbøger med de navngivne enheder, "
-    "som forekommer i den givne sætning.",
-    prompt_template="Sætning: {text}\nNavngivne enheder: {label}",
-    prompt_label_mapping={
-        "b-per": "person",
-        "i-per": "person",
-        "b-loc": "sted",
-        "i-loc": "sted",
-        "b-org": "organisation",
-        "i-org": "organisation",
-        "b-misc": "diverse",
-        "i-misc": "diverse",
-    },
-    num_few_shot_examples=8,
-    max_generated_tokens=128,
-)
-
 DANSK_CONFIG = DatasetConfig(
     name="dansk",
     pretty_name="the truncated version of DANSK",
