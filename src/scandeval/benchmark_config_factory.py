@@ -87,12 +87,12 @@ def build_benchmark_config(
     """
     language_codes = get_correct_language_codes(language_codes=language)
     model_languages = prepare_languages(
-        language=model_language,
-        language_codes=language_codes,
+        language_codes=model_language,
+        default_language_codes=language_codes,
     )
     dataset_languages = prepare_languages(
-        language=dataset_language,
-        language_codes=language_codes,
+        language_codes=dataset_language,
+        default_language_codes=language_codes,
     )
 
     dataset_tasks = prepare_dataset_tasks(dataset_task=dataset_task)
@@ -156,8 +156,8 @@ def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
 
 
 def prepare_languages(
-    language: str | list[str] | None,
-    language_codes: list[str],
+    language_codes: str | list[str] | None,
+    default_language_codes: list[str],
 ) -> list[Language]:
     """Prepare language(s) for benchmarking.
 
@@ -177,12 +177,12 @@ def prepare_languages(
 
     # Create the list `model_languages`
     languages_str: list[str]
-    if language is None:
-        languages_str = language_codes
-    elif isinstance(language, str):
-        languages_str = [language]
+    if language_codes is None:
+        languages_str = default_language_codes
+    elif isinstance(language_codes, str):
+        languages_str = [language_codes]
     else:
-        languages_str = language
+        languages_str = language_codes
 
     # Convert the model languages to language objects
     if "all" in languages_str:

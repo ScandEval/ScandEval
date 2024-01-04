@@ -67,7 +67,7 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
         language_codes=input_language_codes
     )
     model_languages = prepare_languages(
-        language=input_language, language_codes=prepared_language_codes
+        language_codes=input_language, default_language_codes=prepared_language_codes
     )
     model_languages = sorted(model_languages, key=lambda x: x.code)
     expected_language = sorted(expected_language, key=lambda x: x.code)
