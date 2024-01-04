@@ -35,7 +35,7 @@ logger = logging.getLogger(__package__)
 GENERATIVE_MODEL_TASKS = [
     "text-generation",
     "conversational",
-    "text2text-generation",
+    # "text2text-generation",  # TODO: Add this when we support it
 ]
 
 
@@ -367,8 +367,8 @@ def get_huggingface_model_lists(
             language_str = None
 
         # Fetch the model list
-        models: list[ModelInfo] = api.list_models(
-            filter=ModelFilter(language=language_str), token=token
+        models: list[ModelInfo] = list(
+            api.list_models(filter=ModelFilter(language=language_str), token=token)
         )
 
         # Filter the models to only keep the ones with the specified language

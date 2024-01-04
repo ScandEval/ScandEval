@@ -165,11 +165,7 @@ class BenchmarkDataset(ABC):
         elif model_is_generative(model=model):
             scores = generate(
                 itr=itr,
-                train=train,
-                val=val,
-                tests=tests,
                 prepared_train=prepared_train,
-                prepared_val=prepared_val,
                 prepared_tests=prepared_tests,
                 model=model,
                 model_config=model_config,

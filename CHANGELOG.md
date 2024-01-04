@@ -10,14 +10,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Now caches the completions of open source generative models, which effectively makes
   benchmarking of these ~33% faster. We cannot store all logits for storage reasons (it
-  quickly gets >100GB in that case), so we instead store the top-100 logits. We thus
-  assume that (a) these are the only logits needed, and (b) that the generations don't
-  change. We argue that (a) is the case since we only use the logits in classification
-  tasks, in which case we only use the first token anyway. Further, since we're using
-  a temperature of 0 anyway, the generations will be as close to deterministic as
-  possible (up to small rounding fluctuations of logits, which is negligible). This is
-  a breaking change, since it is not compatible with the previous way we cached OpenAI
-  model outputs.
+  quickly gets >100GB in that case), so we instead store the top-100 logits for each
+  generated token, but only if the generated sequence is shorter than 50 tokens. We
+  thus assume that (a) these are the only logits needed, and (b) that the generations
+  don't change. We argue that (a) is the case since we only use the logits in
+  classification tasks, in which case we only use the first token anyway. Further,
+  since we're using a temperature of 0 anyway, the generations will be as close to
+  deterministic as possible (up to small rounding fluctuations of logits, which is
+  negligible). This is a breaking change, since it is not compatible with the previous
+  way we cached OpenAI model outputs.
 - Added a new `--clear-model-cache` flag, which removes the cached models after
   finishing the benchmarking of each model, to save disk space. This doesn't remove the
   cached model outputs or datasets.
@@ -39,6 +40,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Now compatible with`transformers >= 4.36.2`, and this is required now as they have
   changed their generation API in a breaking manner.
+- Now removes all newlines from texts in the summarization task, where previously these
+  were merely "squashed" to single newlines. This makes the separation of few-shot
+  examples for generative models easier.
+- Also removes newlines from the NER task, where these were not removed at all
+  previously.
+- Now doesn't force ASCII characters in the NER task for generative models, making the
+  target JSON dictionary more consistent with the input text.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
@@ -52,6 +60,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   based on the dataset itself, starting from 512 and doubling until we have at least
   the number of desired few-shot examples to choose from.
 - Now only sets `torch_dtype` is CUDA is available, as otherwise errors are caused.
+- Previously text generation in a batch would be stopped if any of the samples in the
+  batch reached the stopping criteria, causing a lot of incomplete completions. Now
+  the model continues to generate text until the entire batch is complete, and the
+  excess generation is removed afterwards.
 - When benchmarking encoder models on QA tasks the contexts are split up if they exceed
   the model's context length. The stride value used caused errors in rare cases where
   the model's maximum context length was really small (128). This has been fixed now.

@@ -541,12 +541,12 @@ class NamedEntityRecognition(BenchmarkDataset):
                     labels[prompt_label].append(token)
                 elif label.startswith("i-"):
                     labels[prompt_label][-1] += " " + token
-            return json.dumps(labels)
+            return json.dumps(labels, ensure_ascii=False)
 
         # Build the few-shot part of the prompt
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=" ".join(example["tokens"]),
+                text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                 label=create_label(example),
             )
             for example in few_shot_examples
@@ -558,7 +558,9 @@ class NamedEntityRecognition(BenchmarkDataset):
 
         # Add the texts from the examples to the prompts
         new_prompts = [
-            self.dataset_config.prompt_template.format(text=" ".join(tokens), label="")
+            self.dataset_config.prompt_template.format(
+                text=" ".join(tokens).replace("\n", " ").strip(), label=""
+            )
             for tokens in examples["tokens"]
         ]
         examples["text"] = [
@@ -591,7 +593,6 @@ class NamedEntityRecognition(BenchmarkDataset):
         raw_predictions = extract_raw_predictions(
             generated_sequences=model_output["sequences"],
             tokenizer=tokenizer,
-            dataset_config=self.dataset_config,
         )
 
         tokens = input_batch["tokens"]
@@ -623,6 +624,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                     continue
                 prediction_dict: dict[str, list[str]] = json_output
             except json.JSONDecodeError:
+                logger.debug(
+                    "The model output is not valid JSON, so cannot parse it. Skipping. "
+                    f"Here is the output: {raw_prediction!r}"
+                )
                 continue
 
             prompt_label_mapping = self.dataset_config.prompt_label_mapping

@@ -2,7 +2,6 @@
 
 import logging
 import random
-import re
 from typing import Any
 
 import numpy as np
@@ -171,8 +170,8 @@ class TextToText(BenchmarkDataset):
         # Build the few-shot part of the prompt
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=re.sub(r"\n+", "\n", example["text"]).strip(),
-                target_text=re.sub(r"\n+", "\n", example["target_text"]).strip(),
+                text=example["text"].replace("\n", " ").strip(),
+                target_text=example["target_text"].replace("\n", " ").strip(),
             )
             for example in few_shot_examples
         ]
@@ -220,6 +219,5 @@ class TextToText(BenchmarkDataset):
         raw_predictions = extract_raw_predictions(
             generated_sequences=model_output.sequences,
             tokenizer=tokenizer,
-            dataset_config=self.dataset_config,
         )
         return raw_predictions
