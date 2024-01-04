@@ -34,15 +34,15 @@ def main() -> None:
         df["text"] = [
             f"{row['ctx']}\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['endings'][0]}\n"
-            f"B: {row['endings'][1]}\n"
-            f"C: {row['endings'][2]}\n"
-            f"D: {row['endings'][3]}"
+            f"a: {row['endings'][0]}\n"
+            f"b: {row['endings'][1]}\n"
+            f"c: {row['endings'][2]}\n"
+            f"d: {row['endings'][3]}"
             for _, row in df.iterrows()
         ]
 
         # Fix the label column
-        label_mapping = {"0": "A", "1": "B", "2": "C", "3": "D"}
+        label_mapping = {"0": "a", "1": "b", "2": "c", "3": "d"}
         df.label = df.label.map(label_mapping)
 
         # Only keep the samples whose `activity_label` has at least 3 samples

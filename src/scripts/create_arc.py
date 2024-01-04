@@ -47,28 +47,28 @@ def main() -> None:
         train_df["text"] = [
             f"{row['instruction']}\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['option_a']}\n"
-            f"B: {row['option_b']}\n"
-            f"C: {row['option_c']}\n"
-            f"D: {row['option_d']}"
+            f"a: {row['option_a']}\n"
+            f"b: {row['option_b']}\n"
+            f"c: {row['option_c']}\n"
+            f"d: {row['option_d']}"
             for _, row in train_df.iterrows()
         ]
         val_df["text"] = [
             f"{row['instruction']}\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['option_a']}\n"
-            f"B: {row['option_b']}\n"
-            f"C: {row['option_c']}\n"
-            f"D: {row['option_d']}"
+            f"a: {row['option_a']}\n"
+            f"b: {row['option_b']}\n"
+            f"c: {row['option_c']}\n"
+            f"d: {row['option_d']}"
             for _, row in val_df.iterrows()
         ]
         test_df["text"] = [
             f"{row['instruction']}\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['option_a']}\n"
-            f"B: {row['option_b']}\n"
-            f"C: {row['option_c']}\n"
-            f"D: {row['option_d']}"
+            f"a: {row['option_a']}\n"
+            f"b: {row['option_b']}\n"
+            f"c: {row['option_c']}\n"
+            f"d: {row['option_d']}"
             for _, row in test_df.iterrows()
         ]
 
