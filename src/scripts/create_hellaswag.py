@@ -32,12 +32,12 @@ def main() -> None:
 
         # Make a `text` column with all the options in it
         df["text"] = [
-            f"{row['ctx']}\n"
+            row.ctx.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"a: {row['endings'][0]}\n"
-            f"b: {row['endings'][1]}\n"
-            f"c: {row['endings'][2]}\n"
-            f"d: {row['endings'][3]}"
+            f"a. " + row.endings[0].replace("\n", " ").strip() + "\n"
+            "b. " + row.endings[1].replace("\n", " ").strip() + "\n"
+            "c. " + row.endings[2].replace("\n", " ").strip() + "\n"
+            "d. " + row.endings[3].replace("\n", " ").strip()
             for _, row in df.iterrows()
         ]
 
