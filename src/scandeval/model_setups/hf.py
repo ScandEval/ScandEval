@@ -294,7 +294,7 @@ class HFModelSetup:
                         if not model_kwargs["ignore_mismatched_sizes"]:
                             logger.warning(
                                 f"{type(e).__name__} occurred during the benchmarking "
-                                "of the {model_id!r} model. Retrying with "
+                                f"of the {model_id!r} model. Retrying with "
                                 "`ignore_mismatched_sizes` set to True."
                             )
                             model_kwargs["ignore_mismatched_sizes"] = True
