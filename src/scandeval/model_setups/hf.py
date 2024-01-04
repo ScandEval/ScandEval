@@ -291,8 +291,13 @@ class HFModelSetup:
                                 "flash-attn`."
                             )
                     except (KeyError, RuntimeError) as e:
-                        if not ignore_mismatched_sizes:
-                            ignore_mismatched_sizes = True
+                        if not model_kwargs["ignore_mismatched_sizes"]:
+                            logger.debug(
+                                f"{type(e).__name__} occurred during the loading "
+                                f"of the {model_id!r} model. Retrying with "
+                                "`ignore_mismatched_sizes` set to True."
+                            )
+                            model_kwargs["ignore_mismatched_sizes"] = True
                             continue
                         else:
                             raise InvalidBenchmark(str(e))

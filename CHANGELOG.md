@@ -72,6 +72,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - When benchmarking encoder models on QA tasks the contexts are split up if they exceed
   the model's context length. The stride value used caused errors in rare cases where
   the model's maximum context length was really small (128). This has been fixed now.
+- Now sets `ignore_mismatched_sizes` when loading models if the model cannot be loaded
+  otherwise. This previously caused some issues when loading certain models.
 
 
 ## [v8.2.1] - 2023-12-20
