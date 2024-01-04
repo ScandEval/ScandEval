@@ -41,7 +41,7 @@ def test_get_correct_language_codes(input_language_codes, expected_language_code
     argnames=[
         "input_language_codes",
         "input_language",
-        "expected_model_language",
+        "expected_language",
     ],
     argvalues=[
         ("da", None, [DA]),
