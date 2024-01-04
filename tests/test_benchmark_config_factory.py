@@ -62,18 +62,16 @@ def test_get_correct_language_codes(input_language_codes, expected_language_code
         "all -> all languages",
     ],
 )
-def test_prepare_languages(
-    input_language_codes, input_model_language, expected_model_language
-):
+def test_prepare_languages(input_language_codes, input_language, expected_language):
     prepared_language_codes = get_correct_language_codes(
         language_codes=input_language_codes
     )
     model_languages = prepare_languages(
-        language=input_model_language, language_codes=prepared_language_codes
+        language=input_language, language_codes=prepared_language_codes
     )
     model_languages = sorted(model_languages, key=lambda x: x.code)
-    expected_model_language = sorted(expected_model_language, key=lambda x: x.code)
-    assert model_languages == expected_model_language
+    expected_language = sorted(expected_language, key=lambda x: x.code)
+    assert model_languages == expected_language
 
 
 @pytest.mark.parametrize(
