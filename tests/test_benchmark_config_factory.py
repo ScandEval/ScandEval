@@ -1,12 +1,15 @@
 """Unit tests for the `benchmark_config_factory` module."""
 
 import pytest
+import torch
 from scandeval.benchmark_config_factory import (
     get_correct_language_codes,
     prepare_dataset_tasks,
+    prepare_device,
     prepare_languages,
 )
 from scandeval.dataset_tasks import LA, NER, get_all_dataset_tasks
+from scandeval.enums import CPU
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
 
 
@@ -85,3 +88,26 @@ def test_prepare_languages(
 def test_prepare_dataset_tasks(input_task, expected_task):
     prepared_tasks = prepare_dataset_tasks(dataset_task=input_task)
     assert prepared_tasks == expected_task
+
+
+@pytest.mark.parametrize(
+    argnames=["device" "expected_device"],
+    argvalues=[
+        (CPU, torch.device("cpu")),
+        (
+            None,
+            torch.device("cuda")
+            if torch.cuda.is_available()
+            else torch.device("mps")
+            if torch.backends.mps.is_available()
+            else torch.device("cpu"),
+        ),
+    ],
+    ids=[
+        "device provided",
+        "device not provided",
+    ],
+)
+def test_prepare_device(device, expected_device):
+    prepared_device = prepare_device(device=device)
+    assert prepared_device == expected_device
