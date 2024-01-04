@@ -188,6 +188,12 @@ from .languages import get_all_languages
     show_default=True,
     help="Whether to clear the model cache after benchmarking each model.",
 )
+@click.option(
+    "--only-validation-split/--no-only-validation-split",
+    default=False,
+    show_default=True,
+    help="Whether to only evaluate on the validation split.",
+)
 def benchmark(
     model_id: tuple[str],
     dataset: tuple[str],
@@ -211,6 +217,7 @@ def benchmark(
     load_in_4bit: bool | None,
     use_flash_attention: bool,
     clear_model_cache: bool,
+    only_validation_split: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
 
@@ -246,6 +253,7 @@ def benchmark(
         load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
+        only_validation_split=only_validation_split,
     )
 
     # Perform the benchmark evaluation

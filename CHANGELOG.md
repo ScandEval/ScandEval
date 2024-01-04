@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
       translated version of SQuAD-v2. As with the datasets mentioned above, this is
       meant as a first version of a Dutch QA dataset, until we have a better one
       available.
+- Added `--only-validation-split` flag, which only benchmarks the model on the
+  validation split, which is 5-10x smaller than the test split (depending on the
+  dataset). This is especially useful with paid models like OpenAI models. The value of
+  this flag is stored in the benchmark results, so this will be visible on
+  leaderboards.
 
 ### Changed
 - Now compatible with`transformers >= 4.36.2`, and this is required now as they have

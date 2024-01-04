@@ -35,6 +35,7 @@ def test_cli_param_names(params):
         "load_in_4bit",
         "use_flash_attention",
         "clear_model_cache",
+        "only_validation_split",
         "help",
     }
 
@@ -62,4 +63,5 @@ def test_cli_param_types(params):
     assert params["load_in_4bit"] == BOOL
     assert params["use_flash_attention"] == BOOL
     assert params["clear_model_cache"] == BOOL
+    assert params["only_validation_split"] == BOOL
     assert params["help"] == BOOL

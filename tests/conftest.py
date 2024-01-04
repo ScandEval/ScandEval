@@ -49,6 +49,7 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         load_in_4bit=None,
         use_flash_attention=False,
         clear_model_cache=False,
+        only_validation_split=False,
     )
 
 

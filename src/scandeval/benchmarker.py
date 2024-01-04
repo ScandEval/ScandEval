@@ -104,6 +104,9 @@ class Benchmarker:
         clear_model_cache:
             Whether to clear the model cache after benchmarking each model. Defaults to
             False.
+        only_validation_split:
+            Whether to only evaluate the validation split of the datasets. Defaults to
+            False.
 
     Attributes:
         progress_bar: Whether progress bars should be shown.
@@ -138,6 +141,7 @@ class Benchmarker:
         load_in_4bit: bool | None = None,
         use_flash_attention: bool = False,
         clear_model_cache: bool = False,
+        only_validation_split: bool = False,
     ) -> None:
         self.benchmark_config = build_benchmark_config(
             language=language,
@@ -159,6 +163,7 @@ class Benchmarker:
             load_in_4bit=load_in_4bit,
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
+            only_validation_split=only_validation_split,
         )
 
         # Set attributes from arguments

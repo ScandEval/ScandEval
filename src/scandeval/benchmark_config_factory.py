@@ -28,6 +28,7 @@ def build_benchmark_config(
     load_in_4bit: bool | None,
     use_flash_attention: bool,
     clear_model_cache: bool,
+    only_validation_split: bool,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -84,6 +85,8 @@ def build_benchmark_config(
             Whether to use Flash Attention.
         clear_model_cache:
             Whether to clear the model cache after benchmarking each model.
+        only_validation_split:
+            Whether to only evaluate on the validation split.
     """
     language_codes = get_correct_language_codes(language_codes=language)
     model_languages = prepare_languages(
@@ -99,7 +102,6 @@ def build_benchmark_config(
 
     torch_device = prepare_device(device=device)
 
-    # Build benchmark config and return it
     return BenchmarkConfig(
         model_languages=model_languages,
         dataset_languages=dataset_languages,
@@ -119,6 +121,7 @@ def build_benchmark_config(
         load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
+        only_validation_split=only_validation_split,
     )
 
 

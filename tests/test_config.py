@@ -109,6 +109,7 @@ class TestBenchmarkConfig:
             load_in_4bit=None,
             use_flash_attention=False,
             clear_model_cache=False,
+            only_validation_split=False,
         )
 
     def test_benchmark_config_is_object(self, benchmark_config):
@@ -135,6 +136,7 @@ class TestBenchmarkConfig:
         assert benchmark_config.load_in_4bit is None
         assert benchmark_config.use_flash_attention is False
         assert benchmark_config.clear_model_cache is False
+        assert benchmark_config.only_validation_split is False
 
 
 class TestDatasetConfig:
