@@ -7,6 +7,7 @@ from typing import Generator
 import pytest
 import torch
 from scandeval.config import BenchmarkConfig
+from scandeval.dataset_configs import MMLU_DA_CONFIG, SPEED_CONFIG
 from scandeval.dataset_tasks import LA, NER, QA, SENT
 from scandeval.languages import DA, NO, SV
 
@@ -61,3 +62,13 @@ def model_id():
 @pytest.fixture(scope="session")
 def generative_model_id():
     yield "AI-Sweden-Models/gpt-sw3-126m"
+
+
+@pytest.fixture(scope="session")
+def dataset_config():
+    yield SPEED_CONFIG
+
+
+@pytest.fixture(scope="session")
+def generative_dataset_config():
+    yield MMLU_DA_CONFIG
