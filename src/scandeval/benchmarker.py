@@ -31,15 +31,23 @@ class BenchmarkResult(BaseModel):
     max_sequence_length: int
     vocabulary_size: int
     few_shot: bool
+    validation_split: bool
 
     @classmethod
     def from_dict(cls, config: dict) -> "BenchmarkResult":
-        few_shot = False
-        if re.search(r"\(.*few-shot.*\)$", config["model"]) is not None:
-            few_shot = True
+        has_few_shot = re.search(r"\(.*few-shot.*\)$", config["model"]) is not None
+        has_validation_split = re.search(r"\(.*val.*\)$", config["model"]) is not None
+
+        if has_few_shot:
             config["model"] = re.sub(r"\(.*few-shot.*\)$", "", config["model"]).strip()
+        if has_validation_split:
+            config["model"] = re.sub(r"\(.*val.*\)$", "", config["model"]).strip()
+
         if "few_shot" not in config:
-            config["few_shot"] = few_shot
+            config["few_shot"] = has_few_shot
+        if "validation_split" not in config:
+            config["validation_split"] = has_validation_split
+
         return cls(**config)
 
 
