@@ -43,32 +43,53 @@ def main() -> None:
         val_df = val_df[val_df["option_e"].isnull()]
         test_df = test_df[test_df["option_e"].isnull()]
 
+        # Remove all samples with a null value of `option_a`, `option_b`, `option_c` or
+        # `option_d`
+        train_df = train_df[
+            train_df["option_a"].notnull()
+            & train_df["option_b"].notnull()
+            & train_df["option_c"].notnull()
+            & train_df["option_d"].notnull()
+        ]
+        val_df = val_df[
+            val_df["option_a"].notnull()
+            & val_df["option_b"].notnull()
+            & val_df["option_c"].notnull()
+            & val_df["option_d"].notnull()
+        ]
+        test_df = test_df[
+            test_df["option_a"].notnull()
+            & test_df["option_b"].notnull()
+            & test_df["option_c"].notnull()
+            & test_df["option_d"].notnull()
+        ]
+
         # Make a `text` column with all the options in it
         train_df["text"] = [
-            f"{row['instruction']}\n"
+            row.instruction.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['option_a']}\n"
-            f"B: {row['option_b']}\n"
-            f"C: {row['option_c']}\n"
-            f"D: {row['option_d']}"
+            f"a. " + row.option_a.replace("\n", " ").strip() + "\n"
+            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
+            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
+            "d. " + row.option_d.replace("\n", " ").strip()
             for _, row in train_df.iterrows()
         ]
         val_df["text"] = [
-            f"{row['instruction']}\n"
+            row.instruction.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['option_a']}\n"
-            f"B: {row['option_b']}\n"
-            f"C: {row['option_c']}\n"
-            f"D: {row['option_d']}"
+            f"a. " + row.option_a.replace("\n", " ").strip() + "\n"
+            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
+            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
+            "d. " + row.option_d.replace("\n", " ").strip()
             for _, row in val_df.iterrows()
         ]
         test_df["text"] = [
-            f"{row['instruction']}\n"
+            row.instruction.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['option_a']}\n"
-            f"B: {row['option_b']}\n"
-            f"C: {row['option_c']}\n"
-            f"D: {row['option_d']}"
+            f"a. " + row.option_a.replace("\n", " ").strip() + "\n"
+            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
+            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
+            "d. " + row.option_d.replace("\n", " ").strip()
             for _, row in test_df.iterrows()
         ]
 

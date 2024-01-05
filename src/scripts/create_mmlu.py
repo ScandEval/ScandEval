@@ -45,12 +45,12 @@ def main() -> None:
 
         # Make a `text` column with all the options in it
         df["text"] = [
-            f"{row['instruction']}\n"
+            row.instruction.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"A: {row['option_a']}\n"
-            f"B: {row['option_b']}\n"
-            f"C: {row['option_c']}\n"
-            f"D: {row['option_d']}"
+            f"a. " + row.option_a.replace("\n", " ").strip() + "\n"
+            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
+            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
+            "d. " + row.option_d.replace("\n", " ").strip()
             for _, row in df.iterrows()
         ]
 
