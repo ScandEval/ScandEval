@@ -1,7 +1,6 @@
 """Unit tests for the `speed_benchmark` module."""
 
 import pytest
-from scandeval.dataset_configs import SPEED_CONFIG
 from scandeval.model_setups import HFModelSetup
 from scandeval.speed_benchmark import benchmark_speed
 from tqdm.auto import tqdm
@@ -22,11 +21,6 @@ def model(model_id):
 def model_config(model_id, benchmark_config):
     model_setup = HFModelSetup(benchmark_config=benchmark_config)
     return model_setup.get_model_config(model_id=model_id)
-
-
-@pytest.fixture(scope="module")
-def dataset_config():
-    yield SPEED_CONFIG
 
 
 class TestBenchmarkSpeed:
