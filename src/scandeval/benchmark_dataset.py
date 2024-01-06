@@ -1,5 +1,6 @@
 """Abstract benchmarking dataset class."""
 
+
 import logging
 import sys
 from abc import ABC, abstractmethod
@@ -455,8 +456,8 @@ class BenchmarkDataset(ABC):
         This is to avoid memory issues when the model returns hidden states as well.
 
         Args:
-            logits:
-                The model logits.
+            model_outputs:
+                The raw model outputs.
             labels:
                 The ground truth labels.
 
@@ -478,6 +479,7 @@ class BenchmarkDataset(ABC):
             return model_outputs
 
     def __call__(self, *args, **kwargs):
+        """Call the benchmark method. See `benchmark` for details."""
         return self.benchmark(*args, **kwargs)
 
     def _process_data(self, dataset_dict: DatasetDict) -> DatasetDict:
