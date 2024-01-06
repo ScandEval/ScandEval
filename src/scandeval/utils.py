@@ -71,7 +71,6 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
 
 def clear_memory():
     """Clears the memory of unused items."""
-
     # Clear the Python cache
     gc.collect()
 
@@ -138,7 +137,6 @@ def block_terminal_output():
     libraries, disabled tokeniser progress bars when using Hugging Face tokenisers, and
     disables most of the logging from the `transformers` library.
     """
-
     # Ignore miscellaneous warnings
     warnings.filterwarnings(
         "ignore",
@@ -498,10 +496,12 @@ class HiddenPrints:
     """Context manager which removes all terminal output."""
 
     def __enter__(self):
+        """Enter the context manager."""
         self._original_stdout = sys.stdout
         sys.stdout = open(os.devnull, "w")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context manager."""
         sys.stdout.close()
         sys.stdout = self._original_stdout
 

@@ -28,7 +28,6 @@ from tqdm.auto import tqdm
 
 def main():
     """Create the ScaLA datasets and upload them to the HF Hub."""
-
     # Block terminal output
     block_terminal_output()
 

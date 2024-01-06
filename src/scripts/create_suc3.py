@@ -17,7 +17,6 @@ from requests.exceptions import HTTPError
 
 def main():
     """Create the DaNE-mini NER dataset and uploads it to the HF Hub."""
-
     # Define download URLs
     url = "https://spraakbanken.gu.se/lb/resurser/meningsmangder/suc3.xml.bz2"
 

@@ -44,6 +44,7 @@ from transformers import AutoTokenizer
 def benchmark_dataset(
     benchmark_config, request
 ) -> Generator[BenchmarkDataset, None, None]:
+    """Yields a question answering benchmark dataset."""
     yield QuestionAnswering(
         dataset_config=request.param,
         benchmark_config=benchmark_config,
@@ -51,6 +52,7 @@ def benchmark_dataset(
 
 
 def test_encoder_benchmarking(benchmark_dataset, model_id):
+    """Test that encoder models can be benchmarked on question answering datasets."""
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
         with pytest.raises(InvalidBenchmark):
             benchmark_dataset.benchmark(model_id)
@@ -60,6 +62,7 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
 
 
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
+    """Test that decoder models can be benchmarked on question answering datasets."""
     with does_not_raise():
         benchmark_dataset.benchmark(generative_model_id)
 
@@ -92,6 +95,7 @@ def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
     ],
 )
 def test_prepare_train_examples(examples, tokenizer_model_id):
+    """Test that train examples can be prepared for training."""
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_id)
     if (
         hasattr(tokenizer, "model_max_length")

@@ -17,6 +17,8 @@ logger = logging.getLogger(__package__)
 
 @dataclass
 class GenerativeModelOutput:
+    """The output of a generative model."""
+
     completion: str
     top_score_indices: list[list[int]] | None = None
     top_score_values: list[list[float]] | None = None
@@ -25,14 +27,6 @@ class GenerativeModelOutput:
 
 class ModelCache:
     """A cache for model outputs.
-
-    Args:
-        model_cache_dir:
-            The directory to store the cache in.
-        cache_name:
-            The name of the cache file.
-        max_generated_tokens:
-            The maximum number of tokens to generate for each example.
 
     Attributes:
         model_cache_dir:
@@ -51,6 +45,16 @@ class ModelCache:
         cache_name: str,
         max_generated_tokens: int,
     ):
+        """Initialize the model output cache.
+
+        Args:
+            model_cache_dir:
+                The directory to store the cache in.
+            cache_name:
+                The name of the cache file.
+            max_generated_tokens:
+                The maximum number of tokens to generate for each example.
+        """
         self.model_cache_dir = model_cache_dir
         self.model_cache_dir.mkdir(parents=True, exist_ok=True)
         self.cache_path = self.model_cache_dir / cache_name
@@ -113,6 +117,16 @@ class ModelCache:
         model_output: ModelOutput,
         tokenizer: Tokenizer,
     ) -> None:
+        """Add the model input/output to the cache.
+
+        Args:
+            model_input:
+                The model input.
+            model_output:
+                The model output.
+            tokenizer:
+                The tokenizer used to generate the tokens.
+        """
         # Extract the scores from the model output, to be cached. We only store the
         # indices of the top 100 scores, to save space. Further, we only store the
         # scores if the generated sequence is shorter than the maximum length

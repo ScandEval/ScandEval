@@ -33,6 +33,7 @@ from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
     ],
 )
 def test_get_correct_language_codes(input_language_codes, expected_language_codes):
+    """Test that the correct language codes are returned."""
     languages = get_correct_language_codes(language_codes=input_language_codes)
     assert set(languages) == set(expected_language_codes)
 
@@ -63,6 +64,7 @@ def test_get_correct_language_codes(input_language_codes, expected_language_code
     ],
 )
 def test_prepare_languages(input_language_codes, input_language, expected_language):
+    """Test the output of `prepare_languages`."""
     prepared_language_codes = get_correct_language_codes(
         language_codes=input_language_codes
     )
@@ -90,6 +92,7 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
     ],
 )
 def test_prepare_dataset_tasks(input_task, expected_task):
+    """Test the output of `prepare_dataset_tasks`."""
     prepared_tasks = prepare_dataset_tasks(dataset_task=input_task)
     assert prepared_tasks == expected_task
 
@@ -113,5 +116,6 @@ def test_prepare_dataset_tasks(input_task, expected_task):
     ],
 )
 def test_prepare_device(device, expected_device):
+    """Test the output of `prepare_device`."""
     prepared_device = prepare_device(device=device)
     assert prepared_device == expected_device

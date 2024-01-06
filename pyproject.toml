@@ -97,8 +97,13 @@ exclude = '''
 
 [tool.ruff]
 target-version = "py311"
-extend-select = ["I"]
+extend-select = [
+    "I",
+    "D",
+]
 
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [tool.ruff.extend-per-file-ignores]
 "__init__.py" = ["F401"]

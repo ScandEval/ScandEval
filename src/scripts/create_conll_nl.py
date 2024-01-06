@@ -8,7 +8,6 @@ from requests import HTTPError
 
 def main():
     """Create the CoNLL-NL-mini NER dataset and uploads it to the HF Hub."""
-
     # Define dataset ID
     repo_id = "conll2002"
 

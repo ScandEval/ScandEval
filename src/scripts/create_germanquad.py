@@ -12,7 +12,6 @@ from requests.exceptions import HTTPError
 
 def main() -> None:
     """Create the GermanQuAD-mini dataset and upload them to the HF Hub."""
-
     dataset_id = "deepset/germanquad"
 
     # Load the datasets from the `alexandrainst` organisation

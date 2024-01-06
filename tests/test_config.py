@@ -13,42 +13,22 @@ from scandeval.config import (
 from scandeval.enums import ModelType
 
 
-@pytest.fixture(scope="module")
-def metric_config():
-    yield MetricConfig(
-        name="metric_name",
-        pretty_name="Metric name",
-        huggingface_id="metric_id",
-        results_key="metric_key",
-    )
-
-
-@pytest.fixture(scope="class")
-def dataset_task(metric_config):
-    yield DatasetTask(
-        name="dataset_task_name",
-        supertask="supertask_name",
-        metrics=[metric_config],
-        labels=["label"],
-    )
-
-
-@pytest.fixture(scope="class")
-def language():
-    yield Language(code="language_code", name="Language name")
-
-
 class TestMetricConfig:
+    """Unit tests for the `MetricConfig` class."""
+
     def test_metric_config_is_object(self, metric_config):
+        """Test that the metric config is a `MetricConfig` object."""
         assert isinstance(metric_config, MetricConfig)
 
     def test_attributes_correspond_to_arguments(self, metric_config):
+        """Test that the metric config attributes correspond to the arguments."""
         assert metric_config.name == "metric_name"
         assert metric_config.pretty_name == "Metric name"
         assert metric_config.huggingface_id == "metric_id"
         assert metric_config.results_key == "metric_key"
 
     def test_default_value_of_compute_kwargs(self, metric_config):
+        """Test that the default value of `compute_kwargs` is an empty dictionary."""
         assert metric_config.compute_kwargs == dict()
 
     @pytest.mark.parametrize(
@@ -64,100 +44,81 @@ class TestMetricConfig:
         ],
     )
     def test_default_value_of_postprocessing_fn(self, metric_config, inputs, expected):
+        """Test that the default value of `postprocessing_fn` is correct."""
         assert metric_config.postprocessing_fn(inputs) == expected
 
 
 class TestDatasetTask:
+    """Unit tests for the `DatasetTask` class."""
+
     def test_dataset_task_is_object(self, dataset_task):
+        """Test that the dataset task is a `DatasetTask` object."""
         assert isinstance(dataset_task, DatasetTask)
 
-    def test_attributes_correspond_to_arguments(self, dataset_task, metric_config):
-        assert dataset_task.name == "dataset_task_name"
-        assert dataset_task.supertask == "supertask_name"
-        assert dataset_task.metrics == [metric_config]
-        assert dataset_task.labels == ["label"]
+    def test_attributes_correspond_to_arguments(self, dataset_task):
+        """Test that the dataset task attributes correspond to the arguments."""
+        assert dataset_task.name == "speed"
+        assert dataset_task.supertask == "sequence-classification"
+        assert dataset_task.labels == []
 
 
 class TestLanguage:
+    """Unit tests for the `Language` class."""
+
     def test_language_is_object(self, language):
+        """Test that the language is a `Language` object."""
         assert isinstance(language, Language)
 
     def test_attributes_correspond_to_arguments(self, language):
+        """Test that the language attributes correspond to the arguments."""
         assert language.code == "language_code"
         assert language.name == "Language name"
 
 
 class TestBenchmarkConfig:
-    @pytest.fixture(scope="class")
-    def benchmark_config(self, language, dataset_task):
-        yield BenchmarkConfig(
-            model_languages=[language],
-            framework=None,
-            dataset_languages=[language],
-            dataset_tasks=[dataset_task],
-            batch_size=32,
-            raise_errors=True,
-            cache_dir="cache_dir",
-            evaluate_train=True,
-            token=True,
-            openai_api_key=None,
-            progress_bar=False,
-            save_results=False,
-            device=torch.device("cpu"),
-            verbose=False,
-            trust_remote_code=False,
-            load_in_4bit=None,
-            use_flash_attention=False,
-            clear_model_cache=False,
-            only_validation_split=False,
-        )
+    """Unit tests for the `BenchmarkConfig` class."""
 
     def test_benchmark_config_is_object(self, benchmark_config):
+        """Test that the benchmark config is a `BenchmarkConfig` object."""
         assert isinstance(benchmark_config, BenchmarkConfig)
 
     def test_attributes_correspond_to_arguments(
-        self, benchmark_config, language, dataset_task
+        self, benchmark_config, language, dataset_task, auth
     ):
+        """Test that the benchmark config attributes correspond to the arguments."""
         assert benchmark_config.model_languages == [language]
-        assert benchmark_config.framework is None
         assert benchmark_config.dataset_languages == [language]
         assert benchmark_config.dataset_tasks == [dataset_task]
+        assert benchmark_config.framework is None
         assert benchmark_config.batch_size == 32
-        assert benchmark_config.raise_errors is True
-        assert benchmark_config.cache_dir == "cache_dir"
-        assert benchmark_config.evaluate_train is True
-        assert benchmark_config.token is True
+        assert benchmark_config.raise_errors is False
+        assert benchmark_config.cache_dir == ".scandeval_cache"
+        assert benchmark_config.evaluate_train is False
+        assert benchmark_config.token is auth
         assert benchmark_config.openai_api_key is None
         assert benchmark_config.progress_bar is False
         assert benchmark_config.save_results is False
         assert benchmark_config.device == torch.device("cpu")
         assert benchmark_config.verbose is False
-        assert benchmark_config.trust_remote_code is False
+        assert benchmark_config.trust_remote_code is True
         assert benchmark_config.load_in_4bit is None
         assert benchmark_config.use_flash_attention is False
         assert benchmark_config.clear_model_cache is False
         assert benchmark_config.only_validation_split is False
+        assert benchmark_config.few_shot is True
 
 
 class TestDatasetConfig:
-    @pytest.fixture(scope="class")
-    def dataset_config(self, language, dataset_task):
-        yield DatasetConfig(
-            name="dataset_name",
-            pretty_name="Dataset name",
-            huggingface_id="dataset_id",
-            task=dataset_task,
-            languages=[language],
-            prompt_template="{text}\n{label}",
-            max_generated_tokens=1,
-        )
+    """Unit tests for the `DatasetConfig` class."""
 
     def test_dataset_config_is_object(self, dataset_config):
+        """Test that the dataset config is a `DatasetConfig` object."""
         assert isinstance(dataset_config, DatasetConfig)
 
     def test_attributes_correspond_to_arguments(
         self, dataset_config, language, dataset_task
     ):
+        """Test that the dataset config attributes correspond to the arguments."""
         assert dataset_config.name == "dataset_name"
         assert dataset_config.pretty_name == "Dataset name"
         assert dataset_config.huggingface_id == "dataset_id"
@@ -167,35 +128,31 @@ class TestDatasetConfig:
         assert dataset_config.max_generated_tokens == 1
 
     def test_id2label(self, dataset_config):
-        assert dataset_config.id2label == ["label"]
+        """Test that the `id2label` attribute is correct."""
+        assert dataset_config.id2label == []
 
     def test_label2id(self, dataset_config):
-        assert dataset_config.label2id == dict(label=0)
+        """Test that the `label2id` attribute is correct."""
+        assert dataset_config.label2id == dict()
 
     def test_num_labels(self, dataset_config):
-        assert dataset_config.num_labels == 1
+        """Test that the `num_labels` attribute is correct."""
+        assert dataset_config.num_labels == 0
 
     def test_default_value_of_prompt_label_mapping(self, dataset_config):
+        """Test that the default value of `prompt_label_mapping` is an empty dictionary."""
         assert dataset_config.prompt_label_mapping == dict()
 
 
 class TestModelConfig:
-    @pytest.fixture(scope="class")
-    def model_config(self, language):
-        yield ModelConfig(
-            model_id="model_id",
-            revision="revision",
-            framework="framework",
-            task="task",
-            languages=[language],
-            model_type=ModelType.FRESH,
-            model_cache_dir="cache_dir",
-        )
+    """Unit tests for the `ModelConfig` class."""
 
     def test_model_config_is_object(self, model_config):
+        """Test that the model config is a `ModelConfig` object."""
         assert isinstance(model_config, ModelConfig)
 
     def test_attributes_correspond_to_arguments(self, model_config, language):
+        """Test that the model config attributes correspond to the arguments."""
         assert model_config.model_id == "model_id"
         assert model_config.revision == "revision"
         assert model_config.framework == "framework"

@@ -1,6 +1,4 @@
-"""
-.. include:: ../../README.md
-"""
+"""ScandEval - A benchmarking framework for language models."""
 
 import importlib.metadata
 import logging

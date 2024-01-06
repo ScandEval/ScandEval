@@ -11,7 +11,6 @@ from requests.exceptions import HTTPError
 
 def main() -> None:
     """Create the SQuAD-nl-mini datasets and upload them to the HF Hub."""
-
     dataset_id = "yhavinga/squad_v2_dutch"
 
     # Load the dataset

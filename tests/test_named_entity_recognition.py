@@ -49,6 +49,7 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
 def benchmark_dataset(
     benchmark_config, request
 ) -> Generator[BenchmarkDataset, None, None]:
+    """Yields a named entity recognition dataset."""
     yield NamedEntityRecognition(
         dataset_config=request.param,
         benchmark_config=benchmark_config,
@@ -56,6 +57,7 @@ def benchmark_dataset(
 
 
 def test_encoder_benchmarking(benchmark_dataset, model_id):
+    """Test that encoder models can be benchmarked on named entity recognition."""
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
         with pytest.raises(InvalidBenchmark):
             benchmark_dataset.benchmark(model_id)
@@ -65,5 +67,6 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
 
 
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
+    """Test that decoder models can be benchmarked on named entity recognition."""
     with does_not_raise():
         benchmark_dataset.benchmark(generative_model_id)

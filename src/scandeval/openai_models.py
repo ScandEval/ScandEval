@@ -28,12 +28,6 @@ logger = logging.getLogger(__package__)
 class OpenAITokenizer:
     """An OpenAI tokenizer.
 
-    Args:
-        model_config:
-            The model configuration.
-        hf_model_config:
-            The Hugging Face model configuration.
-
     Attributes:
         model_config:
             The model configuration.
@@ -52,6 +46,14 @@ class OpenAITokenizer:
     def __init__(
         self, model_config: ModelConfig, hf_model_config: PretrainedConfig
     ) -> None:
+        """Initialize the tokenizer.
+
+        Args:
+            model_config:
+                The model configuration.
+            hf_model_config:
+                The Hugging Face model configuration.
+        """
         self.model_config = model_config
         self.hf_model_config = hf_model_config
 
@@ -73,6 +75,8 @@ class OpenAITokenizer:
         Args:
             text:
                 The text to tokenize.
+            **kwargs:
+                Additional keyword arguments.
 
         Returns:
             The tokenized text.
@@ -107,6 +111,8 @@ class OpenAITokenizer:
         Args:
             token_ids:
                 The token IDs to decode.
+            **kwargs:
+                Additional keyword arguments.
 
         Returns:
             The decoded text.
@@ -123,6 +129,8 @@ class OpenAITokenizer:
         Args:
             text:
                 The text to encode.
+            **kwargs:
+                Additional keyword arguments.
 
         Returns:
             The encoded text.
@@ -166,6 +174,8 @@ class OpenAITokenizer:
         Args:
             ids:
                 The token IDs to convert.
+            skip_special_tokens:
+                Whether to skip special tokens. Defaults to False.
 
         Returns:
             The tokens.
@@ -218,6 +228,7 @@ class OpenAITokenizer:
                 use this method during preprocessing as well as in a PyTorch Dataloader
                 collate function.
             **kwargs:
+                Additional keyword arguments.
         """
         # Single example
         if isinstance(encoded_inputs, BatchEncoding):
@@ -259,16 +270,6 @@ class OpenAITokenizer:
 class OpenAIModel:
     """An OpenAI model.
 
-    Args:
-        model_config:
-            The model configuration.
-        hf_model_config:
-            The Hugging Face model configuration.
-        benchmark_config:
-            The benchmark configuration.
-        tokenizer:
-            The tokenizer.
-
     Attributes:
         model_config:
             The model configuration.
@@ -291,6 +292,18 @@ class OpenAIModel:
         benchmark_config: BenchmarkConfig,
         tokenizer: OpenAITokenizer,
     ) -> None:
+        """Initialize the model.
+
+        Args:
+            model_config:
+                The model configuration.
+            hf_model_config:
+                The Hugging Face model configuration.
+            benchmark_config:
+                The benchmark configuration.
+            tokenizer:
+                The tokenizer.
+        """
         self.model_config = model_config
         self.config = hf_model_config
         self.benchmark_config = benchmark_config

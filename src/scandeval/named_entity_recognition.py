@@ -67,7 +67,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         """Compute the metrics needed for evaluation.
 
         Args:
-            predictions_and_labels:
+            model_outputs_and_labels:
                 The first array contains the probability predictions and the second
                 array contains the true labels.
             id2label:

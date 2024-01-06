@@ -22,6 +22,8 @@ logger = logging.getLogger(__package__)
 
 
 class BenchmarkResult(BaseModel):
+    """A benchmark result."""
+
     dataset: str
     task: str
     dataset_languages: list[str]
@@ -35,86 +37,35 @@ class BenchmarkResult(BaseModel):
 
     @classmethod
     def from_dict(cls, config: dict) -> "BenchmarkResult":
-        has_few_shot = re.search(r"\(.*few-shot.*\)$", config["model"]) is not None
-        has_validation_split = re.search(r"\(.*val.*\)$", config["model"]) is not None
+        """Create a benchmark result from a dictionary.
 
-        if has_few_shot:
-            config["model"] = re.sub(r"\(.*few-shot.*\)$", "", config["model"]).strip()
-        if has_validation_split:
-            config["model"] = re.sub(r"\(.*val.*\)$", "", config["model"]).strip()
+        Args:
+            config:
+                The configuration dictionary.
 
+        Returns:
+            The benchmark result.
+        """
+        # To be backwards compatible, we accept old results which changed the model
+        # name with parameters rather than adding them as explicit parameters
+        val_matches = re.search(r"\(.*val.*\)$", config["model"])
+        config["model"] = re.sub(
+            r"\(.*(few-shot|val).*\)$", "", config["model"]
+        ).strip()
+
+        # The default value for `few_shot` is True. It won't do anything if the model
+        # is not generative, so this is fine
         if "few_shot" not in config:
-            config["few_shot"] = has_few_shot
+            config["few_shot"] = True
+
         if "validation_split" not in config:
-            config["validation_split"] = has_validation_split
+            config["validation_split"] = val_matches is not None
 
         return cls(**config)
 
 
 class Benchmarker:
     """Benchmarking all the Scandinavian language models.
-
-    Args:
-        progress_bar:
-            Whether progress bars should be shown. Defaults to True.
-        save_results:
-            Whether to save the benchmark results to
-            'scandeval_benchmark_results.jsonl'. Defaults to False.
-        language:
-            The language codes of the languages to include, both for models and
-            datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
-            'all' if all languages (also non-Scandinavian) should be considered.
-            Defaults to ['da', 'sv', 'no'].
-        model_language:
-            The language codes of the languages to include for models. If specified
-            then this overrides the `language` parameter for model languages. Defaults
-            to None.
-        framework:
-            The model framework to use. Only relevant if `model-id` refers to a local
-            path. Otherwise, the framework will be set automatically. Defaults to None.
-        dataset_language:
-            The language codes of the languages to include for datasets. If specified
-            then this overrides the `language` parameter for dataset languages.
-            Defaults to None.
-        dataset_task:
-            The tasks to include for dataset. If "all" then datasets will not be
-            filtered based on their task. Defaults to "all".
-        batch_size:
-            The batch size to use. Defaults to 32.
-        evaluate_train:
-            Whether to evaluate the training set as well. Defaults to False.
-        raise_errors:
-            Whether to raise errors instead of skipping the model evaluation. Defaults
-            to False.
-        cache_dir:
-            Directory to store cached models. Defaults to '.scandeval_cache'.
-        token:
-            The authentication token for the Hugging Face Hub. If a boolean value is
-            specified then the token will be fetched from the Hugging Face CLI, where
-            the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token. Defaults to False.
-        openai_api_key:
-            The OpenAI API key to use for authentication. If None, then no OpenAI
-            models will be evaluated. Defaults to None.
-        ignore_duplicates:
-            Whether to skip evaluation of models which have already been evaluated,
-            with scores lying in the 'scandeval_benchmark_results.jsonl' file. Defaults
-            to True.
-        verbose:
-            Whether to output additional output. Defaults to False.
-        trust_remote_code:
-            Whether to trust remote code when loading models. Defaults to False.
-        load_in_4bit:
-            Whether to load models in 4-bit precision. If None then this will be done
-            if CUDA is available and the model is a decoder model. Defaults to None.
-        use_flash_attention:
-            Whether to use Flash Attention. Defaults to False.
-        clear_model_cache:
-            Whether to clear the model cache after benchmarking each model. Defaults to
-            False.
-        only_validation_split:
-            Whether to only evaluate the validation split of the datasets. Defaults to
-            False.
 
     Attributes:
         progress_bar: Whether progress bars should be shown.
@@ -150,7 +101,80 @@ class Benchmarker:
         use_flash_attention: bool = False,
         clear_model_cache: bool = False,
         only_validation_split: bool = False,
+        few_shot: bool = True,
     ) -> None:
+        """Initialise the benchmarker.
+
+        Args:
+            progress_bar:
+                Whether progress bars should be shown. Defaults to True.
+            save_results:
+                Whether to save the benchmark results to
+                'scandeval_benchmark_results.jsonl'. Defaults to False.
+            language:
+                The language codes of the languages to include, both for models and
+                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
+                to 'all' if all languages (also non-Scandinavian) should be considered.
+                Defaults to ['da', 'sv', 'no'].
+            model_language:
+                The language codes of the languages to include for models. If specified
+                then this overrides the `language` parameter for model languages.
+                Defaults to None.
+            framework:
+                The model framework to use. Only relevant if `model-id` refers to a
+                local path. Otherwise, the framework will be set automatically.
+                Defaults to None.
+            dataset_language:
+                The language codes of the languages to include for datasets. If
+                specified then this overrides the `language` parameter for dataset
+                languages. Defaults to None.
+            dataset_task:
+                The tasks to include for dataset. If "all" then datasets will not be
+                filtered based on their task. Defaults to "all".
+            batch_size:
+                The batch size to use. Defaults to 32.
+            evaluate_train:
+                Whether to evaluate the training set as well. Defaults to False.
+            raise_errors:
+                Whether to raise errors instead of skipping the model evaluation.
+                Defaults to False.
+            cache_dir:
+                Directory to store cached models. Defaults to '.scandeval_cache'.
+            token:
+                The authentication token for the Hugging Face Hub. If a boolean value
+                is specified then the token will be fetched from the Hugging Face CLI,
+                where the user has logged in through `huggingface-cli login`. If a
+                string is specified then it will be used as the token. Defaults to
+                False.
+            openai_api_key:
+                The OpenAI API key to use for authentication. If None, then no OpenAI
+                models will be evaluated. Defaults to None.
+            ignore_duplicates:
+                Whether to skip evaluation of models which have already been evaluated,
+                with scores lying in the 'scandeval_benchmark_results.jsonl' file.
+                Defaults to True.
+            device:
+                The device to use for benchmarking. Defaults to None.
+            verbose:
+                Whether to output additional output. Defaults to False.
+            trust_remote_code:
+                Whether to trust remote code when loading models. Defaults to False.
+            load_in_4bit:
+                Whether to load models in 4-bit precision. If None then this will be
+                done if CUDA is available and the model is a decoder model. Defaults to
+                None.
+            use_flash_attention:
+                Whether to use Flash Attention. Defaults to False.
+            clear_model_cache:
+                Whether to clear the model cache after benchmarking each model.
+                Defaults to False.
+            only_validation_split:
+                Whether to only evaluate the validation split of the datasets. Defaults
+                to False.
+            few_shot:
+                Whether to only evaluate the model using few-shot evaluation. Only
+                relevant if the model is generative. Defaults to True.
+        """
         self.benchmark_config = build_benchmark_config(
             language=language,
             model_language=model_language,
@@ -172,6 +196,7 @@ class Benchmarker:
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
             only_validation_split=only_validation_split,
+            few_shot=few_shot,
         )
 
         # Set attributes from arguments
@@ -240,8 +265,12 @@ class Benchmarker:
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
                 # `ignore_duplicates` is set
-                if self.ignore_duplicates and self._has_been_benchmarked(
-                    model_id=m_id, dataset=dataset_config.name
+                if self.ignore_duplicates and model_has_been_benchmarked(
+                    model_id=m_id,
+                    dataset=dataset_config.name,
+                    few_shot=self.benchmark_config.few_shot,
+                    validation_split=self.benchmark_config.only_validation_split,
+                    benchmark_results=self.benchmark_results,
                 ):
                     logger.debug(
                         f"Skipping benchmarking {m_id} on {dataset_config.pretty_name},"
@@ -292,23 +321,6 @@ class Benchmarker:
                     for sub_model_dir in model_dir.iterdir():
                         if sub_model_dir.is_dir():
                             rmtree(sub_model_dir)
-
-    def _has_been_benchmarked(self, model_id: str, dataset: str) -> bool:
-        """Checks whether a model has already been benchmarked on a dataset.
-
-        Args:
-            model_id:
-                The model ID.
-            dataset:
-                The dataset.
-
-        Returns:
-            Whether the model has already been evaluated on the dataset.
-        """
-        for record in self.benchmark_results:
-            if record.model == model_id and record.dataset == dataset:
-                return True
-        return False
 
     def _prepare_model_ids(
         self,
@@ -455,6 +467,7 @@ class Benchmarker:
                     return dict(error=str(e))
 
     def __call__(self, *args, **kwargs) -> list[BenchmarkResult]:
+        """Call the benchmarker. See `Benchmarker.benchmark`."""
         return self.benchmark(*args, **kwargs)
 
     def _get_model_ids(self, languages: list[Language]) -> list[str]:
@@ -494,3 +507,38 @@ class Benchmarker:
         model_ids = list(set(model_ids))
 
         return model_ids
+
+
+def model_has_been_benchmarked(
+    model_id: str,
+    dataset: str,
+    few_shot: bool,
+    validation_split: bool,
+    benchmark_results: list[BenchmarkResult],
+) -> bool:
+    """Checks whether a model has already been benchmarked on a dataset.
+
+    Args:
+        model_id:
+            The model ID.
+        dataset:
+            The dataset.
+        few_shot:
+            Whether the model was evaluated using few-shot evaluation.
+        validation_split:
+            Whether the model was evaluated on the validation split.
+        benchmark_results:
+            The benchmark results.
+
+    Returns:
+        Whether the model has already been evaluated on the dataset.
+    """
+    for record in benchmark_results:
+        if (
+            record.model == model_id
+            and record.dataset == dataset
+            and record.few_shot == few_shot
+            and record.validation_split == validation_split
+        ):
+            return True
+    return False

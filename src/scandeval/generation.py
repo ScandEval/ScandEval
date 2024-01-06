@@ -310,15 +310,49 @@ def generate_single_iteration(
 
 
 class StopWordCriteria(StoppingCriteria):
+    """Stopping criteria for generation based on stop words.
+
+    Attributes:
+        stop_word_id_lists:
+            A list of lists of token IDs that are used to determine whether generation
+            should stop.
+        indices_done:
+            A list of indices of the examples for which generation has already stopped.
+            Resets every batch.
+    """
+
     def __init__(self, stop_word_id_lists: list[list[int]]):
+        """Initialize the stopping criteria.
+
+        Args:
+            stop_word_id_lists:
+                A list of lists of token IDs that are used to determine whether
+                generation should stop.
+        """
         super().__init__()
         self.stop_word_id_lists = stop_word_id_lists
         self.indices_done: list[int] = list()
 
     def clear(self) -> None:
+        """Clear the example indices for which generation has already stopped."""
         self.indices_done = list()
 
-    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> bool:
+    def __call__(
+        self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs
+    ) -> bool:
+        """Determine whether generation should stop.
+
+        Args:
+            input_ids:
+                The input IDs of the generated sequences.
+            scores:
+                The scores of the generated sequences. Not used.
+            **kwargs:
+                Additional keyword arguments. Not used.
+
+        Returns:
+            Whether generation should stop.
+        """
         for stop_word_id_list in self.stop_word_id_lists:
             for batch_idx in range(input_ids.shape[0]):
                 inputs = input_ids[batch_idx].tolist()

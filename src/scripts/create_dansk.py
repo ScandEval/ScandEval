@@ -10,6 +10,8 @@ from requests import HTTPError
 
 @dataclass
 class NamedEntity:
+    """A named entity."""
+
     start: int
     end: int
     label: str
@@ -17,6 +19,8 @@ class NamedEntity:
 
 @dataclass
 class Token:
+    """A token."""
+
     id: int
     start: int
     end: int
@@ -24,7 +28,6 @@ class Token:
 
 def main():
     """Create the DANSK-mini NER dataset and uploads it to the HF Hub."""
-
     # Define dataset ID
     repo_id = "chcaa/DANSK"
 

@@ -12,7 +12,6 @@ from requests.exceptions import HTTPError
 
 def main() -> None:
     """Create the NQiI-mini dataset and upload them to the HF Hub."""
-
     dataset_id = "vesteinn/icelandic-qa-NQiI"
 
     # Load the datasets from the `alexandrainst` organisation

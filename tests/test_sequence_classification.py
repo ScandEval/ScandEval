@@ -103,6 +103,7 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
 def benchmark_dataset(
     benchmark_config, request
 ) -> Generator[BenchmarkDataset, None, None]:
+    """Yields a sequence classification benchmark dataset."""
     yield SequenceClassification(
         dataset_config=request.param,
         benchmark_config=benchmark_config,
@@ -110,6 +111,7 @@ def benchmark_dataset(
 
 
 def test_encoder_benchmarking(benchmark_dataset, model_id):
+    """Test that the encoder can be benchmarked on sequence classification datasets."""
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
         with pytest.raises(InvalidBenchmark):
             benchmark_dataset.benchmark(model_id)
@@ -119,5 +121,6 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
 
 
 def test_decoder_sequence_benchmarking(benchmark_dataset, generative_model_id):
+    """Test that the decoder can be benchmarked on sequence classification datasets."""
     with does_not_raise():
         benchmark_dataset.benchmark(generative_model_id)

@@ -11,7 +11,6 @@ from requests.exceptions import HTTPError
 
 def main() -> None:
     """Create the NorQuAD-mini dataset and upload them to the HF Hub."""
-
     url = (
         "https://raw.githubusercontent.com/ltgoslo/NorQuAD/main/data/evaluation"
         "/all/{}_dataset_flattened.json"

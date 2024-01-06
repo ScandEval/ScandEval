@@ -129,6 +129,9 @@ class BenchmarkConfig:
             Whether to clear the model cache after benchmarking each model.
         only_validation_split:
             Whether to only evaluate on the validation split.
+        few_shot:
+            Whether to only evaluate the model using few-shot evaluation. Only relevant
+            if the model is generative.
     """
 
     model_languages: list[Language]
@@ -150,6 +153,7 @@ class BenchmarkConfig:
     use_flash_attention: bool
     clear_model_cache: bool
     only_validation_split: bool
+    few_shot: bool
 
 
 @dataclass
@@ -204,14 +208,17 @@ class DatasetConfig:
 
     @property
     def id2label(self) -> list[str]:
+        """The mapping from ID to label."""
         return [label for label in self.task.labels]
 
     @property
     def label2id(self) -> dict[str, int]:
+        """The mapping from label to ID."""
         return {label: i for i, label in enumerate(self.task.labels)}
 
     @property
     def num_labels(self) -> int:
+        """The number of labels in the dataset."""
         return len(self.task.labels)
 
 
