@@ -35,18 +35,20 @@ class BenchmarkResult(BaseModel):
 
     @classmethod
     def from_dict(cls, config: dict) -> "BenchmarkResult":
-        has_few_shot = re.search(r"\(.*few-shot.*\)$", config["model"]) is not None
-        has_validation_split = re.search(r"\(.*val.*\)$", config["model"]) is not None
+        # To be backwards compatible, we accept old results which changed the model
+        # name with parameters rather than adding them as explicit parameters
+        val_matches = re.search(r"\(.*val.*\)$", config["model"])
+        config["model"] = re.sub(
+            r"\(.*(few-shot|val).*\)$", "", config["model"]
+        ).strip()
 
-        if has_few_shot:
-            config["model"] = re.sub(r"\(.*few-shot.*\)$", "", config["model"]).strip()
-        if has_validation_split:
-            config["model"] = re.sub(r"\(.*val.*\)$", "", config["model"]).strip()
-
+        # The default value for `few_shot` is True. It won't do anything if the model
+        # is not generative, so this is fine
         if "few_shot" not in config:
-            config["few_shot"] = has_few_shot
+            config["few_shot"] = True
+
         if "validation_split" not in config:
-            config["validation_split"] = has_validation_split
+            config["validation_split"] = val_matches is not None
 
         return cls(**config)
 
