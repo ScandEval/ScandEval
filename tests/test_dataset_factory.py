@@ -13,7 +13,6 @@ from scandeval.dataset_tasks import (
     QA,
     SENT,
     SUMM,
-    TEXT_MODELLING,
 )
 from scandeval.named_entity_recognition import NamedEntityRecognition
 from scandeval.question_answering import QuestionAnswering
@@ -84,7 +83,7 @@ def test_build_know_dataset(dataset_factory, dataset_config):
     cfg = deepcopy(dataset_config)
     cfg.task = KNOW
     dataset = dataset_factory.build_dataset(dataset=cfg)
-    assert isinstance(dataset, TextToText)
+    assert isinstance(dataset, SequenceClassification)
 
 
 def test_build_common_sense_dataset(dataset_factory, dataset_config):
@@ -92,13 +91,10 @@ def test_build_common_sense_dataset(dataset_factory, dataset_config):
     cfg = deepcopy(dataset_config)
     cfg.task = COMMON_SENSE
     dataset = dataset_factory.build_dataset(dataset=cfg)
-    assert isinstance(dataset, TextToText)
+    assert isinstance(dataset, SequenceClassification)
 
 
 @pytest.mark.skip(reason="Text modelling datasets are not yet implemented.")
 def test_build_text_modelling_dataset(dataset_factory, dataset_config):
     """Test that TEXT_MODELLING datasets are built correctly."""
-    cfg = deepcopy(dataset_config)
-    cfg.task = TEXT_MODELLING
-    dataset = dataset_factory.build_dataset(dataset=cfg)
-    assert isinstance(dataset, TextToText)
+    pass
