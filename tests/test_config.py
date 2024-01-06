@@ -55,12 +55,12 @@ class TestDatasetTask:
         """Test that the dataset task is a `DatasetTask` object."""
         assert isinstance(dataset_task, DatasetTask)
 
-    def test_attributes_correspond_to_arguments(self, dataset_task, metric_config):
+    def test_attributes_correspond_to_arguments(self, dataset_task):
         """Test that the dataset task attributes correspond to the arguments."""
-        assert dataset_task.name == "dataset_task_name"
-        assert dataset_task.supertask == "supertask_name"
-        assert dataset_task.metrics == [metric_config]
-        assert dataset_task.labels == ["label"]
+        assert dataset_task.name == "speed"
+        assert dataset_task.supertask == "speed"
+        assert dataset_task.metrics == ["speed", "speed_short"]
+        assert dataset_task.labels == []
 
 
 class TestLanguage:
