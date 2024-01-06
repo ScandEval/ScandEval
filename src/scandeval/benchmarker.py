@@ -245,8 +245,12 @@ class Benchmarker:
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
                 # `ignore_duplicates` is set
-                if self.ignore_duplicates and self._has_been_benchmarked(
-                    model_id=m_id, dataset=dataset_config.name
+                if self.ignore_duplicates and model_has_been_benchmarked(
+                    model_id=m_id,
+                    dataset=dataset_config.name,
+                    few_shot=self.benchmark_config.few_shot,
+                    validation_split=self.benchmark_config.only_validation_split,
+                    benchmark_results=self.benchmark_results,
                 ):
                     logger.debug(
                         f"Skipping benchmarking {m_id} on {dataset_config.pretty_name},"
@@ -297,23 +301,6 @@ class Benchmarker:
                     for sub_model_dir in model_dir.iterdir():
                         if sub_model_dir.is_dir():
                             rmtree(sub_model_dir)
-
-    def _has_been_benchmarked(self, model_id: str, dataset: str) -> bool:
-        """Checks whether a model has already been benchmarked on a dataset.
-
-        Args:
-            model_id:
-                The model ID.
-            dataset:
-                The dataset.
-
-        Returns:
-            Whether the model has already been evaluated on the dataset.
-        """
-        for record in self.benchmark_results:
-            if record.model == model_id and record.dataset == dataset:
-                return True
-        return False
 
     def _prepare_model_ids(
         self,
@@ -499,3 +486,38 @@ class Benchmarker:
         model_ids = list(set(model_ids))
 
         return model_ids
+
+
+def model_has_been_benchmarked(
+    model_id: str,
+    dataset: str,
+    few_shot: bool,
+    validation_split: bool,
+    benchmark_results: list[BenchmarkResult],
+) -> bool:
+    """Checks whether a model has already been benchmarked on a dataset.
+
+    Args:
+        model_id:
+            The model ID.
+        dataset:
+            The dataset.
+        few_shot:
+            Whether the model was evaluated using few-shot evaluation.
+        validation_split:
+            Whether the model was evaluated on the validation split.
+        benchmark_results:
+            The benchmark results.
+
+    Returns:
+        Whether the model has already been evaluated on the dataset.
+    """
+    for record in benchmark_results:
+        if (
+            record.model == model_id
+            and record.dataset == dataset
+            and record.few_shot == few_shot
+            and record.validation_split == validation_split
+        ):
+            return True
+    return False
