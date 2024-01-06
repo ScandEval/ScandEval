@@ -58,8 +58,7 @@ class TestDatasetTask:
     def test_attributes_correspond_to_arguments(self, dataset_task):
         """Test that the dataset task attributes correspond to the arguments."""
         assert dataset_task.name == "speed"
-        assert dataset_task.supertask == "speed"
-        assert dataset_task.metrics == ["speed", "speed_short"]
+        assert dataset_task.supertask == "sequence-classification"
         assert dataset_task.labels == []
 
 
@@ -130,15 +129,15 @@ class TestDatasetConfig:
 
     def test_id2label(self, dataset_config):
         """Test that the `id2label` attribute is correct."""
-        assert dataset_config.id2label == ["label"]
+        assert dataset_config.id2label == []
 
     def test_label2id(self, dataset_config):
         """Test that the `label2id` attribute is correct."""
-        assert dataset_config.label2id == dict(label=0)
+        assert dataset_config.label2id == dict()
 
     def test_num_labels(self, dataset_config):
         """Test that the `num_labels` attribute is correct."""
-        assert dataset_config.num_labels == 1
+        assert dataset_config.num_labels == 0
 
     def test_default_value_of_prompt_label_mapping(self, dataset_config):
         """Test that the default value of `prompt_label_mapping` is an empty dictionary."""
