@@ -115,6 +115,9 @@ class Benchmarker:
         only_validation_split:
             Whether to only evaluate the validation split of the datasets. Defaults to
             False.
+        few_shot:
+            Whether to only evaluate the model using few-shot evaluation. Only relevant
+            if the model is generative. Defaults to True.
 
     Attributes:
         progress_bar: Whether progress bars should be shown.
@@ -150,6 +153,7 @@ class Benchmarker:
         use_flash_attention: bool = False,
         clear_model_cache: bool = False,
         only_validation_split: bool = False,
+        few_shot: bool = True,
     ) -> None:
         self.benchmark_config = build_benchmark_config(
             language=language,
@@ -172,6 +176,7 @@ class Benchmarker:
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
             only_validation_split=only_validation_split,
+            few_shot=few_shot,
         )
 
         # Set attributes from arguments

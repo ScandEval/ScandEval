@@ -194,6 +194,13 @@ from .languages import get_all_languages
     show_default=True,
     help="Whether to only evaluate on the validation split.",
 )
+@click.option(
+    "--few-shot/--no-few-shot",
+    default=True,
+    show_default=True,
+    help="Whether to only evaluate the model using few-shot evaluation. Only relevant "
+    "if the model is generative.",
+)
 def benchmark(
     model_id: tuple[str],
     dataset: tuple[str],
@@ -218,6 +225,7 @@ def benchmark(
     use_flash_attention: bool,
     clear_model_cache: bool,
     only_validation_split: bool,
+    few_shot: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
 
@@ -254,6 +262,7 @@ def benchmark(
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
         only_validation_split=only_validation_split,
+        few_shot=few_shot,
     )
 
     # Perform the benchmark evaluation

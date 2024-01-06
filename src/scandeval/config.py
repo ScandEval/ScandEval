@@ -129,6 +129,9 @@ class BenchmarkConfig:
             Whether to clear the model cache after benchmarking each model.
         only_validation_split:
             Whether to only evaluate on the validation split.
+        few_shot:
+            Whether to only evaluate the model using few-shot evaluation. Only relevant
+            if the model is generative.
     """
 
     model_languages: list[Language]
@@ -150,6 +153,7 @@ class BenchmarkConfig:
     use_flash_attention: bool
     clear_model_cache: bool
     only_validation_split: bool
+    few_shot: bool
 
 
 @dataclass
