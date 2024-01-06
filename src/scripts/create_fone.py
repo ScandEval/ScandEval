@@ -53,6 +53,36 @@ def main():
         lambda ner_tags: [ner_conversion_dict[ner_tag] for ner_tag in ner_tags]
     )
 
+    for token_list, ner_tag_list in zip(df["tokens"], df["labels"]):
+        # Sanity check that the number of tokens and named entity tags are equal
+        assert len(token_list) == len(
+            ner_tag_list
+        ), "The number of tokens and named entity tags are not equal."
+
+        # Fix invalid I-tags
+        invalid_i_ner_tags = [
+            ner_tag
+            for token_idx, ner_tag in enumerate(ner_tag_list)
+            if ner_tag.startswith("I-")
+            and ner_tag_list[token_idx - 1] not in {f"B-{ner_tag[2:]}", ner_tag}
+        ]
+        while invalid_i_ner_tags:
+            for invalid_i_ner_tag in invalid_i_ner_tags:
+                ner_tag_list[
+                    ner_tag_list.index(invalid_i_ner_tag)
+                ] = f"B-{invalid_i_ner_tag[2:]}"
+            invalid_i_ner_tags = [
+                ner_tag
+                for token_idx, ner_tag in enumerate(ner_tag_list)
+                if ner_tag.startswith("I-")
+                and ner_tag_list[token_idx - 1] not in {f"B-{ner_tag[2:]}", ner_tag}
+            ]
+
+        # Sanity check that all I-tags are valid
+        assert (
+            not invalid_i_ner_tags
+        ), f"The following I- tags are invalid: {invalid_i_ner_tags}."
+
     # Create validation split
     val_size = 256
     val_df = df.sample(
