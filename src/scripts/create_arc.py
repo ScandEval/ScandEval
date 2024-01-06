@@ -8,7 +8,6 @@ from requests import HTTPError
 
 def main() -> None:
     """Create the ARC-mini datasets and upload them to the HF Hub."""
-
     # Define the base download URL
     repo_id = "alexandrainst/m_arc"
 

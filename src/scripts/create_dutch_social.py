@@ -8,7 +8,6 @@ from requests import HTTPError
 
 def main() -> None:
     """Create the DutchSocial-mini sentiment dataset and upload it to the HF Hub."""
-
     # Define the base download URL
     repo_id = "dutch_social"
 

@@ -14,7 +14,6 @@ from sklearn.model_selection import train_test_split
 
 def main() -> None:
     """Create the SweReC-mini sentiment dataset and upload it to the HF Hub."""
-
     # Define the base download URL
     url = (
         "https://github.com/stoffesvensson/DeepLearning-ThesisWork-Convolutional/"

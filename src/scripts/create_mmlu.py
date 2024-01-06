@@ -9,7 +9,6 @@ from sklearn.model_selection import train_test_split
 
 def main() -> None:
     """Create the MMLU-mini datasets and upload them to the HF Hub."""
-
     # Define the base download URL
     repo_id = "alexandrainst/m_mmlu"
 

@@ -16,7 +16,6 @@ from tqdm.auto import tqdm
 
 def main():
     """Create the NorNE-mini NER datasets and uploads them to the HF Hub."""
-
     # Define the base download URLs
     base_urls = dict(
         nb="https://github.com/UniversalDependencies/UD_Norwegian-Bokmaal/raw/master/"

@@ -8,7 +8,6 @@ from requests import HTTPError
 
 def main() -> None:
     """Create the SB10k-mini sentiment dataset and upload it to the HF Hub."""
-
     # Define the base download URL
     repo_id = "cardiffnlp/tweet_sentiment_multilingual"
 

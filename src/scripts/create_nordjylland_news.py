@@ -8,7 +8,6 @@ from requests import HTTPError
 
 def main():
     """Create the NordjyllandNews-mini summarisation dataset and upload to HF Hub."""
-
     dataset_id = "alexandrainst/nordjylland-news-summarization"
 
     dataset = load_dataset(dataset_id, token=True)
