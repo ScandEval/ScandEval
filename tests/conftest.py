@@ -29,8 +29,8 @@ def pytest_unconfigure() -> None:
 
 
 @pytest.fixture(scope="session")
-def benchmark_config(language, dataset_task) -> Generator[BenchmarkConfig, None, None]:
-    """Yields a benchmark configuration used in tests."""
+def auth() -> Generator[str | bool, None, None]:
+    """Yields the authentication token to the Hugging Face Hub."""
     # Get the authentication token to the Hugging Face Hub
     auth = os.environ.get("HUGGINGFACE_HUB_TOKEN", True)
 
@@ -38,6 +38,14 @@ def benchmark_config(language, dataset_task) -> Generator[BenchmarkConfig, None,
     if isinstance(auth, str):
         auth = auth.strip(" \"'")
 
+    yield auth
+
+
+@pytest.fixture(scope="session")
+def benchmark_config(
+    language, dataset_task, auth
+) -> Generator[BenchmarkConfig, None, None]:
+    """Yields a benchmark configuration used in tests."""
     yield BenchmarkConfig(
         model_languages=[language],
         dataset_languages=[language],

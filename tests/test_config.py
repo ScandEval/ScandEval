@@ -84,24 +84,24 @@ class TestBenchmarkConfig:
         assert isinstance(benchmark_config, BenchmarkConfig)
 
     def test_attributes_correspond_to_arguments(
-        self, benchmark_config, language, dataset_task
+        self, benchmark_config, language, dataset_task, auth
     ):
         """Test that the benchmark config attributes correspond to the arguments."""
         assert benchmark_config.model_languages == [language]
-        assert benchmark_config.framework is None
         assert benchmark_config.dataset_languages == [language]
         assert benchmark_config.dataset_tasks == [dataset_task]
+        assert benchmark_config.framework is None
         assert benchmark_config.batch_size == 32
-        assert benchmark_config.raise_errors is True
-        assert benchmark_config.cache_dir == "cache_dir"
-        assert benchmark_config.evaluate_train is True
-        assert benchmark_config.token is True
+        assert benchmark_config.raise_errors is False
+        assert benchmark_config.cache_dir == ".scandeval_cache"
+        assert benchmark_config.evaluate_train is False
+        assert benchmark_config.token is auth
         assert benchmark_config.openai_api_key is None
         assert benchmark_config.progress_bar is False
         assert benchmark_config.save_results is False
         assert benchmark_config.device == torch.device("cpu")
         assert benchmark_config.verbose is False
-        assert benchmark_config.trust_remote_code is False
+        assert benchmark_config.trust_remote_code is True
         assert benchmark_config.load_in_4bit is None
         assert benchmark_config.use_flash_attention is False
         assert benchmark_config.clear_model_cache is False
