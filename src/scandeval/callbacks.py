@@ -1,6 +1,5 @@
 """Callbacks for the Hugging Face Trainer."""
 
-
 import sys
 from collections.abc import Sized
 

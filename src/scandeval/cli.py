@@ -228,7 +228,6 @@ def benchmark(
     few_shot: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
-
     # Set up language variables
     model_ids = None if len(model_id) == 0 else list(model_id)
     datasets = None if len(dataset) == 0 else list(dataset)

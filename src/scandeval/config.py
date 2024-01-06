@@ -1,5 +1,6 @@
 """Configuration classes used throughout the project."""
 
+
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -208,14 +209,17 @@ class DatasetConfig:
 
     @property
     def id2label(self) -> list[str]:
+        """The mapping from ID to label."""
         return [label for label in self.task.labels]
 
     @property
     def label2id(self) -> dict[str, int]:
+        """The mapping from label to ID."""
         return {label: i for i, label in enumerate(self.task.labels)}
 
     @property
     def num_labels(self) -> int:
+        """The number of labels in the dataset."""
         return len(self.task.labels)
 
 
