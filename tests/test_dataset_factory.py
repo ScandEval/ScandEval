@@ -95,7 +95,7 @@ def test_build_common_sense_dataset(dataset_factory, dataset_config):
     assert isinstance(dataset, TextToText)
 
 
-@pytest.skip(reason="Text modelling datasets are not yet implemented.")
+@pytest.mark.skip(reason="Text modelling datasets are not yet implemented.")
 def test_build_text_modelling_dataset(dataset_factory, dataset_config):
     """Test that TEXT_MODELLING datasets are built correctly."""
     cfg = deepcopy(dataset_config)
