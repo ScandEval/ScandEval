@@ -8,6 +8,8 @@ from scandeval.types import SCORE_DICT
 
 
 class DataKwargs(TypedDict):
+    """Helper dict with keyword arguments for `BenchmarkResult`, to avoid redundancy."""
+
     num_model_parameters: int
     max_sequence_length: int
     vocabulary_size: int
@@ -183,6 +185,7 @@ def test_model_has_been_benchmarked(
     benchmark_results: list[BenchmarkResult],
     expected: bool,
 ) -> None:
+    """Test whether we can correctly check if a model has been benchmarked."""
     benchmarked = model_has_been_benchmarked(
         model_id=model_id,
         dataset=dataset,

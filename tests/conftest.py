@@ -6,10 +6,16 @@ from typing import Generator
 
 import pytest
 import torch
-from scandeval.config import BenchmarkConfig
-from scandeval.dataset_configs import MMLU_DA_CONFIG, SPEED_CONFIG
-from scandeval.dataset_tasks import LA, NER, QA, SENT
-from scandeval.languages import DA, NO, SV
+from scandeval.config import (
+    BenchmarkConfig,
+    DatasetConfig,
+    DatasetTask,
+    Language,
+    MetricConfig,
+    ModelConfig,
+)
+from scandeval.dataset_configs import MMLU_DA_CONFIG
+from scandeval.enums import ModelType
 
 
 def pytest_configure() -> None:
@@ -23,7 +29,8 @@ def pytest_unconfigure() -> None:
 
 
 @pytest.fixture(scope="session")
-def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
+def benchmark_config(language, dataset_task) -> Generator[BenchmarkConfig, None, None]:
+    """Yields a benchmark configuration used in tests."""
     # Get the authentication token to the Hugging Face Hub
     auth = os.environ.get("HUGGINGFACE_HUB_TOKEN", True)
 
@@ -32,9 +39,9 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         auth = auth.strip(" \"'")
 
     yield BenchmarkConfig(
-        model_languages=[DA, SV, NO],
-        dataset_languages=[DA, SV, NO],
-        dataset_tasks=[NER, QA, SENT, LA],
+        model_languages=[language],
+        dataset_languages=[language],
+        dataset_tasks=[dataset_task],
         framework=None,
         batch_size=32,
         raise_errors=False,
@@ -51,24 +58,79 @@ def benchmark_config() -> Generator[BenchmarkConfig, None, None]:
         use_flash_attention=False,
         clear_model_cache=False,
         only_validation_split=False,
+        few_shot=True,
     )
 
 
 @pytest.fixture(scope="session")
-def model_id():
+def metric_config() -> Generator[MetricConfig, None, None]:
+    """Yields a metric configuration used in tests."""
+    yield MetricConfig(
+        name="metric_name",
+        pretty_name="Metric name",
+        huggingface_id="metric_id",
+        results_key="metric_key",
+    )
+
+
+@pytest.fixture(scope="session")
+def dataset_task(metric_config) -> Generator[DatasetTask, None, None]:
+    """Yields a dataset task used in tests."""
+    yield DatasetTask(
+        name="dataset_task_name",
+        supertask="supertask_name",
+        metrics=[metric_config],
+        labels=["label"],
+    )
+
+
+@pytest.fixture(scope="session")
+def language():
+    """Yields a language used in tests."""
+    yield Language(code="language_code", name="Language name")
+
+
+@pytest.fixture(scope="session")
+def model_id() -> Generator[str, None, None]:
+    """Yields a model ID used in tests."""
     yield "jonfd/electra-small-nordic"
 
 
 @pytest.fixture(scope="session")
-def generative_model_id():
+def generative_model_id() -> Generator[str, None, None]:
+    """Yields a generative model ID used in tests."""
     yield "AI-Sweden-Models/gpt-sw3-126m"
 
 
 @pytest.fixture(scope="session")
-def dataset_config():
-    yield SPEED_CONFIG
+def dataset_config(language, dataset_task) -> Generator[DatasetConfig, None, None]:
+    """Yields a dataset configuration used in tests."""
+    yield DatasetConfig(
+        name="dataset_name",
+        pretty_name="Dataset name",
+        huggingface_id="dataset_id",
+        task=dataset_task,
+        languages=[language],
+        prompt_template="{text}\n{label}",
+        max_generated_tokens=1,
+    )
 
 
 @pytest.fixture(scope="session")
-def generative_dataset_config():
+def model_config(language) -> Generator[ModelConfig, None, None]:
+    """Yields a model configuration used in tests."""
+    yield ModelConfig(
+        model_id="model_id",
+        revision="revision",
+        framework="framework",
+        task="task",
+        languages=[language],
+        model_type=ModelType.FRESH,
+        model_cache_dir="cache_dir",
+    )
+
+
+@pytest.fixture(scope="session")
+def generative_dataset_config() -> Generator[DatasetConfig, None, None]:
+    """Yields a generative dataset configuration used in tests."""
     yield MMLU_DA_CONFIG

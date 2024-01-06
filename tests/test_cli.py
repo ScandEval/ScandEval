@@ -1,17 +1,22 @@
 """Unit tests for the `cli` module."""
 
+from typing import Generator
+
 import pytest
+from click import ParamType
 from click.types import BOOL, STRING, Choice
 from scandeval.cli import benchmark
 
 
 @pytest.fixture(scope="module")
-def params():
+def params() -> Generator[dict[str | None, ParamType], None, None]:
+    """Yields a dictionary of the CLI parameters."""
     ctx = benchmark.make_context(None, list())
     yield {p.name: p.type for p in benchmark.get_params(ctx)}
 
 
 def test_cli_param_names(params):
+    """Test that the CLI parameters have the correct names."""
     assert set(params.keys()) == {
         "model_id",
         "dataset",
@@ -36,11 +41,13 @@ def test_cli_param_names(params):
         "use_flash_attention",
         "clear_model_cache",
         "only_validation_split",
+        "few_shot",
         "help",
     }
 
 
 def test_cli_param_types(params):
+    """Test that the CLI parameters have the correct types."""
     assert params["model_id"] == STRING
     assert isinstance(params["dataset"], Choice)
     assert isinstance(params["language"], Choice)
@@ -64,4 +71,5 @@ def test_cli_param_types(params):
     assert params["use_flash_attention"] == BOOL
     assert params["clear_model_cache"] == BOOL
     assert params["only_validation_split"] == BOOL
+    assert params["few_shot"] == BOOL
     assert params["help"] == BOOL

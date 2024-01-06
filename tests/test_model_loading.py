@@ -8,6 +8,7 @@ from scandeval.model_loading import load_model
 
 
 def test_load_non_generative_model(model_id, dataset_config, benchmark_config):
+    """Test loading a non-generative model."""
     model_config = get_model_config(
         model_id=model_id, benchmark_config=benchmark_config
     )
@@ -23,6 +24,7 @@ def test_load_non_generative_model(model_id, dataset_config, benchmark_config):
 def test_load_generative_model(
     generative_model_id, generative_dataset_config, benchmark_config
 ):
+    """Test loading a generative model."""
     model_config = get_model_config(
         model_id=generative_model_id, benchmark_config=benchmark_config
     )
@@ -38,6 +40,7 @@ def test_load_generative_model(
 def test_load_non_generative_model_with_generative_data(
     model_id, generative_dataset_config, benchmark_config
 ):
+    """Test loading a non-generative model with generative data."""
     model_config = get_model_config(
         model_id=model_id, benchmark_config=benchmark_config
     )
@@ -52,6 +55,7 @@ def test_load_non_generative_model_with_generative_data(
 def test_load_generative_model_with_non_generative_data(
     generative_model_id, dataset_config, benchmark_config
 ):
+    """Test loading a generative model with non-generative data."""
     model_config = get_model_config(
         model_id=generative_model_id, benchmark_config=benchmark_config
     )
@@ -65,6 +69,7 @@ def test_load_generative_model_with_non_generative_data(
 
 
 def test_load_non_existing_model(dataset_config, benchmark_config):
+    """Test loading a non-existing model."""
     model_config = ModelConfig(
         model_id="non-existing-model",
         revision="revision",
