@@ -1,6 +1,5 @@
 """Configuration classes used throughout the project."""
 
-
 from dataclasses import dataclass, field
 from typing import Any, Callable
 

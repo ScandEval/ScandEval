@@ -11,16 +11,18 @@ from .utils import get_class_by_name
 class DatasetFactory:
     """Factory which produces datasets from a configuration.
 
-    Args:
-        benchmark_config:
-            The benchmark configuration to be used in all datasets constructed.
-
     Attributes:
         benchmark_config:
             The benchmark configuration to be used in all datasets constructed.
     """
 
     def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+        """Initialize the dataset factory.
+
+        Args:
+            benchmark_config:
+                The benchmark configuration to be used in all datasets constructed.
+        """
         self.benchmark_config = benchmark_config
 
     def build_dataset(self, dataset: str | DatasetConfig) -> BenchmarkDataset:
