@@ -15,6 +15,7 @@ from scandeval.config import (
     ModelConfig,
 )
 from scandeval.dataset_configs import MMLU_DA_CONFIG
+from scandeval.dataset_tasks import SPEED
 from scandeval.enums import ModelType
 
 
@@ -82,14 +83,9 @@ def metric_config() -> Generator[MetricConfig, None, None]:
 
 
 @pytest.fixture(scope="session")
-def dataset_task(metric_config) -> Generator[DatasetTask, None, None]:
+def dataset_task() -> Generator[DatasetTask, None, None]:
     """Yields a dataset task used in tests."""
-    yield DatasetTask(
-        name="dataset_task_name",
-        supertask="supertask_name",
-        metrics=[metric_config],
-        labels=["label"],
-    )
+    yield SPEED
 
 
 @pytest.fixture(scope="session")
