@@ -293,7 +293,9 @@ class HFModelSetup:
                                 "The model you are trying to load requires Flash "
                                 "Attention. To use Flash Attention, please install "
                                 "the `flash-attn` package, which can be done by "
-                                "running `pip install -U wheel && FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn --no-build-isolation`."
+                                "running `pip install -U wheel && "
+                                "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install "
+                                "flash-attn --no-build-isolation`."
                             )
                     except (KeyError, RuntimeError) as e:
                         if not model_kwargs["ignore_mismatched_sizes"]:
