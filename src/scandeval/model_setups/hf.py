@@ -51,6 +51,12 @@ class HFModelSetup:
     """
 
     def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+        """Initialize the model setup.
+
+        Args:
+            benchmark_config:
+                The benchmark configuration.
+        """
         self.benchmark_config = benchmark_config
 
     def model_exists(self, model_id: str) -> bool:
@@ -287,8 +293,7 @@ class HFModelSetup:
                                 "The model you are trying to load requires Flash "
                                 "Attention. To use Flash Attention, please install "
                                 "the `flash-attn` package, which can be done by "
-                                "running `pip install --no-build-isolation -U "
-                                "flash-attn`."
+                                "running `pip install -U wheel && FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn --no-build-isolation`."
                             )
                     except (KeyError, RuntimeError) as e:
                         if not model_kwargs["ignore_mismatched_sizes"]:
