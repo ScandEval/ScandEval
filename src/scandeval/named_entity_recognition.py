@@ -599,7 +599,8 @@ class NamedEntityRecognition(BenchmarkDataset):
         # Attempt to extract the JSON dictionary from the predictions
         json_regex = r"\{.+?\}"
         json_matches = [
-            re.search(pattern=json_regex, string=raw_prediction) or raw_prediction
+            re.search(pattern=json_regex, string=raw_prediction, flags=re.DOTALL)
+            or raw_prediction
             for raw_prediction in raw_predictions
         ]
         json_extracted_predictions = [
