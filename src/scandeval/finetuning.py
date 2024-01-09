@@ -101,6 +101,7 @@ def finetune(
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
     bs: int = benchmark_config.batch_size
+    fp16: bool = benchmark_config.device == torch.device("cuda")
     for idx in itr:
         # Set variable that tracks whether we need to initialize new models in
         # the single iteration call
@@ -135,6 +136,7 @@ def finetune(
                     model_config=model_config,
                     iteration_idx=idx,
                     batch_size=bs,
+                    fp16=fp16,
                 )
 
                 itr_scores = finetune_single_iteration(
@@ -334,6 +336,7 @@ def get_training_args(
     benchmark_config: BenchmarkConfig,
     model_config: ModelConfig,
     iteration_idx: int,
+    fp16: bool,
     batch_size: int | None = None,
 ) -> TrainingArguments:
     """Get the training arguments for the current iteration.
@@ -346,6 +349,9 @@ def get_training_args(
         iteration_idx:
             The index of the current iteration. This is only used to generate a
             unique random seed for the current iteration.
+        fp16:
+            Whether to use mixed precision training for the current iteration, or None
+            if the value in the benchmark config should be used.
         batch_size:
             The batch size to use for the current iteration, or None if the batch size
             in the benchmark config should be used.
@@ -392,7 +398,7 @@ def get_training_args(
             load_best_model_at_end=True,
             optim=optimizer,
             seed=seed,
-            fp16=benchmark_config.device == torch.device("cuda"),
+            fp16=fp16,
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )

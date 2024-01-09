@@ -74,6 +74,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the model's maximum context length was really small (128). This has been fixed now.
 - Now sets `ignore_mismatched_sizes` when loading models if the model cannot be loaded
   otherwise. This previously caused some issues when loading certain models.
+- Fixed bug where some encoder models did not work properly when loaded in with mixed
+  precision. These are now loaded with full FP32 precision.
 
 
 ## [v8.2.1] - 2023-12-20
