@@ -48,7 +48,7 @@ class VLLMModel:
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
-                max_model_len=10_000,  # TODO: Is this reasonable?
+                max_model_len=5000,
                 download_dir=str(cache_dir),
             )
             self._model._run_engine = MethodType(
