@@ -246,13 +246,12 @@ class BenchmarkDataset(ABC):
             and "total" in repo_info.safetensors
         ):
             num_params = repo_info.safetensors["total"]
+        elif hasattr(model.config, "num_params"):
+            num_params = model.config.num_params
+        elif isinstance(model, PreTrainedModel):
+            num_params = sum(p.numel() for p in model.parameters())
         else:
-            if hasattr(model.config, "num_params"):
-                num_params = model.config.num_params
-            elif isinstance(model, PreTrainedModel):
-                num_params = sum(p.numel() for p in model.parameters())
-            else:
-                num_params = -1
+            num_params = -1
 
         if hasattr(model.config, "model_max_length"):
             max_seq_length = getattr(model.config, "model_max_length")
