@@ -251,7 +251,7 @@ class HFModelSetup:
                 model = VLLMModel(
                     model_config=model_config,
                     hf_model_config=config,
-                    cache_dir=self.benchmark_config.cache_dir,
+                    model_cache_dir=model_config.model_cache_dir,
                 )
             except ValueError as e:
                 oom_error = (

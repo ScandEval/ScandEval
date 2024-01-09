@@ -21,7 +21,7 @@ class VLLMModel:
         self,
         model_config: ModelConfig,
         hf_model_config: PretrainedConfig,
-        cache_dir: str | Path,
+        model_cache_dir: str | Path,
         tokenizer: PreTrainedTokenizer | None = None,
     ) -> None:
         """Initialize a vLLM model.
@@ -31,7 +31,7 @@ class VLLMModel:
                 A model configuration.
             hf_model_config:
                 A Hugging Face model configuration.
-            cache_dir:
+            model_cache_dir:
                 The directory to cache the model in.
             tokenizer:
                 A Hugging Face tokenizer. If None, the tokenizer will need to be
@@ -43,13 +43,11 @@ class VLLMModel:
         self.tokenizer = tokenizer
         with warnings.catch_warnings(), HiddenPrints():
             warnings.simplefilter("ignore", category=UserWarning)
-            cache_dir = Path(cache_dir) / "model_cache"
-            cache_dir.mkdir(parents=True, exist_ok=True)
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
                 max_model_len=5000,
-                download_dir=str(cache_dir),
+                download_dir=str(model_cache_dir),
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
