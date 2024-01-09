@@ -84,6 +84,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   generated model output. Instead of taking the output as-is, we are now extracting the
   first dictionary (enclosed in curly brackets), as well as replacing all single
   apostrophes (') with double ones (").
+- If a model is already pre-quantized then we will not attempt to quantize it as well.
 
 
 ## [v8.2.1] - 2023-12-20

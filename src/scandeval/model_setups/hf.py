@@ -338,6 +338,15 @@ class HFModelSetup:
                             )
                             sleep(5)
                             continue
+                        except ValueError as e:
+                            if "already quantized" in str(e):
+                                model_kwargs["quantization_config"] = None
+                                model_or_tuple = model_cls_or_none.from_pretrained(
+                                    model_config.model_id, **model_kwargs
+                                )
+                            else:
+                                raise e
+
                     if isinstance(model_or_tuple, tuple):
                         model = model_or_tuple[0]
                     else:
