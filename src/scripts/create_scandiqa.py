@@ -36,6 +36,12 @@ def main() -> None:
         lengths = df.context.str.len()
         lower_bound = lengths.quantile(0.05)
         upper_bound = lengths.quantile(0.95)
+        df = df[lengths.between(lower_bound, upper_bound)]
+
+        # Only work with samples where the context is not very large or small
+        lengths = df.question.str.len()
+        lower_bound = lengths.quantile(0.05)
+        upper_bound = lengths.quantile(0.95)
         df_with_no_outliers = df[lengths.between(lower_bound, upper_bound)]
 
         # Only work with the questions having answers in the context

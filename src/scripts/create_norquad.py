@@ -65,6 +65,12 @@ def main() -> None:
     upper_bound = lengths.quantile(0.95)
     df = df[lengths.between(lower_bound, upper_bound)]
 
+    # Only work with samples where the question is not very large or small
+    lengths = df.question.str.len()
+    lower_bound = lengths.quantile(0.05)
+    upper_bound = lengths.quantile(0.95)
+    df = df[lengths.between(lower_bound, upper_bound)]
+
     # Ensure that the `id` column is a string
     df["id"] = df["id"].astype(str)
 

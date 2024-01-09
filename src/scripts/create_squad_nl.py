@@ -50,6 +50,14 @@ def main() -> None:
     train_df = train_df[train_lengths.between(lower_bound, upper_bound)]
     valtest_df = valtest_df[valtest_lengths.between(lower_bound, upper_bound)]
 
+    # Only work with samples where the question is not very large or small
+    train_question_lengths = train_df.question.str.len()
+    valtest_question_lengths = valtest_df.question.str.len()
+    lower_bound = train_question_lengths.quantile(0.05)
+    upper_bound = train_question_lengths.quantile(0.95)
+    train_df = train_df[train_question_lengths.between(lower_bound, upper_bound)]
+    valtest_df = valtest_df[valtest_question_lengths.between(lower_bound, upper_bound)]
+
     # Extract information on which examples contain an answer
     def has_answer(example: dict) -> bool:
         return len(example["answer_start"]) > 0 and example["answer_start"][0] >= 0

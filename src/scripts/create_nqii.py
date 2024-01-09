@@ -36,6 +36,12 @@ def main() -> None:
     upper_bound = lengths.quantile(0.95)
     df = df[lengths.between(lower_bound, upper_bound)]
 
+    # Only work with samples where the question is not very large or small
+    lengths = df.question.str.len()
+    lower_bound = lengths.quantile(0.03)
+    upper_bound = lengths.quantile(0.97)
+    df = df[lengths.between(lower_bound, upper_bound)]
+
     # Extract information on which examples contain an answer
     has_answer: pd.Series = df.answers.map(
         lambda dct: len(dct["text"]) > 0 and dct["text"][0] != ""
