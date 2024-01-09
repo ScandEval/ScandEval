@@ -15,7 +15,7 @@ from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from huggingface_hub import HfApi
 from huggingface_hub.hf_api import ModelInfo
-from huggingface_hub.utils._errors import HfHubHTTPError
+from huggingface_hub.utils import HfHubHTTPError, HFValidationError
 from requests import RequestException
 from tqdm.auto import tqdm
 from transformers import PretrainedConfig, Trainer
@@ -236,7 +236,7 @@ class BenchmarkDataset(ABC):
         try:
             repo_info = api.repo_info(repo_id=model_id, repo_type="model")
             assert isinstance(repo_info, ModelInfo)
-        except RequestException:
+        except (RequestException, HFValidationError):
             repo_info = None
 
         if (
