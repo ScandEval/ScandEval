@@ -13,7 +13,10 @@ import torch
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
+from huggingface_hub import HfApi
+from huggingface_hub.hf_api import ModelInfo
 from huggingface_hub.utils._errors import HfHubHTTPError
+from requests import RequestException
 from tqdm.auto import tqdm
 from transformers import PretrainedConfig, Trainer
 from transformers.modeling_utils import ModelOutput, PreTrainedModel
@@ -128,7 +131,9 @@ class BenchmarkDataset(ABC):
             else:
                 model_config.task = "fill-mask"
 
-        metadata_dict = self._get_metadata(model=model, tokenizer=tokenizer)
+        metadata_dict = self._get_metadata(
+            model_id=model_id, model=model, tokenizer=tokenizer
+        )
 
         # Set variable with number of iterations
         num_iter = 2 if hasattr(sys, "_called_from_test") else 10
@@ -209,12 +214,15 @@ class BenchmarkDataset(ABC):
 
     def _get_metadata(
         self,
+        model_id: str,
         model: PreTrainedModel | GenerativeModel,
         tokenizer: Tokenizer,
     ) -> dict[str, int]:
         """Get metadata about the model.
 
         Args:
+            model_id:
+                The Hugging Face model ID.
             model:
                 The model to get metadata about.
             tokenizer:
@@ -224,13 +232,27 @@ class BenchmarkDataset(ABC):
             A dictionary containing metadata about the model, with the keys being the
             metadata names and the values being the metadata values.
         """
-        # TODO: vLLM num_parameters is not correct
-        if hasattr(model.config, "num_params"):
-            num_params = model.config.num_params
-        elif isinstance(model, PreTrainedModel):
-            num_params = sum(p.numel() for p in model.parameters())
+        api = HfApi()
+        try:
+            repo_info = api.repo_info(repo_id=model_id, repo_type="model")
+            assert isinstance(repo_info, ModelInfo)
+        except RequestException:
+            repo_info = None
+
+        if (
+            repo_info is not None
+            and hasattr(repo_info, "safetensors")
+            and repo_info.safetensors is not None
+            and "total" in repo_info.safetensors
+        ):
+            num_params = repo_info.safetensors["total"]
         else:
-            num_params = -1
+            if hasattr(model.config, "num_params"):
+                num_params = model.config.num_params
+            elif isinstance(model, PreTrainedModel):
+                num_params = sum(p.numel() for p in model.parameters())
+            else:
+                num_params = -1
 
         if hasattr(model.config, "model_max_length"):
             max_seq_length = getattr(model.config, "model_max_length")
