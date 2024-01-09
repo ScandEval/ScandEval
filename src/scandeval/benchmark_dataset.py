@@ -224,6 +224,7 @@ class BenchmarkDataset(ABC):
             A dictionary containing metadata about the model, with the keys being the
             metadata names and the values being the metadata values.
         """
+        # TODO: vLLM num_parameters is not correct
         if hasattr(model.config, "num_params"):
             num_params = model.config.num_params
         elif isinstance(model, PreTrainedModel):
@@ -233,7 +234,9 @@ class BenchmarkDataset(ABC):
 
         if hasattr(model.config, "model_max_length"):
             max_seq_length = getattr(model.config, "model_max_length")
-        elif hasattr(tokenizer, "model_max_length"):
+        elif hasattr(
+            tokenizer, "model_max_length"
+        ) and tokenizer.model_max_length < int(1e30):
             max_seq_length = getattr(tokenizer, "model_max_length")
         else:
             max_seq_length = -1
@@ -242,7 +245,7 @@ class BenchmarkDataset(ABC):
         # length from the maximum length to allow it to keep generating. But for the
         # model metadata we want to know the maximum length, so we add the generation
         # length back on here
-        if model_is_generative(model=model):
+        if max_seq_length >= 0 and model_is_generative(model=model):
             max_seq_length += self.dataset_config.max_generated_tokens
 
             # If the model is an OpenAI chat model then we add on 7 extra tokens, as

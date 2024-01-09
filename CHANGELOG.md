@@ -41,6 +41,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   dataset). This is especially useful with paid models like OpenAI models. The value of
   this flag is stored in the benchmark results, so this will be visible on
   leaderboards.
+- Now uses vLLM as the underlying engine for few-shot evaluating generative models,
+  which drastically improves the evaluation speed, as well as requiring less GPU
+  memory.
 
 ### Changed
 - Now compatible with`transformers >= 4.36.2`, and this is required now as they have
