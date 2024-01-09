@@ -9,6 +9,7 @@ from copy import deepcopy
 from functools import partial
 from typing import Any
 
+import demjson3
 import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
@@ -603,23 +604,9 @@ class NamedEntityRecognition(BenchmarkDataset):
             or raw_prediction
             for raw_prediction in raw_predictions
         ]
-        json_extracted_predictions = [
+        raw_predictions = [
             json_match.group() if isinstance(json_match, re.Match) else json_match
             for json_match in json_matches
-        ]
-
-        # Clean up the extract JSON dictionaries, to make them parseable
-        raw_predictions = [
-            re.sub(
-                pattern=" +",
-                repl=" ",
-                string=(
-                    json_extracted_prediction.replace("'", '"')
-                    .replace("\\", "")
-                    .replace("\n", "")
-                ),
-            )
-            for json_extracted_prediction in json_extracted_predictions
         ]
 
         tokens = input_batch["tokens"]
@@ -628,7 +615,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         ]
         for idx, raw_prediction in enumerate(raw_predictions):
             try:
-                json_output = json.loads(raw_prediction)
+                json_output = demjson3.decode(txt=raw_prediction)
                 if not isinstance(json_output, dict):
                     logger.debug(
                         "The model output is not a JSON dictionary, so cannot parse "
@@ -650,7 +637,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                     )
                     continue
                 prediction_dict: dict[str, list[str]] = json_output
-            except json.JSONDecodeError:
+            except demjson3.JSONDecodeError:
                 logger.debug(
                     "The model output is not valid JSON, so cannot parse it. Skipping. "
                     f"Here is the output: {raw_prediction!r}"
