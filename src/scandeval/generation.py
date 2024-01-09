@@ -419,22 +419,6 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
-        # TEMP
-        import numpy as np
-
-        inputs_without_padding = [
-            input_ids[input_ids != tokenizer.pad_token_id].tolist()
-            for input_ids in inputs
-        ]
-        logger.debug(
-            "Median number of tokens in prompt: "
-            f"{np.median([len(x) for x in inputs_without_padding]):,}"
-        )
-        logger.debug(
-            "Max number of tokens in prompt: "
-            f"{np.max([len(x) for x in inputs_without_padding]):,}"
-        )
-
         model_output = model.generate(
             inputs=inputs,
             generation_config=generation_config,
