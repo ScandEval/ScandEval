@@ -74,6 +74,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the model's maximum context length was really small (128). This has been fixed now.
 - Now sets `ignore_mismatched_sizes` when loading models if the model cannot be loaded
   otherwise. This previously caused some issues when loading certain models.
+- When few-shot evaluating models on NER tasks, we are now more lenient towards the
+  generated model output. Instead of taking the output as-is, we are now extracting the
+  first dictionary (enclosed in curly brackets), as well as replacing all single
+  apostrophes (') with double ones (").
 
 
 ## [v8.2.1] - 2023-12-20
