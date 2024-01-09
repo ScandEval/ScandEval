@@ -4,6 +4,7 @@ import itertools as it
 import json
 import logging
 import random
+import re
 from copy import deepcopy
 from functools import partial
 from typing import Any
@@ -594,6 +595,31 @@ class NamedEntityRecognition(BenchmarkDataset):
             generated_sequences=model_output["sequences"],
             tokenizer=tokenizer,
         )
+
+        # Attempt to extract the JSON dictionary from the predictions
+        json_regex = r"\{.+?\}"
+        json_matches = [
+            re.search(pattern=json_regex, string=raw_prediction) or raw_prediction
+            for raw_prediction in raw_predictions
+        ]
+        json_extracted_predictions = [
+            json_match.group() if isinstance(json_match, re.Match) else json_match
+            for json_match in json_matches
+        ]
+
+        # Clean up the extract JSON dictionaries, to make them parseable
+        raw_predictions = [
+            re.sub(
+                pattern=" +",
+                repl=" ",
+                string=(
+                    json_extracted_prediction.replace("'", '"')
+                    .replace("\\", "")
+                    .replace("\n", "")
+                ),
+            )
+            for json_extracted_prediction in json_extracted_predictions
+        ]
 
         tokens = input_batch["tokens"]
         predicted_labels: list[list[str]] = [
