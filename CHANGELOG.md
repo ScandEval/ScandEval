@@ -58,6 +58,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - If a model is stored in the Safetensors format on Hugging Face Hub, then we read out
   the number of parameters directly from those files. This results in more accurate
   parameter counts as opposed to loading in the model in 4-bit and counting manually.
+- Samples with excessively short or long texts have been removed.
+- Adjusted number of few-shot examples in datasets to ensure that the resulting prompt
+  is at most ~3000 tokens long.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
