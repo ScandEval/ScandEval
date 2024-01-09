@@ -23,6 +23,14 @@ def main() -> None:
     assert isinstance(train_df, pd.DataFrame)
     assert isinstance(valtest_df, pd.DataFrame)
 
+    # Only work with samples where the context is not very large or small
+    train_lengths = train_df.context.str.len()
+    valtest_lengths = valtest_df.context.str.len()
+    lower_bound = train_lengths.quantile(0.05)
+    upper_bound = train_lengths.quantile(0.95)
+    train_df = train_df[train_lengths.between(lower_bound, upper_bound)]
+    valtest_df = valtest_df[valtest_lengths.between(lower_bound, upper_bound)]
+
     # Extract information on which examples contain an answer
     def has_answer(example: dict) -> bool:
         return len(example["text"]) > 0 and example["text"][0] != ""

@@ -52,6 +52,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   previously.
 - Now doesn't force ASCII characters in the NER task for generative models, making the
   target JSON dictionary more consistent with the input text.
+- Samples with excessively short or long texts have been removed, being contexts whose
+  lengths are in the top-5% or bottom-5%.
+- Adjusted number of few-shot examples in datasets to ensure that the resulting prompt
+  is at most ~3000 tokens long.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,

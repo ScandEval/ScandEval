@@ -30,6 +30,12 @@ def main() -> None:
     # Ensure that `df` is indeed a Pandas DataFrame
     assert isinstance(df, pd.DataFrame)
 
+    # Only work with samples where the context is not very large or small
+    lengths = df.context.str.len()
+    lower_bound = lengths.quantile(0.05)
+    upper_bound = lengths.quantile(0.95)
+    df = df[lengths.between(lower_bound, upper_bound)]
+
     # Extract information on which examples contain an answer
     has_answer: pd.Series = df.answers.map(
         lambda dct: len(dct["text"]) > 0 and dct["text"][0] != ""

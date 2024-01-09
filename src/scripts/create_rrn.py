@@ -22,6 +22,12 @@ def main():
 
     df.dropna(subset=["text", "target_text"], inplace=True)
 
+    # Only work with samples where the text is not very large or small
+    lengths = df.text.str.len()
+    lower_bound = lengths.quantile(0.01)
+    upper_bound = lengths.quantile(0.99)
+    df = df[lengths.between(lower_bound, upper_bound)]
+
     # Create validation split
     val_size = 256
     val_df = df.sample(n=val_size, random_state=4242)

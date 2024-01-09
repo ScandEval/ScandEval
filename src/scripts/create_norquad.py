@@ -59,6 +59,12 @@ def main() -> None:
     df = pd.concat([train_df, val_df, test_df])
     df.reset_index(drop=True, inplace=True)
 
+    # Only work with samples where the context is not very large or small
+    lengths = df.context.str.len()
+    lower_bound = lengths.quantile(0.05)
+    upper_bound = lengths.quantile(0.95)
+    df = df[lengths.between(lower_bound, upper_bound)]
+
     # Ensure that the `id` column is a string
     df["id"] = df["id"].astype(str)
 

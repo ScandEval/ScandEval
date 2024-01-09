@@ -20,6 +20,12 @@ def main():
     df = dataset.to_pandas()
     assert isinstance(df, pd.DataFrame)
 
+    # Only work with samples where the text is not very large or small
+    lengths = df.text.str.len()
+    lower_bound = lengths.quantile(0.05)
+    upper_bound = lengths.quantile(0.95)
+    df = df[lengths.between(lower_bound, upper_bound)]
+
     # Create validation split
     val_size = 256
     val_df = df.sample(n=val_size, random_state=4242)

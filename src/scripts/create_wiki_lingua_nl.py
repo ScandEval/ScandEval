@@ -24,6 +24,16 @@ def main():
     assert isinstance(val_df, pd.DataFrame)
     assert isinstance(test_df, pd.DataFrame)
 
+    # Only work with samples where the text is not very large or small
+    train_lengths = train_df.text.str.len()
+    val_lengths = val_df.text.str.len()
+    test_lengths = test_df.text.str.len()
+    lower_bound = train_lengths.quantile(0.05)
+    upper_bound = train_lengths.quantile(0.95)
+    train_df = train_df[train_lengths.between(lower_bound, upper_bound)]
+    val_df = val_df[val_lengths.between(lower_bound, upper_bound)]
+    test_df = test_df[test_lengths.between(lower_bound, upper_bound)]
+
     # Create validation split
     val_size = 256
     val_df = val_df.sample(n=val_size, random_state=4242)
