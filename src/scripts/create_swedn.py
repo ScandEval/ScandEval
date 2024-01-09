@@ -4,6 +4,7 @@ import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
+from scripts.constants import MAX_NUM_CHARS_IN_ARTICLE, MIN_NUM_CHARS_IN_ARTICLE
 
 
 def main():
@@ -28,8 +29,8 @@ def main():
     train_lengths = train_df.text.str.len()
     val_lengths = val_df.text.str.len()
     test_lengths = test_df.text.str.len()
-    lower_bound = train_lengths.quantile(0.05)
-    upper_bound = train_lengths.quantile(0.95)
+    lower_bound = MIN_NUM_CHARS_IN_ARTICLE
+    upper_bound = MAX_NUM_CHARS_IN_ARTICLE
     train_df = train_df[train_lengths.between(lower_bound, upper_bound)]
     val_df = val_df[val_lengths.between(lower_bound, upper_bound)]
     test_df = test_df[test_lengths.between(lower_bound, upper_bound)]

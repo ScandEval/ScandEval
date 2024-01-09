@@ -4,6 +4,7 @@ import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
+from scripts.constants import MAX_NUM_CHARS_IN_ARTICLE, MIN_NUM_CHARS_IN_ARTICLE
 
 
 def main():
@@ -22,8 +23,8 @@ def main():
 
     # Only work with samples where the text is not very large or small
     lengths = df.text.str.len()
-    lower_bound = lengths.quantile(0.05)
-    upper_bound = lengths.quantile(0.95)
+    lower_bound = MIN_NUM_CHARS_IN_ARTICLE
+    upper_bound = MAX_NUM_CHARS_IN_ARTICLE
     df = df[lengths.between(lower_bound, upper_bound)]
 
     # Create validation split

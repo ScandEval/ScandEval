@@ -7,6 +7,12 @@ from datasets.load import load_dataset
 from datasets.splits import Split
 from huggingface_hub.hf_api import HfApi
 from requests.exceptions import HTTPError
+from scripts.constants import (
+    MAX_NUM_CHARS_IN_CONTEXT,
+    MAX_NUM_CHARS_IN_QUESTION,
+    MIN_NUM_CHARS_IN_CONTEXT,
+    MIN_NUM_CHARS_IN_QUESTION,
+)
 
 
 def main() -> None:
@@ -26,18 +32,26 @@ def main() -> None:
     # Only work with samples where the context is not very large or small
     train_lengths = train_df.context.str.len()
     valtest_lengths = valtest_df.context.str.len()
-    lower_bound = train_lengths.quantile(0.05)
-    upper_bound = train_lengths.quantile(0.95)
-    train_df = train_df[train_lengths.between(lower_bound, upper_bound)]
-    valtest_df = valtest_df[valtest_lengths.between(lower_bound, upper_bound)]
+    train_df = train_df[
+        train_lengths.between(MIN_NUM_CHARS_IN_CONTEXT, MAX_NUM_CHARS_IN_CONTEXT)
+    ]
+    valtest_df = valtest_df[
+        valtest_lengths.between(MIN_NUM_CHARS_IN_CONTEXT, MAX_NUM_CHARS_IN_CONTEXT)
+    ]
 
     # Only work with samples where the question is not very large or small
     train_question_lengths = train_df.question.str.len()
     valtest_question_lengths = valtest_df.question.str.len()
-    lower_bound = train_question_lengths.quantile(0.05)
-    upper_bound = train_question_lengths.quantile(0.95)
-    train_df = train_df[train_question_lengths.between(lower_bound, upper_bound)]
-    valtest_df = valtest_df[valtest_question_lengths.between(lower_bound, upper_bound)]
+    train_df = train_df[
+        train_question_lengths.between(
+            MIN_NUM_CHARS_IN_QUESTION, MAX_NUM_CHARS_IN_QUESTION
+        )
+    ]
+    valtest_df = valtest_df[
+        valtest_question_lengths.between(
+            MIN_NUM_CHARS_IN_QUESTION, MAX_NUM_CHARS_IN_QUESTION
+        )
+    ]
 
     # Extract information on which examples contain an answer
     def has_answer(example: dict) -> bool:
