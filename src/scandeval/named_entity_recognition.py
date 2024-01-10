@@ -17,11 +17,15 @@ from transformers import BatchEncoding, DataCollatorWithPadding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorForTokenClassification
 from transformers.modeling_utils import ModelOutput
 
-from .benchmark_dataset import BenchmarkDataset
+from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import GENERATIVE_MODEL_TASKS, model_is_generative
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    model_is_generative,
+    raise_if_model_output_contains_nan_values,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -63,7 +67,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
+        model_outputs_and_labels: tuple[Predictions, Labels],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
@@ -81,6 +85,8 @@ class NamedEntityRecognition(BenchmarkDataset):
         """
         model_outputs, labels = model_outputs_and_labels
 
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
+
         predictions: list[list[str]]
         if not isinstance(model_outputs[0][0], str):
             raw_predictions: list[list[int]] = np.argmax(
@@ -96,9 +102,9 @@ class NamedEntityRecognition(BenchmarkDataset):
                     )
                     if lbl_id != -100
                 ]
-                for pred, label in zip(raw_predictions, labels)
+                for pred, label in zip(raw_predictions, np.asarray(labels))
             ]
-            labels = [
+            labels_list = [
                 [
                     id2label[lbl_id]
                     if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
@@ -106,11 +112,12 @@ class NamedEntityRecognition(BenchmarkDataset):
                     for lbl_id in label  # type: ignore[call-overload]
                     if lbl_id != -100
                 ]
-                for label in labels
+                for label in np.asarray(labels)
             ]
 
         else:
             predictions = model_outputs  # type: ignore[assignment]
+            labels_list = [label for label in np.asarray(labels)]
 
         # Replace predicted tag with either MISC or O tags if they are not part of the
         # dataset
@@ -136,15 +143,15 @@ class NamedEntityRecognition(BenchmarkDataset):
                     predictions_no_misc[i][j] = "o"
 
         # Remove MISC labels from labels
-        labels_no_misc = deepcopy(labels)
-        for i, label_list in enumerate(labels_no_misc):
+        labels_list_no_misc = deepcopy(labels_list)
+        for i, label_list in enumerate(labels_list_no_misc):
             for j, ner_tag in enumerate(label_list):  # type: ignore[arg-type]
                 if (
                     isinstance(ner_tag, str)
                     and len(ner_tag) >= 4
                     and ner_tag[-4:] == "misc"  # type: ignore[index]
                 ):
-                    labels_no_misc[i][j] = "o"  # type: ignore[call-overload]
+                    labels_list_no_misc[i][j] = "o"  # type: ignore[call-overload]
 
         # Compute the metrics
         # We manually set the F1 metric to be 100% if both the labels and the models
@@ -155,13 +162,13 @@ class NamedEntityRecognition(BenchmarkDataset):
             for prediction_list in predictions
         )
         labels_all_zero = all(
-            all(ner_tag == "o" for ner_tag in label_list) for label_list in labels
+            all(ner_tag == "o" for ner_tag in label_list) for label_list in labels_list
         )
         if predictions_all_zero and labels_all_zero:
             results = dict(overall_f1=1.0)
         else:
             results = self._metrics["micro_f1"].compute(
-                predictions=predictions, references=labels
+                predictions=predictions, references=labels_list
             )
 
         # Compute the metrics without MISC tags
@@ -174,13 +181,13 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
         labels_no_misc_all_zero = all(
             all(ner_tag == "o" for ner_tag in label_list)
-            for label_list in labels_no_misc
+            for label_list in labels_list_no_misc
         )
         if predictions_no_misc_all_zero and labels_no_misc_all_zero:
             results_no_misc = dict(overall_f1=1.0)
         else:
             results_no_misc = self._metrics["micro_f1_no_misc"].compute(
-                predictions=predictions_no_misc, references=labels_no_misc
+                predictions=predictions_no_misc, references=labels_list_no_misc
             )
 
         # Raise error if the metrics are invalid

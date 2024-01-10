@@ -15,12 +15,16 @@ from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.modeling_utils import ModelOutput
 
-from .benchmark_dataset import BenchmarkDataset
+from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .config import DatasetConfig
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import GENERATIVE_MODEL_TASKS, get_special_token_metadata
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    get_special_token_metadata,
+    raise_if_model_output_contains_nan_values,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -125,7 +129,7 @@ class SequenceClassification(BenchmarkDataset):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
+        model_outputs_and_labels: tuple[Predictions, Labels],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
@@ -143,6 +147,8 @@ class SequenceClassification(BenchmarkDataset):
         """
         model_outputs, labels = model_outputs_and_labels
 
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
+
         model_output_dtype = np.asarray(model_outputs).dtype
         if model_output_dtype in [np.float16, np.float32, np.float64]:
             predictions = np.asarray(model_outputs).argmax(axis=-1)
@@ -157,12 +163,12 @@ class SequenceClassification(BenchmarkDataset):
             id2label.index(prompt_label_to_label_mapping[pred.lower()])
             if isinstance(pred, str)
             else pred
-            for pred in predictions
+            for pred in np.asarray(predictions)
         ]
 
-        labels = [
+        labels_list = [
             id2label.index(label.lower()) if isinstance(label, str) else label
-            for label in labels
+            for label in np.asarray(labels)
         ]
 
         results: dict[str, float] = dict()
@@ -170,7 +176,7 @@ class SequenceClassification(BenchmarkDataset):
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
                 predictions=predictions,
-                references=labels,
+                references=labels_list,
                 **cfg.compute_kwargs,
             )
 
@@ -181,6 +187,7 @@ class SequenceClassification(BenchmarkDataset):
                 if isinstance(scores, list):
                     scores = sum(scores) / len(scores)
                 results[cfg.name] = scores
+
         return results
 
     def _extract_few_shot_examples(

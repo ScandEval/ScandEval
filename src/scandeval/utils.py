@@ -25,8 +25,10 @@ from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
 
+from .benchmark_dataset import Predictions
 from .config import Language
 from .enums import Framework
+from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .protocols import GenerativeModel, Tokenizer
 
@@ -543,3 +545,18 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
             return True
     except (NotImplementedError, TypeError):
         return False
+
+
+def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None:
+    """Raise an exception if the model output contains NaN values.
+
+    Args:
+        model_output:
+            The model output to check.
+
+    Raises:
+        NaNValueInModelOutput:
+            If the model output contains NaN values.
+    """
+    if np.isnan(model_output).any():
+        raise NaNValueInModelOutput()

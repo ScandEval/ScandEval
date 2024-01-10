@@ -43,3 +43,17 @@ class NoInternetConnection(Exception):
         """
         self.message = message
         super().__init__(self.message)
+
+
+class NaNValueInModelOutput(Exception):
+    """There is a NaN value in the model output."""
+
+    def __init__(self, message: str = "There is a NaN value in the model output."):
+        """Initialize the exception.
+
+        Args:
+            message:
+                The message to display.
+        """
+        self.message = message
+        super().__init__(self.message)
