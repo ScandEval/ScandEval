@@ -9,9 +9,10 @@ from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
 from transformers.utils import ModelOutput
 from vllm import LLM, RequestOutput, SamplingParams
+from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
 from .config import ModelConfig
-from .utils import HiddenPrints
+from .utils import HiddenPrints, clear_memory
 
 
 class VLLMModel:
@@ -43,11 +44,18 @@ class VLLMModel:
         self.tokenizer = tokenizer
         with warnings.catch_warnings(), HiddenPrints():
             warnings.simplefilter("ignore", category=UserWarning)
+
+            # This is required to be able to re-initialize the model, in case we
+            # have already initialized it once
+            destroy_model_parallel()
+            clear_memory()
+
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
                 max_model_len=10_000,
                 download_dir=str(model_cache_dir),
+                trust_remote_code=True,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
