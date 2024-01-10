@@ -9,6 +9,7 @@ from transformers import (
     PretrainedConfig,
     PreTrainedModel,
 )
+from transformers.utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 
@@ -150,10 +151,10 @@ class GenerativeModel(Protocol):
 
     def generate(
         self,
-        inputs: torch.LongTensor,
+        inputs: torch.Tensor,
         generation_config: GenerationConfig | None = None,
         **generation_kwargs,
-    ) -> torch.LongTensor:
+    ) -> ModelOutput | torch.Tensor:
         """Generate text.
 
         Args:

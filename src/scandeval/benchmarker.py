@@ -63,6 +63,17 @@ class BenchmarkResult(BaseModel):
 
         return cls(**config)
 
+    def append_to_results(self, results_path: Path) -> None:
+        """Append the benchmark result to the results file.
+
+        Args:
+            results_path:
+                The path to the results file.
+        """
+        json_str = json.dumps(self.dict())
+        with results_path.open("a") as f:
+            f.write("\n" + json_str)
+
 
 class Benchmarker:
     """Benchmarking all the Scandinavian language models.
@@ -300,8 +311,7 @@ class Benchmarker:
 
                 # Save the benchmark results
                 if self.benchmark_config.save_results:
-                    with self.results_path.open("a") as f:
-                        f.write("\n" + record.model_dump_json())
+                    record.append_to_results(results_path=self.results_path)
 
             self.clear_model_cache()
 

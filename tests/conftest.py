@@ -59,7 +59,7 @@ def benchmark_config(
         token=auth,
         openai_api_key=None,
         progress_bar=False,
-        save_results=False,
+        save_results=True,
         device=torch.device("cpu"),
         verbose=False,
         trust_remote_code=True,

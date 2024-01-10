@@ -22,10 +22,9 @@ from transformers import (
 )
 from transformers.trainer import OptimizerNames
 
-from scandeval.exceptions import InvalidBenchmark
-
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .exceptions import InvalidBenchmark
 from .model_loading import load_model
 from .protocols import Tokenizer
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
