@@ -17,10 +17,11 @@ from transformers import BatchEncoding, DataCollatorWithPadding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorForTokenClassification
 from transformers.modeling_utils import ModelOutput
 
-from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
+from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
+from .types import Labels, Predictions
 from .utils import (
     GENERATIVE_MODEL_TASKS,
     model_is_generative,

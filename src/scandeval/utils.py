@@ -25,12 +25,12 @@ from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
 
-from .benchmark_dataset import Predictions
 from .config import Language
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .protocols import GenerativeModel, Tokenizer
+from .types import Predictions
 
 logger = logging.getLogger(__package__)
 

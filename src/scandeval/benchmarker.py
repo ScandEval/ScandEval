@@ -15,7 +15,7 @@ from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Device, Framework
 from .exceptions import InvalidBenchmark
-from .types import SCORE_DICT
+from .types import ScoreDict
 from .utils import get_huggingface_model_lists
 
 logger = logging.getLogger(__package__)
@@ -28,7 +28,7 @@ class BenchmarkResult(BaseModel):
     task: str
     dataset_languages: list[str]
     model: str
-    results: SCORE_DICT
+    results: ScoreDict
     num_model_parameters: int
     max_sequence_length: int
     vocabulary_size: int

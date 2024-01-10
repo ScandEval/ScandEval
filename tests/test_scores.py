@@ -6,7 +6,7 @@ from typing import Generator
 import numpy as np
 import pytest
 from scandeval.scores import aggregate_scores, log_scores
-from scandeval.types import SCORE_DICT
+from scandeval.types import ScoreDict
 
 
 @pytest.fixture(scope="module")
@@ -104,7 +104,7 @@ class TestLogScores:
     """Unit tests for the `log_scores` function."""
 
     @pytest.fixture(scope="class")
-    def logged_scores(self, metric_config, scores) -> Generator[SCORE_DICT, None, None]:
+    def logged_scores(self, metric_config, scores) -> Generator[ScoreDict, None, None]:
         """Yields the logged scores."""
         yield log_scores(
             dataset_name="dataset",

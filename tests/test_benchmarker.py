@@ -6,7 +6,7 @@ from typing import Generator, TypedDict
 
 import pytest
 from scandeval.benchmarker import BenchmarkResult, model_has_been_benchmarked
-from scandeval.types import SCORE_DICT
+from scandeval.types import ScoreDict
 
 
 class DataKwargs(TypedDict):
@@ -17,7 +17,7 @@ class DataKwargs(TypedDict):
     vocabulary_size: int
     dataset_languages: list[str]
     task: str
-    results: SCORE_DICT
+    results: ScoreDict
 
 
 DATA_KWARGS = DataKwargs(

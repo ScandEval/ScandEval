@@ -32,14 +32,10 @@ from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
-from .types import SCORE_DICT
+from .types import Labels, Predictions, ScoreDict
 from .utils import GENERATIVE_MODEL_TASKS, enforce_reproducibility, model_is_generative
 
 logger = logging.getLogger(__package__)
-
-
-Predictions = Type[np.ndarray]
-Labels = Type[np.ndarray]
 
 
 class BenchmarkDataset(ABC):
@@ -85,7 +81,7 @@ class BenchmarkDataset(ABC):
         logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
         logger.setLevel(logging_level)
 
-    def benchmark(self, model_id: str) -> tuple[SCORE_DICT, dict[str, bool | int]]:
+    def benchmark(self, model_id: str) -> tuple[ScoreDict, dict[str, bool | int]]:
         """Benchmark a model.
 
         Args:

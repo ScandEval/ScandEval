@@ -11,11 +11,12 @@ from transformers.modeling_utils import ModelOutput, PreTrainedModel
 from transformers.tokenization_utils_base import BatchEncoding
 from transformers.trainer import Trainer
 
-from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
+from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
+from .types import Labels, Predictions
 from .utils import get_special_token_metadata, raise_if_model_output_contains_nan_values
 
 logger = logging.getLogger(__package__)
