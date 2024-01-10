@@ -7,6 +7,12 @@ from datasets.dataset_dict import DatasetDict
 from datasets.splits import Split
 from huggingface_hub.hf_api import HfApi
 from requests.exceptions import HTTPError
+from scripts.constants import (
+    MAX_NUM_CHARS_IN_CONTEXT,
+    MAX_NUM_CHARS_IN_QUESTION,
+    MIN_NUM_CHARS_IN_CONTEXT,
+    MIN_NUM_CHARS_IN_QUESTION,
+)
 
 
 def main() -> None:
@@ -58,6 +64,14 @@ def main() -> None:
     # Concatenate all the splits
     df = pd.concat([train_df, val_df, test_df])
     df.reset_index(drop=True, inplace=True)
+
+    # Only work with samples where the context is not very large or small
+    lengths = df.context.str.len()
+    df = df[lengths.between(MIN_NUM_CHARS_IN_CONTEXT, MAX_NUM_CHARS_IN_CONTEXT)]
+
+    # Only work with samples where the question is not very large or small
+    lengths = df.question.str.len()
+    df = df[lengths.between(MIN_NUM_CHARS_IN_QUESTION, MAX_NUM_CHARS_IN_QUESTION)]
 
     # Ensure that the `id` column is a string
     df["id"] = df["id"].astype(str)

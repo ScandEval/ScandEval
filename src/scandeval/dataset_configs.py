@@ -498,7 +498,8 @@ SCALA_EN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-en",
     task=LA,
     languages=[EN],
-    prompt_prefix="The following are sentences and whether they are grammatically correct.",
+    prompt_prefix="The following are sentences and whether they are grammatically "
+    "correct.",
     prompt_template="Sentence: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(correct="yes", incorrect="no"),
     num_few_shot_examples=12,
@@ -514,7 +515,9 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-da-mini",
     task=QA,
     languages=[DA],
-    prompt_template="{text}\nSpørgsmål: {question}\nSvar med maks. 3 ord: {label}",
+    prompt_prefix="Følgende er tekster med tilhørende spørgsmål og svar.",
+    prompt_template="Tekst: {text}\nSpørgsmål: {question}\nSvar med maks. 3 ord: "
+    "{label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -525,8 +528,9 @@ NORQUAD_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/norquad-mini",
     task=QA,
     languages=[NB, NN],
-    prompt_template="{text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
-    num_few_shot_examples=4,
+    prompt_prefix="Her følger tekster med tilhørende spørsmål og svar.",
+    prompt_template="Tekst: {text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
+    num_few_shot_examples=2,
     max_generated_tokens=32,
 )
 
@@ -536,7 +540,8 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scandiqa-sv-mini",
     task=QA,
     languages=[SV],
-    prompt_template="{text}\nFråga: {question}\nSvar på max 3 ord: {label}",
+    prompt_prefix="Nedan följer texter med tillhörande frågor och svar.",
+    prompt_template="Text: {text}\nFråga: {question}\nSvar på max 3 ord: {label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -547,8 +552,9 @@ NQII_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/nqii-mini",
     task=QA,
     languages=[IS],
-    prompt_template="{text}\nSpurning: {question}\nSvaraðu með að hámarki 3 orðum: "
-    "{label}",
+    prompt_prefix="Eftirfarandi eru textar með tilheyrandi spurningum og svörum.",
+    prompt_template="Texti: {text}\nSpurning: {question}\nSvaraðu með að hámarki 3 "
+    "orðum: {label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -571,7 +577,9 @@ GERMANQUAD_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/germanquad-mini",
     task=QA,
     languages=[DE],
-    prompt_template="{text}\nFragen: {question}\nFragen Antwort in maximal 3 "
+    prompt_prefix="Im Folgenden finden Sie Texte mit den dazugehörigen Fragen und "
+    "Antworten.",
+    prompt_template="Text: {text}\nFragen: {question}\nFragen Antwort in maximal 3 "
     "Wörtern: {label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
@@ -583,7 +591,9 @@ SQUAD_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/squad-mini",
     task=QA,
     languages=[EN],
-    prompt_template="{text}\nQuestion: {question}\nAnswer in max 3 words: {label}",
+    prompt_prefix="The following are texts with accompanying questions and answers.",
+    prompt_template="Text: {text}\nQuestion: {question}\nAnswer in max 3 words: "
+    "{label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -594,7 +604,9 @@ SQUAD_NL_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/squad-nl-mini",
     task=QA,
     languages=[NL],
-    prompt_template="{text}\nVraag: {question}\nAntwoord in max 3 woorden: {label}",
+    prompt_prefix="Hieronder volgen teksten met bijbehorende vragen en antwoorden.",
+    prompt_template="Tekst: {text}\nVraag: {question}\nAntwoord in max 3 woorden: "
+    "{label}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -610,7 +622,8 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/nordjylland-news-mini",
     task=SUMM,
     languages=[DA],
-    prompt_template="{text}\nOpsummering: {target_text}",
+    prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
+    prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
@@ -621,8 +634,10 @@ MLSUM_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mlsum-mini",
     task=SUMM,
     languages=[DE],
-    prompt_template="{text}\nZusammenfassung: {target_text}",
-    num_few_shot_examples=2,
+    prompt_prefix="Im Folgenden finden Sie Nachrichtenartikel mit den dazugehörigen "
+    "Zusammenfassungen.",
+    prompt_template="Nachrichtenartikel: {text}\nZusammenfassung: {target_text}",
+    num_few_shot_examples=1,
     max_generated_tokens=128,
 )
 
@@ -632,7 +647,8 @@ RRN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/rrn-mini",
     task=SUMM,
     languages=[IS],
-    prompt_template="{text}\nSamantekt: {target_text}",
+    prompt_prefix="Eftirfarandi eru fréttagreinar með tilheyrandi samantektum.",
+    prompt_template="Fréttagrein: {text}\nSamantekt: {target_text}",
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
@@ -643,7 +659,8 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/no-sammendrag-mini",
     task=SUMM,
     languages=[NB, NN],
-    prompt_template="{text}\nSammendrag: {target_text}",
+    prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
+    prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
@@ -654,7 +671,8 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/wiki-lingua-nl-mini",
     task=SUMM,
     languages=[NL],
-    prompt_template="{text}\nSamenvatting: {target_text}",
+    prompt_prefix="Hieronder volgen artikelen met bijbehorende samenvattingen.",
+    prompt_template="Artikel: {text}\nSamenvatting: {target_text}",
     num_few_shot_examples=2,
     max_generated_tokens=128,
 )
@@ -665,8 +683,9 @@ SWEDN_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/swedn-mini",
     task=SUMM,
     languages=[SV],
-    prompt_template="{text}\nSammanfattning: {target_text}",
-    num_few_shot_examples=2,
+    prompt_prefix="Nedan följer artiklar med tillhörande sammanfattningar.",
+    prompt_template="Artikel: {text}\nSammanfattning: {target_text}",
+    num_few_shot_examples=1,
     max_generated_tokens=128,
 )
 
@@ -676,8 +695,9 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/cnn-dailymail-mini",
     task=SUMM,
     languages=[EN],
-    prompt_template="{text}\nSummary: {target_text}",
-    num_few_shot_examples=2,
+    prompt_prefix="The following are articles with accompanying summaries.",
+    prompt_template="News article: {text}\nSummary: {target_text}",
+    num_few_shot_examples=1,
     max_generated_tokens=128,
 )
 
@@ -747,7 +767,7 @@ ARC_DA_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=25,
+    num_few_shot_examples=20,
     max_generated_tokens=3,
 )
 
@@ -760,7 +780,7 @@ ARC_SV_CONFIG = DatasetConfig(
     prompt_prefix="Följande är flervalsfrågor (med svar).",
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=25,
+    num_few_shot_examples=20,
     max_generated_tokens=3,
 )
 
@@ -773,7 +793,7 @@ ARC_DE_CONFIG = DatasetConfig(
     prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=25,
+    num_few_shot_examples=20,
     max_generated_tokens=3,
 )
 
@@ -786,7 +806,7 @@ ARC_NL_CONFIG = DatasetConfig(
     prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=25,
+    num_few_shot_examples=20,
     max_generated_tokens=3,
 )
 
@@ -798,7 +818,7 @@ ARC_NL_CONFIG = DatasetConfig(
 ### COMMON SENSE REASONING DATASETS ###
 
 HELLASWAG_DA_CONFIG = DatasetConfig(
-    name="mmlu-da",
+    name="hellaswag-da",
     pretty_name="the Danish part of the truncated version of MMLU",
     huggingface_id="ScandEval/hellaswag-da-mini",
     task=COMMON_SENSE,
@@ -806,12 +826,12 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=10,
+    num_few_shot_examples=5,
     max_generated_tokens=3,
 )
 
 HELLASWAG_SV_CONFIG = DatasetConfig(
-    name="mmlu-sv",
+    name="hellaswag-sv",
     pretty_name="the Swedish part of the truncated version of MMLU",
     huggingface_id="ScandEval/hellaswag-sv-mini",
     task=COMMON_SENSE,
@@ -819,12 +839,12 @@ HELLASWAG_SV_CONFIG = DatasetConfig(
     prompt_prefix="Följande är flervalsfrågor (med svar).",
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=10,
+    num_few_shot_examples=5,
     max_generated_tokens=3,
 )
 
 HELLASWAG_DE_CONFIG = DatasetConfig(
-    name="mmlu-de",
+    name="hellaswag-de",
     pretty_name="the German part of the truncated version of MMLU",
     huggingface_id="ScandEval/hellaswag-de-mini",
     task=COMMON_SENSE,
@@ -832,12 +852,12 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
     prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=10,
+    num_few_shot_examples=5,
     max_generated_tokens=3,
 )
 
 HELLASWAG_NL_CONFIG = DatasetConfig(
-    name="mmlu-nl",
+    name="hellaswag-nl",
     pretty_name="the Dutch part of the truncated version of MMLU",
     huggingface_id="ScandEval/hellaswag-nl-mini",
     task=COMMON_SENSE,
@@ -845,7 +865,7 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=10,
+    num_few_shot_examples=5,
     max_generated_tokens=3,
 )
 
