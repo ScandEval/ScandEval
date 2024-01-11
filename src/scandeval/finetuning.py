@@ -22,10 +22,9 @@ from transformers import (
 )
 from transformers.trainer import OptimizerNames
 
-from scandeval.enums import DataType
-
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .enums import DataType
 from .exceptions import InvalidBenchmark, NaNValueInModelOutput
 from .model_loading import load_model
 from .protocols import Tokenizer
