@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Samples with excessively short or long texts have been removed.
 - Adjusted number of few-shot examples in datasets to ensure that the resulting prompt
   is at most ~3000 tokens long.
+- When timeout errors occur when loading a model then we will try again at most 5 times
+  now, where previously we would attempt to re-load it indefinitely.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
