@@ -25,6 +25,7 @@ from .model_cache import (
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
 from .utils import clear_memory
+from .vllm_models import VLLMModel
 
 logger = logging.getLogger(__package__)
 
@@ -236,9 +237,13 @@ def generate_single_iteration(
             ]
         )
 
-        batch_size = (
-            1 if isinstance(model, OpenAIModel) else benchmark_config.batch_size
-        )
+        if isinstance(model, OpenAIModel):
+            batch_size = 1
+        elif isinstance(model, VLLMModel):
+            batch_size = len(torch_dataset)
+        else:
+            batch_size = benchmark_config.batch_size
+
         dataloader = DataLoader(
             dataset=torch_dataset,
             batch_size=batch_size,
@@ -246,9 +251,14 @@ def generate_single_iteration(
             num_workers=4,
             collate_fn=data_collator,
         )
+        itr = (
+            dataloader
+            if isinstance(model, VLLMModel)
+            else tqdm(dataloader, leave=False)
+        )
 
         # Generate the completions for the non-cached examples
-        for batch_idx, batch in enumerate(tqdm(dataloader, leave=False)):
+        for batch_idx, batch in enumerate(itr):
             model_output, extracted_labels = generate_batch(
                 batch=batch,
                 batch_idx=batch_idx,
@@ -408,11 +418,13 @@ def generate_batch(
         warnings.simplefilter("ignore", category=UserWarning)
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
-        model_output: ModelOutput = model.generate(
+
+        model_output = model.generate(
             inputs=inputs,
             generation_config=generation_config,
             stopping_criteria=[stopping_criteria],
         )
+        assert isinstance(model_output, ModelOutput)
 
     # Hugging Face models include the input in the generated sequence, so we
     # need to remove it in that case

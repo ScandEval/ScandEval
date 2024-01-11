@@ -97,7 +97,7 @@ class TestBenchmarkConfig:
         assert benchmark_config.token is auth
         assert benchmark_config.openai_api_key is None
         assert benchmark_config.progress_bar is False
-        assert benchmark_config.save_results is False
+        assert benchmark_config.save_results is True
         assert benchmark_config.device == torch.device("cpu")
         assert benchmark_config.verbose is False
         assert benchmark_config.trust_remote_code is True

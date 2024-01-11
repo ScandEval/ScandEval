@@ -17,6 +17,7 @@ import numpy as np
 import pkg_resources
 import requests
 import torch
+import vllm
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
@@ -153,6 +154,15 @@ def block_terminal_output():
     logging.getLogger("openai").setLevel(logging.ERROR)
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
+    logging.getLogger("vllm.engine.llm_engine").setLevel(logging.ERROR)
+
+    def init_vllm_logger(name: str):
+        """Dummy function to initialise vLLM loggers with the ERROR level."""
+        vllm_logger = logging.getLogger(name)
+        vllm_logger.setLevel(logging.ERROR)
+        return vllm_logger
+
+    vllm.logger.init_logger = init_vllm_logger
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
@@ -516,6 +526,10 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
     Returns:
         Whether the model is generative or not.
     """
+    known_generative_models = ["VLLMModel", "OpenAIModel"]
+    if any(model.__class__.__name__ == name for name in known_generative_models):
+        return True
+
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)

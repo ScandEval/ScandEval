@@ -33,6 +33,7 @@ from ..utils import (
     internet_connection_available,
     model_is_generative,
 )
+from ..vllm_models import VLLMModel
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 logger = logging.getLogger(__package__)
@@ -63,7 +64,7 @@ class HFModelSetup:
         """Check if a model ID denotes an OpenAI model.
 
         Args:
-            model_id :
+            model_id:
                 The model ID.
 
         Returns:
@@ -240,94 +241,129 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
-        model_kwargs = dict(
-            config=config,
-            from_flax=from_flax,
-            ignore_mismatched_sizes=ignore_mismatched_sizes,
-            revision=model_config.revision,
-            token=self.benchmark_config.token,
-            cache_dir=model_config.model_cache_dir,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-            quantization_config=bnb_config,
-            torch_dtype=self._get_torch_dtype(config=config),
-            use_flash_attention_2=use_flash_attention,
+        use_vllm = (
+            model_config.task in GENERATIVE_MODEL_TASKS
+            and self.benchmark_config.device == torch.device("cuda")
         )
 
-        while True:
+        if use_vllm:
             try:
-                # Get the model class associated with the supertask
-                if model_config.task in ["text-generation", "conversational"]:
-                    model_cls_supertask = "causal-l-m"
-                elif model_config.task == "text2text-generation":
-                    model_cls_supertask = "seq-2-seq-l-m"
-                else:
-                    model_cls_supertask = supertask
-                model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
-                    class_name=f"auto-model-for-{model_cls_supertask}",
-                    module_name="transformers",
+                model = VLLMModel(
+                    model_config=model_config,
+                    hf_model_config=config,
+                    model_cache_dir=model_config.model_cache_dir,
+                )
+            except ValueError as e:
+                oom_error = (
+                    "larger than the maximum number of tokens that can be stored "
+                    "in KV cache"
+                )
+                use_vllm = oom_error in str(e)
+                logger.info(
+                    "Failed to benchmark with vLLM - trying with the Hugging Face "
+                    "implementation instead."
                 )
 
-                # If the model class could not be found then raise an error
-                if not model_cls_or_none:
-                    raise InvalidBenchmark(
-                        f"The supertask {supertask!r} does not correspond to a "
-                        "Hugging Face AutoModel type (such as "
-                        "`AutoModelForSequenceClassification`)."
+        if not use_vllm:
+            model_kwargs = dict(
+                config=config,
+                from_flax=from_flax,
+                ignore_mismatched_sizes=ignore_mismatched_sizes,
+                revision=model_config.revision,
+                token=self.benchmark_config.token,
+                cache_dir=model_config.model_cache_dir,
+                trust_remote_code=self.benchmark_config.trust_remote_code,
+                quantization_config=bnb_config,
+                torch_dtype=self._get_torch_dtype(config=config),
+                use_flash_attention_2=use_flash_attention,
+            )
+            while True:
+                try:
+                    # Get the model class associated with the supertask
+                    if model_config.task in ["text-generation", "conversational"]:
+                        model_cls_supertask = "causal-l-m"
+                    elif model_config.task == "text2text-generation":
+                        model_cls_supertask = "seq-2-seq-l-m"
+                    else:
+                        model_cls_supertask = supertask
+                    model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
+                        class_name=f"auto-model-for-{model_cls_supertask}",
+                        module_name="transformers",
                     )
 
-                # If the model is a DeBERTaV2 model then we ensure that
-                # `pooler_hidden_size` is the same size as `hidden_size`
-                if config.model_type == "deberta-v2":
-                    config.pooler_hidden_size = config.hidden_size
-
-                with warnings.catch_warnings(), HiddenPrints():
-                    warnings.filterwarnings("ignore", category=UserWarning)
-                    warnings.filterwarnings("ignore", category=FutureWarning)
-                    try:
-                        model_or_tuple = model_cls_or_none.from_pretrained(
-                            model_config.model_id, **model_kwargs
+                    # If the model class could not be found then raise an error
+                    if not model_cls_or_none:
+                        raise InvalidBenchmark(
+                            f"The supertask {supertask!r} does not correspond to a "
+                            "Hugging Face AutoModel type (such as "
+                            "`AutoModelForSequenceClassification`)."
                         )
-                    except ImportError as e:
-                        if "flash attention" in str(e).lower():
-                            raise InvalidBenchmark(
-                                "The model you are trying to load requires Flash "
-                                "Attention. To use Flash Attention, please install "
-                                "the `flash-attn` package, which can be done by "
-                                "running `pip install -U wheel && "
-                                "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install "
-                                "flash-attn --no-build-isolation`."
+
+                    # If the model is a DeBERTaV2 model then we ensure that
+                    # `pooler_hidden_size` is the same size as `hidden_size`
+                    if config.model_type == "deberta-v2":
+                        config.pooler_hidden_size = config.hidden_size
+
+                    with warnings.catch_warnings(), HiddenPrints():
+                        warnings.filterwarnings("ignore", category=UserWarning)
+                        warnings.filterwarnings("ignore", category=FutureWarning)
+                        try:
+                            model_or_tuple = model_cls_or_none.from_pretrained(
+                                model_config.model_id, **model_kwargs
                             )
-                    except (KeyError, RuntimeError) as e:
-                        if not model_kwargs["ignore_mismatched_sizes"]:
-                            logger.debug(
-                                f"{type(e).__name__} occurred during the loading "
-                                f"of the {model_id!r} model. Retrying with "
-                                "`ignore_mismatched_sizes` set to True."
+                        except ImportError as e:
+                            if "flash attention" in str(e).lower():
+                                raise InvalidBenchmark(
+                                    "The model you are trying to load requires Flash "
+                                    "Attention. To use Flash Attention, please install "
+                                    "the `flash-attn` package, which can be done by "
+                                    "running `pip install -U wheel && "
+                                    "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install "
+                                    "flash-attn --no-build-isolation`."
+                                )
+                        except (KeyError, RuntimeError) as e:
+                            if not model_kwargs["ignore_mismatched_sizes"]:
+                                logger.debug(
+                                    f"{type(e).__name__} occurred during the loading "
+                                    f"of the {model_id!r} model. Retrying with "
+                                    "`ignore_mismatched_sizes` set to True."
+                                )
+                                model_kwargs["ignore_mismatched_sizes"] = True
+                                continue
+                            else:
+                                raise InvalidBenchmark(str(e))
+                        except (TimeoutError, RequestError):
+                            logger.info(
+                                f"Couldn't load the model {model_id!r}. Retrying."
                             )
-                            model_kwargs["ignore_mismatched_sizes"] = True
+                            sleep(5)
                             continue
-                        else:
-                            raise InvalidBenchmark(str(e))
-                    except (TimeoutError, RequestError):
-                        logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
-                        sleep(5)
+                        except ValueError as e:
+                            if "already quantized" in str(e):
+                                model_kwargs["quantization_config"] = None
+                                model_or_tuple = model_cls_or_none.from_pretrained(
+                                    model_config.model_id, **model_kwargs
+                                )
+                            else:
+                                raise e
+
+                    if isinstance(model_or_tuple, tuple):
+                        model = model_or_tuple[0]
+                    else:
+                        model = model_or_tuple
+                    break
+
+                except (OSError, ValueError) as e:
+                    # If `from_flax` is False but only Flax models are available then
+                    # try again with `from_flax` set to True
+                    if (
+                        not from_flax
+                        and "Use `from_flax=True` to load this model" in str(e)
+                    ):
+                        from_flax = True
                         continue
-                if isinstance(model_or_tuple, tuple):
-                    model = model_or_tuple[0]
-                else:
-                    model = model_or_tuple
-                break
 
-            except (OSError, ValueError) as e:
-                # If `from_flax` is False but only Flax models are available then try
-                # again with `from_flax` set to True
-                if not from_flax and "Use `from_flax=True` to load this model" in str(
-                    e
-                ):
-                    from_flax = True
-                    continue
-
-                self._handle_loading_exception(exception=e, model_id=model_id)
+                    self._handle_loading_exception(exception=e, model_id=model_id)
 
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
@@ -336,6 +372,9 @@ class HFModelSetup:
             warnings.filterwarnings("ignore", category=UserWarning)
             warnings.filterwarnings("ignore", category=FutureWarning)
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
+
+        if use_vllm:
+            model.tokenizer = tokenizer
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,

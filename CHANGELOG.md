@@ -41,6 +41,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   dataset). This is especially useful with paid models like OpenAI models. The value of
   this flag is stored in the benchmark results, so this will be visible on
   leaderboards.
+- Now uses vLLM as the underlying engine for few-shot evaluating generative models,
+  which drastically improves the evaluation speed, as well as requiring less GPU
+  memory.
 
 ### Changed
 - Now compatible with`transformers >= 4.36.2`, and this is required now as they have
@@ -52,6 +55,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   previously.
 - Now doesn't force ASCII characters in the NER task for generative models, making the
   target JSON dictionary more consistent with the input text.
+- If a model is stored in the Safetensors format on Hugging Face Hub, then we read out
+  the number of parameters directly from those files. This results in more accurate
+  parameter counts as opposed to loading in the model in 4-bit and counting manually.
 - Samples with excessively short or long texts have been removed.
 - Adjusted number of few-shot examples in datasets to ensure that the resulting prompt
   is at most ~3000 tokens long.
@@ -81,6 +87,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   generated model output. Instead of taking the output as-is, we are now extracting the
   first dictionary (enclosed in curly brackets), as well as replacing all single
   apostrophes (') with double ones (").
+- If a model is already pre-quantized then we will not attempt to quantize it as well.
 
 
 ## [v8.2.1] - 2023-12-20
