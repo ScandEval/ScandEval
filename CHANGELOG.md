@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Samples with excessively short or long texts have been removed.
 - Adjusted number of few-shot examples in datasets to ensure that the resulting prompt
   is at most ~3000 tokens long.
+- When timeout errors occur when loading a model then we will try again at most 5 times
+  now, where previously we would attempt to re-load it indefinitely.
 
 ### Fixed
 - Removed `text2text-generation` temporarily from the tags defining generative models,
@@ -83,6 +85,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the model's maximum context length was really small (128). This has been fixed now.
 - Now sets `ignore_mismatched_sizes` when loading models if the model cannot be loaded
   otherwise. This previously caused some issues when loading certain models.
+- Fixed bug where some encoder models did not work properly when loaded in with FP16
+  mixed precision due to overflow. We now load in models with BF16 as these have a
+  larger range, but fall back to FP16 if BF16 is not available. If both lead to
+  overflow then we attempt again with full FP32, and lastly throw an informative error
+  and block evaluation if the overflow persists.
 - When few-shot evaluating models on NER tasks, we are now more lenient towards the
   generated model output. Instead of taking the output as-is, we are now extracting the
   first dictionary (enclosed in curly brackets), as well as replacing all single

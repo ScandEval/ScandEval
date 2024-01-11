@@ -21,7 +21,12 @@ from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import GENERATIVE_MODEL_TASKS, model_is_generative
+from .types import Labels, Predictions
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    model_is_generative,
+    raise_if_model_output_contains_nan_values,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -63,7 +68,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
     def _compute_metrics(
         self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
+        model_outputs_and_labels: tuple[Predictions, Labels],
         id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
@@ -80,6 +85,8 @@ class NamedEntityRecognition(BenchmarkDataset):
             values.
         """
         model_outputs, labels = model_outputs_and_labels
+
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
 
         predictions: list[list[str]]
         if not isinstance(model_outputs[0][0], str):

@@ -1,5 +1,6 @@
 """A wrapper for vLLM models."""
 
+import logging
 import warnings
 from pathlib import Path
 from types import MethodType
@@ -13,6 +14,8 @@ from vllm.model_executor.parallel_utils.parallel_state import destroy_model_para
 
 from .config import ModelConfig
 from .utils import HiddenPrints, clear_memory
+
+logger = logging.getLogger(__package__)
 
 
 class VLLMModel:
@@ -50,10 +53,18 @@ class VLLMModel:
             destroy_model_parallel()
             clear_memory()
 
+            max_model_len = 10_000
+            if hasattr(hf_model_config, "max_position_embeddings"):
+                max_model_len = min(10_000, hf_model_config.max_position_embeddings)
+            if hasattr(hf_model_config, "model_max_length"):
+                max_model_len = min(10_000, hf_model_config.model_max_length)
+            if hasattr(hf_model_config, "n_positions"):
+                max_model_len = min(10_000, hf_model_config.n_positions)
+
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
-                max_model_len=10_000,
+                max_model_len=max_model_len,
                 download_dir=str(model_cache_dir),
                 trust_remote_code=True,
             )
@@ -126,6 +137,15 @@ class VLLMModel:
         prompts = self.tokenizer.batch_decode(
             sequences=inputs, skip_special_tokens=True
         )
+
+        # If any of the prompts are empty then we need to replace them with a BOS token
+        # so that the vLLM model can generate from them
+        if any(len(prompt) == 0 for prompt in prompts):
+            logger.debug("Found empty prompts, replacing with BOS token.")
+        prompts = [
+            prompt if len(prompt) > 0 else self.tokenizer.bos_token
+            for prompt in prompts
+        ]
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(prompts[0]) == 1

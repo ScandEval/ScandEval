@@ -13,6 +13,7 @@ from transformers.utils import ModelOutput
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
+from .utils import raise_if_model_output_contains_nan_values
 
 logger = logging.getLogger(__package__)
 
@@ -95,6 +96,8 @@ class TextToText(BenchmarkDataset):
         """
         model_outputs, labels = model_outputs_and_labels
 
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
+
         model_output_dtype = np.asarray(model_outputs).dtype
         output_is_prob = model_output_dtype in [np.float16, np.float32, np.float64]
         if output_is_prob:
@@ -118,6 +121,7 @@ class TextToText(BenchmarkDataset):
                 if isinstance(scores, list):
                     scores = sum(scores) / len(scores)
                 results[cfg.name] = scores
+
         return results
 
     def _extract_few_shot_examples(

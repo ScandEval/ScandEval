@@ -21,7 +21,12 @@ from urllib3.exceptions import RequestError
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
+from ..exceptions import (
+    FlashAttentionNotInstalled,
+    HuggingFaceHubDown,
+    InvalidBenchmark,
+    NoInternetConnection,
+)
 from ..languages import get_all_languages
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import (
@@ -228,6 +233,8 @@ class HFModelSetup:
             else None
         )
 
+        # We hardcode that we're using flash attention for models with "mistral" in
+        # their name, as this is currently one of the only ones that support it
         use_flash_attention = (
             self.benchmark_config.use_flash_attention or "mistral" in model_id.lower()
         )
@@ -254,15 +261,12 @@ class HFModelSetup:
                     model_cache_dir=model_config.model_cache_dir,
                 )
             except ValueError as e:
-                oom_error = (
-                    "larger than the maximum number of tokens that can be stored "
-                    "in KV cache"
-                )
-                use_vllm = oom_error in str(e)
+                use_vllm = False
                 logger.info(
                     "Failed to benchmark with vLLM - trying with the Hugging Face "
                     "implementation instead."
                 )
+                logger.debug(f"The error was: {e!r}")
 
         if not use_vllm:
             model_kwargs = dict(
@@ -277,6 +281,10 @@ class HFModelSetup:
                 torch_dtype=self._get_torch_dtype(config=config),
                 use_flash_attention_2=use_flash_attention,
             )
+
+            # These are used when a timeout occurs
+            attempts_left = 5
+
             while True:
                 try:
                     # Get the model class associated with the supertask
@@ -313,14 +321,7 @@ class HFModelSetup:
                             )
                         except ImportError as e:
                             if "flash attention" in str(e).lower():
-                                raise InvalidBenchmark(
-                                    "The model you are trying to load requires Flash "
-                                    "Attention. To use Flash Attention, please install "
-                                    "the `flash-attn` package, which can be done by "
-                                    "running `pip install -U wheel && "
-                                    "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install "
-                                    "flash-attn --no-build-isolation`."
-                                )
+                                raise FlashAttentionNotInstalled()
                         except (KeyError, RuntimeError) as e:
                             if not model_kwargs["ignore_mismatched_sizes"]:
                                 logger.debug(
@@ -333,6 +334,11 @@ class HFModelSetup:
                             else:
                                 raise InvalidBenchmark(str(e))
                         except (TimeoutError, RequestError):
+                            attempts_left -= 1
+                            if attempts_left == 0:
+                                raise InvalidBenchmark(
+                                    "The model could not be loaded after 5 attempts."
+                                )
                             logger.info(
                                 f"Couldn't load the model {model_id!r}. Retrying."
                             )
