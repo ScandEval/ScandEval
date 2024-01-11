@@ -260,12 +260,13 @@ class HFModelSetup:
                     hf_model_config=config,
                     model_cache_dir=model_config.model_cache_dir,
                 )
-            except ValueError:
+            except ValueError as e:
                 use_vllm = False
                 logger.info(
                     "Failed to benchmark with vLLM - trying with the Hugging Face "
                     "implementation instead."
                 )
+                logger.debug(f"The error was: {e!r}")
 
         if not use_vllm:
             model_kwargs = dict(
