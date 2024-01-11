@@ -101,8 +101,7 @@ def finetune(
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
     using_cuda = benchmark_config.device == torch.device("cuda")
-    bf16_available = torch.cuda.is_bf16_supported()
-    if using_cuda and bf16_available:
+    if using_cuda and torch.cuda.is_bf16_supported():
         dtype = DataType.BF16
     elif using_cuda:
         dtype = DataType.FP16
