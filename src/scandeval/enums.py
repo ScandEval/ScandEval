@@ -65,3 +65,20 @@ class ModelType(AutoStrEnum):
     HF = auto()
     LOCAL = auto()
     OPENAI = auto()
+
+
+class DataType(AutoStrEnum):
+    """The data type of the model weights.
+
+    Attributes:
+        FP32:
+            32-bit floating point.
+        FP16:
+            16-bit floating point.
+        BF16:
+            16-bit bfloat.
+    """
+
+    FP32 = auto()
+    FP16 = auto()
+    BF16 = auto()

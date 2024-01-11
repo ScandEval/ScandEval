@@ -22,6 +22,8 @@ from transformers import (
 )
 from transformers.trainer import OptimizerNames
 
+from scandeval.enums import DataType
+
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark, NaNValueInModelOutput
@@ -101,8 +103,12 @@ def finetune(
 
     using_cuda = benchmark_config.device == torch.device("cuda")
     bf16_available = torch.cuda.is_bf16_supported()
-    bf16 = using_cuda and bf16_available
-    fp16 = using_cuda and not bf16_available
+    if using_cuda and bf16_available:
+        dtype = DataType.BF16
+    elif using_cuda:
+        dtype = DataType.FP16
+    else:
+        dtype = DataType.FP32
 
     bs: int = benchmark_config.batch_size
     for idx in itr:
@@ -138,9 +144,8 @@ def finetune(
                     benchmark_config=benchmark_config,
                     model_config=model_config,
                     iteration_idx=idx,
+                    dtype=dtype,
                     batch_size=bs,
-                    fp16=fp16,
-                    bf16=bf16,
                 )
 
                 itr_scores = finetune_single_iteration(
@@ -175,23 +180,14 @@ def finetune(
 
             # NaN values can appear in the model output when using mixed precision, as
             # the hidden states get overflowed. In this case we try to disable mixed
-            # precision bit by bit and try again.
+            # precision and try again.
             except NaNValueInModelOutput:
-                if bf16:
-                    bf16 = False
-                    fp16 = True
+                if dtype != DataType.FP32:
+                    dtype = DataType.FP32
                     model_already_initialized = False
                     logger.debug(
-                        "NaN value detected in model outputs while using bf16 mixed "
-                        "precision. Retrying with fp16 mixed precision."
-                    )
-                elif fp16:
-                    bf16 = False
-                    fp16 = False
-                    model_already_initialized = False
-                    logger.debug(
-                        "NaN value detected in model outputs while using fp16 mixed "
-                        "precision. Retrying with fp32."
+                        "NaN value detected in model outputs while using mixed "
+                        "precision. Retrying with full fp32 precision."
                     )
                 else:
                     raise InvalidBenchmark(
@@ -373,8 +369,7 @@ def get_training_args(
     benchmark_config: BenchmarkConfig,
     model_config: ModelConfig,
     iteration_idx: int,
-    fp16: bool,
-    bf16: bool,
+    dtype: DataType,
     batch_size: int | None = None,
 ) -> TrainingArguments:
     """Get the training arguments for the current iteration.
@@ -387,10 +382,8 @@ def get_training_args(
         iteration_idx:
             The index of the current iteration. This is only used to generate a
             unique random seed for the current iteration.
-        fp16:
-            Whether to use fp16 mixed precision training for the current iteration.
-        bf16:
-            Whether to use bf16 mixed precision training for the current iteration.
+        dtype:
+            The data type to use for the model weights.
         batch_size:
             The batch size to use for the current iteration, or None if the batch size
             in the benchmark config should be used.
@@ -398,8 +391,6 @@ def get_training_args(
     Returns:
         The training arguments for the current iteration.
     """
-    assert not (fp16 and bf16), "Cannot use both fp16 and bf16 mixed precision training"
-
     # Set the logging strategy
     if benchmark_config.verbose:
         logging_strategy = IntervalStrategy.STEPS
@@ -439,8 +430,8 @@ def get_training_args(
             load_best_model_at_end=True,
             optim=optimizer,
             seed=seed,
-            fp16=fp16,
-            bf16=bf16,
+            fp16=dtype == DataType.FP16,
+            bf16=dtype == DataType.BF16,
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )
