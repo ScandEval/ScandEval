@@ -21,7 +21,12 @@ from urllib3.exceptions import RequestError
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import HuggingFaceHubDown, InvalidBenchmark, NoInternetConnection
+from ..exceptions import (
+    FlashAttentionNotInstalled,
+    HuggingFaceHubDown,
+    InvalidBenchmark,
+    NoInternetConnection,
+)
 from ..languages import get_all_languages
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import (
@@ -228,6 +233,8 @@ class HFModelSetup:
             else None
         )
 
+        # We hardcode that we're using flash attention for models with "mistral" in
+        # their name, as this is currently one of the only ones that support it
         use_flash_attention = (
             self.benchmark_config.use_flash_attention or "mistral" in model_id.lower()
         )
@@ -313,14 +320,7 @@ class HFModelSetup:
                             )
                         except ImportError as e:
                             if "flash attention" in str(e).lower():
-                                raise InvalidBenchmark(
-                                    "The model you are trying to load requires Flash "
-                                    "Attention. To use Flash Attention, please install "
-                                    "the `flash-attn` package, which can be done by "
-                                    "running `pip install -U wheel && "
-                                    "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install "
-                                    "flash-attn --no-build-isolation`."
-                                )
+                                raise FlashAttentionNotInstalled()
                         except (KeyError, RuntimeError) as e:
                             if not model_kwargs["ignore_mismatched_sizes"]:
                                 logger.debug(
