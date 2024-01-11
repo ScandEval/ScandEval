@@ -284,6 +284,10 @@ class HFModelSetup:
                 torch_dtype=self._get_torch_dtype(config=config),
                 use_flash_attention_2=use_flash_attention,
             )
+
+            # These are used when a timeout occurs
+            attempts_left = 5
+
             while True:
                 try:
                     # Get the model class associated with the supertask
@@ -333,6 +337,11 @@ class HFModelSetup:
                             else:
                                 raise InvalidBenchmark(str(e))
                         except (TimeoutError, RequestError):
+                            attempts_left -= 1
+                            if attempts_left == 0:
+                                raise InvalidBenchmark(
+                                    "The model could not be loaded after 5 attempts."
+                                )
                             logger.info(
                                 f"Couldn't load the model {model_id!r}. Retrying."
                             )
