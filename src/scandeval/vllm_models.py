@@ -1,5 +1,6 @@
 """A wrapper for vLLM models."""
 
+import logging
 import warnings
 from pathlib import Path
 from types import MethodType
@@ -13,6 +14,8 @@ from vllm.model_executor.parallel_utils.parallel_state import destroy_model_para
 
 from .config import ModelConfig
 from .utils import HiddenPrints, clear_memory
+
+logger = logging.getLogger(__package__)
 
 
 class VLLMModel:
@@ -134,6 +137,15 @@ class VLLMModel:
         prompts = self.tokenizer.batch_decode(
             sequences=inputs, skip_special_tokens=True
         )
+
+        # If any of the prompts are empty then we need to replace them with a BOS token
+        # so that the vLLM model can generate from them
+        if any(len(prompt) == 0 for prompt in prompts):
+            logger.debug("Found empty prompts, replacing with BOS token.")
+        prompts = [
+            prompt if len(prompt) > 0 else self.tokenizer.bos_token
+            for prompt in prompts
+        ]
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(prompts[0]) == 1
