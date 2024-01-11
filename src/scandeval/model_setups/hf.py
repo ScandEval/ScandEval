@@ -260,12 +260,8 @@ class HFModelSetup:
                     hf_model_config=config,
                     model_cache_dir=model_config.model_cache_dir,
                 )
-            except ValueError as e:
-                oom_error = (
-                    "larger than the maximum number of tokens that can be stored "
-                    "in KV cache"
-                )
-                use_vllm = oom_error in str(e)
+            except ValueError:
+                use_vllm = False
                 logger.info(
                     "Failed to benchmark with vLLM - trying with the Hugging Face "
                     "implementation instead."

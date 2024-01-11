@@ -50,10 +50,18 @@ class VLLMModel:
             destroy_model_parallel()
             clear_memory()
 
+            max_model_len = 10_000
+            if hasattr(hf_model_config, "max_position_embeddings"):
+                max_model_len = min(10_000, hf_model_config.max_position_embeddings)
+            if hasattr(hf_model_config, "model_max_length"):
+                max_model_len = min(10_000, hf_model_config.model_max_length)
+            if hasattr(hf_model_config, "n_positions"):
+                max_model_len = min(10_000, hf_model_config.n_positions)
+
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
-                max_model_len=10_000,
+                max_model_len=max_model_len,
                 download_dir=str(model_cache_dir),
                 trust_remote_code=True,
             )
