@@ -164,12 +164,12 @@ class SequenceClassification(BenchmarkDataset):
             id2label.index(prompt_label_to_label_mapping[pred.lower()])
             if isinstance(pred, str)
             else pred
-            for pred in np.asarray(predictions)
+            for pred in predictions
         ]
 
-        labels_list = [
+        labels = [
             id2label.index(label.lower()) if isinstance(label, str) else label
-            for label in np.asarray(labels)
+            for label in labels
         ]
 
         results: dict[str, float] = dict()
@@ -177,7 +177,7 @@ class SequenceClassification(BenchmarkDataset):
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
                 predictions=predictions,
-                references=labels_list,
+                references=labels,
                 **cfg.compute_kwargs,
             )
 
