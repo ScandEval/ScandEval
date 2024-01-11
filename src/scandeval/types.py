@@ -1,12 +1,12 @@
 """Types used throughout the project."""
 
-from typing import Any, Type, TypeGuard
+from typing import Any, TypeGuard
 
 import numpy as np
 
 ScoreDict = dict[str, dict[str, float] | dict[str, list[dict[str, float]]]]
-Predictions = Type[np.ndarray]
-Labels = Type[np.ndarray]
+Predictions = np.ndarray | list[str]
+Labels = np.ndarray | list[str]
 
 
 def is_list_of_int(x: Any) -> TypeGuard[list[int]]:

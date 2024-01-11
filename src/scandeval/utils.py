@@ -559,5 +559,5 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
         NaNValueInModelOutput:
             If the model output contains NaN values.
     """
-    if model_output.dtype == np.float_ and np.isnan(np.asarray(model_output)).any():
+    if any(np.isnan(element).any() for element in model_output):
         raise NaNValueInModelOutput()

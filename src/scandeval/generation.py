@@ -8,7 +8,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable
 
-import numpy as np
 import torch
 from datasets import Dataset
 from torch.utils.data import DataLoader
@@ -313,7 +312,7 @@ def generate_single_iteration(
         )
 
     itr_scores: dict[str, float] = compute_metrics(
-        model_outputs_and_labels=(np.asarray(all_preds), np.asarray(ground_truth)),
+        model_outputs_and_labels=(all_preds, ground_truth),
         id2label=dataset_config.id2label,
     )
 
