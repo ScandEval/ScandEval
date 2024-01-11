@@ -157,6 +157,7 @@ def block_terminal_output():
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
     logging.getLogger("vllm.engine.llm_engine").setLevel(logging.ERROR)
+    logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.ERROR)
 
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the ERROR level."""
@@ -558,5 +559,5 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
         NaNValueInModelOutput:
             If the model output contains NaN values.
     """
-    if np.isnan(model_output).any():
+    if model_output.dtype == np.float_ and np.isnan(np.asarray(model_output)).any():
         raise NaNValueInModelOutput()
