@@ -60,11 +60,10 @@ class ModelCache:
         self.model_cache_dir = model_cache_dir
         self.model_cache_dir.mkdir(parents=True, exist_ok=True)
         self.cache_path = self.model_cache_dir / cache_name
-        self.cache: dict[str, GenerativeModelOutput] = self.load()
         self.max_generated_tokens = max_generated_tokens
 
-    def load(self) -> dict[str, GenerativeModelOutput]:
-        """Load and return the model output cache."""
+    def load(self) -> None:
+        """Load the model output cache."""
         if not self.cache_path.exists():
             with self.cache_path.open("w") as f:
                 json.dump(dict(), f)
@@ -75,7 +74,8 @@ class ModelCache:
         cache: dict[str, GenerativeModelOutput] = dict()
         for key in json_cache:
             cache[key] = GenerativeModelOutput(**json_cache[key])
-        return cache
+
+        self.cache = cache
 
     def save(self) -> None:
         """Save the model output cache to disk."""

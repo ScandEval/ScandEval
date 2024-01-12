@@ -80,6 +80,21 @@ def generate(
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
+    # Initialise the model output cache. If we are testing then we save the model
+    # outputs to a different cache and ensure that that cache is deleted before the
+    # next test, to ensure that the tests are independent of each other
+    model_cache_dir = Path(model_config.model_cache_dir)
+    if not hasattr(sys, "_called_from_test"):
+        cache_name = f"{dataset_config.name}-model-outputs.json"
+    else:
+        cache_name = f"{dataset_config.name}-model-outputs-test.json"
+        (model_cache_dir / cache_name).unlink(missing_ok=True)
+    cache = ModelCache(
+        model_cache_dir=model_cache_dir,
+        cache_name=cache_name,
+        max_generated_tokens=dataset_config.max_generated_tokens,
+    )
+
     for idx in itr:
         prepared_test = prepared_tests[idx]
         assert isinstance(prepared_test, Dataset)
@@ -95,7 +110,7 @@ def generate(
                     extract_labels_fn=extract_labels_fn,
                     benchmark_config=benchmark_config,
                     dataset_config=dataset_config,
-                    model_cache_dir=Path(model_config.model_cache_dir),
+                    cache=cache,
                 )
                 break
             except Exception as e:
@@ -128,7 +143,7 @@ def generate(
                 extract_labels_fn=extract_labels_fn,
                 benchmark_config=benchmark_config,
                 dataset_config=dataset_config,
-                model_cache_dir=Path(model_config.model_cache_dir),
+                cache=cache,
             )
             logger.debug(f"Train scores for iteration {idx}: {train_scores}")
             scores["train"].append(train_scores)
@@ -146,7 +161,7 @@ def generate_single_iteration(
     extract_labels_fn: Callable[..., list[Any]],
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
-    model_cache_dir: Path,
+    cache: ModelCache,
 ) -> dict[str, float]:
     """Evaluate a model on a dataset in a single iteration through generation.
 
@@ -167,26 +182,13 @@ def generate_single_iteration(
             The configuration of the dataset.
         benchmark_config:
             The configuration of the benchmark.
-        model_cache_dir:
-            The directory to store the model output cache in.
+        cache:
+            The model output cache.
 
     Returns:
         A list of dictionaries containing the scores for each metric.
     """
-    # If we are testing then we save the model outputs to a different cache and ensure
-    # that that cache is deleted before the next test, to ensure that the tests are
-    # independent of each other
-    if not hasattr(sys, "_called_from_test"):
-        cache_name = f"{dataset_config.name}-model-outputs.json"
-    else:
-        cache_name = f"{dataset_config.name}-model-outputs-test.json"
-        (model_cache_dir / cache_name).unlink(missing_ok=True)
-
-    cache = ModelCache(
-        model_cache_dir=model_cache_dir,
-        cache_name=cache_name,
-        max_generated_tokens=dataset_config.max_generated_tokens,
-    )
+    cache.load()
 
     # Split up the prepared dataset into a cached and non-cached part
     cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
