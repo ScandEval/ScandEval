@@ -186,9 +186,9 @@ def generate_single_iteration(
     # that that cache is deleted before the next test, to ensure that the tests are
     # independent of each other
     if not hasattr(sys, "_called_from_test"):
-        cache_name = "model_outputs.json"
+        cache_name = f"{dataset_config.name}-model-outputs.json"
     else:
-        cache_name = "model_outputs_test.json"
+        cache_name = f"{dataset_config.name}-model-outputs-test.json"
         (model_cache_dir / cache_name).unlink(missing_ok=True)
 
     cache = ModelCache(
