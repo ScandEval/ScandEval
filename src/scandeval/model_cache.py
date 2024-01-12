@@ -222,9 +222,18 @@ def load_cached_model_outputs(
     Returns:
         The model output containing the cached sequences.
     """
+    # If we are benchmarking a generative model then we want to
+    # encode and decode all the texts in the test dataset, to
+    # ensure that the model output cache has the correct input
+    # prompts in it
+    cached_prompts = tokenizer.decode(
+        token_ids=[example["input_ids"] for example in cached_dataset],
+        skip_special_tokens=True,
+    )
+
     # Load the raw model outputs from the cache
     cached_model_outputs: list[GenerativeModelOutput] = [
-        cache[example["text"]] for example in cached_dataset
+        cache[prompt] for prompt in cached_prompts
     ]
 
     # Tokenize the cached sequences

@@ -2,7 +2,6 @@
 
 
 import logging
-import multiprocessing as mp
 import sys
 from abc import ABC, abstractmethod
 from functools import partial
@@ -464,23 +463,6 @@ class BenchmarkDataset(ABC):
                         )
                         test = test.map(
                             few_shot_fn, batched=True, load_from_cache_file=False
-                        )
-
-                        # If we are benchmarking a generative model then we want to
-                        # encode and decode all the texts in the test dataset, to
-                        # ensure that the model output cache has the correct input
-                        # prompts in it
-                        test = test.map(
-                            lambda example: dict(
-                                text=tokenizer.decode(
-                                    tokenizer(
-                                        text=example["text"],
-                                        truncation=True,
-                                    ).input_ids,
-                                    skip_special_tokens=True,
-                                )
-                            ),
-                            num_proc=mp.cpu_count(),
                         )
 
                     prepared_test = self._preprocess_data(
