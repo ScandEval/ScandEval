@@ -112,6 +112,7 @@ class BenchmarkDataset(ABC):
         # weights
         rng = enforce_reproducibility(framework=model_config.framework)
 
+        logger.info("Loading model and tokenizer...")
         tokenizer, model = load_model(
             model_config=model_config,
             dataset_config=self.dataset_config,
