@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
-- Now only stores the log probabilities of
-  generated tokens when the generation length is less than 8 tokens, rather than less
-  than 50. ow keeps separate caches for each (model, dataset) combination, where
-  it previously had a single cache for each model.
+- Now only stores the top-10 log probabilities of generated tokens when the generation
+  length is less than 8 tokens. Also now keeps separate caches for each (model,
+  dataset) combination, where it previously had a single cache for each model. Both of
+  these help reduce the memory usage of the model output cache.
 - Optimised cache saving/loading a bit, making the waiting time in between iterations
   slightly shorter.
+- Removed indents in model output cache JSON files, to reduce disk space used.
 
 ### Fixed
 - Removed some vLLM logging.

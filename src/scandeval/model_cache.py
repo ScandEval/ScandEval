@@ -84,7 +84,7 @@ class ModelCache:
             dumpable_cache[key] = asdict(value)
 
         with self.cache_path.open("w") as f:
-            json.dump(dumpable_cache, f, indent=4)
+            json.dump(dumpable_cache, f)
 
     def __getitem__(self, key: str) -> GenerativeModelOutput:
         """Get an item from the cache.
@@ -142,7 +142,7 @@ class ModelCache:
                 ],
                 dim=1,
             )
-            top_scores = torch.topk(scores, k=100)
+            top_scores = torch.topk(scores, k=10)
 
         # Store the generated sequences in the cache, one by one
         # TODO: This is a bit slow, should be optimized
