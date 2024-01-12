@@ -6,6 +6,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+import pandas as pd
 import torch
 from datasets import Dataset
 from transformers.modeling_utils import ModelOutput
@@ -183,13 +184,12 @@ def split_dataset_into_cached_and_non_cached(
         The cached and non-cached parts of the dataset.
     """
     # Get the sample indices of the non-cached examples, which are unique with respect
-    # to the "text" column
-    unique_non_cached_ids: set[int] = set()
-    for example_idx, example in enumerate(dataset):
-        cached_texts = cache.cached_texts()
-        cached_texts += dataset.select(unique_non_cached_ids)["text"]
-        if example["text"] not in cached_texts:
-            unique_non_cached_ids.add(example_idx)
+    # to the "text" column.
+    dataset_texts = pd.Series(dataset["text"])
+    dataset_texts.drop_duplicates(inplace=True)
+    unique_non_cached_ids = set(
+        dataset_texts[~dataset_texts.isin(cache.cached_texts())].index.tolist()
+    )
 
     # The cached examples are the ones that are not in the non-cached examples. This
     # means that if the dataset has duplicates, only a single copy of the duplicate
