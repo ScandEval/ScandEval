@@ -1,6 +1,5 @@
 """Functions related to text generation of models."""
 
-import json
 import logging
 import sys
 import warnings
@@ -80,14 +79,6 @@ def generate(
         iteration.
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
-
-    # Create model output cache
-    model_cache_dir = Path(model_config.model_cache_dir)
-    model_cache_dir.mkdir(parents=True, exist_ok=True)
-    cache_path = model_cache_dir / "model_outputs.json"
-    if not cache_path.exists():
-        with cache_path.open("w") as f:
-            json.dump(dict(), f)
 
     for idx in itr:
         prepared_test = prepared_tests[idx]
