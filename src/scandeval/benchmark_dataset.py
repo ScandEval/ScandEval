@@ -2,6 +2,7 @@
 
 
 import logging
+import multiprocessing as mp
 import sys
 from abc import ABC, abstractmethod
 from functools import partial
@@ -119,24 +120,32 @@ class BenchmarkDataset(ABC):
             benchmark_config=self.benchmark_config,
         )
 
+        benchmarking_generative_model = model_is_generative(model=model)
+
         # This happens when a local model is used, as we cannot fetch the model
         # metadata. Note that this is only the case if the model type is not any of the
         # ones hardcoded in `local.py`
         if model_config.task == "unknown":
-            if model_is_generative(model=model):
+            if benchmarking_generative_model:
                 model_config.task = GENERATIVE_MODEL_TASKS[0]
             else:
                 model_config.task = "fill-mask"
 
         metadata_dict = self._get_metadata(
-            model_id=model_id, model=model, tokenizer=tokenizer
+            model_id=model_id,
+            model=model,
+            tokenizer=tokenizer,
+            benchmarking_generative_model=benchmarking_generative_model,
         )
 
         # Set variable with number of iterations
         num_iter = 2 if hasattr(sys, "_called_from_test") else 10
 
         if self.dataset_config.task != SPEED:
-            train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
+            train, val, tests = self._load_data(
+                num_iter=num_iter,
+                rng=rng,
+            )
             prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
                 train=train,
                 val=val,
@@ -144,7 +153,7 @@ class BenchmarkDataset(ABC):
                 model_config=model_config,
                 hf_model_config=model.config,
                 tokenizer=tokenizer,
-                generative_model=model_is_generative(model=model),
+                benchmarking_generative_model=benchmarking_generative_model,
             )
 
         # Set up progress bar
@@ -165,7 +174,7 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-        elif model_is_generative(model=model):
+        elif benchmarking_generative_model:
             scores = generate(
                 itr=itr,
                 prepared_train=prepared_train,
@@ -214,6 +223,7 @@ class BenchmarkDataset(ABC):
         model_id: str,
         model: PreTrainedModel | GenerativeModel,
         tokenizer: Tokenizer,
+        benchmarking_generative_model: bool,
     ) -> dict[str, int]:
         """Get metadata about the model.
 
@@ -224,6 +234,8 @@ class BenchmarkDataset(ABC):
                 The model to get metadata about.
             tokenizer:
                 The tokenizer to get metadata about.
+            benchmarking_generative_model:
+                Whether the model is a generative model.
 
         Returns:
             A dictionary containing metadata about the model, with the keys being the
@@ -263,7 +275,7 @@ class BenchmarkDataset(ABC):
         # length from the maximum length to allow it to keep generating. But for the
         # model metadata we want to know the maximum length, so we add the generation
         # length back on here
-        if max_seq_length >= 0 and model_is_generative(model=model):
+        if max_seq_length >= 0 and benchmarking_generative_model:
             max_seq_length += self.dataset_config.max_generated_tokens
 
             # If the model is an OpenAI chat model then we add on 7 extra tokens, as
@@ -284,7 +296,7 @@ class BenchmarkDataset(ABC):
             num_model_parameters=num_params,
             max_sequence_length=max_seq_length,
             vocabulary_size=vocab_size,
-            few_shot=model_is_generative(model=model),
+            few_shot=benchmarking_generative_model,
             validation_split=self.benchmark_config.only_validation_split,
         )
 
@@ -307,9 +319,7 @@ class BenchmarkDataset(ABC):
         return metadata_dict
 
     def _load_data(
-        self,
-        num_iter: int,
-        rng: np.random.Generator,
+        self, num_iter: int, rng: np.random.Generator
     ) -> tuple[Dataset, Dataset, list[Dataset]]:
         """Load the raw bootstrapped datasets.
 
@@ -379,7 +389,7 @@ class BenchmarkDataset(ABC):
         model_config: ModelConfig,
         hf_model_config: PretrainedConfig,
         tokenizer: Tokenizer,
-        generative_model: bool,
+        benchmarking_generative_model: bool,
     ) -> tuple[Dataset, Dataset, list[Dataset]]:
         """Load the data and prepare it for training.
 
@@ -396,7 +406,7 @@ class BenchmarkDataset(ABC):
                 The Hugging Face model configuration.
             tokenizer:
                 The tokenizer.
-            generative_model:
+            benchmarking_generative_model:
                 Whether the model is a generative model.
 
         Returns:
@@ -407,7 +417,7 @@ class BenchmarkDataset(ABC):
             hf_model_config=hf_model_config,
             model_config=model_config,
             tokenizer=tokenizer,
-            generative_model=generative_model,
+            generative_model=benchmarking_generative_model,
         )
 
         # Prepare the train and validation datasets
@@ -416,7 +426,7 @@ class BenchmarkDataset(ABC):
             # there's no need to prepare the train split
             try:
                 prepared_train = train
-                if not generative_model:
+                if not benchmarking_generative_model:
                     prepared_train = self._preprocess_data(
                         train, split="train", **preprocess_params
                     )
@@ -430,7 +440,7 @@ class BenchmarkDataset(ABC):
             # there's no need to prepare the validation split
             try:
                 prepared_val = val
-                if not generative_model:
+                if not benchmarking_generative_model:
                     prepared_val = self._preprocess_data(
                         val, split="val", **preprocess_params
                     )
@@ -443,7 +453,7 @@ class BenchmarkDataset(ABC):
             try:
                 prepared_tests: list[Dataset] = list()
                 for itr_idx, test in enumerate(tests):
-                    if generative_model:
+                    if benchmarking_generative_model:
                         itr_seed = 4242 + itr_idx
                         few_shot_examples = self._extract_few_shot_examples(
                             train_dataset=train, random_seed=itr_seed
@@ -455,6 +465,24 @@ class BenchmarkDataset(ABC):
                         test = test.map(
                             few_shot_fn, batched=True, load_from_cache_file=False
                         )
+
+                        # If we are benchmarking a generative model then we want to
+                        # encode and decode all the texts in the test dataset, to
+                        # ensure that the model output cache has the correct input
+                        # prompts in it
+                        test = test.map(
+                            lambda example: dict(
+                                text=tokenizer.decode(
+                                    tokenizer(
+                                        text=example["text"],
+                                        truncation=True,
+                                    ).input_ids,
+                                    skip_special_tokens=True,
+                                )
+                            ),
+                            num_proc=mp.cpu_count(),
+                        )
+
                     prepared_test = self._preprocess_data(
                         test, split="test", **preprocess_params
                     )

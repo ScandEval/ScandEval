@@ -219,21 +219,6 @@ def load_cached_model_outputs(
     Returns:
         The model output containing the cached sequences.
     """
-    # Encode and decode the samples in the cached dataset, to ensure that the cached
-    # sequences are tokenized in the same way as the model outputs
-    cached_dataset = cached_dataset.map(
-        lambda example: dict(
-            text=tokenizer.decode(
-                tokenizer(
-                    text=example["text"],
-                    truncation=True,
-                    return_tensors="pt",
-                ).input_ids.squeeze(dim=0),
-                skip_special_tokens=True,
-            )
-        ),
-    )
-
     # Load the raw model outputs from the cache
     cached_model_outputs: list[GenerativeModelOutput] = [
         cache[example["text"]] for example in cached_dataset
