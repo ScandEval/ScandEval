@@ -322,6 +322,8 @@ class HFModelSetup:
                         except ImportError as e:
                             if "flash attention" in str(e).lower():
                                 raise FlashAttentionNotInstalled()
+                            else:
+                                raise e
                         except (KeyError, RuntimeError) as e:
                             if not model_kwargs["ignore_mismatched_sizes"]:
                                 logger.debug(
