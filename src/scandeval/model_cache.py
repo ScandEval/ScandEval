@@ -127,12 +127,19 @@ class ModelCache:
             tokenizer:
                 The tokenizer used to generate the tokens.
         """
+        model_input = model_input.detach().cpu()
+
         # Extract the scores from the model output, to be cached. We only store the
-        # indices of the top 100 scores, to save space. Further, we only store the
-        # scores if the generated sequence is shorter than the maximum length
-        store_scores = "scores" in model_output and self.max_generated_tokens < 50
+        # indices of the top scores, to save space. Further, we only store the scores
+        # if the generated sequence is shorter than the maximum length
+        store_scores = "scores" in model_output and self.max_generated_tokens < 8
         if store_scores:
-            scores = torch.stack(model_output.scores, dim=1)
+            scores = torch.stack(
+                tensors=[
+                    score_tensor.detach().cpu() for score_tensor in model_output.scores
+                ],
+                dim=1,
+            )
             top_scores = torch.topk(scores, k=100)
 
         # Store the generated sequences in the cache, one by one
