@@ -123,6 +123,20 @@ class OpenAITokenizer:
         ]
         return encoding.decode(tokens=token_ids)
 
+    def batch_decode(self, sequences: list[list[int]], **kwargs) -> list[str]:
+        """Decode batched token IDs.
+
+        Args:
+            sequences:
+                The token IDs to decode.
+            **kwargs:
+                Additional keyword arguments.
+
+        Returns:
+            The decoded text.
+        """
+        return [self.decode(token_ids=sequence) for sequence in sequences]
+
     def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
         """Encode text.
 

@@ -468,6 +468,18 @@ class BenchmarkDataset(ABC):
                     prepared_test = self._preprocess_data(
                         test, split="test", **preprocess_params
                     )
+
+                    if benchmarking_generative_model:
+                        prepared_test = prepared_test.map(
+                            lambda examples: dict(
+                                text=tokenizer.batch_decode(
+                                    sequences=examples["input_ids"],
+                                    skip_special_tokens=True,
+                                ),
+                            ),
+                            batched=True,
+                        )
+
                     prepared_tests.append(prepared_test)
                     pbar.update(1)
             except ValueError:
