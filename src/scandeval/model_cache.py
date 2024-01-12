@@ -9,6 +9,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 from datasets import Dataset
+from tqdm.auto import tqdm
 from transformers.modeling_utils import ModelOutput
 
 from .protocols import Tokenizer
@@ -144,29 +145,31 @@ class ModelCache:
             top_scores = torch.topk(scores, k=100)
 
         # Store the generated sequences in the cache, one by one
-        for sample_idx, sample in enumerate(model_input):
-            decoded_inputs = tokenizer.decode(
-                token_ids=sample, skip_special_tokens=True
-            )
-            generated_ids = model_output.sequences[sample_idx].tolist()
+        # TODO: This is a bit slow, should be optimized
+        with tqdm(model_input, desc="Caching model outputs", leave=False) as pbar:
+            for sample_idx, sample in enumerate(pbar):
+                decoded_inputs = tokenizer.decode(
+                    token_ids=sample, skip_special_tokens=True
+                )
+                generated_ids = model_output.sequences[sample_idx].tolist()
 
-            # Set up the model output in a GenerativeModelOutput object
-            cached_model_output = GenerativeModelOutput(
-                completion=tokenizer.decode(
-                    token_ids=generated_ids, skip_special_tokens=True
-                ),
-            )
-            if store_scores:
-                cached_model_output.top_score_indices = top_scores.indices[
-                    sample_idx
-                ].tolist()
-                cached_model_output.top_score_values = top_scores.values[
-                    sample_idx
-                ].tolist()
-                cached_model_output.vocab_size = int(scores.shape[-1])
+                # Set up the model output in a GenerativeModelOutput object
+                cached_model_output = GenerativeModelOutput(
+                    completion=tokenizer.decode(
+                        token_ids=generated_ids, skip_special_tokens=True
+                    ),
+                )
+                if store_scores:
+                    cached_model_output.top_score_indices = top_scores.indices[
+                        sample_idx
+                    ].tolist()
+                    cached_model_output.top_score_values = top_scores.values[
+                        sample_idx
+                    ].tolist()
+                    cached_model_output.vocab_size = int(scores.shape[-1])
 
-            # Store the generated sequence in the cache
-            self[decoded_inputs] = cached_model_output
+                # Store the generated sequence in the cache
+                self[decoded_inputs] = cached_model_output
 
 
 def split_dataset_into_cached_and_non_cached(
