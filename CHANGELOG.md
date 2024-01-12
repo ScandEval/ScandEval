@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Optimised cache saving/loading a bit, making the waiting time in between iterations
   slightly shorter.
 - Removed indents in model output cache JSON files, to reduce disk space used.
+- Removes the model output cache for a (model, dataset) combination when the
+  benchmarking of the model on the dataset finishes successfully.
 
 ### Fixed
 - Removed some vLLM logging.

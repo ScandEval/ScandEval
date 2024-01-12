@@ -80,15 +80,16 @@ def generate(
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
-    # Initialise the model output cache. If we are testing then we save the model
-    # outputs to a different cache and ensure that that cache is deleted before the
-    # next test, to ensure that the tests are independent of each other
+    # Set up the name of the model output cache. If we are testing then we save the
+    # model outputs to a different cache and ensure that that cache is deleted before
+    # the next test, to ensure that the tests are independent of each other
     model_cache_dir = Path(model_config.model_cache_dir)
     if not hasattr(sys, "_called_from_test"):
         cache_name = f"{dataset_config.name}-model-outputs.json"
     else:
         cache_name = f"{dataset_config.name}-model-outputs-test.json"
         (model_cache_dir / cache_name).unlink(missing_ok=True)
+
     cache = ModelCache(
         model_cache_dir=model_cache_dir,
         cache_name=cache_name,
@@ -148,6 +149,9 @@ def generate(
             logger.debug(f"Train scores for iteration {idx}: {train_scores}")
             scores["train"].append(train_scores)
             clear_memory()
+
+    # Delete the model output cache again
+    del cache
 
     return scores
 

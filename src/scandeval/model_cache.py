@@ -109,6 +109,11 @@ class ModelCache:
         """
         self.cache[key] = value
 
+    def __del__(self) -> None:
+        """Remove the cache from memory and delete it from disk."""
+        self.cache_path.unlink()
+        del self.cache
+
     def cached_texts(self) -> list[str]:
         """Return the text inputs indexed in the cache."""
         return [key for key in self.cache.keys()]
