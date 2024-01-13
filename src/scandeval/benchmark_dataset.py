@@ -141,10 +141,7 @@ class BenchmarkDataset(ABC):
         num_iter = 2 if hasattr(sys, "_called_from_test") else 10
 
         if self.dataset_config.task != SPEED:
-            train, val, tests = self._load_data(
-                num_iter=num_iter,
-                rng=rng,
-            )
+            train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
             prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
                 train=train,
                 val=val,
