@@ -460,7 +460,7 @@ def extract_raw_predictions(
         tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True)
         .split("\n\n")[0]
         .strip("\n ")
-        for completion_ids in generated_sequences
+        for completion_ids in generated_sequences.long()
     ]
     return raw_predictions
 
