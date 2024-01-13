@@ -275,15 +275,18 @@ def generate_single_iteration(
             all_preds.extend(extracted_labels)
 
         # Store the cache to disk
+        logger.debug("Saving cache to disk...")  # TEMP
         cache.save()
 
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
+        logger.debug("Loading cached model outputs...")  # TEMP
         model_output = load_cached_model_outputs(
             cached_dataset=cached_dataset,
             cache=cache,
             tokenizer=tokenizer,
         )
+        logger.debug("Extracting labels from cached model outputs...")  # TEMP
         extracted_labels = extract_labels_fn(
             input_batch=cached_dataset,
             model_output=model_output,
@@ -308,11 +311,13 @@ def generate_single_iteration(
             "The dataset must have either a 'label', 'labels', or 'target_text' column"
         )
 
+    logger.debug("Computing metrics...")  # TEMP
     itr_scores: dict[str, float] = compute_metrics(
         model_outputs_and_labels=(all_preds, ground_truth),
         id2label=dataset_config.id2label,
     )
 
+    logger.debug("Finished iteration")  # TEMP
     return itr_scores
 
 
