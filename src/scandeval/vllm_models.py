@@ -157,12 +157,10 @@ class VLLMModel:
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
-        breakpoint()
         logger.debug("Padding generated sequences...")  # TEMP
         output = torch.nn.utils.rnn.pad_sequence(
             sequences=[
-                torch.LongTensor(output.outputs[0].token_ids).to(self.device)
-                for output in raw_outputs
+                torch.LongTensor(output.outputs[0].token_ids) for output in raw_outputs
             ],
             batch_first=True,
             padding_value=float(self.tokenizer.pad_token_id),
@@ -179,6 +177,7 @@ class VLLMModel:
                 max_seq_len = max(
                     len(raw_output.outputs[0].logprobs) for raw_output in raw_outputs
                 )
+                breakpoint()
                 scores = [
                     torch.full(size=(batch_size, vocab_size), fill_value=-1e9)
                     for _ in range(max_seq_len)
