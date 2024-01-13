@@ -157,6 +157,7 @@ class VLLMModel:
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
+        logger.debug("Padding generated sequences...")  # TEMP
         output = torch.nn.utils.rnn.pad_sequence(
             sequences=[
                 torch.LongTensor(output.outputs[0].token_ids).to(self.device)
@@ -169,6 +170,7 @@ class VLLMModel:
         if generation_config.return_dict_in_generate:
             # Add logprobs scores to the output
             if generation_config.output_scores:
+                logger.debug("Adding logprobs to output...")  # TEMP
                 # Create a list with placeholder logprobs for every token generated.
                 # Each tensor in the list will be of shape (batch_size, vocab_size)
                 batch_size = len(raw_outputs)
