@@ -151,7 +151,7 @@ def generate(
             clear_memory()
 
     # Delete the model output cache again
-    del cache
+    cache.remove()
 
     return scores
 

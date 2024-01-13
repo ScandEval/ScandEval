@@ -109,7 +109,7 @@ class ModelCache:
         """
         self.cache[key] = value
 
-    def __del__(self) -> None:
+    def remove(self) -> None:
         """Remove the cache from memory and delete it from disk."""
         self.cache_path.unlink()
         del self.cache
