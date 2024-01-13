@@ -291,8 +291,7 @@ class Benchmarker:
 
                 # Benchmark a single model on a single dataset
                 record = self._benchmark_single(
-                    dataset_config=dataset_config,
-                    model_id=m_id,
+                    dataset_config=dataset_config, model_id=m_id
                 )
 
                 # If the benchmark was unsuccessful then skip
@@ -411,9 +410,7 @@ class Benchmarker:
         return dataset_configs
 
     def _benchmark_single(
-        self,
-        dataset_config: DatasetConfig,
-        model_id: str,
+        self, dataset_config: DatasetConfig, model_id: str
     ) -> BenchmarkResult | dict[str, str]:
         """Benchmark a single model on a single dataset.
 
