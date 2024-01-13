@@ -157,6 +157,7 @@ class VLLMModel:
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
+        breakpoint()
         logger.debug("Padding generated sequences...")  # TEMP
         output = torch.nn.utils.rnn.pad_sequence(
             sequences=[
