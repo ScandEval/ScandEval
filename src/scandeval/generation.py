@@ -267,6 +267,7 @@ def generate_single_iteration(
                 generation_config=generation_config,
                 extract_labels_fn=extract_labels_fn,
             )
+            logger.debug(f"Adding batch {batch_idx} to cache...")  # TEMP
             cache.add_to_cache(
                 model_input=batch["input_ids"],
                 model_output=model_output,
