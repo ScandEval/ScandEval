@@ -313,7 +313,8 @@ class Benchmarker:
                 if self.benchmark_config.save_results:
                     record.append_to_results(results_path=self.results_path)
 
-            self.clear_model_cache()
+            if self.benchmark_config.clear_model_cache:
+                self.clear_model_cache()
 
         return self.benchmark_results
 
@@ -323,14 +324,13 @@ class Benchmarker:
         Note that this will not remove the stored completions, and it will only clear
         the cache if `clear_model_cache` is set to True.
         """
-        if self.benchmark_config.clear_model_cache:
-            model_cache_path = Path(self.benchmark_config.cache_dir) / "model_cache"
-            model_cache_path.mkdir(parents=True, exist_ok=True)
-            for model_dir in model_cache_path.iterdir():
-                if model_dir.is_dir():
-                    for sub_model_dir in model_dir.iterdir():
-                        if sub_model_dir.is_dir():
-                            rmtree(sub_model_dir)
+        model_cache_path = Path(self.benchmark_config.cache_dir) / "model_cache"
+        model_cache_path.mkdir(parents=True, exist_ok=True)
+        for model_dir in model_cache_path.iterdir():
+            if model_dir.is_dir():
+                for sub_model_dir in model_dir.iterdir():
+                    if sub_model_dir.is_dir():
+                        rmtree(sub_model_dir)
 
     def _prepare_model_ids(
         self,
