@@ -431,11 +431,13 @@ def generate_batch(
 
     # Hugging Face models include the input in the generated sequence, so we
     # need to remove it in that case
+    logger.debug("Removing prefix outputs...")  # TEMP
     if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
         model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
 
     # Extract the labels from the model output and store them for metric
     # computation later
+    logger.debug("Extracting labels from model output...")  # TEMP
     batch_start = batch_idx * batch_size
     batch_end = (batch_idx + 1) * batch_size
     input_batch = non_cached_dataset[batch_start:batch_end]
