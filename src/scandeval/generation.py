@@ -150,9 +150,7 @@ def generate(
             scores["train"].append(train_scores)
             clear_memory()
 
-    # Delete the model output cache again
     cache.remove()
-
     return scores
 
 
