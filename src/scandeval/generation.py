@@ -23,7 +23,7 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
-from .utils import clear_memory
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
 from .vllm_models import VLLMModel
 
 logger = logging.getLogger(__package__)
@@ -210,7 +210,7 @@ def generate_single_iteration(
         generation_config = GenerationConfig(
             max_new_tokens=dataset_config.max_generated_tokens,
             do_sample=False,
-            output_scores=True,
+            output_scores=dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS,
             return_dict_in_generate=True,
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
@@ -267,7 +267,6 @@ def generate_single_iteration(
                 generation_config=generation_config,
                 extract_labels_fn=extract_labels_fn,
             )
-            logger.debug(f"Adding batch {batch_idx} to cache...")  # TEMP
             cache.add_to_cache(
                 model_input=batch["input_ids"],
                 model_output=model_output,
@@ -276,18 +275,15 @@ def generate_single_iteration(
             all_preds.extend(extracted_labels)
 
         # Store the cache to disk
-        logger.debug("Saving cache to disk...")  # TEMP
         cache.save()
 
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
-        logger.debug("Loading cached model outputs...")  # TEMP
         model_output = load_cached_model_outputs(
             cached_dataset=cached_dataset,
             cache=cache,
             tokenizer=tokenizer,
         )
-        logger.debug("Extracting labels from cached model outputs...")  # TEMP
         extracted_labels = extract_labels_fn(
             input_batch=cached_dataset,
             model_output=model_output,
@@ -312,13 +308,11 @@ def generate_single_iteration(
             "The dataset must have either a 'label', 'labels', or 'target_text' column"
         )
 
-    logger.debug("Computing metrics...")  # TEMP
     itr_scores: dict[str, float] = compute_metrics(
         model_outputs_and_labels=(all_preds, ground_truth),
         id2label=dataset_config.id2label,
     )
 
-    logger.debug("Finished iteration")  # TEMP
     return itr_scores
 
 
@@ -431,13 +425,11 @@ def generate_batch(
 
     # Hugging Face models include the input in the generated sequence, so we
     # need to remove it in that case
-    logger.debug("Removing prefix outputs...")  # TEMP
     if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
         model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
 
     # Extract the labels from the model output and store them for metric
     # computation later
-    logger.debug("Extracting labels from model output...")  # TEMP
     batch_start = batch_idx * batch_size
     batch_end = (batch_idx + 1) * batch_size
     input_batch = non_cached_dataset[batch_start:batch_end]

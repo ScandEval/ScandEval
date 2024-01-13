@@ -157,7 +157,6 @@ class VLLMModel:
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
-        logger.debug("Padding generated sequences...")  # TEMP
         output = torch.nn.utils.rnn.pad_sequence(
             sequences=[
                 torch.LongTensor(output.outputs[0].token_ids) for output in raw_outputs
@@ -169,7 +168,6 @@ class VLLMModel:
         if generation_config.return_dict_in_generate:
             # Add logprobs scores to the output
             if generation_config.output_scores:
-                logger.debug("Adding logprobs to output...")  # TEMP
                 # Create a list with placeholder logprobs for every token generated.
                 # Each tensor in the list will be of shape (batch_size, vocab_size)
                 batch_size = len(raw_outputs)
@@ -177,7 +175,6 @@ class VLLMModel:
                 max_seq_len = max(
                     len(raw_output.outputs[0].logprobs) for raw_output in raw_outputs
                 )
-                breakpoint()
                 scores = [
                     torch.full(size=(batch_size, vocab_size), fill_value=-1e9)
                     for _ in range(max_seq_len)
@@ -185,8 +182,7 @@ class VLLMModel:
 
                 # Fill in the logprobs for each generated token. The logprobs from the
                 # vLLM output only contain the logprobs for the top-k tokens, so we
-                # only fill in these and leave the rest as -1e9, corresponding to ~0%
-                # probability
+                # only fill in these and leave the rest at ~0% probability
                 for sample_idx, raw_output in enumerate(raw_outputs):
                     assert raw_output.outputs[0].logprobs is not None
                     seq_len = len(raw_output.outputs[0].logprobs)
