@@ -425,6 +425,7 @@ def generate_batch(
 
     # Hugging Face models include the input in the generated sequence, so we
     # need to remove it in that case
+    inputs = inputs.detach().cpu()
     if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
         model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
 
