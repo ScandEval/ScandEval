@@ -20,10 +20,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   caching.
 
 ### Fixed
-- Removed some vLLM logging.
 - Only require generative models to output logprobs if the dataset is of a task that
   requires it. This caused the benchmarking to use excessive memory when benchmarking
   datasets that require long generative outputs, such as NER.
+
+### Removed
+- Removed some vLLM logging.
 
 
 ## [v9.0.0] - 2024-01-12
