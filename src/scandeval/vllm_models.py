@@ -129,7 +129,7 @@ class VLLMModel:
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             stop=stop_tokens,
-            logprobs=100,
+            logprobs=10,
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which
