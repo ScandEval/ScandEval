@@ -1,6 +1,5 @@
 """Functions related to text generation of models."""
 
-import json
 import logging
 import sys
 import warnings
@@ -24,7 +23,7 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
-from .utils import clear_memory
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
 from .vllm_models import VLLMModel
 
 logger = logging.getLogger(__package__)
@@ -81,13 +80,21 @@ def generate(
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
-    # Create model output cache
+    # Set up the name of the model output cache. If we are testing then we save the
+    # model outputs to a different cache and ensure that that cache is deleted before
+    # the next test, to ensure that the tests are independent of each other
     model_cache_dir = Path(model_config.model_cache_dir)
-    model_cache_dir.mkdir(parents=True, exist_ok=True)
-    cache_path = model_cache_dir / "model_outputs.json"
-    if not cache_path.exists():
-        with cache_path.open("w") as f:
-            json.dump(dict(), f)
+    if not hasattr(sys, "_called_from_test"):
+        cache_name = f"{dataset_config.name}-model-outputs.json"
+    else:
+        cache_name = f"{dataset_config.name}-model-outputs-test.json"
+        (model_cache_dir / cache_name).unlink(missing_ok=True)
+
+    cache = ModelCache(
+        model_cache_dir=model_cache_dir,
+        cache_name=cache_name,
+        max_generated_tokens=dataset_config.max_generated_tokens,
+    )
 
     for idx in itr:
         prepared_test = prepared_tests[idx]
@@ -104,7 +111,7 @@ def generate(
                     extract_labels_fn=extract_labels_fn,
                     benchmark_config=benchmark_config,
                     dataset_config=dataset_config,
-                    model_cache_dir=Path(model_config.model_cache_dir),
+                    cache=cache,
                 )
                 break
             except Exception as e:
@@ -137,12 +144,13 @@ def generate(
                 extract_labels_fn=extract_labels_fn,
                 benchmark_config=benchmark_config,
                 dataset_config=dataset_config,
-                model_cache_dir=Path(model_config.model_cache_dir),
+                cache=cache,
             )
             logger.debug(f"Train scores for iteration {idx}: {train_scores}")
             scores["train"].append(train_scores)
             clear_memory()
 
+    cache.remove()
     return scores
 
 
@@ -155,7 +163,7 @@ def generate_single_iteration(
     extract_labels_fn: Callable[..., list[Any]],
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
-    model_cache_dir: Path,
+    cache: ModelCache,
 ) -> dict[str, float]:
     """Evaluate a model on a dataset in a single iteration through generation.
 
@@ -176,26 +184,13 @@ def generate_single_iteration(
             The configuration of the dataset.
         benchmark_config:
             The configuration of the benchmark.
-        model_cache_dir:
-            The directory to store the model output cache in.
+        cache:
+            The model output cache.
 
     Returns:
         A list of dictionaries containing the scores for each metric.
     """
-    # If we are testing then we save the model outputs to a different cache and ensure
-    # that that cache is deleted before the next test, to ensure that the tests are
-    # independent of each other
-    if not hasattr(sys, "_called_from_test"):
-        cache_name = "model_outputs.json"
-    else:
-        cache_name = "model_outputs_test.json"
-        (model_cache_dir / cache_name).unlink(missing_ok=True)
-
-    cache = ModelCache(
-        model_cache_dir=model_cache_dir,
-        cache_name=cache_name,
-        max_generated_tokens=dataset_config.max_generated_tokens,
-    )
+    cache.load()
 
     # Split up the prepared dataset into a cached and non-cached part
     cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
@@ -213,7 +208,7 @@ def generate_single_iteration(
         generation_config = GenerationConfig(
             max_new_tokens=dataset_config.max_generated_tokens,
             do_sample=False,
-            output_scores=True,
+            output_scores=dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS,
             return_dict_in_generate=True,
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
@@ -428,6 +423,7 @@ def generate_batch(
 
     # Hugging Face models include the input in the generated sequence, so we
     # need to remove it in that case
+    inputs = inputs.detach().cpu()
     if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
         model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
 
@@ -464,7 +460,7 @@ def extract_raw_predictions(
         tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True)
         .split("\n\n")[0]
         .strip("\n ")
-        for completion_ids in generated_sequences
+        for completion_ids in generated_sequences.long()
     ]
     return raw_predictions
 

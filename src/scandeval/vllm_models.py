@@ -129,7 +129,7 @@ class VLLMModel:
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             stop=stop_tokens,
-            logprobs=100,
+            logprobs=10 if generation_config.output_scores else None,
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which
@@ -159,8 +159,7 @@ class VLLMModel:
         # (batch_size, generated_sequence_length)
         output = torch.nn.utils.rnn.pad_sequence(
             sequences=[
-                torch.LongTensor(output.outputs[0].token_ids).to(self.device)
-                for output in raw_outputs
+                torch.LongTensor(output.outputs[0].token_ids) for output in raw_outputs
             ],
             batch_first=True,
             padding_value=float(self.tokenizer.pad_token_id),
@@ -183,8 +182,7 @@ class VLLMModel:
 
                 # Fill in the logprobs for each generated token. The logprobs from the
                 # vLLM output only contain the logprobs for the top-k tokens, so we
-                # only fill in these and leave the rest as -1e9, corresponding to ~0%
-                # probability
+                # only fill in these and leave the rest at ~0% probability
                 for sample_idx, raw_output in enumerate(raw_outputs):
                     assert raw_output.outputs[0].logprobs is not None
                     seq_len = len(raw_output.outputs[0].logprobs)

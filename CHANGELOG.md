@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Now only stores the top-10 log probabilities of generated tokens when the generation
+  length is less than 8 tokens. Also now keeps separate caches for each (model,
+  dataset) combination, where it previously had a single cache for each model. Both of
+  these help reduce the memory usage of the model output cache.
+- Optimised cache saving/loading a bit, making the waiting time in between iterations
+  slightly shorter.
+- Removes the model output cache for a (model, dataset) combination when the
+  benchmarking of the model on the dataset finishes successfully. Also removed indents
+  in model output cache JSON files. Both of these help reducing the disk space used on
+  caching.
+
 ### Fixed
+- Only require generative models to output logprobs if the dataset is of a task that
+  requires it. This caused the benchmarking to use excessive memory when benchmarking
+  datasets that require long generative outputs, such as NER.
+
+### Removed
 - Removed some vLLM logging.
 
 

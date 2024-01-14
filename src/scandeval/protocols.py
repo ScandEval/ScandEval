@@ -60,6 +60,20 @@ class Tokenizer(Protocol):
         """
         ...
 
+    def batch_decode(self, sequences: list[list[int]], **kwargs) -> list[str]:
+        """Decode a batch of token IDs.
+
+        Args:
+            sequences:
+                The token IDs to decode.
+            **kwargs:
+                Keyword arguments to pass to the tokenizer.
+
+        Returns:
+            The decoded strings.
+        """
+        ...
+
     def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
         """Encode one or more texts.
 

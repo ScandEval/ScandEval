@@ -54,6 +54,11 @@ GENERATIVE_DATASET_SUPERTASKS = [
 ]
 
 
+SUPERTASKS_USING_LOGPROBS = [
+    "sequence-classification",
+]
+
+
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
     """Create cache directory for a model.
 

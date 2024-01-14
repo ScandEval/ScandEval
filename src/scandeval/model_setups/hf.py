@@ -261,6 +261,14 @@ class HFModelSetup:
                     model_cache_dir=model_config.model_cache_dir,
                 )
             except ValueError as e:
+                # If the model is too large to fit on the GPU then we simply throw an
+                # informative error message
+                oom_error_message = "No available memory for the cache blocks"
+                if oom_error_message in str(e):
+                    raise InvalidBenchmark("The model is too large to load on the GPU.")
+
+                # Otherwise some other error occurred, and we log it and try to load
+                # the model with Hugging Face instead
                 use_vllm = False
                 logger.info(
                     "Failed to benchmark with vLLM - trying with the Hugging Face "
@@ -322,6 +330,8 @@ class HFModelSetup:
                         except ImportError as e:
                             if "flash attention" in str(e).lower():
                                 raise FlashAttentionNotInstalled()
+                            else:
+                                raise e
                         except (KeyError, RuntimeError) as e:
                             if not model_kwargs["ignore_mismatched_sizes"]:
                                 logger.debug(

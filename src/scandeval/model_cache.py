@@ -6,8 +6,10 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+import pandas as pd
 import torch
 from datasets import Dataset
+from tqdm.auto import tqdm
 from transformers.modeling_utils import ModelOutput
 
 from .protocols import Tokenizer
@@ -58,11 +60,10 @@ class ModelCache:
         self.model_cache_dir = model_cache_dir
         self.model_cache_dir.mkdir(parents=True, exist_ok=True)
         self.cache_path = self.model_cache_dir / cache_name
-        self.cache: dict[str, GenerativeModelOutput] = self.load()
         self.max_generated_tokens = max_generated_tokens
 
-    def load(self) -> dict[str, GenerativeModelOutput]:
-        """Load and return the model output cache."""
+    def load(self) -> None:
+        """Load the model output cache."""
         if not self.cache_path.exists():
             with self.cache_path.open("w") as f:
                 json.dump(dict(), f)
@@ -73,7 +74,8 @@ class ModelCache:
         cache: dict[str, GenerativeModelOutput] = dict()
         for key in json_cache:
             cache[key] = GenerativeModelOutput(**json_cache[key])
-        return cache
+
+        self.cache = cache
 
     def save(self) -> None:
         """Save the model output cache to disk."""
@@ -82,7 +84,7 @@ class ModelCache:
             dumpable_cache[key] = asdict(value)
 
         with self.cache_path.open("w") as f:
-            json.dump(dumpable_cache, f, indent=4)
+            json.dump(dumpable_cache, f)
 
     def __getitem__(self, key: str) -> GenerativeModelOutput:
         """Get an item from the cache.
@@ -107,6 +109,11 @@ class ModelCache:
         """
         self.cache[key] = value
 
+    def remove(self) -> None:
+        """Remove the cache from memory and delete it from disk."""
+        self.cache_path.unlink()
+        del self.cache
+
     def cached_texts(self) -> list[str]:
         """Return the text inputs indexed in the cache."""
         return [key for key in self.cache.keys()]
@@ -127,38 +134,47 @@ class ModelCache:
             tokenizer:
                 The tokenizer used to generate the tokens.
         """
+        model_input = model_input.detach().cpu()
+
         # Extract the scores from the model output, to be cached. We only store the
-        # indices of the top 100 scores, to save space. Further, we only store the
-        # scores if the generated sequence is shorter than the maximum length
-        store_scores = "scores" in model_output and self.max_generated_tokens < 50
+        # indices of the top scores, to save space. Further, we only store the scores
+        # if the generated sequence is shorter than the maximum length
+        store_scores = "scores" in model_output and self.max_generated_tokens < 8
         if store_scores:
-            scores = torch.stack(model_output.scores, dim=1)
-            top_scores = torch.topk(scores, k=100)
+            scores = torch.stack(
+                tensors=[
+                    score_tensor.detach().cpu() for score_tensor in model_output.scores
+                ],
+                dim=1,
+            )
+            top_scores = torch.topk(scores, k=10)
 
         # Store the generated sequences in the cache, one by one
-        for sample_idx, sample in enumerate(model_input):
-            decoded_inputs = tokenizer.decode(
-                token_ids=sample, skip_special_tokens=True
-            )
-            generated_ids = model_output.sequences[sample_idx].tolist()
+        # TODO: This is a bit slow, should be optimized
+        with tqdm(model_input, desc="Caching model outputs", leave=False) as pbar:
+            for sample_idx, sample in enumerate(pbar):
+                decoded_inputs = tokenizer.decode(
+                    token_ids=sample, skip_special_tokens=True
+                )
+                generated_ids = model_output.sequences[sample_idx].tolist()
 
-            # Set up the model output in a GenerativeModelOutput object
-            cached_model_output = GenerativeModelOutput(
-                completion=tokenizer.decode(
-                    token_ids=generated_ids, skip_special_tokens=True
-                ),
-            )
-            if store_scores:
-                cached_model_output.top_score_indices = top_scores.indices[
-                    sample_idx
-                ].tolist()
-                cached_model_output.top_score_values = top_scores.values[
-                    sample_idx
-                ].tolist()
-                cached_model_output.vocab_size = int(scores.shape[-1])
+                # Set up the model output in a GenerativeModelOutput object
+                cached_model_output = GenerativeModelOutput(
+                    completion=tokenizer.decode(
+                        token_ids=generated_ids, skip_special_tokens=True
+                    ),
+                )
+                if store_scores:
+                    cached_model_output.top_score_indices = top_scores.indices[
+                        sample_idx
+                    ].tolist()
+                    cached_model_output.top_score_values = top_scores.values[
+                        sample_idx
+                    ].tolist()
+                    cached_model_output.vocab_size = int(scores.shape[-1])
 
-            # Store the generated sequence in the cache
-            self[decoded_inputs] = cached_model_output
+                # Store the generated sequence in the cache
+                self[decoded_inputs] = cached_model_output
 
 
 def split_dataset_into_cached_and_non_cached(
@@ -176,13 +192,12 @@ def split_dataset_into_cached_and_non_cached(
         The cached and non-cached parts of the dataset.
     """
     # Get the sample indices of the non-cached examples, which are unique with respect
-    # to the "text" column
-    unique_non_cached_ids: set[int] = set()
-    for example_idx, example in enumerate(dataset):
-        cached_texts = cache.cached_texts()
-        cached_texts += dataset.select(unique_non_cached_ids)["text"]
-        if example["text"] not in cached_texts:
-            unique_non_cached_ids.add(example_idx)
+    # to the "text" column.
+    dataset_texts = pd.Series(dataset["text"])
+    dataset_texts.drop_duplicates(inplace=True)
+    unique_non_cached_ids = set(
+        dataset_texts[~dataset_texts.isin(cache.cached_texts())].index.tolist()
+    )
 
     # The cached examples are the ones that are not in the non-cached examples. This
     # means that if the dataset has duplicates, only a single copy of the duplicate
@@ -212,24 +227,9 @@ def load_cached_model_outputs(
     Returns:
         The model output containing the cached sequences.
     """
-    # Encode and decode the samples in the cached dataset, to ensure that the cached
-    # sequences are tokenized in the same way as the model outputs
-    cached_dataset = cached_dataset.map(
-        lambda example: dict(
-            text=tokenizer.decode(
-                tokenizer(
-                    text=example["text"],
-                    truncation=True,
-                    return_tensors="pt",
-                ).input_ids.squeeze(dim=0),
-                skip_special_tokens=True,
-            )
-        ),
-    )
-
     # Load the raw model outputs from the cache
     cached_model_outputs: list[GenerativeModelOutput] = [
-        cache[example["text"]] for example in cached_dataset
+        cache[prompt] for prompt in cached_dataset["text"]
     ]
 
     # Tokenize the cached sequences
