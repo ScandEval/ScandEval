@@ -475,6 +475,7 @@ class BenchmarkDataset(ABC):
                                 ),
                             ),
                             batched=True,
+                            load_from_cache_file=False,
                         )
 
                     prepared_tests.append(prepared_test)
