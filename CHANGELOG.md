@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v9.1.0] - 2024-01-14
 ### Changed
 - Now only stores the top-10 log probabilities of generated tokens when the generation
   length is less than 8 tokens. Also now keeps separate caches for each (model,
