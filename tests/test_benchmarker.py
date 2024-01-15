@@ -39,6 +39,7 @@ class TestBenchmarkResult:
         yield BenchmarkResult(
             dataset="dataset",
             model="model",
+            generative=False,
             few_shot=True,
             validation_split=False,
             **DATA_KWARGS,
@@ -55,6 +56,7 @@ class TestBenchmarkResult:
         """Test that the `BenchmarkResult` parameters are correct."""
         assert benchmark_result.dataset == "dataset"
         assert benchmark_result.model == "model"
+        assert benchmark_result.generative is False
         assert benchmark_result.few_shot is True
         assert benchmark_result.validation_split is False
         assert benchmark_result.num_model_parameters == 100
@@ -78,6 +80,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=False,
                     few_shot=True,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -93,6 +96,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=True,
                     few_shot=True,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -108,6 +112,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=False,
                     few_shot=True,
                     validation_split=True,
                     **DATA_KWARGS,
@@ -122,6 +127,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=True,
                     few_shot=True,
                     validation_split=True,
                     **DATA_KWARGS,
@@ -155,6 +161,7 @@ class TestBenchmarkResult:
                 num_model_parameters=benchmark_result.num_model_parameters,
                 max_sequence_length=benchmark_result.max_sequence_length,
                 vocabulary_size=benchmark_result.vocabulary_size,
+                generative=benchmark_result.generative,
                 few_shot=benchmark_result.few_shot,
                 validation_split=benchmark_result.validation_split,
             )
@@ -194,6 +201,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -210,6 +218,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="another-dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -226,6 +235,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -242,6 +252,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=True,
                     few_shot=True,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -258,6 +269,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -274,6 +286,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=True,
                     **DATA_KWARGS,
@@ -290,6 +303,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -297,6 +311,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,

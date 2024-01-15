@@ -292,6 +292,7 @@ class BenchmarkDataset(ABC):
             num_model_parameters=num_params,
             max_sequence_length=max_seq_length,
             vocabulary_size=vocab_size,
+            generative=benchmarking_generative_model,
             few_shot=benchmarking_generative_model,
             validation_split=self.benchmark_config.only_validation_split,
         )
