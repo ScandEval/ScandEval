@@ -39,6 +39,7 @@ class TestBenchmarkResult:
         yield BenchmarkResult(
             dataset="dataset",
             model="model",
+            generative=False,
             few_shot=True,
             validation_split=False,
             **DATA_KWARGS,
@@ -78,6 +79,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=True,
                     few_shot=True,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -93,6 +95,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=True,
                     few_shot=True,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -102,12 +105,14 @@ class TestBenchmarkResult:
                 dict(
                     dataset="dataset",
                     model="model (val)",
+                    generative=True,
                     few_shot=True,
                     **DATA_KWARGS,
                 ),
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=True,
                     few_shot=True,
                     validation_split=True,
                     **DATA_KWARGS,
@@ -122,6 +127,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    generative=True,
                     few_shot=True,
                     validation_split=True,
                     **DATA_KWARGS,
@@ -194,6 +200,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -210,6 +217,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="another-dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -226,6 +234,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -242,6 +251,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=True,
                     few_shot=True,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -258,6 +268,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -274,6 +285,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=True,
                     **DATA_KWARGS,
@@ -290,6 +302,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -297,6 +310,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
+                    generative=False,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,

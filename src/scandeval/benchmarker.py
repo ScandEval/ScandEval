@@ -32,6 +32,7 @@ class BenchmarkResult(BaseModel):
     num_model_parameters: int
     max_sequence_length: int
     vocabulary_size: int
+    generative: bool
     few_shot: bool
     validation_split: bool
 
