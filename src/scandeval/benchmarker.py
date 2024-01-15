@@ -548,8 +548,8 @@ def model_has_been_benchmarked(
         if (
             record.model == model_id
             and record.dataset == dataset
-            and record.few_shot == few_shot
             and record.validation_split == validation_split
+            and (not record.generative or record.few_shot == few_shot)
         ):
             return True
     return False

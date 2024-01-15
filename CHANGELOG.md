@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- When checking if a model has already been benchmarked, we only care about the
+  `few_shot` parameter if the model is generative.
+
+
 ## [v9.1.1] - 2024-01-15
 ### Fixed
 - Now adds a `generative` key to the logged results, to enable parsing few-shot
