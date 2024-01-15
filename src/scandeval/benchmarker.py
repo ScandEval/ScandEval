@@ -50,12 +50,15 @@ class BenchmarkResult(BaseModel):
         # To be backwards compatible, we accept old results which changed the model
         # name with parameters rather than adding them as explicit parameters
         val_matches = re.search(r"\(.*val.*\)$", config["model"])
+        few_shot_matches = re.search(r"\(.*few-shot.*\)$", config["model"])
         config["model"] = re.sub(
             r"\(.*(few-shot|val).*\)$", "", config["model"]
         ).strip()
 
         # The default value for `few_shot` is True. It won't do anything if the model
         # is not generative, so this is fine
+        if "generative" not in config:
+            config["generative"] = few_shot_matches is not None
         if "few_shot" not in config:
             config["few_shot"] = True
 
