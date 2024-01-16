@@ -17,7 +17,6 @@ import numpy as np
 import pkg_resources
 import requests
 import torch
-import vllm
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
@@ -33,6 +32,12 @@ from .protocols import GenerativeModel, Tokenizer
 from .types import Predictions
 
 logger = logging.getLogger(__package__)
+
+
+try:
+    import vllm
+except ImportError:
+    logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
 
 GENERATIVE_MODEL_TASKS = [
@@ -171,7 +176,10 @@ def block_terminal_output():
         vllm_logger.setLevel(logging.ERROR)
         return vllm_logger
 
-    vllm.logger.init_logger = init_vllm_logger
+    try:
+        vllm.logger.init_logger = init_vllm_logger
+    except NameError:
+        pass
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
