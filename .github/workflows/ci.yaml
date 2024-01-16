@@ -19,7 +19,7 @@ jobs:
             os: [macos-latest, ubuntu-latest]
             python-version: ["3.10", "3.11"]
 
-            # This runs the tests on MacOS only if the PR has the `macos` label
+            # This runs the tests on MacOS if and only if the PR has the `macos` label
             shouldTestMacOs:
               - ${{ contains(github.event.pull_request.labels.*.name, 'macos') }}
             exclude:
