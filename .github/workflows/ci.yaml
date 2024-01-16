@@ -18,9 +18,15 @@ jobs:
         matrix:
             os: [ubuntu-latest]
             python-version: ["3.10", "3.11"]
+
+            # This runs the tests on MacOS only if the PR has the `macos` label
+            shouldTestMacOs:
+              - ${{ contains(github.event.pull_request.labels.*.name, 'macos') }}
             include:
-              - os: macos-latest
+              - shouldTestMacOs: true
+                os: macos-latest
                 python-version: "3.10"
+
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
