@@ -235,7 +235,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     model="model",
                     dataset="dataset",
-                    generative=False,
+                    generative=True,
                     few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
@@ -254,6 +254,23 @@ class TestBenchmarkResult:
                     dataset="dataset",
                     generative=True,
                     few_shot=True,
+                    validation_split=False,
+                    **DATA_KWARGS,
+                )
+            ],
+            True,
+        ),
+        (
+            "model",
+            "dataset",
+            True,
+            False,
+            [
+                BenchmarkResult(
+                    model="model",
+                    dataset="dataset",
+                    generative=False,
+                    few_shot=False,
                     validation_split=False,
                     **DATA_KWARGS,
                 )
@@ -326,6 +343,7 @@ class TestBenchmarkResult:
         "model has not been benchmarked",
         "model few-shot has not been benchmarked",
         "model few-shot has been benchmarked",
+        "model few-shot has been benchmarked, but not generative",
         "model validation split has not been benchmarked",
         "model validation split has been benchmarked",
         "model has been benchmarked twice",
