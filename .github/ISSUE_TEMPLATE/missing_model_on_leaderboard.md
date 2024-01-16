@@ -6,10 +6,7 @@ labels: "model evaluation request"
 assignees: ''
 ---
 
-**Describe the dataset**
-Include the name and a brief description of the dataset, along with a link to where it
-is currently hosted (doesn't have to be Hugging Face). Also include roughly how many
-samples the dataset contains, and what language it pertains to.
-
-**Rationale**
-Explain why you think it is important to include this dataset in ScandEval.
+**Describe the model**
+Include the name and a brief description of the model, along with a Hugging Face link
+to it. Also include whether it is an encoder (BERT-style) model or a decoder
+(GPT-style) model, and what language(s) it should be benchmarked on.

@@ -15,5 +15,5 @@ Steps to reproduce the behaviour.
 **Context (please complete the following information):**
  - OS [e.g., MacOS, Ubuntu]:
  - Python version [e.g., 3.10.6]:
- - Package version [e.g., 0.1.2]:
+ - Device [e.g., CUDA, CPU, MPS]:
  - Output of `pip list` or `poetry show`:
