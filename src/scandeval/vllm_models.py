@@ -9,13 +9,31 @@ import torch
 from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
 from transformers.utils import ModelOutput
-from vllm import LLM, RequestOutput, SamplingParams
-from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
 from .config import ModelConfig
 from .utils import HiddenPrints, clear_memory
 
 logger = logging.getLogger(__package__)
+
+try:
+    from vllm import LLM, RequestOutput, SamplingParams
+    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+except ImportError:
+    logger.debug("Failed to import vLLM, assuming that it is not needed.")
+
+    class LLM:  # type: ignore[no-redef]
+        """Dummy class for the vLLM model."""
+
+        def __init__(self, **kwargs):
+            """Initialize a dummy vLLM model."""
+            pass
+
+    class RequestOutput:  # type: ignore[no-redef]
+        """Dummy class for the request output."""
+
+    def destroy_model_parallel():  #  type: ignore[no-redef]
+        """Dummy function to destroy the model parallel state."""
+        pass
 
 
 class VLLMModel:

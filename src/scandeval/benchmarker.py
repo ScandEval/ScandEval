@@ -265,7 +265,8 @@ class Benchmarker:
         Returns:
             A list of benchmark results.
         """
-        self.clear_model_cache()
+        if self.benchmark_config.clear_model_cache:
+            self.clear_model_cache()
 
         # Prepare the model IDs
         model_ids = self._prepare_model_ids(model_id)

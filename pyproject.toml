@@ -42,8 +42,9 @@ accelerate = ">=0.23.0,<1.0.0"
 rouge-score = ">=0.1.2,<1.0.0"
 bert-score = ">=0.3.13,<1.0.0"
 evaluate = ">=0.4.1,<1.0.0"
-vllm = ">=0.2.7,<1.0.0"
+vllm = {markers="sys_platform != 'darwin'", version = ">=0.2.7,<1.0.0"}
 demjson3 = "^3.0.6"
+pydantic = ">=1.10.0,<3.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pdoc = "^14.0.0"
