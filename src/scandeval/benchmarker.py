@@ -545,11 +545,9 @@ def model_has_been_benchmarked(
         Whether the model has already been evaluated on the dataset.
     """
     for record in benchmark_results:
-        if (
-            record.model == model_id
-            and record.dataset == dataset
-            and record.validation_split == validation_split
-            and (not record.generative or record.few_shot == few_shot)
-        ):
+        same_evaluation = record.model == model_id and record.dataset == dataset
+        same_validation_split_setting = record.validation_split == validation_split
+        same_few_shot_setting = record.few_shot == few_shot or not record.generative
+        if same_evaluation and same_validation_split_setting and same_few_shot_setting:
             return True
     return False
