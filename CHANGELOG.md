@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- There was a bug where all models were removed from disk prior to benchmarking. This
+  will now only happen if the `--clear-model-cache` flag is set.
+- The `vllm` package cannot be installed when CUDA is not available - this is now
+  neither installed nor used when this is the case, and generative few-shot evaluation
+  is done using the `transformers` package rather than `vllm`.
+
+
 ## [v9.1.2] - 2024-01-16
 ### Fixed
 - When checking if a model has already been benchmarked, we only care about the
