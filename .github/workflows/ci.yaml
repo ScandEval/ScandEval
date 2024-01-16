@@ -22,8 +22,8 @@ jobs:
             # This runs the tests on MacOS only if the PR has the `macos` label
             shouldTestMacOs:
               - ${{ contains(github.event.pull_request.labels.*.name, 'macos') }}
-            include:
-              - shouldTestMacOs: true
+            exclude:
+              - shouldTestMacOs: false
                 os: macos-latest
 
     runs-on: ${{ matrix.os }}
