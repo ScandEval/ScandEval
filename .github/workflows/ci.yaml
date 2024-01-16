@@ -16,7 +16,7 @@ jobs:
   pytest:
     strategy:
         matrix:
-            os: [ubuntu-latest]
+            os: [macos-latest, ubuntu-latest]
             python-version: ["3.10", "3.11"]
 
             # This runs the tests on MacOS only if the PR has the `macos` label
@@ -25,7 +25,6 @@ jobs:
             include:
               - shouldTestMacOs: true
                 os: macos-latest
-                python-version: "3.10"
 
     runs-on: ${{ matrix.os }}
     steps:
