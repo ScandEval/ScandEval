@@ -42,7 +42,7 @@ def main() -> None:
         df["text"] = [
             row.ctx.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"a. " + row.endings[0].replace("\n", " ").strip() + "\n"
+            "a. " + row.endings[0].replace("\n", " ").strip() + "\n"
             "b. " + row.endings[1].replace("\n", " ").strip() + "\n"
             "c. " + row.endings[2].replace("\n", " ").strip() + "\n"
             "d. " + row.endings[3].replace("\n", " ").strip()

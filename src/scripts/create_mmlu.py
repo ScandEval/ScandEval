@@ -55,7 +55,7 @@ def main() -> None:
         df["text"] = [
             row.instruction.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"a. " + row.option_a.replace("\n", " ").strip() + "\n"
+            "a. " + row.option_a.replace("\n", " ").strip() + "\n"
             "b. " + row.option_b.replace("\n", " ").strip() + "\n"
             "c. " + row.option_c.replace("\n", " ").strip() + "\n"
             "d. " + row.option_d.replace("\n", " ").strip()
