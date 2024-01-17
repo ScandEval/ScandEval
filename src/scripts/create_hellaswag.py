@@ -13,16 +13,25 @@ def main() -> None:
     repo_id = "alexandrainst/m_hellaswag"
 
     # Create a mapping with the word "Choices" in different languages
-    choices_mapping = dict(
-        da="Svarmuligheder",
-        sv="Svarsalternativ",
-        de="Antwortmöglichkeiten",
-        nl="Antwoordopties",
-    )
+    choices_mapping = {
+        "da": "Svarmuligheder",
+        "no": "Svaralternativer",
+        "sv": "Svarsalternativ",
+        "is": "Svarmöguleikar",
+        "de": "Antwortmöglichkeiten",
+        "nl": "Antwoordopties",
+        "en": "Choices",
+    }
 
-    for language in ["da", "sv", "de", "nl"]:
+    for language in choices_mapping.keys():
         # Download the dataset
-        dataset = load_dataset(path=repo_id, name=language, token=True, split="val")
+        try:
+            dataset = load_dataset(path=repo_id, name=language, token=True, split="val")
+        except ValueError as e:
+            if language == "no":
+                dataset = load_dataset(path=repo_id, name="nb", token=True, split="val")
+            else:
+                raise e
         assert isinstance(dataset, Dataset)
 
         # Convert the dataset to a dataframe
@@ -33,7 +42,7 @@ def main() -> None:
         df["text"] = [
             row.ctx.replace("\n", " ").strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            f"a. " + row.endings[0].replace("\n", " ").strip() + "\n"
+            "a. " + row.endings[0].replace("\n", " ").strip() + "\n"
             "b. " + row.endings[1].replace("\n", " ").strip() + "\n"
             "c. " + row.endings[2].replace("\n", " ").strip() + "\n"
             "d. " + row.endings[3].replace("\n", " ").strip()
@@ -95,7 +104,10 @@ def main() -> None:
         )
 
         # Create dataset ID
-        dataset_id = f"ScandEval/hellaswag-{language}-mini"
+        if language == "en":
+            dataset_id = "ScandEval/hellaswag-mini"
+        else:
+            dataset_id = f"ScandEval/hellaswag-{language}-mini"
 
         # Remove the dataset from Hugging Face Hub if it already exists
         try:
