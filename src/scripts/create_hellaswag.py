@@ -13,14 +13,17 @@ def main() -> None:
     repo_id = "alexandrainst/m_hellaswag"
 
     # Create a mapping with the word "Choices" in different languages
-    choices_mapping = dict(
-        da="Svarmuligheder",
-        sv="Svarsalternativ",
-        de="Antwortmöglichkeiten",
-        nl="Antwoordopties",
-    )
+    choices_mapping = {
+        "da": "Svarmuligheder",
+        "no": "Svaralternativer",
+        "sv": "Svarsalternativ",
+        "is": "Svarmöguleikar",
+        "de": "Antwortmöglichkeiten",
+        "nl": "Antwoordopties",
+        "en": "Choices",
+    }
 
-    for language in ["da", "sv", "de", "nl"]:
+    for language in choices_mapping.keys():
         # Download the dataset
         dataset = load_dataset(path=repo_id, name=language, token=True, split="val")
         assert isinstance(dataset, Dataset)
@@ -95,7 +98,10 @@ def main() -> None:
         )
 
         # Create dataset ID
-        dataset_id = f"ScandEval/hellaswag-{language}-mini"
+        if language == "en":
+            dataset_id = "ScandEval/hellaswag-mini"
+        else:
+            dataset_id = f"ScandEval/hellaswag-{language}-mini"
 
         # Remove the dataset from Hugging Face Hub if it already exists
         try:

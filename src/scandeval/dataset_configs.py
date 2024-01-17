@@ -719,6 +719,19 @@ MMLU_DA_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+MMLU_NO_CONFIG = DatasetConfig(
+    name="mmlu-no",
+    pretty_name="the Norwegian part of the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-no-mini",
+    task=KNOW,
+    languages=[NB, NN],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 MMLU_SV_CONFIG = DatasetConfig(
     name="mmlu-sv",
     pretty_name="the Swedish part of the truncated version of MMLU",
@@ -727,6 +740,19 @@ MMLU_SV_CONFIG = DatasetConfig(
     languages=[SV],
     prompt_prefix="Följande är flervalsfrågor (med svar).",
     prompt_template="Fråga: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
+MMLU_IS_CONFIG = DatasetConfig(
+    name="mmlu-is",
+    pretty_name="the Icelandic part of the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-is-mini",
+    task=KNOW,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
+    prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
     max_generated_tokens=3,
@@ -758,6 +784,19 @@ MMLU_NL_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+MMLU_CONFIG = DatasetConfig(
+    name="mmlu",
+    pretty_name="the truncated version of MMLU",
+    huggingface_id="ScandEval/mmlu-mini",
+    task=KNOW,
+    languages=[EN],
+    prompt_prefix="The following are multiple choice questions (with answers).",
+    prompt_template="Question: {text}\nAnswer: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 ARC_DA_CONFIG = DatasetConfig(
     name="arc-da",
     pretty_name="the Danish part of the truncated version of ARC",
@@ -771,6 +810,19 @@ ARC_DA_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+ARC_NO_CONFIG = DatasetConfig(
+    name="arc-no",
+    pretty_name="the Norwegian part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-no-mini",
+    task=KNOW,
+    languages=[NB, NN],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=20,
+    max_generated_tokens=3,
+)
+
 ARC_SV_CONFIG = DatasetConfig(
     name="arc-sv",
     pretty_name="the Swedish part of the truncated version of ARC",
@@ -779,6 +831,19 @@ ARC_SV_CONFIG = DatasetConfig(
     languages=[SV],
     prompt_prefix="Följande är flervalsfrågor (med svar).",
     prompt_template="Fråga: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=20,
+    max_generated_tokens=3,
+)
+
+ARC_IS_CONFIG = DatasetConfig(
+    name="arc-is",
+    pretty_name="the Icelandic part of the truncated version of ARC",
+    huggingface_id="ScandEval/arc-is-mini",
+    task=KNOW,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
+    prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=20,
     max_generated_tokens=3,
@@ -810,8 +875,19 @@ ARC_NL_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-# TODO: Norwegian knowledge
-# TODO: Icelandic knowledge
+ARC_CONFIG = DatasetConfig(
+    name="arc",
+    pretty_name="the truncated version of ARC",
+    huggingface_id="ScandEval/arc-mini",
+    task=KNOW,
+    languages=[EN],
+    prompt_prefix="The following are multiple choice questions (with answers).",
+    prompt_template="Question: {text}\nAnswer: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=20,
+    max_generated_tokens=3,
+)
+
 # TODO: Faroese knowledge
 
 
@@ -819,7 +895,7 @@ ARC_NL_CONFIG = DatasetConfig(
 
 HELLASWAG_DA_CONFIG = DatasetConfig(
     name="hellaswag-da",
-    pretty_name="the Danish part of the truncated version of MMLU",
+    pretty_name="the Danish part of the truncated version of HellaSwag",
     huggingface_id="ScandEval/hellaswag-da-mini",
     task=COMMON_SENSE,
     languages=[DA],
@@ -830,9 +906,22 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+HELLASWAG_NO_CONFIG = DatasetConfig(
+    name="hellaswag-no",
+    pretty_name="the Norwegian part of the truncated version of HellaSwag",
+    huggingface_id="ScandEval/hellaswag-no-mini",
+    task=COMMON_SENSE,
+    languages=[NB, NN],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 HELLASWAG_SV_CONFIG = DatasetConfig(
     name="hellaswag-sv",
-    pretty_name="the Swedish part of the truncated version of MMLU",
+    pretty_name="the Swedish part of the truncated version of HellaSwag",
     huggingface_id="ScandEval/hellaswag-sv-mini",
     task=COMMON_SENSE,
     languages=[SV],
@@ -843,9 +932,22 @@ HELLASWAG_SV_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+HELLASWAG_IS_CONFIG = DatasetConfig(
+    name="hellaswag-is",
+    pretty_name="the Icelandic part of the truncated version of HellaSwag",
+    huggingface_id="ScandEval/hellaswag-is-mini",
+    task=COMMON_SENSE,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
+    prompt_template="Spurningar: {text}\nSvara: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 HELLASWAG_DE_CONFIG = DatasetConfig(
     name="hellaswag-de",
-    pretty_name="the German part of the truncated version of MMLU",
+    pretty_name="the German part of the truncated version of HellaSwag",
     huggingface_id="ScandEval/hellaswag-de-mini",
     task=COMMON_SENSE,
     languages=[DE],
@@ -858,7 +960,7 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
 
 HELLASWAG_NL_CONFIG = DatasetConfig(
     name="hellaswag-nl",
-    pretty_name="the Dutch part of the truncated version of MMLU",
+    pretty_name="the Dutch part of the truncated version of HellaSwag",
     huggingface_id="ScandEval/hellaswag-nl-mini",
     task=COMMON_SENSE,
     languages=[NL],
@@ -869,8 +971,19 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-# TODO: Norwegian common sense reasoning
-# TODO: Icelandic common sense reasoning
+HELLASWAG_CONFIG = DatasetConfig(
+    name="hellaswag",
+    pretty_name="the truncated version of HellaSwag",
+    huggingface_id="ScandEval/hellaswag-mini",
+    task=COMMON_SENSE,
+    languages=[EN],
+    prompt_prefix="The following are multiple choice questions (with answers).",
+    prompt_template="Question: {text}\nAnswer: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 # TODO: Faroese common sense reasoning
 
 

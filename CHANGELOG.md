@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   neither installed nor used when this is the case, and generative few-shot evaluation
   is done using the `transformers` package rather than `vllm`.
 
+### Added
+- Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
+  Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
+  are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
+  en).
+
 
 ## [v9.1.2] - 2024-01-16
 ### Fixed
