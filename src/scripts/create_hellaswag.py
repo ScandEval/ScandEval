@@ -25,7 +25,13 @@ def main() -> None:
 
     for language in choices_mapping.keys():
         # Download the dataset
-        dataset = load_dataset(path=repo_id, name=language, token=True, split="val")
+        try:
+            dataset = load_dataset(path=repo_id, name=language, token=True, split="val")
+        except ValueError as e:
+            if language == "no":
+                dataset = load_dataset(path=repo_id, name="nb", token=True, split="val")
+            else:
+                raise e
         assert isinstance(dataset, Dataset)
 
         # Convert the dataset to a dataframe
