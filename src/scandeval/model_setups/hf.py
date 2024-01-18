@@ -233,10 +233,8 @@ class HFModelSetup:
             else None
         )
 
-        # We hardcode that we're using flash attention for models with "mistral" in
-        # their name, as this is currently one of the only ones that support it
         use_flash_attention = (
-            self.benchmark_config.use_flash_attention or "mistral" in model_id.lower()
+            self.benchmark_config.use_flash_attention
         )
 
         config = self._load_hf_model_config(
