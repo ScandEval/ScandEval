@@ -233,9 +233,7 @@ class HFModelSetup:
             else None
         )
 
-        use_flash_attention = (
-            self.benchmark_config.use_flash_attention
-        )
+        use_flash_attention = self.benchmark_config.use_flash_attention
 
         config = self._load_hf_model_config(
             model_id=model_id,
