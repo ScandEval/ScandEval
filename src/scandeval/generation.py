@@ -207,7 +207,7 @@ def generate_single_iteration(
 
         generation_config = GenerationConfig(
             max_new_tokens=dataset_config.max_generated_tokens,
-            do_sample=False,
+            do_sample=False,  # Equivalent to greedy decoding (temperature=0)
             output_scores=dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS,
             return_dict_in_generate=True,
             bos_token_id=tokenizer.bos_token_id,
