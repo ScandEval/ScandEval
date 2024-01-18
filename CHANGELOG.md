@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now sets the `top_k` parameter in the vLLM `SamplingParams` based on the value it has
   in the `GenerationConfig`. This caused a discrepancy, as vLLM defaulted to -1 and
   `transformers` to 50.
+- When loading a model using `transformers` then the quantized compute dtype is now
+  correctly set to either `bfloat16` or `float16`, depending on the GPU available,
+  rather than the previous `float32`. This does not affect generation performance.
 
 ### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
@@ -32,6 +35,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now uses speculative ngram sampling for text generation when vLLM is not available.
   This has no effect on performance and increases evaluation speed by 3x on generation
   heavy tasks like NER and summarization.
+
+### Removed
+- Removed vLLM performance for now, as it results in worse generation performance. This
+  means that evaluation will be way slower until this can be solved, unfortunately.
 
 
 ## [v9.1.2] - 2024-01-16

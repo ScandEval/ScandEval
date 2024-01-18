@@ -253,6 +253,11 @@ class HFModelSetup:
             and self.benchmark_config.device == torch.device("cuda")
         )
 
+        # TODO: We have temporarily disabled the use of VLLM for the time being, as it
+        # results in poorer generation performance, despite being faster. If we can fix
+        # this then we should re-enable it.
+        use_vllm = False
+
         if use_vllm:
             try:
                 model = VLLMModel(
