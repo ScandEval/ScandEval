@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   defaulting to their 1.0 values. This was due to the fact that this is set in
   `transformers` using the `do_sample=False` argument, which doesn't transfer to the
   other libraries. This has now been set to 0.0.
+- Now catches OpenAI `InvalidRequestError`s.
+- Removed overly long or repetitive samples in the multiple choice datasets, which
+  caused errors when evaluating OpenAI models on them.
 
 ### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and

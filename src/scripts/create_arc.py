@@ -1,9 +1,17 @@
 """Create the ARC-mini datasets and upload them to the HF Hub."""
 
+from collections import Counter
+
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
+from scripts.constants import (
+    MAX_NUM_CHARS_IN_INSTRUCTION,
+    MAX_NUM_CHARS_IN_OPTION,
+    MIN_NUM_CHARS_IN_INSTRUCTION,
+    MIN_NUM_CHARS_IN_OPTION,
+)
 
 
 def main() -> None:
@@ -70,6 +78,72 @@ def main() -> None:
             & test_df["option_b"].notnull()
             & test_df["option_c"].notnull()
             & test_df["option_d"].notnull()
+        ]
+
+        # Remove the samples with overly short or long texts
+        train_df = train_df[
+            (train_df.instruction.str.len() >= MIN_NUM_CHARS_IN_INSTRUCTION)
+            & (train_df.instruction.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
+            & (train_df.option_a.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (train_df.option_a.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (train_df.option_b.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (train_df.option_b.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (train_df.option_c.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (train_df.option_c.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (train_df.option_d.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (train_df.option_d.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+        ]
+        val_df = val_df[
+            (val_df.instruction.str.len() >= MIN_NUM_CHARS_IN_INSTRUCTION)
+            & (val_df.instruction.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
+            & (val_df.option_a.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (val_df.option_a.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (val_df.option_b.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (val_df.option_b.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (val_df.option_c.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (val_df.option_c.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (val_df.option_d.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (val_df.option_d.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+        ]
+        test_df = test_df[
+            (test_df.instruction.str.len() >= MIN_NUM_CHARS_IN_INSTRUCTION)
+            & (test_df.instruction.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
+            & (test_df.option_a.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (test_df.option_a.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (test_df.option_b.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (test_df.option_b.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (test_df.option_c.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (test_df.option_c.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (test_df.option_d.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (test_df.option_d.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+        ]
+
+        def is_repetitive(text: str) -> bool:
+            """Return True if the text is repetitive."""
+            max_repetitions = max(Counter(text.split()).values())
+            return max_repetitions > 50
+
+        # Remove overly repetitive samples
+        train_df = train_df[
+            ~train_df.instruction.apply(is_repetitive)
+            & ~train_df.option_a.apply(is_repetitive)
+            & ~train_df.option_b.apply(is_repetitive)
+            & ~train_df.option_c.apply(is_repetitive)
+            & ~train_df.option_d.apply(is_repetitive)
+        ]
+        val_df = val_df[
+            ~val_df.instruction.apply(is_repetitive)
+            & ~val_df.option_a.apply(is_repetitive)
+            & ~val_df.option_b.apply(is_repetitive)
+            & ~val_df.option_c.apply(is_repetitive)
+            & ~val_df.option_d.apply(is_repetitive)
+        ]
+        test_df = test_df[
+            ~test_df.instruction.apply(is_repetitive)
+            & ~test_df.option_a.apply(is_repetitive)
+            & ~test_df.option_b.apply(is_repetitive)
+            & ~test_df.option_c.apply(is_repetitive)
+            & ~test_df.option_d.apply(is_repetitive)
         ]
 
         # Make a `text` column with all the options in it
