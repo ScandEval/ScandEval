@@ -213,6 +213,9 @@ def generate_single_iteration(
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
             pad_token_id=tokenizer.pad_token_id,
+            # This enables ngram speculation, which improves generation speed up to 3x,
+            # while having exactly the same results as without it
+            prompt_lookup_num_tokens=10,
         )
 
         # Sort the non_cached dataset by the length of the text, to minimise the amount

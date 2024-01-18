@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
   are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
   en).
+- Now uses speculative ngram sampling for text generation when vLLM is not available.
+  This has no effect on performance and increases evaluation speed by 3x on generation
+  heavy tasks like NER and summarization.
 
 
 ## [v9.1.2] - 2024-01-16
