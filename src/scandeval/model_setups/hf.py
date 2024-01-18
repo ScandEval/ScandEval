@@ -1,4 +1,4 @@
-"""Model setup for Hugging Face Hub models. Test!"""
+"""Model setup for Hugging Face Hub models."""
 
 import logging
 import warnings
