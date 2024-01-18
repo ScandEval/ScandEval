@@ -139,9 +139,12 @@ class VLLMModel:
 
         # Define the parameters used for vLLM generation
         max_tokens: int = generation_config.max_new_tokens or 1
+        temperature = (
+            0.0 if not generation_config.do_sample else generation_config.temperature
+        )
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
-            temperature=generation_config.temperature,
+            temperature=temperature,
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
             repetition_penalty=generation_config.repetition_penalty,

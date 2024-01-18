@@ -391,10 +391,13 @@ class OpenAIModel:
 
         model_id = self.model_config.model_id
         max_tokens: int = generation_config.max_new_tokens or 1
+        temperature = (
+            0.0 if not generation_config.do_sample else generation_config.temperature
+        )
         generation_kwargs = dict(
             model=model_id,
             max_tokens=max_tokens,
-            temperature=generation_config.temperature,
+            temperature=temperature,
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
             frequency_penalty=generation_config.repetition_penalty - 1.0,

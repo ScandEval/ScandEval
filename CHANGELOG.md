@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The `vllm` package cannot be installed when CUDA is not available - this is now
   neither installed nor used when this is the case, and generative few-shot evaluation
   is done using the `transformers` package rather than `vllm`.
+- Previously `temperature` was wrongly not set for vLLM and OpenAI models, instead
+  defaulting to their 1.0 values. This was due to the fact that this is set in
+  `transformers` using the `do_sample=False` argument, which doesn't transfer to the
+  other libraries. This has now been set to 0.0.
 
 ### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
