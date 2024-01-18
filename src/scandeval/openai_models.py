@@ -425,12 +425,10 @@ class OpenAIModel:
             except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                 sleep(1)
             except InvalidRequestError as e:
-                logger.info(
-                    "OpenAI refused to generate a completion to the prompt "
-                    f"{prompt!r}. It threw the error: {e!r}. Setting the generation "
-                    "output to an empty string."
+                raise InvalidBenchmark(
+                    "OpenAI refused to generate a completion. It threw the error: "
+                    f"{e!r}."
                 )
-                generation_output = ""
         else:
             raise InvalidBenchmark("OpenAI API is not available")
 
