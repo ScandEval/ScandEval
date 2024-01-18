@@ -73,11 +73,13 @@ class VLLMModel:
 
             max_model_len = 10_000
             if hasattr(hf_model_config, "max_position_embeddings"):
-                max_model_len = min(10_000, hf_model_config.max_position_embeddings)
+                max_model_len = min(
+                    max_model_len, hf_model_config.max_position_embeddings
+                )
             if hasattr(hf_model_config, "model_max_length"):
-                max_model_len = min(10_000, hf_model_config.model_max_length)
+                max_model_len = min(max_model_len, hf_model_config.model_max_length)
             if hasattr(hf_model_config, "n_positions"):
-                max_model_len = min(10_000, hf_model_config.n_positions)
+                max_model_len = min(max_model_len, hf_model_config.n_positions)
 
             self._model = LLM(
                 model=model_config.model_id,
@@ -152,6 +154,8 @@ class VLLMModel:
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             stop=stop_tokens,
             logprobs=10 if generation_config.output_scores else None,
+            skip_special_tokens=False,
+            spaces_between_special_tokens=False,
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which
