@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now catches OpenAI `InvalidRequestError`s.
 - Removed overly long or repetitive samples in the multiple choice datasets, which
   caused errors when evaluating OpenAI models on them.
+- Now sets the `top_k` parameter in the vLLM `SamplingParams` based on the value it has
+  in the `GenerationConfig`. This caused a discrepancy, as vLLM defaulted to -1 and
+  `transformers` to 50.
 
 ### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and

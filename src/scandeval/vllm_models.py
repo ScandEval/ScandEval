@@ -145,6 +145,7 @@ class VLLMModel:
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
             temperature=temperature,
+            top_k=generation_config.top_k,
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
             repetition_penalty=generation_config.repetition_penalty,
