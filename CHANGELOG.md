@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now uses speculative ngram sampling for text generation when vLLM is not available.
   This has no effect on performance and increases evaluation speed by 3x on generation
   heavy tasks like NER and summarization.
+- Added structured generation for the NER task, which enables the models to (almost)
+  always output correct JSON, separating the NER capabilities from the JSON
+  capabilities. JSON can be tested separately in a (future) coding benchmark.
 
 ### Changed
 - Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much

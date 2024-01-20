@@ -9,12 +9,21 @@ from typing import Any, Callable
 
 import torch
 from datasets import Dataset
+from lmformatenforcer.integrations.transformers import (
+    build_transformers_prefix_allowed_tokens_fn,
+)
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from transformers import DataCollator, GenerationConfig, StoppingCriteria
+from transformers import (
+    DataCollator,
+    GenerationConfig,
+    PreTrainedTokenizer,
+    StoppingCriteria,
+)
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .dataset_tasks import NER
 from .exceptions import InvalidBenchmark
 from .model_cache import (
     ModelCache,
@@ -23,7 +32,7 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
-from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
 from .vllm_models import VLLMModel
 
 logger = logging.getLogger(__package__)
@@ -268,6 +277,9 @@ def generate_single_iteration(
                 stopping_criteria=stopping_criteria,
                 generation_config=generation_config,
                 extract_labels_fn=extract_labels_fn,
+                prefix_allowed_tokens_fn=get_prefix_allowed_fn(
+                    dataset_config=dataset_config, tokenizer=tokenizer
+                ),
             )
             cache.add_to_cache(
                 model_input=batch["input_ids"],
@@ -319,6 +331,70 @@ def generate_single_iteration(
     )
 
     return itr_scores
+
+
+def get_prefix_allowed_fn(
+    dataset_config: DatasetConfig, tokenizer: Tokenizer
+) -> Callable[[int, torch.Tensor], torch.Tensor] | None:
+    """Return the prefix allowed function to use for structured generation.
+
+    Args:
+        dataset_config:
+            The dataset config.
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The prefix allowed function.
+    """
+    prefix_allowed_tokens_fns = list()
+
+    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizer):
+        parser = get_ner_parser(dataset_config=dataset_config)
+        json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
+            tokenizer_data=tokenizer, character_level_parser=parser
+        )
+        prefix_allowed_tokens_fns.append(json_prefix_allowed_tokens_fn)
+
+    # Do not allow newlines or tabs in the generated text
+    forbidden_token_ids = list(
+        set(list(tokenizer("\n\n\n\t\t\t", add_special_tokens=False).input_ids))
+    )
+
+    def prefix_allowed_tokens_fn(
+        batch_id: int, input_ids: torch.Tensor
+    ) -> torch.Tensor:
+        """Aggregate of all the prefix allowed token functions.
+
+        Args:
+            batch_id:
+                The batch id.
+            input_ids:
+                The input ids.
+
+        Returns:
+            The prefix allowed tokens.
+        """
+        if not prefix_allowed_tokens_fns:
+            return torch.tensor(
+                [
+                    token_id
+                    for token_id in range(tokenizer.vocab_size)
+                    if token_id not in forbidden_token_ids
+                ]
+            )
+
+        allowed_ids = None
+        for fn in prefix_allowed_tokens_fns:
+            allowed_ids = [
+                input_id
+                for input_id in fn(batch_id, input_ids)
+                if input_id not in forbidden_token_ids
+                and (allowed_ids is None or input_id in allowed_ids)
+            ]
+        return torch.tensor(allowed_ids)
+
+    return prefix_allowed_tokens_fn
 
 
 class StopWordCriteria(StoppingCriteria):
@@ -388,6 +464,7 @@ def generate_batch(
     stopping_criteria: StopWordCriteria,
     generation_config: GenerationConfig,
     extract_labels_fn: Callable[..., list[str]],
+    prefix_allowed_tokens_fn: Callable[[int, torch.Tensor], torch.Tensor] | None,
 ) -> tuple[ModelOutput, list[str | list[str]]]:
     """Evaluate a model on a single batch of examples through generation.
 
@@ -410,6 +487,9 @@ def generate_batch(
             The generation configuration to use.
         extract_labels_fn:
             The function to use to extract the labels from the model output.
+        prefix_allowed_tokens_fn:
+            The function to use to determine which tokens are allowed as a prefix to
+            the generated sequence.
 
     Returns:
         The predictions generated so far, with the predictions for the current batch
@@ -425,6 +505,7 @@ def generate_batch(
             inputs=inputs,
             generation_config=generation_config,
             stopping_criteria=[stopping_criteria],
+            prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
         )
         assert isinstance(model_output, ModelOutput)
 
@@ -467,7 +548,7 @@ def extract_raw_predictions(
     raw_predictions: list[str] = [
         tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True)
         .split("\n\n")[0]
-        .strip("\n ")
+        .strip()
         for completion_ids in generated_sequences.long()
     ]
     return raw_predictions

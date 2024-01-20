@@ -197,8 +197,8 @@ class NamedEntityRecognition(BenchmarkDataset):
             )
 
         return dict(
-            micro_f1=results["overall_f1"],
             micro_f1_no_misc=results_no_misc["overall_f1"],
+            micro_f1=results["overall_f1"],
         )
 
     def _tokenize_and_align_labels(
@@ -600,8 +600,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 The predicted labels.
         """
         raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output["sequences"],
-            tokenizer=tokenizer,
+            generated_sequences=model_output["sequences"], tokenizer=tokenizer
         )
 
         # Attempt to extract the JSON dictionary from the predictions

@@ -260,6 +260,7 @@ class HFModelSetup:
                 model = VLLMModel(
                     model_config=model_config,
                     hf_model_config=config,
+                    dataset_config=dataset_config,
                     model_cache_dir=model_config.model_cache_dir,
                     trust_remote_code=self.benchmark_config.trust_remote_code,
                 )
