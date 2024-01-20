@@ -16,10 +16,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   This has no effect on performance and increases evaluation speed by 3x on generation
   heavy tasks like NER and summarization.
 
-### Removed
-- Removed vLLM performance for now, as it results in worse generation performance. This
-  means that evaluation will be way slower until this can be solved, unfortunately.
-
 ### Changed
 - Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much
   from dataset to dataset to be meaningful as a primary metric. Now uses micro-average
