@@ -39,14 +39,14 @@ NER = DatasetTask(
     supertask="token-classification",
     metrics=[
         MetricConfig(
-            name="micro_f1",
-            pretty_name="Micro-average F1-score",
+            name="micro_f1_no_misc",
+            pretty_name="Micro-average F1-score without MISC tags",
             huggingface_id="seqeval",
             results_key="overall_f1",
         ),
         MetricConfig(
-            name="micro_f1_no_misc",
-            pretty_name="Micro-average F1-score without MISC tags",
+            name="micro_f1",
+            pretty_name="Micro-average F1-score with MISC tags",
             huggingface_id="seqeval",
             results_key="overall_f1",
         ),
