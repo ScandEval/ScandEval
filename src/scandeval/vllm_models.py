@@ -148,17 +148,17 @@ class VLLMModel:
             0.0 if not generation_config.do_sample else generation_config.temperature
         )
         sampling_params = SamplingParams(
+            # What to output
             max_tokens=max_tokens,
-            temperature=temperature,
-            top_k=generation_config.top_k,
-            top_p=generation_config.top_p,
+            logprobs=10 if generation_config.output_scores else None,
             n=generation_config.num_return_sequences,
+            # How to sample
+            temperature=temperature,
+            top_p=generation_config.top_p,
+            top_k=generation_config.top_k,
+            stop=stop_tokens,
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            stop=stop_tokens,
-            logprobs=10 if generation_config.output_scores else None,
-            skip_special_tokens=False,
-            spaces_between_special_tokens=False,
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which
