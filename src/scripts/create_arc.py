@@ -9,6 +9,7 @@ from requests import HTTPError
 from scripts.constants import (
     MAX_NUM_CHARS_IN_INSTRUCTION,
     MAX_NUM_CHARS_IN_OPTION,
+    MAX_REPETITIONS,
     MIN_NUM_CHARS_IN_INSTRUCTION,
     MIN_NUM_CHARS_IN_OPTION,
 )
@@ -121,7 +122,7 @@ def main() -> None:
         def is_repetitive(text: str) -> bool:
             """Return True if the text is repetitive."""
             max_repetitions = max(Counter(text.split()).values())
-            return max_repetitions > 50
+            return max_repetitions > MAX_REPETITIONS
 
         # Remove overly repetitive samples
         train_df = train_df[
