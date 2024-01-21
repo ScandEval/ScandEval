@@ -1,9 +1,18 @@
 """Create the MMLU-mini datasets and upload them to the HF Hub."""
 
+from collections import Counter
+
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
+from scripts.constants import (
+    MAX_NUM_CHARS_IN_INSTRUCTION,
+    MAX_NUM_CHARS_IN_OPTION,
+    MAX_REPETITIONS,
+    MIN_NUM_CHARS_IN_INSTRUCTION,
+    MIN_NUM_CHARS_IN_OPTION,
+)
 from sklearn.model_selection import train_test_split
 
 
@@ -47,6 +56,34 @@ def main() -> None:
 
         # Rename the columns
         df.rename(columns=dict(answer="label"), inplace=True)
+
+        # Remove the samples with overly short or long texts
+        df = df[
+            (df.instruction.str.len() >= MIN_NUM_CHARS_IN_INSTRUCTION)
+            & (df.instruction.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
+            & (df.option_a.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (df.option_a.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (df.option_b.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (df.option_b.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (df.option_c.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (df.option_c.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            & (df.option_d.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+            & (df.option_d.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+        ]
+
+        def is_repetitive(text: str) -> bool:
+            """Return True if the text is repetitive."""
+            max_repetitions = max(Counter(text.split()).values())
+            return max_repetitions > MAX_REPETITIONS
+
+        # Remove overly repetitive samples
+        df = df[
+            ~df.instruction.apply(is_repetitive)
+            & ~df.option_a.apply(is_repetitive)
+            & ~df.option_b.apply(is_repetitive)
+            & ~df.option_c.apply(is_repetitive)
+            & ~df.option_d.apply(is_repetitive)
+        ]
 
         # Extract the category as a column
         df["category"] = df["id"].str.split("/").str[0]

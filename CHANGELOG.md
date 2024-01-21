@@ -7,18 +7,40 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
+  Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
+  are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
+  en).
+- Now uses speculative ngram sampling for text generation when vLLM is not available.
+  This has no effect on performance and increases evaluation speed by 3x on generation
+  heavy tasks like NER and summarization.
+
+### Changed
+- Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much
+  from dataset to dataset to be meaningful as a primary metric. Now uses micro-average
+  F1-score across all tags except the `MISC` tag as a primary metric.
+
 ### Fixed
 - There was a bug where all models were removed from disk prior to benchmarking. This
   will now only happen if the `--clear-model-cache` flag is set.
 - The `vllm` package cannot be installed when CUDA is not available - this is now
   neither installed nor used when this is the case, and generative few-shot evaluation
   is done using the `transformers` package rather than `vllm`.
-
-### Added
-- Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
-  Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
-  are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
-  en).
+- Previously `temperature` was wrongly not set for vLLM and OpenAI models, instead
+  defaulting to their 1.0 values. This was due to the fact that this is set in
+  `transformers` using the `do_sample=False` argument, which doesn't transfer to the
+  other libraries. This has now been set to 0.0.
+- Now catches OpenAI `InvalidRequestError`s.
+- Removed overly long or repetitive samples in the multiple choice datasets, which
+  caused errors when evaluating OpenAI models on them.
+- Now sets the `top_k` parameter in the vLLM `SamplingParams` based on the value it has
+  in the `GenerationConfig`. This caused a discrepancy, as vLLM defaulted to -1 and
+  `transformers` to 50.
+- When loading a model using `transformers` then the quantized compute dtype is now
+  correctly set to either `bfloat16` or `float16`, depending on the GPU available,
+  rather than the previous `float32`. This does not affect generation performance.
+- Fixed formatting of summarization metrics.
 
 
 ## [v9.1.2] - 2024-01-16

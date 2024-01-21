@@ -44,6 +44,7 @@ class VLLMModel:
         model_config: ModelConfig,
         hf_model_config: PretrainedConfig,
         model_cache_dir: str | Path,
+        trust_remote_code: bool,
         tokenizer: PreTrainedTokenizer | None = None,
     ) -> None:
         """Initialize a vLLM model.
@@ -55,6 +56,8 @@ class VLLMModel:
                 A Hugging Face model configuration.
             model_cache_dir:
                 The directory to cache the model in.
+            trust_remote_code:
+                Whether to trust remote code, e.g., from Hugging Face.
             tokenizer:
                 A Hugging Face tokenizer. If None, the tokenizer will need to be
                 loaded separately.
@@ -73,18 +76,20 @@ class VLLMModel:
 
             max_model_len = 10_000
             if hasattr(hf_model_config, "max_position_embeddings"):
-                max_model_len = min(10_000, hf_model_config.max_position_embeddings)
+                max_model_len = min(
+                    max_model_len, hf_model_config.max_position_embeddings
+                )
             if hasattr(hf_model_config, "model_max_length"):
-                max_model_len = min(10_000, hf_model_config.model_max_length)
+                max_model_len = min(max_model_len, hf_model_config.model_max_length)
             if hasattr(hf_model_config, "n_positions"):
-                max_model_len = min(10_000, hf_model_config.n_positions)
+                max_model_len = min(max_model_len, hf_model_config.n_positions)
 
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
                 max_model_len=max_model_len,
                 download_dir=str(model_cache_dir),
-                trust_remote_code=True,
+                trust_remote_code=trust_remote_code,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
@@ -139,15 +144,21 @@ class VLLMModel:
 
         # Define the parameters used for vLLM generation
         max_tokens: int = generation_config.max_new_tokens or 1
+        temperature = (
+            0.0 if not generation_config.do_sample else generation_config.temperature
+        )
         sampling_params = SamplingParams(
+            # What to output
             max_tokens=max_tokens,
-            temperature=generation_config.temperature,
-            top_p=generation_config.top_p,
+            logprobs=10 if generation_config.output_scores else None,
             n=generation_config.num_return_sequences,
+            # How to sample
+            temperature=temperature,
+            top_p=generation_config.top_p,
+            top_k=generation_config.top_k,
+            stop=stop_tokens,
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            stop=stop_tokens,
-            logprobs=10 if generation_config.output_scores else None,
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which

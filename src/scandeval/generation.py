@@ -206,10 +206,14 @@ def generate_single_iteration(
         )
 
         generation_config = GenerationConfig(
+            # What to output
             max_new_tokens=dataset_config.max_generated_tokens,
-            do_sample=False,
             output_scores=dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS,
             return_dict_in_generate=True,
+            # How to sample
+            do_sample=False,  # Equivalent to greedy decoding (temperature=0)
+            prompt_lookup_num_tokens=10,  # n-gram speculation, improves speed by ~3x
+            # Special tokens
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
             pad_token_id=tokenizer.pad_token_id,
@@ -271,6 +275,9 @@ def generate_single_iteration(
                 tokenizer=tokenizer,
             )
             all_preds.extend(extracted_labels)
+
+        if isinstance(itr, tqdm):
+            itr.close()
 
         # Store the cache to disk
         cache.save()

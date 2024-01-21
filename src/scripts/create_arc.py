@@ -1,9 +1,18 @@
 """Create the ARC-mini datasets and upload them to the HF Hub."""
 
+from collections import Counter
+
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
+from scripts.constants import (
+    MAX_NUM_CHARS_IN_INSTRUCTION,
+    MAX_NUM_CHARS_IN_OPTION,
+    MAX_REPETITIONS,
+    MIN_NUM_CHARS_IN_INSTRUCTION,
+    MIN_NUM_CHARS_IN_OPTION,
+)
 
 
 def main() -> None:
@@ -33,98 +42,99 @@ def main() -> None:
                 raise e
         assert isinstance(dataset, DatasetDict)
 
-        # Convert the dataset to a dataframe
-        train_df = dataset["train"].to_pandas()
-        val_df = dataset["val"].to_pandas()
-        test_df = dataset["test"].to_pandas()
-        assert isinstance(train_df, pd.DataFrame)
-        assert isinstance(val_df, pd.DataFrame)
-        assert isinstance(test_df, pd.DataFrame)
+        def prepare_dataframe(dataset: Dataset) -> pd.DataFrame:
+            """Prepare a dataframe from a dataset.
 
-        # Rename the columns
-        train_df.rename(columns=dict(answer="label"), inplace=True)
-        val_df.rename(columns=dict(answer="label"), inplace=True)
-        test_df.rename(columns=dict(answer="label"), inplace=True)
+            Args:
+                dataset:
+                    The dataset to prepare.
 
-        # Remove all samples with a non-null value of `option_e`
-        train_df = train_df[train_df["option_e"].isnull()]
-        val_df = val_df[val_df["option_e"].isnull()]
-        test_df = test_df[test_df["option_e"].isnull()]
+            Returns:
+                A dataframe with the prepared dataset.
+            """
+            df = dataset.to_pandas()
+            assert isinstance(df, pd.DataFrame)
 
-        # Remove all samples with a null value of `option_a`, `option_b`, `option_c` or
-        # `option_d`
-        train_df = train_df[
-            train_df["option_a"].notnull()
-            & train_df["option_b"].notnull()
-            & train_df["option_c"].notnull()
-            & train_df["option_d"].notnull()
-        ]
-        val_df = val_df[
-            val_df["option_a"].notnull()
-            & val_df["option_b"].notnull()
-            & val_df["option_c"].notnull()
-            & val_df["option_d"].notnull()
-        ]
-        test_df = test_df[
-            test_df["option_a"].notnull()
-            & test_df["option_b"].notnull()
-            & test_df["option_c"].notnull()
-            & test_df["option_d"].notnull()
-        ]
+            # Rename the columns
+            df.rename(columns=dict(answer="label"), inplace=True)
 
-        # Make a `text` column with all the options in it
-        train_df["text"] = [
-            row.instruction.replace("\n", " ").strip() + "\n"
-            f"{choices_mapping[language]}:\n"
-            "a. " + row.option_a.replace("\n", " ").strip() + "\n"
-            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
-            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
-            "d. " + row.option_d.replace("\n", " ").strip()
-            for _, row in train_df.iterrows()
-        ]
-        val_df["text"] = [
-            row.instruction.replace("\n", " ").strip() + "\n"
-            f"{choices_mapping[language]}:\n"
-            "a. " + row.option_a.replace("\n", " ").strip() + "\n"
-            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
-            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
-            "d. " + row.option_d.replace("\n", " ").strip()
-            for _, row in val_df.iterrows()
-        ]
-        test_df["text"] = [
-            row.instruction.replace("\n", " ").strip() + "\n"
-            f"{choices_mapping[language]}:\n"
-            "a. " + row.option_a.replace("\n", " ").strip() + "\n"
-            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
-            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
-            "d. " + row.option_d.replace("\n", " ").strip()
-            for _, row in test_df.iterrows()
-        ]
+            # Remove all samples with a non-null value of `option_e`
+            df = df[df["option_e"].isnull()]
 
-        # Only keep the `text` and `label` columns
-        train_df = train_df[["text", "label"]]
-        val_df = val_df[["text", "label"]]
-        test_df = test_df[["text", "label"]]
+            # Remove all samples with a null value of `option_a`, `option_b`,
+            # `option_c` or `option_d`
+            df = df[
+                df["option_a"].notnull()
+                & df["option_b"].notnull()
+                & df["option_c"].notnull()
+                & df["option_d"].notnull()
+            ]
 
-        # Remove duplicates
-        train_df.drop_duplicates(inplace=True)
-        train_df.reset_index(drop=True, inplace=True)
-        val_df.drop_duplicates(inplace=True)
-        val_df.reset_index(drop=True, inplace=True)
-        test_df.drop_duplicates(inplace=True)
-        test_df.reset_index(drop=True, inplace=True)
+            # Remove the samples with overly short or long texts
+            df = df[
+                (df.instruction.str.len() >= MIN_NUM_CHARS_IN_INSTRUCTION)
+                & (df.instruction.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
+                & (df.option_a.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+                & (df.option_a.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+                & (df.option_b.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+                & (df.option_b.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+                & (df.option_c.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+                & (df.option_c.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+                & (df.option_d.str.len() >= MIN_NUM_CHARS_IN_OPTION)
+                & (df.option_d.str.len() <= MAX_NUM_CHARS_IN_OPTION)
+            ]
+
+            def is_repetitive(text: str) -> bool:
+                """Return True if the text is repetitive."""
+                max_repetitions = max(Counter(text.split()).values())
+                return max_repetitions > MAX_REPETITIONS
+
+            # Remove overly repetitive samples
+            df = df[
+                ~df.instruction.apply(is_repetitive)
+                & ~df.option_a.apply(is_repetitive)
+                & ~df.option_b.apply(is_repetitive)
+                & ~df.option_c.apply(is_repetitive)
+                & ~df.option_d.apply(is_repetitive)
+            ]
+
+            # Make a `text` column with all the options in it
+            df["text"] = [
+                row.instruction.replace("\n", " ").strip() + "\n"
+                f"{choices_mapping[language]}:\n"
+                "a. " + row.option_a.replace("\n", " ").strip() + "\n"
+                "b. " + row.option_b.replace("\n", " ").strip() + "\n"
+                "c. " + row.option_c.replace("\n", " ").strip() + "\n"
+                "d. " + row.option_d.replace("\n", " ").strip()
+                for _, row in df.iterrows()
+            ]
+
+            # Only keep the `text` and `label` columns
+            df = df[["text", "label"]]
+
+            # Remove duplicates
+            df.drop_duplicates(inplace=True)
+            df.reset_index(drop=True, inplace=True)
+
+            return df
 
         # Create validation split
         val_size = 256
-        val_df = val_df.sample(n=val_size, random_state=4242)
+        val_df = prepare_dataframe(dataset=dataset["val"]).sample(
+            n=val_size, random_state=4242
+        )
 
         # Create test split
         test_size = 1024
-        test_df = test_df.sample(n=test_size, random_state=4242)
+        test_df = prepare_dataframe(dataset=dataset["test"]).sample(
+            n=test_size, random_state=4242
+        )
 
         # Create train split
         train_size = 1024
-        train_df = train_df.sample(n=train_size, random_state=4242)
+        train_df = prepare_dataframe(dataset=dataset["train"]).sample(
+            n=train_size, random_state=4242
+        )
 
         # Reset the index
         train_df = train_df.reset_index(drop=True)
