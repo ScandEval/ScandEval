@@ -354,12 +354,35 @@ def get_prefix_allowed_fn(
         json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
             tokenizer_data=tokenizer, character_level_parser=parser
         )
-        prefix_allowed_tokens_fns.append(json_prefix_allowed_tokens_fn)
 
-    # Do not allow newlines or tabs in the generated text
-    forbidden_token_ids = list(
-        set(list(tokenizer("\n\n\n\t\t\t", add_special_tokens=False).input_ids))
-    )
+        # Do not allow newlines or tabs in the generated text
+        forbidden_token_ids = list(
+            set(list(tokenizer("\n\n\n\t\t\t", add_special_tokens=False).input_ids))
+        )
+
+        def ner_prefix_allowed_tokens_fn(
+            batch_id: int, input_ids: torch.Tensor
+        ) -> torch.Tensor:
+            """Return the tokens allowed for the current batch.
+
+            Args:
+                batch_id:
+                    The batch index.
+                input_ids:
+                    The input ids.
+
+            Returns:
+                The tokens allowed for the current batch.
+            """
+            return torch.tensor(
+                [
+                    token_id
+                    for token_id in json_prefix_allowed_tokens_fn(batch_id, input_ids)
+                    if token_id not in forbidden_token_ids
+                ]
+            )
+
+        prefix_allowed_tokens_fns.append(ner_prefix_allowed_tokens_fn)
 
     def prefix_allowed_tokens_fn(
         batch_id: int, input_ids: torch.Tensor
@@ -376,21 +399,14 @@ def get_prefix_allowed_fn(
             The prefix allowed tokens.
         """
         if not prefix_allowed_tokens_fns:
-            return torch.tensor(
-                [
-                    token_id
-                    for token_id in range(tokenizer.vocab_size)
-                    if token_id not in forbidden_token_ids
-                ]
-            )
+            return torch.tensor(list(range(tokenizer.vocab_size)))
 
         allowed_ids = None
         for fn in prefix_allowed_tokens_fns:
             allowed_ids = [
                 input_id
                 for input_id in fn(batch_id, input_ids)
-                if input_id not in forbidden_token_ids
-                and (allowed_ids is None or input_id in allowed_ids)
+                if allowed_ids is None or input_id in allowed_ids
             ]
         return torch.tensor(allowed_ids)
 

@@ -275,21 +275,25 @@ class VLLMModel:
             )
             logits_processors.append(logits_processor)
 
-        # Do not allow newlines or tabs in the generated text
-        assert self.tokenizer is not None
-        forbidden_token_ids = list(
-            set(
-                list(self.tokenizer("\n\n\n\t\t\t", add_special_tokens=False).input_ids)
+            # Do not allow newlines or tabs in the generated text
+            assert self.tokenizer is not None
+            forbidden_token_ids = list(
+                set(
+                    list(
+                        self.tokenizer(
+                            "\n\n\n\t\t\t", add_special_tokens=False
+                        ).input_ids
+                    )
+                )
             )
-        )
 
-        def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
-            mask = torch.zeros_like(scores)
-            for forbidden_token_id in forbidden_token_ids:
-                mask[forbidden_token_id] = -1e9
-            return scores + mask
+            def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
+                mask = torch.zeros_like(scores)
+                for forbidden_token_id in forbidden_token_ids:
+                    mask[forbidden_token_id] = -1e9
+                return scores + mask
 
-        logits_processors.append(no_tabs_or_newlines)
+            logits_processors.append(no_tabs_or_newlines)
 
         return logits_processors
 
