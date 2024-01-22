@@ -63,10 +63,10 @@ class OpenAITokenizer:
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
-        encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
-        self.bos_token = encoding.decode([self.bos_token_id])
+        self.encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
-        self.eos_token = encoding.decode([self.eos_token_id])
+        self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
@@ -84,12 +84,11 @@ class OpenAITokenizer:
         truncation = kwargs.get("truncation", False)
         start_idx = -self.model_max_length if truncation else 0
 
-        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         text_list = [text] if isinstance(text, str) else text
         encoded_inputs = [
             BatchEncoding(
                 dict(
-                    input_ids=encoding.encode(
+                    input_ids=self.encoding.encode(
                         text,
                         allowed_special={
                             self.bos_token,
@@ -117,11 +116,10 @@ class OpenAITokenizer:
         Returns:
             The decoded text.
         """
-        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         token_ids = [
             token_id for token_id in token_ids if token_id != self.pad_token_id
         ]
-        return encoding.decode(tokens=token_ids)
+        return self.encoding.decode(tokens=token_ids)
 
     def batch_decode(self, sequences: list[list[int]], **kwargs) -> list[str]:
         """Decode batched token IDs.
@@ -279,6 +277,11 @@ class OpenAITokenizer:
         )
 
         return BatchEncoding(dict(input_ids=padded_input_ids))
+
+    @property
+    def vocab_size(self) -> int:
+        """Return the size of the vocabulary."""
+        return self.encoding.max_token_value + 1
 
 
 class OpenAIModel:

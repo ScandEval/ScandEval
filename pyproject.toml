@@ -45,6 +45,7 @@ evaluate = ">=0.4.1,<1.0.0"
 vllm = {markers="sys_platform != 'darwin'", version = ">=0.2.7,<1.0.0"}
 demjson3 = "^3.0.6"
 pydantic = ">=1.10.0,<3.0.0"
+lm-format-enforcer = ">=0.8.2,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pdoc = "^14.0.0"
