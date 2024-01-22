@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   correctly set to either `bfloat16` or `float16`, depending on the GPU available,
   rather than the previous `float32`. This does not affect generation performance.
 - Fixed formatting of summarization metrics.
+- Removed print output from `bert_score` during summarization metric computation.
 
 
 ## [v9.1.2] - 2024-01-16

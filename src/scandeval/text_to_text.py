@@ -13,7 +13,7 @@ from transformers.utils import ModelOutput
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import raise_if_model_output_contains_nan_values
+from .utils import HiddenPrints, raise_if_model_output_contains_nan_values
 
 logger = logging.getLogger(__package__)
 
@@ -108,11 +108,12 @@ class TextToText(BenchmarkDataset):
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
-            score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
-            )
+            with HiddenPrints():
+                score_dict: dict[str, float] | None = metric.compute(
+                    predictions=predictions,
+                    references=labels,
+                    **cfg.compute_kwargs,
+                )
 
             # The metric returns None if we are running on multi-GPU and the current
             # process is not the main process
