@@ -122,7 +122,7 @@ SUMM = DatasetTask(
             compute_kwargs=dict(model_type="microsoft/mdeberta-v3-base", device="cpu"),
         ),
         MetricConfig(
-            name="rouge-l",
+            name="rouge_l",
             pretty_name="ROUGE-L",
             huggingface_id="rouge",
             results_key="rougeL",
