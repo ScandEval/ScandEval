@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added structured generation for the NER task, which enables the models to (almost)
   always output correct JSON, separating the NER capabilities from the JSON
   capabilities. JSON can be tested separately in a (future) coding benchmark.
+- Added ROUGE-1 and ROUGE-2 as additional secondary metrics for the summarisation task.
 
 ### Changed
 - Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much
