@@ -277,15 +277,14 @@ class VLLMModel:
 
             # Do not allow newlines or tabs in the generated text
             assert self.tokenizer is not None
-            forbidden_token_ids = list(
-                set(
-                    list(
-                        self.tokenizer(
-                            "\n\n\n\t\t\t", add_special_tokens=False
-                        ).input_ids
+            forbidden_token_ids = list()
+            for raw_token in ["\n", "\t"]:
+                for num_tokens in range(1, 4):
+                    token = raw_token * num_tokens
+                    forbidden_token_ids.extend(
+                        list(self.tokenizer(token, add_special_tokens=False).input_ids)
                     )
-                )
-            )
+            forbidden_token_ids = list(set(forbidden_token_ids))
 
             def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
                 mask = torch.zeros_like(scores)
