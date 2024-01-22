@@ -355,14 +355,12 @@ def get_prefix_allowed_fn(
             tokenizer_data=tokenizer, character_level_parser=parser
         )
 
-        # Do not allow newlines or tabs in the generated text
         forbidden_token_ids = list()
-        for raw_token in ["\n", "\t"]:
-            for num_tokens in range(1, 4):
-                token = raw_token * num_tokens
-                forbidden_token_ids.extend(
-                    list(tokenizer(token, add_special_tokens=False).input_ids)
-                )
+        forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
+        for forbidden_token in forbidden_tokens:
+            forbidden_token_ids.extend(
+                list(tokenizer(forbidden_token, add_special_tokens=False).input_ids)
+            )
         forbidden_token_ids = list(set(forbidden_token_ids))
 
         def ner_prefix_allowed_tokens_fn(
