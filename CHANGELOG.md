@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   which has been set in the model's Hugging Face tokenizer config. If not set then we
   won't use any chat template, and will instead separate examples with double newlines,
   as with completion models.
+- Now adds `scandeval_version` to the output JSONL results, to make it easier to
+  determine when outdated results need re-benchmarking.
 
 ### Changed
 - Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much
