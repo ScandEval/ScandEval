@@ -257,6 +257,7 @@ class SequenceClassification(BenchmarkDataset):
         prompt_prefix = ""
         if self.dataset_config.prompt_prefix:
             prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
 
         # Add the texts from the examples to the prompts. We remove newlines from the
         # examples as they have the special function to separate the few-shot examples
@@ -267,8 +268,6 @@ class SequenceClassification(BenchmarkDataset):
             ).strip()
             for text in examples["text"]
         ]
-
-        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
         final_prompts = [
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]

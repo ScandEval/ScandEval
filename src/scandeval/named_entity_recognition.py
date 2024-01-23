@@ -521,7 +521,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -530,10 +530,12 @@ class NamedEntityRecognition(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to tokenise the examples. Used to apply the
+                chat template if the model we're benchmarking is instruction tuned.
 
         Returns:
-            dict:
-                The examples with the few-shot prompt applied.
+            The examples with the few-shot prompt applied.
         """
 
         def create_label(example: dict) -> str:
@@ -572,10 +574,19 @@ class NamedEntityRecognition(BenchmarkDataset):
             )
             for tokens in examples["tokens"]
         ]
-        examples["text"] = [
+        final_prompts = [
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
 
+        if tokenizer.chat_template is not None:
+            final_prompts = [
+                tokenizer.apply_chat_template(
+                    conversation=[dict(role="user", content=prompt)],
+                )
+                for prompt in final_prompts
+            ]
+
+        examples["text"] = final_prompts
         return examples
 
     def _extract_labels_from_generation(
