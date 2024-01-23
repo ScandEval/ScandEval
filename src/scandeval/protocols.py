@@ -155,12 +155,14 @@ class Tokenizer(Protocol):
         """
         ...
 
-    def apply_chat_template(self, conversation: Conversation) -> str:
+    def apply_chat_template(self, conversation: Conversation, **kwargs) -> str:
         """Apply a chat template to a conversation.
 
         Args:
             conversation:
                 The conversation to apply the chat template to.
+            **kwargs:
+                Keyword arguments to pass to the tokenizer.
 
         Returns:
             The conversation with the chat template applied.

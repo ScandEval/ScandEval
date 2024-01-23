@@ -17,7 +17,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .dataset_tasks import NER
-from .utils import HiddenPrints, clear_memory, get_ner_parser
+from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
@@ -76,7 +76,7 @@ class VLLMModel:
         self.dataset_config = dataset_config
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
-        with warnings.catch_warnings(), HiddenPrints():
+        with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
 
             # This is required to be able to re-initialize the model, in case we

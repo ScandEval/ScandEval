@@ -273,11 +273,38 @@ class SequenceClassification(BenchmarkDataset):
         ]
 
         if tokenizer.chat_template is not None:
+            conversation = [
+                dict(role="user", content=prompt_prefix.strip()),
+                dict(role="assistant", content="Understood."),
+            ]
+            for few_shot_example in few_shot_examples:
+                conversation.extend(
+                    [
+                        dict(
+                            role="user",
+                            content=re.sub(
+                                r"\n+", "\n", few_shot_example["text"]
+                            ).strip(),
+                        ),
+                        dict(
+                            role="assistant",
+                            content=label_mapping[few_shot_example["label"].lower()],
+                        ),
+                    ]
+                )
             final_prompts = [
                 tokenizer.apply_chat_template(
-                    conversation=[dict(role="user", content=prompt)],
+                    conversation=conversation
+                    + [
+                        dict(
+                            role="user",
+                            content=re.sub(r"\n+", "\n", text).strip(),
+                        )
+                    ],
+                    tokenize=False,
+                    add_generation_prompt=True,
                 )
-                for prompt in final_prompts
+                for text in examples["text"]
             ]
 
         examples["text"] = final_prompts

@@ -284,12 +284,14 @@ class OpenAITokenizer:
         """Return the size of the vocabulary."""
         return self.encoding.max_token_value + 1
 
-    def apply_chat_template(self, conversation: Conversation) -> str:
+    def apply_chat_template(self, conversation: Conversation, **kwargs) -> str:
         """Apply a chat template to a conversation.
 
         Args:
             conversation:
                 The conversation to apply the chat template to.
+            **kwargs:
+                Keyword arguments to pass to the tokenizer.
 
         Returns:
             The conversation with the chat template applied.
