@@ -459,6 +459,7 @@ class BenchmarkDataset(ABC):
                         few_shot_fn = partial(
                             self._apply_few_shot_prompt,
                             few_shot_examples=few_shot_examples,
+                            tokenizer=tokenizer,
                         )
                         test = test.map(
                             few_shot_fn, batched=True, load_from_cache_file=False
