@@ -1,5 +1,6 @@
 """Class that benchmarks Scandinavian language models."""
 
+import importlib.metadata
 import json
 import logging
 import re
@@ -35,6 +36,7 @@ class BenchmarkResult(BaseModel):
     generative: bool
     few_shot: bool
     validation_split: bool
+    scandeval_version: str = importlib.metadata.version(__package__)
 
     @classmethod
     def from_dict(cls, config: dict) -> "BenchmarkResult":

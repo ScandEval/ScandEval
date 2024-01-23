@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Generator, TypedDict
 
 import pytest
+from scandeval import __version__
 from scandeval.benchmarker import BenchmarkResult, model_has_been_benchmarked
 from scandeval.types import ScoreDict
 
@@ -65,6 +66,7 @@ class TestBenchmarkResult:
         assert benchmark_result.dataset_languages == ["da"]
         assert benchmark_result.task == "task"
         assert benchmark_result.results == dict()
+        assert benchmark_result.scandeval_version == __version__
 
     @pytest.mark.parametrize(
         argnames=["config", "expected"],
@@ -164,6 +166,7 @@ class TestBenchmarkResult:
                 generative=benchmark_result.generative,
                 few_shot=benchmark_result.few_shot,
                 validation_split=benchmark_result.validation_split,
+                scandeval_version=benchmark_result.scandeval_version,
             )
         )
         assert results_path.read_text() == f"\n{json_str}"
