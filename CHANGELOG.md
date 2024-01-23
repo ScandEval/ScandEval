@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added structured generation for the NER task, which enables the models to (almost)
   always output correct JSON, separating the NER capabilities from the JSON
   capabilities. JSON can be tested separately in a (future) coding benchmark.
+- When benchmarking instruction tuned generative models, we now use the chat template
+  which has been set in the model's Hugging Face tokenizer config. If not set then we
+  won't use any chat template, and will instead separate examples with double newlines,
+  as with completion models.
 
 ### Changed
 - Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much

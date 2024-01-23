@@ -12,6 +12,7 @@ from transformers import (
 from transformers.utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .types import Conversation
 
 
 @runtime_checkable
@@ -31,6 +32,7 @@ class Tokenizer(Protocol):
     pad_token_id: int
     unk_token_id: int
     is_fast: bool
+    chat_template: str | None
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Call the tokenizer.
@@ -150,6 +152,18 @@ class Tokenizer(Protocol):
 
         Returns:
             The padded encoded inputs.
+        """
+        ...
+
+    def apply_chat_template(self, conversation: Conversation) -> str:
+        """Apply a chat template to a conversation.
+
+        Args:
+            conversation:
+                The conversation to apply the chat template to.
+
+        Returns:
+            The conversation with the chat template applied.
         """
         ...
 

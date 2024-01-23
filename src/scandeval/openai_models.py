@@ -20,7 +20,7 @@ from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, ModelConfig
 from .exceptions import InvalidBenchmark
-from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
+from .types import Conversation, is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 logger = logging.getLogger(__package__)
 
@@ -42,6 +42,7 @@ class OpenAITokenizer:
     pad_token = "<pad>"
     padding_side = "left"
     is_fast = False
+    chat_template: str | None = None
 
     def __init__(
         self, model_config: ModelConfig, hf_model_config: PretrainedConfig
@@ -282,6 +283,18 @@ class OpenAITokenizer:
     def vocab_size(self) -> int:
         """Return the size of the vocabulary."""
         return self.encoding.max_token_value + 1
+
+    def apply_chat_template(self, conversation: Conversation) -> str:
+        """Apply a chat template to a conversation.
+
+        Args:
+            conversation:
+                The conversation to apply the chat template to.
+
+        Returns:
+            The conversation with the chat template applied.
+        """
+        raise NotImplementedError
 
 
 class OpenAIModel:
