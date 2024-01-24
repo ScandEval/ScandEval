@@ -47,6 +47,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   rather than the previous `float32`. This does not affect generation performance.
 - Fixed formatting of summarization metrics.
 - Removed print output from `bert_score` during summarization metric computation.
+- Now clears GPU memory properly after finishing the benchmark of a generative model
+  with vLLM.
 
 
 ## [v9.1.2] - 2024-01-16

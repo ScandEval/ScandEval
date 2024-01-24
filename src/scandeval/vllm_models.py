@@ -17,7 +17,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .dataset_tasks import NER
-from .utils import HiddenPrints, clear_memory, get_ner_parser
+from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
@@ -76,7 +76,7 @@ class VLLMModel:
         self.dataset_config = dataset_config
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
-        with warnings.catch_warnings(), HiddenPrints():
+        with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
 
             # This is required to be able to re-initialize the model, in case we
@@ -104,6 +104,13 @@ class VLLMModel:
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
             )
+
+    def __del__(self) -> None:
+        """Clear the GPU memory used by the model, and remove the model itself."""
+        destroy_model_parallel()
+        del self._model
+        clear_memory()
+        del self
 
     def generate(
         self,
