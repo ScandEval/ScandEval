@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v9.2.0] - 2024-01-24
 ### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
   Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
