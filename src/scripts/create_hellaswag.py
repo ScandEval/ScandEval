@@ -95,8 +95,11 @@ def main() -> None:
         df = df[df["activity_label"].isin(acceptable_activity_labels)]
 
         # Remove duplicates
-        df.drop_duplicates(subset="ctx", inplace=True)
+        df.drop_duplicates(subset="text", inplace=True)
         df.reset_index(drop=True, inplace=True)
+
+        # Make the `label` column case-consistent with the `text` column
+        df.label = df.label.str.lower()
 
         # Only keep the columns `text`, `label` and `activity_label`
         df = df[["text", "label", "activity_label"]]

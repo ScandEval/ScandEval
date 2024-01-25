@@ -99,6 +99,9 @@ def main() -> None:
             for _, row in df.iterrows()
         ]
 
+        # Make the `label` column case-consistent with the `text` column
+        df.label = df.label.str.lower()
+
         # Only keep the `text`, `label` and `category` columns
         df = df[["text", "label", "category"]]
 
