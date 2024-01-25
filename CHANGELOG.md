@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+
+
 ## [v9.2.0] - 2024-01-24
 ### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
