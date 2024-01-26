@@ -421,7 +421,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                     self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
                 )
                 dataset = dataset.map(
-                    few_shot_fn, batched=True, load_from_cache_file=False
+                    few_shot_fn,
+                    batched=True,
+                    load_from_cache_file=False,
+                    keep_in_memory=True,
                 )
 
             def tokenise(examples: dict) -> BatchEncoding:
@@ -432,7 +435,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                 )
 
             tokenised_dataset = dataset.map(
-                tokenise, batched=True, load_from_cache_file=False
+                tokenise,
+                batched=True,
+                load_from_cache_file=False,
+                keep_in_memory=True,
             )
 
         else:
@@ -442,7 +448,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                 label2id=kwargs["hf_model_config"].label2id,
             )
             tokenised_dataset = dataset.map(
-                map_fn, batched=True, load_from_cache_file=False
+                map_fn,
+                batched=True,
+                load_from_cache_file=False,
+                keep_in_memory=True,
             )
 
         return tokenised_dataset

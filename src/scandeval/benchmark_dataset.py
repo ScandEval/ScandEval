@@ -461,7 +461,10 @@ class BenchmarkDataset(ABC):
                             few_shot_examples=few_shot_examples,
                         )
                         test = test.map(
-                            few_shot_fn, batched=True, load_from_cache_file=False
+                            few_shot_fn,
+                            batched=True,
+                            load_from_cache_file=False,
+                            keep_in_memory=True,
                         )
 
                     prepared_test = self._preprocess_data(
@@ -478,6 +481,7 @@ class BenchmarkDataset(ABC):
                             ),
                             batched=True,
                             load_from_cache_file=False,
+                            keep_in_memory=True,
                         )
 
                     prepared_tests.append(prepared_test)
