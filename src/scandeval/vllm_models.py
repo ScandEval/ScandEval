@@ -223,7 +223,7 @@ class VLLMModel:
                     len(raw_output.outputs[0].logprobs) for raw_output in raw_outputs
                 )
                 scores = [
-                    torch.full(size=(batch_size, vocab_size), fill_value=-1e9)
+                    torch.full(size=(batch_size, vocab_size), fill_value=-1e3)
                     for _ in range(max_seq_len)
                 ]
 
@@ -298,7 +298,7 @@ class VLLMModel:
             def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
                 mask = torch.zeros_like(scores)
                 for forbidden_token_id in forbidden_token_ids:
-                    mask[forbidden_token_id] = -1e9
+                    mask[forbidden_token_id] = -1e3
                 return scores + mask
 
             logits_processors.append(no_tabs_or_newlines)
