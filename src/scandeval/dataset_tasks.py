@@ -137,16 +137,16 @@ KNOW = DatasetTask(
     supertask="sequence-classification",
     metrics=[
         MetricConfig(
-            name="accuracy",
-            pretty_name="Accuracy",
-            huggingface_id="accuracy",
-            results_key="accuracy",
-        ),
-        MetricConfig(
             name="mcc",
             pretty_name="Matthew's Correlation Coefficient",
             huggingface_id="matthews_correlation",
             results_key="matthews_correlation",
+        ),
+        MetricConfig(
+            name="accuracy",
+            pretty_name="Accuracy",
+            huggingface_id="accuracy",
+            results_key="accuracy",
         ),
     ],
     labels=["a", "b", "c", "d"],
