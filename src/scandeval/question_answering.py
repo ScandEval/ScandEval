@@ -85,6 +85,7 @@ class QuestionAnswering(BenchmarkDataset):
                 batch_size=10,
                 remove_columns=cols_to_remove,
                 load_from_cache_file=False,
+                keep_in_memory=True,
             )
 
         except NotImplementedError as e:

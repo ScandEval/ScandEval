@@ -93,7 +93,10 @@ class SequenceClassification(BenchmarkDataset):
                 label2id=kwargs["hf_model_config"].label2id,
             )
             return tokenised.map(
-                numericalise, batched=True, load_from_cache_file=False
+                numericalise,
+                batched=True,
+                load_from_cache_file=False,
+                keep_in_memory=True,
             ).remove_columns(["text"])
         else:
             return tokenised

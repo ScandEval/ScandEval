@@ -52,7 +52,12 @@ class TextToText(BenchmarkDataset):
         def tokenise(examples: dict) -> BatchEncoding:
             return tokenizer(text=examples["text"], truncation=True, padding=False)
 
-        tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
+        tokenised = dataset.map(
+            tokenise,
+            batched=True,
+            load_from_cache_file=False,
+            keep_in_memory=True,
+        )
 
         return tokenised
 
