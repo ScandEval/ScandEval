@@ -48,15 +48,14 @@ pydantic = ">=1.10.0,<3.0.0"
 lm-format-enforcer = ">=0.8.2,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
-pdoc = "^14.0.0"
-pytest = "^7.4.0"
-pre-commit = "^3.3.3"
-black = "^23.7.0"
+pytest = ">=7.4.0"
+pre-commit = ">=3.3.3"
+black = ">=24.1.0"
 lxml = "^4.9.3"
-pytest-cov = "^4.1.0"
-readme-coverage-badger = ">=0.1.2,<1.0.0"
-ruff = ">=0.1.6,<1.0.0"
-mypy = "^1.7.1"
+pytest-cov = ">=4.1.0"
+readme-coverage-badger = ">=0.1.2"
+ruff = ">=0.1.13"
+mypy = ">=1.8.0"
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"
