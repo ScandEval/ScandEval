@@ -108,7 +108,6 @@ class VLLMModel:
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
-        del self._model
         clear_memory()
         del self
 

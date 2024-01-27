@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-### Fixed
+### Fixed
 - Prevents FP16 overflow by using -1e3 instead of -1e9 for ~0% probability logprobs
   during generation with vLLM.
 - Avoids excessive disk usage by not caching processed datasets to disk, as we are
   never using the cached versions anyway.
+- Fixed an issue with OOM errors when changing from benchmarking one generative model
+  to another.
 
 ### Changed
 - Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
