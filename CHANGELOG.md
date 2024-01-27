@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   never using the cached versions anyway.
 - Fixed an issue with OOM errors when changing from benchmarking one generative model
   to another.
+- When testing a model's maximum sequence length, we put dummy inputs into them. This
+  causes errors if the dummy inputs are one of the special tokens. Sometimes these have
+  not been set up properly in the tokenizer config, causing errors during this process.
+  We now, as a precaution, assume that (at least) the first 10 tokens are special
+  tokens, which prevents errors in most cases.
 
 ### Changed
 - Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC

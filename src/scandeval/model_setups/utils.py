@@ -153,8 +153,11 @@ def align_model_and_tokenizer(
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
-    first_non_special_token = next(
-        i for i in range(initial_max_length) if i not in tokenizer.all_special_ids
+    first_non_special_token = max(
+        10,
+        next(
+            i for i in range(initial_max_length) if i not in tokenizer.all_special_ids
+        ),
     )
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
