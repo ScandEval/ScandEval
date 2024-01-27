@@ -7,7 +7,7 @@ import torch.nn as nn
 from transformers import PreTrainedModel, PreTrainedTokenizer
 
 from ..exceptions import InvalidBenchmark
-from ..utils import model_is_generative
+from ..utils import DUMMY_FILL_VALUE, model_is_generative
 
 
 def get_children_of_module(
@@ -153,17 +153,11 @@ def align_model_and_tokenizer(
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
-    first_non_special_token = max(
-        10,
-        next(
-            i for i in range(initial_max_length) if i not in tokenizer.all_special_ids
-        ),
-    )
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
         dummy_inputs = torch.full(
             size=(1, max_length),
-            fill_value=first_non_special_token,
+            fill_value=DUMMY_FILL_VALUE,
             dtype=torch.long,
             device=model.device,
         )
