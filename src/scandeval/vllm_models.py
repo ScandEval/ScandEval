@@ -13,6 +13,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .dataset_tasks import NER
+from .protocols import Tokenizer
 from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
@@ -303,6 +304,16 @@ class VLLMModel:
             logits_processors.append(no_tabs_or_newlines)
 
         return logits_processors
+
+    def set_tokenizer(self, tokenizer: Tokenizer) -> None:
+        """Set the tokenizer to use for generation.
+
+        Args:
+            tokenizer:
+                The tokenizer to use for generation.
+        """
+        self.tokenizer = tokenizer
+        self._model.set_tokenizer(tokenizer)
 
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""

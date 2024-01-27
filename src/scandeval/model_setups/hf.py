@@ -396,7 +396,7 @@ class HFModelSetup:
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         if use_vllm:
-            model.tokenizer = tokenizer
+            model.set_tokenizer(tokenizer=tokenizer)
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
@@ -506,6 +506,11 @@ class HFModelSetup:
             Tokenizer:
                 The loaded tokenizer.
         """
+        # TEMP: `mlabonne/NeuralBeagle14-7B` has the wrong tokenizer config. This hack
+        # fixes it, as it is based on Mistral-7B-v0.1
+        if model_id == "mlabonne/NeuralBeagle14-7B":
+            model_id = "mistralai/Mistral-7B-v0.1"
+
         # If the model is a subclass of a RoBERTa model then we have to add a prefix
         # space to the tokens, by the way the model is constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]

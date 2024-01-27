@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   that the 100th token ID is not a special token.
 - An import depended on `vllm`, which is not installed on non-Linux devices, causing an
   `ImportError`. This has now been removed.
+- A temporary fix has been included for the `NeuralBeagle14-7B` model, as the
+  tokenization configuration wasn't set properly.
 
 ### Changed
 - Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
