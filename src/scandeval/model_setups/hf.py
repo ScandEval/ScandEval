@@ -291,7 +291,9 @@ class HFModelSetup:
                 trust_remote_code=self.benchmark_config.trust_remote_code,
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
-                use_flash_attention_2=use_flash_attention,
+                attn_implementation=(
+                    "flash_attention_2" if use_flash_attention else None
+                ),
             )
 
             # These are used when a timeout occurs
