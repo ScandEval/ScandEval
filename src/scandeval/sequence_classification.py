@@ -232,7 +232,7 @@ class SequenceClassification(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -241,6 +241,8 @@ class SequenceClassification(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.
@@ -265,13 +267,38 @@ class SequenceClassification(BenchmarkDataset):
         new_prompts = [
             self.dataset_config.prompt_template.format(
                 text=re.sub(r"\n+", "\n", text).strip(), label=""
-            ).strip()
+            )
             for text in examples["text"]
         ]
 
-        examples["text"] = [
+        final_prompts = [
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
+
+        # Determine if we should strip the prompts. This is the case if the tokenizer
+        # needs to include the space as part of the label token
+        labels_to_be_generated = self.dataset_config.prompt_label_mapping.values()
+        strip_prompts = True
+        for label in labels_to_be_generated:
+            label_tokens = tokenizer(label, add_special_tokens=False).input_ids
+            label_tokens_with_prefix_space = tokenizer(
+                " " + label, add_special_tokens=False
+            ).input_ids
+            label_tokens_with_prefix_space_ends_with_label_tokens = (
+                label_tokens_with_prefix_space[-len(label_tokens) :] == label_tokens
+            )
+            if label_tokens_with_prefix_space_ends_with_label_tokens:
+                strip_prompts = False
+                break
+
+        tokenizer.needs_prefix_space_in_labels = not strip_prompts  # type: ignore
+        if strip_prompts:
+            new_prompts = [prompt.strip() for prompt in new_prompts]
+            logger.debug("Stripping prompts for model")
+        else:
+            logger.debug("Not stripping prompts for model")
+
+        examples["text"] = final_prompts
 
         return examples
 
@@ -352,6 +379,9 @@ def get_closest_logprobs_labels(
     for idx, candidate_label in enumerate(candidate_labels):
         # We only use the first token to represent the logprob value of the entire
         # label.
+        label_ready_for_tokenization = candidate_label.lower()
+        if tokenizer.needs_prefix_space_in_labels:  # type: ignore
+            label_ready_for_tokenization = " " + label_ready_for_tokenization
         candidate_label_ids: list[list[int]] = tokenizer(
             [candidate_label.lower()], add_special_tokens=False
         )["input_ids"]
