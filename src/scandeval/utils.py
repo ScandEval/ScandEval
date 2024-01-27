@@ -43,7 +43,7 @@ except ImportError:
 
 
 # This is used as input to generative models; it cannot be a special token
-DUMMY_FILL_VALUE = 28723
+DUMMY_FILL_VALUE = 100
 
 
 GENERATIVE_MODEL_TASKS = [
