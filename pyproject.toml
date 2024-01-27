@@ -37,7 +37,7 @@ einops = ">=0.6.0,<1.0.0"
 bitsandbytes = {markers="sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.40.0.post4,<1.0.0"}
 requests = "^2.31.0"
 torch = "^2.1.1"
-transformers = "^4.36.2"
+transformers = "^4.37.1"
 accelerate = ">=0.23.0,<1.0.0"
 rouge-score = ">=0.1.2,<1.0.0"
 bert-score = ">=0.3.13,<1.0.0"
