@@ -174,10 +174,6 @@ def align_model_and_tokenizer(
                 model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long())
                 break
 
-            except RuntimeError:
-                breakpoint()
-                pass
-
             # This happens if `max_length` is too large
             except IndexError:
                 continue
