@@ -7,10 +7,6 @@ from types import MethodType
 from typing import Callable
 
 import torch
-from lmformatenforcer.integrations.vllm import (
-    build_vllm_logits_processor,
-    build_vllm_token_enforcer_tokenizer_data,
-)
 from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
 from transformers.utils import ModelOutput
@@ -22,6 +18,10 @@ from .utils import clear_memory, get_ner_parser
 logger = logging.getLogger(__package__)
 
 try:
+    from lmformatenforcer.integrations.vllm import (
+        build_vllm_logits_processor,
+        build_vllm_token_enforcer_tokenizer_data,
+    )
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
