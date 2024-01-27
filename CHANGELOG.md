@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   causes errors if the dummy inputs are one of the special tokens. Since the special
   tokens have not always been set up in the tokenizer, we instead rely on a heuristic
   that the 100th token ID is not a special token.
+- An import depended on `vllm`, which is not installed on non-Linux devices, causing an
+  `ImportError`. This has now been removed.
 
 ### Changed
 - Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
