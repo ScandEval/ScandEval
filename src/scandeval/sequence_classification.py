@@ -164,9 +164,11 @@ class SequenceClassification(BenchmarkDataset):
             for label, prompt_label in self.dataset_config.prompt_label_mapping.items()
         }
         predictions = [
-            id2label.index(prompt_label_to_label_mapping[pred.lower()])
-            if isinstance(pred, str)
-            else pred
+            (
+                id2label.index(prompt_label_to_label_mapping[pred.lower()])
+                if isinstance(pred, str)
+                else pred
+            )
             for pred in predictions
         ]
 

@@ -223,11 +223,13 @@ class OpenAITokenizer:
 
     def pad(
         self,
-        encoded_inputs: BatchEncoding
-        | list[BatchEncoding]
-        | dict[str, list[int]]
-        | dict[str, list[list[int]]]
-        | list[dict[str, list[int]]],
+        encoded_inputs: (
+            BatchEncoding
+            | list[BatchEncoding]
+            | dict[str, list[int]]
+            | dict[str, list[list[int]]]
+            | list[dict[str, list[int]]]
+        ),
         **kwargs,
     ) -> BatchEncoding:
         """Pad encoded inputs.

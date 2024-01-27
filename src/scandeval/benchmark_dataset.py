@@ -1,6 +1,5 @@
 """Abstract benchmarking dataset class."""
 
-
 import logging
 import sys
 from abc import ABC, abstractmethod
@@ -68,12 +67,14 @@ class BenchmarkDataset(ABC):
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self._metrics = {
-            metric_cfg.name: evaluate.load(
-                path=metric_cfg.huggingface_id,
-                cache_dir=self.benchmark_config.cache_dir,
+            metric_cfg.name: (
+                evaluate.load(
+                    path=metric_cfg.huggingface_id,
+                    cache_dir=self.benchmark_config.cache_dir,
+                )
+                if metric_cfg.huggingface_id != ""
+                else None
             )
-            if metric_cfg.huggingface_id != ""
-            else None
             for metric_cfg in dataset_config.task.metrics
         }
 

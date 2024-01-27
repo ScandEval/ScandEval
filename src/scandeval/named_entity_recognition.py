@@ -107,9 +107,11 @@ class NamedEntityRecognition(BenchmarkDataset):
             ]
             labels = [
                 [
-                    id2label[lbl_id]
-                    if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
-                    else lbl_id
+                    (
+                        id2label[lbl_id]
+                        if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
+                        else lbl_id
+                    )
                     for lbl_id in label  # type: ignore[call-overload]
                     if lbl_id != -100
                 ]
