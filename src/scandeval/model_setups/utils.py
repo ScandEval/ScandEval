@@ -155,6 +155,7 @@ def align_model_and_tokenizer(
     initial_max_length = tokenizer.model_max_length
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
+        breakpoint()
         dummy_inputs = torch.full(
             size=(1, max_length),
             fill_value=DUMMY_FILL_VALUE,
