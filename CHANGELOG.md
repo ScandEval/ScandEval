@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
   as the primary metric and accuracy and secondary. This is due to the fact that MCC
   handles class imbalance better.
+- Number of generated tokens for sequence classification tasks has been changed back to
+  3 (from 1). This makes no difference to open source models, as we only use the
+  logprobs from the first token anyway, but it *does* make a difference to closed
+  source models where the logprobs are not available (like OpenAI's chat models), as
+  we're instead calculating word edit distance to the labels.
 
 
 ## [v9.2.0] - 2024-01-24
