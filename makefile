@@ -102,7 +102,10 @@ view-docs:  ## View documentation
 		"$${openCmd}" docs/{{ cookiecutter.project_name }}.html
 
 test:  ## Run tests
-	@poetry run pytest && poetry run readme-cov && rm .coverage*
+	@USE_CUDA=1 poetry run pytest \
+		&& poetry run pytest \
+		&& poetry run readme-cov \
+		&& rm .coverage*
 
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .

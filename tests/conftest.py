@@ -47,6 +47,7 @@ def benchmark_config(
     language, dataset_task, auth
 ) -> Generator[BenchmarkConfig, None, None]:
     """Yields a benchmark configuration used in tests."""
+    device = torch.device("cuda" if os.environ["USE_CUDA"] else "cpu")
     yield BenchmarkConfig(
         model_languages=[language],
         dataset_languages=[language],
@@ -60,7 +61,7 @@ def benchmark_config(
         openai_api_key=None,
         progress_bar=False,
         save_results=True,
-        device=torch.device("cpu"),
+        device=device,
         verbose=False,
         trust_remote_code=True,
         load_in_4bit=None,
