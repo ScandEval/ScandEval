@@ -506,13 +506,6 @@ class HFModelSetup:
             Tokenizer:
                 The loaded tokenizer.
         """
-        # TEMP: `mlabonne/NeuralBeagle14-7B` has the wrong tokenizer config. This hack
-        # fixes it, as it is based on Mistral-7B-v0.1. Instead of this hacky fix, we
-        # should make it possible to specify the tokenizer model ID as input, which
-        # should just default to the model ID
-        if model_id == "mlabonne/NeuralBeagle14-7B":
-            model_id = "mistralai/Mistral-7B-v0.1"
-
         # If the model is a subclass of a RoBERTa model then we have to add a prefix
         # space to the tokens, by the way the model is constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
