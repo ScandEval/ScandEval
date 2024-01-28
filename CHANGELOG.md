@@ -22,11 +22,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ImportError`. This has now been removed.
 - A temporary fix has been included for the `NeuralBeagle14-7B` model, as the
   tokenization configuration wasn't set properly.
+- Fixed an issue where structured generation wasn't triggered when vLLM wasn't
+  available.
 
 ### Changed
+- Now requires `transformers` versions `4.37.x`. As they often introduce breaking
+  changes in minor versions, we now only allow a patch version difference and manually
+  update to `4.38.x` when it comes out.
 - Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
   as the primary metric and accuracy and secondary. This is due to the fact that MCC
   handles class imbalance better.
+- Removed speculative ngram sampling again, as `transformers` now requires the batch
+  size to be 1, which doesn't make it any faster than normal.
 
 
 ## [v9.2.0] - 2024-01-24
