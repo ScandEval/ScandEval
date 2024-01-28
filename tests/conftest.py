@@ -43,11 +43,17 @@ def auth() -> Generator[str | bool, None, None]:
 
 
 @pytest.fixture(scope="session")
+def device() -> Generator[torch.device, None, None]:
+    """Yields the device to use for the tests."""
+    device = torch.device("cuda" if os.environ["USE_CUDA"] else "cpu")
+    yield device
+
+
+@pytest.fixture(scope="session")
 def benchmark_config(
-    language, dataset_task, auth
+    language, dataset_task, auth, device
 ) -> Generator[BenchmarkConfig, None, None]:
     """Yields a benchmark configuration used in tests."""
-    device = torch.device("cuda" if os.environ["USE_CUDA"] else "cpu")
     yield BenchmarkConfig(
         model_languages=[language],
         dataset_languages=[language],
