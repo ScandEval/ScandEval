@@ -42,6 +42,10 @@ except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
 
+# This is used as input to generative models; it cannot be a special token
+DUMMY_FILL_VALUE = 100
+
+
 GENERATIVE_MODEL_TASKS = [
     "text-generation",
     "conversational",
@@ -556,7 +560,9 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
-            dummy_inputs = torch.tensor([[1]], device=model.device, dtype=torch.long)
+            dummy_inputs = torch.tensor(
+                [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
+            )
             generation_config = GenerationConfig(
                 max_new_tokens=1,
                 pad_token_id=model.config.pad_token_id,

@@ -133,11 +133,13 @@ class Tokenizer(Protocol):
 
     def pad(
         self,
-        encoded_inputs: BatchEncoding
-        | list[BatchEncoding]
-        | dict[str, list[str]]
-        | dict[str, list[list[str]]]
-        | list[dict[str, list[str]]],
+        encoded_inputs: (
+            BatchEncoding
+            | list[BatchEncoding]
+            | dict[str, list[str]]
+            | dict[str, list[list[str]]]
+            | list[dict[str, list[str]]]
+        ),
         **kwargs,
     ) -> BatchEncoding:
         """Pad a batch of encoded inputs.

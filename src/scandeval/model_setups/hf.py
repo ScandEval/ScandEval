@@ -226,9 +226,9 @@ class HFModelSetup:
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
-                bnb_4bit_compute_dtype=torch.bfloat16
-                if torch.cuda.is_bf16_supported()
-                else torch.float16,
+                bnb_4bit_compute_dtype=(
+                    torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+                ),
                 bnb_4bit_use_double_quant=True,
             )
             if load_in_4bit
@@ -291,7 +291,9 @@ class HFModelSetup:
                 trust_remote_code=self.benchmark_config.trust_remote_code,
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
-                use_flash_attention_2=use_flash_attention,
+                attn_implementation=(
+                    "flash_attention_2" if use_flash_attention else None
+                ),
             )
 
             # These are used when a timeout occurs
@@ -394,7 +396,7 @@ class HFModelSetup:
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         if use_vllm:
-            model.tokenizer = tokenizer
+            model.set_tokenizer(tokenizer=tokenizer)
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
