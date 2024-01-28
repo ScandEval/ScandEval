@@ -18,12 +18,8 @@ logger = logging.getLogger(__package__)
 class LocalModelSetup:
     """Model setup for local Hugging Face Hub models.
 
-    Args:
-        benchmark_config (BenchmarkConfig):
-            The benchmark configuration.
-
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
     """
 
@@ -31,18 +27,23 @@ class LocalModelSetup:
         self,
         benchmark_config: BenchmarkConfig,
     ) -> None:
+        """Initialize the LocalModelSetup class.
+
+        Args:
+            benchmark_config:
+                The benchmark configuration.
+        """
         self.benchmark_config = benchmark_config
 
     def model_exists(self, model_id: str) -> bool:
         """Check if a model exists locally.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
 
         Returns:
-            bool:
-                Whether the model exists locally.
+            Whether the model exists locally.
         """
         # Ensure that `model_id` is a Path object
         model_dir = Path(model_id)
@@ -67,12 +68,11 @@ class LocalModelSetup:
         """Fetches configuration for a local Hugging Face model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID of the model.
 
         Returns:
-            ModelConfig:
-                The model configuration.
+            The model configuration.
         """
         framework = self.benchmark_config.framework
         if framework is None:
@@ -129,14 +129,13 @@ class LocalModelSetup:
         """Load a local Hugging Face model.
 
         Args:
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
-            dataset_config (DatasetConfig):
+            dataset_config:
                 The dataset configuration.
 
         Returns:
-            pair of (tokenizer, model):
-                The tokenizer and model.
+            The tokenizer and model.
         """
         hf_model_setup = HFModelSetup(benchmark_config=self.benchmark_config)
         return hf_model_setup.load_model(

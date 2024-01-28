@@ -37,7 +37,7 @@ einops = ">=0.6.0,<1.0.0"
 bitsandbytes = {markers="sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.40.0.post4,<1.0.0"}
 requests = "^2.31.0"
 torch = "^2.1.1"
-transformers = "^4.36.2"
+transformers = "~4.37.1"  # Only minor upgrades as breaking changes happen often
 accelerate = ">=0.23.0,<1.0.0"
 rouge-score = ">=0.1.2,<1.0.0"
 bert-score = ">=0.3.13,<1.0.0"
@@ -48,15 +48,14 @@ pydantic = ">=1.10.0,<3.0.0"
 lm-format-enforcer = ">=0.8.2,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
-pdoc = "^14.0.0"
-pytest = "^7.4.0"
-pre-commit = "^3.3.3"
-black = "^23.7.0"
+pytest = ">=7.4.0"
+pre-commit = ">=3.3.3"
+black = ">=24.1.0"
 lxml = "^4.9.3"
-pytest-cov = "^4.1.0"
-readme-coverage-badger = ">=0.1.2,<1.0.0"
-ruff = ">=0.1.6,<1.0.0"
-mypy = "^1.7.1"
+pytest-cov = ">=4.1.0"
+readme-coverage-badger = ">=0.1.2"
+ruff = ">=0.1.13"
+mypy = ">=1.8.0"
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"

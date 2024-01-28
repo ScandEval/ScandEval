@@ -7,21 +7,22 @@ from types import MethodType
 from typing import Callable
 
 import torch
-from lmformatenforcer.integrations.vllm import (
-    build_vllm_logits_processor,
-    build_vllm_token_enforcer_tokenizer_data,
-)
 from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
 from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .dataset_tasks import NER
+from .protocols import Tokenizer
 from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
 try:
+    from lmformatenforcer.integrations.vllm import (
+        build_vllm_logits_processor,
+        build_vllm_token_enforcer_tokenizer_data,
+    )
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
@@ -108,7 +109,6 @@ class VLLMModel:
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
-        del self._model
         clear_memory()
         del self
 
@@ -304,6 +304,16 @@ class VLLMModel:
             logits_processors.append(no_tabs_or_newlines)
 
         return logits_processors
+
+    def set_tokenizer(self, tokenizer: Tokenizer) -> None:
+        """Set the tokenizer to use for generation.
+
+        Args:
+            tokenizer:
+                The tokenizer to use for generation.
+        """
+        self.tokenizer = tokenizer
+        self._model.set_tokenizer(tokenizer)
 
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""

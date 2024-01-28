@@ -103,11 +103,15 @@ def test_prepare_dataset_tasks(input_task, expected_task):
         (Device.CPU, torch.device("cpu")),
         (
             None,
-            torch.device("cuda")
-            if torch.cuda.is_available()
-            else torch.device("mps")
-            if torch.backends.mps.is_available()
-            else torch.device("cpu"),
+            (
+                torch.device("cuda")
+                if torch.cuda.is_available()
+                else (
+                    torch.device("mps")
+                    if torch.backends.mps.is_available()
+                    else torch.device("cpu")
+                )
+            ),
         ),
     ],
     ids=[

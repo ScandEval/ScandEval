@@ -17,7 +17,7 @@ from tqdm.auto import tqdm
 from transformers import (
     DataCollator,
     GenerationConfig,
-    PreTrainedTokenizer,
+    PreTrainedTokenizerBase,
     StoppingCriteria,
 )
 from transformers.modeling_utils import ModelOutput
@@ -221,7 +221,6 @@ def generate_single_iteration(
             return_dict_in_generate=True,
             # How to sample
             do_sample=False,  # Equivalent to greedy decoding (temperature=0)
-            prompt_lookup_num_tokens=10,  # n-gram speculation, improves speed by ~3x
             # Special tokens
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
@@ -347,9 +346,7 @@ def get_prefix_allowed_fn(
     Returns:
         The prefix allowed function.
     """
-    prefix_allowed_tokens_fns = list()
-
-    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizer):
+    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
         parser = get_ner_parser(dataset_config=dataset_config)
         json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
             tokenizer_data=tokenizer, character_level_parser=parser
@@ -385,35 +382,9 @@ def get_prefix_allowed_fn(
                 ]
             )
 
-        prefix_allowed_tokens_fns.append(ner_prefix_allowed_tokens_fn)
+        return ner_prefix_allowed_tokens_fn
 
-    def prefix_allowed_tokens_fn(
-        batch_id: int, input_ids: torch.Tensor
-    ) -> torch.Tensor:
-        """Aggregate of all the prefix allowed token functions.
-
-        Args:
-            batch_id:
-                The batch id.
-            input_ids:
-                The input ids.
-
-        Returns:
-            The prefix allowed tokens.
-        """
-        if not prefix_allowed_tokens_fns:
-            return torch.tensor(list(range(tokenizer.vocab_size)))
-
-        allowed_ids = None
-        for fn in prefix_allowed_tokens_fns:
-            allowed_ids = [
-                input_id
-                for input_id in fn(batch_id, input_ids)
-                if allowed_ids is None or input_id in allowed_ids
-            ]
-        return torch.tensor(allowed_ids)
-
-    return prefix_allowed_tokens_fn
+    return None
 
 
 class StopWordCriteria(StoppingCriteria):

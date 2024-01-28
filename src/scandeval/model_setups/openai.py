@@ -61,12 +61,8 @@ NUM_PARAMS_MAPPING = {
 class OpenAIModelSetup:
     """Model setup for OpenAI models.
 
-    Args:
-        benchmark_config (BenchmarkConfig):
-            The benchmark configuration.
-
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
     """
 
@@ -74,18 +70,23 @@ class OpenAIModelSetup:
         self,
         benchmark_config: BenchmarkConfig,
     ) -> None:
+        """Initialize the model setup.
+
+        Args:
+            benchmark_config:
+                The benchmark configuration.
+        """
         self.benchmark_config = benchmark_config
 
     def model_exists(self, model_id: str) -> bool:
         """Check if a model ID denotes an OpenAI model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
 
         Returns:
-            bool:
-                Whether the model exists on OpenAI.
+            Whether the model exists on OpenAI.
         """
         if self.benchmark_config.openai_api_key is not None:
             openai.api_key = self.benchmark_config.openai_api_key
@@ -123,12 +124,11 @@ class OpenAIModelSetup:
         """Fetches configuration for an OpenAI model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID of the model.
 
         Returns:
-            ModelConfig:
-                The model configuration.
+            The model configuration.
         """
         return ModelConfig(
             model_id=model_id,
@@ -149,14 +149,13 @@ class OpenAIModelSetup:
         """Load an OpenAI model.
 
         Args:
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
-            dataset_config (DatasetConfig):
+            dataset_config:
                 The dataset configuration.
 
         Returns:
-            pair of (tokenizer, model):
-                The tokenizer and model.
+            The tokenizer and model.
         """
         hf_model_config = PretrainedConfig.from_pretrained("gpt2")
 
