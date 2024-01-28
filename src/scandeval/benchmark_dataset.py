@@ -32,7 +32,12 @@ from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .types import Labels, Predictions, ScoreDict
-from .utils import GENERATIVE_MODEL_TASKS, enforce_reproducibility, model_is_generative
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    enforce_reproducibility,
+    model_is_generative,
+    should_prompts_be_stripped,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -468,6 +473,23 @@ class BenchmarkDataset(ABC):
                             load_from_cache_file=False,
                             keep_in_memory=True,
                         )
+
+                        # Determine if we should strip the prompts. This is the case if
+                        # the tokenizer needs to include the space as part of the label
+                        # token
+                        labels_to_be_generated = list(
+                            self.dataset_config.prompt_label_mapping.values()
+                        )
+                        strip_prompts = should_prompts_be_stripped(
+                            labels_to_be_generated=labels_to_be_generated,
+                            tokenizer=tokenizer,
+                        )
+                        if strip_prompts:
+                            test = test.map(
+                                lambda x: dict(text=x["text"].strip()),
+                                load_from_cache_file=False,
+                                keep_in_memory=True,
+                            )
 
                     prepared_test = self._preprocess_data(
                         test, split="test", **preprocess_params

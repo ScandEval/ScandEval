@@ -25,6 +25,7 @@ from .utils import (
     GENERATIVE_MODEL_TASKS,
     get_special_token_metadata,
     raise_if_model_output_contains_nan_values,
+    should_prompts_be_stripped,
 )
 
 logger = logging.getLogger(__package__)
@@ -277,29 +278,6 @@ class SequenceClassification(BenchmarkDataset):
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
 
-        # Determine if we should strip the prompts. This is the case if the tokenizer
-        # needs to include the space as part of the label token
-        labels_to_be_generated = self.dataset_config.prompt_label_mapping.values()
-        strip_prompts = True
-        for label in labels_to_be_generated:
-            label_tokens = tokenizer(label, add_special_tokens=False).input_ids
-            label_tokens_with_prefix_space = tokenizer(
-                " " + label, add_special_tokens=False
-            ).input_ids
-            label_tokens_with_prefix_space_ends_with_label_tokens = (
-                label_tokens_with_prefix_space[-len(label_tokens) :] == label_tokens
-            )
-            if label_tokens_with_prefix_space_ends_with_label_tokens:
-                strip_prompts = False
-                break
-
-        tokenizer.needs_prefix_space_in_labels = not strip_prompts  # type: ignore
-        if strip_prompts:
-            new_prompts = [prompt.strip() for prompt in new_prompts]
-            logger.debug("Stripping prompts for model")
-        else:
-            logger.debug("Not stripping prompts for model")
-
         examples["text"] = final_prompts
 
         return examples
@@ -371,6 +349,10 @@ def get_closest_logprobs_labels(
         dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
     ]
 
+    add_prefix_space_to_labels = should_prompts_be_stripped(
+        labels_to_be_generated=candidate_labels, tokenizer=tokenizer
+    )
+
     # Shape: [batch_size, num_candidate_labels]
     pred_logprobs = torch.empty(
         generation_logprobs.shape[0],
@@ -382,7 +364,7 @@ def get_closest_logprobs_labels(
         # We only use the first token to represent the logprob value of the entire
         # label.
         label_ready_for_tokenization = candidate_label.lower()
-        if tokenizer.needs_prefix_space_in_labels:  # type: ignore
+        if add_prefix_space_to_labels:
             label_ready_for_tokenization = " " + label_ready_for_tokenization
         candidate_label_ids: list[list[int]] = tokenizer(
             [candidate_label.lower()], add_special_tokens=False
