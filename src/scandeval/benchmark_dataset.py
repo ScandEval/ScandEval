@@ -83,6 +83,15 @@ class BenchmarkDataset(ABC):
             for metric_cfg in dataset_config.task.metrics
         }
 
+        # Set logging level based on verbosity
+        if hasattr(sys, "_called_from_test"):
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
+        logger.setLevel(logging_level)
+
     def benchmark(self, model_id: str) -> tuple[ScoreDict, dict[str, bool | int]]:
         """Benchmark a model.
 
@@ -422,7 +431,7 @@ class BenchmarkDataset(ABC):
 
         # Prepare the train and validation datasets
         with tqdm(
-            total=12,
+            total=4 if hasattr(sys, "_called_from_test") else 12,
             desc="Preprocessing data splits",
             disable=hasattr(sys, "_called_from_test"),
         ) as pbar:
