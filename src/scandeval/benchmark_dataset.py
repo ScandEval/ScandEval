@@ -421,7 +421,11 @@ class BenchmarkDataset(ABC):
         )
 
         # Prepare the train and validation datasets
-        with tqdm(total=12, desc="Preprocessing data splits") as pbar:
+        with tqdm(
+            total=12,
+            desc="Preprocessing data splits",
+            disable=hasattr(sys, "_called_from_test"),
+        ) as pbar:
             # When evaluating generative models we only need the test split, so
             # there's no need to prepare the train split
             try:
