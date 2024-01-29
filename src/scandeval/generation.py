@@ -261,7 +261,11 @@ def generate_single_iteration(
         itr = (
             dataloader
             if isinstance(model, VLLMModel)
-            else tqdm(dataloader, leave=False)
+            else tqdm(
+                iterable=dataloader,
+                leave=False,
+                disable=hasattr(sys, "_called_from_test"),
+            )
         )
 
         # Generate the completions for the non-cached examples

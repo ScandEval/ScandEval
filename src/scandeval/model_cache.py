@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -151,7 +152,12 @@ class ModelCache:
 
         # Store the generated sequences in the cache, one by one
         # TODO: This is a bit slow, should be optimized
-        with tqdm(model_input, desc="Caching model outputs", leave=False) as pbar:
+        with tqdm(
+            iterable=model_input,
+            desc="Caching model outputs",
+            leave=False,
+            disable=hasattr(sys, "_called_from_test"),
+        ) as pbar:
             for sample_idx, sample in enumerate(pbar):
                 decoded_inputs = tokenizer.decode(
                     token_ids=sample, skip_special_tokens=True
