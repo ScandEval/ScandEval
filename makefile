@@ -102,7 +102,11 @@ view-docs:  ## View documentation
 		"$${openCmd}" docs/{{ cookiecutter.project_name }}.html
 
 test:  ## Run tests
-	@USE_CUDA=1 poetry run pytest \
+	@echo "Running tests with CUDA and vLLM:" \
+		&& USE_CUDA=1 USE_VLLM=1 poetry run pytest \
+		&& echo "Running tests with CUDA and no vLLM:" \
+		&& USE_CUDA=1 USE_VLLM=0 poetry run pytest \
+		&& echo "Running tests with CPU:" \
 		&& poetry run pytest \
 		&& poetry run readme-cov \
 		&& rm .coverage*
