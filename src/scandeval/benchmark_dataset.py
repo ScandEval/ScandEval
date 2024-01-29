@@ -83,10 +83,6 @@ class BenchmarkDataset(ABC):
             for metric_cfg in dataset_config.task.metrics
         }
 
-        # Set logging level based on verbosity
-        logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
-        logger.setLevel(logging_level)
-
     def benchmark(self, model_id: str) -> tuple[ScoreDict, dict[str, bool | int]]:
         """Benchmark a model.
 
