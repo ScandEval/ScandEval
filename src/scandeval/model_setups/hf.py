@@ -1,6 +1,7 @@
 """Model setup for Hugging Face Hub models."""
 
 import logging
+import os
 import warnings
 from json import JSONDecodeError
 from time import sleep
@@ -253,6 +254,7 @@ class HFModelSetup:
         use_vllm = (
             model_config.task in GENERATIVE_MODEL_TASKS
             and self.benchmark_config.device == torch.device("cuda")
+            and os.getenv("USE_VLLM", True)
         )
 
         if use_vllm:

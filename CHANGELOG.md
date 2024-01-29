@@ -16,12 +16,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   handles class imbalance better.
 - Removed speculative ngram sampling again, as `transformers` now requires the batch
   size to be 1, which doesn't make it any faster than normal.
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+- Number of generated tokens for sequence classification tasks has been changed back to
+  3 (from 1). This makes no difference to open source models, as we only use the
+  logprobs from the first token anyway, but it *does* make a difference to closed
+  source models where the logprobs are not available (like OpenAI's chat models), as
+  we're instead calculating word edit distance to the labels.
 
 ### Fixed
 - Prevents FP16 overflow by using -1e3 instead of -1e9 for ~0% probability logprobs
   during generation with vLLM.
 - Avoids excessive disk usage by not caching processed datasets to disk, as we are
   never using the cached versions anyway.
+- We now only strip the prompts if the model's tokenizer includes a prefix space when
+  tokenizing the labels.
 - Fixed an issue with OOM errors when changing from benchmarking one generative model
   to another.
 - When testing a model's maximum sequence length, we put dummy inputs into them. This

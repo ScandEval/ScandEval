@@ -582,8 +582,7 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
             The model output to check.
 
     Raises:
-        NaNValueInModelOutput:
-            If the model output contains NaN values.
+        If the model output contains NaN values.
     """
     if isinstance(model_output, np.ndarray):
         if model_output.dtype == np.float32 and np.isnan(model_output).any():
@@ -605,8 +604,7 @@ def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
             The dataset configuration.
 
     Returns:
-        JsonSchemaParser:
-            The JSON schema parser.
+        The JSON schema parser.
     """
     tag_names = list(set(dataset_config.prompt_label_mapping.values()))
     keys_and_their_types: dict[str, Any] = {
@@ -616,3 +614,38 @@ def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
     parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
     return parser
+
+
+def should_prompts_be_stripped(
+    labels_to_be_generated: list[str], tokenizer: Tokenizer
+) -> bool:
+    """Determine if we should strip the prompts for few-shot evaluation.
+
+    This is the case if the tokenizer needs to include the space as part of the label
+    token. The strategy is thus to tokenize a label, say "positive", as well as the
+    label with a prefix space, " positive". If the tokens of the former is a subset of
+    the tokens of the latter, then that means that the space is being added as a
+    separate token, meaning that we should strip the prompts to avoid the model
+    generating the space as part of the label.
+
+    Args:
+        labels_to_be_generated:
+            The labels that are to be generated.
+        tokenizer:
+            The tokenizer used to tokenize the labels.
+
+    Returns:
+        Whether we should strip the prompts.
+    """
+    strip_prompts = True
+    for label in labels_to_be_generated:
+        label_tokens = tokenizer(label, add_special_tokens=False).input_ids
+        label_tokens_with_prefix_space = tokenizer(
+            " " + label, add_special_tokens=False
+        ).input_ids
+        label_tokens_with_prefix_space_ends_with_label_tokens = (
+            label_tokens_with_prefix_space[-len(label_tokens) :] == label_tokens
+        )
+        if label_tokens_with_prefix_space_ends_with_label_tokens:
+            strip_prompts = False
+    return strip_prompts

@@ -1,6 +1,7 @@
 """A wrapper for vLLM models."""
 
 import logging
+import sys
 import warnings
 from pathlib import Path
 from types import MethodType
@@ -331,7 +332,11 @@ class VLLMModel:
 def _run_engine_with_fixed_progress_bars(self, use_tqdm: bool) -> list[RequestOutput]:
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
-        pbar = tqdm(total=num_requests, leave=False)
+        pbar = tqdm(
+            total=num_requests,
+            leave=False,
+            disable=hasattr(sys, "_called_from_test"),
+        )
 
     # Run the engine.
     outputs: list[RequestOutput] = list()

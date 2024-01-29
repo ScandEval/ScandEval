@@ -25,6 +25,7 @@ from .utils import (
     GENERATIVE_MODEL_TASKS,
     get_special_token_metadata,
     raise_if_model_output_contains_nan_values,
+    should_prompts_be_stripped,
 )
 
 logger = logging.getLogger(__package__)
@@ -234,7 +235,7 @@ class SequenceClassification(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -243,6 +244,8 @@ class SequenceClassification(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.
@@ -267,13 +270,15 @@ class SequenceClassification(BenchmarkDataset):
         new_prompts = [
             self.dataset_config.prompt_template.format(
                 text=re.sub(r"\n+", "\n", text).strip(), label=""
-            ).strip()
+            )
             for text in examples["text"]
         ]
 
-        examples["text"] = [
+        final_prompts = [
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
+
+        examples["text"] = final_prompts
 
         return examples
 
@@ -344,6 +349,10 @@ def get_closest_logprobs_labels(
         dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
     ]
 
+    add_prefix_space_to_labels = should_prompts_be_stripped(
+        labels_to_be_generated=candidate_labels, tokenizer=tokenizer
+    )
+
     # Shape: [batch_size, num_candidate_labels]
     pred_logprobs = torch.empty(
         generation_logprobs.shape[0],
@@ -354,6 +363,9 @@ def get_closest_logprobs_labels(
     for idx, candidate_label in enumerate(candidate_labels):
         # We only use the first token to represent the logprob value of the entire
         # label.
+        label_ready_for_tokenization = candidate_label.lower()
+        if add_prefix_space_to_labels:
+            label_ready_for_tokenization = " " + label_ready_for_tokenization
         candidate_label_ids: list[list[int]] = tokenizer(
             [candidate_label.lower()], add_special_tokens=False
         )["input_ids"]

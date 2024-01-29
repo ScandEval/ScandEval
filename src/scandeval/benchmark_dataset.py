@@ -32,7 +32,12 @@ from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .types import Labels, Predictions, ScoreDict
-from .utils import GENERATIVE_MODEL_TASKS, enforce_reproducibility, model_is_generative
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    enforce_reproducibility,
+    model_is_generative,
+    should_prompts_be_stripped,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -79,7 +84,12 @@ class BenchmarkDataset(ABC):
         }
 
         # Set logging level based on verbosity
-        logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
+        if hasattr(sys, "_called_from_test"):
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
         logger.setLevel(logging_level)
 
     def benchmark(self, model_id: str) -> tuple[ScoreDict, dict[str, bool | int]]:
@@ -420,7 +430,11 @@ class BenchmarkDataset(ABC):
         )
 
         # Prepare the train and validation datasets
-        with tqdm(total=12, desc="Preprocessing data splits") as pbar:
+        with tqdm(
+            total=4 if hasattr(sys, "_called_from_test") else 12,
+            desc="Preprocessing data splits",
+            disable=hasattr(sys, "_called_from_test"),
+        ) as pbar:
             # When evaluating generative models we only need the test split, so
             # there's no need to prepare the train split
             try:
@@ -460,6 +474,7 @@ class BenchmarkDataset(ABC):
                         few_shot_fn = partial(
                             self._apply_few_shot_prompt,
                             few_shot_examples=few_shot_examples,
+                            tokenizer=tokenizer,
                         )
                         test = test.map(
                             few_shot_fn,
@@ -467,6 +482,23 @@ class BenchmarkDataset(ABC):
                             load_from_cache_file=False,
                             keep_in_memory=True,
                         )
+
+                        # Determine if we should strip the prompts. This is the case if
+                        # the tokenizer needs to include the space as part of the label
+                        # token
+                        labels_to_be_generated = list(
+                            self.dataset_config.prompt_label_mapping.values()
+                        )
+                        strip_prompts = should_prompts_be_stripped(
+                            labels_to_be_generated=labels_to_be_generated,
+                            tokenizer=tokenizer,
+                        )
+                        if strip_prompts:
+                            test = test.map(
+                                lambda x: dict(text=x["text"].strip()),
+                                load_from_cache_file=False,
+                                keep_in_memory=True,
+                            )
 
                     prepared_test = self._preprocess_data(
                         test, split="test", **preprocess_params
@@ -638,7 +670,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -647,6 +679,8 @@ class BenchmarkDataset(ABC):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.

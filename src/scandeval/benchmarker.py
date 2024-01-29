@@ -4,6 +4,7 @@ import importlib.metadata
 import json
 import logging
 import re
+import sys
 from pathlib import Path
 from shutil import rmtree
 from time import sleep
@@ -240,7 +241,12 @@ class Benchmarker:
             self.benchmark_results = list()
 
         # Set logging level based on verbosity
-        logging_level = logging.DEBUG if verbose else logging.INFO
+        if hasattr(sys, "_called_from_test"):
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
         logger.setLevel(logging_level)
 
         # Initialise a dataset factory
