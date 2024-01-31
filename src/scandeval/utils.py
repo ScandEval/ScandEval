@@ -622,11 +622,10 @@ def should_prompts_be_stripped(
     """Determine if we should strip the prompts for few-shot evaluation.
 
     This is the case if the tokenizer needs to include the space as part of the label
-    token. The strategy is thus to tokenize a label, say "positive", as well as the
-    label with a prefix space, " positive". If the tokens of the former is a subset of
-    the tokens of the latter, then that means that the space is being added as a
-    separate token, meaning that we should strip the prompts to avoid the model
-    generating the space as part of the label.
+    token. The strategy is thus to tokenize a label with a preceeding colon (as in the
+    prompts), i.e., ": positive", and check if the tokenization starts with the tokens
+    of ": ". If this is the case, then we should not strip the prompts, since the
+    tokenizer produces the whitespace token separately.
 
     Args:
         labels_to_be_generated:
@@ -639,13 +638,11 @@ def should_prompts_be_stripped(
     """
     strip_prompts = True
     for label in labels_to_be_generated:
-        label_tokens = tokenizer(label, add_special_tokens=False).input_ids
-        label_tokens_with_prefix_space = tokenizer(
-            " " + label, add_special_tokens=False
-        ).input_ids
-        label_tokens_with_prefix_space_ends_with_label_tokens = (
-            label_tokens_with_prefix_space[-len(label_tokens) :] == label_tokens
+        colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
+        label_tokens = tokenizer(": " + label, add_special_tokens=False).input_ids
+        label_tokens_start_with_colon_tokens = (
+            label_tokens[: len(colon_tokens)] == colon_tokens
         )
-        if label_tokens_with_prefix_space_ends_with_label_tokens:
+        if label_tokens_start_with_colon_tokens:
             strip_prompts = False
     return strip_prompts

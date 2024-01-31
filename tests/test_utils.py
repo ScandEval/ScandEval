@@ -78,18 +78,15 @@ def test_module_is_installed(module_name, expected):
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
     argvalues=[
-        ("mistralai/Mistral-7B-v0.1", False),
-        ("gpt2", True),
-    ],
-    ids=[
-        "mistralai/Mistral-7B-v0.1",
-        "gpt2",
+        ("mistralai/Mistral-7B-v0.1", True),
+        ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
+        ("bert-base-uncased", False),
     ],
 )
 def test_should_prompts_be_stripped(model_id, expected):
     """Test that a model ID is a generative model."""
     tokenizer = AutoTokenizer.from_pretrained(model_id)
-    labels = ["positive"]
+    labels = ["positiv", "negativ"]
     strip_prompts = should_prompts_be_stripped(
         labels_to_be_generated=labels,
         tokenizer=tokenizer,
