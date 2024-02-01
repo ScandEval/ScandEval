@@ -535,7 +535,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
         def create_label(example: dict) -> str:
             labels: dict[str, list[str]] = {
-                prompt_label: []
+                prompt_label: list()
                 for prompt_label in self.dataset_config.prompt_label_mapping.values()
             }
             for token, label in zip(example["tokens"], example["labels"]):
