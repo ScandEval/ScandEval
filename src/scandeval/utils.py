@@ -167,6 +167,7 @@ def block_terminal_output():
     logging.getLogger("vllm.engine.llm_engine").setLevel(logging.ERROR)
     logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.ERROR)
     logging.getLogger("vllm.core.scheduler").setLevel(logging.ERROR)
+    logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.ERROR)
 
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the ERROR level."""
