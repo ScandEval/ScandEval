@@ -102,6 +102,9 @@ indent-style = "space"
 docstring-code-format = true
 skip-magic-trailing-comma = true
 
+[tool.ruff.isort]
+split-on-trailing-comma = false
+
 [tool.ruff.pydocstyle]
 convention = "google"
 
