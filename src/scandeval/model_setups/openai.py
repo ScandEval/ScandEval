@@ -66,10 +66,7 @@ class OpenAIModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         """Initialize the model setup.
 
         Args:
@@ -138,8 +135,7 @@ class OpenAIModelSetup:
             languages=list(),
             model_type=ModelType.OPENAI,
             model_cache_dir=create_model_cache_dir(
-                cache_dir=self.benchmark_config.cache_dir,
-                model_id=model_id,
+                cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
         )
 
@@ -204,8 +200,7 @@ class OpenAIModelSetup:
             )
 
         tokenizer = OpenAITokenizer(
-            model_config=model_config,
-            hf_model_config=hf_model_config,
+            model_config=model_config, hf_model_config=hf_model_config
         )
         model = OpenAIModel(
             model_config=model_config,

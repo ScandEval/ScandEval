@@ -23,10 +23,7 @@ class LocalModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         """Initialize the LocalModelSetup class.
 
         Args:
@@ -117,8 +114,7 @@ class LocalModelSetup:
             languages=list(),
             model_type=ModelType.LOCAL,
             model_cache_dir=create_model_cache_dir(
-                cache_dir=self.benchmark_config.cache_dir,
-                model_id=model_id,
+                cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
         )
         return model_config
@@ -139,6 +135,5 @@ class LocalModelSetup:
         """
         hf_model_setup = HFModelSetup(benchmark_config=self.benchmark_config)
         return hf_model_setup.load_model(
-            model_config=model_config,
-            dataset_config=dataset_config,
+            model_config=model_config, dataset_config=dataset_config
         )

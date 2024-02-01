@@ -265,9 +265,7 @@ class VLLMModel:
             The generated sequences.
         """
         return self.generate(
-            inputs=inputs,
-            generation_config=generation_config,
-            **generation_kwargs,
+            inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
 
     def get_logits_processors(self) -> list[Callable] | None:
@@ -333,9 +331,7 @@ def _run_engine_with_fixed_progress_bars(self, use_tqdm: bool) -> list[RequestOu
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
         pbar = tqdm(
-            total=num_requests,
-            leave=False,
-            disable=hasattr(sys, "_called_from_test"),
+            total=num_requests, leave=False, disable=hasattr(sys, "_called_from_test")
         )
 
     # Run the engine.

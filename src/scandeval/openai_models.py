@@ -406,11 +406,7 @@ class OpenAIModel:
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            stop=[
-                "\n\n",
-                self.tokenizer.eos_token,
-                self.tokenizer.pad_token,
-            ],
+            stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
         )
 
         for _ in range(60):

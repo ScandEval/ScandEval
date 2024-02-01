@@ -39,11 +39,7 @@ def test_get_correct_language_codes(input_language_codes, expected_language_code
 
 
 @pytest.mark.parametrize(
-    argnames=[
-        "input_language_codes",
-        "input_language",
-        "expected_language",
-    ],
+    argnames=["input_language_codes", "input_language", "expected_language"],
     argvalues=[
         ("da", None, [DA]),
         (["da"], None, [DA]),
@@ -84,12 +80,7 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
         (["linguistic-acceptability"], [LA]),
         (["linguistic-acceptability", "named-entity-recognition"], [LA, NER]),
     ],
-    ids=[
-        "all tasks",
-        "single task",
-        "single task as list",
-        "multiple tasks",
-    ],
+    ids=["all tasks", "single task", "single task as list", "multiple tasks"],
 )
 def test_prepare_dataset_tasks(input_task, expected_task):
     """Test the output of `prepare_dataset_tasks`."""
@@ -114,10 +105,7 @@ def test_prepare_dataset_tasks(input_task, expected_task):
             ),
         ),
     ],
-    ids=[
-        "device provided",
-        "device not provided",
-    ],
+    ids=["device provided", "device not provided"],
 )
 def test_prepare_device(device, expected_device):
     """Test the output of `prepare_device`."""

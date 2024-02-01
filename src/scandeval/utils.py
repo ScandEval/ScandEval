@@ -53,21 +53,13 @@ GENERATIVE_MODEL_TASKS = [
 ]
 
 
-GENERATIVE_DATASET_TASKS = [
-    "knowledge",
-    "common-sense-reasoning",
-]
+GENERATIVE_DATASET_TASKS = ["knowledge", "common-sense-reasoning"]
 
 
-GENERATIVE_DATASET_SUPERTASKS = [
-    "text-to-text",
-    "text-modelling",
-]
+GENERATIVE_DATASET_SUPERTASKS = ["text-to-text", "text-modelling"]
 
 
-SUPERTASKS_USING_LOGPROBS = [
-    "sequence-classification",
-]
+SUPERTASKS_USING_LOGPROBS = ["sequence-classification"]
 
 
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
@@ -197,8 +189,7 @@ def block_terminal_output():
 
 
 def get_class_by_name(
-    class_name: str | list[str],
-    module_name: str | None = None,
+    class_name: str | list[str], module_name: str | None = None
 ) -> Type | None:
     """Get a class by its name.
 
@@ -328,8 +319,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 
 
 def get_huggingface_model_lists(
-    languages: list[Language] | None,
-    token: bool | str,
+    languages: list[Language] | None, token: bool | str
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 

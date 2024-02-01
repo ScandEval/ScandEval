@@ -133,9 +133,7 @@ class SequenceClassification(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer, padding="longest")
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -182,9 +180,7 @@ class SequenceClassification(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
+                predictions=predictions, references=labels, **cfg.compute_kwargs
             )
 
             # The metric returns None if we are running on multi-GPU and the current
@@ -399,8 +395,7 @@ def get_closest_word_edit_labels(
         The candidate labels with the smallest edit distance to the predicted labels.
     """
     raw_predictions = extract_raw_predictions(
-        generated_sequences=generated_sequences,
-        tokenizer=tokenizer,
+        generated_sequences=generated_sequences, tokenizer=tokenizer
     )
 
     candidate_labels = [

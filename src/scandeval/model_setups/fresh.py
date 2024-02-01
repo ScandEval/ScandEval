@@ -25,10 +25,7 @@ from ..protocols import GenerativeModel, Tokenizer
 from ..utils import block_terminal_output, create_model_cache_dir
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
-FRESH_MODELS: list[str] = [
-    "electra-small",
-    "xlm-roberta-base",
-]
+FRESH_MODELS: list[str] = ["electra-small", "xlm-roberta-base"]
 
 
 class FreshModelSetup:
@@ -39,10 +36,7 @@ class FreshModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         """Initialize the FreshModelSetup class.
 
         Args:
@@ -85,8 +79,7 @@ class FreshModelSetup:
             revision="main",
             model_type=ModelType.FRESH,
             model_cache_dir=create_model_cache_dir(
-                cache_dir=self.benchmark_config.cache_dir,
-                model_id=model_id,
+                cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
         )
 
