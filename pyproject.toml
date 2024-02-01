@@ -64,7 +64,7 @@ minversion = "6.0"
 addopts = [
     '--verbose',
     '--durations=10',
-    '--color=yes',
+    '--color=no',
     '-s',
     '-vv',
     '--doctest-modules',
