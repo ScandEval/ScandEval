@@ -597,10 +597,9 @@ def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
     Returns:
         The JSON schema parser.
     """
-    tag_names = list(set(dataset_config.prompt_label_mapping.values()))
+    tag_names = set(dataset_config.prompt_label_mapping.values())
     keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_length=5, unique_items=True), ...)
-        for tag_name in tag_names
+        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
     }
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
     parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
