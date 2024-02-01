@@ -505,6 +505,10 @@ class HFModelSetup:
             Tokenizer:
                 The loaded tokenizer.
         """
+        # TEMP: Fix for the NeuralBeagle model
+        if model_id == "mlabonne/NeuralBeagle14-7B":
+            model_id = "mistralai/Mistral-7B-v0.1"
+
         # If the model is a subclass of a RoBERTa model then we have to add a prefix
         # space to the tokens, by the way the model is constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
