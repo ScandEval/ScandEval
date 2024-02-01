@@ -312,7 +312,11 @@ class VLLMModel:
                 The tokenizer to use for generation.
         """
         self.tokenizer = tokenizer
-        self._model.set_tokenizer(tokenizer)
+        self._model.llm_engine.tokenizer.tokenizer = tokenizer
+        for attr in dir(tokenizer):
+            if attr.startswith("_") or hasattr(self._model.llm_engine.tokenizer, attr):
+                continue
+            setattr(self._model.llm_engine.tokenizer, attr, getattr(tokenizer, attr))
 
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
