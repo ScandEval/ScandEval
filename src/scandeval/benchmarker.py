@@ -86,14 +86,22 @@ class Benchmarker:
     """Benchmarking all the Scandinavian language models.
 
     Attributes:
-        progress_bar: Whether progress bars should be shown.
-        save_results: Whether to save the benchmark results.
-        language: The languages to include in the list.
-        dataset_task: The dataset tasks to include.
-        evaluate_train: Whether to evaluate the training set as well.
-        verbose: Whether to output additional output.
-        token: The authentication token for the Hugging Face Hub.
-        benchmark_results: The benchmark results.
+        progress_bar:
+            Whether progress bars should be shown.
+        save_results:
+            Whether to save the benchmark results.
+        language:
+            The languages to include in the list.
+        dataset_task:
+            The dataset tasks to include.
+        evaluate_train:
+            Whether to evaluate the training set as well.
+        verbose:
+            Whether to output additional output.
+        token:
+            The authentication token for the Hugging Face Hub.
+        benchmark_results:
+            The benchmark results.
     """
 
     def __init__(
