@@ -1,7 +1,6 @@
 """Unit tests for the `config` module."""
 
 import pytest
-import torch
 from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,
@@ -83,7 +82,7 @@ class TestBenchmarkConfig:
         assert isinstance(benchmark_config, BenchmarkConfig)
 
     def test_attributes_correspond_to_arguments(
-        self, benchmark_config, language, dataset_task, auth
+        self, benchmark_config, language, dataset_task, auth, device
     ):
         """Test that the benchmark config attributes correspond to the arguments."""
         assert benchmark_config.model_languages == [language]
@@ -98,7 +97,7 @@ class TestBenchmarkConfig:
         assert benchmark_config.openai_api_key is None
         assert benchmark_config.progress_bar is False
         assert benchmark_config.save_results is True
-        assert benchmark_config.device == torch.device("cpu")
+        assert benchmark_config.device == device
         assert benchmark_config.verbose is False
         assert benchmark_config.trust_remote_code is True
         assert benchmark_config.load_in_4bit is None

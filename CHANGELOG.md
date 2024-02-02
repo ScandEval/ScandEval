@@ -6,19 +6,93 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v9.3.1] - 2024-01-31
+### Fixed
+- The prompts were not stripped correctly, causing bad evaluations for sequence
+  classification tasks.
+
+
+## [v9.3.0] - 2024-01-29
+### Changed
+- Now requires `transformers` versions `4.37.x`. As they often introduce breaking
+  changes in minor versions, we now only allow a patch version difference and manually
+  update to `4.38.x` when it comes out.
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+- Removed speculative ngram sampling again, as `transformers` now requires the batch
+  size to be 1, which doesn't make it any faster than normal.
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+- Number of generated tokens for sequence classification tasks has been changed back to
+  3 (from 1). This makes no difference to open source models, as we only use the
+  logprobs from the first token anyway, but it *does* make a difference to closed
+  source models where the logprobs are not available (like OpenAI's chat models), as
+  we're instead calculating word edit distance to the labels.
+
+### Fixed
+- Prevents FP16 overflow by using -1e3 instead of -1e9 for ~0% probability logprobs
+  during generation with vLLM.
+- Avoids excessive disk usage by not caching processed datasets to disk, as we are
+  never using the cached versions anyway.
+- We now only strip the prompts if the model's tokenizer includes a prefix space when
+  tokenizing the labels.
+- Fixed an issue with OOM errors when changing from benchmarking one generative model
+  to another.
+- When testing a model's maximum sequence length, we put dummy inputs into them. This
+  causes errors if the dummy inputs are one of the special tokens. Since the special
+  tokens have not always been set up in the tokenizer, we instead rely on a heuristic
+  that the 100th token ID is not a special token.
+- An import depended on `vllm`, which is not installed on non-Linux devices, causing an
+  `ImportError`. This has now been removed.
+- Fixed an issue where structured generation wasn't triggered when vLLM wasn't
+  available.
+
+
+## [v9.2.0] - 2024-01-24
+### Added
+- Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
+  Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
+  are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
+  en).
+- Now uses speculative ngram sampling for text generation when vLLM is not available.
+  This has no effect on performance and increases evaluation speed by 3x on generation
+  heavy tasks like NER and summarization.
+- Added structured generation for the NER task, which enables the models to (almost)
+  always output correct JSON, separating the NER capabilities from the JSON
+  capabilities. JSON can be tested separately in a (future) coding benchmark.
+- Now adds `scandeval_version` to the output JSONL results, to make it easier to
+  determine when outdated results need re-benchmarking.
+
+### Changed
+- Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much
+  from dataset to dataset to be meaningful as a primary metric. Now uses micro-average
+  F1-score across all tags except the `MISC` tag as a primary metric.
+
 ### Fixed
 - There was a bug where all models were removed from disk prior to benchmarking. This
   will now only happen if the `--clear-model-cache` flag is set.
 - The `vllm` package cannot be installed when CUDA is not available - this is now
   neither installed nor used when this is the case, and generative few-shot evaluation
   is done using the `transformers` package rather than `vllm`.
-
-### Added
-- Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
-  Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
-  are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
-  en).
+- Previously `temperature` was wrongly not set for vLLM and OpenAI models, instead
+  defaulting to their 1.0 values. This was due to the fact that this is set in
+  `transformers` using the `do_sample=False` argument, which doesn't transfer to the
+  other libraries. This has now been set to 0.0.
+- Now catches OpenAI `InvalidRequestError`s.
+- Removed overly long or repetitive samples in the multiple choice datasets, which
+  caused errors when evaluating OpenAI models on them.
+- Now sets the `top_k` parameter in the vLLM `SamplingParams` based on the value it has
+  in the `GenerationConfig`. This caused a discrepancy, as vLLM defaulted to -1 and
+  `transformers` to 50.
+- When loading a model using `transformers` then the quantized compute dtype is now
+  correctly set to either `bfloat16` or `float16`, depending on the GPU available,
+  rather than the previous `float32`. This does not affect generation performance.
+- Fixed formatting of summarization metrics.
+- Removed print output from `bert_score` during summarization metric computation.
+- Now clears GPU memory properly after finishing the benchmark of a generative model
+  with vLLM.
 
 
 ## [v9.1.2] - 2024-01-16

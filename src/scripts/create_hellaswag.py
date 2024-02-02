@@ -1,9 +1,18 @@
 """Create the HellaSwag-mini datasets and upload them to the HF Hub."""
 
+from collections import Counter
+
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
+from scripts.constants import (
+    MAX_NUM_CHARS_IN_INSTRUCTION,
+    MAX_NUM_CHARS_IN_OPTION,
+    MAX_REPETITIONS,
+    MIN_NUM_CHARS_IN_INSTRUCTION,
+    MIN_NUM_CHARS_IN_OPTION,
+)
 from sklearn.model_selection import train_test_split
 
 
@@ -38,6 +47,30 @@ def main() -> None:
         df = dataset.to_pandas()
         assert isinstance(df, pd.DataFrame)
 
+        # Remove the samples with overly short or long texts
+        df = df[
+            (df.ctx.str.len() >= MIN_NUM_CHARS_IN_INSTRUCTION)
+            & (df.ctx.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
+            & df.endings.map(
+                lambda endings: min(len(ending) for ending in endings)
+                >= MIN_NUM_CHARS_IN_OPTION
+                and max(len(ending) for ending in endings) <= MAX_NUM_CHARS_IN_OPTION
+            )
+        ]
+
+        def is_repetitive(text: str) -> bool:
+            """Return True if the text is repetitive."""
+            max_repetitions = max(Counter(text.split()).values())
+            return max_repetitions > MAX_REPETITIONS
+
+        # Remove overly repetitive samples
+        df = df[
+            ~df.ctx.apply(is_repetitive)
+            & ~df.endings.map(
+                lambda endings: any(is_repetitive(ending) for ending in endings)
+            )
+        ]
+
         # Make a `text` column with all the options in it
         df["text"] = [
             row.ctx.replace("\n", " ").strip() + "\n"
@@ -62,8 +95,11 @@ def main() -> None:
         df = df[df["activity_label"].isin(acceptable_activity_labels)]
 
         # Remove duplicates
-        df.drop_duplicates(subset="ctx", inplace=True)
+        df.drop_duplicates(subset="text", inplace=True)
         df.reset_index(drop=True, inplace=True)
+
+        # Make the `label` column case-consistent with the `text` column
+        df.label = df.label.str.lower()
 
         # Only keep the columns `text`, `label` and `activity_label`
         df = df[["text", "label", "activity_label"]]

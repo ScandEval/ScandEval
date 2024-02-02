@@ -1,21 +1,29 @@
 """A wrapper for vLLM models."""
 
 import logging
+import sys
 import warnings
 from pathlib import Path
 from types import MethodType
+from typing import Callable
 
 import torch
 from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
 from transformers.utils import ModelOutput
 
-from .config import ModelConfig
-from .utils import HiddenPrints, clear_memory
+from .config import DatasetConfig, ModelConfig
+from .dataset_tasks import NER
+from .protocols import Tokenizer
+from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
 try:
+    from lmformatenforcer.integrations.vllm import (
+        build_vllm_logits_processor,
+        build_vllm_token_enforcer_tokenizer_data,
+    )
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
@@ -43,7 +51,9 @@ class VLLMModel:
         self,
         model_config: ModelConfig,
         hf_model_config: PretrainedConfig,
+        dataset_config: DatasetConfig,
         model_cache_dir: str | Path,
+        trust_remote_code: bool,
         tokenizer: PreTrainedTokenizer | None = None,
     ) -> None:
         """Initialize a vLLM model.
@@ -53,17 +63,22 @@ class VLLMModel:
                 A model configuration.
             hf_model_config:
                 A Hugging Face model configuration.
+            dataset_config:
+                A dataset configuration.
             model_cache_dir:
                 The directory to cache the model in.
+            trust_remote_code:
+                Whether to trust remote code, e.g., from Hugging Face.
             tokenizer:
                 A Hugging Face tokenizer. If None, the tokenizer will need to be
                 loaded separately.
         """
         self.model_config = model_config
         self.config = hf_model_config
+        self.dataset_config = dataset_config
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
-        with warnings.catch_warnings(), HiddenPrints():
+        with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
 
             # This is required to be able to re-initialize the model, in case we
@@ -73,22 +88,30 @@ class VLLMModel:
 
             max_model_len = 10_000
             if hasattr(hf_model_config, "max_position_embeddings"):
-                max_model_len = min(10_000, hf_model_config.max_position_embeddings)
+                max_model_len = min(
+                    max_model_len, hf_model_config.max_position_embeddings
+                )
             if hasattr(hf_model_config, "model_max_length"):
-                max_model_len = min(10_000, hf_model_config.model_max_length)
+                max_model_len = min(max_model_len, hf_model_config.model_max_length)
             if hasattr(hf_model_config, "n_positions"):
-                max_model_len = min(10_000, hf_model_config.n_positions)
+                max_model_len = min(max_model_len, hf_model_config.n_positions)
 
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
                 max_model_len=max_model_len,
                 download_dir=str(model_cache_dir),
-                trust_remote_code=True,
+                trust_remote_code=trust_remote_code,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
             )
+
+    def __del__(self) -> None:
+        """Clear the GPU memory used by the model, and remove the model itself."""
+        destroy_model_parallel()
+        clear_memory()
+        del self
 
     def generate(
         self,
@@ -139,15 +162,22 @@ class VLLMModel:
 
         # Define the parameters used for vLLM generation
         max_tokens: int = generation_config.max_new_tokens or 1
+        temperature = (
+            0.0 if not generation_config.do_sample else generation_config.temperature
+        )
         sampling_params = SamplingParams(
+            # What to output
             max_tokens=max_tokens,
-            temperature=generation_config.temperature,
-            top_p=generation_config.top_p,
+            logprobs=10 if generation_config.output_scores else None,
             n=generation_config.num_return_sequences,
+            # How to sample
+            temperature=temperature,
+            top_p=generation_config.top_p,
+            top_k=generation_config.top_k,
+            stop=stop_tokens,
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            stop=stop_tokens,
-            logprobs=10 if generation_config.output_scores else None,
+            logits_processors=self.get_logits_processors(),
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which
@@ -160,13 +190,13 @@ class VLLMModel:
         # so that the vLLM model can generate from them
         if any(len(prompt) == 0 for prompt in prompts):
             logger.debug("Found empty prompts, replacing with BOS token.")
-        prompts = [
-            prompt if len(prompt) > 0 else self.tokenizer.bos_token
-            for prompt in prompts
-        ]
+            prompts = [
+                prompt if len(prompt) > 0 else self.tokenizer.bos_token
+                for prompt in prompts
+            ]
 
         # Generate sequences using vLLM
-        input_is_a_test = len(prompts) == 1 and len(prompts[0]) == 1
+        input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
         raw_outputs = self._model.generate(
             prompts=prompts,
             use_tqdm=(not input_is_a_test),
@@ -194,7 +224,7 @@ class VLLMModel:
                     len(raw_output.outputs[0].logprobs) for raw_output in raw_outputs
                 )
                 scores = [
-                    torch.full(size=(batch_size, vocab_size), fill_value=-1e9)
+                    torch.full(size=(batch_size, vocab_size), fill_value=-1e3)
                     for _ in range(max_seq_len)
                 ]
 
@@ -240,6 +270,52 @@ class VLLMModel:
             **generation_kwargs,
         )
 
+    def get_logits_processors(self) -> list[Callable] | None:
+        """Return the logits processors to use for structured generation."""
+        logits_processors = list()
+
+        # Add JSON generation constraint if we are benchmarking the NER task
+        if self.dataset_config.task == NER:
+            parser = get_ner_parser(dataset_config=self.dataset_config)
+            tokenizer_data = build_vllm_token_enforcer_tokenizer_data(llm=self._model)
+            logits_processor = build_vllm_logits_processor(
+                llm=tokenizer_data, character_level_parser=parser
+            )
+            logits_processors.append(logits_processor)
+
+            assert self.tokenizer is not None
+            forbidden_token_ids = list()
+            forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
+            for forbidden_token in forbidden_tokens:
+                forbidden_token_ids.extend(
+                    list(
+                        self.tokenizer(
+                            forbidden_token, add_special_tokens=False
+                        ).input_ids
+                    )
+                )
+            forbidden_token_ids = list(set(forbidden_token_ids))
+
+            def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
+                mask = torch.zeros_like(scores)
+                for forbidden_token_id in forbidden_token_ids:
+                    mask[forbidden_token_id] = -1e3
+                return scores + mask
+
+            logits_processors.append(no_tabs_or_newlines)
+
+        return logits_processors
+
+    def set_tokenizer(self, tokenizer: Tokenizer) -> None:
+        """Set the tokenizer to use for generation.
+
+        Args:
+            tokenizer:
+                The tokenizer to use for generation.
+        """
+        self.tokenizer = tokenizer
+        self._model.set_tokenizer(tokenizer)
+
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
         pass
@@ -256,7 +332,11 @@ class VLLMModel:
 def _run_engine_with_fixed_progress_bars(self, use_tqdm: bool) -> list[RequestOutput]:
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
-        pbar = tqdm(total=num_requests, leave=False)
+        pbar = tqdm(
+            total=num_requests,
+            leave=False,
+            disable=hasattr(sys, "_called_from_test"),
+        )
 
     # Run the engine.
     outputs: list[RequestOutput] = list()

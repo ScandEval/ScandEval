@@ -13,7 +13,7 @@ from transformers.utils import ModelOutput
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import raise_if_model_output_contains_nan_values
+from .utils import HiddenPrints, raise_if_model_output_contains_nan_values
 
 logger = logging.getLogger(__package__)
 
@@ -52,7 +52,12 @@ class TextToText(BenchmarkDataset):
         def tokenise(examples: dict) -> BatchEncoding:
             return tokenizer(text=examples["text"], truncation=True, padding=False)
 
-        tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
+        tokenised = dataset.map(
+            tokenise,
+            batched=True,
+            load_from_cache_file=False,
+            keep_in_memory=True,
+        )
 
         return tokenised
 
@@ -108,11 +113,12 @@ class TextToText(BenchmarkDataset):
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
-            score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
-            )
+            with HiddenPrints():
+                score_dict: dict[str, float] | None = metric.compute(
+                    predictions=predictions,
+                    references=labels,
+                    **cfg.compute_kwargs,
+                )
 
             # The metric returns None if we are running on multi-GPU and the current
             # process is not the main process
@@ -158,7 +164,7 @@ class TextToText(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -167,6 +173,8 @@ class TextToText(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.

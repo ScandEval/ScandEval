@@ -107,9 +107,11 @@ class NamedEntityRecognition(BenchmarkDataset):
             ]
             labels = [
                 [
-                    id2label[lbl_id]
-                    if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
-                    else lbl_id
+                    (
+                        id2label[lbl_id]
+                        if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
+                        else lbl_id
+                    )
                     for lbl_id in label  # type: ignore[call-overload]
                     if lbl_id != -100
                 ]
@@ -197,8 +199,8 @@ class NamedEntityRecognition(BenchmarkDataset):
             )
 
         return dict(
-            micro_f1=results["overall_f1"],
             micro_f1_no_misc=results_no_misc["overall_f1"],
+            micro_f1=results["overall_f1"],
         )
 
     def _tokenize_and_align_labels(
@@ -421,7 +423,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                     self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
                 )
                 dataset = dataset.map(
-                    few_shot_fn, batched=True, load_from_cache_file=False
+                    few_shot_fn,
+                    batched=True,
+                    load_from_cache_file=False,
+                    keep_in_memory=True,
                 )
 
             def tokenise(examples: dict) -> BatchEncoding:
@@ -432,7 +437,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                 )
 
             tokenised_dataset = dataset.map(
-                tokenise, batched=True, load_from_cache_file=False
+                tokenise,
+                batched=True,
+                load_from_cache_file=False,
+                keep_in_memory=True,
             )
 
         else:
@@ -442,7 +450,10 @@ class NamedEntityRecognition(BenchmarkDataset):
                 label2id=kwargs["hf_model_config"].label2id,
             )
             tokenised_dataset = dataset.map(
-                map_fn, batched=True, load_from_cache_file=False
+                map_fn,
+                batched=True,
+                load_from_cache_file=False,
+                keep_in_memory=True,
             )
 
         return tokenised_dataset
@@ -521,7 +532,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -530,10 +541,11 @@ class NamedEntityRecognition(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
-            dict:
-                The examples with the few-shot prompt applied.
+            The examples with the few-shot prompt applied.
         """
 
         def create_label(example: dict) -> str:
@@ -600,8 +612,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 The predicted labels.
         """
         raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output["sequences"],
-            tokenizer=tokenizer,
+            generated_sequences=model_output["sequences"], tokenizer=tokenizer
         )
 
         # Attempt to extract the JSON dictionary from the predictions

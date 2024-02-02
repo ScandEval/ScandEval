@@ -43,8 +43,15 @@ def auth() -> Generator[str | bool, None, None]:
 
 
 @pytest.fixture(scope="session")
+def device() -> Generator[torch.device, None, None]:
+    """Yields the device to use for the tests."""
+    device = torch.device("cuda" if os.getenv("USE_CUDA", False) else "cpu")
+    yield device
+
+
+@pytest.fixture(scope="session")
 def benchmark_config(
-    language, dataset_task, auth
+    language, dataset_task, auth, device
 ) -> Generator[BenchmarkConfig, None, None]:
     """Yields a benchmark configuration used in tests."""
     yield BenchmarkConfig(
@@ -60,7 +67,7 @@ def benchmark_config(
         openai_api_key=None,
         progress_bar=False,
         save_results=True,
-        device=torch.device("cpu"),
+        device=device,
         verbose=False,
         trust_remote_code=True,
         load_in_4bit=None,

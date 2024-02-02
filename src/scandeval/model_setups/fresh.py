@@ -12,7 +12,7 @@ from transformers import (
     ElectraForTokenClassification,
     PretrainedConfig,
     PreTrainedModel,
-    PreTrainedTokenizer,
+    PreTrainedTokenizerBase,
     XLMRobertaForQuestionAnswering,
     XLMRobertaForSequenceClassification,
     XLMRobertaForTokenClassification,
@@ -34,12 +34,8 @@ FRESH_MODELS: list[str] = [
 class FreshModelSetup:
     """Model setup for fresh models.
 
-    Args:
-        benchmark_config (BenchmarkConfig):
-            The benchmark configuration.
-
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
     """
 
@@ -47,6 +43,12 @@ class FreshModelSetup:
         self,
         benchmark_config: BenchmarkConfig,
     ) -> None:
+        """Initialize the FreshModelSetup class.
+
+        Args:
+            benchmark_config:
+                The benchmark configuration.
+        """
         self.benchmark_config = benchmark_config
 
     @staticmethod
@@ -57,12 +59,11 @@ class FreshModelSetup:
         """Check if a model ID denotes a fresh model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
 
         Returns:
-            bool:
-                Whether the model exists as a fresh model.
+            Whether the model exists as a fresh model.
         """
         return self._strip_model_id(model_id=model_id) in FRESH_MODELS
 
@@ -70,12 +71,11 @@ class FreshModelSetup:
         """Fetches configuration for a fresh model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
 
         Returns:
-            ModelConfig:
-                The model configuration.
+            The model configuration.
         """
         return ModelConfig(
             model_id=self._strip_model_id(model_id=model_id),
@@ -96,14 +96,14 @@ class FreshModelSetup:
         """Load a fresh model.
 
         Args:
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
+            dataset_config:
+                The dataset configuration.
 
         Returns:
-            pair of (tokenizer, model):
-                The tokenizer and model.
+            The tokenizer and model.
         """
-
         config: PretrainedConfig
         block_terminal_output()
 
@@ -160,7 +160,7 @@ class FreshModelSetup:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             try:
-                tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
+                tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
                     model_id,
                     revision=model_config.revision,
                     token=self.benchmark_config.token,

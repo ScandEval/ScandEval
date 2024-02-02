@@ -11,7 +11,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Type
+from typing import Any, Type
 
 import numpy as np
 import pkg_resources
@@ -20,11 +20,13 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
+from lmformatenforcer import JsonSchemaParser
+from pydantic import conlist, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
 
-from .config import Language
+from .config import DatasetConfig, Language
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
@@ -38,6 +40,10 @@ try:
     import vllm
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
+
+
+# This is used as input to generative models; it cannot be a special token
+DUMMY_FILL_VALUE = 100
 
 
 GENERATIVE_MODEL_TASKS = [
@@ -525,12 +531,16 @@ class HiddenPrints:
     def __enter__(self):
         """Enter the context manager."""
         self._original_stdout = sys.stdout
+        self._original_stderr = sys.stderr
         sys.stdout = open(os.devnull, "w")
+        sys.stderr = open(os.devnull, "w")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Exit the context manager."""
         sys.stdout.close()
+        sys.stderr.close()
         sys.stdout = self._original_stdout
+        sys.stderr = self._original_stderr
 
 
 def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
@@ -550,7 +560,9 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
-            dummy_inputs = torch.tensor([[1]], device=model.device, dtype=torch.long)
+            dummy_inputs = torch.tensor(
+                [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
+            )
             generation_config = GenerationConfig(
                 max_new_tokens=1,
                 pad_token_id=model.config.pad_token_id,
@@ -570,8 +582,7 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
             The model output to check.
 
     Raises:
-        NaNValueInModelOutput:
-            If the model output contains NaN values.
+        If the model output contains NaN values.
     """
     if isinstance(model_output, np.ndarray):
         if model_output.dtype == np.float32 and np.isnan(model_output).any():
@@ -583,3 +594,55 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
         elif len(model_output[0]) > 0:
             if any(x != x for sublist in model_output for x in sublist):
                 raise NaNValueInModelOutput()
+
+
+def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
+    """Get the JSON schema parser used for structured generation for the NER task.
+
+    Args:
+        dataset_config:
+            The dataset configuration.
+
+    Returns:
+        The JSON schema parser.
+    """
+    tag_names = list(set(dataset_config.prompt_label_mapping.values()))
+    keys_and_their_types: dict[str, Any] = {
+        tag_name: (conlist(str, max_items=5, unique_items=True), ...)
+        for tag_name in tag_names
+    }
+    AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
+    parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
+    return parser
+
+
+def should_prompts_be_stripped(
+    labels_to_be_generated: list[str], tokenizer: Tokenizer
+) -> bool:
+    """Determine if we should strip the prompts for few-shot evaluation.
+
+    This is the case if the tokenizer needs to include the space as part of the label
+    token. The strategy is thus to tokenize a label with a preceeding colon (as in the
+    prompts), i.e., ": positive", and check if the tokenization starts with the tokens
+    of ": ". If this is the case, then we should not strip the prompts, since the
+    tokenizer produces the whitespace token separately.
+
+    Args:
+        labels_to_be_generated:
+            The labels that are to be generated.
+        tokenizer:
+            The tokenizer used to tokenize the labels.
+
+    Returns:
+        Whether we should strip the prompts.
+    """
+    strip_prompts = True
+    for label in labels_to_be_generated:
+        colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
+        label_tokens = tokenizer(": " + label, add_special_tokens=False).input_ids
+        label_tokens_start_with_colon_tokens = (
+            label_tokens[: len(colon_tokens)] == colon_tokens
+        )
+        if label_tokens_start_with_colon_tokens:
+            strip_prompts = False
+    return strip_prompts

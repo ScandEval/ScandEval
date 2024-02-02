@@ -126,13 +126,20 @@ class Tokenizer(Protocol):
         """The maximum length of a sequence that can be processed by the model."""
         ...
 
+    @property
+    def vocab_size(self) -> int:
+        """Return the size of the vocabulary."""
+        ...
+
     def pad(
         self,
-        encoded_inputs: BatchEncoding
-        | list[BatchEncoding]
-        | dict[str, list[str]]
-        | dict[str, list[list[str]]]
-        | list[dict[str, list[str]]],
+        encoded_inputs: (
+            BatchEncoding
+            | list[BatchEncoding]
+            | dict[str, list[str]]
+            | dict[str, list[list[str]]]
+            | list[dict[str, list[str]]]
+        ),
         **kwargs,
     ) -> BatchEncoding:
         """Pad a batch of encoded inputs.

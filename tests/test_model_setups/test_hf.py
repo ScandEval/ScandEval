@@ -8,7 +8,7 @@ from scandeval.model_setups.hf import HFModelSetup
 
 
 @pytest.mark.parametrize(
-    argnames=["device", "model_id", "expected"],
+    argnames=["test_device", "model_id", "expected"],
     argvalues=[
         ("cuda", "microsoft/mdeberta-v3-base", None),
         ("cuda", "jonfd/electra-small-nordic", None),
@@ -38,9 +38,12 @@ from scandeval.model_setups.hf import HFModelSetup
         "cpu: phi-2",
     ],
 )
-def test_torch_dtype_is_set_correctly(benchmark_config, device, model_id, expected):
+def test_torch_dtype_is_set_correctly(
+    benchmark_config, test_device, model_id, expected
+):
+    """Test that the torch dtype is set correctly."""
     benchmark_config_copy = copy.deepcopy(benchmark_config)
-    benchmark_config_copy.device = torch.device(device)
+    benchmark_config_copy.device = torch.device(test_device)
     model_setup = HFModelSetup(benchmark_config=benchmark_config_copy)
     hf_model_config = model_setup._load_hf_model_config(
         model_id=model_id,

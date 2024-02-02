@@ -1,6 +1,7 @@
 """Model setup for Hugging Face Hub models."""
 
 import logging
+import os
 import warnings
 from json import JSONDecodeError
 from time import sleep
@@ -226,7 +227,9 @@ class HFModelSetup:
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
-                bnb_4bit_compute_type=torch.float16,
+                bnb_4bit_compute_dtype=(
+                    torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+                ),
                 bnb_4bit_use_double_quant=True,
             )
             if load_in_4bit
@@ -247,6 +250,7 @@ class HFModelSetup:
         use_vllm = (
             model_config.task in GENERATIVE_MODEL_TASKS
             and self.benchmark_config.device == torch.device("cuda")
+            and os.getenv("USE_VLLM", True)
         )
 
         if use_vllm:
@@ -254,7 +258,9 @@ class HFModelSetup:
                 model = VLLMModel(
                     model_config=model_config,
                     hf_model_config=config,
+                    dataset_config=dataset_config,
                     model_cache_dir=model_config.model_cache_dir,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
                 )
             except ValueError as e:
                 # If the model is too large to fit on the GPU then we simply throw an
@@ -283,7 +289,9 @@ class HFModelSetup:
                 trust_remote_code=self.benchmark_config.trust_remote_code,
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
-                use_flash_attention_2=use_flash_attention,
+                attn_implementation=(
+                    "flash_attention_2" if use_flash_attention else None
+                ),
             )
 
             # These are used when a timeout occurs
@@ -386,7 +394,7 @@ class HFModelSetup:
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         if use_vllm:
-            model.tokenizer = tokenizer
+            model.set_tokenizer(tokenizer=tokenizer)
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,

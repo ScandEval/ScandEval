@@ -63,10 +63,10 @@ class OpenAITokenizer:
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
-        encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
-        self.bos_token = encoding.decode([self.bos_token_id])
+        self.encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
-        self.eos_token = encoding.decode([self.eos_token_id])
+        self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
@@ -84,12 +84,11 @@ class OpenAITokenizer:
         truncation = kwargs.get("truncation", False)
         start_idx = -self.model_max_length if truncation else 0
 
-        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         text_list = [text] if isinstance(text, str) else text
         encoded_inputs = [
             BatchEncoding(
                 dict(
-                    input_ids=encoding.encode(
+                    input_ids=self.encoding.encode(
                         text,
                         allowed_special={
                             self.bos_token,
@@ -117,11 +116,10 @@ class OpenAITokenizer:
         Returns:
             The decoded text.
         """
-        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         token_ids = [
             token_id for token_id in token_ids if token_id != self.pad_token_id
         ]
-        return encoding.decode(tokens=token_ids)
+        return self.encoding.decode(tokens=token_ids)
 
     def batch_decode(self, sequences: list[list[int]], **kwargs) -> list[str]:
         """Decode batched token IDs.
@@ -225,11 +223,13 @@ class OpenAITokenizer:
 
     def pad(
         self,
-        encoded_inputs: BatchEncoding
-        | list[BatchEncoding]
-        | dict[str, list[int]]
-        | dict[str, list[list[int]]]
-        | list[dict[str, list[int]]],
+        encoded_inputs: (
+            BatchEncoding
+            | list[BatchEncoding]
+            | dict[str, list[int]]
+            | dict[str, list[list[int]]]
+            | list[dict[str, list[int]]]
+        ),
         **kwargs,
     ) -> BatchEncoding:
         """Pad encoded inputs.
@@ -279,6 +279,11 @@ class OpenAITokenizer:
         )
 
         return BatchEncoding(dict(input_ids=padded_input_ids))
+
+    @property
+    def vocab_size(self) -> int:
+        """Return the size of the vocabulary."""
+        return self.encoding.max_token_value + 1
 
 
 class OpenAIModel:
@@ -391,10 +396,13 @@ class OpenAIModel:
 
         model_id = self.model_config.model_id
         max_tokens: int = generation_config.max_new_tokens or 1
+        temperature = (
+            0.0 if not generation_config.do_sample else generation_config.temperature
+        )
         generation_kwargs = dict(
             model=model_id,
             max_tokens=max_tokens,
-            temperature=generation_config.temperature,
+            temperature=temperature,
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
@@ -421,6 +429,11 @@ class OpenAIModel:
                 break
             except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
                 sleep(1)
+            except InvalidRequestError as e:
+                raise InvalidBenchmark(
+                    "OpenAI refused to generate a completion. It threw the error: "
+                    f"{e!r}."
+                )
         else:
             raise InvalidBenchmark("OpenAI API is not available")
 

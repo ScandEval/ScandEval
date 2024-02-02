@@ -1,8 +1,10 @@
 """Class that benchmarks Scandinavian language models."""
 
+import importlib.metadata
 import json
 import logging
 import re
+import sys
 from pathlib import Path
 from shutil import rmtree
 from time import sleep
@@ -35,6 +37,7 @@ class BenchmarkResult(BaseModel):
     generative: bool
     few_shot: bool
     validation_split: bool
+    scandeval_version: str = importlib.metadata.version(__package__)
 
     @classmethod
     def from_dict(cls, config: dict) -> "BenchmarkResult":
@@ -238,7 +241,12 @@ class Benchmarker:
             self.benchmark_results = list()
 
         # Set logging level based on verbosity
-        logging_level = logging.DEBUG if verbose else logging.INFO
+        if hasattr(sys, "_called_from_test"):
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
         logger.setLevel(logging_level)
 
         # Initialise a dataset factory
