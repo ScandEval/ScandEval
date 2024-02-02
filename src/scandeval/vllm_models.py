@@ -102,6 +102,8 @@ class VLLMModel:
                 max_model_len=max_model_len,
                 download_dir=str(model_cache_dir),
                 trust_remote_code=trust_remote_code,
+                revision=self.model_config.revision,
+                seed=4242,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model

@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-### Fixed
+### Fixed
 - Fixed an issue with OOM errors when changing from benchmarking one generative model
   to another.
+- Using model revisions did not work with vLLM models - this has now been fixed. These
+  revisions are specified using the '@' operator in the model ID, e.g., `scandeval -m
+  gpt2@main`.
 
 
 ## [v9.3.1] - 2024-01-31
