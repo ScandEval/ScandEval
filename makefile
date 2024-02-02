@@ -102,7 +102,8 @@ view-docs:  ## View documentation
 		"$${openCmd}" docs/{{ cookiecutter.project_name }}.html
 
 test:  ## Run tests
-	@date "+%H:%M:%S ⋅ Running tests with CUDA and vLLM..." \
+	@rm tests*.log; \
+		date "+%H:%M:%S ⋅ Running tests with CUDA and vLLM..." \
 		&& USE_CUDA=1 USE_VLLM=1 poetry run pytest | tee tests_with_cuda_and_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and no vLLM..." \
 		&& USE_CUDA=1 USE_VLLM=0 poetry run pytest | tee tests_with_cuda_and_no_vllm.log; \
