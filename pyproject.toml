@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ScandEval"
-version = "9.3.1"
+version = "9.3.2"
 description = "Evaluation of pretrained language models on mono- or multilingual language tasks."
 authors = ["Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>"]
 maintainers = [
