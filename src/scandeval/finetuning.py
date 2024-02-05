@@ -343,9 +343,7 @@ def finetune_single_iteration(
 
         with torch.inference_mode():
             evaluate_inputs = evaluate_inputs_fn(
-                dataset=test,
-                prepared_dataset=prepared_test,
-                metric_key_prefix="test",
+                dataset=test, prepared_dataset=prepared_test, metric_key_prefix="test"
             )
             test_scores = trainer.evaluate(**evaluate_inputs)
         scores["test"] = test_scores

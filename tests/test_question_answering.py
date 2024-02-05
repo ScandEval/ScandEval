@@ -46,8 +46,7 @@ def benchmark_dataset(
 ) -> Generator[BenchmarkDataset, None, None]:
     """Yields a question answering benchmark dataset."""
     yield QuestionAnswering(
-        dataset_config=request.param,
-        benchmark_config=benchmark_config,
+        dataset_config=request.param, benchmark_config=benchmark_config
     )
 
 
@@ -69,10 +68,7 @@ def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
 
 @pytest.mark.parametrize(
     argnames="tokenizer_model_id",
-    argvalues=[
-        "jonfd/electra-small-nordic",
-        "flax-community/swe-roberta-wiki-oscar",
-    ],
+    argvalues=["jonfd/electra-small-nordic", "flax-community/swe-roberta-wiki-oscar"],
 )
 @pytest.mark.parametrize(
     argnames="examples",

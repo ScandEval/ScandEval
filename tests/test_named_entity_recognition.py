@@ -51,8 +51,7 @@ def benchmark_dataset(
 ) -> Generator[BenchmarkDataset, None, None]:
     """Yields a named entity recognition dataset."""
     yield NamedEntityRecognition(
-        dataset_config=request.param,
-        benchmark_config=benchmark_config,
+        dataset_config=request.param, benchmark_config=benchmark_config
     )
 
 

@@ -110,10 +110,7 @@ def main():
 
             # Collect datasets in a dataset dictionary
             dataset = DatasetDict(
-                train=train,
-                val=val,
-                test=test,
-                full_train=full_train,
+                train=train, val=val, test=test, full_train=full_train
             )
 
             # Create dataset ID

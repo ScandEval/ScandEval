@@ -23,7 +23,7 @@ numpy = "^1.23.0"
 sentencepiece = ">=0.1.96,<1.0.0"
 protobuf = ">=3.20.0,<3.21.0"
 seqeval = "^1.2.2"
-pandas = "^1.4.0"
+pandas = "^2.2.0"
 python-dotenv = ">=0.20.0,<1.0.0"
 sacremoses = ">=0.0.53,<1.0.0"
 jax = ">=0.4.1,<1.0.0"
@@ -34,7 +34,7 @@ openai = ">=0.27.8,<1.0.0"
 tiktoken = ">=0.4.0,<1.0.0"
 levenshtein = ">=0.21.1,<1.0.0"
 einops = ">=0.6.0,<1.0.0"
-bitsandbytes = {markers="sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.40.0.post4,<1.0.0"}
+bitsandbytes = {markers="sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.42.0,<1.0.0"}
 requests = "^2.31.0"
 torch = "^2.1.1"
 transformers = "~4.37.1"  # Only minor upgrades as breaking changes happen often
@@ -42,16 +42,15 @@ accelerate = ">=0.23.0,<1.0.0"
 rouge-score = ">=0.1.2,<1.0.0"
 bert-score = ">=0.3.13,<1.0.0"
 evaluate = ">=0.4.1,<1.0.0"
-vllm = {markers="sys_platform != 'darwin'", version = ">=0.2.7,<1.0.0"}
+vllm = {markers="sys_platform != 'darwin'", version = ">=0.3.0,<1.0.0"}
 demjson3 = "^3.0.6"
-pydantic = ">=1.10.0,<3.0.0"
+pydantic = "^2.6.0"
 lm-format-enforcer = ">=0.8.2,<1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.0"
 pre-commit = ">=3.3.3"
-black = ">=24.1.0"
-lxml = "^4.9.3"
+lxml = ">=4.9.3"
 pytest-cov = ">=4.1.0"
 readme-coverage-badger = ">=0.1.2"
 ruff = ">=0.1.13"
@@ -65,7 +64,7 @@ minversion = "6.0"
 addopts = [
     '--verbose',
     '--durations=10',
-    '--color=yes',
+    '--color=no',
     '-s',
     '-vv',
     '--doctest-modules',
@@ -81,28 +80,30 @@ filterwarnings = [
 log_cli_level = "info"
 testpaths = ["tests", "src/scandeval"]
 
-[tool.black]
-line-length = 88
-include = '\.pyi?$'
-exclude = '''
-/(
-	\.git
-| \.hg
-| \.mypy_cache
-| \.tox
-| \.venv
-| _build
-| buck-out
-| build
-)/
-'''
-
 [tool.ruff]
-target-version = "py311"
+line-length = 88
+target-version = "py310"
 extend-select = [
     "I",
     "D",
 ]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".scandeval_cache",
+    ".venv",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+skip-magic-trailing-comma = true
+
+[tool.ruff.isort]
+split-on-trailing-comma = false
 
 [tool.ruff.pydocstyle]
 convention = "google"

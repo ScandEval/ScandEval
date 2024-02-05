@@ -63,8 +63,7 @@ class QuestionAnswering(BenchmarkDataset):
 
         if generative_model:
             preprocess_fn = partial(
-                prepare_examples_for_generation,
-                tokenizer=tokenizer,
+                prepare_examples_for_generation, tokenizer=tokenizer
             )
         elif split == "test":
             preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
@@ -95,8 +94,7 @@ class QuestionAnswering(BenchmarkDataset):
         # `offset_mapping` which we will need for our post-processing), so we put them
         # back
         preprocessed.set_format(
-            type=preprocessed.format["type"],
-            columns=list(preprocessed.features.keys()),
+            type=preprocessed.format["type"], columns=list(preprocessed.features.keys())
         )
 
         # Return the preprocessed dataset
@@ -135,9 +133,7 @@ class QuestionAnswering(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer=tokenizer)
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -166,9 +162,7 @@ class QuestionAnswering(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
+                predictions=predictions, references=labels, **cfg.compute_kwargs
             )
 
             # The metric returns None if we are running on multi-GPU and the current
@@ -292,8 +286,7 @@ class QuestionAnswering(BenchmarkDataset):
             The predicted labels.
         """
         raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output["sequences"],
-            tokenizer=tokenizer,
+            generated_sequences=model_output["sequences"], tokenizer=tokenizer
         )
 
         predictions = [
@@ -461,8 +454,7 @@ def prepare_train_examples(
 
 
 def prepare_test_examples(
-    examples: BatchEncoding,
-    tokenizer: Tokenizer,
+    examples: BatchEncoding, tokenizer: Tokenizer
 ) -> BatchEncoding:
     """Prepare test examples.
 

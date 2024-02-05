@@ -179,8 +179,7 @@ class HFModelSetup:
                 revision=revision,
                 model_type=ModelType.HF,
                 model_cache_dir=create_model_cache_dir(
-                    cache_dir=self.benchmark_config.cache_dir,
-                    model_id=model_id,
+                    cache_dir=self.benchmark_config.cache_dir, model_id=model_id
                 ),
             )
 
@@ -491,9 +490,7 @@ class HFModelSetup:
                 continue
 
     def _load_tokenizer(
-        self,
-        model: PreTrainedModel | GenerativeModel,
-        model_id: str,
+        self, model: PreTrainedModel | GenerativeModel, model_id: str
     ) -> Tokenizer:
         """Load the tokenizer.
 

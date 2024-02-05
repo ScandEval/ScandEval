@@ -86,14 +86,22 @@ class Benchmarker:
     """Benchmarking all the Scandinavian language models.
 
     Attributes:
-        progress_bar: Whether progress bars should be shown.
-        save_results: Whether to save the benchmark results.
-        language: The languages to include in the list.
-        dataset_task: The dataset tasks to include.
-        evaluate_train: Whether to evaluate the training set as well.
-        verbose: Whether to output additional output.
-        token: The authentication token for the Hugging Face Hub.
-        benchmark_results: The benchmark results.
+        progress_bar:
+            Whether progress bars should be shown.
+        save_results:
+            Whether to save the benchmark results.
+        language:
+            The languages to include in the list.
+        dataset_task:
+            The dataset tasks to include.
+        evaluate_train:
+            Whether to evaluate the training set as well.
+        verbose:
+            Whether to output additional output.
+        token:
+            The authentication token for the Hugging Face Hub.
+        benchmark_results:
+            The benchmark results.
     """
 
     def __init__(
@@ -344,10 +352,7 @@ class Benchmarker:
                     if sub_model_dir.is_dir():
                         rmtree(sub_model_dir)
 
-    def _prepare_model_ids(
-        self,
-        model_id: list[str] | str | None,
-    ) -> list[str]:
+    def _prepare_model_ids(self, model_id: list[str] | str | None) -> list[str]:
         """Prepare the model ID(s) to be benchmarked.
 
         Args:
@@ -363,7 +368,7 @@ class Benchmarker:
         # If `model_id` is not specified, then fetch all the relevant model IDs
         if model_id is None:
             model_ids = self._get_model_ids(
-                languages=self.benchmark_config.model_languages,
+                languages=self.benchmark_config.model_languages
             )
 
         # Otherwise, if `model_id` is a string, ensure that it is a list
@@ -388,8 +393,7 @@ class Benchmarker:
         return model_ids_sorted
 
     def _prepare_dataset_configs(
-        self,
-        dataset: list[str] | str | None,
+        self, dataset: list[str] | str | None
     ) -> list[DatasetConfig]:
         """Prepare the dataset configuration(s) to be benchmarked.
 
@@ -508,8 +512,7 @@ class Benchmarker:
         # If the model lists have not been fetched already, then do it
         if self._model_lists is None or new_languages:
             self._model_lists = get_huggingface_model_lists(
-                languages=languages,
-                token=self.benchmark_config.token,
+                languages=languages, token=self.benchmark_config.token
             )
 
         # Extract all the model IDs from the model lists, for the chosen languages

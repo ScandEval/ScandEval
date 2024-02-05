@@ -102,6 +102,8 @@ class VLLMModel:
                 max_model_len=max_model_len,
                 download_dir=str(model_cache_dir),
                 trust_remote_code=trust_remote_code,
+                revision=self.model_config.revision,
+                seed=4242,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
@@ -110,6 +112,8 @@ class VLLMModel:
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
+        if hasattr(self, "_model"):
+            del self._model
         clear_memory()
         del self
 
@@ -265,9 +269,7 @@ class VLLMModel:
             The generated sequences.
         """
         return self.generate(
-            inputs=inputs,
-            generation_config=generation_config,
-            **generation_kwargs,
+            inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
 
     def get_logits_processors(self) -> list[Callable] | None:
@@ -314,7 +316,21 @@ class VLLMModel:
                 The tokenizer to use for generation.
         """
         self.tokenizer = tokenizer
-        self._model.set_tokenizer(tokenizer)
+
+        # This sets the internal tokenizer in the vLLM model. The
+        # `LLM.llm_engine.tokenizer` is a `TokenizerGroup` object, which has a
+        # `tokenizer` attribute that is the actual tokenizer. This is a new change from
+        # `vllm` version 0.3.0, which is a breaking change since the `TokenizerGroup`
+        # doesn't have the same properties and methods as a Hugging Face
+        # `PreTrainedTokenizer` object. To resolve this, we copy all properties and
+        # methods from the `PreTrainedTokenizer` object to the `TokenizerGroup` object,
+        # unless the property or method already exists in the `TokenizerGroup` object.
+        # vLLM issue on this: https://github.com/vllm-project/vllm/issues/2713
+        self._model.llm_engine.tokenizer.tokenizer = tokenizer
+        for attr in dir(tokenizer):
+            if attr.startswith("_") or hasattr(self._model.llm_engine.tokenizer, attr):
+                continue
+            setattr(self._model.llm_engine.tokenizer, attr, getattr(tokenizer, attr))
 
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
@@ -333,9 +349,7 @@ def _run_engine_with_fixed_progress_bars(self, use_tqdm: bool) -> list[RequestOu
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
         pbar = tqdm(
-            total=num_requests,
-            leave=False,
-            disable=hasattr(sys, "_called_from_test"),
+            total=num_requests, leave=False, disable=hasattr(sys, "_called_from_test")
         )
 
     # Run the engine.

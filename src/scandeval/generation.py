@@ -300,14 +300,10 @@ def generate_single_iteration(
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
         model_output = load_cached_model_outputs(
-            cached_dataset=cached_dataset,
-            cache=cache,
-            tokenizer=tokenizer,
+            cached_dataset=cached_dataset, cache=cache, tokenizer=tokenizer
         )
         extracted_labels = extract_labels_fn(
-            input_batch=cached_dataset,
-            model_output=model_output,
-            tokenizer=tokenizer,
+            input_batch=cached_dataset, model_output=model_output, tokenizer=tokenizer
         )
         all_preds.extend(extracted_labels)
 
@@ -523,8 +519,7 @@ def generate_batch(
 
 
 def extract_raw_predictions(
-    generated_sequences: torch.Tensor,
-    tokenizer: Tokenizer,
+    generated_sequences: torch.Tensor, tokenizer: Tokenizer
 ) -> list[str]:
     """Get the raw predictions from the generated sequences.
 
@@ -549,8 +544,7 @@ def extract_raw_predictions(
 
 
 def get_generation_stopping_criteria(
-    tokenizer: Tokenizer,
-    model: GenerativeModel,
+    tokenizer: Tokenizer, model: GenerativeModel
 ) -> StopWordCriteria:
     """Get the stopping criteria for generation.
 

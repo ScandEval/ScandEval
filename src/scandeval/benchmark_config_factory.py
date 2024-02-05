@@ -94,12 +94,10 @@ def build_benchmark_config(
     """
     language_codes = get_correct_language_codes(language_codes=language)
     model_languages = prepare_languages(
-        language_codes=model_language,
-        default_language_codes=language_codes,
+        language_codes=model_language, default_language_codes=language_codes
     )
     dataset_languages = prepare_languages(
-        language_codes=dataset_language,
-        default_language_codes=language_codes,
+        language_codes=dataset_language, default_language_codes=language_codes
     )
 
     dataset_tasks = prepare_dataset_tasks(dataset_task=dataset_task)
@@ -164,8 +162,7 @@ def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
 
 
 def prepare_languages(
-    language_codes: str | list[str] | None,
-    default_language_codes: list[str],
+    language_codes: str | list[str] | None, default_language_codes: list[str]
 ) -> list[Language]:
     """Prepare language(s) for benchmarking.
 

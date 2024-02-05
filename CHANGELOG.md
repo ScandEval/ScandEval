@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Fixed an issue with OOM errors when changing from benchmarking one generative model
+  to another.
+- Using model revisions did not work with vLLM models - this has now been fixed. These
+  revisions are specified using the '@' operator in the model ID, e.g., `scandeval -m
+  gpt2@main`.
+
+
 ## [v9.3.1] - 2024-01-31
 ### Fixed
 - The prompts were not stripped correctly, causing bad evaluations for sequence
@@ -38,8 +47,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   never using the cached versions anyway.
 - We now only strip the prompts if the model's tokenizer includes a prefix space when
   tokenizing the labels.
-- Fixed an issue with OOM errors when changing from benchmarking one generative model
-  to another.
 - When testing a model's maximum sequence length, we put dummy inputs into them. This
   causes errors if the dummy inputs are one of the special tokens. Since the special
   tokens have not always been set up in the tokenizer, we instead rely on a heuristic

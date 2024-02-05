@@ -510,7 +510,7 @@ class BenchmarkDataset(ABC):
                                 text=tokenizer.batch_decode(
                                     sequences=examples["input_ids"],
                                     skip_special_tokens=True,
-                                ),
+                                )
                             ),
                             batched=True,
                             load_from_cache_file=False,
@@ -527,9 +527,7 @@ class BenchmarkDataset(ABC):
         return prepared_train, prepared_val, prepared_tests
 
     def _preprocess_logits_for_metrics(
-        self,
-        model_outputs: torch.Tensor | tuple,
-        labels: torch.Tensor,
+        self, model_outputs: torch.Tensor | tuple, labels: torch.Tensor
     ) -> torch.Tensor | tuple:
         """Ensure that only the logits are returned from the model.
 
@@ -632,9 +630,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 

@@ -183,7 +183,7 @@ TEXT_MODELLING = DatasetTask(
             pretty_name="Perplexity",
             huggingface_id="perplexity",
             results_key="mean_perplexity",
-        ),
+        )
     ],
     labels=[],
 )

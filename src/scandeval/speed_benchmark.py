@@ -113,12 +113,7 @@ def benchmark_speed_single_iteration(
                 raise ValueError("Tokenizer and model must not be None.")
 
             # Tokenize the document
-            inputs = tokenizer(
-                doc,
-                padding=True,
-                truncation=True,
-                return_tensors="pt",
-            )
+            inputs = tokenizer(doc, padding=True, truncation=True, return_tensors="pt")
 
             inputs = {name: tensor.to(model.device) for name, tensor in inputs.items()}
 

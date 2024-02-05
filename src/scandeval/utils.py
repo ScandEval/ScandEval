@@ -53,21 +53,13 @@ GENERATIVE_MODEL_TASKS = [
 ]
 
 
-GENERATIVE_DATASET_TASKS = [
-    "knowledge",
-    "common-sense-reasoning",
-]
+GENERATIVE_DATASET_TASKS = ["knowledge", "common-sense-reasoning"]
 
 
-GENERATIVE_DATASET_SUPERTASKS = [
-    "text-to-text",
-    "text-modelling",
-]
+GENERATIVE_DATASET_SUPERTASKS = ["text-to-text", "text-modelling"]
 
 
-SUPERTASKS_USING_LOGPROBS = [
-    "sequence-classification",
-]
+SUPERTASKS_USING_LOGPROBS = ["sequence-classification"]
 
 
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
@@ -175,6 +167,7 @@ def block_terminal_output():
     logging.getLogger("vllm.engine.llm_engine").setLevel(logging.ERROR)
     logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.ERROR)
     logging.getLogger("vllm.core.scheduler").setLevel(logging.ERROR)
+    logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.ERROR)
 
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the ERROR level."""
@@ -197,8 +190,7 @@ def block_terminal_output():
 
 
 def get_class_by_name(
-    class_name: str | list[str],
-    module_name: str | None = None,
+    class_name: str | list[str], module_name: str | None = None
 ) -> Type | None:
     """Get a class by its name.
 
@@ -328,8 +320,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 
 
 def get_huggingface_model_lists(
-    languages: list[Language] | None,
-    token: bool | str,
+    languages: list[Language] | None, token: bool | str
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -606,10 +597,9 @@ def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
     Returns:
         The JSON schema parser.
     """
-    tag_names = list(set(dataset_config.prompt_label_mapping.values()))
+    tag_names = set(dataset_config.prompt_label_mapping.values())
     keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_items=5, unique_items=True), ...)
-        for tag_name in tag_names
+        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
     }
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
     parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
