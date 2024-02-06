@@ -13,7 +13,7 @@ from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_loading import load_model
 from .protocols import GenerativeModel, Tokenizer
-from .utils import model_is_generative
+from .utils import clear_memory, model_is_generative
 
 logger = logging.getLogger(__package__)
 
@@ -56,6 +56,7 @@ def benchmark_speed(
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
         )
+        clear_memory()
 
         if isinstance(itr_scores, Exception):
             raise InvalidBenchmark(f"Speed benchmark failed with error: {itr_scores!r}")
