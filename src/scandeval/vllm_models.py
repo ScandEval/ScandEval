@@ -114,8 +114,8 @@ class VLLMModel:
         destroy_model_parallel()
         if hasattr(self, "_model"):
             del self._model
-        clear_memory()
         del self
+        clear_memory()
 
     def generate(
         self,
