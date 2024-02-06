@@ -83,10 +83,7 @@ class VLLMModel:
 
             # This is required to be able to re-initialize the model, in case we
             # have already initialized it once
-            try:
-                destroy_model_parallel()
-            except RuntimeError:
-                pass
+            destroy_model_parallel()
             clear_memory()
 
             max_model_len = 10_000
@@ -114,10 +111,7 @@ class VLLMModel:
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
-        try:
-            destroy_model_parallel()
-        except RuntimeError:
-            pass
+        destroy_model_parallel()
         if hasattr(self, "_model"):
             del self._model
         del self
