@@ -82,13 +82,12 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
 
 def clear_memory():
     """Clears the memory of unused items."""
-    # Clear the Python cache
     gc.collect()
-
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     if torch.backends.mps.is_available():
         torch.mps.empty_cache()
+    torch.distributed.destroy_process_group()
 
 
 def enforce_reproducibility(framework: Framework | str, seed: int = 4242):
