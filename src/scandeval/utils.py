@@ -87,7 +87,10 @@ def clear_memory():
         torch.cuda.empty_cache()
     if torch.backends.mps.is_available():
         torch.mps.empty_cache()
-    torch.distributed.destroy_process_group()
+    try:
+        torch.distributed.destroy_process_group()
+    except AssertionError:
+        pass
 
 
 def enforce_reproducibility(framework: Framework | str, seed: int = 4242):
