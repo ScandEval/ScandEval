@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - Error when encoding a batch of size 1 with OpenAI models.
+- Fixed an issue with OOM errors when changing from benchmarking one generative model
+  to another.
 
 
 ## [v9.3.2] - 2024-02-05
 ### Fixed
-- Fixed an issue with OOM errors when changing from benchmarking one generative model
-  to another.
 - Using model revisions did not work with vLLM models - this has now been fixed. These
   revisions are specified using the '@' operator in the model ID, e.g., `scandeval -m
   gpt2@main`.
