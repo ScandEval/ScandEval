@@ -629,8 +629,8 @@ def should_prompts_be_stripped(
         colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
         label_tokens = tokenizer(": " + label, add_special_tokens=False).input_ids
         label_tokens_start_with_colon_tokens = list(
-            label_tokens[: len(colon_tokens)]
-        ) == list(colon_tokens)
+            label_tokens[: len(colon_tokens)].squeeze(0)
+        ) == list(colon_tokens.squeeze(0))
         if label_tokens_start_with_colon_tokens:
             strip_prompts = False
     return strip_prompts
