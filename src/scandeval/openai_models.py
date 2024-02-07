@@ -278,6 +278,9 @@ class OpenAITokenizer:
             .long()
         )
 
+        if padded_input_ids.shape[0] == 1:
+            padded_input_ids = padded_input_ids.squeeze(0)
+
         return BatchEncoding(dict(input_ids=padded_input_ids))
 
     @property

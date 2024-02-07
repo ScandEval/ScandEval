@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Error when encoding a batch of size 1 with OpenAI models.
+
+
 ## [v9.3.2] - 2024-02-05
 ### Fixed
 - Fixed an issue with OOM errors when changing from benchmarking one generative model
