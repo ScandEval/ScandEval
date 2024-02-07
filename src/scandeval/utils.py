@@ -628,9 +628,15 @@ def should_prompts_be_stripped(
     for label in labels_to_be_generated:
         colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
         label_tokens = tokenizer(": " + label, add_special_tokens=False).input_ids
-        label_tokens_start_with_colon_tokens = list(
-            label_tokens[: len(colon_tokens)].squeeze(0)
-        ) == list(colon_tokens.squeeze(0))
+
+        if isinstance(colon_tokens, torch.Tensor):
+            colon_tokens = list(colon_tokens.squeeze(0))
+        if isinstance(label_tokens, torch.Tensor):
+            label_tokens = list(label_tokens.squeeze(0))
+
+        label_tokens_start_with_colon_tokens = (
+            label_tokens[: len(colon_tokens)] == colon_tokens
+        )
         if label_tokens_start_with_colon_tokens:
             strip_prompts = False
     return strip_prompts
