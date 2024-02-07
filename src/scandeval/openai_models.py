@@ -63,11 +63,15 @@ class OpenAITokenizer:
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
-        self.encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
         self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
         self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
+
+    @property
+    def encoding(self) -> tiktoken.Encoding:
+        """Return the underlying tiktoken encoding."""
+        return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.

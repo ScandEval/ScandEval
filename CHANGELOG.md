@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - Error when encoding a batch of size 1 with OpenAI models.
+- Error when benchmarking OpenAI models on MacOS due to the `tiktoken.Encoding` object
+  not being picklable.
 - Fixed an issue with OOM errors when changing from benchmarking one generative model
   to another.
 
