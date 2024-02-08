@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Updated many dependencies. In particular now uses `openai` version 1.x.x, which
+  required some changes to the code base as they changed their API.
+
 ### Fixed
 - Error when encoding a batch of size 1 with OpenAI models.
 - Error when benchmarking OpenAI models on MacOS due to the `tiktoken.Encoding` object
@@ -15,12 +19,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   to another.
 - Now allows loading tokenisers that require remote code, if `--trust-remote-code` has
   been set.
-- Sometimes there is a discrepancy between the `vocab_size` parameter of a tokeniser
-  and the actual size of the tokenisers vocabulary (via the `get_vocab` method), which
-  caused indexing errors when dealing with vLLM decoder models. We now simply take the
-  maximum of the two, to ensure that it is large enough. This is purely used in
-  returning scores, so it does not matter if the size is a bit larger than the actual
-  vocabulary size.
 
 
 ## [v9.3.2] - 2024-02-05

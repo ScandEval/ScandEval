@@ -228,9 +228,7 @@ class VLLMModel:
                 # Create a list with placeholder logprobs for every token generated.
                 # Each tensor in the list will be of shape (batch_size, vocab_size)
                 batch_size = len(raw_outputs)
-                vocab_size = max(
-                    [len(self.tokenizer.get_vocab()), self.tokenizer.vocab_size]
-                )
+                vocab_size = len(self.tokenizer.get_vocab())
                 max_seq_len = max(
                     len(raw_output.outputs[0].logprobs) for raw_output in raw_outputs
                 )
