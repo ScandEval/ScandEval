@@ -15,7 +15,7 @@ jobs:
   pytest-linux:
     strategy:
         matrix:
-            python-version: ["3.10", "3.11"]
+            python-version: ["3.10", "3.11", "3.12"]
 
     runs-on: ubuntu-latest
     steps:
@@ -41,10 +41,6 @@ jobs:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
 
   pytest-macos:
-    strategy:
-        matrix:
-            python-version: ["3.10", "3.11"]
-
     if: contains(github.event.pull_request.labels.*.name, 'macos')
     runs-on: macos-latest
     steps:
@@ -56,7 +52,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.10
           cache: "poetry"
 
       - name: Install Dependencies
