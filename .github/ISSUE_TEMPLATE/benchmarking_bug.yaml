@@ -11,34 +11,31 @@ body:
   attributes:
     label: 🐛 Describe the bug
     description: |
-      Please provide a clear and concise description of what the bug is. If relevant,
-      add a minimal example so that we can reproduce the error by running the code.
-    placeholder: |
-      A clear and concise description of what the bug is.
+      Please provide a clear and concise description of what the bug is. If relevant, add a minimal example so that we can reproduce the error by running the code.
   validations:
     required: true
 - type: textarea
   attributes:
     label: Operating System
-    placeholder: For instance, MacOS, Ubuntu
+    description: For instance, MacOS, Ubuntu
   validations:
     required: true
 - type: textarea
   attributes:
     label: Python version
-    placeholder: Output of `python --version`
+    description: Output of `python --version`
   validations:
     required: true
 - type: textarea
   attributes:
     label: Device
-    placeholder: For instance, CUDA GPU, AMD GPU, CPU, Mac M1
+    description: For instance, CUDA GPU, AMD GPU, CPU, Mac M1
   validations:
     required: true
 - type: textarea
   attributes:
     label: Packages installed
-    placeholder: Output of `pip list` or `poetry show`
+    description: Output of `pip list` or `poetry show`
   validations:
     required: true
 - type: markdown
