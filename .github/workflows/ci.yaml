@@ -41,7 +41,7 @@ jobs:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
 
   pytest-macos:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'macos') }}
+    if: contains(github.event.pull_request.labels.*.name, 'macos')
     strategy:
         matrix:
             python-version: ["3.10", "3.11"]
