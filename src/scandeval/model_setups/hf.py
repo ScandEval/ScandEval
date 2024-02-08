@@ -522,6 +522,7 @@ class HFModelSetup:
                         verbose=False,
                         padding_side=padding_side,
                         truncation_side=padding_side,
+                        trust_remote_code=self.benchmark_config.trust_remote_code,
                     )
                 except (JSONDecodeError, OSError, TypeError):
                     raise InvalidBenchmark(

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   not being picklable.
 - Fixed an issue with OOM errors when changing from benchmarking one generative model
   to another.
+- Now allows loading tokenisers that require remote code, if `--trust-remote-code` has
+  been set.
 
 
 ## [v9.3.2] - 2024-02-05
