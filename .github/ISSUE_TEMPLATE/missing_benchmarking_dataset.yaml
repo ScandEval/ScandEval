@@ -1,0 +1,29 @@
+name: 📚 Benchmarking Bug Report
+description: Do you think a particular benchmark dataset is missing in ScandEval?
+labels: "benchmark dataset request"
+
+body:
+- type: textarea
+  attributes:
+    label: 📚 Describe the dataset
+    description: |
+      Include the name and a brief description of the dataset, along with a link to
+      where it is currently hosted (doesn't have to be Hugging Face). Also include
+      roughly how many samples the dataset contains, and what language it pertains to.
+    placeholder: |
+      A clear and concise description of the dataset.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Rationale
+    description: |
+      Explain why you think it is important to include this dataset in ScandEval.
+    placeholder: |
+      A brief argument of the dataset is important.
+  validations:
+    required: true
+- type: markdown
+  attributes:
+    value: >
+      Thanks for contributing 🎉!
