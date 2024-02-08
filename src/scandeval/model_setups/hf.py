@@ -272,6 +272,9 @@ class HFModelSetup:
                 if oom_error_message in str(e):
                     raise InvalidBenchmark("The model is too large to load on the GPU.")
 
+                if self.benchmark_config.raise_errors:
+                    raise e
+
                 # Otherwise some other error occurred, and we log it and try to load
                 # the model with Hugging Face instead
                 use_vllm = False
