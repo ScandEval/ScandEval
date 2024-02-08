@@ -8,12 +8,14 @@ on:
 jobs:
 
   lint:
+    name: code-style
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: jpetrucciani/ruff-check@main
 
   pytest:
+    name: unit-tests
     strategy:
         matrix:
             os: [macos-latest, ubuntu-latest]
