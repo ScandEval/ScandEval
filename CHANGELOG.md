@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   to another.
 - Now allows loading tokenisers that require remote code, if `--trust-remote-code` has
   been set.
+- Fixed an issue where the `max_sequence_length` parameter in the Hugging Face model
+  configuration wasn't used to determine the `max_model_len` parameter in the
+  `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
 
 
 ## [v9.3.2] - 2024-02-05

@@ -86,14 +86,17 @@ class VLLMModel:
             clear_memory()
 
             max_model_len = 10_000
-            if hasattr(hf_model_config, "max_position_embeddings"):
-                max_model_len = min(
-                    max_model_len, hf_model_config.max_position_embeddings
-                )
-            if hasattr(hf_model_config, "model_max_length"):
-                max_model_len = min(max_model_len, hf_model_config.model_max_length)
-            if hasattr(hf_model_config, "n_positions"):
-                max_model_len = min(max_model_len, hf_model_config.n_positions)
+            potential_max_model_length_config_names = [
+                "max_position_embeddings",
+                "max_sequence_length",
+                "model_max_length",
+                "n_positions",
+            ]
+            for config_name in potential_max_model_length_config_names:
+                if hasattr(hf_model_config, config_name):
+                    max_model_len = min(
+                        max_model_len, getattr(hf_model_config, config_name)
+                    )
 
             self._model = LLM(
                 model=model_config.model_id,
