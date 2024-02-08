@@ -108,7 +108,8 @@ class VLLMModel:
                 _run_engine_with_fixed_progress_bars, self._model
             )
 
-            # Temporary fix until this vLLM PR is part of a release:
+            # Temporary fix until this vLLM PR is part of a release (should be any
+            # release after 0.3.0):
             # https://github.com/vllm-project/vllm/pull/2741
             self._model.get_tokenizer = MethodType(_get_tokenizer, self._model)
             self._model.set_tokenizer = MethodType(_set_tokenizer, self._model)
@@ -324,6 +325,7 @@ class VLLMModel:
         self.tokenizer = tokenizer
         self._model.set_tokenizer(tokenizer)
 
+        # TODO: Remove this block if it's not needed
         # This sets the internal tokenizer in the vLLM model. The
         # `LLM.llm_engine.tokenizer` is a `TokenizerGroup` object, which has a
         # `tokenizer` attribute that is the actual tokenizer. This is a new change from
