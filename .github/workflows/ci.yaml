@@ -6,29 +6,47 @@ on:
       - main
 
 jobs:
-
   lint:
-    name: code-style
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: jpetrucciani/ruff-check@main
 
-  pytest:
-    name: unit-tests
+  pytest-linux:
     strategy:
         matrix:
-            os: [macos-latest, ubuntu-latest]
             python-version: ["3.10", "3.11"]
 
-            # This runs the tests on MacOS if and only if the PR has the `macos` label
-            shouldTestMacOs:
-              - ${{ contains(github.event.pull_request.labels.*.name, 'macos') }}
-            exclude:
-              - shouldTestMacOs: false
-                os: macos-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-    runs-on: ${{ matrix.os }}
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install Dependencies
+        run: |
+          poetry env use "${{ matrix.python-version }}"
+          poetry install
+
+      - name: Test with pytest
+        run: poetry run pytest
+        env:
+          HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
+
+  pytest-macos:
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'macos') }}
+    strategy:
+        matrix:
+            python-version: ["3.10", "3.11"]
+
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
 
