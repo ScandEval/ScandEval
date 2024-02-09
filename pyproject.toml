@@ -74,8 +74,6 @@ jax = [
     "flax",
 ]
 generative = [
-    "rouge-score",
-    "bert-score",
     "demjson3",
     "lm-format-enforcer",
     "bitsandbytes",
