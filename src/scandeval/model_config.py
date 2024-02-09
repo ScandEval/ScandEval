@@ -4,7 +4,7 @@ import importlib.util
 
 from .config import BenchmarkConfig, ModelConfig
 from .enums import Framework
-from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .exceptions import InvalidModel, NeedsExtraInstalled
 from .model_setups import MODEL_SETUP_CLASSES
 
 
@@ -35,4 +35,4 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
                 raise NeedsExtraInstalled(extra="jax")
             return model_config
     else:
-        raise InvalidBenchmark(f"Model {model_id} not found.")
+        raise InvalidModel(f"Model {model_id} not found.")

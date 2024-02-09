@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
 
-from ..exceptions import InvalidBenchmark
+from ..exceptions import InvalidModel
 from ..utils import DUMMY_FILL_VALUE, model_is_generative
 
 
@@ -180,7 +180,7 @@ def align_model_and_tokenizer(
     if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
         if model.config.vocab_size < tokenizer.vocab_size:
             if raise_errors:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     "The vocab size of the tokenizer is larger than the vocab size of "
                     "the model. As the --raise-errors option was specified, the "
                     "embeddings of the model will not be automatically adjusted."
@@ -199,7 +199,7 @@ def align_model_and_tokenizer(
             if tokenizer.sep_token is not None:
                 tokenizer.pad_token = tokenizer.sep_token
             else:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     "The tokenizer does not have a padding token and does not have a "
                     "SEP token or EOS token to use as a padding token."
                 )

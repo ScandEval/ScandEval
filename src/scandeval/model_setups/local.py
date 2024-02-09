@@ -7,7 +7,7 @@ from transformers import AutoConfig, PreTrainedModel
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import InvalidBenchmark
+from ..exceptions import InvalidModel
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
 from .hf import HFModelSetup
@@ -80,9 +80,9 @@ class LocalModelSetup:
                 elif ".msgpack" in exts:
                     framework = Framework.JAX
                 elif ".whl" in exts:
-                    raise InvalidBenchmark("SpaCy models are not supported.")
+                    raise InvalidModel("SpaCy models are not supported.")
                 elif ".h5" in exts:
-                    raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
+                    raise InvalidModel("TensorFlow/Keras models are not supported.")
             except OSError as e:
                 logger.info(f"Cannot list files for local model `{model_id}`!")
                 if self.benchmark_config.raise_errors:

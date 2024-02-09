@@ -27,6 +27,7 @@ from ..exceptions import (
     FlashAttentionNotInstalled,
     HuggingFaceHubDown,
     InvalidBenchmark,
+    InvalidModel,
     NeedsExtraInstalled,
     NoInternetConnection,
 )
@@ -148,7 +149,7 @@ class HFModelSetup:
 
             # Check that the model exists. If it does not then raise an error
             if len(models) == 0:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     f"The model {model_id} does not exist on the Hugging Face Hub."
                 )
 
@@ -160,9 +161,9 @@ class HFModelSetup:
             elif "jax" in tags:
                 framework = Framework.JAX
             elif "spacy" in tags:
-                raise InvalidBenchmark("SpaCy models are not supported.")
+                raise InvalidModel("SpaCy models are not supported.")
             elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
-                raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
+                raise InvalidModel("TensorFlow/Keras models are not supported.")
 
             model_task: str | None = models[0].pipeline_tag
             if model_task is None:
@@ -278,7 +279,7 @@ class HFModelSetup:
                 # informative error message
                 oom_error_message = "No available memory for the cache blocks"
                 if oom_error_message in str(e):
-                    raise InvalidBenchmark("The model is too large to load on the GPU.")
+                    raise InvalidModel("The model is too large to load on the GPU.")
 
                 if self.benchmark_config.raise_errors:
                     raise e
@@ -359,11 +360,11 @@ class HFModelSetup:
                                 model_kwargs["ignore_mismatched_sizes"] = True
                                 continue
                             else:
-                                raise InvalidBenchmark(str(e))
+                                raise InvalidModel(str(e))
                         except (TimeoutError, RequestError):
                             attempts_left -= 1
                             if attempts_left == 0:
-                                raise InvalidBenchmark(
+                                raise InvalidModel(
                                     "The model could not be loaded after 5 attempts."
                                 )
                             logger.info(
@@ -485,12 +486,12 @@ class HFModelSetup:
                 return config
             except KeyError as e:
                 key = e.args[0]
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     f"The model config for the model {model_id!r} could not be "
                     f"loaded, as the key {key!r} was not found in the config."
                 )
             except OSError as e:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     f"Couldn't load model config for {model_id!r}. The error was "
                     f"{e!r}. Skipping"
                 )
@@ -535,7 +536,7 @@ class HFModelSetup:
                         trust_remote_code=self.benchmark_config.trust_remote_code,
                     )
                 except (JSONDecodeError, OSError, TypeError):
-                    raise InvalidBenchmark(
+                    raise InvalidModel(
                         f"Could not load tokenizer for model {model_id!r}."
                     )
                 except (TimeoutError, RequestError):
@@ -546,16 +547,14 @@ class HFModelSetup:
     @staticmethod
     def _handle_loading_exception(exception: Exception, model_id: str) -> None:
         if "checkpoint seems to be incorrect" in str(exception):
-            raise InvalidBenchmark(
-                f"The model {model_id!r} has an incorrect checkpoint."
-            )
+            raise InvalidModel(f"The model {model_id!r} has an incorrect checkpoint.")
         if "trust_remote_code" in str(exception):
-            raise InvalidBenchmark(
+            raise InvalidModel(
                 f"Loading the model {model_id!r} needs to trust remote code. "
                 "If you trust the suppliers of this model, then you can enable "
                 "this by setting the `--trust-remote-code` flag."
             )
-        raise InvalidBenchmark(
+        raise InvalidModel(
             f"The model {model_id} either does not exist on the Hugging Face "
             "Hub, or it has no frameworks registered, or it is a private "
             "model. If it *does* exist on the Hub and is a public model then "
