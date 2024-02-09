@@ -288,9 +288,8 @@ class HFModelSetup:
                 use_vllm = False
                 logger.info(
                     "Failed to benchmark with vLLM - trying with the Hugging Face "
-                    "implementation instead."
+                    f"implementation instead. The error raised was {e!r}"
                 )
-                logger.debug(f"The error was: {e!r}")
 
         if not use_vllm:
             model_kwargs = dict(
