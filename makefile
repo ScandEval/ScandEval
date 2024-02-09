@@ -109,26 +109,27 @@ test:  ## Run tests
 	@date "+%H:%M:%S ⋅ All done!"
 
 test-cuda-vllm:
-	@rm tests*.log; \
+	@rm tests_with_cuda_and_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and vLLM..." \
 		&& USE_CUDA=1 USE_VLLM=1 poetry run pytest | tee tests_with_cuda_and_vllm.log \
 		&& date "+%H:%M:%S ⋅ Successfully tested with CUDA and vLLM!"
 
 test-cuda-no-vllm:
-	@rm tests*.log; \
+	@rm tests_with_cuda_and_no_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and no vLLM..." \
 		&& USE_CUDA=1 USE_VLLM=0 poetry run pytest | tee tests_with_cuda_and_no_vllm.log \
 		&& date "+%H:%M:%S ⋅ Successfully tested with CUDA and no vLLM!"
 
 test-cpu:
-	@rm tests*.log; \
+	@rm tests_with_cpu.log; \
 		date "+%H:%M:%S ⋅ Running tests with CPU..." \
 		&& USE_CUDA=0 poetry run pytest | tee tests_with_cpu.log \
 		&& date "+%H:%M:%S ⋅ Successfully tested with CPU!"
 
 update-coverage-badge:
-	@rm tests*.log; poetry run readme-cov && rm .coverage* \
-		&& date "+%H:%M:%S ⋅ Updated coverage badge!"
+	@poetry run readme-cov
+	@rm .coverage*
+	@date "+%H:%M:%S ⋅ Updated coverage badge!"
 
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .
