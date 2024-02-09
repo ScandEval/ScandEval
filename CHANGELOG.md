@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+- Many dependencies are now optional, to make the package less bloated. These extras
+  are `jax`, for models based on the JAX framework, `generative` for evaluating
+  generative models, `olmo` for models based on the OLMO architecture, `openai` for
+  evaluating OpenAI models, and `all` to install all of them.
 - Updated many dependencies. In particular now uses `openai` version 1.x.x, which
   required some changes to the code base as they changed their API.
 
