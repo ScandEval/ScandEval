@@ -35,7 +35,6 @@ from ..languages import get_all_languages
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import (
     GENERATIVE_MODEL_TASKS,
-    HiddenPrints,
     block_terminal_output,
     create_model_cache_dir,
     get_class_by_name,
@@ -338,7 +337,7 @@ class HFModelSetup:
                     if config.model_type == "deberta-v2":
                         config.pooler_hidden_size = config.hidden_size
 
-                    with warnings.catch_warnings(), HiddenPrints():
+                    with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", category=UserWarning)
                         warnings.filterwarnings("ignore", category=FutureWarning)
                         try:
