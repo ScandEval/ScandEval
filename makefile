@@ -64,9 +64,9 @@ install-pipx:
 	fi
 
 install-poetry:
-	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.5.1)" ]; then \
+	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.7.1)" ]; then \
 		python3 -m pip uninstall -y poetry poetry-core poetry-plugin-export; \
-		pipx install --force poetry==1.5.1; \
+		pipx install --force poetry==1.7.1; \
 		echo "Installed Poetry."; \
 	fi
 

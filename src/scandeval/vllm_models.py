@@ -9,12 +9,11 @@ from typing import Callable
 
 import torch
 from tqdm import tqdm
-from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
+from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizerBase
 from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .dataset_tasks import NER
-from .protocols import Tokenizer
 from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
@@ -54,7 +53,7 @@ class VLLMModel:
         dataset_config: DatasetConfig,
         model_cache_dir: str | Path,
         trust_remote_code: bool,
-        tokenizer: PreTrainedTokenizer | None = None,
+        tokenizer: PreTrainedTokenizerBase | None = None,
     ) -> None:
         """Initialize a vLLM model.
 
@@ -87,14 +86,17 @@ class VLLMModel:
             clear_memory()
 
             max_model_len = 10_000
-            if hasattr(hf_model_config, "max_position_embeddings"):
-                max_model_len = min(
-                    max_model_len, hf_model_config.max_position_embeddings
-                )
-            if hasattr(hf_model_config, "model_max_length"):
-                max_model_len = min(max_model_len, hf_model_config.model_max_length)
-            if hasattr(hf_model_config, "n_positions"):
-                max_model_len = min(max_model_len, hf_model_config.n_positions)
+            potential_max_model_length_config_names = [
+                "max_position_embeddings",
+                "max_sequence_length",
+                "model_max_length",
+                "n_positions",
+            ]
+            for config_name in potential_max_model_length_config_names:
+                if hasattr(hf_model_config, config_name):
+                    max_model_len = min(
+                        max_model_len, getattr(hf_model_config, config_name)
+                    )
 
             self._model = LLM(
                 model=model_config.model_id,
@@ -109,13 +111,19 @@ class VLLMModel:
                 _run_engine_with_fixed_progress_bars, self._model
             )
 
+            # Temporary fix until this vLLM PR is part of a release (should be any
+            # release after 0.3.0):
+            # https://github.com/vllm-project/vllm/pull/2741
+            self._model.get_tokenizer = MethodType(_get_tokenizer, self._model)
+            self._model.set_tokenizer = MethodType(_set_tokenizer, self._model)
+
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
         if hasattr(self, "_model"):
             del self._model
-        clear_memory()
         del self
+        clear_memory()
 
     def generate(
         self,
@@ -308,7 +316,7 @@ class VLLMModel:
 
         return logits_processors
 
-    def set_tokenizer(self, tokenizer: Tokenizer) -> None:
+    def set_tokenizer(self, tokenizer: PreTrainedTokenizerBase) -> None:
         """Set the tokenizer to use for generation.
 
         Args:
@@ -316,7 +324,9 @@ class VLLMModel:
                 The tokenizer to use for generation.
         """
         self.tokenizer = tokenizer
+        self._model.set_tokenizer(tokenizer)
 
+        # TODO: Remove this block if it's not needed
         # This sets the internal tokenizer in the vLLM model. The
         # `LLM.llm_engine.tokenizer` is a `TokenizerGroup` object, which has a
         # `tokenizer` attribute that is the actual tokenizer. This is a new change from
@@ -326,11 +336,11 @@ class VLLMModel:
         # methods from the `PreTrainedTokenizer` object to the `TokenizerGroup` object,
         # unless the property or method already exists in the `TokenizerGroup` object.
         # vLLM issue on this: https://github.com/vllm-project/vllm/issues/2713
-        self._model.llm_engine.tokenizer.tokenizer = tokenizer
-        for attr in dir(tokenizer):
-            if attr.startswith("_") or hasattr(self._model.llm_engine.tokenizer, attr):
-                continue
-            setattr(self._model.llm_engine.tokenizer, attr, getattr(tokenizer, attr))
+        # self._model.llm_engine.tokenizer.tokenizer = tokenizer
+        # for attr in dir(tokenizer):
+        #     if attr.startswith("_") or hasattr(self._model.llm_engine.tokenizer, attr):
+        #         continue
+        #     setattr(self._model.llm_engine.tokenizer, attr, getattr(tokenizer, attr))
 
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
@@ -345,7 +355,9 @@ class VLLMModel:
         return []
 
 
-def _run_engine_with_fixed_progress_bars(self, use_tqdm: bool) -> list[RequestOutput]:
+def _run_engine_with_fixed_progress_bars(
+    self: LLM, use_tqdm: bool
+) -> list[RequestOutput]:
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
         pbar = tqdm(
@@ -370,3 +382,11 @@ def _run_engine_with_fixed_progress_bars(self, use_tqdm: bool) -> list[RequestOu
     outputs = sorted(outputs, key=lambda x: int(x.request_id))
 
     return outputs
+
+
+def _get_tokenizer(self: LLM) -> PreTrainedTokenizerBase:
+    return self.llm_engine.tokenizer.tokenizer
+
+
+def _set_tokenizer(self: LLM, tokenizer: PreTrainedTokenizerBase) -> None:
+    self.llm_engine.tokenizer.tokenizer = tokenizer

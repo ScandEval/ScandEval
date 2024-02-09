@@ -82,9 +82,7 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
 
 def clear_memory():
     """Clears the memory of unused items."""
-    # Clear the Python cache
     gc.collect()
-
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     if torch.backends.mps.is_available():
@@ -168,6 +166,7 @@ def block_terminal_output():
     logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.ERROR)
     logging.getLogger("vllm.core.scheduler").setLevel(logging.ERROR)
     logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.ERROR)
+    logging.getLogger("httpx").setLevel(logging.ERROR)
 
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the ERROR level."""
@@ -630,6 +629,12 @@ def should_prompts_be_stripped(
     for label in labels_to_be_generated:
         colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
         label_tokens = tokenizer(": " + label, add_special_tokens=False).input_ids
+
+        if isinstance(colon_tokens, torch.Tensor):
+            colon_tokens = list(colon_tokens.squeeze(0))
+        if isinstance(label_tokens, torch.Tensor):
+            label_tokens = list(label_tokens.squeeze(0))
+
         label_tokens_start_with_colon_tokens = (
             label_tokens[: len(colon_tokens)] == colon_tokens
         )

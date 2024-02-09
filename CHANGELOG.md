@@ -6,10 +6,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [v9.3.2] - 2024-02-05
+## [Unreleased]
+### Changed
+- Updated many dependencies. In particular now uses `openai` version 1.x.x, which
+  required some changes to the code base as they changed their API.
+
 ### Fixed
+- Error when encoding a batch of size 1 with OpenAI models.
+- Error when benchmarking OpenAI models on MacOS due to the `tiktoken.Encoding` object
+  not being picklable.
 - Fixed an issue with OOM errors when changing from benchmarking one generative model
   to another.
+- Now allows loading tokenisers that require remote code, if `--trust-remote-code` has
+  been set.
+- Fixed an issue where the `max_sequence_length` parameter in the Hugging Face model
+  configuration wasn't used to determine the `max_model_len` parameter in the
+  `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
+
+
+## [v9.3.2] - 2024-02-05
+### Fixed
 - Using model revisions did not work with vLLM models - this has now been fixed. These
   revisions are specified using the '@' operator in the model ID, e.g., `scandeval -m
   gpt2@main`.

@@ -1,5 +1,6 @@
 """Benchmarking model inference speed."""
 
+import logging
 from collections import defaultdict
 
 import pyinfer
@@ -12,7 +13,9 @@ from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_loading import load_model
 from .protocols import GenerativeModel, Tokenizer
-from .utils import model_is_generative
+from .utils import clear_memory, model_is_generative
+
+logger = logging.getLogger(__package__)
 
 
 def benchmark_speed(
@@ -53,6 +56,7 @@ def benchmark_speed(
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
         )
+        clear_memory()
 
         if isinstance(itr_scores, Exception):
             raise InvalidBenchmark(f"Speed benchmark failed with error: {itr_scores!r}")
@@ -60,8 +64,7 @@ def benchmark_speed(
             scores["test"].append(itr_scores["test"])
             if benchmark_config.evaluate_train:
                 scores["train"].append(itr_scores["train"])
-            if benchmark_config.verbose:
-                print(itr_scores)
+            logger.debug(f"Scores for iteration {itr_idx}: {itr_scores}")
 
     return scores
 

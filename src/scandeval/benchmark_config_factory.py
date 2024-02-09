@@ -1,5 +1,7 @@
 """Factory class for creating dataset configurations."""
 
+import os
+
 import torch
 
 from .config import BenchmarkConfig, DatasetTask, Language
@@ -103,6 +105,9 @@ def build_benchmark_config(
     dataset_tasks = prepare_dataset_tasks(dataset_task=dataset_task)
 
     torch_device = prepare_device(device=device)
+
+    if openai_api_key is None:
+        openai_api_key = os.getenv("OPENAI_API_KEY")
 
     return BenchmarkConfig(
         model_languages=model_languages,
