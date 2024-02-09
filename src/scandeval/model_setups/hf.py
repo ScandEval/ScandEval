@@ -226,7 +226,6 @@ class HFModelSetup:
             )
 
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
-            breakpoint()
             raise NeedsExtraInstalled(extra="generative")
 
         bnb_config = (
