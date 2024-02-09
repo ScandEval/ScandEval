@@ -46,6 +46,7 @@ vllm = {markers="sys_platform != 'darwin'", version = "^0.3.0"}
 demjson3 = "^3.0.6"
 pydantic = "^2.6.0"
 lm-format-enforcer = "^0.8.2"
+ai2-olmo = "^0.2.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.0"
