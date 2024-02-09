@@ -2,17 +2,22 @@
 
 import logging
 
-import openai
-import tiktoken
 import torch
-from openai import OpenAI
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, ModelConfig
+from .exceptions import NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
+
+try:
+    import tiktoken
+    from openai import NotFoundError, OpenAI
+except ImportError:
+    OpenAI = None
+    tiktoken = None
 
 logger = logging.getLogger(__package__)
 
@@ -61,7 +66,7 @@ class OpenAITokenizer:
         self.sep_token = self.eos_token
 
     @property
-    def encoding(self) -> tiktoken.Encoding:
+    def encoding(self) -> "tiktoken.Encoding":
         """Return the underlying tiktoken encoding."""
         return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
 
@@ -319,15 +324,18 @@ class OpenAIModel:
             tokenizer:
                 The tokenizer.
         """
+        if OpenAI is None:
+            raise NeedsExtraInstalled(extra="openai")
+
         self.model_config = model_config
         self.config = hf_model_config
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
+        self.is_chat_model = self._is_chat_model()
         self.client = OpenAI(
             api_key=self.benchmark_config.openai_api_key, max_retries=60
         )
-        self.is_chat_model = self._is_chat_model()
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""
@@ -336,7 +344,7 @@ class OpenAIModel:
                 model=self.model_config.model_id, prompt="Test", max_tokens=1
             )
             return False
-        except openai.NotFoundError as e:
+        except NotFoundError as e:
             if "This is a chat model" in str(e):
                 return True
             raise e
@@ -403,10 +411,12 @@ class OpenAIModel:
         )
 
         if not self.is_chat_model:
-            model_output = openai.completions.create(prompt=prompt, **generation_kwargs)
+            model_output = self.client.completions.create(
+                prompt=prompt, **generation_kwargs
+            )
             generation_output = model_output.choices[0].text.strip()
         else:
-            model_output = openai.chat.completions.create(
+            model_output = self.client.chat.completions.create(
                 messages=[dict(role="user", content=prompt)], **generation_kwargs
             )
             generation_output = model_output.choices[0].message.content.strip()

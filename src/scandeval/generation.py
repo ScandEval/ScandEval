@@ -9,9 +9,6 @@ from typing import Any, Callable
 
 import torch
 from datasets import Dataset
-from lmformatenforcer.integrations.transformers import (
-    build_transformers_prefix_allowed_tokens_fn,
-)
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import (
@@ -24,7 +21,7 @@ from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .dataset_tasks import NER
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .model_cache import (
     ModelCache,
     load_cached_model_outputs,
@@ -34,6 +31,14 @@ from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
 from .vllm_models import VLLMModel
+
+try:
+    from lmformatenforcer.integrations.transformers import (
+        build_transformers_prefix_allowed_tokens_fn,
+    )
+except ImportError:
+    build_transformers_prefix_allowed_tokens_fn = None
+
 
 logger = logging.getLogger(__package__)
 
@@ -353,6 +358,9 @@ def get_prefix_allowed_fn(
     Returns:
         The prefix allowed function.
     """
+    if build_transformers_prefix_allowed_tokens_fn is None:
+        raise NeedsExtraInstalled(extra="generative")
+
     if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
         parser = get_ner_parser(dataset_config=dataset_config)
         json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(

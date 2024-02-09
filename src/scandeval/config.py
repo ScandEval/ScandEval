@@ -137,7 +137,7 @@ class BenchmarkConfig:
     model_languages: list[Language]
     dataset_languages: list[Language]
     dataset_tasks: list[DatasetTask]
-    framework: Framework | str | None
+    framework: Framework | None
     batch_size: int
     raise_errors: bool
     cache_dir: str
@@ -245,7 +245,7 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: Framework | str
+    framework: Framework
     task: str
     languages: list[Language]
     model_type: ModelType | str

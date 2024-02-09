@@ -1,5 +1,6 @@
 """Model setup for Hugging Face Hub models."""
 
+import importlib.util
 import logging
 import os
 import warnings
@@ -26,6 +27,7 @@ from ..exceptions import (
     FlashAttentionNotInstalled,
     HuggingFaceHubDown,
     InvalidBenchmark,
+    NeedsExtraInstalled,
     NoInternetConnection,
 )
 from ..languages import get_all_languages
@@ -223,6 +225,9 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
+        if load_in_4bit and not importlib.util.find_spec("bitsandbytes") is not None:
+            raise NeedsExtraInstalled(extra="generative")
+
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
@@ -255,6 +260,9 @@ class HFModelSetup:
             and self.benchmark_config.device == torch.device("cuda")
             and os.getenv("USE_VLLM", True)
         )
+
+        if use_vllm and not importlib.util.find_spec("vllm") is not None:
+            raise NeedsExtraInstalled(extra="generative")
 
         if use_vllm:
             try:

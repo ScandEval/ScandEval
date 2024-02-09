@@ -1,5 +1,6 @@
 """Functions related to the finetuning of models."""
 
+import importlib.util
 import logging
 import sys
 import warnings
@@ -399,7 +400,10 @@ def get_training_args(
     if batch_size is None:
         batch_size = benchmark_config.batch_size
 
-    if benchmark_config.device == torch.device("cuda"):
+    if (
+        benchmark_config.device == torch.device("cuda")
+        and importlib.util.find_spec("bitsandbytes") is not None
+    ):
         optimizer = OptimizerNames.ADAMW_8BIT
     else:
         optimizer = OptimizerNames.ADAMW_TORCH

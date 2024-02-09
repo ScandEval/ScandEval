@@ -3,17 +3,23 @@
 import logging
 import re
 
-import openai
-import tiktoken
 from transformers import PretrainedConfig, PreTrainedModel
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
+from ..exceptions import NeedsExtraInstalled
 from ..openai_models import OpenAIModel, OpenAITokenizer
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
 
 logger = logging.getLogger(__package__)
+
+try:
+    import openai
+    import tiktoken
+except ImportError:
+    openai = None
+    tiktoken = None
 
 
 VOCAB_SIZE_MAPPING = {
@@ -74,6 +80,9 @@ class OpenAIModelSetup:
         Returns:
             Whether the model exists on OpenAI.
         """
+        if openai is None:
+            raise NeedsExtraInstalled(extra="openai")
+
         all_models: list[openai.models.Model] = list(openai.models.list())
         return model_id in [model.id for model in all_models]
 
