@@ -68,7 +68,11 @@ ruff = ">=0.1.13"
 mypy = ">=1.8.0"
 
 [tool.poetry.extras]
-jax = ["jax", "jaxlib", "flax"]
+jax = [
+    "jax",
+    "jaxlib",
+    "flax",
+]
 generative = [
     "rouge-score",
     "bert-score",
@@ -76,14 +80,10 @@ generative = [
     "lm-format-enforcer",
     "bitsandbytes",
     "vllm",
-]
-olmo = [
     "rouge-score",
     "bert-score",
-    "demjson3",
-    "lm-format-enforcer",
-    "bitsandbytes",
-    "vllm",
+]
+olmo = [
     "ai2-olmo",
     "boto3",
     "huggingface-hub",
@@ -92,19 +92,25 @@ openai = [
     "openai",
     "tiktoken",
     "levenshtein",
-    "rouge-score",
-    "bert-score",
 ]
 all = [
-    "openai",
-    "tiktoken",
-    "levenshtein",
     "jax",
     "jaxlib",
     "flax",
+    "rouge-score",
+    "bert-score",
+    "demjson3",
+    "lm-format-enforcer",
+    "bitsandbytes",
+    "vllm",
+    "rouge-score",
+    "bert-score",
     "ai2-olmo",
     "boto3",
     "huggingface-hub",
+    "openai",
+    "tiktoken",
+    "levenshtein",
 ]
 
 [tool.poetry.scripts]

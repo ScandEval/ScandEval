@@ -225,7 +225,8 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
-        if load_in_4bit and not importlib.util.find_spec("bitsandbytes") is not None:
+        if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
+            breakpoint()
             raise NeedsExtraInstalled(extra="generative")
 
         bnb_config = (
@@ -261,7 +262,7 @@ class HFModelSetup:
             and os.getenv("USE_VLLM", True)
         )
 
-        if use_vllm and not importlib.util.find_spec("vllm") is not None:
+        if use_vllm and importlib.util.find_spec("vllm") is None:
             raise NeedsExtraInstalled(extra="generative")
 
         if use_vllm:
