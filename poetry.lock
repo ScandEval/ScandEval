@@ -5509,7 +5509,7 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [extras]
 all = ["ai2-olmo", "bert-score", "bert-score", "bitsandbytes", "boto3", "demjson3", "flax", "huggingface-hub", "jax", "jaxlib", "levenshtein", "lm-format-enforcer", "openai", "rouge-score", "rouge-score", "tiktoken", "vllm"]
-generative = ["bert-score", "bert-score", "bitsandbytes", "demjson3", "lm-format-enforcer", "rouge-score", "rouge-score", "vllm"]
+generative = ["bert-score", "bitsandbytes", "demjson3", "lm-format-enforcer", "rouge-score", "vllm"]
 jax = ["flax", "jax", "jaxlib"]
 olmo = ["ai2-olmo", "boto3", "huggingface-hub"]
 openai = ["levenshtein", "openai", "tiktoken"]
@@ -5517,4 +5517,4 @@ openai = ["levenshtein", "openai", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "cd4bc928ab32a4cb17b06fba6e6535c5239dc0e9006a117676f449f02aef45ed"
+content-hash = "1ed3318b965ad87c90d21985b8c23f6f7f512d202ae769d532b92014c761140d"
