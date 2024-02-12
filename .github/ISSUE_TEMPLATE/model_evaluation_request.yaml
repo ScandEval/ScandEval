@@ -6,9 +6,33 @@ labels: "model evaluation request"
 body:
 - type: textarea
   attributes:
-    label: 📊 Describe the model
-    description: |
-      Include the name and a brief description of the model, along with a Hugging Face link to it. Also include whether it is an encoder (BERT-style) model or a decoder (GPT-style) model, and what language(s) it should be benchmarked on.
+    label: Model ID
+    description: What is the Hugging Face model ID?
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Model type
+    description: What is the architecture of the model?
+    options:
+      - Decoder model (e.g., GPT)
+      - Encoder model (e.g., BERT)
+      - Sequence-to-sequence model (e.g., T5)
+  validations:
+    required: true
+- type: checkboxes
+  attributes:
+    label: Model languages
+    description: What languages have the model been trained on?
+    options:
+      - label: Danish
+      - label: Swedish
+      - label: Norwegian (Bokmål or Nynorsk)
+      - label: Icelandic
+      - label: Faroese
+      - label: German
+      - label: Dutch
+      - label: English
   validations:
     required: true
 - type: markdown
