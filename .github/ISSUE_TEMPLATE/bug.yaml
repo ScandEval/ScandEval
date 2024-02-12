@@ -1,5 +1,6 @@
-name: 🐛 Benchmarking Bug Report
+name: 🐛 Bug Report
 description: Have you experienced a bug using the `scandeval` package?
+title: "[BUG] "
 labels: bug
 
 body:

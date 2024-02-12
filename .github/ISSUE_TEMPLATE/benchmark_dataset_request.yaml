@@ -1,5 +1,6 @@
-name: 📚 Benchmarking Bug Report
+name: 📚 Benchmark Dataset Request
 description: Do you think a particular benchmark dataset is missing in ScandEval?
+title: "[BENCHMARK DATASET REQUEST] "
 labels: "benchmark dataset request"
 
 body:
