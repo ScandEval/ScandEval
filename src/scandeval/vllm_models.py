@@ -85,7 +85,7 @@ class VLLMModel:
             destroy_model_parallel()
             clear_memory()
 
-            max_model_len = 5_000
+            max_model_len = 10_000
             potential_max_model_length_config_names = [
                 "max_position_embeddings",
                 "max_sequence_length",
@@ -100,7 +100,7 @@ class VLLMModel:
 
             self._model = LLM(
                 model=model_config.model_id,
-                gpu_memory_utilization=0.99,
+                gpu_memory_utilization=0.9,
                 max_model_len=max_model_len,
                 download_dir=str(model_cache_dir),
                 trust_remote_code=trust_remote_code,
