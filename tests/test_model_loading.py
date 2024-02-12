@@ -2,7 +2,9 @@
 
 import pytest
 from scandeval.config import ModelConfig
-from scandeval.exceptions import InvalidBenchmark
+from scandeval.enums import Framework
+from scandeval.exceptions import InvalidModel
+from scandeval.languages import DA
 from scandeval.model_config import get_model_config
 from scandeval.model_loading import load_model
 
@@ -44,7 +46,7 @@ def test_load_non_generative_model_with_generative_data(
     model_config = get_model_config(
         model_id=model_id, benchmark_config=benchmark_config
     )
-    with pytest.raises(InvalidBenchmark):
+    with pytest.raises(InvalidModel):
         load_model(
             model_config=model_config,
             dataset_config=generative_dataset_config,
@@ -73,13 +75,13 @@ def test_load_non_existing_model(dataset_config, benchmark_config):
     model_config = ModelConfig(
         model_id="non-existing-model",
         revision="revision",
-        framework="framework",
+        framework=Framework.PYTORCH,
         task="task",
-        languages=["language"],
+        languages=[DA],
         model_type="fresh",
         model_cache_dir="cache_dir",
     )
-    with pytest.raises(InvalidBenchmark):
+    with pytest.raises(InvalidModel):
         load_model(
             model_config=model_config,
             dataset_config=dataset_config,
