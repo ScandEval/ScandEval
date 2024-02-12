@@ -4,7 +4,7 @@ title: "[MODEL EVALUATION REQUEST] "
 labels: "model evaluation request"
 
 body:
-- type: textarea
+- type: input
   attributes:
     label: Model ID
     description: What is the Hugging Face model ID?
