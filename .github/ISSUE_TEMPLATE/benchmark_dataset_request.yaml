@@ -8,7 +8,7 @@ body:
   attributes:
     label: 📚 Describe the dataset
     description: |
-      Include the name and a brief description of the dataset, along with a link to where it is currently hosted (doesn't have to be Hugging Face). Also include roughly how many samples the dataset contains, and what language it pertains to.
+      Include the name and a brief description of the dataset, along with a link to where it is currently hosted (doesn't have to be Hugging Face).
   validations:
     required: true
 - type: textarea
@@ -16,6 +16,21 @@ body:
     label: Rationale
     description: |
       Explain why you think it is important to include this dataset in ScandEval.
+  validations:
+    required: true
+- type: checkboxes
+  attributes:
+    label: Dataset languages
+    description: What languages are the dataset in?
+    options:
+      - label: Danish
+      - label: Swedish
+      - label: Norwegian (Bokmål or Nynorsk)
+      - label: Icelandic
+      - label: Faroese
+      - label: German
+      - label: Dutch
+      - label: English
   validations:
     required: true
 - type: markdown

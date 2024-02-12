@@ -50,7 +50,7 @@ body:
       - Newer than 3.12.x
   validations:
     required: true
-- type: textarea
+- type: input
   attributes:
     label: ScandEval version
     description: What version of ScandEval are you using?
