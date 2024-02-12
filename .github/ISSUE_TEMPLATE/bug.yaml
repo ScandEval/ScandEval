@@ -15,28 +15,46 @@ body:
       Please provide a clear and concise description of what the bug is. If relevant, add a minimal example so that we can reproduce the error by running the code.
   validations:
     required: true
-- type: textarea
+- type: dropdown
   attributes:
     label: Operating System
-    description: For instance, MacOS, Ubuntu
+    description: What operating system are you on?
+    options:
+      - MacOS
+      - Linux
+      - Windows
+      - Other
   validations:
     required: true
-- type: textarea
-  attributes:
-    label: Python version
-    description: Output of `python --version`
-  validations:
-    required: true
-- type: textarea
+- type: dropdown
   attributes:
     label: Device
-    description: For instance, CUDA GPU, AMD GPU, CPU, Mac M1
+    description: What hardware device do you use?
+    options:
+      - CUDA GPU
+      - AMD GPU
+      - Mac GPU
+      - CPU
+      - Other
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Python version
+    description: What Python version are you using?
+    options:
+      - Older than 3.10.x
+      - 3.10.x
+      - 3.11.x
+      - 3.12.x
+      - Newer than 3.12.x
   validations:
     required: true
 - type: textarea
   attributes:
-    label: Packages installed
-    description: Output of `pip list` or `poetry show`
+    label: ScandEval version
+    description: What version of ScandEval are you using?
+    placeholder: Output of `pip list | grep scandeval`
   validations:
     required: true
 - type: markdown
