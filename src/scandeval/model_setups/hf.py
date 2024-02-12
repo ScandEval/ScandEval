@@ -34,6 +34,8 @@ from ..exceptions import (
 from ..languages import get_all_languages
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import (
+    GENERATIVE_DATASET_SUPERTASKS,
+    GENERATIVE_DATASET_TASKS,
     GENERATIVE_MODEL_TASKS,
     block_terminal_output,
     create_model_cache_dir,
@@ -317,6 +319,14 @@ class HFModelSetup:
                         model_cls_supertask = "causal-l-m"
                     elif model_config.task == "text2text-generation":
                         model_cls_supertask = "seq-2-seq-l-m"
+                    elif (
+                        dataset_config.task.name in GENERATIVE_DATASET_TASKS
+                        or supertask in GENERATIVE_DATASET_SUPERTASKS
+                    ):
+                        raise InvalidBenchmark(
+                            f"The {dataset_config.task.name!r} task is not supported "
+                            f"for the model {model_id!r}."
+                        )
                     else:
                         model_cls_supertask = supertask
                     model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
