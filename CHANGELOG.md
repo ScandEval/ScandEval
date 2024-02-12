@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Now throws a more informative error when attempting to benchmark a non-generative
+  model on a generative task.
+
 ### Changed
 - Many dependencies are now optional, to make the package less bloated. These extras
   are `jax`, for models based on the JAX framework, `generative` for evaluating
