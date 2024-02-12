@@ -109,6 +109,8 @@ def build_benchmark_config(
     if openai_api_key is None:
         openai_api_key = os.getenv("OPENAI_API_KEY")
 
+    framework_obj = Framework(framework) if framework is not None else None
+
     return BenchmarkConfig(
         model_languages=model_languages,
         dataset_languages=dataset_languages,
@@ -122,7 +124,7 @@ def build_benchmark_config(
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose,
-        framework=framework,
+        framework=framework_obj,
         device=torch_device,
         trust_remote_code=trust_remote_code,
         load_in_4bit=load_in_4bit,

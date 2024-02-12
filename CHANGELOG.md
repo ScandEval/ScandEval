@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+- Many dependencies are now optional, to make the package less bloated. These extras
+  are `jax`, for models based on the JAX framework, `generative` for evaluating
+  generative models, `olmo` for models based on the OLMO architecture, `openai` for
+  evaluating OpenAI models, and `all` to install all of them.
 - Updated many dependencies. In particular now uses `openai` version 1.x.x, which
   required some changes to the code base as they changed their API.
 
@@ -22,6 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed an issue where the `max_sequence_length` parameter in the Hugging Face model
   configuration wasn't used to determine the `max_model_len` parameter in the
   `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
+- An error occured if a tokenizer had no defined BOS token, which happens for some
+  generative models. It is now set to be equal to the EOS token in that case.
 
 
 ## [v9.3.2] - 2024-02-05

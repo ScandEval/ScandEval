@@ -16,7 +16,7 @@ from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Device, Framework
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, InvalidModel
 from .types import ScoreDict
 from .utils import get_huggingface_model_lists
 
@@ -311,9 +311,15 @@ class Benchmarker:
                     continue
 
                 # Benchmark a single model on a single dataset
-                record = self._benchmark_single(
-                    dataset_config=dataset_config, model_id=m_id
-                )
+                try:
+                    record = self._benchmark_single(
+                        dataset_config=dataset_config, model_id=m_id
+                    )
+                except InvalidModel as e:
+                    if self.benchmark_config.raise_errors:
+                        raise e
+                    logger.info(e)
+                    break
 
                 # If the benchmark was unsuccessful then skip
                 if isinstance(record, dict) and "error" in record:

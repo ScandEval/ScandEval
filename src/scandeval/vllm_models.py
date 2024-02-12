@@ -29,17 +29,17 @@ except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
     class LLM:  # type: ignore[no-redef]
-        """Dummy class for the vLLM model."""
+        """Dummy class."""
 
-        def __init__(self, **kwargs):
-            """Initialize a dummy vLLM model."""
-            pass
+        pass
 
     class RequestOutput:  # type: ignore[no-redef]
-        """Dummy class for the request output."""
+        """Dummy class."""
+
+        pass
 
     def destroy_model_parallel():  #  type: ignore[no-redef]
-        """Dummy function to destroy the model parallel state."""
+        """Dummy function."""
         pass
 
 
