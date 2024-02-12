@@ -51,9 +51,6 @@ coverage.xml
 # Log files
 *.log
 
-# Sphinx documentation
-docs/_build/
-
 # PyBuilder
 target/
 
@@ -100,13 +97,6 @@ checkpoint-*
 
 # Result log
 scandeval_benchmark_results.jsonl
-
-# Documentation
-docs/scandeval/
-docs/index.html
-docs/scandeval.html
-docs/search.json
-docs/search.js
 
 # Experiments
 gai-experiments.xlsx

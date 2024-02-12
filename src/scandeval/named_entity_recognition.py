@@ -9,7 +9,6 @@ from copy import deepcopy
 from functools import partial
 from typing import Any
 
-import demjson3
 import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
@@ -18,7 +17,7 @@ from transformers.data.data_collator import DataCollatorForTokenClassification
 from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 from .types import Labels, Predictions
@@ -27,6 +26,11 @@ from .utils import (
     model_is_generative,
     raise_if_model_output_contains_nan_values,
 )
+
+try:
+    import demjson3
+except ImportError:
+    demjson3 = None
 
 logger = logging.getLogger(__package__)
 
@@ -596,6 +600,9 @@ class NamedEntityRecognition(BenchmarkDataset):
             list:
                 The predicted labels.
         """
+        if demjson3 is None:
+            raise NeedsExtraInstalled(extra="generative")
+
         raw_predictions = extract_raw_predictions(
             generated_sequences=model_output["sequences"], tokenizer=tokenizer
         )

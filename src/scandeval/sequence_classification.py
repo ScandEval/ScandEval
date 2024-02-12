@@ -7,7 +7,6 @@ import re
 from functools import partial
 from typing import Any
 
-import Levenshtein
 import numpy as np
 import torch
 from datasets.arrow_dataset import Dataset
@@ -17,7 +16,7 @@ from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
 from .config import DatasetConfig
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 from .types import Labels, Predictions
@@ -27,6 +26,11 @@ from .utils import (
     raise_if_model_output_contains_nan_values,
     should_prompts_be_stripped,
 )
+
+try:
+    import Levenshtein
+except ImportError:
+    Levenshtein = None
 
 logger = logging.getLogger(__package__)
 
@@ -394,6 +398,9 @@ def get_closest_word_edit_labels(
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
+    if Levenshtein is None:
+        raise NeedsExtraInstalled(extra="openai")
+
     raw_predictions = extract_raw_predictions(
         generated_sequences=generated_sequences, tokenizer=tokenizer
     )

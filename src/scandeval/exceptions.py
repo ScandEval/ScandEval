@@ -2,10 +2,26 @@
 
 
 class InvalidBenchmark(Exception):
-    """The benchmark is invalid and cannot be run."""
+    """The (model, dataset) combination cannot be benchmarked."""
 
     def __init__(
         self, message: str = "This model cannot be benchmarked on the given dataset."
+    ):
+        """Initialize the exception.
+
+        Args:
+            message:
+                The message to display.
+        """
+        self.message = message
+        super().__init__(self.message)
+
+
+class InvalidModel(Exception):
+    """The model cannot be benchmarked on any datasets."""
+
+    def __init__(
+        self, message: str = "The model cannot be benchmarked on any datasets."
     ):
         """Initialize the exception.
 
@@ -65,12 +81,10 @@ class FlashAttentionNotInstalled(Exception):
     def __init__(
         self,
         message: str = (
-            "The model you are trying to load requires Flash "
-            "Attention. To use Flash Attention, please install "
-            "the `flash-attn` package, which can be done by "
-            "running `pip install -U wheel && "
-            "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install "
-            "flash-attn --no-build-isolation`."
+            "The model you are trying to load requires Flash Attention. To use Flash "
+            "Attention, please install the `flash-attn` package, which can be done by "
+            "running `pip install -U wheel && FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE "
+            "pip install flash-attn --no-build-isolation`."
         ),
     ):
         """Initialize the exception.
@@ -80,4 +94,22 @@ class FlashAttentionNotInstalled(Exception):
                 The message to display.
         """
         self.message = message
+        super().__init__(self.message)
+
+
+class NeedsExtraInstalled(InvalidModel):
+    """The evaluation requires extra to be installed."""
+
+    def __init__(self, extra: str):
+        """Initialize the exception.
+
+        Args:
+            extra:
+                The extra that needs to be installed.
+        """
+        self.message = (
+            f"The model you are trying to load requires the `{extra}` extra to be "
+            f"installed. To install the `{extra}` extra, please run `pip install "
+            f"scandeval[{extra}]` or `pip install scandeval[all]`."
+        )
         super().__init__(self.message)
