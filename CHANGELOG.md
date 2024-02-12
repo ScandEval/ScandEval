@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   on, rather than remembering all the names of the datasets. E.g., to benchmark a model
   on all Danish question-answering datasets, we call `scandeval -m <model_id> -l da -t
   question-answering`. All the names of the tasks is shown in `scandeval --help`.
+- Renamed the `--no-ignore-duplicates` to `--force` (shorthand: `-f`), which _forces_
+  the evaluation, meaning that it evaluates the model even if it has previously been
+  evaluated.
+- Renamed the `--model-id` to `--model`.
 
 ### Fixed
 - Error when encoding a batch of size 1 with OpenAI models.
@@ -27,6 +31,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed an issue where the `max_sequence_length` parameter in the Hugging Face model
   configuration wasn't used to determine the `max_model_len` parameter in the
   `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
+
+### Removed
+- Removed the `-d` shorthand for `--dataset` in the CLI, to encourage the use of `-t`
+  (`--task`) and `-l` (`--language`) instead.
 
 
 ## [v9.3.2] - 2024-02-05

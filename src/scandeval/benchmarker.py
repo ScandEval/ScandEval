@@ -86,20 +86,15 @@ class Benchmarker:
     """Benchmarking all the Scandinavian language models.
 
     Attributes:
-        progress_bar:
-            Whether progress bars should be shown.
-        save_results:
-            Whether to save the benchmark results.
-        language:
-            The languages to include in the list.
-        dataset_task:
-            The dataset tasks to include.
-        evaluate_train:
-            Whether to evaluate the training set as well.
-        verbose:
-            Whether to output additional output.
-        token:
-            The authentication token for the Hugging Face Hub.
+        benchmark_config:
+            The benchmark configuration.
+        force:
+            Whether to force evaluations of models, even if they have been benchmarked
+            already.
+        dataset_factory:
+            The factory for creating datasets.
+        results_path:
+            The path to the results file.
         benchmark_results:
             The benchmark results.
     """
@@ -119,7 +114,7 @@ class Benchmarker:
         cache_dir: str = ".scandeval_cache",
         token: bool | str = False,
         openai_api_key: str | None = None,
-        ignore_duplicates: bool = True,
+        force: bool = False,
         device: Device | None = None,
         verbose: bool = False,
         trust_remote_code: bool = False,
@@ -175,10 +170,9 @@ class Benchmarker:
             openai_api_key:
                 The OpenAI API key to use for authentication. If None, then no OpenAI
                 models will be evaluated. Defaults to None.
-            ignore_duplicates:
-                Whether to skip evaluation of models which have already been evaluated,
-                with scores lying in the 'scandeval_benchmark_results.jsonl' file.
-                Defaults to True.
+            force:
+                Whether to force evaluations of models, even if they have been
+                benchmarked already. Defaults to False.
             device:
                 The device to use for benchmarking. Defaults to None.
             verbose:
@@ -226,7 +220,7 @@ class Benchmarker:
         )
 
         # Set attributes from arguments
-        self.ignore_duplicates = ignore_duplicates
+        self.force = force
 
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: dict[str, list[str]] | None = None
@@ -262,16 +256,16 @@ class Benchmarker:
 
     def benchmark(
         self,
-        model_id: list[str] | str | None = None,
+        model: list[str] | str | None = None,
         dataset: list[str] | str | None = None,
     ) -> list[BenchmarkResult]:
         """Benchmarks models on datasets.
 
         Args:
-            model_id:
+            model:
                 The full Hugging Face Hub path(s) to the pretrained transformer model.
                 The specific model version to use can be added after the suffix '@':
-                "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id,
+                "model@v1.0.0". It can be a branch name, a tag name, or a commit id,
                 and defaults to the latest version if not specified. If None then all
                 relevant model IDs will be benchmarked. Defaults to None.
             dataset:
@@ -285,7 +279,7 @@ class Benchmarker:
             self.clear_model_cache()
 
         # Prepare the model IDs
-        model_ids = self._prepare_model_ids(model_id)
+        model_ids = self._prepare_model_ids(model=model)
 
         # Get all the relevant dataset configurations
         dataset_configs = self._prepare_dataset_configs(dataset)
@@ -296,8 +290,8 @@ class Benchmarker:
 
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
-                # `ignore_duplicates` is set
-                if self.ignore_duplicates and model_has_been_benchmarked(
+                # we are not forcing the benchmark
+                if not self.force and model_has_been_benchmarked(
                     model_id=m_id,
                     dataset=dataset_config.name,
                     few_shot=self.benchmark_config.few_shot,
@@ -352,11 +346,11 @@ class Benchmarker:
                     if sub_model_dir.is_dir():
                         rmtree(sub_model_dir)
 
-    def _prepare_model_ids(self, model_id: list[str] | str | None) -> list[str]:
+    def _prepare_model_ids(self, model: list[str] | str | None) -> list[str]:
         """Prepare the model ID(s) to be benchmarked.
 
         Args:
-            model_id:
+            model:
                 The model ID(s) of the models to benchmark. If None then all model IDs
                 will be retrieved.
 
@@ -366,18 +360,18 @@ class Benchmarker:
         model_ids: list[str]
 
         # If `model_id` is not specified, then fetch all the relevant model IDs
-        if model_id is None:
+        if model is None:
             model_ids = self._get_model_ids(
                 languages=self.benchmark_config.model_languages
             )
 
         # Otherwise, if `model_id` is a string, ensure that it is a list
-        elif isinstance(model_id, str):
-            model_ids = [model_id]
+        elif isinstance(model, str):
+            model_ids = [model]
 
         # Otherwise `model_id` is already a list, so we do nothing
         else:
-            model_ids = model_id
+            model_ids = model
 
         # Reorder the `model_ids` list to include the ones present in the benchmark
         # results first
