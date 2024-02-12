@@ -6,8 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
-### Added
+## [v10.0.0] - 2024-02-12
+### Added
 - Now throws a more informative error when attempting to benchmark a non-generative
   model on a generative task.
 
@@ -100,7 +100,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [v9.2.0] - 2024-01-24
-### Added
+### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
   Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
   are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
@@ -443,7 +443,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   another framework, then re-try the evaluation with `from_flax` set to `True`.
 
 
-## [v6.2.2] - 2023-02-25
+## [v6.2.2] - 2023-02-25
 ### Fixed
 - If `max_position_embeddings` is smaller than any of the context lengths specified in
   `model_max_length` and `max_model_input_sizes` then we use that as the the
@@ -706,7 +706,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   their framework could not be determined.
 
 
-## [v2.3.0] - 2022-01-20
+## [v2.3.0] - 2022-01-20
 ### Added
 - Specific branches/commits/tags can now be benchmarked, using the `@`
   delimiter. For instance, `scandeval -m model_id@commit_hash` will benchmark
