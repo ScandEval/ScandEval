@@ -17,8 +17,8 @@ from .languages import get_all_languages
     show_default=True,
     multiple=True,
     help="""The Hugging Face model ID of the model(s) to be benchmarked. If not
-    specified then all models will be benchmarked, filtered by `model_language` and
-    `model_task`. The specific model version to use can be added after the suffix "@":
+    specified then all models will be benchmarked, filtered by `model_language`. The
+    specific model version to use can be added after the suffix "@":
     "<model_id>@v1.0.0". It can be a branch name, a tag name, or a commit id, and
     defaults to the latest version if not specified.""",
 )
@@ -30,7 +30,7 @@ from .languages import get_all_languages
     multiple=True,
     type=click.Choice(list(get_all_dataset_configs().keys())),
     help="""The name of the benchmark dataset. If not specified then all datasets will
-    be benchmarked, filtered by `dataset_language` and `dataset_task`.""",
+    be benchmarked, filtered by `dataset_language` and `task`.""",
 )
 @click.option(
     "--language",
@@ -69,13 +69,13 @@ from .languages import get_all_languages
     specified then this will use the `language` value.""",
 )
 @click.option(
-    "--dataset-task",
-    "-dt",
+    "--task",
+    "-t",
     default=None,
     show_default=True,
     multiple=True,
     type=click.Choice(list(get_all_dataset_tasks().keys())),
-    help="The dataset tasks to consider.",
+    help="The dataset tasks to benchmark the model(s) on.",
 )
 @click.option(
     "--batch-size",
@@ -208,7 +208,7 @@ def benchmark(
     model_language: tuple[str],
     dataset_language: tuple[str],
     raise_errors: bool,
-    dataset_task: tuple[str],
+    task: tuple[str],
     batch_size: str,
     evaluate_train: bool,
     progress_bar: bool,
@@ -234,7 +234,7 @@ def benchmark(
     languages: list[str] = list(language)
     model_languages = None if len(model_language) == 0 else list(model_language)
     dataset_languages = None if len(dataset_language) == 0 else list(dataset_language)
-    dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
+    dataset_tasks = None if len(task) == 0 else list(task)
     batch_size_int = int(batch_size)
     device = Device[device.upper()] if device is not None else None
     token_str_bool: str | bool = token if token != "" else use_token

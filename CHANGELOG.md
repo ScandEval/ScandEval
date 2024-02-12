@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Updated many dependencies. In particular now uses `openai` version 1.x.x, which
   required some changes to the code base as they changed their API.
+- Changed the `--dataset-task` CLI argument (`dataset_task` in the Python API) to
+  `--task` (`task`). This is now the preferred way to choose what to benchmark a model
+  on, rather than remembering all the names of the datasets. E.g., to benchmark a model
+  on all Danish question-answering datasets, we call `scandeval -m <model_id> -l da -t
+  question-answering`. All the names of the tasks is shown in `scandeval --help`.
 
 ### Fixed
 - Error when encoding a batch of size 1 with OpenAI models.
