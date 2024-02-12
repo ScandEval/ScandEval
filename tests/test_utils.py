@@ -8,6 +8,7 @@ import torch
 from scandeval.utils import (
     enforce_reproducibility,
     is_module_installed,
+    should_prefix_space_be_added_to_labels,
     should_prompts_be_stripped,
 )
 from transformers import AutoTokenizer
@@ -74,6 +75,7 @@ def test_module_is_installed(module_name, expected):
     argvalues=[
         ("mistralai/Mistral-7B-v0.1", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
+        ("01-ai/Yi-6B", True),
         ("bert-base-uncased", False),
     ],
 )
@@ -82,6 +84,24 @@ def test_should_prompts_be_stripped(model_id, expected):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     labels = ["positiv", "negativ"]
     strip_prompts = should_prompts_be_stripped(
+        labels_to_be_generated=labels, tokenizer=tokenizer
+    )
+    assert strip_prompts == expected
+
+
+@pytest.mark.parametrize(
+    argnames=["model_id", "expected"],
+    argvalues=[
+        ("mistralai/Mistral-7B-v0.1", False),
+        ("AI-Sweden-Models/gpt-sw3-6.7b-v2", False),
+        ("01-ai/Yi-6B", True),
+    ],
+)
+def test_should_prefix_space_be_added_to_labels(model_id, expected):
+    """Test that a model ID is a generative model."""
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    labels = ["positiv", "negativ"]
+    strip_prompts = should_prefix_space_be_added_to_labels(
         labels_to_be_generated=labels, tokenizer=tokenizer
     )
     assert strip_prompts == expected

@@ -657,3 +657,41 @@ def should_prompts_be_stripped(
         if label_tokens_start_with_colon_tokens:
             strip_prompts = False
     return strip_prompts
+
+
+def should_prefix_space_be_added_to_labels(
+    labels_to_be_generated: list[str], tokenizer: Tokenizer
+) -> bool:
+    """Determine if we should add a prefix space to the labels.
+
+    This is the case if the prompts are stripped and the tokenizer doesn't
+    automatically add prefix whitespaces to the labels.
+
+    Args:
+        labels_to_be_generated:
+            The labels that are to be generated.
+        tokenizer:
+            The tokenizer used to tokenize the labels.
+
+    Returns:
+        Whether we should add a prefix space to the labels.
+    """
+    if not should_prompts_be_stripped(
+        labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
+    ):
+        return False
+
+    whitespace_token = tokenizer.convert_ids_to_tokens(
+        ids=tokenizer(" ", add_special_tokens=False).input_ids[0]
+    )[0]
+
+    for label in labels_to_be_generated:
+        label_tokens = tokenizer(label, add_special_tokens=False).input_ids
+        if isinstance(label_tokens, torch.Tensor):
+            label_tokens = list(label_tokens.squeeze(0))
+        first_label_token: int = int(label_tokens[0])
+        first_character_of_label = tokenizer.convert_ids_to_tokens(first_label_token)[0]
+        has_prefix_space = first_character_of_label == whitespace_token
+        if has_prefix_space:
+            return False
+    return True

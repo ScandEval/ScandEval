@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- A prefix space was added to labels in sequence classification tasks that
+  automatically adds a prefix space (such as Mistral). We now check for this and ensure
+  to only manually add prefix space to models that don't automatically do this (such as
+  the Yi models).
+
+
 ## [v10.0.0] - 2024-02-12
 ### Added
 - Now throws a more informative error when attempting to benchmark a non-generative

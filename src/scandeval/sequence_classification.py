@@ -24,7 +24,7 @@ from .utils import (
     GENERATIVE_MODEL_TASKS,
     get_special_token_metadata,
     raise_if_model_output_contains_nan_values,
-    should_prompts_be_stripped,
+    should_prefix_space_be_added_to_labels,
 )
 
 try:
@@ -349,7 +349,7 @@ def get_closest_logprobs_labels(
         dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
     ]
 
-    add_prefix_space_to_labels = should_prompts_be_stripped(
+    add_prefix_space_to_labels = should_prefix_space_be_added_to_labels(
         labels_to_be_generated=candidate_labels, tokenizer=tokenizer
     )
 
