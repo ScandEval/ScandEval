@@ -41,6 +41,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
 - An error occured if a tokenizer had no defined BOS token, which happens for some
   generative models. It is now set to be equal to the EOS token in that case.
+- Fixed error related to the extraction of predicted labels in sequence classification
+  tasks for generative models, which unfairly evaluated generative models that require
+  a prefix space on the labels (which are most of them currently).
 
 ### Removed
 - Removed the `-d` shorthand for `--dataset` in the CLI, to encourage the use of `-t`
