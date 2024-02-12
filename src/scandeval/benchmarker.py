@@ -112,7 +112,7 @@ class Benchmarker:
         model_language: str | list[str] | None = None,
         framework: Framework | str | None = None,
         dataset_language: str | list[str] | None = None,
-        dataset_task: str | list[str] | None = None,
+        task: str | list[str] | None = None,
         batch_size: int = 32,
         evaluate_train: bool = False,
         raise_errors: bool = False,
@@ -154,8 +154,8 @@ class Benchmarker:
                 The language codes of the languages to include for datasets. If
                 specified then this overrides the `language` parameter for dataset
                 languages. Defaults to None.
-            dataset_task:
-                The tasks to include for dataset. If "all" then datasets will not be
+            task:
+                The tasks benchmark the model(s) on. If "all" then datasets will not be
                 filtered based on their task. Defaults to "all".
             batch_size:
                 The batch size to use. Defaults to 32.
@@ -205,7 +205,7 @@ class Benchmarker:
             language=language,
             model_language=model_language,
             dataset_language=dataset_language,
-            dataset_task=dataset_task,
+            dataset_task=task,
             batch_size=batch_size,
             raise_errors=raise_errors,
             cache_dir=cache_dir,
