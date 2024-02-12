@@ -18,12 +18,12 @@ def params() -> Generator[dict[str | None, ParamType], None, None]:
 def test_cli_param_names(params):
     """Test that the CLI parameters have the correct names."""
     assert set(params.keys()) == {
-        "model_id",
-        "dataset",
+        "model",
+        "task",
         "language",
         "model_language",
         "dataset_language",
-        "dataset_task",
+        "dataset",
         "batch_size",
         "evaluate_train",
         "progress_bar",
@@ -33,7 +33,7 @@ def test_cli_param_names(params):
         "cache_dir",
         "token",
         "use_token",
-        "ignore_duplicates",
+        "force",
         "framework",
         "device",
         "trust_remote_code",
@@ -48,12 +48,12 @@ def test_cli_param_names(params):
 
 def test_cli_param_types(params):
     """Test that the CLI parameters have the correct types."""
-    assert params["model_id"] == STRING
+    assert params["model"] == STRING
     assert isinstance(params["dataset"], Choice)
     assert isinstance(params["language"], Choice)
     assert isinstance(params["model_language"], Choice)
     assert isinstance(params["dataset_language"], Choice)
-    assert isinstance(params["dataset_task"], Choice)
+    assert isinstance(params["task"], Choice)
     assert isinstance(params["batch_size"], Choice)
     assert params["evaluate_train"] == BOOL
     assert params["progress_bar"] == BOOL
@@ -63,7 +63,7 @@ def test_cli_param_types(params):
     assert params["cache_dir"] == STRING
     assert params["token"] == STRING
     assert params["use_token"] == BOOL
-    assert params["ignore_duplicates"] == BOOL
+    assert params["force"] == BOOL
     assert isinstance(params["framework"], Choice)
     assert isinstance(params["device"], Choice)
     assert params["trust_remote_code"] == BOOL

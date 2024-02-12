@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   evaluating OpenAI models, and `all` to install all of them.
 - Updated many dependencies. In particular now uses `openai` version 1.x.x, which
   required some changes to the code base as they changed their API.
+- Changed the `--dataset-task` CLI argument (`dataset_task` in the Python API) to
+  `--task` (`task`). This is now the preferred way to choose what to benchmark a model
+  on, rather than remembering all the names of the datasets. E.g., to benchmark a model
+  on all Danish question-answering datasets, we call `scandeval -m <model_id> -l da -t
+  question-answering`. All the names of the tasks is shown in `scandeval --help`.
+- Renamed the `--no-ignore-duplicates` to `--force` (shorthand: `-f`), which _forces_
+  the evaluation, meaning that it evaluates the model even if it has previously been
+  evaluated.
+- Renamed the `--model-id` to `--model`.
 
 ### Fixed
 - Error when encoding a batch of size 1 with OpenAI models.
@@ -28,6 +37,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
 - An error occured if a tokenizer had no defined BOS token, which happens for some
   generative models. It is now set to be equal to the EOS token in that case.
+
+### Removed
+- Removed the `-d` shorthand for `--dataset` in the CLI, to encourage the use of `-t`
+  (`--task`) and `-l` (`--language`) instead.
 
 
 ## [v9.3.2] - 2024-02-05

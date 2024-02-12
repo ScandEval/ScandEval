@@ -11,26 +11,25 @@ from .languages import get_all_languages
 
 @click.command()
 @click.option(
-    "--model-id",
+    "--model",
     "-m",
     default=None,
     show_default=True,
     multiple=True,
     help="""The Hugging Face model ID of the model(s) to be benchmarked. If not
-    specified then all models will be benchmarked, filtered by `model_language` and
-    `model_task`. The specific model version to use can be added after the suffix "@":
-    "<model_id>@v1.0.0". It can be a branch name, a tag name, or a commit id, and
+    specified then all models will be benchmarked, filtered by `model_language` or
+    `language`. The specific model revision to use can be added after the suffix "@":
+    "<model>@v1.0.0". It can be a branch name, a tag name, or a commit id, and
     defaults to the latest version if not specified.""",
 )
 @click.option(
-    "--dataset",
-    "-d",
+    "--task",
+    "-t",
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(list(get_all_dataset_configs().keys())),
-    help="""The name of the benchmark dataset. If not specified then all datasets will
-    be benchmarked, filtered by `dataset_language` and `dataset_task`.""",
+    type=click.Choice(list(get_all_dataset_tasks().keys())),
+    help="The dataset tasks to benchmark the model(s) on.",
 )
 @click.option(
     "--language",
@@ -40,9 +39,8 @@ from .languages import get_all_languages
     multiple=True,
     metavar="ISO 639-1 LANGUAGE CODE",
     type=click.Choice(["all"] + list(get_all_languages().keys())),
-    help="""The languages to benchmark, both for models and datasets. Only relevant if
-    `model-id` and `dataset` have not both been specified. If "all" then all models
-    will be benchmarked on all datasets.""",
+    help="""The languages to benchmark, both for models and datasets. If "all" then all
+    models will be benchmarked on all datasets.""",
 )
 @click.option(
     "--model-language",
@@ -52,9 +50,8 @@ from .languages import get_all_languages
     multiple=True,
     metavar="ISO 639-1 LANGUAGE CODE",
     type=click.Choice(["all"] + list(get_all_languages().keys())),
-    help="""The model languages to benchmark. Only relevant if `model-id` has not been
-    specified. If "all" then all models will be benchmarked. If not specified then this
-    will use the `language` value.""",
+    help="""The model languages to benchmark. If not specified then this will use the
+    `language` value.""",
 )
 @click.option(
     "--dataset-language",
@@ -64,18 +61,18 @@ from .languages import get_all_languages
     multiple=True,
     metavar="ISO 639-1 LANGUAGE CODE",
     type=click.Choice(["all"] + list(get_all_languages().keys())),
-    help="""The dataset languages to benchmark. Only relevant if `dataset` has not been
-    specified. If "all" then the models will be benchmarked on all datasets. If not
-    specified then this will use the `language` value.""",
+    help="""The dataset languages to benchmark. If "all" then the models will be
+    benchmarked on all datasets. If not specified then this will use the `language`
+    value.""",
 )
 @click.option(
-    "--dataset-task",
-    "-dt",
+    "--dataset",
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(list(get_all_dataset_tasks().keys())),
-    help="The dataset tasks to consider.",
+    type=click.Choice(list(get_all_dataset_configs().keys())),
+    help="""The name of the benchmark dataset. We recommend to use the `task` and
+    `language` options instead of this option.""",
 )
 @click.option(
     "--batch-size",
@@ -91,7 +88,6 @@ from .languages import get_all_languages
 )
 @click.option(
     "--progress-bar/--no-progress-bar",
-    "-p/-np",
     default=True,
     show_default=True,
     help="Whether to show a progress bar.",
@@ -140,19 +136,19 @@ from .languages import get_all_languages
     command.""",
 )
 @click.option(
-    "--ignore-duplicates/--no-ignore-duplicates",
-    default=True,
+    "--force/--no-force",
+    "-f",
+    default=False,
     show_default=True,
-    help="""Whether to skip evaluation of models which have already been evaluated,
+    help="""Whether to force evaluation of models which have already been evaluated,
     with scores lying in the 'scandeval_benchmark_results.jsonl' file.""",
 )
 @click.option(
     "--framework",
-    "-f",
     default=None,
     show_default=True,
     type=click.Choice([framework.lower() for framework in Framework.__members__]),
-    help="""The model framework to use. Only relevant if `model-id` refers to a local
+    help="""The model framework to use. Only relevant if `model` refers to a local
     path. Otherwise, the framework will be set automatically.""",
 )
 @click.option(
@@ -174,25 +170,31 @@ from .languages import get_all_languages
     "--load-in-4bit/--no-load-in-4bit",
     default=None,
     show_default=True,
-    help="Whether to load the model in 4-bit precision.",
+    help="""Whether to load the model in 4-bit precision. If not specified then the
+    model will be loaded in 4-bit precision if possible.""",
 )
 @click.option(
     "--use-flash-attention/--no-use-flash-attention",
     default=False,
     show_default=True,
-    help="Whether to use Flash Attention.",
+    help="""Whether to use Flash Attention. If not specified then the model will use
+    Flash Attention if possible.""",
 )
 @click.option(
     "--clear-model-cache/--no-clear-model-cache",
     default=False,
     show_default=True,
-    help="Whether to clear the model cache after benchmarking each model.",
+    help="""Whether to clear the model cache after benchmarking each model. Note that
+    this will only remove the model files, and not the cached model outputs (which
+    don't take up a lot of disk space). This is useful when benchmarking many models,
+    to avoid running out of disk space.""",
 )
 @click.option(
     "--only-validation-split/--no-only-validation-split",
     default=False,
     show_default=True,
-    help="Whether to only evaluate on the validation split.",
+    help="""Whether to only evaluate on the validation split. This is useful if you're
+    optimising hyperparameters, to avoid overfitting to the test sets.""",
 )
 @click.option(
     "--few-shot/--no-few-shot",
@@ -202,13 +204,13 @@ from .languages import get_all_languages
     "if the model is generative.",
 )
 def benchmark(
-    model_id: tuple[str],
+    model: tuple[str],
     dataset: tuple[str],
     language: tuple[str],
     model_language: tuple[str],
     dataset_language: tuple[str],
     raise_errors: bool,
-    dataset_task: tuple[str],
+    task: tuple[str],
     batch_size: str,
     evaluate_train: bool,
     progress_bar: bool,
@@ -216,7 +218,7 @@ def benchmark(
     cache_dir: str,
     use_token: bool,
     token: str,
-    ignore_duplicates: bool,
+    force: bool,
     verbose: bool,
     framework: str | None,
     device: str | None,
@@ -229,12 +231,12 @@ def benchmark(
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
     # Set up language variables
-    model_ids = None if len(model_id) == 0 else list(model_id)
+    models = None if len(model) == 0 else list(model)
     datasets = None if len(dataset) == 0 else list(dataset)
     languages: list[str] = list(language)
     model_languages = None if len(model_language) == 0 else list(model_language)
     dataset_languages = None if len(dataset_language) == 0 else list(dataset_language)
-    dataset_tasks = None if len(dataset_task) == 0 else list(dataset_task)
+    tasks = None if len(task) == 0 else list(task)
     batch_size_int = int(batch_size)
     device = Device[device.upper()] if device is not None else None
     token_str_bool: str | bool = token if token != "" else use_token
@@ -244,7 +246,7 @@ def benchmark(
         language=languages,
         model_language=model_languages,
         dataset_language=dataset_languages,
-        dataset_task=dataset_tasks,
+        task=tasks,
         batch_size=batch_size_int,
         progress_bar=progress_bar,
         save_results=save_results,
@@ -252,7 +254,7 @@ def benchmark(
         raise_errors=raise_errors,
         verbose=verbose,
         token=token_str_bool,
-        ignore_duplicates=ignore_duplicates,
+        force=force,
         cache_dir=cache_dir,
         framework=framework,
         device=device,
@@ -265,7 +267,7 @@ def benchmark(
     )
 
     # Perform the benchmark evaluation
-    benchmarker(model_id=model_ids, dataset=datasets)
+    benchmarker(model=models, dataset=datasets)
 
 
 if __name__ == "__main__":

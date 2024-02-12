@@ -90,8 +90,8 @@ class BenchmarkConfig:
         dataset_tasks:
             The tasks to benchmark.
         framework:
-            The framework of the models to benchmark. If None then the framework will
-            be inferred.
+            The framework of the models to benchmark. If None then the framework will be
+            inferred.
         batch_size:
             The batch size to use.
         raise_errors:
@@ -111,15 +111,13 @@ class BenchmarkConfig:
         progress_bar:
             Whether to show a progress bar.
         save_results:
-            Whether to save the benchmark results to
-            'scandeval_benchmark_results.json'.
+            Whether to save the benchmark results to 'scandeval_benchmark_results.json'.
         device:
             The device to use for benchmarking.
         verbose:
             Whether to print verbose output.
         trust_remote_code:
-            Whether to trust remote code when loading models from the Hugging Face
-            Hub.
+            Whether to trust remote code when loading models from the Hugging Face Hub.
         load_in_4bit:
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model.
