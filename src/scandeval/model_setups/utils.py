@@ -205,4 +205,8 @@ def align_model_and_tokenizer(
                 )
         model.config.pad_token_id = tokenizer.pad_token_id
 
+    if tokenizer.bos_token is None and tokenizer.eos_token is not None:
+        tokenizer.bos_token = tokenizer.eos_token
+        tokenizer.bos_token_id = tokenizer.eos_token_id
+
     return model, tokenizer
