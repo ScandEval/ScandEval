@@ -20,8 +20,8 @@ body:
     label: Operating System
     description: What operating system are you on?
     options:
-      - MacOS
       - Linux
+      - MacOS
       - Windows
       - Other
   validations:
@@ -43,10 +43,10 @@ body:
     label: Python version
     description: What Python version are you using?
     options:
-      - Older than 3.10.x
       - 3.10.x
       - 3.11.x
       - 3.12.x
+      - Older than 3.10.x
       - Newer than 3.12.x
   validations:
     required: true
