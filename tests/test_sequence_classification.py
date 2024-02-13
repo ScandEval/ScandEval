@@ -132,8 +132,7 @@ def benchmark_dataset(
 ) -> Generator[BenchmarkDataset, None, None]:
     """Yields a sequence classification benchmark dataset."""
     yield SequenceClassification(
-        dataset_config=request.param,
-        benchmark_config=benchmark_config,
+        dataset_config=request.param, benchmark_config=benchmark_config
     )
 
 

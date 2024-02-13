@@ -9,7 +9,6 @@ from copy import deepcopy
 from functools import partial
 from typing import Any
 
-import demjson3
 import numpy as np
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
@@ -18,7 +17,7 @@ from transformers.data.data_collator import DataCollatorForTokenClassification
 from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 from .types import Labels, Predictions
@@ -27,6 +26,11 @@ from .utils import (
     model_is_generative,
     raise_if_model_output_contains_nan_values,
 )
+
+try:
+    import demjson3
+except ImportError:
+    demjson3 = None
 
 logger = logging.getLogger(__package__)
 
@@ -67,9 +71,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         return dataset_dict
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -222,10 +224,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         # Tokenize the texts. We use the `is_split_into_words` argument here because
         # the texts in our dataset are lists of words (with a label for each word)
         tokenized_inputs = tokenizer(
-            examples["tokens"],
-            is_split_into_words=True,
-            truncation=True,
-            padding=True,
+            examples["tokens"], is_split_into_words=True, truncation=True, padding=True
         )
 
         # Extract a mapping between all the tokens and their corresponding word. If the
@@ -262,9 +261,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
                 # Replace UNK tokens with the correct word
                 tokens = self._handle_unk_tokens(
-                    tokenizer=tokenizer,
-                    tokens=tokens,
-                    words=words,
+                    tokenizer=tokenizer, tokens=tokens, words=words
                 )
 
                 # Get list of special tokens. Some tokenizers do not record these
@@ -431,16 +428,11 @@ class NamedEntityRecognition(BenchmarkDataset):
 
             def tokenise(examples: dict) -> BatchEncoding:
                 return kwargs["tokenizer"](
-                    text=examples["text"],
-                    truncation=True,
-                    padding=False,
+                    text=examples["text"], truncation=True, padding=False
                 )
 
             tokenised_dataset = dataset.map(
-                tokenise,
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
+                tokenise, batched=True, load_from_cache_file=False, keep_in_memory=True
             )
 
         else:
@@ -450,10 +442,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 label2id=kwargs["hf_model_config"].label2id,
             )
             tokenised_dataset = dataset.map(
-                map_fn,
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
+                map_fn, batched=True, load_from_cache_file=False, keep_in_memory=True
             )
 
         return tokenised_dataset
@@ -550,7 +539,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
         def create_label(example: dict) -> str:
             labels: dict[str, list[str]] = {
-                prompt_label: []
+                prompt_label: list()
                 for prompt_label in self.dataset_config.prompt_label_mapping.values()
             }
             for token, label in zip(example["tokens"], example["labels"]):
@@ -611,6 +600,9 @@ class NamedEntityRecognition(BenchmarkDataset):
             list:
                 The predicted labels.
         """
+        if demjson3 is None:
+            raise NeedsExtraInstalled(extra="generative")
+
         raw_predictions = extract_raw_predictions(
             generated_sequences=model_output["sequences"], tokenizer=tokenizer
         )

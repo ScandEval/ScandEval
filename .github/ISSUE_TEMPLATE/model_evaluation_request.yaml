@@ -1,0 +1,41 @@
+name: 📊 Model Evaluation Request
+description: Would you like to have a particular model included in the leaderboards?
+title: "[MODEL EVALUATION REQUEST] "
+labels: "model evaluation request"
+
+body:
+- type: input
+  attributes:
+    label: Model ID
+    description: What is the Hugging Face model ID?
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Model type
+    description: What is the architecture of the model?
+    options:
+      - Decoder model (e.g., GPT)
+      - Encoder model (e.g., BERT)
+      - Sequence-to-sequence model (e.g., T5)
+  validations:
+    required: true
+- type: checkboxes
+  attributes:
+    label: Model languages
+    description: What languages have the model been trained on?
+    options:
+      - label: Danish
+      - label: Swedish
+      - label: Norwegian (Bokmål or Nynorsk)
+      - label: Icelandic
+      - label: Faroese
+      - label: German
+      - label: Dutch
+      - label: English
+  validations:
+    required: true
+- type: markdown
+  attributes:
+    value: >
+      Thanks for contributing 🎉!

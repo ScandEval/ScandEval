@@ -98,10 +98,7 @@ class QuestionAnsweringTrainer(Trainer):
 
 
 def postprocess_predictions_and_labels(
-    predictions: list,
-    dataset: Dataset,
-    prepared_dataset: Dataset,
-    cls_token_index: int,
+    predictions: list, dataset: Dataset, prepared_dataset: Dataset, cls_token_index: int
 ) -> tuple[list[dict], list[dict]]:
     """Postprocess the predictions and labels, to allow easier metric computation.
 
@@ -152,9 +149,7 @@ def postprocess_predictions_and_labels(
         # Create the final prediction dictionary, to be added to the list of
         # predictions
         prediction = dict(
-            id=example["id"],
-            prediction_text=best_answer,
-            no_answer_probability=0.0,
+            id=example["id"], prediction_text=best_answer, no_answer_probability=0.0
         )
 
         # Add the answer to the list of predictions

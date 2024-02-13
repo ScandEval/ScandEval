@@ -42,10 +42,7 @@ def benchmark_dataset(
     benchmark_config, request
 ) -> Generator[BenchmarkDataset, None, None]:
     """Yields a text-to-text benchmark dataset."""
-    yield TextToText(
-        dataset_config=request.param,
-        benchmark_config=benchmark_config,
-    )
+    yield TextToText(dataset_config=request.param, benchmark_config=benchmark_config)
 
 
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):

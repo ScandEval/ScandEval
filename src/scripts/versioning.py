@@ -55,10 +55,7 @@ def set_new_version(major: int, minor: int, patch: int):
     pyproject_path = Path("pyproject.toml")
     pyproject = pyproject_path.read_text()
     pyproject = re.sub(
-        r'version = "[^"]+"',
-        f'version = "{version}"',
-        pyproject,
-        count=1,
+        r'version = "[^"]+"', f'version = "{version}"', pyproject, count=1
     )
     pyproject_path.write_text(pyproject)
 

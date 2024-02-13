@@ -7,7 +7,6 @@ import re
 from functools import partial
 from typing import Any
 
-import Levenshtein
 import numpy as np
 import torch
 from datasets.arrow_dataset import Dataset
@@ -17,7 +16,7 @@ from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
 from .config import DatasetConfig
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 from .types import Labels, Predictions
@@ -25,8 +24,13 @@ from .utils import (
     GENERATIVE_MODEL_TASKS,
     get_special_token_metadata,
     raise_if_model_output_contains_nan_values,
-    should_prompts_be_stripped,
+    should_prefix_space_be_added_to_labels,
 )
+
+try:
+    import Levenshtein
+except ImportError:
+    Levenshtein = None
 
 logger = logging.getLogger(__package__)
 
@@ -133,9 +137,7 @@ class SequenceClassification(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer, padding="longest")
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -182,9 +184,7 @@ class SequenceClassification(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
+                predictions=predictions, references=labels, **cfg.compute_kwargs
             )
 
             # The metric returns None if we are running on multi-GPU and the current
@@ -349,7 +349,7 @@ def get_closest_logprobs_labels(
         dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
     ]
 
-    add_prefix_space_to_labels = should_prompts_be_stripped(
+    add_prefix_space_to_labels = should_prefix_space_be_added_to_labels(
         labels_to_be_generated=candidate_labels, tokenizer=tokenizer
     )
 
@@ -367,7 +367,7 @@ def get_closest_logprobs_labels(
         if add_prefix_space_to_labels:
             label_ready_for_tokenization = " " + label_ready_for_tokenization
         candidate_label_ids: list[list[int]] = tokenizer(
-            [candidate_label.lower()], add_special_tokens=False
+            [label_ready_for_tokenization.lower()], add_special_tokens=False
         )["input_ids"]
         candidate_label_id: int = candidate_label_ids[0][0]
         pred_logprobs[:, idx] = generation_logprobs[:, 0, candidate_label_id]
@@ -398,9 +398,11 @@ def get_closest_word_edit_labels(
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
+    if Levenshtein is None:
+        raise NeedsExtraInstalled(extra="openai")
+
     raw_predictions = extract_raw_predictions(
-        generated_sequences=generated_sequences,
-        tokenizer=tokenizer,
+        generated_sequences=generated_sequences, tokenizer=tokenizer
     )
 
     candidate_labels = [

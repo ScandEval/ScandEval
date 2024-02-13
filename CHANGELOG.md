@@ -6,6 +6,65 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [v10.0.1] - 2024-02-12
+### Fixed
+- A prefix space was added to labels in sequence classification tasks that
+  automatically adds a prefix space (such as Mistral). We now check for this and ensure
+  to only manually add prefix space to models that don't automatically do this (such as
+  the Yi models).
+
+
+## [v10.0.0] - 2024-02-12
+### Added
+- Now throws a more informative error when attempting to benchmark a non-generative
+  model on a generative task.
+
+### Changed
+- Many dependencies are now optional, to make the package less bloated. These extras
+  are `jax`, for models based on the JAX framework, `generative` for evaluating
+  generative models, `olmo` for models based on the OLMO architecture, `openai` for
+  evaluating OpenAI models, and `all` to install all of them.
+- Updated many dependencies. In particular now uses `openai` version 1.x.x, which
+  required some changes to the code base as they changed their API.
+- Changed the `--dataset-task` CLI argument (`dataset_task` in the Python API) to
+  `--task` (`task`). This is now the preferred way to choose what to benchmark a model
+  on, rather than remembering all the names of the datasets. E.g., to benchmark a model
+  on all Danish question-answering datasets, we call `scandeval -m <model_id> -l da -t
+  question-answering`. All the names of the tasks is shown in `scandeval --help`.
+- Renamed the `--no-ignore-duplicates` to `--force` (shorthand: `-f`), which _forces_
+  the evaluation, meaning that it evaluates the model even if it has previously been
+  evaluated.
+- Renamed the `--model-id` to `--model`.
+
+### Fixed
+- Error when encoding a batch of size 1 with OpenAI models.
+- Error when benchmarking OpenAI models on MacOS due to the `tiktoken.Encoding` object
+  not being picklable.
+- Fixed an issue with OOM errors when changing from benchmarking one generative model
+  to another.
+- Now allows loading tokenisers that require remote code, if `--trust-remote-code` has
+  been set.
+- Fixed an issue where the `max_sequence_length` parameter in the Hugging Face model
+  configuration wasn't used to determine the `max_model_len` parameter in the
+  `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
+- An error occured if a tokenizer had no defined BOS token, which happens for some
+  generative models. It is now set to be equal to the EOS token in that case.
+- Fixed error related to the extraction of predicted labels in sequence classification
+  tasks for generative models, which unfairly evaluated generative models that require
+  a prefix space on the labels (which are most of them currently).
+
+### Removed
+- Removed the `-d` shorthand for `--dataset` in the CLI, to encourage the use of `-t`
+  (`--task`) and `-l` (`--language`) instead.
+
+
+## [v9.3.2] - 2024-02-05
+### Fixed
+- Using model revisions did not work with vLLM models - this has now been fixed. These
+  revisions are specified using the '@' operator in the model ID, e.g., `scandeval -m
+  gpt2@main`.
+
+
 ## [v9.3.1] - 2024-01-31
 ### Fixed
 - The prompts were not stripped correctly, causing bad evaluations for sequence
@@ -38,8 +97,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   never using the cached versions anyway.
 - We now only strip the prompts if the model's tokenizer includes a prefix space when
   tokenizing the labels.
-- Fixed an issue with OOM errors when changing from benchmarking one generative model
-  to another.
 - When testing a model's maximum sequence length, we put dummy inputs into them. This
   causes errors if the dummy inputs are one of the special tokens. Since the special
   tokens have not always been set up in the tokenizer, we instead rely on a heuristic
@@ -51,7 +108,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [v9.2.0] - 2024-01-24
-### Added
+### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
   Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
   are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
@@ -394,7 +451,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   another framework, then re-try the evaluation with `from_flax` set to `True`.
 
 
-## [v6.2.2] - 2023-02-25
+## [v6.2.2] - 2023-02-25
 ### Fixed
 - If `max_position_embeddings` is smaller than any of the context lengths specified in
   `model_max_length` and `max_model_input_sizes` then we use that as the the
@@ -657,7 +714,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   their framework could not be determined.
 
 
-## [v2.3.0] - 2022-01-20
+## [v2.3.0] - 2022-01-20
 ### Added
 - Specific branches/commits/tags can now be benchmarked, using the `@`
   delimiter. For instance, `scandeval -m model_id@commit_hash` will benchmark

@@ -1,5 +1,6 @@
 """Functions related to the finetuning of models."""
 
+import importlib.util
 import logging
 import sys
 import warnings
@@ -343,9 +344,7 @@ def finetune_single_iteration(
 
         with torch.inference_mode():
             evaluate_inputs = evaluate_inputs_fn(
-                dataset=test,
-                prepared_dataset=prepared_test,
-                metric_key_prefix="test",
+                dataset=test, prepared_dataset=prepared_test, metric_key_prefix="test"
             )
             test_scores = trainer.evaluate(**evaluate_inputs)
         scores["test"] = test_scores
@@ -401,7 +400,10 @@ def get_training_args(
     if batch_size is None:
         batch_size = benchmark_config.batch_size
 
-    if benchmark_config.device == torch.device("cuda"):
+    if (
+        benchmark_config.device == torch.device("cuda")
+        and importlib.util.find_spec("bitsandbytes") is not None
+    ):
         optimizer = OptimizerNames.ADAMW_8BIT
     else:
         optimizer = OptimizerNames.ADAMW_TORCH

@@ -7,7 +7,7 @@ from transformers import AutoConfig, PreTrainedModel
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import InvalidBenchmark
+from ..exceptions import InvalidModel
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
 from .hf import HFModelSetup
@@ -23,10 +23,7 @@ class LocalModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         """Initialize the LocalModelSetup class.
 
         Args:
@@ -83,9 +80,9 @@ class LocalModelSetup:
                 elif ".msgpack" in exts:
                     framework = Framework.JAX
                 elif ".whl" in exts:
-                    raise InvalidBenchmark("SpaCy models are not supported.")
+                    raise InvalidModel("SpaCy models are not supported.")
                 elif ".h5" in exts:
-                    raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
+                    raise InvalidModel("TensorFlow/Keras models are not supported.")
             except OSError as e:
                 logger.info(f"Cannot list files for local model `{model_id}`!")
                 if self.benchmark_config.raise_errors:
@@ -117,8 +114,7 @@ class LocalModelSetup:
             languages=list(),
             model_type=ModelType.LOCAL,
             model_cache_dir=create_model_cache_dir(
-                cache_dir=self.benchmark_config.cache_dir,
-                model_id=model_id,
+                cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
         )
         return model_config
@@ -139,6 +135,5 @@ class LocalModelSetup:
         """
         hf_model_setup = HFModelSetup(benchmark_config=self.benchmark_config)
         return hf_model_setup.load_model(
-            model_config=model_config,
-            dataset_config=dataset_config,
+            model_config=model_config, dataset_config=dataset_config
         )

@@ -214,7 +214,8 @@ def load_ud_pos(
             The URL of the validation data.
         test_url:
             The URL of the test data.
-
+        doc_process_fn:
+            A function to apply to each document before parsing it.
 
     Returns:
         The dataframes, stored in the keys `train`, `val` and `test`.

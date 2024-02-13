@@ -110,7 +110,7 @@ def model_id() -> Generator[str, None, None]:
 @pytest.fixture(scope="session")
 def generative_model_id() -> Generator[str, None, None]:
     """Yields a generative model ID used in tests."""
-    yield "AI-Sweden-Models/gpt-sw3-126m"
+    yield "mhenrichsen/danskgpt-tiny"
 
 
 @pytest.fixture(scope="session")

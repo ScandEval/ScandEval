@@ -1,30 +1,25 @@
 """Model setup for OpenAI models."""
 
 import logging
-import os
 import re
 
-import openai
-import tiktoken
 from transformers import PretrainedConfig, PreTrainedModel
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
+from ..exceptions import NeedsExtraInstalled
 from ..openai_models import OpenAIModel, OpenAITokenizer
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
 
 logger = logging.getLogger(__package__)
 
-
-# This is a list of the major models that OpenAI has released
-CACHED_OPENAI_MODEL_IDS: list[str] = [
-    "ada|babbage|curie|davinci",
-    "(code|text)-(ada|babbage|curie|davinci)-[0-9]{3}",
-    "gpt-3.5-turbo(-16k|-instruct)?(-[0-9]{4})?",
-    "gpt-4(-[0-9]{4})?",
-    "gpt-4-32k(-[0-9]{4})?",
-]
+try:
+    import openai
+    import tiktoken
+except ImportError:
+    openai = None
+    tiktoken = None
 
 
 VOCAB_SIZE_MAPPING = {
@@ -66,10 +61,7 @@ class OpenAIModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
         """Initialize the model setup.
 
         Args:
@@ -88,37 +80,11 @@ class OpenAIModelSetup:
         Returns:
             Whether the model exists on OpenAI.
         """
-        if self.benchmark_config.openai_api_key is not None:
-            openai.api_key = self.benchmark_config.openai_api_key
-        else:
-            openai.api_key = os.getenv("OPENAI_API_KEY")
+        if openai is None:
+            raise NeedsExtraInstalled(extra="openai")
 
-        if openai.api_key is not None:
-            all_models = openai.Model.list()["data"]
-            return model_id in [model["id"] for model in all_models]
-        else:
-            model_exists = any(
-                [
-                    re.match(pattern=model_pattern, string=model_id) is not None
-                    for model_pattern in CACHED_OPENAI_MODEL_IDS
-                ]
-            )
-            if model_exists:
-                logger.warning(
-                    "It looks like you're trying to use an OpenAI model, but you "
-                    "haven't set your OpenAI API key. Please set your OpenAI API key "
-                    "using the environment variable `OPENAI_API_KEY`, or by passing it "
-                    "as the `--openai-api-key` argument."
-                )
-            else:
-                logger.info(
-                    "It doesn't seem like the model exists on OpenAI, but we can't be "
-                    "sure because you haven't set your OpenAI API key. If you intended "
-                    "to use an OpenAI model, please set your OpenAI API key using the "
-                    "environment variable `OPENAI_API_KEY`, or by passing it as the "
-                    "`--openai-api-key` argument."
-                )
-            return model_exists
+        all_models: list[openai.models.Model] = list(openai.models.list())
+        return model_id in [model.id for model in all_models]
 
     def get_model_config(self, model_id: str) -> ModelConfig:
         """Fetches configuration for an OpenAI model.
@@ -138,8 +104,7 @@ class OpenAIModelSetup:
             languages=list(),
             model_type=ModelType.OPENAI,
             model_cache_dir=create_model_cache_dir(
-                cache_dir=self.benchmark_config.cache_dir,
-                model_id=model_id,
+                cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
         )
 
@@ -204,8 +169,7 @@ class OpenAIModelSetup:
             )
 
         tokenizer = OpenAITokenizer(
-            model_config=model_config,
-            hf_model_config=hf_model_config,
+            model_config=model_config, hf_model_config=hf_model_config
         )
         model = OpenAIModel(
             model_config=model_config,
