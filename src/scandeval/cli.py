@@ -247,6 +247,7 @@ def benchmark(
         model_language=model_languages,
         dataset_language=dataset_languages,
         task=tasks,
+        dataset=datasets,
         batch_size=batch_size_int,
         progress_bar=progress_bar,
         save_results=save_results,
@@ -267,7 +268,7 @@ def benchmark(
     )
 
     # Perform the benchmark evaluation
-    benchmarker(model=models, dataset=datasets)
+    benchmarker(model=models)
 
 
 if __name__ == "__main__":
