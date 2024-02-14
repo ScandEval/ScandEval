@@ -9,7 +9,7 @@ from scandeval.config import (
     ModelConfig,
     Task,
 )
-from scandeval.enums import ModelType
+from scandeval.enums import Framework, ModelType
 
 
 class TestMetricConfig:
@@ -152,7 +152,7 @@ class TestModelConfig:
         """Test that the model config attributes correspond to the arguments."""
         assert model_config.model_id == "model_id"
         assert model_config.revision == "revision"
-        assert model_config.framework == "framework"
+        assert model_config.framework == Framework.PYTORCH
         assert model_config.task == "task"
         assert model_config.languages == [language]
         assert model_config.model_type == ModelType.FRESH

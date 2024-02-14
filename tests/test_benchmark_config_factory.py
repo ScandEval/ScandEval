@@ -75,33 +75,69 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
 
 
 @pytest.mark.parametrize(
-    argnames=["input_task", "input_dataset", "expected_task", "expected_dataset"],
+    argnames=[
+        "input_task",
+        "input_dataset",
+        "input_languages",
+        "expected_task",
+        "expected_dataset",
+    ],
     argvalues=[
         (
             None,
             None,
+            list(get_all_languages().values()),
             list(get_all_tasks().values()),
             list(get_all_dataset_configs().keys()),
         ),
         (
             "linguistic-acceptability",
             None,
+            list(get_all_languages().values()),
             [LA],
             [cfg.name for cfg in get_all_dataset_configs().values() if LA == cfg.task],
         ),
-        (None, "scala-da", list(get_all_tasks().values()), ["scala-da"]),
-        ("linguistic-acceptability", ["scala-da", "angry-tweets"], [LA], ["scala-da"]),
+        (
+            None,
+            "scala-da",
+            list(get_all_languages().values()),
+            list(get_all_tasks().values()),
+            ["scala-da"],
+        ),
+        (
+            "linguistic-acceptability",
+            ["scala-da", "angry-tweets"],
+            list(get_all_languages().values()),
+            [LA],
+            ["scala-da"],
+        ),
         (
             ["linguistic-acceptability", "named-entity-recognition"],
             "scala-da",
-            {LA, NER},
-            {"scala-da"},
+            list(get_all_languages().values()),
+            [LA, NER],
+            ["scala-da"],
         ),
         (
             ["linguistic-acceptability", "sentiment-classification"],
             ["scala-da", "angry-tweets", "scandiqa-da"],
-            {LA, SENT},
-            {"scala-da", "angry-tweets"},
+            list(get_all_languages().values()),
+            [LA, SENT],
+            ["scala-da", "angry-tweets"],
+        ),
+        (
+            ["linguistic-acceptability", "sentiment-classification"],
+            ["scala-da", "angry-tweets", "scandiqa-sv"],
+            [DA],
+            [LA, SENT],
+            ["scala-da", "angry-tweets"],
+        ),
+        (
+            ["linguistic-acceptability", "sentiment-classification"],
+            None,
+            [DA],
+            [LA, SENT],
+            ["scala-da", "angry-tweets"],
         ),
     ],
     ids=[
@@ -111,14 +147,16 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
         "single task and multiple datasets",
         "multiple tasks and single dataset",
         "multiple tasks and datasets",
+        "multiple tasks and datasets, filtered by language",
+        "multiple tasks, filtered by language",
     ],
 )
 def test_prepare_tasks_and_datasets(
-    input_task, input_dataset, expected_task, expected_dataset
+    input_task, input_dataset, input_languages, expected_task, expected_dataset
 ):
     """Test the output of `prepare_tasks_and_datasets`."""
     prepared_tasks, prepared_datasets = prepare_tasks_and_datasets(
-        task=input_task, dataset=input_dataset
+        task=input_task, dataset=input_dataset, dataset_languages=input_languages
     )
     assert set(prepared_tasks) == set(expected_task)
     assert set(prepared_datasets) == set(expected_dataset)
@@ -127,13 +165,17 @@ def test_prepare_tasks_and_datasets(
 def test_prepare_tasks_and_datasets_invalid_task():
     """Test that an invalid task raises an error."""
     with pytest.raises(InvalidBenchmark):
-        prepare_tasks_and_datasets(task="invalid-task", dataset=None)
+        prepare_tasks_and_datasets(
+            task="invalid-task", dataset=None, dataset_languages=[DA]
+        )
 
 
 def test_prepare_tasks_and_datasets_invalid_dataset():
     """Test that an invalid dataset raises an error."""
     with pytest.raises(InvalidBenchmark):
-        prepare_tasks_and_datasets(task=None, dataset="invalid-dataset")
+        prepare_tasks_and_datasets(
+            task=None, dataset="invalid-dataset", dataset_languages=[DA]
+        )
 
 
 @pytest.mark.parametrize(
