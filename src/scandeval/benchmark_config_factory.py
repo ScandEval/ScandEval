@@ -108,7 +108,9 @@ def build_benchmark_config(
         language_codes=dataset_language, default_language_codes=language_codes
     )
 
-    tasks, datasets = prepare_tasks_and_datasets(task=task, dataset=dataset)
+    tasks, datasets = prepare_tasks_and_datasets(
+        task=task, dataset=dataset, dataset_languages=dataset_languages
+    )
 
     torch_device = prepare_device(device=device)
 
@@ -144,7 +146,7 @@ def build_benchmark_config(
 
 
 def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
-    """Get correct language-code(s).
+    """Get correct language code(s).
 
     Args:
         language_codes:
@@ -153,7 +155,7 @@ def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
             to 'all' if all languages (also non-Scandinavian) should be considered.
 
     Returns:
-        The correct language-codes.
+        The correct language codes.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
@@ -214,7 +216,9 @@ def prepare_languages(
 
 
 def prepare_tasks_and_datasets(
-    task: str | list[str] | None, dataset: str | list[str] | None
+    task: str | list[str] | None,
+    dataset_languages: list[Language],
+    dataset: str | list[str] | None,
 ) -> tuple[list[Task], list[str]]:
     """Prepare task(s) and dataset(s) for benchmarking.
 
@@ -222,9 +226,11 @@ def prepare_tasks_and_datasets(
         task:
             The tasks to include for dataset. If None then datasets will not be
             filtered based on their task.
+        dataset_languages:
+            The languages of the datasets in the benchmark.
         dataset:
             The datasets to include for task. If None then all datasets will be
-            included, limited by the `task` parameter.
+            included, limited by the `task` and `dataset_languages` parameters.
 
     Returns:
         The prepared tasks and datasets.
@@ -263,11 +269,12 @@ def prepare_tasks_and_datasets(
             "datasets."
         )
 
-    # Create the list of dataset names
     datasets = [
         dataset_name
         for dataset_name, dataset_config in all_dataset_configs.items()
-        if dataset_name in dataset and dataset_config.task in tasks
+        if dataset_name in dataset
+        and dataset_config.task in tasks
+        and set(dataset_config.languages).intersection(dataset_languages)
     ]
 
     return tasks, datasets

@@ -13,7 +13,7 @@ from time import sleep
 from pydantic import BaseModel, ConfigDict
 
 from .benchmark_config_factory import build_benchmark_config
-from .config import DatasetConfig, Language, Task
+from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Device, Framework
@@ -138,7 +138,7 @@ class Benchmarker:
         save_results: bool = False,
         task: str | list[str] | None = None,
         dataset: list[str] | str | None = None,
-        language: str | list[str] = ["da", "sv", "no"],
+        language: str | list[str] = "all",
         model_language: str | list[str] | None = None,
         dataset_language: str | list[str] | None = None,
         framework: Framework | str | None = None,
@@ -175,9 +175,8 @@ class Benchmarker:
                 `task` and `dataset` are None then all datasets will be benchmarked.
             language:
                 The language codes of the languages to include, both for models and
-                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
-                to 'all' if all languages (also non-Scandinavian) should be considered.
-                Defaults to ['da', 'sv', 'no'].
+                datasets. Set this to 'all' if all languages should be considered.
+                Defaults to "all".
             model_language:
                 The language codes of the languages to include for models. If specified
                 then this overrides the `language` parameter for model languages.
@@ -482,18 +481,13 @@ class Benchmarker:
         if benchmark_config.clear_model_cache:
             clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
 
-        # Prepare the model IDs
         model_ids = self._prepare_model_ids(
             model=model,
             model_languages=benchmark_config.model_languages,
             token=benchmark_config.token,
         )
-
-        # Get all the relevant dataset configurations
         dataset_configs = prepare_dataset_configs(
-            dataset=dataset,
-            dataset_languages=benchmark_config.dataset_languages,
-            tasks=benchmark_config.tasks,
+            dataset_names=benchmark_config.datasets
         )
 
         # Iterate over all the models and datasets
@@ -776,39 +770,16 @@ def clear_model_cache_fn(cache_dir: str) -> None:
                     rmtree(sub_model_dir)
 
 
-def prepare_dataset_configs(
-    dataset: list[str] | str | None,
-    dataset_languages: list[Language],
-    tasks: list[Task],
-) -> list[DatasetConfig]:
+def prepare_dataset_configs(dataset_names: list[str]) -> list[DatasetConfig]:
     """Prepare the dataset configuration(s) to be benchmarked.
 
     Args:
-        dataset:
-            The datasets to benchmark on. If None then all datasets will be
-            benchmarked. Defaults to None.
-        dataset_languages:
-            The languages of the datasets to fetch.
-        tasks:
-            The tasks of the datasets to fetch.
+        dataset_names:
+            The dataset names to benchmark.
 
     Returns:
         The prepared list of model IDs.
     """
-    if dataset is None:
-        dataset_configs = [
-            cfg
-            for cfg in get_all_dataset_configs().values()
-            if any(lang in dataset_languages for lang in cfg.languages)
-            and cfg.task in tasks
-        ]
-    elif isinstance(dataset, str):
-        dataset_configs = [
-            cfg for cfg in get_all_dataset_configs().values() if cfg.name == dataset
-        ]
-    else:
-        dataset_configs = [
-            cfg for cfg in get_all_dataset_configs().values() if cfg.name in dataset
-        ]
-
-    return dataset_configs
+    return [
+        cfg for cfg in get_all_dataset_configs().values() if cfg.name in dataset_names
+    ]

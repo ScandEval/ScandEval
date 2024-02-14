@@ -34,7 +34,7 @@ from .tasks import get_all_tasks
 @click.option(
     "--language",
     "-l",
-    default=["da", "sv", "no"],
+    default=["all"],
     show_default=True,
     multiple=True,
     metavar="ISO 639-1 LANGUAGE CODE",
