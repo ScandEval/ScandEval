@@ -120,8 +120,8 @@ def test_prepare_tasks_and_datasets(
     prepared_tasks, prepared_datasets = prepare_tasks_and_datasets(
         task=input_task, dataset=input_dataset
     )
-    assert set(prepared_tasks) == expected_task
-    assert set(prepared_datasets) == expected_dataset
+    assert set(prepared_tasks) == set(expected_task)
+    assert set(prepared_datasets) == set(expected_dataset)
 
 
 def test_prepare_tasks_and_datasets_invalid_task():
