@@ -4,13 +4,13 @@ import pytest
 import torch
 from scandeval.benchmark_config_factory import (
     get_correct_language_codes,
-    prepare_dataset_tasks,
     prepare_device,
     prepare_languages,
+    prepare_tasks_and_datasets,
 )
-from scandeval.dataset_tasks import LA, NER, get_all_dataset_tasks
 from scandeval.enums import Device
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
+from scandeval.tasks import LA, NER, get_all_tasks
 
 
 @pytest.mark.parametrize(
@@ -75,16 +75,16 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
 @pytest.mark.parametrize(
     argnames=["input_task", "expected_task"],
     argvalues=[
-        (None, list(get_all_dataset_tasks().values())),
+        (None, list(get_all_tasks().values())),
         ("linguistic-acceptability", [LA]),
         (["linguistic-acceptability"], [LA]),
         (["linguistic-acceptability", "named-entity-recognition"], [LA, NER]),
     ],
     ids=["all tasks", "single task", "single task as list", "multiple tasks"],
 )
-def test_prepare_dataset_tasks(input_task, expected_task):
-    """Test the output of `prepare_dataset_tasks`."""
-    prepared_tasks = prepare_dataset_tasks(dataset_task=input_task)
+def test_prepare_tasks_and_datasets(input_task, expected_task):
+    """Test the output of `prepare_tasks_and_datasets`."""
+    prepared_tasks = prepare_tasks_and_datasets(task=input_task, dataset=None)
     assert prepared_tasks == expected_task
 
 

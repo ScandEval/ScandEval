@@ -10,10 +10,10 @@ from pathlib import Path
 from shutil import rmtree
 from time import sleep
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .benchmark_config_factory import build_benchmark_config
-from .config import DatasetConfig, DatasetTask, Language
+from .config import DatasetConfig, Language, Task
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Device, Framework
@@ -26,6 +26,8 @@ logger = logging.getLogger(__package__)
 
 class BenchmarkConfigParams(BaseModel):
     """The parameters for the benchmark configuration."""
+
+    model_config = ConfigDict(protected_namespaces=())
 
     progress_bar: bool
     save_results: bool
@@ -268,9 +270,6 @@ class Benchmarker:
             **self.benchmark_config_default_params.model_dump()
         )
 
-        # Set attributes from arguments
-        self.force = force
-
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: dict[str, list[str]] | None = None
 
@@ -494,7 +493,7 @@ class Benchmarker:
         dataset_configs = prepare_dataset_configs(
             dataset=dataset,
             dataset_languages=benchmark_config.dataset_languages,
-            dataset_tasks=benchmark_config.dataset_tasks,
+            tasks=benchmark_config.tasks,
         )
 
         # Iterate over all the models and datasets
@@ -504,7 +503,7 @@ class Benchmarker:
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
                 # we are not forcing the benchmark
-                if not self.force and model_has_been_benchmarked(
+                if not benchmark_config.force and model_has_been_benchmarked(
                     model_id=m_id,
                     dataset=dataset_config.name,
                     few_shot=benchmark_config.few_shot,
@@ -780,7 +779,7 @@ def clear_model_cache_fn(cache_dir: str) -> None:
 def prepare_dataset_configs(
     dataset: list[str] | str | None,
     dataset_languages: list[Language],
-    dataset_tasks: list[DatasetTask],
+    tasks: list[Task],
 ) -> list[DatasetConfig]:
     """Prepare the dataset configuration(s) to be benchmarked.
 
@@ -790,7 +789,7 @@ def prepare_dataset_configs(
             benchmarked. Defaults to None.
         dataset_languages:
             The languages of the datasets to fetch.
-        dataset_tasks:
+        tasks:
             The tasks of the datasets to fetch.
 
     Returns:
@@ -801,7 +800,7 @@ def prepare_dataset_configs(
             cfg
             for cfg in get_all_dataset_configs().values()
             if any(lang in dataset_languages for lang in cfg.languages)
-            and cfg.task in dataset_tasks
+            and cfg.task in tasks
         ]
     elif isinstance(dataset, str):
         dataset_configs = [

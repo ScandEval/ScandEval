@@ -43,7 +43,7 @@ class MetricConfig:
 
 
 @dataclass
-class DatasetTask:
+class Task:
     """A dataset task.
 
     Attributes:
@@ -87,8 +87,10 @@ class BenchmarkConfig:
             The languages of the models to benchmark.
         dataset_languages:
             The languages of the datasets in the benchmark.
-        dataset_tasks:
-            The tasks to benchmark.
+        tasks:
+            The tasks benchmark the model(s) on.
+        datasets:
+            The datasets to benchmark on.
         framework:
             The framework of the models to benchmark. If None then the framework will be
             inferred.
@@ -108,6 +110,9 @@ class BenchmarkConfig:
         openai_api_key:
             The API key for the OpenAI API. If None then OpenAI models will not be
             benchmarked.
+        force:
+            Whether to force the benchmark to run even if the results are already
+            cached.
         progress_bar:
             Whether to show a progress bar.
         save_results:
@@ -134,7 +139,8 @@ class BenchmarkConfig:
 
     model_languages: list[Language]
     dataset_languages: list[Language]
-    dataset_tasks: list[DatasetTask]
+    tasks: list[Task]
+    datasets: list[str]
     framework: Framework | None
     batch_size: int
     raise_errors: bool
@@ -142,6 +148,7 @@ class BenchmarkConfig:
     evaluate_train: bool
     token: bool | str
     openai_api_key: str | None
+    force: bool
     progress_bar: bool
     save_results: bool
     device: torch.device
@@ -196,7 +203,7 @@ class DatasetConfig:
     name: str
     pretty_name: str
     huggingface_id: str
-    task: DatasetTask
+    task: Task
     languages: list[Language]
     prompt_template: str
     max_generated_tokens: int

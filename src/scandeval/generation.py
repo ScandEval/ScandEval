@@ -20,7 +20,6 @@ from transformers import (
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .dataset_tasks import NER
 from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .model_cache import (
     ModelCache,
@@ -29,6 +28,7 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
+from .tasks import NER
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
 from .vllm_models import VLLMModel
 

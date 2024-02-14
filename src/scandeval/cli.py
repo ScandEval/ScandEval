@@ -4,9 +4,9 @@ import click
 
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
-from .dataset_tasks import get_all_dataset_tasks
 from .enums import Device, Framework
 from .languages import get_all_languages
+from .tasks import get_all_tasks
 
 
 @click.command()
@@ -28,7 +28,7 @@ from .languages import get_all_languages
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(list(get_all_dataset_tasks().keys())),
+    type=click.Choice(list(get_all_tasks().keys())),
     help="The dataset tasks to benchmark the model(s) on.",
 )
 @click.option(

@@ -1,8 +1,8 @@
 """All dataset configurations used in ScandEval."""
 
 from .config import DatasetConfig
-from .dataset_tasks import COMMON_SENSE, KNOW, LA, NER, QA, SENT, SPEED, SUMM
 from .languages import DA, DE, EN, FO, IS, NB, NL, NN, SV, get_all_languages
+from .tasks import COMMON_SENSE, KNOW, LA, NER, QA, SENT, SPEED, SUMM
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:

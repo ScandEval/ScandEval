@@ -21,7 +21,6 @@ from transformers import PretrainedConfig, Trainer
 from transformers.modeling_utils import ModelOutput, PreTrainedModel
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .dataset_tasks import SPEED
 from .exceptions import InvalidBenchmark
 from .finetuning import finetune
 from .generation import generate
@@ -31,6 +30,7 @@ from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
+from .tasks import SPEED
 from .types import Labels, Predictions, ScoreDict
 from .utils import (
     GENERATIVE_MODEL_TASKS,
