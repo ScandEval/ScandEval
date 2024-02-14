@@ -21,12 +21,17 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
         The model configuration.
 
     Raises:
-        RuntimeError:
-            If the model doesn't exist.
+        InvalidModel:
+            If all model setups can handle the model, but the model does not exist.
     """
+    needs_extras: list[str] = list()
     for setup_class in MODEL_SETUP_CLASSES:
         setup = setup_class(benchmark_config=benchmark_config)
-        if setup.model_exists(model_id=model_id):
+
+        exists_or_missing_extra = setup.model_exists(model_id=model_id)
+        if isinstance(exists_or_missing_extra, str):
+            needs_extras.append(exists_or_missing_extra)
+        elif exists_or_missing_extra:
             model_config = setup.get_model_config(model_id=model_id)
             if (
                 model_config.framework == Framework.JAX
@@ -35,4 +40,12 @@ def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelC
                 raise NeedsExtraInstalled(extra="jax")
             return model_config
     else:
-        raise InvalidModel(f"Model {model_id} not found.")
+        msg = f"Model {model_id} not found."
+        if needs_extras:
+            msg += (
+                " However, it is possible that the model exists, but a package "
+                "needs to be installed to check if it exists. Please try running "
+                f"`pip install scandeval[{','.join(needs_extras)}]` or `pip install "
+                "scandeval[all]`, and try again."
+            )
+        raise InvalidModel(msg)

@@ -70,15 +70,16 @@ class HFModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool:
-        """Check if a model ID denotes an OpenAI model.
+    def model_exists(self, model_id: str) -> bool | str:
+        """Check if a model ID denotes a model on the Hugging Face Hub.
 
         Args:
             model_id:
                 The model ID.
 
         Returns:
-            Whether the model exists on OpenAI.
+            Whether the model exists on the Hugging Face Hub, or the name of an extra
+            that needs to be installed to check if the model exists.
         """
         # Extract the revision from the model_id, if present
         model_id, revision = (

@@ -7,7 +7,6 @@ from transformers import PretrainedConfig, PreTrainedModel
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import NeedsExtraInstalled
 from ..openai_models import OpenAIModel, OpenAITokenizer
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
@@ -16,8 +15,9 @@ logger = logging.getLogger(__package__)
 
 try:
     import openai
+    import openai.models
     import tiktoken
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     openai = None
     tiktoken = None
 
@@ -70,7 +70,7 @@ class OpenAIModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool:
+    def model_exists(self, model_id: str) -> bool | str:
         """Check if a model ID denotes an OpenAI model.
 
         Args:
@@ -78,10 +78,11 @@ class OpenAIModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists on OpenAI.
+            Whether the model exists on OpenAI, or the name of an extra that needs to
+            be installed to check if the model exists.
         """
         if openai is None:
-            raise NeedsExtraInstalled(extra="openai")
+            return "openai"
 
         all_models: list[openai.models.Model] = list(openai.models.list())
         return model_id in [model.id for model in all_models]
