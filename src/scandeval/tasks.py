@@ -1,18 +1,18 @@
 """All benchmarks tasks used in ScandEval."""
 
-from .config import DatasetTask, MetricConfig
+from .config import MetricConfig, Task
 
 
-def get_all_dataset_tasks() -> dict[str, DatasetTask]:
+def get_all_tasks() -> dict[str, Task]:
     """Get a list of all the dataset tasks.
 
     Returns:
         A mapping between names of dataset tasks and their configurations.
     """
-    return {cfg.name: cfg for cfg in globals().values() if isinstance(cfg, DatasetTask)}
+    return {cfg.name: cfg for cfg in globals().values() if isinstance(cfg, Task)}
 
 
-LA = DatasetTask(
+LA = Task(
     name="linguistic-acceptability",
     supertask="sequence-classification",
     metrics=[
@@ -34,7 +34,7 @@ LA = DatasetTask(
 )
 
 
-NER = DatasetTask(
+NER = Task(
     name="named-entity-recognition",
     supertask="token-classification",
     metrics=[
@@ -65,7 +65,7 @@ NER = DatasetTask(
 )
 
 
-QA = DatasetTask(
+QA = Task(
     name="question-answering",
     supertask="question-answering",
     metrics=[
@@ -88,7 +88,7 @@ QA = DatasetTask(
 )
 
 
-SENT = DatasetTask(
+SENT = Task(
     name="sentiment-classification",
     supertask="sequence-classification",
     metrics=[
@@ -110,7 +110,7 @@ SENT = DatasetTask(
 )
 
 
-SUMM = DatasetTask(
+SUMM = Task(
     name="summarization",
     supertask="text-to-text",
     metrics=[
@@ -132,7 +132,7 @@ SUMM = DatasetTask(
 )
 
 
-KNOW = DatasetTask(
+KNOW = Task(
     name="knowledge",
     supertask="sequence-classification",
     metrics=[
@@ -153,7 +153,7 @@ KNOW = DatasetTask(
 )
 
 
-COMMON_SENSE = DatasetTask(
+COMMON_SENSE = Task(
     name="common-sense-reasoning",
     supertask="sequence-classification",
     metrics=[
@@ -174,7 +174,7 @@ COMMON_SENSE = DatasetTask(
 )
 
 
-TEXT_MODELLING = DatasetTask(
+TEXT_MODELLING = Task(
     name="text-modelling",
     supertask="text-modelling",
     metrics=[
@@ -189,7 +189,7 @@ TEXT_MODELLING = DatasetTask(
 )
 
 
-SPEED = DatasetTask(
+SPEED = Task(
     name="speed",
     supertask="sequence-classification",
     metrics=[

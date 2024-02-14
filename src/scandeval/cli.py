@@ -4,9 +4,9 @@ import click
 
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
-from .dataset_tasks import get_all_dataset_tasks
 from .enums import Device, Framework
 from .languages import get_all_languages
+from .tasks import get_all_tasks
 
 
 @click.command()
@@ -28,13 +28,13 @@ from .languages import get_all_languages
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(list(get_all_dataset_tasks().keys())),
+    type=click.Choice(list(get_all_tasks().keys())),
     help="The dataset tasks to benchmark the model(s) on.",
 )
 @click.option(
     "--language",
     "-l",
-    default=["da", "sv", "no"],
+    default=["all"],
     show_default=True,
     multiple=True,
     metavar="ISO 639-1 LANGUAGE CODE",
@@ -247,6 +247,7 @@ def benchmark(
         model_language=model_languages,
         dataset_language=dataset_languages,
         task=tasks,
+        dataset=datasets,
         batch_size=batch_size_int,
         progress_bar=progress_bar,
         save_results=save_results,
@@ -267,7 +268,7 @@ def benchmark(
     )
 
     # Perform the benchmark evaluation
-    benchmarker(model=models, dataset=datasets)
+    benchmarker(model=models)
 
 
 if __name__ == "__main__":

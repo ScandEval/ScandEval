@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added arguments to `Benchmarker.benchmark` (or simply `Benchmarker.__call_`),
+  corresponding to the same arguments during initialisation. The idea here is that the
+  default parameters are set during initialisation, and then any of these can be
+  changed if needed when performing a concrete evaluation, without having to
+  re-initialise the `Benchmarker`.
+
+### Changed
+- The default value of the languages are now all languages, rather than only Danish,
+  Swedish and Norwegian.
+
 ### Fixed
 - There was an error caused if an old version of the `openai` package was installed and
   if the `scandeval` package was checking if a model exists as an OpenAI model. Now an

@@ -4,28 +4,33 @@ import os
 
 import torch
 
-from .config import BenchmarkConfig, DatasetTask, Language
-from .dataset_tasks import get_all_dataset_tasks
+from scandeval.dataset_configs import get_all_dataset_configs
+from scandeval.exceptions import InvalidBenchmark
+
+from .config import BenchmarkConfig, Language, Task
 from .enums import Device, Framework
 from .languages import get_all_languages
+from .tasks import get_all_tasks
 
 
 def build_benchmark_config(
+    progress_bar: bool,
+    save_results: bool,
+    task: str | list[str] | None,
+    dataset: str | list[str] | None,
     language: str | list[str],
     model_language: str | list[str] | None,
     dataset_language: str | list[str] | None,
-    dataset_task: str | list[str] | None,
-    batch_size: int,
-    raise_errors: bool,
-    cache_dir: str,
-    evaluate_train: bool,
-    token: bool | str,
-    openai_api_key: str | None,
-    progress_bar: bool,
-    save_results: bool,
-    verbose: bool,
     framework: Framework | str | None,
     device: Device | None,
+    batch_size: int,
+    evaluate_train: bool,
+    raise_errors: bool,
+    cache_dir: str,
+    token: bool | str,
+    openai_api_key: str | None,
+    force: bool,
+    verbose: bool,
     trust_remote_code: bool,
     load_in_4bit: bool | None,
     use_flash_attention: bool,
@@ -36,63 +41,64 @@ def build_benchmark_config(
     """Create a benchmark configuration.
 
     Args:
+        progress_bar:
+            Whether to show a progress bar when running the benchmark.
+        save_results:
+            Whether to save the benchmark results to a file.
+        task:
+            The tasks to include for dataset. If None then datasets will not be
+            filtered based on their task.
+        dataset:
+            The datasets to include for task. If None then all datasets will be
+            included, limited by the `task` parameter.
         language:
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
             to 'all' if all languages (also non-Scandinavian) should be considered.
         model_language:
-            The language codes of the languages to include for models. If specified
-            then this overrides the `language` parameter for model languages.
+            The language codes of the languages to include for models. If None then
+            the `language` parameter will be used.
         dataset_language:
-            The language codes of the languages to include for datasets. If
-            specified then this overrides the `language` parameter for dataset
-            languages.
-        dataset_task:
-            The tasks to include for dataset. If None then datasets will not be
-            filtered based on their task.
-        batch_size:
-            The batch size to use.
-        raise_errors:
-            Whether to raise errore instead of skipping them.
-        cache_dir:
-            Directory to store cached models.
-        evaluate_train:
-            Whether to evaluate the training set as well.
-        token:
-            The authentication token for the Hugging Face Hub. If a boolean value is
-            specified then the token will be fetched from the Hugging Face CLI, where
-            the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token.
-        openai_api_key:
-            The OpenAI API key to use for authentication. If None, then None will be
-            returned.
-        progress_bar:
-            Whether progress bars should be shown.
-        save_results:
-            Whether to save the benchmark results to local JSON file.
-        verbose:
-            Whether to output additional output.
+            The language codes of the languages to include for datasets. If None then
+            the `language` parameter will be used.
         framework:
-            The model framework to use. If None then the framework will be set
-            automatically. Only relevant if `model_id` refers to a local model.
+            The framework to use for running the models. If None then the framework
+            will be set automatically.
         device:
             The device to use for running the models. If None then the device will be
             set automatically.
+        batch_size:
+            The batch size to use for running the models.
+        evaluate_train:
+            Whether to evaluate the models on the training set.
+        raise_errors:
+            Whether to raise errors when running the benchmark.
+        cache_dir:
+            The directory to use for caching the models.
+        token:
+            The token to use for running the models.
+        openai_api_key:
+            The OpenAI API key to use for running the models.
+        force:
+            Whether to force the benchmark to run even if the results are already
+            cached.
+        verbose:
+            Whether to print verbose output when running the benchmark.
         trust_remote_code:
-            Whether to trust remote code when loading models from the Hugging Face
-            Hub.
+            Whether to trust remote code when running the benchmark.
         load_in_4bit:
-            Whether to load models in 4-bit precision. If None then this will be done
-            if CUDA is available and the model is a decoder model. Defaults to None.
+            Whether to load the models in 4-bit precision.
         use_flash_attention:
-            Whether to use Flash Attention.
+            Whether to use Flash Attention for the models.
         clear_model_cache:
-            Whether to clear the model cache after benchmarking each model.
+            Whether to clear the model cache before running the benchmark.
         only_validation_split:
-            Whether to only evaluate on the validation split.
+            Whether to only use the validation split for the datasets.
         few_shot:
-            Whether to only evaluate the model using few-shot evaluation. Only relevant
-            if the model is generative.
+            Whether to use few-shot learning for the models.
+
+    Returns:
+        The benchmark configuration.
     """
     language_codes = get_correct_language_codes(language_codes=language)
     model_languages = prepare_languages(
@@ -102,7 +108,9 @@ def build_benchmark_config(
         language_codes=dataset_language, default_language_codes=language_codes
     )
 
-    dataset_tasks = prepare_dataset_tasks(dataset_task=dataset_task)
+    tasks, datasets = prepare_tasks_and_datasets(
+        task=task, dataset=dataset, dataset_languages=dataset_languages
+    )
 
     torch_device = prepare_device(device=device)
 
@@ -114,13 +122,15 @@ def build_benchmark_config(
     return BenchmarkConfig(
         model_languages=model_languages,
         dataset_languages=dataset_languages,
-        dataset_tasks=dataset_tasks,
+        tasks=tasks,
+        datasets=datasets,
         batch_size=batch_size,
         raise_errors=raise_errors,
         cache_dir=cache_dir,
         evaluate_train=evaluate_train,
         token=token,
         openai_api_key=openai_api_key,
+        force=force,
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose,
@@ -136,7 +146,7 @@ def build_benchmark_config(
 
 
 def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
-    """Get correct language-code(s).
+    """Get correct language code(s).
 
     Args:
         language_codes:
@@ -145,7 +155,7 @@ def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
             to 'all' if all languages (also non-Scandinavian) should be considered.
 
     Returns:
-        The correct language-codes.
+        The correct language codes.
     """
     # Create a dictionary that maps languages to their associated language objects
     language_mapping = get_all_languages()
@@ -205,30 +215,69 @@ def prepare_languages(
     return prepared_languages
 
 
-def prepare_dataset_tasks(dataset_task: str | list[str] | None) -> list[DatasetTask]:
-    """Prepare dataset task(s) for benchmarking.
+def prepare_tasks_and_datasets(
+    task: str | list[str] | None,
+    dataset_languages: list[Language],
+    dataset: str | list[str] | None,
+) -> tuple[list[Task], list[str]]:
+    """Prepare task(s) and dataset(s) for benchmarking.
 
     Args:
-        dataset_task:
+        task:
             The tasks to include for dataset. If None then datasets will not be
             filtered based on their task.
+        dataset_languages:
+            The languages of the datasets in the benchmark.
+        dataset:
+            The datasets to include for task. If None then all datasets will be
+            included, limited by the `task` and `dataset_languages` parameters.
 
     Returns:
-        The prepared dataset tasks.
+        The prepared tasks and datasets.
+
+    Raises:
+        InvalidBenchmark:
+            If the task or dataset is not found in the benchmark tasks or datasets.
     """
     # Create a dictionary that maps benchmark tasks to their associated benchmark
-    # task objects
-    dataset_task_mapping = get_all_dataset_tasks()
+    # task objects, and a dictionary that maps dataset names to their associated
+    # dataset configuration objects
+    task_mapping = get_all_tasks()
+    all_dataset_configs = get_all_dataset_configs()
 
     # Create the list of dataset tasks
-    if dataset_task is None:
-        dataset_tasks = list(dataset_task_mapping.values())
-    elif isinstance(dataset_task, str):
-        dataset_tasks = [dataset_task_mapping[dataset_task]]
-    else:
-        dataset_tasks = [dataset_task_mapping[task] for task in dataset_task]
+    try:
+        if task is None:
+            tasks = list(task_mapping.values())
+        elif isinstance(task, str):
+            tasks = [task_mapping[task]]
+        else:
+            tasks = [task_mapping[t] for t in task]
+    except KeyError as e:
+        raise InvalidBenchmark(f"Task {e} not found in the benchmark tasks.") from e
 
-    return dataset_tasks
+    all_datasets = list(all_dataset_configs.keys())
+    if dataset is None:
+        dataset = all_datasets
+    elif isinstance(dataset, str):
+        dataset = [dataset]
+
+    invalid_datasets = set(dataset) - set(all_datasets)
+    if invalid_datasets:
+        raise InvalidBenchmark(
+            f"Dataset(s) {', '.join(invalid_datasets)} not found in the benchmark "
+            "datasets."
+        )
+
+    datasets = [
+        dataset_name
+        for dataset_name, dataset_config in all_dataset_configs.items()
+        if dataset_name in dataset
+        and dataset_config.task in tasks
+        and set(dataset_config.languages).intersection(dataset_languages)
+    ]
+
+    return tasks, datasets
 
 
 def prepare_device(device: Device | None) -> torch.device:

@@ -13,7 +13,7 @@ from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
 from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
-from .dataset_tasks import NER
+from .tasks import NER
 from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)

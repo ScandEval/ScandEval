@@ -9,14 +9,14 @@ import torch
 from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,
-    DatasetTask,
     Language,
     MetricConfig,
     ModelConfig,
+    Task,
 )
-from scandeval.dataset_configs import MMLU_DA_CONFIG
-from scandeval.dataset_tasks import SPEED
-from scandeval.enums import ModelType
+from scandeval.dataset_configs import MMLU_DA_CONFIG, get_all_dataset_configs
+from scandeval.enums import Framework, ModelType
+from scandeval.tasks import SPEED
 
 
 def pytest_configure() -> None:
@@ -51,13 +51,14 @@ def device() -> Generator[torch.device, None, None]:
 
 @pytest.fixture(scope="session")
 def benchmark_config(
-    language, dataset_task, auth, device
+    language, task, auth, device
 ) -> Generator[BenchmarkConfig, None, None]:
     """Yields a benchmark configuration used in tests."""
     yield BenchmarkConfig(
         model_languages=[language],
         dataset_languages=[language],
-        dataset_tasks=[dataset_task],
+        tasks=[task],
+        datasets=list(get_all_dataset_configs().keys()),
         framework=None,
         batch_size=32,
         raise_errors=False,
@@ -65,6 +66,7 @@ def benchmark_config(
         evaluate_train=False,
         token=auth,
         openai_api_key=None,
+        force=False,
         progress_bar=False,
         save_results=True,
         device=device,
@@ -90,7 +92,7 @@ def metric_config() -> Generator[MetricConfig, None, None]:
 
 
 @pytest.fixture(scope="session")
-def dataset_task() -> Generator[DatasetTask, None, None]:
+def task() -> Generator[Task, None, None]:
     """Yields a dataset task used in tests."""
     yield SPEED
 
@@ -114,13 +116,13 @@ def generative_model_id() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
-def dataset_config(language, dataset_task) -> Generator[DatasetConfig, None, None]:
+def dataset_config(language, task) -> Generator[DatasetConfig, None, None]:
     """Yields a dataset configuration used in tests."""
     yield DatasetConfig(
         name="dataset_name",
         pretty_name="Dataset name",
         huggingface_id="dataset_id",
-        task=dataset_task,
+        task=task,
         languages=[language],
         prompt_template="{text}\n{label}",
         max_generated_tokens=1,
@@ -133,7 +135,7 @@ def model_config(language) -> Generator[ModelConfig, None, None]:
     yield ModelConfig(
         model_id="model_id",
         revision="revision",
-        framework="framework",
+        framework=Framework.PYTORCH,
         task="task",
         languages=[language],
         model_type=ModelType.FRESH,
