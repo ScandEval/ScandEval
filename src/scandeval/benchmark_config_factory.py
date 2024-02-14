@@ -228,6 +228,10 @@ def prepare_tasks_and_datasets(
 
     Returns:
         The prepared tasks and datasets.
+
+    Raises:
+        InvalidBenchmark:
+            If the task or dataset is not found in the benchmark tasks or datasets.
     """
     # Create a dictionary that maps benchmark tasks to their associated benchmark
     # task objects, and a dictionary that maps dataset names to their associated
@@ -246,9 +250,20 @@ def prepare_tasks_and_datasets(
     except KeyError as e:
         raise InvalidBenchmark(f"Task {e} not found in the benchmark tasks.") from e
 
-    # Create the list of dataset names
+    all_datasets = list(all_dataset_configs.keys())
     if dataset is None:
-        dataset = list(all_dataset_configs.keys())
+        dataset = all_datasets
+    elif isinstance(dataset, str):
+        dataset = [dataset]
+
+    invalid_datasets = set(dataset) - set(all_datasets)
+    if invalid_datasets:
+        raise InvalidBenchmark(
+            f"Dataset(s) {', '.join(invalid_datasets)} not found in the benchmark "
+            "datasets."
+        )
+
+    # Create the list of dataset names
     datasets = [
         dataset_name
         for dataset_name, dataset_config in all_dataset_configs.items()
