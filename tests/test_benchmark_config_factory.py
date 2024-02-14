@@ -8,9 +8,10 @@ from scandeval.benchmark_config_factory import (
     prepare_languages,
     prepare_tasks_and_datasets,
 )
+from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.enums import Device
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
-from scandeval.tasks import LA, NER, get_all_tasks
+from scandeval.tasks import LA, get_all_tasks
 
 
 @pytest.mark.parametrize(
@@ -73,19 +74,32 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
 
 
 @pytest.mark.parametrize(
-    argnames=["input_task", "expected_task"],
+    argnames=["input_task", "input_dataset", "expected_task", "expected_dataset"],
     argvalues=[
-        (None, list(get_all_tasks().values())),
-        ("linguistic-acceptability", [LA]),
-        (["linguistic-acceptability"], [LA]),
-        (["linguistic-acceptability", "named-entity-recognition"], [LA, NER]),
+        (
+            None,
+            None,
+            list(get_all_tasks().values()),
+            list(get_all_dataset_configs().keys()),
+        ),
+        (
+            "linguistic-acceptability",
+            None,
+            [LA],
+            [cfg.name for cfg in get_all_dataset_configs().values() if LA == cfg.task],
+        ),
     ],
-    ids=["all tasks", "single task", "single task as list", "multiple tasks"],
+    ids=["all tasks and datasets", "single task"],
 )
-def test_prepare_tasks_and_datasets(input_task, expected_task):
+def test_prepare_tasks_and_datasets(
+    input_task, input_dataset, expected_task, expected_dataset
+):
     """Test the output of `prepare_tasks_and_datasets`."""
-    prepared_tasks = prepare_tasks_and_datasets(task=input_task, dataset=None)
+    prepared_tasks, prepared_datasets = prepare_tasks_and_datasets(
+        task=input_task, dataset=input_dataset
+    )
     assert prepared_tasks == expected_task
+    assert prepared_datasets == expected_dataset
 
 
 @pytest.mark.parametrize(

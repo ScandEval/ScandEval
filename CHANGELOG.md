@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   changed if needed when performing a concrete evaluation, without having to
   re-initialise the `Benchmarker`.
 
+### Fixed
+- There was an error caused if an old version of the `openai` package was installed and
+  if the `scandeval` package was checking if a model exists as an OpenAI model. Now an
+  informative error is thrown if the model is not found on any available platforms, as
+  well as noting the extras that are missing, which prevents the package from checking
+  existence on those platforms.
+
 
 ## [v10.0.1] - 2024-02-12
 ### Fixed
