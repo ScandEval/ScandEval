@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added arguments to `Benchmarker.benchmark` (or simply `Benchmarker.__call_`),
+  corresponding to the same arguments during initialisation. The idea here is that the
+  default parameters are set during initialisation, and then any of these can be
+  changed if needed when performing a concrete evaluation, without having to
+  re-initialise the `Benchmarker`.
+
+
 ## [v10.0.1] - 2024-02-12
 ### Fixed
 - A prefix space was added to labels in sequence classification tasks that

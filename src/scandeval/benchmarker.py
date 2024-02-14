@@ -5,6 +5,7 @@ import json
 import logging
 import re
 import sys
+from copy import deepcopy
 from pathlib import Path
 from shutil import rmtree
 from time import sleep
@@ -12,7 +13,7 @@ from time import sleep
 from pydantic import BaseModel
 
 from .benchmark_config_factory import build_benchmark_config
-from .config import DatasetConfig, Language
+from .config import DatasetConfig, DatasetTask, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Device, Framework
@@ -21,6 +22,34 @@ from .types import ScoreDict
 from .utils import get_huggingface_model_lists
 
 logger = logging.getLogger(__package__)
+
+
+class BenchmarkConfigParams(BaseModel):
+    """The parameters for the benchmark configuration."""
+
+    progress_bar: bool
+    save_results: bool
+    task: str | list[str] | None
+    dataset: str | list[str] | None
+    language: str | list[str]
+    model_language: str | list[str] | None
+    dataset_language: str | list[str] | None
+    framework: Framework | str | None
+    device: Device | None
+    batch_size: int
+    evaluate_train: bool
+    raise_errors: bool
+    cache_dir: str
+    token: bool | str
+    openai_api_key: str | None
+    force: bool
+    verbose: bool
+    trust_remote_code: bool
+    load_in_4bit: bool | None
+    use_flash_attention: bool
+    clear_model_cache: bool
+    only_validation_split: bool
+    few_shot: bool
 
 
 class BenchmarkResult(BaseModel):
@@ -77,7 +106,7 @@ class BenchmarkResult(BaseModel):
             results_path:
                 The path to the results file.
         """
-        json_str = json.dumps(self.dict())
+        json_str = json.dumps(self.model_dump())
         with results_path.open("a") as f:
             f.write("\n" + json_str)
 
@@ -86,6 +115,8 @@ class Benchmarker:
     """Benchmarking all the Scandinavian language models.
 
     Attributes:
+        benchmark_config_default_params:
+            The default parameters for the benchmark configuration.
         benchmark_config:
             The benchmark configuration.
         force:
@@ -103,11 +134,13 @@ class Benchmarker:
         self,
         progress_bar: bool = True,
         save_results: bool = False,
+        task: str | list[str] | None = None,
+        dataset: list[str] | str | None = None,
         language: str | list[str] = ["da", "sv", "no"],
         model_language: str | list[str] | None = None,
-        framework: Framework | str | None = None,
         dataset_language: str | list[str] | None = None,
-        task: str | list[str] | None = None,
+        framework: Framework | str | None = None,
+        device: Device | None = None,
         batch_size: int = 32,
         evaluate_train: bool = False,
         raise_errors: bool = False,
@@ -115,7 +148,6 @@ class Benchmarker:
         token: bool | str = False,
         openai_api_key: str | None = None,
         force: bool = False,
-        device: Device | None = None,
         verbose: bool = False,
         trust_remote_code: bool = False,
         load_in_4bit: bool | None = None,
@@ -132,6 +164,13 @@ class Benchmarker:
             save_results:
                 Whether to save the benchmark results to
                 'scandeval_benchmark_results.jsonl'. Defaults to False.
+            task:
+                The tasks benchmark the model(s) on. Mutually exclusive with `dataset`.
+                If both `task` and `dataset` are None then all datasets will be
+                benchmarked.
+            dataset:
+                The datasets to benchmark on. Mutually exclusive with `task`. If both
+                `task` and `dataset` are None then all datasets will be benchmarked.
             language:
                 The language codes of the languages to include, both for models and
                 datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
@@ -141,17 +180,16 @@ class Benchmarker:
                 The language codes of the languages to include for models. If specified
                 then this overrides the `language` parameter for model languages.
                 Defaults to None.
-            framework:
-                The model framework to use. Only relevant if `model-id` refers to a
-                local path. Otherwise, the framework will be set automatically.
-                Defaults to None.
             dataset_language:
                 The language codes of the languages to include for datasets. If
                 specified then this overrides the `language` parameter for dataset
                 languages. Defaults to None.
-            task:
-                The tasks benchmark the model(s) on. If "all" then datasets will not be
-                filtered based on their task. Defaults to "all".
+            framework:
+                The model framework to use. Only relevant if `model-id` refers to a
+                local path. Otherwise, the framework will be set automatically.
+                Defaults to None.
+            device:
+                The device to use for benchmarking. Defaults to None.
             batch_size:
                 The batch size to use. Defaults to 32.
             evaluate_train:
@@ -173,8 +211,6 @@ class Benchmarker:
             force:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to False.
-            device:
-                The device to use for benchmarking. Defaults to None.
             verbose:
                 Whether to output additional output. Defaults to False.
             trust_remote_code:
@@ -194,29 +230,42 @@ class Benchmarker:
             few_shot:
                 Whether to only evaluate the model using few-shot evaluation. Only
                 relevant if the model is generative. Defaults to True.
+
+        Raises:
+            ValueError:
+                If both `task` and `dataset` are specified.
         """
-        self.benchmark_config = build_benchmark_config(
+        if task is not None and dataset is not None:
+            raise ValueError("Only one of `task` and `dataset` can be specified.")
+
+        self.benchmark_config_default_params = BenchmarkConfigParams(
+            progress_bar=progress_bar,
+            save_results=save_results,
+            task=task,
+            dataset=dataset,
             language=language,
             model_language=model_language,
             dataset_language=dataset_language,
-            dataset_task=task,
-            batch_size=batch_size,
-            raise_errors=raise_errors,
-            cache_dir=cache_dir,
-            evaluate_train=evaluate_train,
-            token=token,
-            openai_api_key=openai_api_key,
-            progress_bar=progress_bar,
-            save_results=save_results,
-            verbose=verbose,
             framework=framework,
             device=device,
+            batch_size=batch_size,
+            evaluate_train=evaluate_train,
+            raise_errors=raise_errors,
+            cache_dir=cache_dir,
+            token=token,
+            openai_api_key=openai_api_key,
+            force=force,
+            verbose=verbose,
             trust_remote_code=trust_remote_code,
             load_in_4bit=load_in_4bit,
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
             only_validation_split=only_validation_split,
             few_shot=few_shot,
+        )
+
+        self.benchmark_config = build_benchmark_config(
+            **self.benchmark_config_default_params.model_dump()
         )
 
         # Set attributes from arguments
@@ -242,22 +291,35 @@ class Benchmarker:
         else:
             self.benchmark_results = list()
 
-        # Set logging level based on verbosity
-        if hasattr(sys, "_called_from_test"):
-            logging_level = logging.CRITICAL
-        elif self.benchmark_config.verbose:
-            logging_level = logging.DEBUG
-        else:
-            logging_level = logging.INFO
-        logger.setLevel(logging_level)
-
-        # Initialise a dataset factory
+        adjust_logging_level(verbose=self.benchmark_config.verbose)
         self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
 
     def benchmark(
         self,
         model: list[str] | str | None = None,
+        task: str | list[str] | None = None,
         dataset: list[str] | str | None = None,
+        progress_bar: bool | None = None,
+        save_results: bool | None = None,
+        language: str | list[str] | None = None,
+        model_language: str | list[str] | None = None,
+        dataset_language: str | list[str] | None = None,
+        framework: Framework | str | None = None,
+        device: Device | None = None,
+        batch_size: int | None = None,
+        evaluate_train: bool | None = None,
+        raise_errors: bool | None = None,
+        cache_dir: str | None = None,
+        token: bool | str | None = None,
+        openai_api_key: str | None = None,
+        force: bool | None = None,
+        verbose: bool | None = None,
+        trust_remote_code: bool | None = None,
+        load_in_4bit: bool | None = None,
+        use_flash_attention: bool | None = None,
+        clear_model_cache: bool | None = None,
+        only_validation_split: bool | None = None,
+        few_shot: bool | None = None,
     ) -> list[BenchmarkResult]:
         """Benchmarks models on datasets.
 
@@ -268,21 +330,172 @@ class Benchmarker:
                 "model@v1.0.0". It can be a branch name, a tag name, or a commit id,
                 and defaults to the latest version if not specified. If None then all
                 relevant model IDs will be benchmarked. Defaults to None.
-            dataset:
-                The datasets to benchmark on. If None then all datasets will be
+            task:
+                The tasks benchmark the model(s) on. Mutually exclusive with `dataset`.
+                If both `task` and `dataset` are None then all datasets will be
                 benchmarked. Defaults to None.
+            dataset:
+                The datasets to benchmark on. Mutually exclusive with `task`. If both
+                `task` and `dataset` are None then all datasets will be benchmarked.
+                Defaults to None.
+            progress_bar:
+                Whether progress bars should be shown. Defaults to the value specified
+                when initialising the benchmarker.
+            save_results:
+                Whether to save the benchmark results to
+                'scandeval_benchmark_results.jsonl'. Defaults to the value specified
+                when initialising the benchmarker.
+            language:
+                The language codes of the languages to include, both for models and
+                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
+                to 'all' if all languages (also non-Scandinavian) should be considered.
+                Defaults to the value specified when initialising the benchmarker.
+            model_language:
+                The language codes of the languages to include for models. If specified
+                then this overrides the `language` parameter for model languages.
+                Defaults to the value specified when initialising the benchmarker.
+            dataset_language:
+                The language codes of the languages to include for datasets. If
+                specified then this overrides the `language` parameter for dataset
+                languages. Defaults to the value specified when initialising the
+                benchmarker.
+            framework:
+                The model framework to use. Only relevant if `model-id` refers to a
+                local path. Otherwise, the framework will be set automatically.
+                Defaults to the value specified when initialising the benchmarker.
+            device:
+                The device to use for benchmarking. Defaults to the value specified when
+                initialising the benchmarker.
+            batch_size:
+                The batch size to use. Defaults to the value specified when initialising
+                the benchmarker.
+            evaluate_train:
+                Whether to evaluate the training set as well. Defaults to the value
+                specified when initialising the benchmarker.
+            raise_errors:
+                Whether to raise errors instead of skipping the model evaluation.
+            cache_dir:
+                Directory to store cached models. Defaults to the value specified when
+                initialising the benchmarker.
+            token:
+                The authentication token for the Hugging Face Hub. If a boolean value is
+                specified then the token will be fetched from the Hugging Face CLI, where
+                the user has logged in through `huggingface-cli login`. If a string is
+                specified then it will be used as the token. Defaults to the value
+                specified when initialising the benchmarker.
+            openai_api_key:
+                The OpenAI API key to use for authentication. If None, then no OpenAI
+                models will be evaluated. Defaults to the value specified when
+                initialising the benchmarker.
+            force:
+                Whether to force evaluations of models, even if they have been
+                benchmarked already. Defaults to the value specified when initialising
+                the benchmarker.
+            verbose:
+                Whether to output additional output. Defaults to the value specified when
+                initialising the benchmarker.
+            trust_remote_code:
+                Whether to trust remote code when loading models. Defaults to the value
+                specified when initialising the benchmarker.
+            load_in_4bit:
+                Whether to load models in 4-bit precision. If None then this will be done
+                if CUDA is available and the model is a decoder model. Defaults to the
+                value specified when initialising the benchmarker.
+            use_flash_attention:
+                Whether to use Flash Attention. Defaults to the value specified when
+                initialising the benchmarker.
+            clear_model_cache:
+                Whether to clear the model cache after benchmarking each model. Defaults
+                to the value specified when initialising the benchmarker.
+            only_validation_split:
+                Whether to only evaluate the validation split of the datasets. Defaults
+                to the value specified when initialising the benchmarker.
+            few_shot:
+                Whether to only evaluate the model using few-shot evaluation. Only
+                relevant if the model is generative. Defaults to the value specified
+                when initialising the benchmarker.
 
         Returns:
             A list of benchmark results.
+
+        Raises:
+            ValueError:
+                If both `task` and `dataset` are specified.
         """
-        if self.benchmark_config.clear_model_cache:
-            self.clear_model_cache()
+        if task is not None and dataset is not None:
+            raise ValueError("Only one of `task` and `dataset` can be specified.")
+
+        benchmark_config_params = deepcopy(self.benchmark_config_default_params)
+        if task is not None:
+            benchmark_config_params.task = task
+            benchmark_config_params.dataset = None
+        if dataset is not None:
+            benchmark_config_params.dataset = dataset
+            benchmark_config_params.task = None
+        if progress_bar is not None:
+            benchmark_config_params.progress_bar = progress_bar
+        if save_results is not None:
+            benchmark_config_params.save_results = save_results
+        if language is not None:
+            benchmark_config_params.language = language
+        if model_language is not None:
+            benchmark_config_params.model_language = model_language
+        if dataset_language is not None:
+            benchmark_config_params.dataset_language = dataset_language
+        if framework is not None:
+            benchmark_config_params.framework = framework
+        if device is not None:
+            benchmark_config_params.device = device
+        if batch_size is not None:
+            benchmark_config_params.batch_size = batch_size
+        if evaluate_train is not None:
+            benchmark_config_params.evaluate_train = evaluate_train
+        if raise_errors is not None:
+            benchmark_config_params.raise_errors = raise_errors
+        if cache_dir is not None:
+            benchmark_config_params.cache_dir = cache_dir
+        if token is not None:
+            benchmark_config_params.token = token
+        if openai_api_key is not None:
+            benchmark_config_params.openai_api_key = openai_api_key
+        if force is not None:
+            benchmark_config_params.force = force
+        if verbose is not None:
+            benchmark_config_params.verbose = verbose
+        if trust_remote_code is not None:
+            benchmark_config_params.trust_remote_code = trust_remote_code
+        if load_in_4bit is not None:
+            benchmark_config_params.load_in_4bit = load_in_4bit
+        if use_flash_attention is not None:
+            benchmark_config_params.use_flash_attention = use_flash_attention
+        if clear_model_cache is not None:
+            benchmark_config_params.clear_model_cache = clear_model_cache
+        if only_validation_split is not None:
+            benchmark_config_params.only_validation_split = only_validation_split
+        if few_shot is not None:
+            benchmark_config_params.few_shot = few_shot
+
+        benchmark_config = build_benchmark_config(
+            **benchmark_config_params.model_dump()
+        )
+        adjust_logging_level(verbose=benchmark_config.verbose)
+
+        if benchmark_config.clear_model_cache:
+            clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
 
         # Prepare the model IDs
-        model_ids = self._prepare_model_ids(model=model)
+        model_ids = self._prepare_model_ids(
+            model=model,
+            model_languages=benchmark_config.model_languages,
+            token=benchmark_config.token,
+        )
 
         # Get all the relevant dataset configurations
-        dataset_configs = self._prepare_dataset_configs(dataset)
+        dataset_configs = prepare_dataset_configs(
+            dataset=dataset,
+            dataset_languages=benchmark_config.dataset_languages,
+            dataset_tasks=benchmark_config.dataset_tasks,
+        )
 
         # Iterate over all the models and datasets
         for m_id in model_ids:
@@ -294,8 +507,8 @@ class Benchmarker:
                 if not self.force and model_has_been_benchmarked(
                     model_id=m_id,
                     dataset=dataset_config.name,
-                    few_shot=self.benchmark_config.few_shot,
-                    validation_split=self.benchmark_config.only_validation_split,
+                    few_shot=benchmark_config.few_shot,
+                    validation_split=benchmark_config.only_validation_split,
                     benchmark_results=self.benchmark_results,
                 ):
                     logger.debug(
@@ -307,10 +520,12 @@ class Benchmarker:
                 # Benchmark a single model on a single dataset
                 try:
                     record = self._benchmark_single(
-                        dataset_config=dataset_config, model_id=m_id
+                        dataset_config=dataset_config,
+                        model_id=m_id,
+                        raise_errors=benchmark_config.raise_errors,
                     )
                 except InvalidModel as e:
-                    if self.benchmark_config.raise_errors:
+                    if benchmark_config.raise_errors:
                         raise e
                     logger.info(e)
                     break
@@ -330,35 +545,30 @@ class Benchmarker:
                 self.benchmark_results.append(record)
 
                 # Save the benchmark results
-                if self.benchmark_config.save_results:
+                if benchmark_config.save_results:
                     record.append_to_results(results_path=self.results_path)
 
-            if self.benchmark_config.clear_model_cache:
-                self.clear_model_cache()
+            if benchmark_config.clear_model_cache:
+                clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
 
         return self.benchmark_results
 
-    def clear_model_cache(self) -> None:
-        """Clear the model cache.
-
-        Note that this will not remove the stored completions, and it will only clear
-        the cache if `clear_model_cache` is set to True.
-        """
-        model_cache_path = Path(self.benchmark_config.cache_dir) / "model_cache"
-        model_cache_path.mkdir(parents=True, exist_ok=True)
-        for model_dir in model_cache_path.iterdir():
-            if model_dir.is_dir():
-                for sub_model_dir in model_dir.iterdir():
-                    if sub_model_dir.is_dir():
-                        rmtree(sub_model_dir)
-
-    def _prepare_model_ids(self, model: list[str] | str | None) -> list[str]:
+    def _prepare_model_ids(
+        self,
+        model: list[str] | str | None,
+        model_languages: list[Language],
+        token: bool | str,
+    ) -> list[str]:
         """Prepare the model ID(s) to be benchmarked.
 
         Args:
             model:
                 The model ID(s) of the models to benchmark. If None then all model IDs
                 will be retrieved.
+            model_languages:
+                The languages of the models to fetch.
+            token:
+                The authentication token for the Hugging Face Hub.
 
         Returns:
             The prepared list of model IDs.
@@ -367,9 +577,7 @@ class Benchmarker:
 
         # If `model_id` is not specified, then fetch all the relevant model IDs
         if model is None:
-            model_ids = self._get_model_ids(
-                languages=self.benchmark_config.model_languages
-            )
+            model_ids = self._get_model_ids(languages=model_languages, token=token)
 
         # Otherwise, if `model_id` is a string, ensure that it is a list
         elif isinstance(model, str):
@@ -392,42 +600,8 @@ class Benchmarker:
 
         return model_ids_sorted
 
-    def _prepare_dataset_configs(
-        self, dataset: list[str] | str | None
-    ) -> list[DatasetConfig]:
-        """Prepare the dataset configuration(s) to be benchmarked.
-
-        Args:
-            dataset:
-                The datasets to benchmark on. If None then all datasets will be
-                benchmarked. Defaults to None.
-
-        Returns:
-            The prepared list of model IDs.
-        """
-        if dataset is None:
-            dataset_configs = [
-                cfg
-                for cfg in get_all_dataset_configs().values()
-                if any(
-                    lang in self.benchmark_config.dataset_languages
-                    for lang in cfg.languages
-                )
-                and cfg.task in self.benchmark_config.dataset_tasks
-            ]
-        elif isinstance(dataset, str):
-            dataset_configs = [
-                cfg for cfg in get_all_dataset_configs().values() if cfg.name == dataset
-            ]
-        else:
-            dataset_configs = [
-                cfg for cfg in get_all_dataset_configs().values() if cfg.name in dataset
-            ]
-
-        return dataset_configs
-
     def _benchmark_single(
-        self, dataset_config: DatasetConfig, model_id: str
+        self, dataset_config: DatasetConfig, model_id: str, raise_errors: bool
     ) -> BenchmarkResult | dict[str, str]:
         """Benchmark a single model on a single dataset.
 
@@ -436,6 +610,8 @@ class Benchmarker:
                 The dataset configuration to use.
             model_id:
                 The model ID to use.
+            raise_errors:
+                Whether to raise errors instead of skipping the model evaluation.
 
         Returns:
             The benchmark result, or a dictionary containing an error message.
@@ -461,7 +637,7 @@ class Benchmarker:
             except InvalidBenchmark as e:
                 # If the model ID is not valid then raise an error, if specified
                 model_err_msg = "does not exist on the Hugging Face Hub"
-                if self.benchmark_config.raise_errors and model_err_msg in str(e):
+                if raise_errors and model_err_msg in str(e):
                     raise e
 
                 # Otherwise, if the error is due to Hugging Face Hub being down, then
@@ -486,7 +662,7 @@ class Benchmarker:
 
                 # Otherwise, raise the error or return the error message
                 else:
-                    if self.benchmark_config.raise_errors:
+                    if raise_errors:
                         raise e
                     return dict(error=str(e))
 
@@ -494,12 +670,14 @@ class Benchmarker:
         """Call the benchmarker. See `Benchmarker.benchmark`."""
         return self.benchmark(*args, **kwargs)
 
-    def _get_model_ids(self, languages: list[Language]) -> list[str]:
+    def _get_model_ids(self, languages: list[Language], token: bool | str) -> list[str]:
         """Get list of model IDs from the Hugging Face Hub.
 
         Args:
             languages:
                 The languages of the models to fetch.
+            token:
+                The authentication token for the Hugging Face Hub.
 
         Returns:
             List of model IDs.
@@ -512,7 +690,7 @@ class Benchmarker:
         # If the model lists have not been fetched already, then do it
         if self._model_lists is None or new_languages:
             self._model_lists = get_huggingface_model_lists(
-                languages=languages, token=self.benchmark_config.token
+                languages=languages, token=token
             )
 
         # Extract all the model IDs from the model lists, for the chosen languages
@@ -563,3 +741,75 @@ def model_has_been_benchmarked(
         if same_evaluation and same_validation_split_setting and same_few_shot_setting:
             return True
     return False
+
+
+def adjust_logging_level(verbose: bool) -> None:
+    """Adjust the logging level based on verbosity.
+
+    Args:
+        verbose:
+            Whether to output additional output.
+    """
+    if hasattr(sys, "_called_from_test"):
+        logging_level = logging.CRITICAL
+    elif verbose:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.INFO
+    logger.setLevel(logging_level)
+
+
+def clear_model_cache_fn(cache_dir: str) -> None:
+    """Clear the model cache.
+
+    Note that this will not remove the stored completions.
+
+    Args:
+        cache_dir:
+            The path to the cache directory.
+    """
+    model_cache_path = Path(cache_dir) / "model_cache"
+    model_cache_path.mkdir(parents=True, exist_ok=True)
+    for model_dir in model_cache_path.iterdir():
+        if model_dir.is_dir():
+            for sub_model_dir in model_dir.iterdir():
+                if sub_model_dir.is_dir():
+                    rmtree(sub_model_dir)
+
+
+def prepare_dataset_configs(
+    dataset: list[str] | str | None,
+    dataset_languages: list[Language],
+    dataset_tasks: list[DatasetTask],
+) -> list[DatasetConfig]:
+    """Prepare the dataset configuration(s) to be benchmarked.
+
+    Args:
+        dataset:
+            The datasets to benchmark on. If None then all datasets will be
+            benchmarked. Defaults to None.
+        dataset_languages:
+            The languages of the datasets to fetch.
+        dataset_tasks:
+            The tasks of the datasets to fetch.
+
+    Returns:
+        The prepared list of model IDs.
+    """
+    if dataset is None:
+        dataset_configs = [
+            cfg
+            for cfg in get_all_dataset_configs().values()
+            if any(lang in dataset_languages for lang in cfg.languages)
+            and cfg.task in dataset_tasks
+        ]
+    elif isinstance(dataset, str):
+        dataset_configs = [
+            cfg for cfg in get_all_dataset_configs().values() if cfg.name == dataset
+        ]
+    else:
+        dataset_configs = [
+            cfg for cfg in get_all_dataset_configs().values() if cfg.name in dataset
+        ]
+
+    return dataset_configs
