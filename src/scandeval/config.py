@@ -41,6 +41,10 @@ class MetricConfig:
         default_factory=lambda: lambda raw_score: (100 * raw_score, f"{raw_score:.2%}")
     )
 
+    def __hash__(self) -> int:
+        """Return a hash of the metric configuration."""
+        return hash(self.name)
+
 
 @dataclass
 class Task:
@@ -62,6 +66,10 @@ class Task:
     metrics: list[MetricConfig]
     labels: list[str]
 
+    def __hash__(self) -> int:
+        """Return a hash of the task."""
+        return hash(self.name)
+
 
 @dataclass
 class Language:
@@ -76,6 +84,10 @@ class Language:
 
     code: str
     name: str
+
+    def __hash__(self) -> int:
+        """Return a hash of the language."""
+        return hash(self.code)
 
 
 @dataclass
@@ -226,6 +238,10 @@ class DatasetConfig:
         """The number of labels in the dataset."""
         return len(self.task.labels)
 
+    def __hash__(self) -> int:
+        """Return a hash of the dataset configuration."""
+        return hash(self.name)
+
 
 @dataclass
 class ModelConfig:
@@ -255,3 +271,7 @@ class ModelConfig:
     languages: list[Language]
     model_type: ModelType | str
     model_cache_dir: str
+
+    def __hash__(self) -> int:
+        """Return a hash of the model configuration."""
+        return hash(self.model_id)
