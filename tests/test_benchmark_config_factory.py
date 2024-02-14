@@ -94,14 +94,14 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
         (
             ["linguistic-acceptability", "named-entity-recognition"],
             "scala-da",
-            [LA, NER],
-            ["scala-da"],
+            {LA, NER},
+            {"scala-da"},
         ),
         (
             ["linguistic-acceptability", "sentiment-classification"],
             ["scala-da", "angry-tweets", "scandiqa-da"],
-            [LA, SENT],
-            ["scala-da", "angry-tweets"],
+            {LA, SENT},
+            {"scala-da", "angry-tweets"},
         ),
     ],
     ids=[
@@ -120,8 +120,8 @@ def test_prepare_tasks_and_datasets(
     prepared_tasks, prepared_datasets = prepare_tasks_and_datasets(
         task=input_task, dataset=input_dataset
     )
-    assert prepared_tasks == expected_task
-    assert prepared_datasets == expected_dataset
+    assert set(prepared_tasks) == expected_task
+    assert set(prepared_datasets) == expected_dataset
 
 
 def test_prepare_tasks_and_datasets_invalid_task():
