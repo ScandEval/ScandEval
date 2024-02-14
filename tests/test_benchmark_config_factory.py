@@ -10,8 +10,9 @@ from scandeval.benchmark_config_factory import (
 )
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.enums import Device
+from scandeval.exceptions import InvalidBenchmark
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
-from scandeval.tasks import LA, get_all_tasks
+from scandeval.tasks import LA, NER, SENT, get_all_tasks
 
 
 @pytest.mark.parametrize(
@@ -88,8 +89,29 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
             [LA],
             [cfg.name for cfg in get_all_dataset_configs().values() if LA == cfg.task],
         ),
+        (None, "scala-da", list(get_all_tasks().values()), ["scala-da"]),
+        ("linguistic-acceptability", ["scala-da", "angry-tweets"], [LA], ["scala-da"]),
+        (
+            ["linguistic-acceptability", "named-entity-recognition"],
+            "scala-da",
+            [LA, NER],
+            ["scala-da"],
+        ),
+        (
+            ["linguistic-acceptability", "sentiment-classification"],
+            ["scala-da", "angry-tweets", "scandiqa-da"],
+            [LA, SENT],
+            ["scala-da", "angry-tweets"],
+        ),
     ],
-    ids=["all tasks and datasets", "single task"],
+    ids=[
+        "all tasks and datasets",
+        "single task",
+        "single dataset",
+        "single task and multiple datasets",
+        "multiple tasks and single dataset",
+        "multiple tasks and datasets",
+    ],
 )
 def test_prepare_tasks_and_datasets(
     input_task, input_dataset, expected_task, expected_dataset
@@ -100,6 +122,18 @@ def test_prepare_tasks_and_datasets(
     )
     assert prepared_tasks == expected_task
     assert prepared_datasets == expected_dataset
+
+
+def test_prepare_tasks_and_datasets_invalid_task():
+    """Test that an invalid task raises an error."""
+    with pytest.raises(InvalidBenchmark):
+        prepare_tasks_and_datasets(task="invalid-task", dataset=None)
+
+
+def test_prepare_tasks_and_datasets_invalid_dataset():
+    """Test that an invalid dataset raises an error."""
+    with pytest.raises(InvalidBenchmark):
+        prepare_tasks_and_datasets(task=None, dataset="invalid-dataset")
 
 
 @pytest.mark.parametrize(
