@@ -252,7 +252,7 @@ def prepare_tasks_and_datasets(
         elif isinstance(task, str):
             tasks = [task_mapping[task]]
         else:
-            tasks = [task_mapping[task] for task in task]
+            tasks = [task_mapping[t] for t in task]
     except KeyError as e:
         raise InvalidBenchmark(f"Task {e} not found in the benchmark tasks.") from e
 
