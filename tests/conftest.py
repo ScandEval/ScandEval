@@ -45,7 +45,7 @@ def auth() -> Generator[str | bool, None, None]:
 @pytest.fixture(scope="session")
 def device() -> Generator[torch.device, None, None]:
     """Yields the device to use for the tests."""
-    device = torch.device("cuda" if os.getenv("USE_CUDA", False) else "cpu")
+    device = torch.device("cuda" if os.getenv("USE_CUDA", "0") == "1" else "cpu")
     yield device
 
 
