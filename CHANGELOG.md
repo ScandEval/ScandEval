@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   changed if needed when performing a concrete evaluation, without having to
   re-initialise the `Benchmarker`.
 - Added the Danish knowledge dataset `danske-talemaader`, which is a multiple choice
-  dataset, checking whether the language models know the meaning of Danish idioms.
+  dataset, checking whether the language models know the meaning of Danish idioms. This
+  replaces the machine translated Danish knowledge datasets MMLU-da and ARC-da.
 
 ### Changed
 - The default value of the languages are now all languages, rather than only Danish,

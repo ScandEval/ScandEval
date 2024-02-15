@@ -747,20 +747,6 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-MMLU_DA_CONFIG = DatasetConfig(
-    name="mmlu-da",
-    pretty_name="the truncated version of the Danish knowledge dataset MMLU-da, "
-    "translated from the English MMLU dataset",
-    huggingface_id="ScandEval/mmlu-da-mini",
-    task=KNOW,
-    languages=[DA],
-    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
-    prompt_template="Spørgsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=5,
-    max_generated_tokens=3,
-)
-
 MMLU_NO_CONFIG = DatasetConfig(
     name="mmlu-no",
     pretty_name="the truncated version of the Norwegian knowledge dataset MMLU-no, "
@@ -841,20 +827,6 @@ MMLU_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=3,
-)
-
-ARC_DA_CONFIG = DatasetConfig(
-    name="arc-da",
-    pretty_name="the truncated version of the Danish knowledge dataset ARC-da, "
-    "translated from the English ARC dataset",
-    huggingface_id="ScandEval/arc-da-mini",
-    task=KNOW,
-    languages=[DA],
-    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
-    prompt_template="Spørgsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
     max_generated_tokens=3,
 )
 
