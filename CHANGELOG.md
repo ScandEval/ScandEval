@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   informative error is thrown if the model is not found on any available platforms, as
   well as noting the extras that are missing, which prevents the package from checking
   existence on those platforms.
+- Disabled `lmformatenforcer` logging, which happens in the rare case when we're
+  few-shot evaluating a model on NER and there are no JSON-valid tokens to generate.
 
 
 ## [v10.0.1] - 2024-02-12
