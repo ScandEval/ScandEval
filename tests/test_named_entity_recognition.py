@@ -1,5 +1,6 @@
 """Unit tests for the `named_entity_recognition` module."""
 
+import os
 from contextlib import nullcontext as does_not_raise
 from typing import Generator
 
@@ -55,6 +56,7 @@ def benchmark_dataset(
     )
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_encoder_benchmarking(benchmark_dataset, model_id):
     """Test that encoder models can be benchmarked on named entity recognition."""
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
@@ -65,6 +67,7 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
             benchmark_dataset.benchmark(model_id)
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
     """Test that decoder models can be benchmarked on named entity recognition."""
     with does_not_raise():
