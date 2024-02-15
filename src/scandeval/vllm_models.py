@@ -286,6 +286,7 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
+            breakpoint()
             parser = get_ner_parser(dataset_config=self.dataset_config)
             tokenizer_data = build_vllm_token_enforcer_tokenizer_data(llm=self._model)
             logits_processor = build_vllm_logits_processor(
