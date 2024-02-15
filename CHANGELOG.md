@@ -13,10 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   default parameters are set during initialisation, and then any of these can be
   changed if needed when performing a concrete evaluation, without having to
   re-initialise the `Benchmarker`.
-- Added the Danish knowledge dataset `danske-talemaader`, which is a multiple choice
-  dataset, checking whether the language models know the meaning of Danish idioms. This
-  complements MMLU-da, as this datasets checks knowledge about the Danish language, and
-  MMLU-da checks knowledge about the world.
+- Added the Danish knowledge datasets `danske-talemaader` and `danish-citizen-tests`.
+  Both are multiple choice datasets, where the first one tests knowledge about Danish
+  idioms, and the second one tests knowledge about the Danish society. These replace
+  the machine translated MMLU-da dataset.
 - Added a `--num-iterations` flag (`num_iterations` in the Python CLI), which controls
   the number of times each model should be evaluated, defaulting to the usual 10
   iterations. This is only meant to be changed for power users, and if it is changed

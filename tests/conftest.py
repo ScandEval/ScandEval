@@ -14,7 +14,7 @@ from scandeval.config import (
     ModelConfig,
     Task,
 )
-from scandeval.dataset_configs import MMLU_DA_CONFIG, get_all_dataset_configs
+from scandeval.dataset_configs import MMLU_CONFIG, get_all_dataset_configs
 from scandeval.enums import Framework, ModelType
 from scandeval.tasks import SPEED
 
@@ -147,4 +147,4 @@ def model_config(language) -> Generator[ModelConfig, None, None]:
 @pytest.fixture(scope="session")
 def generative_dataset_config() -> Generator[DatasetConfig, None, None]:
     """Yields a generative dataset configuration used in tests."""
-    yield MMLU_DA_CONFIG
+    yield MMLU_CONFIG

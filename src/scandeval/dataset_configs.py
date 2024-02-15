@@ -747,11 +747,10 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-MMLU_DA_CONFIG = DatasetConfig(
-    name="mmlu-da",
-    pretty_name="the truncated version of the Danish knowledge dataset MMLU-da, "
-    "translated from the English MMLU dataset",
-    huggingface_id="ScandEval/mmlu-da-mini",
+DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
+    name="danish-citizen-tests",
+    pretty_name="the Danish knowledge dataset Danish Citizen Tests",
+    huggingface_id="ScandEval/danish-citizen-tests",
     task=KNOW,
     languages=[DA],
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",

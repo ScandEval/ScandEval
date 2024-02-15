@@ -8,6 +8,7 @@ import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
+    DANISH_CITIZEN_TESTS_CONFIG,
     DANSKE_TALEMAADER_CONFIG,
     DUTCH_SOCIAL_CONFIG,
     HELLASWAG_CONFIG,
@@ -18,7 +19,6 @@ from scandeval.dataset_configs import (
     HELLASWAG_NO_CONFIG,
     HELLASWAG_SV_CONFIG,
     MMLU_CONFIG,
-    MMLU_DA_CONFIG,
     MMLU_DE_CONFIG,
     MMLU_IS_CONFIG,
     MMLU_NL_CONFIG,
@@ -62,7 +62,7 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         SCALA_NL_CONFIG,
         SCALA_EN_CONFIG,
         DANSKE_TALEMAADER_CONFIG,
-        MMLU_DA_CONFIG,
+        DANISH_CITIZEN_TESTS_CONFIG,
         MMLU_SV_CONFIG,
         MMLU_NO_CONFIG,
         MMLU_IS_CONFIG,
@@ -94,7 +94,7 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         "scala-nl",
         "scala-en",
         "danske-talemaader",
-        "mmlu-da",
+        "danish-citizen-tests",
         "mmlu-sv",
         "mmlu-no",
         "mmlu-is",
