@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Changed the prompt for the English sentiment classification dataset SST5, where it
   previously stated that the documents were tweets - these have now been renamed to
   "texts".
+- Correctly assess whether the `openai` extra should be used, which made it impossible
+  to benchmark OpenAI models.
 
 
 ## [v10.0.1] - 2024-02-12
