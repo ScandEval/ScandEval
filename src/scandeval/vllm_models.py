@@ -209,11 +209,16 @@ class VLLMModel:
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
-        raw_outputs = self._model.generate(
-            prompts=prompts,
-            use_tqdm=(not input_is_a_test),
-            sampling_params=sampling_params,
-        )
+        try:
+            raw_outputs = self._model.generate(
+                prompts=prompts,
+                use_tqdm=(not input_is_a_test),
+                sampling_params=sampling_params,
+            )
+        except ValueError as e:
+            print(e)
+            breakpoint()
+            pass
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
@@ -286,7 +291,6 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            breakpoint()
             parser = get_ner_parser(dataset_config=self.dataset_config)
             tokenizer_data = build_vllm_token_enforcer_tokenizer_data(llm=self._model)
             logits_processor = build_vllm_logits_processor(
