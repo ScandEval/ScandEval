@@ -169,23 +169,25 @@ def block_terminal_output():
     warnings.filterwarnings("ignore", module="seqeval*")
 
     # Up the logging level, to disable outputs
-    logging.getLogger("filelock").setLevel(logging.ERROR)
-    logging.getLogger("absl").setLevel(logging.ERROR)
-    logging.getLogger("datasets").setLevel(logging.ERROR)
-    logging.getLogger("openai").setLevel(logging.ERROR)
-    logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
-    logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
-    logging.getLogger("vllm.engine.llm_engine").setLevel(logging.ERROR)
-    logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.ERROR)
-    logging.getLogger("vllm.core.scheduler").setLevel(logging.ERROR)
-    logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.ERROR)
-    logging.getLogger("httpx").setLevel(logging.ERROR)
-    logging.getLogger("root").setLevel(logging.ERROR)  # For `lmformatenforcer` package
+    logging.getLogger("filelock").setLevel(logging.CRITICAL)
+    logging.getLogger("absl").setLevel(logging.CRITICAL)
+    logging.getLogger("datasets").setLevel(logging.CRITICAL)
+    logging.getLogger("openai").setLevel(logging.CRITICAL)
+    logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.CRITICAL)
+    logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.engine.llm_engine").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.core.scheduler").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.CRITICAL)
+    logging.getLogger("httpx").setLevel(logging.CRITICAL)
+
+    # The `lmformatenforcer` uses the root logger, so we need to set the level of that
+    logging.getLogger("root").setLevel(logging.CRITICAL)
 
     def init_vllm_logger(name: str):
-        """Dummy function to initialise vLLM loggers with the ERROR level."""
+        """Dummy function to initialise vLLM loggers with the CRITICAL level."""
         vllm_logger = logging.getLogger(name)
-        vllm_logger.setLevel(logging.ERROR)
+        vllm_logger.setLevel(logging.CRITICAL)
         return vllm_logger
 
     try:
