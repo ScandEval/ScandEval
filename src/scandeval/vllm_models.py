@@ -177,6 +177,7 @@ class VLLMModel:
         temperature = (
             0.0 if not generation_config.do_sample else generation_config.temperature
         )
+        breakpoint()
         sampling_params = SamplingParams(
             # What to output
             max_tokens=max_tokens,
