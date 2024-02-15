@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   re-initialise the `Benchmarker`.
 - Added the Danish knowledge dataset `danske-talemaader`, which is a multiple choice
   dataset, checking whether the language models know the meaning of Danish idioms. This
-  replaces the machine translated Danish knowledge datasets MMLU-da and ARC-da.
+  complements MMLU-da, as this datasets checks knowledge about the Danish language, and
+  MMLU-da checks knowledge about the world.
 
 ### Changed
 - The default value of the languages are now all languages, rather than only Danish,
@@ -32,6 +33,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   "texts".
 - Correctly assess whether the `openai` extra should be used, which made it impossible
   to benchmark OpenAI models.
+
+### Removed
+- Removed all machine translated ARC datasets, as they had a near 100% correlation with
+  the machine translated version of the MMLU datasets.
 
 
 ## [v10.0.1] - 2024-02-12

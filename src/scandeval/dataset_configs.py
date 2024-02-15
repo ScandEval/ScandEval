@@ -747,6 +747,20 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
+MMLU_DA_CONFIG = DatasetConfig(
+    name="mmlu-da",
+    pretty_name="the truncated version of the Danish knowledge dataset MMLU-da, "
+    "translated from the English MMLU dataset",
+    huggingface_id="ScandEval/mmlu-da-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="Spørgsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 MMLU_NO_CONFIG = DatasetConfig(
     name="mmlu-no",
     pretty_name="the truncated version of the Norwegian knowledge dataset MMLU-no, "
@@ -827,89 +841,6 @@ MMLU_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=3,
-)
-
-ARC_NO_CONFIG = DatasetConfig(
-    name="arc-no",
-    pretty_name="the truncated version of the Norwegian knowledge dataset ARC-no, "
-    "translated from the English ARC dataset",
-    huggingface_id="ScandEval/arc-no-mini",
-    task=KNOW,
-    languages=[NB, NN],
-    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
-    prompt_template="Spørsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_SV_CONFIG = DatasetConfig(
-    name="arc-sv",
-    pretty_name="the truncated version of the Swedish knowledge dataset ARC-sv, "
-    "translated from the English ARC dataset",
-    huggingface_id="ScandEval/arc-sv-mini",
-    task=KNOW,
-    languages=[SV],
-    prompt_prefix="Följande är flervalsfrågor (med svar).",
-    prompt_template="Fråga: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_IS_CONFIG = DatasetConfig(
-    name="arc-is",
-    pretty_name="the truncated version of the Icelandic knowledge dataset ARC-is, "
-    "translated from the English ARC dataset",
-    huggingface_id="ScandEval/arc-is-mini",
-    task=KNOW,
-    languages=[IS],
-    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
-    prompt_template="Spurningar: {text}\nSvara: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_DE_CONFIG = DatasetConfig(
-    name="arc-de",
-    pretty_name="the truncated version of the German knowledge dataset ARC-de, "
-    "translated from the English ARC dataset",
-    huggingface_id="ScandEval/arc-de-mini",
-    task=KNOW,
-    languages=[DE],
-    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
-    prompt_template="Frage: {text}\nAntwort: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_NL_CONFIG = DatasetConfig(
-    name="arc-nl",
-    pretty_name="the truncated version of the Dutch knowledge dataset ARC-nl, "
-    "translated from the English ARC dataset",
-    huggingface_id="ScandEval/arc-nl-mini",
-    task=KNOW,
-    languages=[NL],
-    prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
-    prompt_template="Vraag: {text}\nAntwoord: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_CONFIG = DatasetConfig(
-    name="arc",
-    pretty_name="the truncated version of the English knowledge dataset ARC",
-    huggingface_id="ScandEval/arc-mini",
-    task=KNOW,
-    languages=[EN],
-    prompt_prefix="The following are multiple choice questions (with answers).",
-    prompt_template="Question: {text}\nAnswer: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
     max_generated_tokens=3,
 )
 
