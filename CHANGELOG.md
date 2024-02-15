@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   dataset, checking whether the language models know the meaning of Danish idioms. This
   complements MMLU-da, as this datasets checks knowledge about the Danish language, and
   MMLU-da checks knowledge about the world.
+- Added a `--num-iterations` flag (`num_iterations` in the Python CLI), which controls
+  the number of times each model should be evaluated, defaulting to the usual 10
+  iterations. This is only meant to be changed for power users, and if it is changed
+  then the resulting scores will not be included in the leaderboards.
 
 ### Changed
 - The default value of the languages are now all languages, rather than only Danish,

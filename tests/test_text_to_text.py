@@ -1,5 +1,6 @@
 """Unit tests for the `text_to_text` module."""
 
+import os
 from contextlib import nullcontext as does_not_raise
 from typing import Generator
 
@@ -45,6 +46,7 @@ def benchmark_dataset(
     yield TextToText(dataset_config=request.param, benchmark_config=benchmark_config)
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
     """Test that decoder models can be benchmarked on text-to-text tasks."""
     with does_not_raise():

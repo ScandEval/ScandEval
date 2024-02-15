@@ -149,7 +149,10 @@ class BenchmarkDataset(ABC):
         )
 
         # Set variable with number of iterations
-        num_iter = 2 if hasattr(sys, "_called_from_test") else 10
+        if hasattr(sys, "_called_from_test"):
+            num_iter = 2
+        else:
+            num_iter = self.benchmark_config.num_iterations
 
         if self.dataset_config.task != SPEED:
             train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
