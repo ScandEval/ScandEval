@@ -37,6 +37,7 @@ def build_benchmark_config(
     clear_model_cache: bool,
     only_validation_split: bool,
     few_shot: bool,
+    num_iterations: int,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -96,6 +97,8 @@ def build_benchmark_config(
             Whether to only use the validation split for the datasets.
         few_shot:
             Whether to use few-shot learning for the models.
+        num_iterations:
+            The number of iterations each model should be evaluated for.
 
     Returns:
         The benchmark configuration.
@@ -142,6 +145,7 @@ def build_benchmark_config(
         clear_model_cache=clear_model_cache,
         only_validation_split=only_validation_split,
         few_shot=few_shot,
+        num_iterations=num_iterations,
     )
 
 

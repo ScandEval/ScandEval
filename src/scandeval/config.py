@@ -147,6 +147,8 @@ class BenchmarkConfig:
         few_shot:
             Whether to only evaluate the model using few-shot evaluation. Only relevant
             if the model is generative.
+        num_iterations:
+            The number of iterations each model should be evaluated for.
     """
 
     model_languages: list[Language]
@@ -171,6 +173,7 @@ class BenchmarkConfig:
     clear_model_cache: bool
     only_validation_split: bool
     few_shot: bool
+    num_iterations: int
 
 
 @dataclass

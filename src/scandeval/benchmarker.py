@@ -52,6 +52,7 @@ class BenchmarkConfigParams(BaseModel):
     clear_model_cache: bool
     only_validation_split: bool
     few_shot: bool
+    num_iterations: int
 
 
 class BenchmarkResult(BaseModel):
@@ -157,6 +158,7 @@ class Benchmarker:
         clear_model_cache: bool = False,
         only_validation_split: bool = False,
         few_shot: bool = True,
+        num_iterations: int = 10,
     ) -> None:
         """Initialise the benchmarker.
 
@@ -231,6 +233,10 @@ class Benchmarker:
             few_shot:
                 Whether to only evaluate the model using few-shot evaluation. Only
                 relevant if the model is generative. Defaults to True.
+            num_iterations:
+                The number of times each model should be evaluated. This is only meant
+                to be used for power users, and scores will not be allowed on the
+                leaderboards if this is changed.
 
         Raises:
             ValueError:
@@ -263,6 +269,7 @@ class Benchmarker:
             clear_model_cache=clear_model_cache,
             only_validation_split=only_validation_split,
             few_shot=few_shot,
+            num_iterations=num_iterations,
         )
 
         self.benchmark_config = build_benchmark_config(
@@ -318,6 +325,7 @@ class Benchmarker:
         clear_model_cache: bool | None = None,
         only_validation_split: bool | None = None,
         few_shot: bool | None = None,
+        num_iterations: int | None = None,
     ) -> list[BenchmarkResult]:
         """Benchmarks models on datasets.
 
@@ -412,6 +420,11 @@ class Benchmarker:
                 Whether to only evaluate the model using few-shot evaluation. Only
                 relevant if the model is generative. Defaults to the value specified
                 when initialising the benchmarker.
+            num_iterations:
+                The number of times each model should be evaluated. This is only meant
+                to be used for power users, and scores will not be allowed on the
+                leaderboards if this is changed. Defaults to the value specified when
+                initialising the benchmarker.
 
         Returns:
             A list of benchmark results.
@@ -472,6 +485,8 @@ class Benchmarker:
             benchmark_config_params.only_validation_split = only_validation_split
         if few_shot is not None:
             benchmark_config_params.few_shot = few_shot
+        if num_iterations is not None:
+            benchmark_config_params.num_iterations = num_iterations
 
         benchmark_config = build_benchmark_config(
             **benchmark_config_params.model_dump()
