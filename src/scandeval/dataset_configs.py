@@ -647,7 +647,7 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     languages=[DA],
     prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
     prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
-    num_few_shot_examples=2,
+    num_few_shot_examples=1,
     max_generated_tokens=128,
 )
 
@@ -661,7 +661,7 @@ MLSUM_CONFIG = DatasetConfig(
     "Zusammenfassungen.",
     prompt_template="Nachrichtenartikel: {text}\nZusammenfassung: {target_text}",
     num_few_shot_examples=1,
-    max_generated_tokens=128,
+    max_generated_tokens=256,
 )
 
 RRN_CONFIG = DatasetConfig(
@@ -673,8 +673,8 @@ RRN_CONFIG = DatasetConfig(
     languages=[IS],
     prompt_prefix="Eftirfarandi eru fréttagreinar með tilheyrandi samantektum.",
     prompt_template="Fréttagrein: {text}\nSamantekt: {target_text}",
-    num_few_shot_examples=2,
-    max_generated_tokens=128,
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
 )
 
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
@@ -686,8 +686,8 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     languages=[NB, NN],
     prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
     prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
-    num_few_shot_examples=2,
-    max_generated_tokens=128,
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
 )
 
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
@@ -699,8 +699,8 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     languages=[NL],
     prompt_prefix="Hieronder volgen artikelen met bijbehorende samenvattingen.",
     prompt_template="Artikel: {text}\nSamenvatting: {target_text}",
-    num_few_shot_examples=2,
-    max_generated_tokens=128,
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
 )
 
 SWEDN_CONFIG = DatasetConfig(
@@ -712,7 +712,7 @@ SWEDN_CONFIG = DatasetConfig(
     prompt_prefix="Nedan följer artiklar med tillhörande sammanfattningar.",
     prompt_template="Artikel: {text}\nSammanfattning: {target_text}",
     num_few_shot_examples=1,
-    max_generated_tokens=128,
+    max_generated_tokens=256,
 )
 
 CNN_DAILYMAIL_CONFIG = DatasetConfig(
@@ -725,7 +725,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     prompt_prefix="The following are articles with accompanying summaries.",
     prompt_template="News article: {text}\nSummary: {target_text}",
     num_few_shot_examples=1,
-    max_generated_tokens=128,
+    max_generated_tokens=256,
 )
 
 # TODO: Faroese summarization

@@ -24,7 +24,11 @@ load_dotenv()
 
 
 # Set up logging
-fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
+fmt = (
+    colored("%(asctime)s - %(name)s", "light_blue")
+    + " ⋅ "
+    + colored("%(message)s", "green")
+)
 logging.basicConfig(
     level=logging.CRITICAL if hasattr(sys, "_called_from_test") else logging.INFO,
     format=fmt,
