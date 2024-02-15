@@ -706,6 +706,19 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
 
 ### KNOWLEDGE DATASETS ###
 
+DANSKE_TALEMAADER_CONFIG = DatasetConfig(
+    name="danske-talemaader",
+    pretty_name="the truncated version of Danske Talemåder",
+    huggingface_id="ScandEval/danske-talemaader-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 MMLU_DA_CONFIG = DatasetConfig(
     name="mmlu-da",
     pretty_name="the Danish part of the truncated version of MMLU",
