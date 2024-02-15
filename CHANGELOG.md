@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   informative error is thrown if the model is not found on any available platforms, as
   well as noting the extras that are missing, which prevents the package from checking
   existence on those platforms.
+- Changed the prompt for the English sentiment classification dataset SST5, where it
+  previously stated that the documents were tweets - these have now been renamed to
+  "texts".
 
 
 ## [v10.0.1] - 2024-02-12
