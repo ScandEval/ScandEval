@@ -127,9 +127,9 @@ test-cpu:
 		&& date "+%H:%M:%S ⋅ Successfully tested with CPU!"
 
 test-fast:  # Run CPU tests without evaluations
-	@rm tests_with_cpu.log; \
+	@rm tests_with_cpu_fast.log; \
 		date "+%H:%M:%S ⋅ Running fast tests with CPU..." \
-		&& USE_CUDA=0 TEST_EVALUATIONS=0 poetry run pytest | tee tests_with_cpu.log \
+		&& USE_CUDA=0 TEST_EVALUATIONS=0 poetry run pytest | tee tests_with_cpu_fast.log \
 		&& date "+%H:%M:%S ⋅ Successfully tested with CPU!"
 
 update-coverage-badge:
