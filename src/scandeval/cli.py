@@ -203,6 +203,14 @@ from .tasks import get_all_tasks
     help="Whether to only evaluate the model using few-shot evaluation. Only relevant "
     "if the model is generative.",
 )
+@click.option(
+    "--num-iterations",
+    default=10,
+    show_default=True,
+    help="""The number of times each model should be evaluated. This is only meant to
+    be used for power users, and scores will not be allowed on the leaderboards if this
+    is changed.""",
+)
 def benchmark(
     model: tuple[str],
     dataset: tuple[str],
@@ -228,6 +236,7 @@ def benchmark(
     clear_model_cache: bool,
     only_validation_split: bool,
     few_shot: bool,
+    num_iterations: int,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
     # Set up language variables
@@ -265,6 +274,7 @@ def benchmark(
         clear_model_cache=clear_model_cache,
         only_validation_split=only_validation_split,
         few_shot=few_shot,
+        num_iterations=num_iterations,
     )
 
     # Perform the benchmark evaluation

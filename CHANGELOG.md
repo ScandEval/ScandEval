@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   default parameters are set during initialisation, and then any of these can be
   changed if needed when performing a concrete evaluation, without having to
   re-initialise the `Benchmarker`.
+- Added a `--num-iterations` flag (`num_iterations` in the Python CLI), which controls
+  the number of times each model should be evaluated, defaulting to the usual 10
+  iterations. This is only meant to be changed for power users, and if it is changed
+  then the resulting scores will not be included in the leaderboards.
 
 ### Changed
 - The default value of the languages are now all languages, rather than only Danish,

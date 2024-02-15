@@ -3,7 +3,7 @@
 from typing import Generator
 
 import pytest
-from click import ParamType
+from click import INT, ParamType
 from click.types import BOOL, STRING, Choice
 from scandeval.cli import benchmark
 
@@ -42,6 +42,7 @@ def test_cli_param_names(params):
         "clear_model_cache",
         "only_validation_split",
         "few_shot",
+        "num_iterations",
         "help",
     }
 
@@ -72,4 +73,5 @@ def test_cli_param_types(params):
     assert params["clear_model_cache"] == BOOL
     assert params["only_validation_split"] == BOOL
     assert params["few_shot"] == BOOL
+    assert params["num_iterations"] == INT
     assert params["help"] == BOOL

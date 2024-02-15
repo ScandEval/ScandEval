@@ -77,6 +77,7 @@ def benchmark_config(
         clear_model_cache=False,
         only_validation_split=False,
         few_shot=True,
+        num_iterations=10,
     )
 
 
