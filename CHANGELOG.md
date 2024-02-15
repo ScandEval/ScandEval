@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   default parameters are set during initialisation, and then any of these can be
   changed if needed when performing a concrete evaluation, without having to
   re-initialise the `Benchmarker`.
+- Added the Danish knowledge dataset `danske-talemaader`, which is a multiple choice
+  dataset, checking whether the language models know the meaning of Danish idioms. This
+  complements MMLU-da, as this datasets checks knowledge about the Danish language, and
+  MMLU-da checks knowledge about the world.
 - Added a `--num-iterations` flag (`num_iterations` in the Python CLI), which controls
   the number of times each model should be evaluated, defaulting to the usual 10
   iterations. This is only meant to be changed for power users, and if it is changed
@@ -31,8 +35,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   informative error is thrown if the model is not found on any available platforms, as
   well as noting the extras that are missing, which prevents the package from checking
   existence on those platforms.
+- Changed the prompt for the English sentiment classification dataset SST5, where it
+  previously stated that the documents were tweets - these have now been renamed to
+  "texts".
+- Correctly assess whether the `openai` extra should be used, which made it impossible
+  to benchmark OpenAI models.
 - Disabled `lmformatenforcer` logging, which happens in the rare case when we're
   few-shot evaluating a model on NER and there are no JSON-valid tokens to generate.
+
+### Removed
+- Removed all machine translated ARC datasets, as they had a near 100% correlation with
+  the machine translated version of the MMLU datasets.
 
 
 ## [v10.0.1] - 2024-02-12

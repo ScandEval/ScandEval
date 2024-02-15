@@ -15,9 +15,12 @@ logger = logging.getLogger(__package__)
 
 try:
     import openai
-    import openai.models
     import tiktoken
-except (ImportError, ModuleNotFoundError):
+
+    # Older versions of `openai` doesn't have the `models` module, so we need to check
+    # that, as it will cause errors later otherwise
+    openai.models
+except (ImportError, AttributeError):
     openai = None
     tiktoken = None
 

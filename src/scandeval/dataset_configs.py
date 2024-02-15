@@ -45,7 +45,8 @@ def get_dataset_config(dataset_name: str) -> DatasetConfig:
 
 SWEREC_CONFIG = DatasetConfig(
     name="swerec",
-    pretty_name="the truncated version of SweReC",
+    pretty_name="the truncated version of the Swedish sentiment classification "
+    "dataset SweReC",
     huggingface_id="ScandEval/swerec-mini",
     task=SENT,
     languages=[SV],
@@ -61,7 +62,8 @@ SWEREC_CONFIG = DatasetConfig(
 
 ANGRY_TWEETS_CONFIG = DatasetConfig(
     name="angry-tweets",
-    pretty_name="the truncated version of AngryTweets",
+    pretty_name="the truncated version of the Danish sentiment classification "
+    "dataset AngryTweets",
     huggingface_id="ScandEval/angry-tweets-mini",
     task=SENT,
     languages=[DA],
@@ -77,7 +79,8 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
 
 NOREC_CONFIG = DatasetConfig(
     name="norec",
-    pretty_name="the truncated version of NoReC",
+    pretty_name="the truncated version of the Norwegian sentiment classification "
+    "dataset NoReC",
     huggingface_id="ScandEval/norec-mini",
     task=SENT,
     languages=[NB, NN],
@@ -125,7 +128,8 @@ NOREC_CONFIG = DatasetConfig(
 
 SB10K_CONFIG = DatasetConfig(
     name="sb10k",
-    pretty_name="the truncated version of SB10k",
+    pretty_name="the truncated version of the German sentiment classification "
+    "dataset SB10k",
     huggingface_id="ScandEval/sb10k-mini",
     task=SENT,
     languages=[DE],
@@ -141,7 +145,8 @@ SB10K_CONFIG = DatasetConfig(
 
 DUTCH_SOCIAL_CONFIG = DatasetConfig(
     name="dutch-social",
-    pretty_name="the truncated version of Dutch Social",
+    pretty_name="the truncated version of the Dutch sentiment classification "
+    "dataset Dutch Social",
     huggingface_id="ScandEval/dutch-social-mini",
     task=SENT,
     languages=[NL],
@@ -157,13 +162,14 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
 
 SST5_CONFIG = DatasetConfig(
     name="sst5",
-    pretty_name="the truncated version of SST5",
+    pretty_name="the truncated version of the English sentiment classification "
+    "dataset SST5",
     huggingface_id="ScandEval/sst5-mini",
     task=SENT,
     languages=[EN],
-    prompt_prefix="The following are tweets are their sentiment, which can be "
+    prompt_prefix="The following are texts are their sentiment, which can be "
     "'positive', 'neutral' or 'negative'.",
-    prompt_template="Tweet: {text}\nSentiment: {label}",
+    prompt_template="Text: {text}\nSentiment: {label}",
     prompt_label_mapping=dict(
         positive="positive", neutral="neutral", negative="negative"
     ),
@@ -179,7 +185,8 @@ SST5_CONFIG = DatasetConfig(
 
 SUC3_CONFIG = DatasetConfig(
     name="suc3",
-    pretty_name="the truncated version of SUC 3.0",
+    pretty_name="the truncated version of the Swedish named entity recognition "
+    "dataset SUC 3.0",
     huggingface_id="ScandEval/suc3-mini",
     task=NER,
     languages=[SV],
@@ -202,7 +209,8 @@ SUC3_CONFIG = DatasetConfig(
 
 DANSK_CONFIG = DatasetConfig(
     name="dansk",
-    pretty_name="the truncated version of DANSK",
+    pretty_name="the truncated version of the Danish named entity recognition "
+    "dataset DANSK",
     huggingface_id="ScandEval/dansk-mini",
     task=NER,
     languages=[DA],
@@ -225,7 +233,8 @@ DANSK_CONFIG = DatasetConfig(
 
 NORNE_NB_CONFIG = DatasetConfig(
     name="norne-nb",
-    pretty_name="the truncated version of the Bokmål part of NorNE",
+    pretty_name="the truncated version of the Bokmål part of the Norwegian named "
+    "entity recognition dataset NorNE",
     huggingface_id="ScandEval/norne-nb-mini",
     task=NER,
     languages=[NB],
@@ -248,7 +257,8 @@ NORNE_NB_CONFIG = DatasetConfig(
 
 NORNE_NN_CONFIG = DatasetConfig(
     name="norne-nn",
-    pretty_name="the truncated version of the Nynorsk part of NorNE",
+    pretty_name="the truncated version of the Nynorsk part of the Norwegian named "
+    "entity recognition dataset NorNE",
     huggingface_id="ScandEval/norne-nn-mini",
     task=NER,
     languages=[NN],
@@ -271,7 +281,8 @@ NORNE_NN_CONFIG = DatasetConfig(
 
 MIM_GOLD_NER_CONFIG = DatasetConfig(
     name="mim-gold-ner",
-    pretty_name="the truncated version of MIM-GOLD-NER",
+    pretty_name="the truncated version of the Icelandic named entity recognition "
+    "dataset MIM-GOLD-NER",
     huggingface_id="ScandEval/mim-gold-ner-mini",
     task=NER,
     languages=[IS],
@@ -294,7 +305,8 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
 
 FONE_CONFIG = DatasetConfig(
     name="fone",
-    pretty_name="the truncated version of FoNE",
+    pretty_name="the truncated version of the Faroese named entity recognition "
+    "dataset FoNE",
     huggingface_id="ScandEval/fone-mini",
     task=NER,
     languages=[FO],
@@ -317,7 +329,8 @@ FONE_CONFIG = DatasetConfig(
 
 GERMEVAL_CONFIG = DatasetConfig(
     name="germeval",
-    pretty_name="the truncated version of GermEval",
+    pretty_name="the truncated version of the German named entity recognition "
+    "dataset GermEval",
     huggingface_id="ScandEval/germeval-mini",
     task=NER,
     languages=[DE],
@@ -340,7 +353,8 @@ GERMEVAL_CONFIG = DatasetConfig(
 
 CONLL_NL_CONFIG = DatasetConfig(
     name="conll-nl",
-    pretty_name="the Dutch part of the truncated version of CoNLL 2002",
+    pretty_name="the Dutch part of the truncated version of the named entity "
+    "recognition dataset CoNLL 2002",
     huggingface_id="ScandEval/conll-nl-mini",
     task=NER,
     languages=[NL],
@@ -363,7 +377,8 @@ CONLL_NL_CONFIG = DatasetConfig(
 
 CONLL_EN_CONFIG = DatasetConfig(
     name="conll-en",
-    pretty_name="the truncated version of CoNLL 2003",
+    pretty_name="the truncated version of the English named entity recognition "
+    "dataset CoNLL 2003",
     huggingface_id="ScandEval/conll-en-mini",
     task=NER,
     languages=[EN],
@@ -389,7 +404,7 @@ CONLL_EN_CONFIG = DatasetConfig(
 
 SCALA_SV_CONFIG = DatasetConfig(
     name="scala-sv",
-    pretty_name="The Swedish part of ScaLA",
+    pretty_name="The Swedish part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-sv",
     task=LA,
     languages=[SV],
@@ -402,7 +417,7 @@ SCALA_SV_CONFIG = DatasetConfig(
 
 SCALA_DA_CONFIG = DatasetConfig(
     name="scala-da",
-    pretty_name="the Danish part of ScaLA",
+    pretty_name="the Danish part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-da",
     task=LA,
     languages=[DA],
@@ -415,7 +430,7 @@ SCALA_DA_CONFIG = DatasetConfig(
 
 SCALA_NB_CONFIG = DatasetConfig(
     name="scala-nb",
-    pretty_name="the Bokmål part of ScaLA",
+    pretty_name="the Bokmål part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-nb",
     task=LA,
     languages=[NB],
@@ -428,7 +443,7 @@ SCALA_NB_CONFIG = DatasetConfig(
 
 SCALA_NN_CONFIG = DatasetConfig(
     name="scala-nn",
-    pretty_name="the Nynorsk part of ScaLA",
+    pretty_name="the Nynorsk part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-nn",
     task=LA,
     languages=[NN],
@@ -441,7 +456,7 @@ SCALA_NN_CONFIG = DatasetConfig(
 
 SCALA_IS_CONFIG = DatasetConfig(
     name="scala-is",
-    pretty_name="the Icelandic part of ScaLA",
+    pretty_name="the Icelandic part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-is",
     task=LA,
     languages=[IS],
@@ -455,7 +470,7 @@ SCALA_IS_CONFIG = DatasetConfig(
 
 SCALA_FO_CONFIG = DatasetConfig(
     name="scala-fo",
-    pretty_name="the Faroese part of ScaLA",
+    pretty_name="the Faroese part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-fo",
     task=LA,
     languages=[FO],
@@ -468,7 +483,7 @@ SCALA_FO_CONFIG = DatasetConfig(
 
 SCALA_DE_CONFIG = DatasetConfig(
     name="scala-de",
-    pretty_name="the German part of ScaLA",
+    pretty_name="the German part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-de",
     task=LA,
     languages=[DE],
@@ -481,7 +496,7 @@ SCALA_DE_CONFIG = DatasetConfig(
 
 SCALA_NL_CONFIG = DatasetConfig(
     name="scala-nl",
-    pretty_name="the Dutch part of ScaLA",
+    pretty_name="the Dutch part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-nl",
     task=LA,
     languages=[NL],
@@ -494,7 +509,7 @@ SCALA_NL_CONFIG = DatasetConfig(
 
 SCALA_EN_CONFIG = DatasetConfig(
     name="scala-en",
-    pretty_name="the English part of ScaLA",
+    pretty_name="the English part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-en",
     task=LA,
     languages=[EN],
@@ -511,7 +526,8 @@ SCALA_EN_CONFIG = DatasetConfig(
 
 SCANDIQA_DA_CONFIG = DatasetConfig(
     name="scandiqa-da",
-    pretty_name="the Danish part of the truncated version of ScandiQA",
+    pretty_name="the Danish part of the truncated version of the question answering "
+    "dataset ScandiQA",
     huggingface_id="ScandEval/scandiqa-da-mini",
     task=QA,
     languages=[DA],
@@ -524,7 +540,8 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
 
 NORQUAD_CONFIG = DatasetConfig(
     name="norquad",
-    pretty_name="the truncated version of NorQuAD",
+    pretty_name="the truncated version of the Norwegian question answering "
+    "dataset NorQuAD",
     huggingface_id="ScandEval/norquad-mini",
     task=QA,
     languages=[NB, NN],
@@ -536,7 +553,8 @@ NORQUAD_CONFIG = DatasetConfig(
 
 SCANDIQA_SV_CONFIG = DatasetConfig(
     name="scandiqa-sv",
-    pretty_name="the Swedish part of the truncated version of ScandiQA",
+    pretty_name="the Swedish part of the truncated version of the question answering "
+    "dataset ScandiQA",
     huggingface_id="ScandEval/scandiqa-sv-mini",
     task=QA,
     languages=[SV],
@@ -548,7 +566,8 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
 
 NQII_CONFIG = DatasetConfig(
     name="nqii",
-    pretty_name="Natural Questions in Icelandic",
+    pretty_name="the truncated version of the Icelandic question answering dataset "
+    "Natural Questions in Icelandic",
     huggingface_id="ScandEval/nqii-mini",
     task=QA,
     languages=[IS],
@@ -573,7 +592,8 @@ NQII_CONFIG = DatasetConfig(
 
 GERMANQUAD_CONFIG = DatasetConfig(
     name="germanquad",
-    pretty_name="GermanQuAD",
+    pretty_name="the truncated version of the German question answering dataset "
+    "GermanQuAD",
     huggingface_id="ScandEval/germanquad-mini",
     task=QA,
     languages=[DE],
@@ -587,7 +607,8 @@ GERMANQUAD_CONFIG = DatasetConfig(
 
 SQUAD_CONFIG = DatasetConfig(
     name="squad",
-    pretty_name="SQuAD",
+    pretty_name="the truncated version of the English question answering "
+    "dataset SQuAD",
     huggingface_id="ScandEval/squad-mini",
     task=QA,
     languages=[EN],
@@ -600,7 +621,8 @@ SQUAD_CONFIG = DatasetConfig(
 
 SQUAD_NL_CONFIG = DatasetConfig(
     name="squad-nl",
-    pretty_name="SQuAD-nl",
+    pretty_name="the truncated version of the Dutch question answering dataset "
+    "SQuAD-nl, translated from the English SQuAD dataset",
     huggingface_id="ScandEval/squad-nl-mini",
     task=QA,
     languages=[NL],
@@ -618,7 +640,8 @@ SQUAD_NL_CONFIG = DatasetConfig(
 
 NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     name="nordjylland-news",
-    pretty_name="the truncated version of Nordjylland News",
+    pretty_name="the truncated version of the Danish summarisation dataset "
+    "Nordjylland News",
     huggingface_id="ScandEval/nordjylland-news-mini",
     task=SUMM,
     languages=[DA],
@@ -630,7 +653,7 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
 
 MLSUM_CONFIG = DatasetConfig(
     name="mlsum",
-    pretty_name="the truncated version of MLSum",
+    pretty_name="the truncated version of the German summarisation dataset MLSum",
     huggingface_id="ScandEval/mlsum-mini",
     task=SUMM,
     languages=[DE],
@@ -643,7 +666,8 @@ MLSUM_CONFIG = DatasetConfig(
 
 RRN_CONFIG = DatasetConfig(
     name="rrn",
-    pretty_name="the truncated version of RÚV Radio News",
+    pretty_name="the truncated version of the Icelandic summarisation dataset "
+    "RÚV Radio News",
     huggingface_id="ScandEval/rrn-mini",
     task=SUMM,
     languages=[IS],
@@ -655,7 +679,8 @@ RRN_CONFIG = DatasetConfig(
 
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
     name="no-sammendrag",
-    pretty_name="the truncated version of the Norwegian Sammendrag dataset",
+    pretty_name="the truncated version of the Norwegian summarisation dataset "
+    "Norske Sammendrag",
     huggingface_id="ScandEval/no-sammendrag-mini",
     task=SUMM,
     languages=[NB, NN],
@@ -667,7 +692,8 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
 
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
-    pretty_name="the Dutch part of the truncated version of WikiLingua",
+    pretty_name="the Dutch part of the truncated version of the summarisation dataset "
+    " WikiLingua",
     huggingface_id="ScandEval/wiki-lingua-nl-mini",
     task=SUMM,
     languages=[NL],
@@ -679,7 +705,7 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
 
 SWEDN_CONFIG = DatasetConfig(
     name="swedn",
-    pretty_name="the truncated version of SweDN",
+    pretty_name="the truncated version of the Swedish summarisation dataset SweDN",
     huggingface_id="ScandEval/swedn-mini",
     task=SUMM,
     languages=[SV],
@@ -691,7 +717,8 @@ SWEDN_CONFIG = DatasetConfig(
 
 CNN_DAILYMAIL_CONFIG = DatasetConfig(
     name="cnn-dailymail",
-    pretty_name="the truncated version of CNN-DailyMail",
+    pretty_name="the truncated version of the English summarisation dataset "
+    "CNN-DailyMail",
     huggingface_id="ScandEval/cnn-dailymail-mini",
     task=SUMM,
     languages=[EN],
@@ -706,9 +733,24 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
 
 ### KNOWLEDGE DATASETS ###
 
+DANSKE_TALEMAADER_CONFIG = DatasetConfig(
+    name="danske-talemaader",
+    pretty_name="the truncated version of the Danish knowledge dataset Danske "
+    "Talemåder",
+    huggingface_id="ScandEval/danske-talemaader-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+)
+
 MMLU_DA_CONFIG = DatasetConfig(
     name="mmlu-da",
-    pretty_name="the Danish part of the truncated version of MMLU",
+    pretty_name="the truncated version of the Danish knowledge dataset MMLU-da, "
+    "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-da-mini",
     task=KNOW,
     languages=[DA],
@@ -721,7 +763,8 @@ MMLU_DA_CONFIG = DatasetConfig(
 
 MMLU_NO_CONFIG = DatasetConfig(
     name="mmlu-no",
-    pretty_name="the Norwegian part of the truncated version of MMLU",
+    pretty_name="the truncated version of the Norwegian knowledge dataset MMLU-no, "
+    "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-no-mini",
     task=KNOW,
     languages=[NB, NN],
@@ -734,7 +777,8 @@ MMLU_NO_CONFIG = DatasetConfig(
 
 MMLU_SV_CONFIG = DatasetConfig(
     name="mmlu-sv",
-    pretty_name="the Swedish part of the truncated version of MMLU",
+    pretty_name="the truncated version of the Swedish knowledge dataset MMLU-sv, "
+    "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-sv-mini",
     task=KNOW,
     languages=[SV],
@@ -747,7 +791,8 @@ MMLU_SV_CONFIG = DatasetConfig(
 
 MMLU_IS_CONFIG = DatasetConfig(
     name="mmlu-is",
-    pretty_name="the Icelandic part of the truncated version of MMLU",
+    pretty_name="the truncated version of the Icelandic knowledge dataset MMLU-is, "
+    "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-is-mini",
     task=KNOW,
     languages=[IS],
@@ -760,7 +805,8 @@ MMLU_IS_CONFIG = DatasetConfig(
 
 MMLU_DE_CONFIG = DatasetConfig(
     name="mmlu-de",
-    pretty_name="the German part of the truncated version of MMLU",
+    pretty_name="the truncated version of the German knowledge dataset MMLU-de, "
+    "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-de-mini",
     task=KNOW,
     languages=[DE],
@@ -773,7 +819,8 @@ MMLU_DE_CONFIG = DatasetConfig(
 
 MMLU_NL_CONFIG = DatasetConfig(
     name="mmlu-nl",
-    pretty_name="the Dutch part of the truncated version of MMLU",
+    pretty_name="the truncated version of the Dutch knowledge dataset MMLU-nl, "
+    "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-nl-mini",
     task=KNOW,
     languages=[NL],
@@ -786,7 +833,7 @@ MMLU_NL_CONFIG = DatasetConfig(
 
 MMLU_CONFIG = DatasetConfig(
     name="mmlu",
-    pretty_name="the truncated version of MMLU",
+    pretty_name="the truncated version of the English knowledge dataset MMLU",
     huggingface_id="ScandEval/mmlu-mini",
     task=KNOW,
     languages=[EN],
@@ -797,97 +844,6 @@ MMLU_CONFIG = DatasetConfig(
     max_generated_tokens=3,
 )
 
-ARC_DA_CONFIG = DatasetConfig(
-    name="arc-da",
-    pretty_name="the Danish part of the truncated version of ARC",
-    huggingface_id="ScandEval/arc-da-mini",
-    task=KNOW,
-    languages=[DA],
-    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
-    prompt_template="Spørgsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_NO_CONFIG = DatasetConfig(
-    name="arc-no",
-    pretty_name="the Norwegian part of the truncated version of ARC",
-    huggingface_id="ScandEval/arc-no-mini",
-    task=KNOW,
-    languages=[NB, NN],
-    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
-    prompt_template="Spørsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_SV_CONFIG = DatasetConfig(
-    name="arc-sv",
-    pretty_name="the Swedish part of the truncated version of ARC",
-    huggingface_id="ScandEval/arc-sv-mini",
-    task=KNOW,
-    languages=[SV],
-    prompt_prefix="Följande är flervalsfrågor (med svar).",
-    prompt_template="Fråga: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_IS_CONFIG = DatasetConfig(
-    name="arc-is",
-    pretty_name="the Icelandic part of the truncated version of ARC",
-    huggingface_id="ScandEval/arc-is-mini",
-    task=KNOW,
-    languages=[IS],
-    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
-    prompt_template="Spurningar: {text}\nSvara: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_DE_CONFIG = DatasetConfig(
-    name="arc-de",
-    pretty_name="the German part of the truncated version of ARC",
-    huggingface_id="ScandEval/arc-de-mini",
-    task=KNOW,
-    languages=[DE],
-    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
-    prompt_template="Frage: {text}\nAntwort: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_NL_CONFIG = DatasetConfig(
-    name="arc-nl",
-    pretty_name="the Dutch part of the truncated version of ARC",
-    huggingface_id="ScandEval/arc-nl-mini",
-    task=KNOW,
-    languages=[NL],
-    prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
-    prompt_template="Vraag: {text}\nAntwoord: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
-ARC_CONFIG = DatasetConfig(
-    name="arc",
-    pretty_name="the truncated version of ARC",
-    huggingface_id="ScandEval/arc-mini",
-    task=KNOW,
-    languages=[EN],
-    prompt_prefix="The following are multiple choice questions (with answers).",
-    prompt_template="Question: {text}\nAnswer: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    num_few_shot_examples=20,
-    max_generated_tokens=3,
-)
-
 # TODO: Faroese knowledge
 
 
@@ -895,7 +851,8 @@ ARC_CONFIG = DatasetConfig(
 
 HELLASWAG_DA_CONFIG = DatasetConfig(
     name="hellaswag-da",
-    pretty_name="the Danish part of the truncated version of HellaSwag",
+    pretty_name="the truncated version of the Danish common-sense reasoning dataset "
+    "HellaSwag-da, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-da-mini",
     task=COMMON_SENSE,
     languages=[DA],
@@ -908,7 +865,8 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
 
 HELLASWAG_NO_CONFIG = DatasetConfig(
     name="hellaswag-no",
-    pretty_name="the Norwegian part of the truncated version of HellaSwag",
+    pretty_name="the truncated version of the Norwegian common-sense reasoning dataset "
+    "HellaSwag-no, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-no-mini",
     task=COMMON_SENSE,
     languages=[NB, NN],
@@ -921,7 +879,8 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
 
 HELLASWAG_SV_CONFIG = DatasetConfig(
     name="hellaswag-sv",
-    pretty_name="the Swedish part of the truncated version of HellaSwag",
+    pretty_name="the truncated version of the Swedish common-sense reasoning dataset "
+    "HellaSwag-sv, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-sv-mini",
     task=COMMON_SENSE,
     languages=[SV],
@@ -934,7 +893,8 @@ HELLASWAG_SV_CONFIG = DatasetConfig(
 
 HELLASWAG_IS_CONFIG = DatasetConfig(
     name="hellaswag-is",
-    pretty_name="the Icelandic part of the truncated version of HellaSwag",
+    pretty_name="the truncated version of the Icelandic common-sense reasoning dataset "
+    "HellaSwag-is, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-is-mini",
     task=COMMON_SENSE,
     languages=[IS],
@@ -947,7 +907,8 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
 
 HELLASWAG_DE_CONFIG = DatasetConfig(
     name="hellaswag-de",
-    pretty_name="the German part of the truncated version of HellaSwag",
+    pretty_name="the truncated version of the German common-sense reasoning dataset "
+    "HellaSwag-de, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-de-mini",
     task=COMMON_SENSE,
     languages=[DE],
@@ -960,7 +921,8 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
 
 HELLASWAG_NL_CONFIG = DatasetConfig(
     name="hellaswag-nl",
-    pretty_name="the Dutch part of the truncated version of HellaSwag",
+    pretty_name="the truncated version of the Dutch common-sense reasoning dataset "
+    "HellaSwag-nl, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-nl-mini",
     task=COMMON_SENSE,
     languages=[NL],
@@ -973,7 +935,8 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
 
 HELLASWAG_CONFIG = DatasetConfig(
     name="hellaswag",
-    pretty_name="the truncated version of HellaSwag",
+    pretty_name="the truncated version of the English common-sense reasoning "
+    "dataset HellaSwag",
     huggingface_id="ScandEval/hellaswag-mini",
     task=COMMON_SENSE,
     languages=[EN],
