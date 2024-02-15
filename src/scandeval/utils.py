@@ -180,6 +180,7 @@ def block_terminal_output():
     logging.getLogger("vllm.core.scheduler").setLevel(logging.ERROR)
     logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.ERROR)
     logging.getLogger("httpx").setLevel(logging.ERROR)
+    logging.getLogger("root").setLevel(logging.ERROR)  # For `lmformatenforcer` package
 
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the ERROR level."""
