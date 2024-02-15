@@ -84,7 +84,6 @@ class OpenAIModelSetup:
             Whether the model exists on OpenAI, or the name of an extra that needs to
             be installed to check if the model exists.
         """
-        breakpoint()
         if openai is None:
             return "openai"
 
