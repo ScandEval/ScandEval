@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v11.0.0] - 2024-02-16
 ### Added
 - Added arguments to `Benchmarker.benchmark` (or simply `Benchmarker.__call_`),
   corresponding to the same arguments during initialisation. The idea here is that the
