@@ -119,7 +119,9 @@ SUMM = Task(
             pretty_name="BERTScore",
             huggingface_id="bertscore",
             results_key="f1",
-            compute_kwargs=dict(model_type="microsoft/mdeberta-v3-base", device="cpu"),
+            compute_kwargs=dict(
+                model_type="microsoft/mdeberta-v3-base", device="cuda", batch_size=8
+            ),
         ),
         MetricConfig(
             name="rouge_l",
