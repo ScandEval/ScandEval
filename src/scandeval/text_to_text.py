@@ -10,6 +10,8 @@ from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.utils import ModelOutput
 
+from scandeval.exceptions import InvalidBenchmark
+
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
@@ -117,9 +119,23 @@ class TextToText(BenchmarkDataset):
                 score_dict: dict[str, float] | None = metric.compute(
                     predictions=predictions, references=labels, **cfg.compute_kwargs
                 )
-            except Exception:
-                breakpoint()
-                pass
+            except Exception as e:
+                oom_error = [
+                    "CUDA out of memory",
+                    "CUDA error",
+                    "MPS backend out of memory",
+                    "Too many parallel completions requested.",  # OpenAI specific
+                ]
+                if not (
+                    any(error in str(e) for error in oom_error)
+                    and "device" in cfg.compute_kwargs
+                    and cfg.compute_kwargs["device"] == "cuda"
+                ):
+                    raise InvalidBenchmark(str(e))
+                cfg.compute_kwargs["device"] = "cpu"
+                score_dict = metric.compute(
+                    predictions=predictions, references=labels, **cfg.compute_kwargs
+                )
 
             # The metric returns None if we are running on multi-GPU and the current
             # process is not the main process
