@@ -50,6 +50,7 @@ logger = logging.getLogger(__package__)
 
 
 try:
+    import ray
     import vllm
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
@@ -180,11 +181,7 @@ def block_terminal_output():
     logging.getLogger("vllm.core.scheduler").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.CRITICAL)
     logging.getLogger("httpx").setLevel(logging.CRITICAL)
-
     logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
-    import ray
-
-    ray._private.worker._worker_logs_enabled = False
 
     # The `lmformatenforcer` uses the root logger, so we need to set the level of that
     logging.getLogger("root").setLevel(logging.CRITICAL)
@@ -197,6 +194,7 @@ def block_terminal_output():
 
     try:
         vllm.logger.init_logger = init_vllm_logger
+        ray._private.worker._worker_logs_enabled = False
     except NameError:
         pass
 

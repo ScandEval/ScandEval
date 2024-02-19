@@ -14,7 +14,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import block_terminal_output, clear_memory, get_ner_parser
+from .utils import HiddenPrints, block_terminal_output, clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
@@ -83,7 +83,8 @@ class VLLMModel:
 
             # This is required to be able to re-initialize the model, in case we
             # have already initialized it once
-            destroy_model_parallel()
+            with HiddenPrints():
+                destroy_model_parallel()
             clear_memory()
 
             block_terminal_output()
