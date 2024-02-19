@@ -181,7 +181,7 @@ def block_terminal_output():
     logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.CRITICAL)
     logging.getLogger("httpx").setLevel(logging.CRITICAL)
 
-    logging.getLogger("ray").setLevel(logging.CRITICAL)
+    logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     import ray
 
     ray._private.worker._worker_logs_enabled = False
