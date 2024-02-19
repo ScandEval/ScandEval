@@ -1,6 +1,8 @@
 """Model setup for Hugging Face Hub models."""
 
+import importlib.util
 import logging
+import os
 import warnings
 from json import JSONDecodeError
 from time import sleep
@@ -25,13 +27,16 @@ from ..exceptions import (
     FlashAttentionNotInstalled,
     HuggingFaceHubDown,
     InvalidBenchmark,
+    InvalidModel,
+    NeedsExtraInstalled,
     NoInternetConnection,
 )
 from ..languages import get_all_languages
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import (
+    GENERATIVE_DATASET_SUPERTASKS,
+    GENERATIVE_DATASET_TASKS,
     GENERATIVE_MODEL_TASKS,
-    HiddenPrints,
     block_terminal_output,
     create_model_cache_dir,
     get_class_by_name,
@@ -65,15 +70,16 @@ class HFModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool:
-        """Check if a model ID denotes an OpenAI model.
+    def model_exists(self, model_id: str) -> bool | str:
+        """Check if a model ID denotes a model on the Hugging Face Hub.
 
         Args:
             model_id:
                 The model ID.
 
         Returns:
-            Whether the model exists on OpenAI.
+            Whether the model exists on the Hugging Face Hub, or the name of an extra
+            that needs to be installed to check if the model exists.
         """
         # Extract the revision from the model_id, if present
         model_id, revision = (
@@ -145,7 +151,7 @@ class HFModelSetup:
 
             # Check that the model exists. If it does not then raise an error
             if len(models) == 0:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     f"The model {model_id} does not exist on the Hugging Face Hub."
                 )
 
@@ -157,9 +163,9 @@ class HFModelSetup:
             elif "jax" in tags:
                 framework = Framework.JAX
             elif "spacy" in tags:
-                raise InvalidBenchmark("SpaCy models are not supported.")
+                raise InvalidModel("SpaCy models are not supported.")
             elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
-                raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
+                raise InvalidModel("TensorFlow/Keras models are not supported.")
 
             model_task: str | None = models[0].pipeline_tag
             if model_task is None:
@@ -178,8 +184,7 @@ class HFModelSetup:
                 revision=revision,
                 model_type=ModelType.HF,
                 model_cache_dir=create_model_cache_dir(
-                    cache_dir=self.benchmark_config.cache_dir,
-                    model_id=model_id,
+                    cache_dir=self.benchmark_config.cache_dir, model_id=model_id
                 ),
             )
 
@@ -223,12 +228,15 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
+        if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
+            raise NeedsExtraInstalled(extra="generative")
+
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
-                bnb_4bit_compute_dtype=torch.bfloat16
-                if torch.cuda.is_bf16_supported()
-                else torch.float16,
+                bnb_4bit_compute_dtype=(
+                    torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+                ),
                 bnb_4bit_use_double_quant=True,
             )
             if load_in_4bit
@@ -253,7 +261,11 @@ class HFModelSetup:
         use_vllm = (
             model_config.task in GENERATIVE_MODEL_TASKS
             and self.benchmark_config.device == torch.device("cuda")
+            and os.getenv("USE_VLLM", True)
         )
+
+        if use_vllm and importlib.util.find_spec("vllm") is None:
+            raise NeedsExtraInstalled(extra="generative")
 
         if use_vllm:
             try:
@@ -269,16 +281,18 @@ class HFModelSetup:
                 # informative error message
                 oom_error_message = "No available memory for the cache blocks"
                 if oom_error_message in str(e):
-                    raise InvalidBenchmark("The model is too large to load on the GPU.")
+                    raise InvalidModel("The model is too large to load on the GPU.")
+
+                if self.benchmark_config.raise_errors:
+                    raise e
 
                 # Otherwise some other error occurred, and we log it and try to load
                 # the model with Hugging Face instead
                 use_vllm = False
                 logger.info(
                     "Failed to benchmark with vLLM - trying with the Hugging Face "
-                    "implementation instead."
+                    f"implementation instead. The error raised was {e!r}"
                 )
-                logger.debug(f"The error was: {e!r}")
 
         if not use_vllm:
             model_kwargs = dict(
@@ -291,7 +305,9 @@ class HFModelSetup:
                 trust_remote_code=self.benchmark_config.trust_remote_code,
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
-                use_flash_attention_2=use_flash_attention,
+                attn_implementation=(
+                    "flash_attention_2" if use_flash_attention else None
+                ),
             )
 
             # These are used when a timeout occurs
@@ -304,6 +320,14 @@ class HFModelSetup:
                         model_cls_supertask = "causal-l-m"
                     elif model_config.task == "text2text-generation":
                         model_cls_supertask = "seq-2-seq-l-m"
+                    elif (
+                        dataset_config.task.name in GENERATIVE_DATASET_TASKS
+                        or supertask in GENERATIVE_DATASET_SUPERTASKS
+                    ):
+                        raise InvalidBenchmark(
+                            f"The {dataset_config.task.name!r} task is not supported "
+                            f"for the model {model_id!r}."
+                        )
                     else:
                         model_cls_supertask = supertask
                     model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
@@ -324,7 +348,7 @@ class HFModelSetup:
                     if config.model_type == "deberta-v2":
                         config.pooler_hidden_size = config.hidden_size
 
-                    with warnings.catch_warnings(), HiddenPrints():
+                    with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", category=UserWarning)
                         warnings.filterwarnings("ignore", category=FutureWarning)
                         try:
@@ -346,11 +370,11 @@ class HFModelSetup:
                                 model_kwargs["ignore_mismatched_sizes"] = True
                                 continue
                             else:
-                                raise InvalidBenchmark(str(e))
+                                raise InvalidModel(str(e))
                         except (TimeoutError, RequestError):
                             attempts_left -= 1
                             if attempts_left == 0:
-                                raise InvalidBenchmark(
+                                raise InvalidModel(
                                     "The model could not be loaded after 5 attempts."
                                 )
                             logger.info(
@@ -394,7 +418,7 @@ class HFModelSetup:
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         if use_vllm:
-            model.tokenizer = tokenizer
+            model.set_tokenizer(tokenizer=tokenizer)
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
@@ -472,12 +496,12 @@ class HFModelSetup:
                 return config
             except KeyError as e:
                 key = e.args[0]
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     f"The model config for the model {model_id!r} could not be "
                     f"loaded, as the key {key!r} was not found in the config."
                 )
             except OSError as e:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     f"Couldn't load model config for {model_id!r}. The error was "
                     f"{e!r}. Skipping"
                 )
@@ -487,9 +511,7 @@ class HFModelSetup:
                 continue
 
     def _load_tokenizer(
-        self,
-        model: PreTrainedModel | GenerativeModel,
-        model_id: str,
+        self, model: PreTrainedModel | GenerativeModel, model_id: str
     ) -> Tokenizer:
         """Load the tokenizer.
 
@@ -521,9 +543,10 @@ class HFModelSetup:
                         verbose=False,
                         padding_side=padding_side,
                         truncation_side=padding_side,
+                        trust_remote_code=self.benchmark_config.trust_remote_code,
                     )
                 except (JSONDecodeError, OSError, TypeError):
-                    raise InvalidBenchmark(
+                    raise InvalidModel(
                         f"Could not load tokenizer for model {model_id!r}."
                     )
                 except (TimeoutError, RequestError):
@@ -534,16 +557,14 @@ class HFModelSetup:
     @staticmethod
     def _handle_loading_exception(exception: Exception, model_id: str) -> None:
         if "checkpoint seems to be incorrect" in str(exception):
-            raise InvalidBenchmark(
-                f"The model {model_id!r} has an incorrect checkpoint."
-            )
+            raise InvalidModel(f"The model {model_id!r} has an incorrect checkpoint.")
         if "trust_remote_code" in str(exception):
-            raise InvalidBenchmark(
+            raise InvalidModel(
                 f"Loading the model {model_id!r} needs to trust remote code. "
                 "If you trust the suppliers of this model, then you can enable "
                 "this by setting the `--trust-remote-code` flag."
             )
-        raise InvalidBenchmark(
+        raise InvalidModel(
             f"The model {model_id} either does not exist on the Hugging Face "
             "Hub, or it has no frameworks registered, or it is a private "
             "model. If it *does* exist on the Hub and is a public model then "

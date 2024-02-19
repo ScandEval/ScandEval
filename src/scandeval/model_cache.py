@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -42,10 +43,7 @@ class ModelCache:
     """
 
     def __init__(
-        self,
-        model_cache_dir: Path,
-        cache_name: str,
-        max_generated_tokens: int,
+        self, model_cache_dir: Path, cache_name: str, max_generated_tokens: int
     ):
         """Initialize the model output cache.
 
@@ -119,10 +117,7 @@ class ModelCache:
         return [key for key in self.cache.keys()]
 
     def add_to_cache(
-        self,
-        model_input: torch.Tensor,
-        model_output: ModelOutput,
-        tokenizer: Tokenizer,
+        self, model_input: torch.Tensor, model_output: ModelOutput, tokenizer: Tokenizer
     ) -> None:
         """Add the model input/output to the cache.
 
@@ -151,7 +146,12 @@ class ModelCache:
 
         # Store the generated sequences in the cache, one by one
         # TODO: This is a bit slow, should be optimized
-        with tqdm(model_input, desc="Caching model outputs", leave=False) as pbar:
+        with tqdm(
+            iterable=model_input,
+            desc="Caching model outputs",
+            leave=False,
+            disable=hasattr(sys, "_called_from_test"),
+        ) as pbar:
             for sample_idx, sample in enumerate(pbar):
                 decoded_inputs = tokenizer.decode(
                     token_ids=sample, skip_special_tokens=True
@@ -162,7 +162,7 @@ class ModelCache:
                 cached_model_output = GenerativeModelOutput(
                     completion=tokenizer.decode(
                         token_ids=generated_ids, skip_special_tokens=True
-                    ),
+                    )
                 )
                 if store_scores:
                     cached_model_output.top_score_indices = top_scores.indices[
@@ -210,9 +210,7 @@ def split_dataset_into_cached_and_non_cached(
 
 
 def load_cached_model_outputs(
-    cached_dataset: Dataset,
-    cache: ModelCache,
-    tokenizer: Tokenizer,
+    cached_dataset: Dataset, cache: ModelCache, tokenizer: Tokenizer
 ) -> ModelOutput:
     """Load the cached model outputs.
 

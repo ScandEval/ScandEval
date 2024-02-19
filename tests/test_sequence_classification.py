@@ -1,5 +1,6 @@
 """Unit tests for the `sequence_classification` module."""
 
+import os
 from contextlib import nullcontext as does_not_raise
 from typing import Generator
 
@@ -7,13 +8,8 @@ import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
-    ARC_CONFIG,
-    ARC_DA_CONFIG,
-    ARC_DE_CONFIG,
-    ARC_IS_CONFIG,
-    ARC_NL_CONFIG,
-    ARC_NO_CONFIG,
-    ARC_SV_CONFIG,
+    DANISH_CITIZEN_TESTS_CONFIG,
+    DANSKE_TALEMAADER_CONFIG,
     DUTCH_SOCIAL_CONFIG,
     HELLASWAG_CONFIG,
     HELLASWAG_DA_CONFIG,
@@ -23,7 +19,6 @@ from scandeval.dataset_configs import (
     HELLASWAG_NO_CONFIG,
     HELLASWAG_SV_CONFIG,
     MMLU_CONFIG,
-    MMLU_DA_CONFIG,
     MMLU_DE_CONFIG,
     MMLU_IS_CONFIG,
     MMLU_NL_CONFIG,
@@ -66,7 +61,8 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         SCALA_DE_CONFIG,
         SCALA_NL_CONFIG,
         SCALA_EN_CONFIG,
-        MMLU_DA_CONFIG,
+        DANSKE_TALEMAADER_CONFIG,
+        DANISH_CITIZEN_TESTS_CONFIG,
         MMLU_SV_CONFIG,
         MMLU_NO_CONFIG,
         MMLU_IS_CONFIG,
@@ -80,13 +76,6 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         HELLASWAG_DE_CONFIG,
         HELLASWAG_NL_CONFIG,
         HELLASWAG_CONFIG,
-        ARC_DA_CONFIG,
-        ARC_SV_CONFIG,
-        ARC_NO_CONFIG,
-        ARC_IS_CONFIG,
-        ARC_DE_CONFIG,
-        ARC_NL_CONFIG,
-        ARC_CONFIG,
     ],
     ids=[
         "angry-tweets",
@@ -104,7 +93,8 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         "scala-de",
         "scala-nl",
         "scala-en",
-        "mmlu-da",
+        "danske-talemaader",
+        "danish-citizen-tests",
         "mmlu-sv",
         "mmlu-no",
         "mmlu-is",
@@ -118,13 +108,6 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         "hellaswag-de",
         "hellaswag-nl",
         "hellaswag",
-        "arc-da",
-        "arc-sv",
-        "arc-no",
-        "arc-is",
-        "arc-de",
-        "arc-nl",
-        "arc",
     ],
 )
 def benchmark_dataset(
@@ -132,11 +115,11 @@ def benchmark_dataset(
 ) -> Generator[BenchmarkDataset, None, None]:
     """Yields a sequence classification benchmark dataset."""
     yield SequenceClassification(
-        dataset_config=request.param,
-        benchmark_config=benchmark_config,
+        dataset_config=request.param, benchmark_config=benchmark_config
     )
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_encoder_benchmarking(benchmark_dataset, model_id):
     """Test that the encoder can be benchmarked on sequence classification datasets."""
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
@@ -147,6 +130,7 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
             benchmark_dataset.benchmark(model_id)
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_decoder_sequence_benchmarking(benchmark_dataset, generative_model_id):
     """Test that the decoder can be benchmarked on sequence classification datasets."""
     with does_not_raise():

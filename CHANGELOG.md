@@ -10,20 +10,152 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Now allows using multiple GPUs when evaluating generative models with vLLM.
 
+
+## [v11.0.0] - 2024-02-16
+### Added
+- Added arguments to `Benchmarker.benchmark` (or simply `Benchmarker.__call_`),
+  corresponding to the same arguments during initialisation. The idea here is that the
+  default parameters are set during initialisation, and then any of these can be
+  changed if needed when performing a concrete evaluation, without having to
+  re-initialise the `Benchmarker`.
+- Added the Danish knowledge datasets `danske-talemaader` and `danish-citizen-tests`.
+  Both are multiple choice datasets, where the first one tests knowledge about Danish
+  idioms, and the second one tests knowledge about the Danish society. These replace
+  the machine translated MMLU-da dataset.
+- Added a `--num-iterations` flag (`num_iterations` in the Python CLI), which controls
+  the number of times each model should be evaluated, defaulting to the usual 10
+  iterations. This is only meant to be changed for power users, and if it is changed
+  then the resulting scores will not be included in the leaderboards.
+
+### Changed
+- The default value of the languages are now all languages, rather than only Danish,
+  Swedish and Norwegian.
+- Changed all summarisation datasets to use one few-shot example (some were set to 2),
+  and increased the maximum amount of generated tokens to 256 rather than the previous
+  128, since many of the gold standard summaries are around 200 tokens.
+
+### Fixed
+- There was an error caused if an old version of the `openai` package was installed and
+  if the `scandeval` package was checking if a model exists as an OpenAI model. Now an
+  informative error is thrown if the model is not found on any available platforms, as
+  well as noting the extras that are missing, which prevents the package from checking
+  existence on those platforms.
+- Changed the prompt for the English sentiment classification dataset SST5, where it
+  previously stated that the documents were tweets - these have now been renamed to
+  "texts".
+- Correctly assess whether the `openai` extra should be used, which made it impossible
+  to benchmark OpenAI models.
+- Disabled `lmformatenforcer` logging, which happens in the rare case when we're
+  few-shot evaluating a model on NER and there are no JSON-valid tokens to generate.
+
+### Removed
+- Removed all machine translated ARC datasets, as they had a near 100% correlation with
+  the machine translated version of the MMLU datasets.
+
+
+## [v10.0.1] - 2024-02-12
+### Fixed
+- A prefix space was added to labels in sequence classification tasks that
+  automatically adds a prefix space (such as Mistral). We now check for this and ensure
+  to only manually add prefix space to models that don't automatically do this (such as
+  the Yi models).
+
+
+## [v10.0.0] - 2024-02-12
+### Added
+- Now throws a more informative error when attempting to benchmark a non-generative
+  model on a generative task.
+
+### Changed
+- Many dependencies are now optional, to make the package less bloated. These extras
+  are `jax`, for models based on the JAX framework, `generative` for evaluating
+  generative models, `olmo` for models based on the OLMO architecture, `openai` for
+  evaluating OpenAI models, and `all` to install all of them.
+- Updated many dependencies. In particular now uses `openai` version 1.x.x, which
+  required some changes to the code base as they changed their API.
+- Changed the `--dataset-task` CLI argument (`dataset_task` in the Python API) to
+  `--task` (`task`). This is now the preferred way to choose what to benchmark a model
+  on, rather than remembering all the names of the datasets. E.g., to benchmark a model
+  on all Danish question-answering datasets, we call `scandeval -m <model_id> -l da -t
+  question-answering`. All the names of the tasks is shown in `scandeval --help`.
+- Renamed the `--no-ignore-duplicates` to `--force` (shorthand: `-f`), which _forces_
+  the evaluation, meaning that it evaluates the model even if it has previously been
+  evaluated.
+- Renamed the `--model-id` to `--model`.
+
+### Fixed
+- Error when encoding a batch of size 1 with OpenAI models.
+- Error when benchmarking OpenAI models on MacOS due to the `tiktoken.Encoding` object
+  not being picklable.
+- Fixed an issue with OOM errors when changing from benchmarking one generative model
+  to another.
+- Now allows loading tokenisers that require remote code, if `--trust-remote-code` has
+  been set.
+- Fixed an issue where the `max_sequence_length` parameter in the Hugging Face model
+  configuration wasn't used to determine the `max_model_len` parameter in the
+  `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
+- An error occured if a tokenizer had no defined BOS token, which happens for some
+  generative models. It is now set to be equal to the EOS token in that case.
+- Fixed error related to the extraction of predicted labels in sequence classification
+  tasks for generative models, which unfairly evaluated generative models that require
+  a prefix space on the labels (which are most of them currently).
+
+### Removed
+- Removed the `-d` shorthand for `--dataset` in the CLI, to encourage the use of `-t`
+  (`--task`) and `-l` (`--language`) instead.
+
+
+## [v9.3.2] - 2024-02-05
+### Fixed
+- Using model revisions did not work with vLLM models - this has now been fixed. These
+  revisions are specified using the '@' operator in the model ID, e.g., `scandeval -m
+  gpt2@main`.
+
+
+## [v9.3.1] - 2024-01-31
+### Fixed
+- The prompts were not stripped correctly, causing bad evaluations for sequence
+  classification tasks.
+
+
+## [v9.3.0] - 2024-01-29
+### Changed
+- Now requires `transformers` versions `4.37.x`. As they often introduce breaking
+  changes in minor versions, we now only allow a patch version difference and manually
+  update to `4.38.x` when it comes out.
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+- Removed speculative ngram sampling again, as `transformers` now requires the batch
+  size to be 1, which doesn't make it any faster than normal.
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+- Number of generated tokens for sequence classification tasks has been changed back to
+  3 (from 1). This makes no difference to open source models, as we only use the
+  logprobs from the first token anyway, but it *does* make a difference to closed
+  source models where the logprobs are not available (like OpenAI's chat models), as
+  we're instead calculating word edit distance to the labels.
+
 ### Fixed
 - Prevents FP16 overflow by using -1e3 instead of -1e9 for ~0% probability logprobs
   during generation with vLLM.
 - Avoids excessive disk usage by not caching processed datasets to disk, as we are
   never using the cached versions anyway.
-
-### Changed
-- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
-  as the primary metric and accuracy and secondary. This is due to the fact that MCC
-  handles class imbalance better.
+- We now only strip the prompts if the model's tokenizer includes a prefix space when
+  tokenizing the labels.
+- When testing a model's maximum sequence length, we put dummy inputs into them. This
+  causes errors if the dummy inputs are one of the special tokens. Since the special
+  tokens have not always been set up in the tokenizer, we instead rely on a heuristic
+  that the 100th token ID is not a special token.
+- An import depended on `vllm`, which is not installed on non-Linux devices, causing an
+  `ImportError`. This has now been removed.
+- Fixed an issue where structured generation wasn't triggered when vLLM wasn't
+  available.
 
 
 ## [v9.2.0] - 2024-01-24
-### Added
+### Added
 - Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
   Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
   are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
@@ -366,7 +498,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   another framework, then re-try the evaluation with `from_flax` set to `True`.
 
 
-## [v6.2.2] - 2023-02-25
+## [v6.2.2] - 2023-02-25
 ### Fixed
 - If `max_position_embeddings` is smaller than any of the context lengths specified in
   `model_max_length` and `max_model_input_sizes` then we use that as the the
@@ -629,7 +761,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   their framework could not be determined.
 
 
-## [v2.3.0] - 2022-01-20
+## [v2.3.0] - 2022-01-20
 ### Added
 - Specific branches/commits/tags can now be benchmarked, using the `@`
   delimiter. For instance, `scandeval -m model_id@commit_hash` will benchmark

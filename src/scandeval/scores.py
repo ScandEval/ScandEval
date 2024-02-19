@@ -102,9 +102,11 @@ def aggregate_scores(
 
         if "train" in scores.keys():
             train_scores = [
-                dct[metric_config.name]
-                if metric_config.name in dct
-                else dct[f"train_{metric_config.name}"]
+                (
+                    dct[metric_config.name]
+                    if metric_config.name in dct
+                    else dct[f"train_{metric_config.name}"]
+                )
                 for dct in scores["train"]
             ]
             train_score = np.mean(train_scores)
@@ -119,9 +121,11 @@ def aggregate_scores(
 
         if "test" in scores.keys():
             test_scores = [
-                dct[metric_config.name]
-                if metric_config.name in dct
-                else dct[f"test_{metric_config.name}"]
+                (
+                    dct[metric_config.name]
+                    if metric_config.name in dct
+                    else dct[f"test_{metric_config.name}"]
+                )
                 for dct in scores["test"]
             ]
             test_score = np.mean(test_scores)

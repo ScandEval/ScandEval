@@ -1,16 +1,15 @@
 """Unit tests for the `config` module."""
 
 import pytest
-import torch
 from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,
-    DatasetTask,
     Language,
     MetricConfig,
     ModelConfig,
+    Task,
 )
-from scandeval.enums import ModelType
+from scandeval.enums import Framework, ModelType
 
 
 class TestMetricConfig:
@@ -48,18 +47,18 @@ class TestMetricConfig:
         assert metric_config.postprocessing_fn(inputs) == expected
 
 
-class TestDatasetTask:
-    """Unit tests for the `DatasetTask` class."""
+class TestTask:
+    """Unit tests for the `Task` class."""
 
-    def test_dataset_task_is_object(self, dataset_task):
-        """Test that the dataset task is a `DatasetTask` object."""
-        assert isinstance(dataset_task, DatasetTask)
+    def test_task_is_object(self, task):
+        """Test that the dataset task is a `Task` object."""
+        assert isinstance(task, Task)
 
-    def test_attributes_correspond_to_arguments(self, dataset_task):
+    def test_attributes_correspond_to_arguments(self, task):
         """Test that the dataset task attributes correspond to the arguments."""
-        assert dataset_task.name == "speed"
-        assert dataset_task.supertask == "sequence-classification"
-        assert dataset_task.labels == []
+        assert task.name == "speed"
+        assert task.supertask == "sequence-classification"
+        assert task.labels == []
 
 
 class TestLanguage:
@@ -83,12 +82,12 @@ class TestBenchmarkConfig:
         assert isinstance(benchmark_config, BenchmarkConfig)
 
     def test_attributes_correspond_to_arguments(
-        self, benchmark_config, language, dataset_task, auth
+        self, benchmark_config, language, task, auth, device
     ):
         """Test that the benchmark config attributes correspond to the arguments."""
         assert benchmark_config.model_languages == [language]
         assert benchmark_config.dataset_languages == [language]
-        assert benchmark_config.dataset_tasks == [dataset_task]
+        assert benchmark_config.tasks == [task]
         assert benchmark_config.framework is None
         assert benchmark_config.batch_size == 32
         assert benchmark_config.raise_errors is False
@@ -98,7 +97,7 @@ class TestBenchmarkConfig:
         assert benchmark_config.openai_api_key is None
         assert benchmark_config.progress_bar is False
         assert benchmark_config.save_results is True
-        assert benchmark_config.device == torch.device("cpu")
+        assert benchmark_config.device == device
         assert benchmark_config.verbose is False
         assert benchmark_config.trust_remote_code is True
         assert benchmark_config.load_in_4bit is None
@@ -115,14 +114,12 @@ class TestDatasetConfig:
         """Test that the dataset config is a `DatasetConfig` object."""
         assert isinstance(dataset_config, DatasetConfig)
 
-    def test_attributes_correspond_to_arguments(
-        self, dataset_config, language, dataset_task
-    ):
+    def test_attributes_correspond_to_arguments(self, dataset_config, language, task):
         """Test that the dataset config attributes correspond to the arguments."""
         assert dataset_config.name == "dataset_name"
         assert dataset_config.pretty_name == "Dataset name"
         assert dataset_config.huggingface_id == "dataset_id"
-        assert dataset_config.task == dataset_task
+        assert dataset_config.task == task
         assert dataset_config.languages == [language]
         assert dataset_config.prompt_template == "{text}\n{label}"
         assert dataset_config.max_generated_tokens == 1
@@ -155,7 +152,7 @@ class TestModelConfig:
         """Test that the model config attributes correspond to the arguments."""
         assert model_config.model_id == "model_id"
         assert model_config.revision == "revision"
-        assert model_config.framework == "framework"
+        assert model_config.framework == Framework.PYTORCH
         assert model_config.task == "task"
         assert model_config.languages == [language]
         assert model_config.model_type == ModelType.FRESH

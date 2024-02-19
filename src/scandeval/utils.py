@@ -20,7 +20,6 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
-from lmformatenforcer import JsonSchemaParser
 from pydantic import conlist, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
@@ -28,10 +27,24 @@ from transformers import logging as tf_logging
 
 from .config import DatasetConfig, Language
 from .enums import Framework
-from .exceptions import NaNValueInModelOutput
+from .exceptions import NaNValueInModelOutput, NeedsExtraInstalled
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .protocols import GenerativeModel, Tokenizer
 from .types import Predictions
+
+try:
+    from lmformatenforcer import JsonSchemaParser
+
+    _lmformatenforcer_available = True
+except ImportError:
+
+    class JsonSchemaParser:  # type: ignore[no-redef]
+        """Dummy class."""
+
+        pass
+
+    _lmformatenforcer_available = False
+
 
 logger = logging.getLogger(__package__)
 
@@ -42,6 +55,10 @@ except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
 
+# This is used as input to generative models; it cannot be a special token
+DUMMY_FILL_VALUE = 100
+
+
 GENERATIVE_MODEL_TASKS = [
     "text-generation",
     "conversational",
@@ -49,21 +66,13 @@ GENERATIVE_MODEL_TASKS = [
 ]
 
 
-GENERATIVE_DATASET_TASKS = [
-    "knowledge",
-    "common-sense-reasoning",
-]
+GENERATIVE_DATASET_TASKS = ["knowledge", "common-sense-reasoning"]
 
 
-GENERATIVE_DATASET_SUPERTASKS = [
-    "text-to-text",
-    "text-modelling",
-]
+GENERATIVE_DATASET_SUPERTASKS = ["text-to-text", "text-modelling"]
 
 
-SUPERTASKS_USING_LOGPROBS = [
-    "sequence-classification",
-]
+SUPERTASKS_USING_LOGPROBS = ["sequence-classification"]
 
 
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
@@ -86,9 +95,7 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
 
 def clear_memory():
     """Clears the memory of unused items."""
-    # Clear the Python cache
     gc.collect()
-
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     if torch.backends.mps.is_available():
@@ -162,20 +169,25 @@ def block_terminal_output():
     warnings.filterwarnings("ignore", module="seqeval*")
 
     # Up the logging level, to disable outputs
-    logging.getLogger("filelock").setLevel(logging.ERROR)
-    logging.getLogger("absl").setLevel(logging.ERROR)
-    logging.getLogger("datasets").setLevel(logging.ERROR)
-    logging.getLogger("openai").setLevel(logging.ERROR)
-    logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.ERROR)
-    logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.ERROR)
-    logging.getLogger("vllm.engine.llm_engine").setLevel(logging.ERROR)
-    logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.ERROR)
-    logging.getLogger("vllm.core.scheduler").setLevel(logging.ERROR)
+    logging.getLogger("filelock").setLevel(logging.CRITICAL)
+    logging.getLogger("absl").setLevel(logging.CRITICAL)
+    logging.getLogger("datasets").setLevel(logging.CRITICAL)
+    logging.getLogger("openai").setLevel(logging.CRITICAL)
+    logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.CRITICAL)
+    logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.engine.llm_engine").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.core.scheduler").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.CRITICAL)
+    logging.getLogger("httpx").setLevel(logging.CRITICAL)
+
+    # The `lmformatenforcer` uses the root logger, so we need to set the level of that
+    logging.getLogger("root").setLevel(logging.CRITICAL)
 
     def init_vllm_logger(name: str):
-        """Dummy function to initialise vLLM loggers with the ERROR level."""
+        """Dummy function to initialise vLLM loggers with the CRITICAL level."""
         vllm_logger = logging.getLogger(name)
-        vllm_logger.setLevel(logging.ERROR)
+        vllm_logger.setLevel(logging.CRITICAL)
         return vllm_logger
 
     try:
@@ -193,8 +205,7 @@ def block_terminal_output():
 
 
 def get_class_by_name(
-    class_name: str | list[str],
-    module_name: str | None = None,
+    class_name: str | list[str], module_name: str | None = None
 ) -> Type | None:
     """Get a class by its name.
 
@@ -324,8 +335,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 
 
 def get_huggingface_model_lists(
-    languages: list[Language] | None,
-    token: bool | str,
+    languages: list[Language] | None, token: bool | str
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -556,7 +566,9 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
-            dummy_inputs = torch.tensor([[1]], device=model.device, dtype=torch.long)
+            dummy_inputs = torch.tensor(
+                [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
+            )
             generation_config = GenerationConfig(
                 max_new_tokens=1,
                 pad_token_id=model.config.pad_token_id,
@@ -576,8 +588,7 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
             The model output to check.
 
     Raises:
-        NaNValueInModelOutput:
-            If the model output contains NaN values.
+        If the model output contains NaN values.
     """
     if isinstance(model_output, np.ndarray):
         if model_output.dtype == np.float32 and np.isnan(model_output).any():
@@ -599,14 +610,91 @@ def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
             The dataset configuration.
 
     Returns:
-        JsonSchemaParser:
-            The JSON schema parser.
+        The JSON schema parser.
     """
-    tag_names = list(set(dataset_config.prompt_label_mapping.values()))
+    if not _lmformatenforcer_available:
+        raise NeedsExtraInstalled(extra="generative")
+
+    tag_names = set(dataset_config.prompt_label_mapping.values())
     keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_items=5, unique_items=True), ...)
-        for tag_name in tag_names
+        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
     }
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
     parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
     return parser
+
+
+def should_prompts_be_stripped(
+    labels_to_be_generated: list[str], tokenizer: Tokenizer
+) -> bool:
+    """Determine if we should strip the prompts for few-shot evaluation.
+
+    This is the case if the tokenizer needs to include the space as part of the label
+    token. The strategy is thus to tokenize a label with a preceeding colon (as in the
+    prompts), i.e., ": positive", and check if the tokenization starts with the tokens
+    of ": ". If this is the case, then we should not strip the prompts, since the
+    tokenizer produces the whitespace token separately.
+
+    Args:
+        labels_to_be_generated:
+            The labels that are to be generated.
+        tokenizer:
+            The tokenizer used to tokenize the labels.
+
+    Returns:
+        Whether we should strip the prompts.
+    """
+    strip_prompts = True
+    for label in labels_to_be_generated:
+        colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
+        label_tokens = tokenizer(": " + label, add_special_tokens=False).input_ids
+
+        if isinstance(colon_tokens, torch.Tensor):
+            colon_tokens = list(colon_tokens.squeeze(0))
+        if isinstance(label_tokens, torch.Tensor):
+            label_tokens = list(label_tokens.squeeze(0))
+
+        label_tokens_start_with_colon_tokens = (
+            label_tokens[: len(colon_tokens)] == colon_tokens
+        )
+        if label_tokens_start_with_colon_tokens:
+            strip_prompts = False
+    return strip_prompts
+
+
+def should_prefix_space_be_added_to_labels(
+    labels_to_be_generated: list[str], tokenizer: Tokenizer
+) -> bool:
+    """Determine if we should add a prefix space to the labels.
+
+    This is the case if the prompts are stripped and the tokenizer doesn't
+    automatically add prefix whitespaces to the labels.
+
+    Args:
+        labels_to_be_generated:
+            The labels that are to be generated.
+        tokenizer:
+            The tokenizer used to tokenize the labels.
+
+    Returns:
+        Whether we should add a prefix space to the labels.
+    """
+    if not should_prompts_be_stripped(
+        labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
+    ):
+        return False
+
+    whitespace_token = tokenizer.convert_ids_to_tokens(
+        ids=tokenizer(" ", add_special_tokens=False).input_ids[0]
+    )[0]
+
+    for label in labels_to_be_generated:
+        label_tokens = tokenizer(label, add_special_tokens=False).input_ids
+        if isinstance(label_tokens, torch.Tensor):
+            label_tokens = list(label_tokens.squeeze(0))
+        first_label_token: int = int(label_tokens[0])
+        first_character_of_label = tokenizer.convert_ids_to_tokens(first_label_token)[0]
+        has_prefix_space = first_character_of_label == whitespace_token
+        if has_prefix_space:
+            return False
+    return True

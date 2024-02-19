@@ -1,26 +1,23 @@
 """Model and tokenizer wrapper for OpenAI models."""
 
 import logging
-from time import sleep
 
-import openai
-import tiktoken
 import torch
-from openai.error import (
-    APIError,
-    InvalidRequestError,
-    RateLimitError,
-    ServiceUnavailableError,
-    Timeout,
-)
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, ModelConfig
-from .exceptions import InvalidBenchmark
+from .exceptions import NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
+
+try:
+    import tiktoken
+    from openai import NotFoundError, OpenAI
+except ImportError:
+    OpenAI = None
+    tiktoken = None
 
 logger = logging.getLogger(__package__)
 
@@ -63,11 +60,15 @@ class OpenAITokenizer:
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
-        self.encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
         self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
         self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
+
+    @property
+    def encoding(self) -> "tiktoken.Encoding":
+        """Return the underlying tiktoken encoding."""
+        return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.
@@ -223,11 +224,13 @@ class OpenAITokenizer:
 
     def pad(
         self,
-        encoded_inputs: BatchEncoding
-        | list[BatchEncoding]
-        | dict[str, list[int]]
-        | dict[str, list[list[int]]]
-        | list[dict[str, list[int]]],
+        encoded_inputs: (
+            BatchEncoding
+            | list[BatchEncoding]
+            | dict[str, list[int]]
+            | dict[str, list[list[int]]]
+            | list[dict[str, list[int]]]
+        ),
         **kwargs,
     ) -> BatchEncoding:
         """Pad encoded inputs.
@@ -321,30 +324,30 @@ class OpenAIModel:
             tokenizer:
                 The tokenizer.
         """
+        if OpenAI is None:
+            raise NeedsExtraInstalled(extra="openai")
+
         self.model_config = model_config
         self.config = hf_model_config
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
+        self.client = OpenAI(
+            api_key=self.benchmark_config.openai_api_key, max_retries=60
+        )
         self.is_chat_model = self._is_chat_model()
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""
-        for _ in range(60):
-            try:
-                openai.Completion.create(
-                    model=self.model_config.model_id, prompt="Test", max_tokens=1
-                )
-                return False
-            except InvalidRequestError as e:
-                if "This is a chat model" in str(e):
-                    return True
-                else:
-                    raise e
-            except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                sleep(1)
-        else:
-            raise InvalidBenchmark("OpenAI API is not available")
+        try:
+            self.client.completions.create(
+                model=self.model_config.model_id, prompt="Test", max_tokens=1
+            )
+            return False
+        except NotFoundError as e:
+            if "This is a chat model" in str(e):
+                return True
+            raise e
 
     def generate(
         self,
@@ -404,36 +407,19 @@ class OpenAIModel:
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            stop=[
-                "\n\n",
-                self.tokenizer.eos_token,
-                self.tokenizer.pad_token,
-            ],
+            stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
         )
 
-        for _ in range(60):
-            try:
-                if not self.is_chat_model:
-                    model_output = openai.Completion.create(
-                        prompt=prompt, **generation_kwargs
-                    )
-                    generation_output = model_output.choices[0].text.strip()
-                else:
-                    model_output = openai.ChatCompletion.create(
-                        messages=[dict(role="user", content=prompt)],
-                        **generation_kwargs,
-                    )
-                    generation_output = model_output.choices[0].message.content.strip()
-                break
-            except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                sleep(1)
-            except InvalidRequestError as e:
-                raise InvalidBenchmark(
-                    "OpenAI refused to generate a completion. It threw the error: "
-                    f"{e!r}."
-                )
+        if not self.is_chat_model:
+            model_output = self.client.completions.create(
+                prompt=prompt, **generation_kwargs
+            )
+            generation_output = model_output.choices[0].text.strip()
         else:
-            raise InvalidBenchmark("OpenAI API is not available")
+            model_output = self.client.chat.completions.create(
+                messages=[dict(role="user", content=prompt)], **generation_kwargs
+            )
+            generation_output = model_output.choices[0].message.content.strip()
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)

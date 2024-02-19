@@ -1,5 +1,6 @@
 """Unit tests for the `question_answering` module."""
 
+import os
 from contextlib import nullcontext as does_not_raise
 from typing import Generator
 
@@ -46,11 +47,11 @@ def benchmark_dataset(
 ) -> Generator[BenchmarkDataset, None, None]:
     """Yields a question answering benchmark dataset."""
     yield QuestionAnswering(
-        dataset_config=request.param,
-        benchmark_config=benchmark_config,
+        dataset_config=request.param, benchmark_config=benchmark_config
     )
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_encoder_benchmarking(benchmark_dataset, model_id):
     """Test that encoder models can be benchmarked on question answering datasets."""
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
@@ -61,6 +62,7 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
             benchmark_dataset.benchmark(model_id)
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
     """Test that decoder models can be benchmarked on question answering datasets."""
     with does_not_raise():
@@ -69,10 +71,7 @@ def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
 
 @pytest.mark.parametrize(
     argnames="tokenizer_model_id",
-    argvalues=[
-        "jonfd/electra-small-nordic",
-        "flax-community/swe-roberta-wiki-oscar",
-    ],
+    argvalues=["jonfd/electra-small-nordic", "flax-community/swe-roberta-wiki-oscar"],
 )
 @pytest.mark.parametrize(
     argnames="examples",

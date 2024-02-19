@@ -53,10 +53,7 @@ class TextToText(BenchmarkDataset):
             return tokenizer(text=examples["text"], truncation=True, padding=False)
 
         tokenised = dataset.map(
-            tokenise,
-            batched=True,
-            load_from_cache_file=False,
-            keep_in_memory=True,
+            tokenise, batched=True, load_from_cache_file=False, keep_in_memory=True
         )
 
         return tokenised
@@ -82,9 +79,7 @@ class TextToText(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer, padding="longest")
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -115,9 +110,7 @@ class TextToText(BenchmarkDataset):
             metric = self._metrics[cfg.name]
             with HiddenPrints():
                 score_dict: dict[str, float] | None = metric.compute(
-                    predictions=predictions,
-                    references=labels,
-                    **cfg.compute_kwargs,
+                    predictions=predictions, references=labels, **cfg.compute_kwargs
                 )
 
             # The metric returns None if we are running on multi-GPU and the current
@@ -164,7 +157,7 @@ class TextToText(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -173,6 +166,8 @@ class TextToText(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.
@@ -227,7 +222,6 @@ class TextToText(BenchmarkDataset):
             The predicted labels.
         """
         raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output.sequences,
-            tokenizer=tokenizer,
+            generated_sequences=model_output.sequences, tokenizer=tokenizer
         )
         return raw_predictions

@@ -5,18 +5,10 @@ from typing import Generator
 
 import pytest
 from scandeval.dataset_factory import DatasetFactory
-from scandeval.dataset_tasks import (
-    COMMON_SENSE,
-    KNOW,
-    LA,
-    NER,
-    QA,
-    SENT,
-    SUMM,
-)
 from scandeval.named_entity_recognition import NamedEntityRecognition
 from scandeval.question_answering import QuestionAnswering
 from scandeval.sequence_classification import SequenceClassification
+from scandeval.tasks import COMMON_SENSE, KNOW, LA, NER, QA, SENT, SUMM
 from scandeval.text_to_text import TextToText
 
 

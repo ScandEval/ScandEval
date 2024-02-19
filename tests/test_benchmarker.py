@@ -106,10 +106,7 @@ class TestBenchmarkResult:
             ),
             (
                 dict(
-                    dataset="dataset",
-                    model="model (val)",
-                    few_shot=True,
-                    **DATA_KWARGS,
+                    dataset="dataset", model="model (val)", few_shot=True, **DATA_KWARGS
                 ),
                 BenchmarkResult(
                     dataset="dataset",
@@ -121,11 +118,7 @@ class TestBenchmarkResult:
                 ),
             ),
             (
-                dict(
-                    dataset="dataset",
-                    model="model (few-shot, val)",
-                    **DATA_KWARGS,
-                ),
+                dict(dataset="dataset", model="model (few-shot, val)", **DATA_KWARGS),
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
@@ -187,14 +180,7 @@ class TestBenchmarkResult:
         "expected",
     ],
     argvalues=[
-        (
-            "model",
-            "dataset",
-            False,
-            False,
-            [],
-            False,
-        ),
+        ("model", "dataset", False, False, [], False),
         (
             "model",
             "dataset",

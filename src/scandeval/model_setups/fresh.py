@@ -12,7 +12,7 @@ from transformers import (
     ElectraForTokenClassification,
     PretrainedConfig,
     PreTrainedModel,
-    PreTrainedTokenizer,
+    PreTrainedTokenizerBase,
     XLMRobertaForQuestionAnswering,
     XLMRobertaForSequenceClassification,
     XLMRobertaForTokenClassification,
@@ -20,49 +20,45 @@ from transformers import (
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import InvalidBenchmark
+from ..exceptions import InvalidBenchmark, InvalidModel
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import block_terminal_output, create_model_cache_dir
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
-FRESH_MODELS: list[str] = [
-    "electra-small",
-    "xlm-roberta-base",
-]
+FRESH_MODELS: list[str] = ["electra-small", "xlm-roberta-base"]
 
 
 class FreshModelSetup:
     """Model setup for fresh models.
 
-    Args:
-        benchmark_config (BenchmarkConfig):
-            The benchmark configuration.
-
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+        """Initialize the FreshModelSetup class.
+
+        Args:
+            benchmark_config:
+                The benchmark configuration.
+        """
         self.benchmark_config = benchmark_config
 
     @staticmethod
     def _strip_model_id(model_id: str) -> str:
         return re.sub("(@.*$|^fresh-)", "", model_id)
 
-    def model_exists(self, model_id: str) -> bool:
+    def model_exists(self, model_id: str) -> bool | str:
         """Check if a model ID denotes a fresh model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
 
         Returns:
-            bool:
-                Whether the model exists as a fresh model.
+            Whether the model exists as a fresh model, or the name of an extra that
+            needs to be installed to check if the model exists.
         """
         return self._strip_model_id(model_id=model_id) in FRESH_MODELS
 
@@ -70,12 +66,11 @@ class FreshModelSetup:
         """Fetches configuration for a fresh model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
 
         Returns:
-            ModelConfig:
-                The model configuration.
+            The model configuration.
         """
         return ModelConfig(
             model_id=self._strip_model_id(model_id=model_id),
@@ -85,8 +80,7 @@ class FreshModelSetup:
             revision="main",
             model_type=ModelType.FRESH,
             model_cache_dir=create_model_cache_dir(
-                cache_dir=self.benchmark_config.cache_dir,
-                model_id=model_id,
+                cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
         )
 
@@ -96,14 +90,14 @@ class FreshModelSetup:
         """Load a fresh model.
 
         Args:
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
+            dataset_config:
+                The dataset configuration.
 
         Returns:
-            pair of (tokenizer, model):
-                The tokenizer and model.
+            The tokenizer and model.
         """
-
         config: PretrainedConfig
         block_terminal_output()
 
@@ -136,9 +130,7 @@ class FreshModelSetup:
                 )
 
         else:
-            raise InvalidBenchmark(
-                f"Model {model_id} is not supported as a fresh class."
-            )
+            raise InvalidModel(f"Model {model_id} is not supported as a fresh class.")
 
         config = AutoConfig.from_pretrained(
             model_id,
@@ -160,7 +152,7 @@ class FreshModelSetup:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             try:
-                tokenizer: PreTrainedTokenizer = AutoTokenizer.from_pretrained(
+                tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
                     model_id,
                     revision=model_config.revision,
                     token=self.benchmark_config.token,
@@ -170,9 +162,7 @@ class FreshModelSetup:
                     verbose=False,
                 )
             except (JSONDecodeError, OSError):
-                raise InvalidBenchmark(
-                    f"Could not load tokenizer for model {model_id!r}."
-                )
+                raise InvalidModel(f"Could not load tokenizer for model {model_id!r}.")
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,

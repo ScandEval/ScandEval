@@ -1,6 +1,5 @@
 """Abstract benchmarking dataset class."""
 
-
 import logging
 import sys
 from abc import ABC, abstractmethod
@@ -22,7 +21,6 @@ from transformers import PretrainedConfig, Trainer
 from transformers.modeling_utils import ModelOutput, PreTrainedModel
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .dataset_tasks import SPEED
 from .exceptions import InvalidBenchmark
 from .finetuning import finetune
 from .generation import generate
@@ -32,8 +30,14 @@ from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
+from .tasks import SPEED
 from .types import Labels, Predictions, ScoreDict
-from .utils import GENERATIVE_MODEL_TASKS, enforce_reproducibility, model_is_generative
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    enforce_reproducibility,
+    model_is_generative,
+    should_prompts_be_stripped,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -68,17 +72,24 @@ class BenchmarkDataset(ABC):
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self._metrics = {
-            metric_cfg.name: evaluate.load(
-                path=metric_cfg.huggingface_id,
-                cache_dir=self.benchmark_config.cache_dir,
+            metric_cfg.name: (
+                evaluate.load(
+                    path=metric_cfg.huggingface_id,
+                    cache_dir=self.benchmark_config.cache_dir,
+                )
+                if metric_cfg.huggingface_id != ""
+                else None
             )
-            if metric_cfg.huggingface_id != ""
-            else None
             for metric_cfg in dataset_config.task.metrics
         }
 
         # Set logging level based on verbosity
-        logging_level = logging.DEBUG if self.benchmark_config.verbose else logging.INFO
+        if hasattr(sys, "_called_from_test"):
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
         logger.setLevel(logging_level)
 
     def benchmark(self, model_id: str) -> tuple[ScoreDict, dict[str, bool | int]]:
@@ -138,7 +149,10 @@ class BenchmarkDataset(ABC):
         )
 
         # Set variable with number of iterations
-        num_iter = 2 if hasattr(sys, "_called_from_test") else 10
+        if hasattr(sys, "_called_from_test"):
+            num_iter = 2
+        else:
+            num_iter = self.benchmark_config.num_iterations
 
         if self.dataset_config.task != SPEED:
             train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
@@ -419,7 +433,11 @@ class BenchmarkDataset(ABC):
         )
 
         # Prepare the train and validation datasets
-        with tqdm(total=12, desc="Preprocessing data splits") as pbar:
+        with tqdm(
+            total=4 if hasattr(sys, "_called_from_test") else 12,
+            desc="Preprocessing data splits",
+            disable=hasattr(sys, "_called_from_test"),
+        ) as pbar:
             # When evaluating generative models we only need the test split, so
             # there's no need to prepare the train split
             try:
@@ -459,6 +477,7 @@ class BenchmarkDataset(ABC):
                         few_shot_fn = partial(
                             self._apply_few_shot_prompt,
                             few_shot_examples=few_shot_examples,
+                            tokenizer=tokenizer,
                         )
                         test = test.map(
                             few_shot_fn,
@@ -466,6 +485,23 @@ class BenchmarkDataset(ABC):
                             load_from_cache_file=False,
                             keep_in_memory=True,
                         )
+
+                        # Determine if we should strip the prompts. This is the case if
+                        # the tokenizer needs to include the space as part of the label
+                        # token
+                        labels_to_be_generated = list(
+                            self.dataset_config.prompt_label_mapping.values()
+                        )
+                        strip_prompts = should_prompts_be_stripped(
+                            labels_to_be_generated=labels_to_be_generated,
+                            tokenizer=tokenizer,
+                        )
+                        if strip_prompts:
+                            test = test.map(
+                                lambda x: dict(text=x["text"].strip()),
+                                load_from_cache_file=False,
+                                keep_in_memory=True,
+                            )
 
                     prepared_test = self._preprocess_data(
                         test, split="test", **preprocess_params
@@ -477,7 +513,7 @@ class BenchmarkDataset(ABC):
                                 text=tokenizer.batch_decode(
                                     sequences=examples["input_ids"],
                                     skip_special_tokens=True,
-                                ),
+                                )
                             ),
                             batched=True,
                             load_from_cache_file=False,
@@ -494,9 +530,7 @@ class BenchmarkDataset(ABC):
         return prepared_train, prepared_val, prepared_tests
 
     def _preprocess_logits_for_metrics(
-        self,
-        model_outputs: torch.Tensor | tuple,
-        labels: torch.Tensor,
+        self, model_outputs: torch.Tensor | tuple, labels: torch.Tensor
     ) -> torch.Tensor | tuple:
         """Ensure that only the logits are returned from the model.
 
@@ -599,9 +633,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -637,7 +669,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -646,6 +678,8 @@ class BenchmarkDataset(ABC):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.

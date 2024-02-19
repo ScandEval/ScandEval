@@ -9,22 +9,18 @@ from typing import Any, Callable
 
 import torch
 from datasets import Dataset
-from lmformatenforcer.integrations.transformers import (
-    build_transformers_prefix_allowed_tokens_fn,
-)
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import (
     DataCollator,
     GenerationConfig,
-    PreTrainedTokenizer,
+    PreTrainedTokenizerBase,
     StoppingCriteria,
 )
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .dataset_tasks import NER
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .model_cache import (
     ModelCache,
     load_cached_model_outputs,
@@ -32,8 +28,17 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
+from .tasks import NER
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
 from .vllm_models import VLLMModel
+
+try:
+    from lmformatenforcer.integrations.transformers import (
+        build_transformers_prefix_allowed_tokens_fn,
+    )
+except ImportError:
+    build_transformers_prefix_allowed_tokens_fn = None
+
 
 logger = logging.getLogger(__package__)
 
@@ -221,7 +226,6 @@ def generate_single_iteration(
             return_dict_in_generate=True,
             # How to sample
             do_sample=False,  # Equivalent to greedy decoding (temperature=0)
-            prompt_lookup_num_tokens=10,  # n-gram speculation, improves speed by ~3x
             # Special tokens
             bos_token_id=tokenizer.bos_token_id,
             eos_token_id=tokenizer.eos_token_id,
@@ -259,34 +263,45 @@ def generate_single_iteration(
             num_workers=4,
             collate_fn=data_collator,
         )
-        itr = (
-            dataloader
-            if isinstance(model, VLLMModel)
-            else tqdm(dataloader, leave=False)
-        )
 
-        # Generate the completions for the non-cached examples
-        for batch_idx, batch in enumerate(itr):
-            model_output, extracted_labels = generate_batch(
-                batch=batch,
-                batch_idx=batch_idx,
-                batch_size=batch_size,
-                non_cached_dataset=non_cached_dataset,
-                model=model,
-                tokenizer=tokenizer,
-                stopping_criteria=stopping_criteria,
-                generation_config=generation_config,
-                extract_labels_fn=extract_labels_fn,
-                prefix_allowed_tokens_fn=get_prefix_allowed_fn(
-                    dataset_config=dataset_config, tokenizer=tokenizer
-                ),
+        with warnings.catch_warnings():
+            # This ignores the following warning, which is out of our control:
+            #   "os.fork() was called. os.fork() is incompatible with multithreaded
+            #   code, and JAX is multithreaded, so this will likely lead to a deadlock."
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+
+            itr = (
+                dataloader
+                if isinstance(model, VLLMModel)
+                else tqdm(
+                    iterable=dataloader,
+                    leave=False,
+                    disable=hasattr(sys, "_called_from_test"),
+                )
             )
-            cache.add_to_cache(
-                model_input=batch["input_ids"],
-                model_output=model_output,
-                tokenizer=tokenizer,
-            )
-            all_preds.extend(extracted_labels)
+
+            # Generate the completions for the non-cached examples
+            for batch_idx, batch in enumerate(itr):
+                model_output, extracted_labels = generate_batch(
+                    batch=batch,
+                    batch_idx=batch_idx,
+                    batch_size=batch_size,
+                    non_cached_dataset=non_cached_dataset,
+                    model=model,
+                    tokenizer=tokenizer,
+                    stopping_criteria=stopping_criteria,
+                    generation_config=generation_config,
+                    extract_labels_fn=extract_labels_fn,
+                    prefix_allowed_tokens_fn=get_prefix_allowed_fn(
+                        dataset_config=dataset_config, tokenizer=tokenizer
+                    ),
+                )
+                cache.add_to_cache(
+                    model_input=batch["input_ids"],
+                    model_output=model_output,
+                    tokenizer=tokenizer,
+                )
+                all_preds.extend(extracted_labels)
 
         if isinstance(itr, tqdm):
             itr.close()
@@ -297,14 +312,10 @@ def generate_single_iteration(
     # Fetch the cached predictions for the cached examples
     if len(cached_dataset) > 0:
         model_output = load_cached_model_outputs(
-            cached_dataset=cached_dataset,
-            cache=cache,
-            tokenizer=tokenizer,
+            cached_dataset=cached_dataset, cache=cache, tokenizer=tokenizer
         )
         extracted_labels = extract_labels_fn(
-            input_batch=cached_dataset,
-            model_output=model_output,
-            tokenizer=tokenizer,
+            input_batch=cached_dataset, model_output=model_output, tokenizer=tokenizer
         )
         all_preds.extend(extracted_labels)
 
@@ -347,9 +358,10 @@ def get_prefix_allowed_fn(
     Returns:
         The prefix allowed function.
     """
-    prefix_allowed_tokens_fns = list()
+    if build_transformers_prefix_allowed_tokens_fn is None:
+        raise NeedsExtraInstalled(extra="generative")
 
-    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizer):
+    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
         parser = get_ner_parser(dataset_config=dataset_config)
         json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
             tokenizer_data=tokenizer, character_level_parser=parser
@@ -385,35 +397,9 @@ def get_prefix_allowed_fn(
                 ]
             )
 
-        prefix_allowed_tokens_fns.append(ner_prefix_allowed_tokens_fn)
+        return ner_prefix_allowed_tokens_fn
 
-    def prefix_allowed_tokens_fn(
-        batch_id: int, input_ids: torch.Tensor
-    ) -> torch.Tensor:
-        """Aggregate of all the prefix allowed token functions.
-
-        Args:
-            batch_id:
-                The batch id.
-            input_ids:
-                The input ids.
-
-        Returns:
-            The prefix allowed tokens.
-        """
-        if not prefix_allowed_tokens_fns:
-            return torch.tensor(list(range(tokenizer.vocab_size)))
-
-        allowed_ids = None
-        for fn in prefix_allowed_tokens_fns:
-            allowed_ids = [
-                input_id
-                for input_id in fn(batch_id, input_ids)
-                if allowed_ids is None or input_id in allowed_ids
-            ]
-        return torch.tensor(allowed_ids)
-
-    return prefix_allowed_tokens_fn
+    return None
 
 
 class StopWordCriteria(StoppingCriteria):
@@ -548,8 +534,7 @@ def generate_batch(
 
 
 def extract_raw_predictions(
-    generated_sequences: torch.Tensor,
-    tokenizer: Tokenizer,
+    generated_sequences: torch.Tensor, tokenizer: Tokenizer
 ) -> list[str]:
     """Get the raw predictions from the generated sequences.
 
@@ -574,8 +559,7 @@ def extract_raw_predictions(
 
 
 def get_generation_stopping_criteria(
-    tokenizer: Tokenizer,
-    model: GenerativeModel,
+    tokenizer: Tokenizer, model: GenerativeModel
 ) -> StopWordCriteria:
     """Get the stopping criteria for generation.
 
