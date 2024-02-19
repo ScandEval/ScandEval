@@ -16,7 +16,6 @@ from typing import Any, Type
 import numpy as np
 import pkg_resources
 import requests
-import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
@@ -96,6 +95,8 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
 
 def clear_memory():
     """Clears the memory of unused items."""
+    import torch
+
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
@@ -112,6 +113,8 @@ def enforce_reproducibility(framework: Framework | str, seed: int = 4242):
         seed:
             Seed for the random number generator.
     """
+    import torch
+
     random.seed(seed)
     np.random.seed(seed)
     rng = np.random.default_rng(seed)
@@ -186,7 +189,6 @@ def block_terminal_output():
     # The `lmformatenforcer` uses the root logger, so we need to set the level of that
     logging.getLogger("root").setLevel(logging.CRITICAL)
 
-    # This disables the C++ logging from PyTorch
     os.environ["TORCH_CPP_LOG_LEVEL"] = "FATAL"
 
     def init_vllm_logger(name: str):
@@ -565,6 +567,8 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
     Returns:
         Whether the model is generative or not.
     """
+    import torch
+
     known_generative_models = ["VLLMModel", "OpenAIModel"]
     if any(model.__class__.__name__ == name for name in known_generative_models):
         return True
@@ -650,6 +654,8 @@ def should_prompts_be_stripped(
     Returns:
         Whether we should strip the prompts.
     """
+    import torch
+
     strip_prompts = True
     for label in labels_to_be_generated:
         colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
@@ -685,6 +691,8 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
+    import torch
+
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
