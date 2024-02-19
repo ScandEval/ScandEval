@@ -111,29 +111,32 @@ class TextToText(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
 
-            try:
-                with HiddenPrints():
-                    score_dict: dict[str, float] | None = metric.compute(
-                        predictions=predictions, references=labels, **cfg.compute_kwargs
-                    )
-            except Exception as e:
-                oom_error = [
-                    "CUDA out of memory",
-                    "CUDA error",
-                    "MPS backend out of memory",
-                    "Too many parallel completions requested.",  # OpenAI specific
-                ]
-                if not (
-                    any(error in str(e) for error in oom_error)
-                    and "device" in cfg.compute_kwargs
-                    and cfg.compute_kwargs["device"] == "cuda"
-                ):
-                    raise InvalidBenchmark(str(e))
-                cfg.compute_kwargs["device"] = "cpu"
-                with HiddenPrints():
-                    score_dict = metric.compute(
-                        predictions=predictions, references=labels, **cfg.compute_kwargs
-                    )
+            while True:
+                try:
+                    with HiddenPrints():
+                        score_dict: dict[str, float] | None = metric.compute(
+                            predictions=predictions,
+                            references=labels,
+                            **cfg.compute_kwargs,
+                        )
+                    break
+                except Exception as e:
+                    oom_error = [
+                        "CUDA out of memory",
+                        "CUDA error",
+                        "MPS backend out of memory",
+                        "Too many parallel completions requested.",  # OpenAI specific
+                    ]
+                    if not any(error in str(e) for error in oom_error):
+                        raise InvalidBenchmark(str(e))
+
+                    if cfg.compute_kwargs.get("batch_size", 1) > 1:
+                        batch_size = cfg.compute_kwargs["batch_size"]
+                        cfg.compute_kwargs["batch_size"] = batch_size // 2
+                    elif cfg.compute_kwargs.get("device") == "cuda":
+                        cfg.compute_kwargs["device"] = "cpu"
+                    else:
+                        raise InvalidBenchmark(str(e))
 
             # The metric returns None if we are running on multi-GPU and the current
             # process is not the main process
