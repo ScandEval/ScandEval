@@ -111,6 +111,11 @@ class TextToText(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
 
+            # Some metrics can be computed on hardware accelerators. In this case we
+            # start by setting the device to the same device as the model
+            if cfg.compute_kwargs.get("device", None) == "auto":
+                cfg.compute_kwargs["device"] = self.benchmark_config.device.type
+
             while True:
                 try:
                     with HiddenPrints():
@@ -132,7 +137,7 @@ class TextToText(BenchmarkDataset):
                     if cfg.compute_kwargs.get("batch_size", 1) > 1:
                         batch_size = cfg.compute_kwargs["batch_size"]
                         cfg.compute_kwargs["batch_size"] = batch_size // 2
-                    elif cfg.compute_kwargs.get("device") == "cuda":
+                    elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
                         cfg.compute_kwargs["device"] = "cpu"
                     else:
                         raise InvalidBenchmark(str(e))
