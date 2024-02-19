@@ -127,6 +127,25 @@ def generate(
                     dataset_config=dataset_config,
                     cache=cache,
                 )
+                logger.debug(f"Test scores for iteration {idx}: {test_scores}")
+                scores["test"].append(test_scores)
+
+                if benchmark_config.evaluate_train:
+                    train_scores = generate_single_iteration(
+                        prepared_dataset=prepared_train,
+                        model=model,
+                        tokenizer=tokenizer,
+                        data_collator=data_collator,
+                        compute_metrics=compute_metrics,
+                        extract_labels_fn=extract_labels_fn,
+                        benchmark_config=benchmark_config,
+                        dataset_config=dataset_config,
+                        cache=cache,
+                    )
+                    logger.debug(f"Train scores for iteration {idx}: {train_scores}")
+                    scores["train"].append(train_scores)
+
+                clear_memory()
                 break
             except Exception as e:
                 oom_error = [
@@ -143,26 +162,6 @@ def generate(
                     raise InvalidBenchmark(
                         "GPU out of memory, even with a batch size of 1!"
                     )
-
-        logger.debug(f"Test scores for iteration {idx}: {test_scores}")
-        scores["test"].append(test_scores)
-        clear_memory()
-
-        if benchmark_config.evaluate_train:
-            train_scores = generate_single_iteration(
-                prepared_dataset=prepared_train,
-                model=model,
-                tokenizer=tokenizer,
-                data_collator=data_collator,
-                compute_metrics=compute_metrics,
-                extract_labels_fn=extract_labels_fn,
-                benchmark_config=benchmark_config,
-                dataset_config=dataset_config,
-                cache=cache,
-            )
-            logger.debug(f"Train scores for iteration {idx}: {train_scores}")
-            scores["train"].append(train_scores)
-            clear_memory()
 
     cache.remove()
     return scores
