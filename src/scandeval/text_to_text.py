@@ -125,7 +125,6 @@ class TextToText(BenchmarkDataset):
                         "CUDA out of memory",
                         "CUDA error",
                         "MPS backend out of memory",
-                        "Too many parallel completions requested.",  # OpenAI specific
                     ]
                     if not any(error in str(e) for error in oom_error):
                         raise InvalidBenchmark(str(e))
