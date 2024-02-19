@@ -5622,4 +5622,4 @@ openai = ["levenshtein", "openai", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "800501745aff29be6069a23cbd544143102a302ad239028d1dfa5a60808fe808"
+content-hash = "1ed3318b965ad87c90d21985b8c23f6f7f512d202ae769d532b92014c761140d"

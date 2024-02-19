@@ -114,6 +114,12 @@ class VLLMModel:
                 _run_engine_with_fixed_progress_bars, self._model
             )
 
+            # Temporary fix until this vLLM PR is part of a release (should be any
+            # release after 0.3.0):
+            # https://github.com/vllm-project/vllm/pull/2741
+            self._model.get_tokenizer = MethodType(_get_tokenizer, self._model)
+            self._model.set_tokenizer = MethodType(_set_tokenizer, self._model)
+
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
@@ -363,3 +369,11 @@ def _run_engine_with_fixed_progress_bars(
     outputs = sorted(outputs, key=lambda x: int(x.request_id))
 
     return outputs
+
+
+def _get_tokenizer(self: LLM) -> PreTrainedTokenizerBase:
+    return self.llm_engine.tokenizer.tokenizer
+
+
+def _set_tokenizer(self: LLM, tokenizer: PreTrainedTokenizerBase) -> None:
+    self.llm_engine.tokenizer.tokenizer = tokenizer
