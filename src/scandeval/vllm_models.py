@@ -79,6 +79,7 @@ class VLLMModel:
         self.tokenizer = tokenizer
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
+            warnings.simplefilter("ignore", category=RuntimeWarning)
 
             # This is required to be able to re-initialize the model, in case we
             # have already initialized it once
@@ -98,6 +99,7 @@ class VLLMModel:
                         max_model_len, getattr(hf_model_config, config_name)
                     )
 
+            breakpoint()
             self._model = LLM(
                 model=model_config.model_id,
                 gpu_memory_utilization=0.9,
