@@ -111,7 +111,7 @@ class TextToText(BenchmarkDataset):
             # with HiddenPrints():
 
             if cfg.name == "bertscore":
-                cfg.compute_kwargs["device"] = self.benchmark_config.device
+                cfg.compute_kwargs["device"] = self.benchmark_config.device.type
 
             breakpoint()
             score_dict: dict[str, float] | None = metric.compute(
