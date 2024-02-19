@@ -187,8 +187,6 @@ def block_terminal_output():
     # The `lmformatenforcer` uses the root logger, so we need to set the level of that
     logging.getLogger("root").setLevel(logging.CRITICAL)
 
-    os.environ["TORCH_CPP_LOG_LEVEL"] = "FATAL"
-
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the CRITICAL level."""
         vllm_logger = logging.getLogger(name)
