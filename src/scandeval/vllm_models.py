@@ -14,7 +14,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import HiddenPrints, block_terminal_output, clear_memory, get_ner_parser
+from .utils import block_terminal_output, clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
@@ -81,10 +81,9 @@ class VLLMModel:
             warnings.simplefilter("ignore", category=UserWarning)
             warnings.simplefilter("ignore", category=RuntimeWarning)
 
-            # This is required to be able to re-initialize the model, in case we
-            # have already initialized it once
-            with HiddenPrints():
-                destroy_model_parallel()
+            # This is required to be able to re-initialize the model, in case we have
+            # already initialized it once
+            destroy_model_parallel()
             clear_memory()
 
             block_terminal_output()
@@ -113,7 +112,6 @@ class VLLMModel:
                 tensor_parallel_size=torch.cuda.device_count(),
                 disable_custom_all_reduce=True,
             )
-            breakpoint()
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
             )
