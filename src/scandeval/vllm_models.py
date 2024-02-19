@@ -14,7 +14,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import clear_memory, get_ner_parser
+from .utils import HiddenPrints, clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
@@ -99,17 +99,19 @@ class VLLMModel:
                         max_model_len, getattr(hf_model_config, config_name)
                     )
 
+            with HiddenPrints():
+                self._model = LLM(
+                    model=model_config.model_id,
+                    gpu_memory_utilization=0.9,
+                    max_model_len=max_model_len,
+                    download_dir=str(model_cache_dir),
+                    trust_remote_code=trust_remote_code,
+                    revision=self.model_config.revision,
+                    seed=4242,
+                    tensor_parallel_size=torch.cuda.device_count(),
+                    disable_custom_all_reduce=True,
+                )
             breakpoint()
-            self._model = LLM(
-                model=model_config.model_id,
-                gpu_memory_utilization=0.9,
-                max_model_len=max_model_len,
-                download_dir=str(model_cache_dir),
-                trust_remote_code=trust_remote_code,
-                tensor_parallel_size=torch.cuda.device_count(),
-                revision=self.model_config.revision,
-                seed=4242,
-            )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
             )
