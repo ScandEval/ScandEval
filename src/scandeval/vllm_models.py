@@ -14,7 +14,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import clear_memory, get_ner_parser
+from .utils import block_terminal_output, clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
 
@@ -85,6 +85,8 @@ class VLLMModel:
             # have already initialized it once
             destroy_model_parallel()
             clear_memory()
+
+            block_terminal_output()
 
             max_model_len = 10_000
             potential_max_model_length_config_names = [
