@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Now automatically uses multiple GPUs when evaluating generative models with vLLM.
+
 ### Changed
 - Computation of the BERTScore metric for summarisation tasks are now using the device
   stated in the benchmark config, making the metric computation significantly faster if
