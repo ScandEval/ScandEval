@@ -323,22 +323,6 @@ class VLLMModel:
         self.tokenizer = tokenizer
         self._model.set_tokenizer(tokenizer)
 
-        # TODO: Remove this block if it's not needed
-        # This sets the internal tokenizer in the vLLM model. The
-        # `LLM.llm_engine.tokenizer` is a `TokenizerGroup` object, which has a
-        # `tokenizer` attribute that is the actual tokenizer. This is a new change from
-        # `vllm` version 0.3.0, which is a breaking change since the `TokenizerGroup`
-        # doesn't have the same properties and methods as a Hugging Face
-        # `PreTrainedTokenizer` object. To resolve this, we copy all properties and
-        # methods from the `PreTrainedTokenizer` object to the `TokenizerGroup` object,
-        # unless the property or method already exists in the `TokenizerGroup` object.
-        # vLLM issue on this: https://github.com/vllm-project/vllm/issues/2713
-        # self._model.llm_engine.tokenizer.tokenizer = tokenizer
-        # for attr in dir(tokenizer):
-        #     if attr.startswith("_") or hasattr(self._model.llm_engine.tokenizer, attr):
-        #         continue
-        #     setattr(self._model.llm_engine.tokenizer, attr, getattr(tokenizer, attr))
-
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
         pass
