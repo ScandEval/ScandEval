@@ -106,7 +106,6 @@ class VLLMModel:
                 trust_remote_code=trust_remote_code,
                 revision=self.model_config.revision,
                 seed=4242,
-                enforce_eager=True,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
