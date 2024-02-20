@@ -135,11 +135,10 @@ class TextToText(BenchmarkDataset):
                     if not any(error in str(e) for error in oom_error):
                         raise InvalidBenchmark(str(e))
 
-                    breakpoint()
-                    if cfg.compute_kwargs.get("batch_size", 1) > 1:
-                        batch_size = cfg.compute_kwargs["batch_size"]
-                        cfg.compute_kwargs["batch_size"] = batch_size // 2
-                    elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
+                    # if cfg.compute_kwargs.get("batch_size", 1) > 1:
+                    #     batch_size = cfg.compute_kwargs["batch_size"]
+                    #     cfg.compute_kwargs["batch_size"] = batch_size // 2
+                    if cfg.compute_kwargs.get("device", "cpu") != "cpu":
                         cfg.compute_kwargs["device"] = "cpu"
                     else:
                         raise InvalidBenchmark(str(e))
