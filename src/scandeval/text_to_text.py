@@ -146,6 +146,8 @@ class TextToText(BenchmarkDataset):
                     elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
                         cfg.compute_kwargs["batch_size"] = 32
                         cfg.compute_kwargs["device"] = "cpu"
+                        if hasattr(metric, "cached_bertscorer"):
+                            del metric.cached_bertscorer
                         logger.debug(
                             "Out of memory error occurred during the computation of "
                             f"the metric {cfg.pretty_name}. Moving the computation to "
