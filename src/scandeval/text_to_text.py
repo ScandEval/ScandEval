@@ -10,6 +10,8 @@ from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.utils import ModelOutput
 
+from scandeval.exceptions import InvalidBenchmark
+
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
@@ -108,10 +110,37 @@ class TextToText(BenchmarkDataset):
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
-            with HiddenPrints():
-                score_dict: dict[str, float] | None = metric.compute(
-                    predictions=predictions, references=labels, **cfg.compute_kwargs
-                )
+
+            # Some metrics can be computed on hardware accelerators. In this case we
+            # start by setting the device to the same device as the model
+            if cfg.compute_kwargs.get("device", None) == "auto":
+                cfg.compute_kwargs["device"] = self.benchmark_config.device.type
+
+            while True:
+                try:
+                    with HiddenPrints():
+                        score_dict: dict[str, float] | None = metric.compute(
+                            predictions=predictions,
+                            references=labels,
+                            **cfg.compute_kwargs,
+                        )
+                    break
+                except Exception as e:
+                    oom_error = [
+                        "CUDA out of memory",
+                        "CUDA error",
+                        "MPS backend out of memory",
+                    ]
+                    if not any(error in str(e) for error in oom_error):
+                        raise InvalidBenchmark(str(e))
+
+                    if cfg.compute_kwargs.get("batch_size", 1) > 1:
+                        batch_size = cfg.compute_kwargs["batch_size"]
+                        cfg.compute_kwargs["batch_size"] = batch_size // 2
+                    elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
+                        cfg.compute_kwargs["device"] = "cpu"
+                    else:
+                        raise InvalidBenchmark(str(e))
 
             # The metric returns None if we are running on multi-GPU and the current
             # process is not the main process

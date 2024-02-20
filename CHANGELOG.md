@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Now automatically uses multiple GPUs when evaluating generative models with vLLM.
 
+### Changed
+- Computation of the BERTScore metric for summarisation tasks are now using the device
+  stated in the benchmark config, making the metric computation significantly faster if
+  a GPU is being used. This defaults to processing 32 samples at a time, which is
+  reduced if OOM errors occur. If OOM errors occur with a batch size of 1 then the
+  scores are computed on CPU, as before.
+
 
 ## [v11.0.0] - 2024-02-16
 ### Added
