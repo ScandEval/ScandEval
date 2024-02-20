@@ -15,7 +15,7 @@ from scandeval.exceptions import InvalidBenchmark
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import HiddenPrints, raise_if_model_output_contains_nan_values
+from .utils import HiddenPrints, clear_memory, raise_if_model_output_contains_nan_values
 
 logger = logging.getLogger(__package__)
 
@@ -124,6 +124,7 @@ class TextToText(BenchmarkDataset):
                             references=labels,
                             **cfg.compute_kwargs,
                         )
+                    clear_memory()
                     break
                 except Exception as e:
                     oom_error = [
