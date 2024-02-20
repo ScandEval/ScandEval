@@ -135,11 +135,22 @@ class TextToText(BenchmarkDataset):
                     if not any(error in str(e) for error in oom_error):
                         raise InvalidBenchmark(str(e))
 
-                    # if cfg.compute_kwargs.get("batch_size", 1) > 1:
-                    #     batch_size = cfg.compute_kwargs["batch_size"]
-                    #     cfg.compute_kwargs["batch_size"] = batch_size // 2
-                    if cfg.compute_kwargs.get("device", "cpu") != "cpu":
+                    if cfg.compute_kwargs.get("batch_size", 1) > 1:
+                        batch_size = cfg.compute_kwargs["batch_size"]
+                        cfg.compute_kwargs["batch_size"] = batch_size // 2
+                        logger.debug(
+                            "Out of memory error occurred during the computation of "
+                            f"the metric {cfg.pretty_name}. Reducing the batch size to "
+                            f"{cfg.compute_kwargs['batch_size']}."
+                        )
+                    elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
+                        cfg.compute_kwargs["batch_size"] = 32
                         cfg.compute_kwargs["device"] = "cpu"
+                        logger.debug(
+                            "Out of memory error occurred during the computation of "
+                            f"the metric {cfg.pretty_name}. Moving the computation to "
+                            "the CPU."
+                        )
                     else:
                         raise InvalidBenchmark(str(e))
 
