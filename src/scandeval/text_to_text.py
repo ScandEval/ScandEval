@@ -15,7 +15,12 @@ from scandeval.exceptions import InvalidBenchmark
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import HiddenPrints, raise_if_model_output_contains_nan_values
+from .utils import (
+    METRIC_ATTRIBUTES_TAKING_UP_MEMORY,
+    HiddenPrints,
+    clear_memory,
+    raise_if_model_output_contains_nan_values,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -124,8 +129,20 @@ class TextToText(BenchmarkDataset):
                             references=labels,
                             **cfg.compute_kwargs,
                         )
+
+                    # Clear the cache of the BERTScorer to avoid memory leaks
+                    for attribute in METRIC_ATTRIBUTES_TAKING_UP_MEMORY:
+                        if hasattr(metric, attribute):
+                            delattr(metric, attribute)
+
+                    clear_memory()
                     break
                 except Exception as e:
+                    # Clear the cache of the BERTScorer to avoid memory leaks
+                    if hasattr(metric, "cached_bertscorer"):
+                        del metric.cached_bertscorer
+                        clear_memory()
+
                     oom_error = [
                         "CUDA out of memory",
                         "CUDA error",
@@ -137,8 +154,19 @@ class TextToText(BenchmarkDataset):
                     if cfg.compute_kwargs.get("batch_size", 1) > 1:
                         batch_size = cfg.compute_kwargs["batch_size"]
                         cfg.compute_kwargs["batch_size"] = batch_size // 2
+                        logger.debug(
+                            "Out of memory error occurred during the computation of "
+                            f"the metric {cfg.pretty_name}. Reducing the batch size to "
+                            f"{cfg.compute_kwargs['batch_size']}."
+                        )
                     elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
+                        cfg.compute_kwargs["batch_size"] = 32
                         cfg.compute_kwargs["device"] = "cpu"
+                        logger.debug(
+                            "Out of memory error occurred during the computation of "
+                            f"the metric {cfg.pretty_name}. Moving the computation to "
+                            "the CPU."
+                        )
                     else:
                         raise InvalidBenchmark(str(e))
 
