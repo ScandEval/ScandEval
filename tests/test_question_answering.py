@@ -21,8 +21,7 @@ from transformers import AutoTokenizer
         for dataset_config in get_all_dataset_configs().values()
         if dataset_config.task == QA
         and (
-            os.getenv("INCLUDE_UNOFFICIAL_DATASETS", "0") == "1"
-            or not dataset_config.unofficial
+            os.getenv("TEST_ALL_DATASETS", "0") == "1" or not dataset_config.unofficial
         )
     ],
     ids=lambda dataset_config: dataset_config.name,

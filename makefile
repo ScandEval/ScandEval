@@ -111,22 +111,21 @@ test:  ## Run tests
 test-cuda-vllm:
 	@rm tests_with_cuda_and_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and vLLM..." \
-		&& USE_CUDA=1 USE_VLLM=1 INCLUDE_UNOFFICIAL_DATASETS=1 \
+		&& USE_CUDA=1 USE_VLLM=1 TEST_ALL_DATASETS=1 \
 			poetry run pytest | tee tests_with_cuda_and_vllm.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and vLLM!"
 
 test-cuda-no-vllm:
 	@rm tests_with_cuda_and_no_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and no vLLM..." \
-		&& USE_CUDA=1 USE_VLLM=0 INCLUDE_UNOFFICIAL_DATASETS=1 \
+		&& USE_CUDA=1 USE_VLLM=0 TEST_ALL_DATASETS=1 \
 			poetry run pytest | tee tests_with_cuda_and_no_vllm.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and no vLLM!"
 
 test-cpu:
 	@rm tests_with_cpu.log; \
 		date "+%H:%M:%S ⋅ Running tests with CPU..." \
-		&& USE_CUDA=0 INCLUDE_UNOFFICIAL_DATASETS=1 \
-			poetry run pytest | tee tests_with_cpu.log \
+		&& USE_CUDA=0 TEST_ALL_DATASETS=1 poetry run pytest | tee tests_with_cpu.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CPU!"
 
 test-fast:  # Run CPU tests without evaluations
