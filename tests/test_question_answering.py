@@ -6,17 +6,10 @@ from typing import Generator
 
 import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
-from scandeval.dataset_configs import (
-    GERMANQUAD_CONFIG,
-    NORQUAD_CONFIG,
-    NQII_CONFIG,
-    SCANDIQA_DA_CONFIG,
-    SCANDIQA_SV_CONFIG,
-    SQUAD_CONFIG,
-    SQUAD_NL_CONFIG,
-)
+from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.question_answering import QuestionAnswering, prepare_train_examples
+from scandeval.tasks import QA
 from scandeval.utils import GENERATIVE_DATASET_TASKS
 from transformers import AutoTokenizer
 
@@ -24,23 +17,11 @@ from transformers import AutoTokenizer
 @pytest.fixture(
     scope="module",
     params=[
-        SCANDIQA_DA_CONFIG,
-        SCANDIQA_SV_CONFIG,
-        NORQUAD_CONFIG,
-        NQII_CONFIG,
-        GERMANQUAD_CONFIG,
-        SQUAD_CONFIG,
-        SQUAD_NL_CONFIG,
+        dataset_config
+        for dataset_config in get_all_dataset_configs().values()
+        if dataset_config.task == QA and not dataset_config.unofficial
     ],
-    ids=[
-        "scandiqa-da",
-        "scandiqa-sv",
-        "norquad",
-        "nqii",
-        "germanquad",
-        "squad",
-        "squad-nl",
-    ],
+    ids=lambda dataset_config: dataset_config.name,
 )
 def benchmark_dataset(
     benchmark_config, request
