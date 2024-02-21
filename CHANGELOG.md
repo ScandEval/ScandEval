@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `Benchmarker` API). This allows the inclusion of more datasets, without bloating the
   evaluation time of "official" evaluations, as well as removing the need to remove old
   datasets when they are replaced by newer ones.
+- The following datasets have been added as unofficial, all datasets that used to be
+  part of ScandEval but has since been replaced:
+    1. ARC-da
+    2. ARC-no
+    3. ARC-sv
+    4. ARC-is
+    5. ARC-de
+    6. ARC-nl
+    7. ARC
+    8. DaNE
+    9. WikiANN-fo
 
 ### Changed
 - Computation of the BERTScore metric for summarisation tasks are now using the device
