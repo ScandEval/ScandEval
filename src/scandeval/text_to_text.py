@@ -15,7 +15,7 @@ from scandeval.exceptions import InvalidBenchmark
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import HiddenPrints, clear_memory, raise_if_model_output_contains_nan_values
+from .utils import clear_memory, raise_if_model_output_contains_nan_values
 
 logger = logging.getLogger(__package__)
 
@@ -118,13 +118,11 @@ class TextToText(BenchmarkDataset):
 
             while True:
                 try:
-                    with HiddenPrints():
-                        breakpoint()
-                        score_dict: dict[str, float] | None = metric.compute(
-                            predictions=predictions,
-                            references=labels,
-                            **cfg.compute_kwargs,
-                        )
+                    # with HiddenPrints():
+                    breakpoint()
+                    score_dict: dict[str, float] | None = metric.compute(
+                        predictions=predictions, references=labels, **cfg.compute_kwargs
+                    )
 
                     # Clear the cache of the BERTScorer to avoid memory leaks
                     if hasattr(metric, "cached_bertscorer"):
