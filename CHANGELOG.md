@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Now automatically uses multiple GPUs when evaluating generative models with vLLM.
+- Now allows "unofficial" datasets, which are datasets which are not included on the
+  official leaderboards and models will only be benchmarked on them if they have been
+  explicitly set using the `--dataset` argument (or `dataset` argument if using the
+  `Benchmarker` API). This allows the inclusion of more datasets, without bloating the
+  evaluation time of "official" evaluations, as well as removing the need to remove old
+  datasets when they are replaced by newer ones.
 
 ### Changed
 - Computation of the BERTScore metric for summarisation tasks are now using the device
