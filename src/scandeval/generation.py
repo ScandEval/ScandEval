@@ -127,6 +127,17 @@ def generate(
         def update_scores(
             scores: dict[str, list[dict[str, float]]], benchmark_config: BenchmarkConfig
         ) -> dict[str, list[dict[str, float]]]:
+            """Perform a single iteration of generation and update the scores.
+
+            Args:
+                scores:
+                    The scores so far.
+                benchmark_config:
+                    The configuration of the benchmark.
+
+            Returns:
+                The updated scores.
+            """
             test_scores = generate_single_iteration(
                 prepared_dataset=prepared_test,
                 benchmark_config=benchmark_config,
