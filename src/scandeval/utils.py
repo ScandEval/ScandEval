@@ -76,6 +76,9 @@ GENERATIVE_DATASET_SUPERTASKS = ["text-to-text", "text-modelling"]
 SUPERTASKS_USING_LOGPROBS = ["sequence-classification"]
 
 
+METRIC_ATTRIBUTES_TAKING_UP_MEMORY = ["cached_bertscorer"]
+
+
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
     """Create cache directory for a model.
 

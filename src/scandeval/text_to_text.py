@@ -15,7 +15,12 @@ from scandeval.exceptions import InvalidBenchmark
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import HiddenPrints, clear_memory, raise_if_model_output_contains_nan_values
+from .utils import (
+    METRIC_ATTRIBUTES_TAKING_UP_MEMORY,
+    HiddenPrints,
+    clear_memory,
+    raise_if_model_output_contains_nan_values,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -126,8 +131,9 @@ class TextToText(BenchmarkDataset):
                         )
 
                     # Clear the cache of the BERTScorer to avoid memory leaks
-                    if hasattr(metric, "cached_bertscorer"):
-                        del metric.cached_bertscorer
+                    for attribute in METRIC_ATTRIBUTES_TAKING_UP_MEMORY:
+                        if hasattr(metric, attribute):
+                            delattr(metric, attribute)
 
                     clear_memory()
                     break
