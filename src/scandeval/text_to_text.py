@@ -119,6 +119,7 @@ class TextToText(BenchmarkDataset):
             while True:
                 try:
                     with HiddenPrints():
+                        breakpoint()
                         score_dict: dict[str, float] | None = metric.compute(
                             predictions=predictions,
                             references=labels,
