@@ -124,9 +124,21 @@ class TextToText(BenchmarkDataset):
                             references=labels,
                             **cfg.compute_kwargs,
                         )
+
+                    # Clear the cache of the BERTScorer to avoid memory leaks
+                    if hasattr(metric, "cached_bertscorer"):
+                        breakpoint()
+                        del metric.cached_bertscorer
+
                     clear_memory()
                     break
                 except Exception as e:
+                    # Clear the cache of the BERTScorer to avoid memory leaks
+                    if hasattr(metric, "cached_bertscorer"):
+                        breakpoint()
+                        del metric.cached_bertscorer
+                        clear_memory()
+
                     oom_error = [
                         "CUDA out of memory",
                         "CUDA error",
@@ -146,10 +158,6 @@ class TextToText(BenchmarkDataset):
                     elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
                         cfg.compute_kwargs["batch_size"] = 32
                         cfg.compute_kwargs["device"] = "cpu"
-                        if hasattr(metric, "cached_bertscorer"):
-                            breakpoint()
-                            del metric.cached_bertscorer
-                            clear_memory()
                         logger.debug(
                             "Out of memory error occurred during the computation of "
                             f"the metric {cfg.pretty_name}. Moving the computation to "
