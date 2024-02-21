@@ -625,6 +625,12 @@ class Benchmarker:
             The benchmark result, or a dictionary containing an error message.
         """
         logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
+        if dataset_config.unofficial:
+            logger.info(
+                f"Note that the {dataset_config.name!r} dataset is unofficial, "
+                "meaning that the resulting evaluation will not be included in the "
+                "official leaderboard."
+            )
         while True:
             try:
                 dataset = self.dataset_factory.build_dataset(dataset_config)
