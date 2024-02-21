@@ -19,7 +19,11 @@ from transformers import AutoTokenizer
     params=[
         dataset_config
         for dataset_config in get_all_dataset_configs().values()
-        if dataset_config.task == QA and not dataset_config.unofficial
+        if dataset_config.task == QA
+        and (
+            os.getenv("INCLUDE_UNOFFICIAL_DATASETS", "0") == "1"
+            or not dataset_config.unofficial
+        )
     ],
     ids=lambda dataset_config: dataset_config.name,
 )
