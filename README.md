@@ -97,7 +97,12 @@ running the following:
 $ wget https://raw.githubusercontent.com/ScandEval/ScandEval/main/Dockerfile.cuda
 ```
 
-After that, we first build the image:
+Next, to be able to build the Docker image, first ensure that the NVIDIA Container
+Toolkit is
+[installed](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installation)
+and
+[configured](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#configuring-docker).
+After that, we build the image as follows:
 ```
 $ docker build -t scandeval -f Dockerfile.cuda .
 ```
