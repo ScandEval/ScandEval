@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     7. ARC
     8. DaNE
     9. WikiANN-fo
+- A more informative error message is now being thrown if the
+  `--trust-remote-code`/`trust_remote_code=True` argument is required to evaluate the
+  model.
 
 ### Changed
 - Computation of the BERTScore metric for summarisation tasks are now using the device

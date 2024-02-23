@@ -275,6 +275,7 @@ def benchmark(
         only_validation_split=only_validation_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        run_with_cli=True,
     )
 
     # Perform the benchmark evaluation

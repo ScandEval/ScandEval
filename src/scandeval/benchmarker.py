@@ -53,6 +53,7 @@ class BenchmarkConfigParams(BaseModel):
     only_validation_split: bool
     few_shot: bool
     num_iterations: int
+    run_with_cli: bool
 
 
 class BenchmarkResult(BaseModel):
@@ -159,6 +160,7 @@ class Benchmarker:
         only_validation_split: bool = False,
         few_shot: bool = True,
         num_iterations: int = 10,
+        run_with_cli: bool = False,
     ) -> None:
         """Initialise the benchmarker.
 
@@ -236,7 +238,10 @@ class Benchmarker:
             num_iterations:
                 The number of times each model should be evaluated. This is only meant
                 to be used for power users, and scores will not be allowed on the
-                leaderboards if this is changed.
+                leaderboards if this is changed. Defaults to 10.
+            run_with_cli:
+                Whether the benchmarker is being run from the command-line interface.
+                Defaults to False.
 
         Raises:
             ValueError:
@@ -270,6 +275,7 @@ class Benchmarker:
             only_validation_split=only_validation_split,
             few_shot=few_shot,
             num_iterations=num_iterations,
+            run_with_cli=run_with_cli,
         )
 
         self.benchmark_config = build_benchmark_config(

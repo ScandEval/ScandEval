@@ -28,6 +28,7 @@ from ..exceptions import (
     HuggingFaceHubDown,
     InvalidBenchmark,
     InvalidModel,
+    NeedsAdditionalArgument,
     NeedsExtraInstalled,
     NoInternetConnection,
 )
@@ -509,6 +510,15 @@ class HFModelSetup:
                 logger.info(f"Couldn't load model config for {model_id!r}. Retrying.")
                 sleep(5)
                 continue
+            except ValueError as e:
+                requires_trust_remote_code = "trust_remote_code" in str(e)
+                if requires_trust_remote_code:
+                    raise NeedsAdditionalArgument(
+                        cli_argument="--trust-remote-code",
+                        script_argument="trust_remote_code=True",
+                        run_with_cli=self.benchmark_config.run_with_cli,
+                    )
+                raise e
 
     def _load_tokenizer(
         self, model: PreTrainedModel | GenerativeModel, model_id: str

@@ -113,3 +113,32 @@ class NeedsExtraInstalled(InvalidModel):
             f"scandeval[{extra}]` or `pip install scandeval[all]`."
         )
         super().__init__(self.message)
+
+
+class NeedsAdditionalArgument(InvalidModel):
+    """The evaluation requires additional arguments to the `scandeval` command."""
+
+    def __init__(self, cli_argument: str, script_argument: str, run_with_cli: bool):
+        """Initialize the exception.
+
+        Args:
+            cli_argument:
+                The argument that needs to be passed to the `scandeval` command.
+            script_argument:
+                The argument that needs to be passed to the `Benchmarker` class.
+            run_with_cli:
+                Whether the benchmark is being run with the CLI.
+        """
+        if run_with_cli:
+            self.message = (
+                f"The model you are trying to load requires the `{cli_argument}` "
+                "argument to be passed to the `scandeval` command. Please pass the "
+                "argument and try again."
+            )
+        else:
+            self.message = (
+                f"The model you are trying to load requires the `{script_argument}` "
+                "argument  to be passed to the `Benchmarker` class. Please pass the "
+                "argument and try again."
+            )
+        super().__init__(self.message)
