@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   a GPU is being used. This defaults to processing 32 samples at a time, which is
   reduced if OOM errors occur. If OOM errors occur with a batch size of 1 then the
   scores are computed on CPU, as before.
+- Updated `transformers` dependency to >=4.38.1,<4.39.0, and `vllm` dependency to
+  >=0.3.2,<0.4.0. This allows the benchmarking of the new Gemma and OLMO models.
 
 
 ## [v11.0.0] - 2024-02-16
