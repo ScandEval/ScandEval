@@ -149,7 +149,7 @@ class Benchmarker:
         evaluate_train: bool = False,
         raise_errors: bool = False,
         cache_dir: str = ".scandeval_cache",
-        token: bool | str = False,
+        token: bool | str = True,
         openai_api_key: str | None = None,
         force: bool = False,
         verbose: bool = False,
@@ -209,7 +209,7 @@ class Benchmarker:
                 is specified then the token will be fetched from the Hugging Face CLI,
                 where the user has logged in through `huggingface-cli login`. If a
                 string is specified then it will be used as the token. Defaults to
-                False.
+                True.
             openai_api_key:
                 The OpenAI API key to use for authentication. If None, then no OpenAI
                 models will be evaluated. Defaults to None.
