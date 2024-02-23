@@ -31,7 +31,9 @@ except ImportError:
     class LLM:  # type: ignore[no-redef]
         """Dummy class."""
 
-        pass
+        def __init__(self, **_) -> None:
+            """Dummy method, to avoid typing issues during initialisation."""
+            pass
 
     class RequestOutput:  # type: ignore[no-redef]
         """Dummy class."""
