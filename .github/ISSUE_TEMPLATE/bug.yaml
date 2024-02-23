@@ -54,7 +54,7 @@ body:
   attributes:
     label: ScandEval version
     description: What version of ScandEval are you using?
-    placeholder: Output of `pip list | grep scandeval`
+    placeholder: Output of `pip list | grep ScandEval`
   validations:
     required: true
 - type: markdown
