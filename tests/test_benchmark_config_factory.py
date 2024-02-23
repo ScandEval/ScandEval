@@ -1,5 +1,7 @@
 """Unit tests for the `benchmark_config_factory` module."""
 
+from typing import Generator
+
 import pytest
 import torch
 from scandeval.benchmark_config_factory import (
@@ -8,11 +10,22 @@ from scandeval.benchmark_config_factory import (
     prepare_languages,
     prepare_tasks_and_datasets,
 )
-from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.enums import Device
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
 from scandeval.tasks import LA, NER, SENT, get_all_tasks
+
+
+@pytest.fixture(scope="module")
+def all_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
+    """Fixture for all linguistic acceptability dataset configurations."""
+    yield [cfg.name for cfg in all_dataset_configs]
+
+
+@pytest.fixture(scope="module")
+def all_la_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
+    """Fixture for all linguistic acceptability dataset configurations."""
+    yield [cfg.name for cfg in all_dataset_configs if LA == cfg.task]
 
 
 @pytest.mark.parametrize(
@@ -88,14 +101,14 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
             None,
             list(get_all_languages().values()),
             list(get_all_tasks().values()),
-            list(get_all_dataset_configs().keys()),
+            "all_dataset_names",
         ),
         (
             "linguistic-acceptability",
             None,
             list(get_all_languages().values()),
             [LA],
-            [cfg.name for cfg in get_all_dataset_configs().values() if LA == cfg.task],
+            "all_la_dataset_names",
         ),
         (
             None,
@@ -152,9 +165,13 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
     ],
 )
 def test_prepare_tasks_and_datasets(
-    input_task, input_dataset, input_languages, expected_task, expected_dataset
+    input_task, input_dataset, input_languages, expected_task, expected_dataset, request
 ):
     """Test the output of `prepare_tasks_and_datasets`."""
+    # This replaces the string with the actual fixture
+    if isinstance(expected_dataset, str):
+        expected_dataset = request.getfixturevalue(expected_dataset)
+
     prepared_tasks, prepared_datasets = prepare_tasks_and_datasets(
         task=input_task, dataset=input_dataset, dataset_languages=input_languages
     )
