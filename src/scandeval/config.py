@@ -213,6 +213,8 @@ class DatasetConfig:
         prompt_label_mapping (optional):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
+        unofficial (optional):
+            Whether the dataset is unofficial. Defaults to False.
     """
 
     name: str
@@ -225,6 +227,7 @@ class DatasetConfig:
     prompt_prefix: str = ""
     num_few_shot_examples: int = 0
     prompt_label_mapping: dict[str, str] = field(default_factory=dict)
+    unofficial: bool = False
 
     @property
     def id2label(self) -> list[str]:

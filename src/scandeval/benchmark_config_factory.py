@@ -260,12 +260,17 @@ def prepare_tasks_and_datasets(
     except KeyError as e:
         raise InvalidBenchmark(f"Task {e} not found in the benchmark tasks.") from e
 
-    all_datasets = list(all_dataset_configs.keys())
+    all_official_datasets = [
+        dataset_name
+        for dataset_name, dataset_config in all_dataset_configs.items()
+        if not dataset_config.unofficial
+    ]
     if dataset is None:
-        dataset = all_datasets
+        dataset = all_official_datasets
     elif isinstance(dataset, str):
         dataset = [dataset]
 
+    all_datasets = list(all_dataset_configs.keys())
     invalid_datasets = set(dataset) - set(all_datasets)
     if invalid_datasets:
         raise InvalidBenchmark(
