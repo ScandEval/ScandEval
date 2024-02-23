@@ -137,7 +137,7 @@ class Benchmarker:
     def __init__(
         self,
         progress_bar: bool = True,
-        save_results: bool = False,
+        save_results: bool = True,
         task: str | list[str] | None = None,
         dataset: list[str] | str | None = None,
         language: str | list[str] = "all",
@@ -169,7 +169,7 @@ class Benchmarker:
                 Whether progress bars should be shown. Defaults to True.
             save_results:
                 Whether to save the benchmark results to
-                'scandeval_benchmark_results.jsonl'. Defaults to False.
+                'scandeval_benchmark_results.jsonl'. Defaults to True.
             task:
                 The tasks benchmark the model(s) on. Mutually exclusive with `dataset`.
                 If both `task` and `dataset` are None then all datasets will be
