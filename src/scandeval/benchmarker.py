@@ -288,22 +288,21 @@ class Benchmarker:
         # Set up the results path
         self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
 
-        # Set up the benchmark results variable, which will be populated with the
-        # contents of the results file if it exists. If not, then it will be an empty
-        # list
-        self.benchmark_results: list[BenchmarkResult] = list()
+        adjust_logging_level(verbose=self.benchmark_config.verbose)
+        self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
+
+    @property
+    def benchmark_results(self) -> list[BenchmarkResult]:
+        """The benchmark results."""
         if self.results_path.exists():
             with self.results_path.open() as f:
-                self.benchmark_results = [
+                return [
                     BenchmarkResult.from_dict(json.loads(line))
                     for line in f
                     if line.strip()
                 ]
         else:
-            self.benchmark_results = list()
-
-        adjust_logging_level(verbose=self.benchmark_config.verbose)
-        self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
+            return list()
 
     def benchmark(
         self,
@@ -511,7 +510,7 @@ class Benchmarker:
             dataset_names=benchmark_config.datasets
         )
 
-        # Iterate over all the models and datasets
+        current_benchmark_results: list[BenchmarkResult] = list()
         for m_id in model_ids:
             m_id = m_id.rstrip(" /")
 
@@ -554,18 +553,16 @@ class Benchmarker:
                     )
                     continue
 
-                # Add the record to the benchmark results
-                assert isinstance(record, BenchmarkResult)
-                self.benchmark_results.append(record)
-
                 # Save the benchmark results
+                assert isinstance(record, BenchmarkResult)
+                current_benchmark_results.append(record)
                 if benchmark_config.save_results:
                     record.append_to_results(results_path=self.results_path)
 
             if benchmark_config.clear_model_cache:
                 clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
 
-        return self.benchmark_results
+        return current_benchmark_results
 
     def _prepare_model_ids(
         self,

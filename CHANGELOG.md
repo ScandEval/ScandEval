@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated `transformers` dependency to `>=4.38.1,<4.39.0`, and `vllm` dependency to
   `>=0.3.2,<0.4.0`. This allows the benchmarking of the new Gemma and OLMO models.
 - When using the `Benchmarker` API, the `save_results` argument now defaults to True.
+- The `Benchmarker.benchmark` method now only returns the list of benchmark results
+  from the given run, rather than all historic benchmark results as well.
 
 
 ## [v11.0.0] - 2024-02-16
