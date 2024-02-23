@@ -12,7 +12,7 @@ import torch
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
-from huggingface_hub.utils import LocalTokenNotFoundError
+from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
 from requests.exceptions import RequestException
 from transformers import (
     AutoConfig,
@@ -100,7 +100,7 @@ class HFModelSetup:
             )
             return True
 
-        except LocalTokenNotFoundError:
+        except (GatedRepoError, LocalTokenNotFoundError):
             try:
                 hf_whoami()
                 raise NeedsAdditionalArgument(
@@ -113,8 +113,6 @@ class HFModelSetup:
                     run_with_cli=self.benchmark_config.run_with_cli
                 )
 
-        # GatedRepoError is a subclass of RepositoryNotFoundError, so this catches
-        # other ways that the model could not be found
         except RepositoryNotFoundError:
             return False
 
