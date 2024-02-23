@@ -1,9 +1,9 @@
-FROM python:3.11-slim-bookworm
+FROM nvidia/cuda:12.2.0-base-ubuntu22.02
 
 # Install dependencies
 RUN apt-get -y update && \
     apt-get -y upgrade && \
-    apt-get install -y gcc python3-dev && \
+    apt-get install -y gcc python3.11 python3-pip python3-dev && \
     python3 -m pip install --upgrade pip && \
     python3 -m pip install scandeval[all]
 
