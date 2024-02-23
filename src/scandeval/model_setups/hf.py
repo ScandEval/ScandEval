@@ -10,7 +10,9 @@ from typing import Type
 
 import torch
 from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
+from huggingface_hub.utils import LocalTokenNotFoundError
 from requests.exceptions import RequestException
 from transformers import (
     AutoConfig,
@@ -28,6 +30,7 @@ from ..exceptions import (
     HuggingFaceHubDown,
     InvalidBenchmark,
     InvalidModel,
+    MissingHuggingFaceToken,
     NeedsAdditionalArgument,
     NeedsExtraInstalled,
     NoInternetConnection,
@@ -502,6 +505,20 @@ class HFModelSetup:
                     f"loaded, as the key {key!r} was not found in the config."
                 )
             except OSError as e:
+                gated_repo = "You are trying to access a gated repo" in str(e)
+                if gated_repo:
+                    try:
+                        hf_whoami()
+                        raise NeedsAdditionalArgument(
+                            cli_argument="--use-token",
+                            script_argument="use_token=True",
+                            run_with_cli=self.benchmark_config.run_with_cli,
+                        )
+                    except LocalTokenNotFoundError:
+                        MissingHuggingFaceToken(
+                            run_with_cli=self.benchmark_config.run_with_cli
+                        )
+
                 raise InvalidModel(
                     f"Couldn't load model config for {model_id!r}. The error was "
                     f"{e!r}. Skipping"

@@ -142,3 +142,36 @@ class NeedsAdditionalArgument(InvalidModel):
                 "argument and try again."
             )
         super().__init__(self.message)
+
+
+class MissingHuggingFaceToken(InvalidModel):
+    """The evaluation requires a Hugging Face token."""
+
+    def __init__(self, run_with_cli: bool):
+        """Initialize the exception.
+
+        Args:
+            run_with_cli:
+                Whether the benchmark is being run with the CLI.
+        """
+        self.message = (
+            "The model you are trying to load requires a Hugging Face token. "
+        )
+        if run_with_cli:
+            self.message += (
+                "Please run `huggingface-cli login` to login to the Hugging Face "
+                "Hub and try again. Alternatively, you can pass your Hugging Face Hub "
+                "token directly to the `scandeval` command with the `--token <token>` "
+                "argument."
+            )
+        else:
+            self.message += (
+                "Please pass your Hugging Face Hub token to the `Benchmarker` class "
+                "with the `token=<token>` argument  to the `Benchmarker` class and try "
+                "again. Alternatively, you can also simply pass `token=True` (which is "
+                "the default) to the `Benchmarker` class, which assumes that you have "
+                "logged into the Hugging Face Hub. This can be done by running "
+                "`huggingface-cli login` in the terminal or `from huggingface_hub "
+                "import login; login()` in a Python script."
+            )
+        super().__init__(self.message)
