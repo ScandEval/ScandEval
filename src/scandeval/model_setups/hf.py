@@ -12,7 +12,7 @@ import torch
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
-from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
+from huggingface_hub.utils import LocalTokenNotFoundError
 from requests.exceptions import RequestException
 from transformers import (
     AutoConfig,
@@ -100,7 +100,7 @@ class HFModelSetup:
             )
             return True
 
-        except GatedRepoError:
+        except LocalTokenNotFoundError:
             try:
                 hf_whoami()
                 raise NeedsAdditionalArgument(
