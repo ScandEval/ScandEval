@@ -89,6 +89,28 @@ models on the Danish sentiment classification task:
 >>> benchmark(task="sentiment-classification", language="da")
 ```
 
+### Benchmarking from Docker
+A Dockerfile is provided in the repo, which can be downloaded and run, without needing
+to clone the repo and installing from source. This can be fetched programmatically by
+running the following:
+```
+$ wget https://raw.githubusercontent.com/ScandEval/ScandEval/main/Dockerfile.cuda
+```
+
+After that, we first build the image:
+```
+$ docker build -t scandeval -f Dockerfile.cuda .
+```
+
+With the Docker image built, we can now evaluate any model as follows:
+```
+$ docker run -e args="<scandeval-arguments>" --gpus all --rm scandeval
+```
+
+Here `<scandeval-arguments>` consists of the arguments added to the `scandeval` CLI
+argument. This could for instance be `--model <model-id> --task
+sentiment-classification`.
+
 
 ## Citing ScandEval
 If you want to cite the framework then feel free to use this:
