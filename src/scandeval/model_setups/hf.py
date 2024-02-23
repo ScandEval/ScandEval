@@ -505,8 +505,8 @@ class HFModelSetup:
                     f"loaded, as the key {key!r} was not found in the config."
                 )
             except OSError as e:
-                gated_repo = "You are trying to access a gated repo" in str(e)
-                if gated_repo:
+                gated_model = "You are trying to access a gated repo" in str(e)
+                if gated_model:
                     try:
                         hf_whoami()
                         raise NeedsAdditionalArgument(
