@@ -6,6 +6,7 @@ from typing import Dict, List, Union
 
 import pandas as pd
 import requests
+from datasets import Split
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from huggingface_hub.hf_api import HfApi
@@ -15,7 +16,6 @@ from tqdm.auto import tqdm
 
 def main():
     """Create the NorNE-mini NER datasets and uploads them to the HF Hub."""
-
     # Define the base download URLs
     base_urls = dict(
         nb="https://github.com/UniversalDependencies/UD_Norwegian-Bokmaal/raw/master/"
@@ -121,9 +121,9 @@ def main():
 
             # Collect datasets in a dataset dictionary
             dataset = DatasetDict(
-                train=Dataset.from_pandas(train_df, split="train"),
-                val=Dataset.from_pandas(val_df, split="val"),
-                test=Dataset.from_pandas(test_df, split="test"),
+                train=Dataset.from_pandas(train_df, split=Split.TRAIN),
+                val=Dataset.from_pandas(val_df, split=Split.VALIDATION),
+                test=Dataset.from_pandas(test_df, split=Split.TEST),
                 full_train=Dataset.from_pandas(full_train_df, split="full_train"),
             )
 

@@ -4,6 +4,7 @@ import itertools as it
 import json
 import logging
 import random
+import re
 from copy import deepcopy
 from functools import partial
 from typing import Any
@@ -16,10 +17,20 @@ from transformers.data.data_collator import DataCollatorForTokenClassification
 from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import GENERATIVE_MODEL_TASKS, model_is_generative
+from .types import Labels, Predictions
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    model_is_generative,
+    raise_if_model_output_contains_nan_values,
+)
+
+try:
+    import demjson3
+except ImportError:
+    demjson3 = None
 
 logger = logging.getLogger(__package__)
 
@@ -60,14 +71,12 @@ class NamedEntityRecognition(BenchmarkDataset):
         return dataset_dict
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
         Args:
-            predictions_and_labels:
+            model_outputs_and_labels:
                 The first array contains the probability predictions and the second
                 array contains the true labels.
             id2label:
@@ -78,6 +87,8 @@ class NamedEntityRecognition(BenchmarkDataset):
             values.
         """
         model_outputs, labels = model_outputs_and_labels
+
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
 
         predictions: list[list[str]]
         if not isinstance(model_outputs[0][0], str):
@@ -98,9 +109,11 @@ class NamedEntityRecognition(BenchmarkDataset):
             ]
             labels = [
                 [
-                    id2label[lbl_id]
-                    if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
-                    else lbl_id
+                    (
+                        id2label[lbl_id]
+                        if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
+                        else lbl_id
+                    )
                     for lbl_id in label  # type: ignore[call-overload]
                     if lbl_id != -100
                 ]
@@ -145,12 +158,41 @@ class NamedEntityRecognition(BenchmarkDataset):
                     labels_no_misc[i][j] = "o"  # type: ignore[call-overload]
 
         # Compute the metrics
-        results = self._metrics["micro_f1"].compute(
-            predictions=predictions, references=labels
+        # We manually set the F1 metric to be 100% if both the labels and the models
+        # have no NER tags in them, since this causes an error with the `compute`
+        # method otherwise
+        predictions_all_zero = all(
+            all(ner_tag == "o" for ner_tag in prediction_list)
+            for prediction_list in predictions
         )
-        results_no_misc = self._metrics["micro_f1_no_misc"].compute(
-            predictions=predictions_no_misc, references=labels_no_misc
+        labels_all_zero = all(
+            all(ner_tag == "o" for ner_tag in label_list) for label_list in labels
         )
+        if predictions_all_zero and labels_all_zero:
+            results = dict(overall_f1=1.0)
+        else:
+            results = self._metrics["micro_f1"].compute(
+                predictions=predictions, references=labels
+            )
+
+        # Compute the metrics without MISC tags
+        # We manually set the F1 metric to be 100% if both the labels and the models
+        # have no NER tags in them, since this causes an error with the `compute`
+        # method otherwise
+        predictions_no_misc_all_zero = all(
+            all(ner_tag == "o" for ner_tag in prediction_list)
+            for prediction_list in predictions_no_misc
+        )
+        labels_no_misc_all_zero = all(
+            all(ner_tag == "o" for ner_tag in label_list)
+            for label_list in labels_no_misc
+        )
+        if predictions_no_misc_all_zero and labels_no_misc_all_zero:
+            results_no_misc = dict(overall_f1=1.0)
+        else:
+            results_no_misc = self._metrics["micro_f1_no_misc"].compute(
+                predictions=predictions_no_misc, references=labels_no_misc
+            )
 
         # Raise error if the metrics are invalid
         if results is None or results_no_misc is None:
@@ -159,8 +201,8 @@ class NamedEntityRecognition(BenchmarkDataset):
             )
 
         return dict(
-            micro_f1=results["overall_f1"],
             micro_f1_no_misc=results_no_misc["overall_f1"],
+            micro_f1=results["overall_f1"],
         )
 
     def _tokenize_and_align_labels(
@@ -182,10 +224,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         # Tokenize the texts. We use the `is_split_into_words` argument here because
         # the texts in our dataset are lists of words (with a label for each word)
         tokenized_inputs = tokenizer(
-            examples["tokens"],
-            is_split_into_words=True,
-            truncation=True,
-            padding=True,
+            examples["tokens"], is_split_into_words=True, truncation=True, padding=True
         )
 
         # Extract a mapping between all the tokens and their corresponding word. If the
@@ -222,9 +261,7 @@ class NamedEntityRecognition(BenchmarkDataset):
 
                 # Replace UNK tokens with the correct word
                 tokens = self._handle_unk_tokens(
-                    tokenizer=tokenizer,
-                    tokens=tokens,
-                    words=words,
+                    tokenizer=tokenizer, tokens=tokens, words=words
                 )
 
                 # Get list of special tokens. Some tokenizers do not record these
@@ -383,18 +420,19 @@ class NamedEntityRecognition(BenchmarkDataset):
                     self._apply_few_shot_prompt, few_shot_examples=few_shot_examples
                 )
                 dataset = dataset.map(
-                    few_shot_fn, batched=True, load_from_cache_file=False
+                    few_shot_fn,
+                    batched=True,
+                    load_from_cache_file=False,
+                    keep_in_memory=True,
                 )
 
             def tokenise(examples: dict) -> BatchEncoding:
                 return kwargs["tokenizer"](
-                    text=examples["text"],
-                    truncation=True,
-                    padding=False,
+                    text=examples["text"], truncation=True, padding=False
                 )
 
             tokenised_dataset = dataset.map(
-                tokenise, batched=True, load_from_cache_file=False
+                tokenise, batched=True, load_from_cache_file=False, keep_in_memory=True
             )
 
         else:
@@ -404,7 +442,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                 label2id=kwargs["hf_model_config"].label2id,
             )
             tokenised_dataset = dataset.map(
-                map_fn, batched=True, load_from_cache_file=False
+                map_fn, batched=True, load_from_cache_file=False, keep_in_memory=True
             )
 
         return tokenised_dataset
@@ -467,9 +505,12 @@ class NamedEntityRecognition(BenchmarkDataset):
         # examples
         while len(few_shot_examples) < num_few_shots:
             label = next(labels)
-            example = shuffled_train.filter(
+            possible_examples = shuffled_train.filter(
                 lambda x: label in [tag.lower() for tag in x["labels"]]
-            ).select(range(1))[0]
+            )
+            if len(possible_examples) == 0:
+                continue
+            example = possible_examples.select(range(1))[0]
             few_shot_examples.append(example)
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]
@@ -480,7 +521,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -489,15 +530,16 @@ class NamedEntityRecognition(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
-            dict:
-                The examples with the few-shot prompt applied.
+            The examples with the few-shot prompt applied.
         """
 
         def create_label(example: dict) -> str:
             labels: dict[str, list[str]] = {
-                prompt_label: []
+                prompt_label: list()
                 for prompt_label in self.dataset_config.prompt_label_mapping.values()
             }
             for token, label in zip(example["tokens"], example["labels"]):
@@ -509,12 +551,12 @@ class NamedEntityRecognition(BenchmarkDataset):
                     labels[prompt_label].append(token)
                 elif label.startswith("i-"):
                     labels[prompt_label][-1] += " " + token
-            return json.dumps(labels)
+            return json.dumps(labels, ensure_ascii=False)
 
         # Build the few-shot part of the prompt
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=" ".join(example["tokens"]),
+                text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                 label=create_label(example),
             )
             for example in few_shot_examples
@@ -526,7 +568,9 @@ class NamedEntityRecognition(BenchmarkDataset):
 
         # Add the texts from the examples to the prompts
         new_prompts = [
-            self.dataset_config.prompt_template.format(text=" ".join(tokens), label="")
+            self.dataset_config.prompt_template.format(
+                text=" ".join(tokens).replace("\n", " ").strip(), label=""
+            )
             for tokens in examples["tokens"]
         ]
         examples["text"] = [
@@ -556,11 +600,24 @@ class NamedEntityRecognition(BenchmarkDataset):
             list:
                 The predicted labels.
         """
+        if demjson3 is None:
+            raise NeedsExtraInstalled(extra="generative")
+
         raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output["sequences"],
-            tokenizer=tokenizer,
-            dataset_config=self.dataset_config,
+            generated_sequences=model_output["sequences"], tokenizer=tokenizer
         )
+
+        # Attempt to extract the JSON dictionary from the predictions
+        json_regex = r"\{.+?\}"
+        json_matches = [
+            re.search(pattern=json_regex, string=raw_prediction, flags=re.DOTALL)
+            or raw_prediction
+            for raw_prediction in raw_predictions
+        ]
+        raw_predictions = [
+            json_match.group() if isinstance(json_match, re.Match) else json_match
+            for json_match in json_matches
+        ]
 
         tokens = input_batch["tokens"]
         predicted_labels: list[list[str]] = [
@@ -568,7 +625,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         ]
         for idx, raw_prediction in enumerate(raw_predictions):
             try:
-                json_output = json.loads(raw_prediction)
+                json_output = demjson3.decode(txt=raw_prediction)
                 if not isinstance(json_output, dict):
                     if self.benchmark_config.is_main_process:
                         logger.debug(
@@ -593,7 +650,11 @@ class NamedEntityRecognition(BenchmarkDataset):
                         )
                     continue
                 prediction_dict: dict[str, list[str]] = json_output
-            except json.JSONDecodeError:
+            except demjson3.JSONDecodeError:
+                logger.debug(
+                    "The model output is not valid JSON, so cannot parse it. Skipping. "
+                    f"Here is the output: {raw_prediction!r}"
+                )
                 continue
 
             prompt_label_mapping = self.dataset_config.prompt_label_mapping

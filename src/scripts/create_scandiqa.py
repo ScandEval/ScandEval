@@ -8,11 +8,16 @@ from datasets.load import load_dataset
 from datasets.splits import Split
 from huggingface_hub.hf_api import HfApi
 from requests.exceptions import HTTPError
+from scripts.constants import (
+    MAX_NUM_CHARS_IN_CONTEXT,
+    MAX_NUM_CHARS_IN_QUESTION,
+    MIN_NUM_CHARS_IN_CONTEXT,
+    MIN_NUM_CHARS_IN_QUESTION,
+)
 
 
 def main() -> None:
     """Create the ScandiQA-mini datasets and upload them to the HF Hub."""
-
     dataset_id = "alexandrainst/scandi-qa"
 
     # Iterate over the Danish, Norwegian and Swedish languages
@@ -33,11 +38,21 @@ def main() -> None:
         # Ensure that `df` is indeed a Pandas DataFrame
         assert isinstance(df, pd.DataFrame)
 
-        # Extract information on which examples contain an answer
-        has_answer: pd.Series = df.answers.map(lambda dct: dct["text"][0] != "")
+        # Only work with samples where the context is not very large or small
+        lengths = df.context.str.len()
+        df = df[lengths.between(MIN_NUM_CHARS_IN_CONTEXT, MAX_NUM_CHARS_IN_CONTEXT)]
+
+        # Only work with samples where the context is not very large or small
+        lengths = df.question.str.len()
+        df_with_no_outliers = df[
+            lengths.between(MIN_NUM_CHARS_IN_QUESTION, MAX_NUM_CHARS_IN_QUESTION)
+        ]
 
         # Only work with the questions having answers in the context
-        df_with_answer: pd.DataFrame = df.loc[has_answer]
+        has_answer: pd.Series = df_with_no_outliers.answers.map(
+            lambda dct: dct["text"][0] != ""
+        )
+        df_with_answer: pd.DataFrame = df_with_no_outliers.loc[has_answer]
 
         # Create validation split
         val_size = 256

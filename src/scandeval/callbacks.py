@@ -1,5 +1,6 @@
 """Callbacks for the Hugging Face Trainer."""
 
+import sys
 from collections.abc import Sized
 
 from tqdm.auto import tqdm
@@ -7,28 +8,32 @@ from transformers.trainer_callback import ProgressCallback
 
 
 class NeverLeaveProgressCallback(ProgressCallback):
-    """Progress callback which never leaves the progress bar"""
+    """Progress callback which never leaves the progress bar."""
 
-    def __init__(self, *args, testing: bool = False, **kwargs):
+    def __init__(self, *args, **kwargs):
+        """Initialise the callback."""
         super().__init__(*args, **kwargs)
-        self.testing = testing
 
     def on_train_begin(self, args, state, control, **kwargs):
-        if state.is_world_process_zero:
+        """Callback actions when training begins."""
+        if state.is_local_process_zero:
+            desc = "Finetuning model"
             self.training_bar = tqdm(
                 total=None,
                 leave=False,
-                desc="Finetuning model",
-                disable=self.testing,
+                desc=desc,
+                disable=hasattr(sys, "_called_from_test"),
             )
         self.current_step = 0
 
     def on_step_end(self, args, state, control, **kwargs):
-        if state.is_world_process_zero:
+        """Callback actions when a training step ends."""
+        if state.is_local_process_zero:
             self.training_bar.update(state.global_step - self.current_step)
             self.current_step = state.global_step
 
     def on_prediction_step(self, args, state, control, eval_dataloader=None, **kwargs):
+        """Callback actions when a prediction step ends."""
         if eval_dataloader is None:
             return
         correct_dtype = isinstance(eval_dataloader.dataset, Sized)
@@ -39,6 +44,6 @@ class NeverLeaveProgressCallback(ProgressCallback):
                     total=len(eval_dataloader),
                     leave=False,
                     desc=desc,
-                    disable=self.testing,
+                    disable=hasattr(sys, "_called_from_test"),
                 )
             self.prediction_bar.update(1)

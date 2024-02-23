@@ -4,6 +4,7 @@ import io
 
 import pandas as pd
 import requests
+from datasets import Split
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from huggingface_hub.hf_api import HfApi
@@ -13,7 +14,6 @@ from sklearn.model_selection import train_test_split
 
 def main() -> None:
     """Create the SweReC-mini sentiment dataset and upload it to the HF Hub."""
-
     # Define the base download URL
     url = (
         "https://github.com/stoffesvensson/DeepLearning-ThesisWork-Convolutional/"
@@ -55,9 +55,9 @@ def main() -> None:
 
     # Collect datasets in a dataset dictionary
     dataset = DatasetDict(
-        train=Dataset.from_pandas(train_df, split="train"),
-        val=Dataset.from_pandas(val_df, split="val"),
-        test=Dataset.from_pandas(test_df, split="test"),
+        train=Dataset.from_pandas(train_df, split=Split.TRAIN),
+        val=Dataset.from_pandas(val_df, split=Split.VALIDATION),
+        test=Dataset.from_pandas(test_df, split=Split.TEST),
     )
 
     # Create dataset ID

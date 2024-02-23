@@ -1,56 +1,137 @@
 """Unit tests for the `sequence_classification` module."""
 
-import pytest
+import os
+from contextlib import nullcontext as does_not_raise
+from typing import Generator
 
+import pytest
+from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
     ANGRY_TWEETS_CONFIG,
+    DANISH_CITIZEN_TESTS_CONFIG,
+    DANSKE_TALEMAADER_CONFIG,
+    DUTCH_SOCIAL_CONFIG,
+    HELLASWAG_CONFIG,
+    HELLASWAG_DA_CONFIG,
+    HELLASWAG_DE_CONFIG,
+    HELLASWAG_IS_CONFIG,
+    HELLASWAG_NL_CONFIG,
+    HELLASWAG_NO_CONFIG,
+    HELLASWAG_SV_CONFIG,
+    MMLU_CONFIG,
+    MMLU_DE_CONFIG,
+    MMLU_IS_CONFIG,
+    MMLU_NL_CONFIG,
+    MMLU_NO_CONFIG,
+    MMLU_SV_CONFIG,
     NOREC_CONFIG,
+    SB10K_CONFIG,
     SCALA_DA_CONFIG,
+    SCALA_DE_CONFIG,
+    SCALA_EN_CONFIG,
+    SCALA_FO_CONFIG,
+    SCALA_IS_CONFIG,
     SCALA_NB_CONFIG,
+    SCALA_NL_CONFIG,
     SCALA_NN_CONFIG,
     SCALA_SV_CONFIG,
+    SST5_CONFIG,
     SWEREC_CONFIG,
 )
+from scandeval.exceptions import InvalidBenchmark
 from scandeval.sequence_classification import SequenceClassification
+from scandeval.utils import GENERATIVE_DATASET_TASKS
 
 
-@pytest.mark.parametrize(
-    argnames=["dataset", "correct_scores"],
-    argvalues=[
-        (ANGRY_TWEETS_CONFIG, (-4.43, 23.00)),
-        (SWEREC_CONFIG, (0.00, 23.07)),
-        (NOREC_CONFIG, (2.32, 25.12)),
-        (SCALA_DA_CONFIG, (3.69, 36.61)),
-        (SCALA_SV_CONFIG, (2.85, 36.84)),
-        (SCALA_NB_CONFIG, (0.00, 30.71)),
-        (SCALA_NN_CONFIG, (0.00, 33.39)),
+@pytest.fixture(
+    scope="module",
+    params=[
+        ANGRY_TWEETS_CONFIG,
+        SWEREC_CONFIG,
+        NOREC_CONFIG,
+        SB10K_CONFIG,
+        DUTCH_SOCIAL_CONFIG,
+        SST5_CONFIG,
+        SCALA_DA_CONFIG,
+        SCALA_SV_CONFIG,
+        SCALA_NB_CONFIG,
+        SCALA_NN_CONFIG,
+        SCALA_IS_CONFIG,
+        SCALA_FO_CONFIG,
+        SCALA_DE_CONFIG,
+        SCALA_NL_CONFIG,
+        SCALA_EN_CONFIG,
+        DANSKE_TALEMAADER_CONFIG,
+        DANISH_CITIZEN_TESTS_CONFIG,
+        MMLU_SV_CONFIG,
+        MMLU_NO_CONFIG,
+        MMLU_IS_CONFIG,
+        MMLU_DE_CONFIG,
+        MMLU_NL_CONFIG,
+        MMLU_CONFIG,
+        HELLASWAG_DA_CONFIG,
+        HELLASWAG_SV_CONFIG,
+        HELLASWAG_NO_CONFIG,
+        HELLASWAG_IS_CONFIG,
+        HELLASWAG_DE_CONFIG,
+        HELLASWAG_NL_CONFIG,
+        HELLASWAG_CONFIG,
     ],
     ids=[
         "angry-tweets",
         "swerec",
         "norec",
+        "sb10k",
+        "dutch-social",
+        "sst5",
         "scala-da",
         "scala-sv",
         "scala-nb",
         "scala-nn",
+        "scala-is",
+        "scala-fo",
+        "scala-de",
+        "scala-nl",
+        "scala-en",
+        "danske-talemaader",
+        "danish-citizen-tests",
+        "mmlu-sv",
+        "mmlu-no",
+        "mmlu-is",
+        "mmlu-de",
+        "mmlu-nl",
+        "mmlu",
+        "hellaswag-da",
+        "hellaswag-sv",
+        "hellaswag-no",
+        "hellaswag-is",
+        "hellaswag-de",
+        "hellaswag-nl",
+        "hellaswag",
     ],
-    scope="class",
 )
-class TestScores:
-    @pytest.fixture(scope="class")
-    def scores(self, benchmark_config, model_id, dataset):
-        benchmark = SequenceClassification(
-            dataset_config=dataset,
-            benchmark_config=benchmark_config,
-        )
-        yield benchmark.benchmark(model_id)[0]["total"]
+def benchmark_dataset(
+    benchmark_config, request
+) -> Generator[BenchmarkDataset, None, None]:
+    """Yields a sequence classification benchmark dataset."""
+    yield SequenceClassification(
+        dataset_config=request.param, benchmark_config=benchmark_config
+    )
 
-    def test_mcc_is_correct(self, scores, correct_scores):
-        min_score = scores["test_mcc"] - scores["test_mcc_se"]
-        max_score = scores["test_mcc"] + scores["test_mcc_se"]
-        assert min_score <= correct_scores[0] <= max_score
 
-    def test_macro_f1_is_correct(self, scores, correct_scores):
-        min_score = scores["test_macro_f1"] - scores["test_macro_f1_se"]
-        max_score = scores["test_macro_f1"] + scores["test_macro_f1_se"]
-        assert min_score <= correct_scores[1] <= max_score
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
+def test_encoder_benchmarking(benchmark_dataset, model_id):
+    """Test that the encoder can be benchmarked on sequence classification datasets."""
+    if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
+        with pytest.raises(InvalidBenchmark):
+            benchmark_dataset.benchmark(model_id)
+    else:
+        with does_not_raise():
+            benchmark_dataset.benchmark(model_id)
+
+
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
+def test_decoder_sequence_benchmarking(benchmark_dataset, generative_model_id):
+    """Test that the decoder can be benchmarked on sequence classification datasets."""
+    with does_not_raise():
+        benchmark_dataset.benchmark(generative_model_id)

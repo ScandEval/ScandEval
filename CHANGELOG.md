@@ -2,10 +2,372 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on
-[Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-and this project adheres to
-[Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+
+## [Unreleased]
+### Added
+- Now automatically uses multiple GPUs when evaluating generative models with vLLM.
+
+### Changed
+- Computation of the BERTScore metric for summarisation tasks are now using the device
+  stated in the benchmark config, making the metric computation significantly faster if
+  a GPU is being used. This defaults to processing 32 samples at a time, which is
+  reduced if OOM errors occur. If OOM errors occur with a batch size of 1 then the
+  scores are computed on CPU, as before.
+
+
+## [v11.0.0] - 2024-02-16
+### Added
+- Added arguments to `Benchmarker.benchmark` (or simply `Benchmarker.__call_`),
+  corresponding to the same arguments during initialisation. The idea here is that the
+  default parameters are set during initialisation, and then any of these can be
+  changed if needed when performing a concrete evaluation, without having to
+  re-initialise the `Benchmarker`.
+- Added the Danish knowledge datasets `danske-talemaader` and `danish-citizen-tests`.
+  Both are multiple choice datasets, where the first one tests knowledge about Danish
+  idioms, and the second one tests knowledge about the Danish society. These replace
+  the machine translated MMLU-da dataset.
+- Added a `--num-iterations` flag (`num_iterations` in the Python CLI), which controls
+  the number of times each model should be evaluated, defaulting to the usual 10
+  iterations. This is only meant to be changed for power users, and if it is changed
+  then the resulting scores will not be included in the leaderboards.
+
+### Changed
+- The default value of the languages are now all languages, rather than only Danish,
+  Swedish and Norwegian.
+- Changed all summarisation datasets to use one few-shot example (some were set to 2),
+  and increased the maximum amount of generated tokens to 256 rather than the previous
+  128, since many of the gold standard summaries are around 200 tokens.
+
+### Fixed
+- There was an error caused if an old version of the `openai` package was installed and
+  if the `scandeval` package was checking if a model exists as an OpenAI model. Now an
+  informative error is thrown if the model is not found on any available platforms, as
+  well as noting the extras that are missing, which prevents the package from checking
+  existence on those platforms.
+- Changed the prompt for the English sentiment classification dataset SST5, where it
+  previously stated that the documents were tweets - these have now been renamed to
+  "texts".
+- Correctly assess whether the `openai` extra should be used, which made it impossible
+  to benchmark OpenAI models.
+- Disabled `lmformatenforcer` logging, which happens in the rare case when we're
+  few-shot evaluating a model on NER and there are no JSON-valid tokens to generate.
+
+### Removed
+- Removed all machine translated ARC datasets, as they had a near 100% correlation with
+  the machine translated version of the MMLU datasets.
+
+
+## [v10.0.1] - 2024-02-12
+### Fixed
+- A prefix space was added to labels in sequence classification tasks that
+  automatically adds a prefix space (such as Mistral). We now check for this and ensure
+  to only manually add prefix space to models that don't automatically do this (such as
+  the Yi models).
+
+
+## [v10.0.0] - 2024-02-12
+### Added
+- Now throws a more informative error when attempting to benchmark a non-generative
+  model on a generative task.
+
+### Changed
+- Many dependencies are now optional, to make the package less bloated. These extras
+  are `jax`, for models based on the JAX framework, `generative` for evaluating
+  generative models, `olmo` for models based on the OLMO architecture, `openai` for
+  evaluating OpenAI models, and `all` to install all of them.
+- Updated many dependencies. In particular now uses `openai` version 1.x.x, which
+  required some changes to the code base as they changed their API.
+- Changed the `--dataset-task` CLI argument (`dataset_task` in the Python API) to
+  `--task` (`task`). This is now the preferred way to choose what to benchmark a model
+  on, rather than remembering all the names of the datasets. E.g., to benchmark a model
+  on all Danish question-answering datasets, we call `scandeval -m <model_id> -l da -t
+  question-answering`. All the names of the tasks is shown in `scandeval --help`.
+- Renamed the `--no-ignore-duplicates` to `--force` (shorthand: `-f`), which _forces_
+  the evaluation, meaning that it evaluates the model even if it has previously been
+  evaluated.
+- Renamed the `--model-id` to `--model`.
+
+### Fixed
+- Error when encoding a batch of size 1 with OpenAI models.
+- Error when benchmarking OpenAI models on MacOS due to the `tiktoken.Encoding` object
+  not being picklable.
+- Fixed an issue with OOM errors when changing from benchmarking one generative model
+  to another.
+- Now allows loading tokenisers that require remote code, if `--trust-remote-code` has
+  been set.
+- Fixed an issue where the `max_sequence_length` parameter in the Hugging Face model
+  configuration wasn't used to determine the `max_model_len` parameter in the
+  `vllm.LLM` initialisation, causing some models not being loaded in vLLM.
+- An error occured if a tokenizer had no defined BOS token, which happens for some
+  generative models. It is now set to be equal to the EOS token in that case.
+- Fixed error related to the extraction of predicted labels in sequence classification
+  tasks for generative models, which unfairly evaluated generative models that require
+  a prefix space on the labels (which are most of them currently).
+
+### Removed
+- Removed the `-d` shorthand for `--dataset` in the CLI, to encourage the use of `-t`
+  (`--task`) and `-l` (`--language`) instead.
+
+
+## [v9.3.2] - 2024-02-05
+### Fixed
+- Using model revisions did not work with vLLM models - this has now been fixed. These
+  revisions are specified using the '@' operator in the model ID, e.g., `scandeval -m
+  gpt2@main`.
+
+
+## [v9.3.1] - 2024-01-31
+### Fixed
+- The prompts were not stripped correctly, causing bad evaluations for sequence
+  classification tasks.
+
+
+## [v9.3.0] - 2024-01-29
+### Changed
+- Now requires `transformers` versions `4.37.x`. As they often introduce breaking
+  changes in minor versions, we now only allow a patch version difference and manually
+  update to `4.38.x` when it comes out.
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+- Removed speculative ngram sampling again, as `transformers` now requires the batch
+  size to be 1, which doesn't make it any faster than normal.
+- Swapped primary/secondary metrics for the multiple choice tasks, where we now set MCC
+  as the primary metric and accuracy and secondary. This is due to the fact that MCC
+  handles class imbalance better.
+- Number of generated tokens for sequence classification tasks has been changed back to
+  3 (from 1). This makes no difference to open source models, as we only use the
+  logprobs from the first token anyway, but it *does* make a difference to closed
+  source models where the logprobs are not available (like OpenAI's chat models), as
+  we're instead calculating word edit distance to the labels.
+
+### Fixed
+- Prevents FP16 overflow by using -1e3 instead of -1e9 for ~0% probability logprobs
+  during generation with vLLM.
+- Avoids excessive disk usage by not caching processed datasets to disk, as we are
+  never using the cached versions anyway.
+- We now only strip the prompts if the model's tokenizer includes a prefix space when
+  tokenizing the labels.
+- When testing a model's maximum sequence length, we put dummy inputs into them. This
+  causes errors if the dummy inputs are one of the special tokens. Since the special
+  tokens have not always been set up in the tokenizer, we instead rely on a heuristic
+  that the 100th token ID is not a special token.
+- An import depended on `vllm`, which is not installed on non-Linux devices, causing an
+  `ImportError`. This has now been removed.
+- Fixed an issue where structured generation wasn't triggered when vLLM wasn't
+  available.
+
+
+## [v9.2.0] - 2024-01-24
+### Added
+- Added (the English) datasets MMLU, ARC and HellaSwag, as well as Norwegian and
+  Icelandic translations of it. Now the `knowledge` and `common-sense-reasoning` tasks
+  are covered in all supported languages except Faroese (i.e., da, sv, no, is, de, nl &
+  en).
+- Now uses speculative ngram sampling for text generation when vLLM is not available.
+  This has no effect on performance and increases evaluation speed by 3x on generation
+  heavy tasks like NER and summarization.
+- Added structured generation for the NER task, which enables the models to (almost)
+  always output correct JSON, separating the NER capabilities from the JSON
+  capabilities. JSON can be tested separately in a (future) coding benchmark.
+- Now adds `scandeval_version` to the output JSONL results, to make it easier to
+  determine when outdated results need re-benchmarking.
+
+### Changed
+- Swapped primary/secondary metrics for the NER task, as the `MISC` tag varies too much
+  from dataset to dataset to be meaningful as a primary metric. Now uses micro-average
+  F1-score across all tags except the `MISC` tag as a primary metric.
+
+### Fixed
+- There was a bug where all models were removed from disk prior to benchmarking. This
+  will now only happen if the `--clear-model-cache` flag is set.
+- The `vllm` package cannot be installed when CUDA is not available - this is now
+  neither installed nor used when this is the case, and generative few-shot evaluation
+  is done using the `transformers` package rather than `vllm`.
+- Previously `temperature` was wrongly not set for vLLM and OpenAI models, instead
+  defaulting to their 1.0 values. This was due to the fact that this is set in
+  `transformers` using the `do_sample=False` argument, which doesn't transfer to the
+  other libraries. This has now been set to 0.0.
+- Now catches OpenAI `InvalidRequestError`s.
+- Removed overly long or repetitive samples in the multiple choice datasets, which
+  caused errors when evaluating OpenAI models on them.
+- Now sets the `top_k` parameter in the vLLM `SamplingParams` based on the value it has
+  in the `GenerationConfig`. This caused a discrepancy, as vLLM defaulted to -1 and
+  `transformers` to 50.
+- When loading a model using `transformers` then the quantized compute dtype is now
+  correctly set to either `bfloat16` or `float16`, depending on the GPU available,
+  rather than the previous `float32`. This does not affect generation performance.
+- Fixed formatting of summarization metrics.
+- Removed print output from `bert_score` during summarization metric computation.
+- Now clears GPU memory properly after finishing the benchmark of a generative model
+  with vLLM.
+
+
+## [v9.1.2] - 2024-01-16
+### Fixed
+- When checking if a model has already been benchmarked, we only care about the
+  `few_shot` parameter if the model is generative.
+
+
+## [v9.1.1] - 2024-01-15
+### Fixed
+- Now adds a `generative` key to the logged results, to enable parsing few-shot
+  evaluated models correctly when building leaderboards.
+
+
+## [v9.1.0] - 2024-01-14
+### Changed
+- Now only stores the top-10 log probabilities of generated tokens when the generation
+  length is less than 8 tokens. Also now keeps separate caches for each (model,
+  dataset) combination, where it previously had a single cache for each model. Both of
+  these help reduce the memory usage of the model output cache.
+- Optimised cache saving/loading a bit, making the waiting time in between iterations
+  slightly shorter.
+- Removes the model output cache for a (model, dataset) combination when the
+  benchmarking of the model on the dataset finishes successfully. Also removed indents
+  in model output cache JSON files. Both of these help reducing the disk space used on
+  caching.
+
+### Fixed
+- Only require generative models to output logprobs if the dataset is of a task that
+  requires it. This caused the benchmarking to use excessive memory when benchmarking
+  datasets that require long generative outputs, such as NER.
+
+### Removed
+- Removed some vLLM logging.
+
+
+## [v9.0.0] - 2024-01-12
+### Added
+- Now caches the completions of open source generative models, which effectively makes
+  benchmarking of these ~33% faster. We cannot store all logits for storage reasons (it
+  quickly gets >100GB in that case), so we instead store the top-100 logits for each
+  generated token, but only if the generated sequence is shorter than 50 tokens. We
+  thus assume that (a) these are the only logits needed, and (b) that the generations
+  don't change. We argue that (a) is the case since we only use the logits in
+  classification tasks, in which case we only use the first token anyway. Further,
+  since we're using a temperature of 0 anyway, the generations will be as close to
+  deterministic as possible (up to small rounding fluctuations of logits, which is
+  negligible). This is a breaking change, since it is not compatible with the previous
+  way we cached OpenAI model outputs.
+- Added a new `--clear-model-cache` flag, which removes the cached models after
+  finishing the benchmarking of each model, to save disk space. This doesn't remove the
+  cached model outputs or datasets.
+- Added the following new datasets:
+    - `fone`, a Faroese NER dataset, which replaces the previous `wikiann-fo` dataset.
+    - `dansk`, a Danish NER dataset, which replaces the previous `dane` dataset.
+    - `norquad`, a Norwegian question answering dataset, which replaces the previous
+      `scandiqa-no` dataset.
+    - Danish, Swedish, German and Dutch versions of the MMLU, ARC and HellaSwag
+      datasets, testing knowledge and common sense reasoning of generative models.
+      These have been machine translated by the University of Oregon using
+      GPT-3.5-turbo. Machine translation is not adequate, of course, so see this as a
+      first version of these kinds of evaluations, to get some benchmarks going asap.
+    - `squad-nl`, a Dutch extract question answering dataset, which is a machine
+      translated version of SQuAD-v2. As with the datasets mentioned above, this is
+      meant as a first version of a Dutch QA dataset, until we have a better one
+      available.
+- Added `--only-validation-split` flag, which only benchmarks the model on the
+  validation split, which is 5-10x smaller than the test split (depending on the
+  dataset). This is especially useful with paid models like OpenAI models. The value of
+  this flag is stored in the benchmark results, so this will be visible on
+  leaderboards.
+- Now uses vLLM as the underlying engine for few-shot evaluating generative models,
+  which drastically improves the evaluation speed, as well as requiring less GPU
+  memory.
+
+### Changed
+- Now compatible with`transformers >= 4.36.2`, and this is required now as they have
+  changed their generation API in a breaking manner.
+- Now removes all newlines from texts in the summarization task, where previously these
+  were merely "squashed" to single newlines. This makes the separation of few-shot
+  examples for generative models easier.
+- Also removes newlines from the NER task, where these were not removed at all
+  previously.
+- Now doesn't force ASCII characters in the NER task for generative models, making the
+  target JSON dictionary more consistent with the input text.
+- If a model is stored in the Safetensors format on Hugging Face Hub, then we read out
+  the number of parameters directly from those files. This results in more accurate
+  parameter counts as opposed to loading in the model in 4-bit and counting manually.
+- Samples with excessively short or long texts have been removed.
+- Adjusted number of few-shot examples in datasets to ensure that the resulting prompt
+  is at most ~3000 tokens long.
+- When timeout errors occur when loading a model then we will try again at most 5 times
+  now, where previously we would attempt to re-load it indefinitely.
+
+### Fixed
+- Removed `text2text-generation` temporarily from the tags defining generative models,
+  since we do not support the benchmarking of these yet. This will be added back in as
+  soon as we support them.
+- Now catches `OSError`s when loading Hugging Face model configurations, which happen
+  when there is no `config.json` file in the model repo.
+- When sampling few-shot examples for question answering tasks we previously sampled
+  among examples with context length less than 1024 characters, to keep the prompt
+  short. This is too small for some datasets, so now we dynamically set this threshold
+  based on the dataset itself, starting from 512 and doubling until we have at least
+  the number of desired few-shot examples to choose from.
+- Now only sets `torch_dtype` is CUDA is available, as otherwise errors are caused.
+- Previously text generation in a batch would be stopped if any of the samples in the
+  batch reached the stopping criteria, causing a lot of incomplete completions. Now
+  the model continues to generate text until the entire batch is complete, and the
+  excess generation is removed afterwards.
+- When benchmarking encoder models on QA tasks the contexts are split up if they exceed
+  the model's context length. The stride value used caused errors in rare cases where
+  the model's maximum context length was really small (128). This has been fixed now.
+- Now sets `ignore_mismatched_sizes` when loading models if the model cannot be loaded
+  otherwise. This previously caused some issues when loading certain models.
+- Fixed bug where some encoder models did not work properly when loaded in with FP16
+  mixed precision due to overflow. We now load in models with BF16 as these have a
+  larger range, but fall back to FP16 if BF16 is not available. If both lead to
+  overflow then we attempt again with full FP32, and lastly throw an informative error
+  and block evaluation if the overflow persists.
+- When few-shot evaluating models on NER tasks, we are now more lenient towards the
+  generated model output. Instead of taking the output as-is, we are now extracting the
+  first dictionary (enclosed in curly brackets), as well as replacing all single
+  apostrophes (') with double ones (").
+- If a model is already pre-quantized then we will not attempt to quantize it as well.
+
+
+## [v8.2.1] - 2023-12-20
+### Fixed
+- Removed the non-existent IsReC, FoReC and FoQA datasets.
+
+
+## [v8.2.0] - 2023-12-20
+### Added
+- Added the following new datasets:
+    - `sb10k`, a German sentiment classification dataset.
+    - `dutch-social`, a Dutch sentiment classification dataset.
+    - `sst5`, an English sentiment classification dataset.
+    - `germeval`, a German NER dataset.
+    - `conll-nl`, a Dutch NER dataset.
+    - `conll-en`, an English NER dataset.
+    - `scala-de`, a German linguistic acceptability dataset.
+    - `scala-nl`, a Dutch linguistic acceptability dataset.
+    - `scala-en`, an English linguistic acceptability dataset.
+    - `nqii`, an Icelandic extractive question answering dataset.
+    - `germanquad`, a German extractive question answering dataset.
+    - `squad`, an English extractive question answering dataset.
+    - `cnn-dailymail`, an English summarization dataset.
+
+### Fixed
+- Fixed bug with question answering benchmarking when the answer was a proper subset of
+  the first token in the context, causing errors when benchmarking some models.
+- Some models have been stored in mixed precision as well as containing an
+  implementation of layer normalisation which is incompatible with such mixed
+  precision. When loading models we now only load in mixed precision if `torch_dtype`
+  has been specified in the Hugging Face model configuration (as with the Mistral
+  model, for instance).
+- When sampling examples to use in few-shot prompts in a sequence classification, we
+  previously required that the samples are stratified with respect to the labels. This
+  caused an issue if the dataset did not contain all labels, so now we only stratify
+  with respect to the labels present in the dataset.
+- When few-shot benchmarking on question answering datasets we previously only used the
+  samples whose contexts were at most 512 characters long. This turns out to be too few
+  for `germeval`, so this has been upped to 1024.
 
 
 ## [v8.1.0] - 2023-12-04
@@ -145,7 +507,7 @@ and this project adheres to
   another framework, then re-try the evaluation with `from_flax` set to `True`.
 
 
-## [v6.2.2] - 2023-02-25
+## [v6.2.2] - 2023-02-25
 ### Fixed
 - If `max_position_embeddings` is smaller than any of the context lengths specified in
   `model_max_length` and `max_model_input_sizes` then we use that as the the
@@ -408,7 +770,7 @@ and this project adheres to
   their framework could not be determined.
 
 
-## [v2.3.0] - 2022-01-20
+## [v2.3.0] - 2022-01-20
 ### Added
 - Specific branches/commits/tags can now be benchmarked, using the `@`
   delimiter. For instance, `scandeval -m model_id@commit_hash` will benchmark

@@ -1,40 +1,29 @@
 """Model and tokenizer wrapper for OpenAI models."""
 
-import json
 import logging
-from pathlib import Path
-from time import sleep
 
-import openai
-import tiktoken
 import torch
-from openai.error import (
-    APIError,
-    InvalidRequestError,
-    RateLimitError,
-    ServiceUnavailableError,
-    Timeout,
-)
 from torch import LongTensor, Tensor
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, ModelConfig
-from .exceptions import InvalidBenchmark
+from .exceptions import NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
+
+try:
+    import tiktoken
+    from openai import NotFoundError, OpenAI
+except ImportError:
+    OpenAI = None
+    tiktoken = None
 
 logger = logging.getLogger(__package__)
 
 
 class OpenAITokenizer:
     """An OpenAI tokenizer.
-
-    Args:
-        model_config:
-            The model configuration.
-        hf_model_config:
-            The Hugging Face model configuration.
 
     Attributes:
         model_config:
@@ -54,6 +43,14 @@ class OpenAITokenizer:
     def __init__(
         self, model_config: ModelConfig, hf_model_config: PretrainedConfig
     ) -> None:
+        """Initialize the tokenizer.
+
+        Args:
+            model_config:
+                The model configuration.
+            hf_model_config:
+                The Hugging Face model configuration.
+        """
         self.model_config = model_config
         self.hf_model_config = hf_model_config
 
@@ -63,11 +60,15 @@ class OpenAITokenizer:
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
-        encoding = tiktoken.encoding_for_model(model_name=model_config.model_id)
-        self.bos_token = encoding.decode([self.bos_token_id])
+        self.bos_token = self.encoding.decode([self.bos_token_id])
         self.cls_token = self.bos_token
-        self.eos_token = encoding.decode([self.eos_token_id])
+        self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
+
+    @property
+    def encoding(self) -> "tiktoken.Encoding":
+        """Return the underlying tiktoken encoding."""
+        return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.
@@ -75,6 +76,8 @@ class OpenAITokenizer:
         Args:
             text:
                 The text to tokenize.
+            **kwargs:
+                Additional keyword arguments.
 
         Returns:
             The tokenized text.
@@ -82,12 +85,11 @@ class OpenAITokenizer:
         truncation = kwargs.get("truncation", False)
         start_idx = -self.model_max_length if truncation else 0
 
-        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         text_list = [text] if isinstance(text, str) else text
         encoded_inputs = [
             BatchEncoding(
                 dict(
-                    input_ids=encoding.encode(
+                    input_ids=self.encoding.encode(
                         text,
                         allowed_special={
                             self.bos_token,
@@ -103,21 +105,36 @@ class OpenAITokenizer:
         ]
         return self.pad(encoded_inputs=encoded_inputs)
 
-    def decode(self, token_ids: list[int]) -> str:
+    def decode(self, token_ids: list[int], **kwargs) -> str:
         """Decode token IDs.
 
         Args:
             token_ids:
                 The token IDs to decode.
+            **kwargs:
+                Additional keyword arguments.
 
         Returns:
             The decoded text.
         """
-        encoding = tiktoken.encoding_for_model(model_name=self.model_config.model_id)
         token_ids = [
             token_id for token_id in token_ids if token_id != self.pad_token_id
         ]
-        return encoding.decode(tokens=token_ids)
+        return self.encoding.decode(tokens=token_ids)
+
+    def batch_decode(self, sequences: list[list[int]], **kwargs) -> list[str]:
+        """Decode batched token IDs.
+
+        Args:
+            sequences:
+                The token IDs to decode.
+            **kwargs:
+                Additional keyword arguments.
+
+        Returns:
+            The decoded text.
+        """
+        return [self.decode(token_ids=sequence) for sequence in sequences]
 
     def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
         """Encode text.
@@ -125,6 +142,8 @@ class OpenAITokenizer:
         Args:
             text:
                 The text to encode.
+            **kwargs:
+                Additional keyword arguments.
 
         Returns:
             The encoded text.
@@ -168,6 +187,8 @@ class OpenAITokenizer:
         Args:
             ids:
                 The token IDs to convert.
+            skip_special_tokens:
+                Whether to skip special tokens. Defaults to False.
 
         Returns:
             The tokens.
@@ -203,11 +224,13 @@ class OpenAITokenizer:
 
     def pad(
         self,
-        encoded_inputs: BatchEncoding
-        | list[BatchEncoding]
-        | dict[str, list[int]]
-        | dict[str, list[list[int]]]
-        | list[dict[str, list[int]]],
+        encoded_inputs: (
+            BatchEncoding
+            | list[BatchEncoding]
+            | dict[str, list[int]]
+            | dict[str, list[list[int]]]
+            | list[dict[str, list[int]]]
+        ),
         **kwargs,
     ) -> BatchEncoding:
         """Pad encoded inputs.
@@ -220,6 +243,7 @@ class OpenAITokenizer:
                 use this method during preprocessing as well as in a PyTorch Dataloader
                 collate function.
             **kwargs:
+                Additional keyword arguments.
         """
         # Single example
         if isinstance(encoded_inputs, BatchEncoding):
@@ -257,19 +281,14 @@ class OpenAITokenizer:
 
         return BatchEncoding(dict(input_ids=padded_input_ids))
 
+    @property
+    def vocab_size(self) -> int:
+        """Return the size of the vocabulary."""
+        return self.encoding.max_token_value + 1
+
 
 class OpenAIModel:
     """An OpenAI model.
-
-    Args:
-        model_config:
-            The model configuration.
-        hf_model_config:
-            The Hugging Face model configuration.
-        benchmark_config:
-            The benchmark configuration.
-        tokenizer:
-            The tokenizer.
 
     Attributes:
         model_config:
@@ -284,10 +303,6 @@ class OpenAIModel:
             The device to use, is always CPU.
         is_chat_model:
             Whether the model is a chat model.
-        cache_path:
-            The path to the cache.
-        cache:
-            A cache for the model's outputs.
     """
 
     def __init__(
@@ -297,39 +312,42 @@ class OpenAIModel:
         benchmark_config: BenchmarkConfig,
         tokenizer: OpenAITokenizer,
     ) -> None:
+        """Initialize the model.
+
+        Args:
+            model_config:
+                The model configuration.
+            hf_model_config:
+                The Hugging Face model configuration.
+            benchmark_config:
+                The benchmark configuration.
+            tokenizer:
+                The tokenizer.
+        """
+        if OpenAI is None:
+            raise NeedsExtraInstalled(extra="openai")
+
         self.model_config = model_config
         self.config = hf_model_config
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
+        self.client = OpenAI(
+            api_key=self.benchmark_config.openai_api_key, max_retries=60
+        )
         self.is_chat_model = self._is_chat_model()
-
-        model_cache_dir = Path(model_config.model_cache_dir)
-        model_cache_dir.mkdir(parents=True, exist_ok=True)
-        self.cache_path = model_cache_dir / "model_outputs.json"
-        if not self.cache_path.exists():
-            with self.cache_path.open("w") as f:
-                json.dump(dict(), f)
-        with self.cache_path.open() as f:
-            self.cache: dict[str, dict[str, str]] = json.load(f)
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""
-        for _ in range(60):
-            try:
-                openai.Completion.create(
-                    model=self.model_config.model_id, prompt="Test", max_tokens=1
-                )
-                return False
-            except InvalidRequestError as e:
-                if "This is a chat model" in str(e):
-                    return True
-                else:
-                    raise e
-            except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                sleep(1)
-        else:
-            raise InvalidBenchmark("OpenAI API is not available")
+        try:
+            self.client.completions.create(
+                model=self.model_config.model_id, prompt="Test", max_tokens=1
+            )
+            return False
+        except NotFoundError as e:
+            if "This is a chat model" in str(e):
+                return True
+            raise e
 
     def generate(
         self,
@@ -379,52 +397,29 @@ class OpenAIModel:
 
         model_id = self.model_config.model_id
         max_tokens: int = generation_config.max_new_tokens or 1
+        temperature = (
+            0.0 if not generation_config.do_sample else generation_config.temperature
+        )
         generation_kwargs = dict(
             model=model_id,
             max_tokens=max_tokens,
-            temperature=generation_config.temperature,
+            temperature=temperature,
             top_p=generation_config.top_p,
             n=generation_config.num_return_sequences,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            stop=[
-                "\n\n",
-                self.tokenizer.eos_token,
-                self.tokenizer.pad_token,
-            ],
+            stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
         )
 
-        max_tokens_str = str(max_tokens)
-        if max_tokens_str not in self.cache:
-            self.cache[max_tokens_str] = dict()
-
-        # Use cache if possible
-        if prompt in self.cache[max_tokens_str]:
-            generation_output = self.cache[max_tokens_str][prompt]
+        if not self.is_chat_model:
+            model_output = self.client.completions.create(
+                prompt=prompt, **generation_kwargs
+            )
+            generation_output = model_output.choices[0].text.strip()
         else:
-            for _ in range(60):
-                try:
-                    if not self.is_chat_model:
-                        model_output = openai.Completion.create(
-                            prompt=prompt, **generation_kwargs
-                        )
-                        generation_output = model_output.choices[0].text.strip()
-                    else:
-                        model_output = openai.ChatCompletion.create(
-                            messages=[dict(role="user", content=prompt)],
-                            **generation_kwargs,
-                        )
-                        generation_output = model_output.choices[
-                            0
-                        ].message.content.strip()
-                    break
-                except (RateLimitError, ServiceUnavailableError, APIError, Timeout):
-                    sleep(1)
-            else:
-                raise InvalidBenchmark("OpenAI API is not available")
-
-            self.cache[max_tokens_str][prompt] = generation_output
-            with self.cache_path.open("w") as f:
-                json.dump(self.cache, f, indent=4)
+            model_output = self.client.chat.completions.create(
+                messages=[dict(role="user", content=prompt)], **generation_kwargs
+            )
+            generation_output = model_output.choices[0].message.content.strip()
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)

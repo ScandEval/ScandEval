@@ -16,7 +16,8 @@ from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 from .question_answering_trainer import QuestionAnsweringTrainer
-from .utils import get_special_token_metadata
+from .types import Labels, Predictions
+from .utils import get_special_token_metadata, raise_if_model_output_contains_nan_values
 
 logger = logging.getLogger(__package__)
 
@@ -62,8 +63,7 @@ class QuestionAnswering(BenchmarkDataset):
 
         if generative_model:
             preprocess_fn = partial(
-                prepare_examples_for_generation,
-                tokenizer=tokenizer,
+                prepare_examples_for_generation, tokenizer=tokenizer
             )
         elif split == "test":
             preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
@@ -83,6 +83,8 @@ class QuestionAnswering(BenchmarkDataset):
                 batched=True,
                 batch_size=10,
                 remove_columns=cols_to_remove,
+                load_from_cache_file=False,
+                keep_in_memory=True,
             )
 
         except NotImplementedError as e:
@@ -92,8 +94,7 @@ class QuestionAnswering(BenchmarkDataset):
         # `offset_mapping` which we will need for our post-processing), so we put them
         # back
         preprocessed.set_format(
-            type=preprocessed.format["type"],
-            columns=list(preprocessed.features.keys()),
+            type=preprocessed.format["type"], columns=list(preprocessed.features.keys())
         )
 
         # Return the preprocessed dataset
@@ -132,9 +133,7 @@ class QuestionAnswering(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer=tokenizer)
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -151,6 +150,8 @@ class QuestionAnswering(BenchmarkDataset):
         """
         model_outputs, labels = model_outputs_and_labels
 
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
+
         model_output_dtype = np.asarray(model_outputs).dtype
         if model_output_dtype in [np.float16, np.float32, np.float64]:
             predictions = np.asarray(model_outputs).argmax(axis=-1)
@@ -161,9 +162,7 @@ class QuestionAnswering(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
+                predictions=predictions, references=labels, **cfg.compute_kwargs
             )
 
             # The metric returns None if we are running on multi-GPU and the current
@@ -173,6 +172,7 @@ class QuestionAnswering(BenchmarkDataset):
                 if isinstance(scores, list):
                     scores = sum(scores) / len(scores)
                 results[cfg.name] = scores
+
         return results
 
     def _extract_few_shot_examples(
@@ -189,8 +189,21 @@ class QuestionAnswering(BenchmarkDataset):
         Returns:
             The few-shot examples.
         """
+        # Locate the maximum number of tokens that constitutes a short example. We
+        # start with 512 tokens and double it until there is at least `num_few_shots`
+        # many examples that are shorter than the maximum number of tokens.
+        max_num_tokens = 512
+        while True:
+            train_with_short_examples = train_dataset.filter(
+                lambda example: len(example["context"]) < max_num_tokens
+            )
+            num_short_examples = len(train_with_short_examples)
+            if num_short_examples >= self.dataset_config.num_few_shot_examples:
+                break
+            max_num_tokens *= 2
+
         train_with_short_examples = train_dataset.filter(
-            lambda example: len(example["context"]) < 512
+            lambda example: len(example["context"]) < max_num_tokens
         )
         shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
         num_few_shots = self.dataset_config.num_few_shot_examples
@@ -210,7 +223,7 @@ class QuestionAnswering(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -219,6 +232,8 @@ class QuestionAnswering(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.
@@ -271,9 +286,7 @@ class QuestionAnswering(BenchmarkDataset):
             The predicted labels.
         """
         raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output["sequences"],
-            tokenizer=tokenizer,
-            dataset_config=self.dataset_config,
+            generated_sequences=model_output["sequences"], tokenizer=tokenizer
         )
 
         predictions = [
@@ -322,8 +335,15 @@ def prepare_train_examples(
         ]
         examples["context"] = [f"{c}{sep_token}" for c in examples["context"]]
 
-    # Compute the stride, being a quarter of the context length
+    # Set the stride used during tokenization, when the context is long enough to be
+    # split into several features. Since we are always keeping the question tokens, we
+    # need to make sure that the stride does not exceed the resulting maximum context
+    # length.
+    max_question_tokens = max(len(tokenizer(q).input_ids) for q in examples["question"])
+    num_special_tokens = int(has_cls_token) + int(has_sep_token)
     stride = tokenizer.model_max_length // 4
+    max_length = tokenizer.model_max_length - stride
+    stride = min(stride, max_length - max_question_tokens - num_special_tokens)
     max_length = tokenizer.model_max_length - stride
 
     # Tokenize our examples with truncation and padding, but keep the overflows using a
@@ -415,21 +435,26 @@ def prepare_train_examples(
             # the last word (edge case).
             else:
                 while (
-                    token_start_index < len(offsets)
+                    token_start_index <= token_end_index
                     and offsets[token_start_index][0] <= start_char
                 ):
                     token_start_index += 1
-                tokenized_examples.start_positions.append(token_start_index - 1)
-                while offsets[token_end_index][1] >= end_char:
+                token_start_index -= 1
+                tokenized_examples.start_positions.append(token_start_index)
+                while (
+                    token_start_index <= token_end_index
+                    and offsets[token_end_index][1] >= end_char
+                ):
                     token_end_index -= 1
-                tokenized_examples.end_positions.append(token_end_index + 1)
+                token_end_index += 1
+                tokenized_examples.end_positions.append(token_end_index)
+                assert token_end_index >= token_start_index
 
     return tokenized_examples
 
 
 def prepare_test_examples(
-    examples: BatchEncoding,
-    tokenizer: Tokenizer,
+    examples: BatchEncoding, tokenizer: Tokenizer
 ) -> BatchEncoding:
     """Prepare test examples.
 
@@ -461,8 +486,15 @@ def prepare_test_examples(
         ]
         examples["context"] = [f"{c}{sep_token}" for c in examples["context"]]
 
-    # Compute the stride, being a quarter of the context length
+    # Set the stride used during tokenization, when the context is long enough to be
+    # split into several features. Since we are always keeping the question tokens, we
+    # need to make sure that the stride does not exceed the resulting maximum context
+    # length.
+    max_question_tokens = max(len(tokenizer(q).input_ids) for q in examples["question"])
+    num_special_tokens = int(has_cls_token) + int(has_sep_token)
     stride = tokenizer.model_max_length // 4
+    max_length = tokenizer.model_max_length - stride
+    stride = min(stride, max_length - max_question_tokens - num_special_tokens)
     max_length = tokenizer.model_max_length - stride
 
     # Tokenize our examples with truncation and maybe padding, but keep the overflows

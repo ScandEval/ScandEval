@@ -1,11 +1,13 @@
 """Functions related to the finetuning of models."""
 
+import importlib.util
 import logging
+import os
+import sys
 import warnings
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Type
-import os
 
 import torch
 from datasets import Dataset
@@ -22,10 +24,10 @@ from transformers import (
 )
 from transformers.trainer import OptimizerNames
 
-from scandeval.exceptions import InvalidBenchmark
-
 from .callbacks import NeverLeaveProgressCallback
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .enums import DataType
+from .exceptions import InvalidBenchmark, NaNValueInModelOutput
 from .model_loading import load_model
 from .protocols import Tokenizer
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
@@ -100,6 +102,14 @@ def finetune(
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
+    using_cuda = benchmark_config.device == torch.device("cuda")
+    if using_cuda and torch.cuda.is_bf16_supported():
+        dtype = DataType.BF16
+    elif using_cuda:
+        dtype = DataType.FP16
+    else:
+        dtype = DataType.FP32
+
     bs: int = benchmark_config.batch_size
     for idx in itr:
         # Set variable that tracks whether we need to initialize new models in
@@ -134,6 +144,7 @@ def finetune(
                     benchmark_config=benchmark_config,
                     model_config=model_config,
                     iteration_idx=idx,
+                    dtype=dtype,
                     batch_size=bs,
                 )
 
@@ -170,6 +181,23 @@ def finetune(
                     )
 
                 break
+
+            # NaN values can appear in the model output when using mixed precision, as
+            # the hidden states get overflowed. In this case we try to disable mixed
+            # precision and try again.
+            except NaNValueInModelOutput:
+                if dtype != DataType.FP32:
+                    dtype = DataType.FP32
+                    model_already_initialized = False
+                    logger.debug(
+                        "NaN value detected in model outputs while using mixed "
+                        "precision. Retrying with full fp32 precision."
+                    )
+                else:
+                    raise InvalidBenchmark(
+                        "NaN value detected in model outputs, even with mixed "
+                        "precision disabled."
+                    )
 
             except Exception as e:
                 if "CUDA" not in str(e) and "out of memory" not in str(e):
@@ -331,14 +359,19 @@ def finetune_single_iteration(
 
         with torch.inference_mode():
             evaluate_inputs = evaluate_inputs_fn(
-                dataset=test,
-                prepared_dataset=prepared_test,
-                metric_key_prefix="test",
+                dataset=test, prepared_dataset=prepared_test, metric_key_prefix="test"
             )
             test_scores = trainer.evaluate(**evaluate_inputs)
         scores["test"] = test_scores
 
         return scores
+
+    except NaNValueInModelOutput as e:
+        del trainer
+        del model
+        del tokenizer
+        clear_memory()
+        raise e
 
     except (RuntimeError, ValueError, IndexError) as e:
         raise InvalidBenchmark(str(e))
@@ -348,6 +381,7 @@ def get_training_args(
     benchmark_config: BenchmarkConfig,
     model_config: ModelConfig,
     iteration_idx: int,
+    dtype: DataType,
     batch_size: int | None = None,
 ) -> TrainingArguments:
     """Get the training arguments for the current iteration.
@@ -360,6 +394,8 @@ def get_training_args(
         iteration_idx:
             The index of the current iteration. This is only used to generate a
             unique random seed for the current iteration.
+        dtype:
+            The data type to use for the model weights.
         batch_size:
             The batch size to use for the current iteration, or None if the batch size
             in the benchmark config should be used.
@@ -385,7 +421,10 @@ def get_training_args(
     while world_size > 1 and batch_size * world_size > 32:
         batch_size //= 2
 
-    if benchmark_config.device == torch.device("cuda"):
+    if (
+        benchmark_config.device == torch.device("cuda")
+        and importlib.util.find_spec("bitsandbytes") is not None
+    ):
         optimizer = OptimizerNames.ADAMW_8BIT
     else:
         optimizer = OptimizerNames.ADAMW_TORCH
@@ -400,8 +439,8 @@ def get_training_args(
             eval_steps=30,
             logging_steps=30,
             save_steps=30,
-            max_steps=10_000 if not benchmark_config.testing else 10,
-            use_cpu=benchmark_config.testing,
+            max_steps=2 if hasattr(sys, "_called_from_test") else 10_000,
+            use_cpu=benchmark_config.device == torch.device("cpu"),
             report_to=[],
             save_total_limit=1,
             per_device_train_batch_size=batch_size,
@@ -412,7 +451,8 @@ def get_training_args(
             load_best_model_at_end=True,
             optim=optimizer,
             seed=seed,
-            fp16=benchmark_config.device == torch.device("cuda"),
+            fp16=dtype == DataType.FP16,
+            bf16=dtype == DataType.BF16,
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )

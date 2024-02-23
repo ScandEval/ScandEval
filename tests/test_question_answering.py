@@ -1,44 +1,105 @@
 """Unit tests for the `question_answering` module."""
 
+import os
+from contextlib import nullcontext as does_not_raise
+from typing import Generator
+
 import pytest
-
+from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import (
+    GERMANQUAD_CONFIG,
+    NORQUAD_CONFIG,
+    NQII_CONFIG,
     SCANDIQA_DA_CONFIG,
-    SCANDIQA_NO_CONFIG,
     SCANDIQA_SV_CONFIG,
+    SQUAD_CONFIG,
+    SQUAD_NL_CONFIG,
 )
-from scandeval.question_answering import QuestionAnswering
+from scandeval.exceptions import InvalidBenchmark
+from scandeval.question_answering import QuestionAnswering, prepare_train_examples
+from scandeval.utils import GENERATIVE_DATASET_TASKS
+from transformers import AutoTokenizer
 
 
-@pytest.mark.parametrize(
-    argnames=["dataset", "correct_scores"],
-    argvalues=[
-        (SCANDIQA_DA_CONFIG, (0.24, 4.25)),
-        (SCANDIQA_NO_CONFIG, (0.00, 3.72)),
-        (SCANDIQA_SV_CONFIG, (0.00, 3.72)),
+@pytest.fixture(
+    scope="module",
+    params=[
+        SCANDIQA_DA_CONFIG,
+        SCANDIQA_SV_CONFIG,
+        NORQUAD_CONFIG,
+        NQII_CONFIG,
+        GERMANQUAD_CONFIG,
+        SQUAD_CONFIG,
+        SQUAD_NL_CONFIG,
     ],
     ids=[
         "scandiqa-da",
-        "scandiqa-no",
         "scandiqa-sv",
+        "norquad",
+        "nqii",
+        "germanquad",
+        "squad",
+        "squad-nl",
     ],
-    scope="class",
 )
-class TestScores:
-    @pytest.fixture(scope="class")
-    def scores(self, benchmark_config, model_id, dataset):
-        benchmark = QuestionAnswering(
-            dataset_config=dataset,
-            benchmark_config=benchmark_config,
-        )
-        yield benchmark.benchmark(model_id)[0]["total"]
+def benchmark_dataset(
+    benchmark_config, request
+) -> Generator[BenchmarkDataset, None, None]:
+    """Yields a question answering benchmark dataset."""
+    yield QuestionAnswering(
+        dataset_config=request.param, benchmark_config=benchmark_config
+    )
 
-    def test_em_is_correct(self, scores, correct_scores):
-        min_score = scores["test_em"] - scores["test_em_se"]
-        max_score = scores["test_em"] + scores["test_em_se"]
-        assert min_score <= correct_scores[0] <= max_score
 
-    def test_f1_is_correct(self, scores, correct_scores):
-        min_score = scores["test_f1"] - scores["test_f1_se"]
-        max_score = scores["test_f1"] + scores["test_f1_se"]
-        assert min_score <= correct_scores[1] <= max_score
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
+def test_encoder_benchmarking(benchmark_dataset, model_id):
+    """Test that encoder models can be benchmarked on question answering datasets."""
+    if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
+        with pytest.raises(InvalidBenchmark):
+            benchmark_dataset.benchmark(model_id)
+    else:
+        with does_not_raise():
+            benchmark_dataset.benchmark(model_id)
+
+
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
+def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
+    """Test that decoder models can be benchmarked on question answering datasets."""
+    with does_not_raise():
+        benchmark_dataset.benchmark(generative_model_id)
+
+
+@pytest.mark.parametrize(
+    argnames="tokenizer_model_id",
+    argvalues=["jonfd/electra-small-nordic", "flax-community/swe-roberta-wiki-oscar"],
+)
+@pytest.mark.parametrize(
+    argnames="examples",
+    argvalues=[
+        dict(
+            question=["Hvad er hovedstaden i Sverige?"],
+            context=["Sveriges hovedstad er Stockholm."],
+            answers=[dict(text=["Stockholm"], answer_start=[22])],
+        ),
+        dict(
+            question=["Hvad er hovedstaden i Sverige?"],
+            context=["Sveriges hovedstad er Stockholm." * 100],
+            answers=[dict(text=["Sverige"], answer_start=[0])],
+        ),
+        dict(
+            question=["Hvad er hovedstaden i Danmark?"],
+            context=["Danmarks hovedstad er København. " * 100],
+            answers=[dict(text=["Da"], answer_start=[0])],
+        ),
+    ],
+)
+def test_prepare_train_examples(examples, tokenizer_model_id):
+    """Test that train examples can be prepared for training."""
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_id)
+    if (
+        hasattr(tokenizer, "model_max_length")
+        and tokenizer.model_max_length > 100_000_000
+    ):
+        tokenizer.model_max_length = 512
+    with does_not_raise():
+        prepare_train_examples(examples=examples, tokenizer=tokenizer)

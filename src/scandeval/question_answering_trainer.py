@@ -13,6 +13,7 @@ class QuestionAnsweringTrainer(Trainer):
     """Trainer subclass for question answering tasks."""
 
     def __init__(self, *args, **kwargs) -> None:
+        """Initialize the trainer."""
         super().__init__(*args, **kwargs)
 
         # Get the CLS token id for the tokenizer
@@ -28,7 +29,24 @@ class QuestionAnsweringTrainer(Trainer):
         orig_eval_dataset: Dataset | None = None,
         ignore_keys: list[str] | None = None,
         metric_key_prefix: str = "eval",
-    ):
+    ) -> dict[str, float] | None:
+        """Evaluate the model on the given dataset.
+
+        Args:
+            eval_dataset:
+                The dataset to evaluate on. If None, then use the stored evaluation
+                dataset.
+            orig_eval_dataset:
+                The original evaluation dataset, before any postprocessing. If None,
+                then use the stored original evaluation dataset.
+            ignore_keys:
+                The keys to ignore when computing the metrics.
+            metric_key_prefix:
+                The prefix to use for the metric keys.
+
+        Returns:
+            The metrics computed on the evaluation dataset.
+        """
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
 
         # Temporarily disable metric computation, we will do it in the loop here.
@@ -80,10 +98,7 @@ class QuestionAnsweringTrainer(Trainer):
 
 
 def postprocess_predictions_and_labels(
-    predictions: list,
-    dataset: Dataset,
-    prepared_dataset: Dataset,
-    cls_token_index: int,
+    predictions: list, dataset: Dataset, prepared_dataset: Dataset, cls_token_index: int
 ) -> tuple[list[dict], list[dict]]:
     """Postprocess the predictions and labels, to allow easier metric computation.
 
@@ -134,9 +149,7 @@ def postprocess_predictions_and_labels(
         # Create the final prediction dictionary, to be added to the list of
         # predictions
         prediction = dict(
-            id=example["id"],
-            prediction_text=best_answer,
-            no_answer_probability=0.0,
+            id=example["id"], prediction_text=best_answer, no_answer_probability=0.0
         )
 
         # Add the answer to the list of predictions
@@ -252,6 +265,8 @@ def find_valid_answers(
         offset_mapping:
             The offset mapping, being a list of pairs of integers for each token index,
             containing the start and end character index in the original context.
+        context:
+            The context of the example.
         max_answer_length:
             The maximum length of the answer.
         num_best_logits:

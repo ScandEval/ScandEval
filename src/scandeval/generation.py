@@ -1,40 +1,58 @@
 """Functions related to text generation of models."""
 
 import logging
+import sys
 import warnings
 from collections import defaultdict
+from pathlib import Path
 from typing import Any, Callable
-from accelerate import Accelerator
 
 import torch
 from datasets import Dataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from transformers import DataCollator, GenerationConfig, StoppingCriteria
-from transformers.utils import ModelOutput
+from transformers import (
+    DataCollator,
+    GenerationConfig,
+    PreTrainedTokenizerBase,
+    StoppingCriteria,
+)
+from transformers.modeling_utils import ModelOutput
 
-from .config import BenchmarkConfig, DatasetConfig
-from .exceptions import InvalidBenchmark
-from .protocols import GenerativeModel, Tokenizer
+from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .model_cache import (
+    ModelCache,
+    load_cached_model_outputs,
+    split_dataset_into_cached_and_non_cached,
+)
 from .openai_models import OpenAIModel
-from .utils import clear_memory
+from .protocols import GenerativeModel, Tokenizer
+from .tasks import NER
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
+from .vllm_models import VLLMModel
+
+try:
+    from lmformatenforcer.integrations.transformers import (
+        build_transformers_prefix_allowed_tokens_fn,
+    )
+except ImportError:
+    build_transformers_prefix_allowed_tokens_fn = None
+
 
 logger = logging.getLogger(__package__)
 
 
 def generate(
     itr: tqdm,
-    train: Dataset,
-    val: Dataset,
-    tests: list[Dataset],
     prepared_train: Dataset,
-    prepared_val: Dataset,
     prepared_tests: list[Dataset],
     model: GenerativeModel,
+    model_config: ModelConfig,
     tokenizer: Tokenizer,
     data_collator: DataCollator,
     compute_metrics: Callable,
-    extract_labels_fn: Callable[..., list[str]],
+    extract_labels_fn: Callable[..., list[Any]],
     benchmark_config: BenchmarkConfig,
     dataset_config: DatasetConfig,
 ) -> dict[str, list[dict[str, float]]]:
@@ -43,16 +61,8 @@ def generate(
     Args:
         itr:
             The progress bar iterator.
-        train:
-            The training dataset.
-        val:
-            The validation dataset.
-        tests:
-            The bootstrapped test datasets.
         prepared_train:
             The prepared training dataset.
-        prepared_val:
-            The prepared validation dataset.
         prepared_tests:
             The prepared bootstrapped test datasets.
         num_iter:
@@ -61,6 +71,8 @@ def generate(
             The random number generator.
         model:
             The model to evaluate.
+        model_config:
+            The configuration of the model.
         tokenizer:
             The tokenizer to use for the model. If `None` then the model's
             tokenizer will be used.
@@ -82,58 +94,98 @@ def generate(
     """
     scores: dict[str, list[dict[str, float]]] = defaultdict(list)
 
+    # Set up the name of the model output cache. If we are testing then we save the
+    # model outputs to a different cache and ensure that that cache is deleted before
+    # the next test, to ensure that the tests are independent of each other
+    model_cache_dir = Path(model_config.model_cache_dir)
+    if not hasattr(sys, "_called_from_test"):
+        cache_name = f"{dataset_config.name}-model-outputs.json"
+    else:
+        cache_name = f"{dataset_config.name}-model-outputs-test.json"
+        (model_cache_dir / cache_name).unlink(missing_ok=True)
+
+    cache = ModelCache(
+        model_cache_dir=model_cache_dir,
+        cache_name=cache_name,
+        max_generated_tokens=dataset_config.max_generated_tokens,
+    )
+
     for idx in itr:
         prepared_test = prepared_tests[idx]
         assert isinstance(prepared_test, Dataset)
 
-        while True:
-            try:
-                test_scores = generate_single_iteration(
-                    prepared_dataset=prepared_test,
-                    model=model,
-                    tokenizer=tokenizer,
-                    data_collator=data_collator,
-                    compute_metrics=compute_metrics,
-                    extract_labels_fn=extract_labels_fn,
-                    benchmark_config=benchmark_config,
-                    dataset_config=dataset_config,
-                )
-                break
-            except Exception as e:
-                # TEMP
-                raise e
+        generation_kwargs = dict(
+            model=model,
+            tokenizer=tokenizer,
+            data_collator=data_collator,
+            compute_metrics=compute_metrics,
+            extract_labels_fn=extract_labels_fn,
+            dataset_config=dataset_config,
+            cache=cache,
+        )
 
-                if "CUDA" not in str(e) and "out of memory" not in str(e):
-                    raise InvalidBenchmark(str(e))
+        def update_scores(
+            scores: dict[str, list[dict[str, float]]], benchmark_config: BenchmarkConfig
+        ) -> dict[str, list[dict[str, float]]]:
+            """Perform a single iteration of generation and update the scores.
 
-                clear_memory()
-                benchmark_config.batch_size //= 2
-                if benchmark_config.batch_size < 1:
-                    raise InvalidBenchmark(
-                        "GPU out of memory, even with a batch size of 1!"
-                    )
+            Args:
+                scores:
+                    The scores so far.
+                benchmark_config:
+                    The configuration of the benchmark.
 
-        if benchmark_config.is_main_process:
-            logger.debug(f"Test scores for iteration {idx}: {test_scores}")
-        scores["test"].append(test_scores)
-        clear_memory()
-
-        if benchmark_config.evaluate_train:
-            train_scores = generate_single_iteration(
-                prepared_dataset=prepared_train,
-                model=model,
-                tokenizer=tokenizer,
-                data_collator=data_collator,
-                compute_metrics=compute_metrics,
-                extract_labels_fn=extract_labels_fn,
+            Returns:
+                The updated scores.
+            """
+            test_scores = generate_single_iteration(
+                prepared_dataset=prepared_test,
                 benchmark_config=benchmark_config,
-                dataset_config=dataset_config,
+                **generation_kwargs,
             )
-            if benchmark_config.is_main_process:
-                logger.debug(f"Train scores for iteration {idx}: {train_scores}")
-            scores["train"].append(train_scores)
-            clear_memory()
+            logger.debug(f"Test scores for iteration {idx}: {test_scores}")
+            scores["test"].append(test_scores)
 
+            if benchmark_config.evaluate_train:
+                train_scores = generate_single_iteration(
+                    prepared_dataset=prepared_train,
+                    benchmark_config=benchmark_config,
+                    **generation_kwargs,
+                )
+                logger.debug(f"Train scores for iteration {idx}: {train_scores}")
+                scores["train"].append(train_scores)
+
+            clear_memory()
+            return scores
+
+        if isinstance(model, VLLMModel):
+            scores = update_scores(scores=scores, benchmark_config=benchmark_config)
+        else:
+            while True:
+                try:
+                    scores = update_scores(
+                        scores=scores, benchmark_config=benchmark_config
+                    )
+                    break
+                except Exception as e:
+                    oom_error = [
+                        "CUDA out of memory",
+                        "CUDA error",
+                        "MPS backend out of memory",
+                        "Too many parallel completions requested.",  # OpenAI specific
+                    ]
+                    if isinstance(model, VLLMModel) or all(
+                        error not in str(e) for error in oom_error
+                    ):
+                        raise InvalidBenchmark(str(e))
+                    clear_memory()
+                    benchmark_config.batch_size //= 2
+                    if benchmark_config.batch_size < 1:
+                        raise InvalidBenchmark(
+                            "GPU out of memory, even with a batch size of 1!"
+                        )
+
+    cache.remove()
     return scores
 
 
@@ -146,6 +198,7 @@ def generate_single_iteration(
     extract_labels_fn: Callable[..., list[Any]],
     dataset_config: DatasetConfig,
     benchmark_config: BenchmarkConfig,
+    cache: ModelCache,
 ) -> dict[str, float]:
     """Evaluate a model on a dataset in a single iteration through generation.
 
@@ -166,128 +219,139 @@ def generate_single_iteration(
             The configuration of the dataset.
         benchmark_config:
             The configuration of the benchmark.
+        cache:
+            The model output cache.
 
     Returns:
         A list of dictionaries containing the scores for each metric.
     """
-    # Tokens used in generation to know when generation is finished
-    stopping_criteria = get_generation_stopping_criteria(
-        tokenizer=tokenizer, model=model
+    cache.load()
+
+    # Split up the prepared dataset into a cached and non-cached part
+    cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
+        dataset=prepared_dataset, cache=cache
     )
 
-    generation_config = GenerationConfig(
-        max_new_tokens=dataset_config.max_generated_tokens,
-        do_sample=False,
-        stopping_criteria=stopping_criteria,
-        output_scores=True,
-        return_dict_in_generate=True,
-        bos_token_id=tokenizer.bos_token_id,
-        eos_token_id=tokenizer.eos_token_id,
-        pad_token_id=tokenizer.pad_token_id,
-    )
+    all_preds: list[str | list[str]] = list()
 
-    # Sort the dataset by the length of the text, to minimise the amount of padding
-    # that needs to be added, speeding up generation
-    prepared_dataset = prepared_dataset.add_column(
-        name="length", column=[len(x) for x in prepared_dataset["text"]]
-    )
-    prepared_dataset = prepared_dataset.sort("length", reverse=False)
+    if len(non_cached_dataset) > 0:
+        # Tokens used in generation to know when generation is finished
+        stopping_criteria = get_generation_stopping_criteria(
+            tokenizer=tokenizer, model=model
+        )
 
-    # Enable batching by building a dataloader. The dataloader cannot deal with
-    # text columns, so we create a copy of the dataset without these
-    torch_dataset = (
-        prepared_dataset.with_format("torch")
-        .remove_columns(
+        generation_config = GenerationConfig(
+            # What to output
+            max_new_tokens=dataset_config.max_generated_tokens,
+            output_scores=dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS,
+            return_dict_in_generate=True,
+            # How to sample
+            do_sample=False,  # Equivalent to greedy decoding (temperature=0)
+            # Special tokens
+            bos_token_id=tokenizer.bos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            pad_token_id=tokenizer.pad_token_id,
+        )
+
+        # Sort the non_cached dataset by the length of the text, to minimise the amount
+        # of padding that needs to be added, speeding up generation
+        non_cached_dataset = non_cached_dataset.add_column(
+            name="length", column=[len(x) for x in non_cached_dataset["text"]]
+        )
+        non_cached_dataset = non_cached_dataset.sort("length", reverse=True)
+
+        # Enable batching by building a dataloader. The dataloader cannot deal with
+        # text columns, so we create a copy of the dataset without these
+        torch_dataset = non_cached_dataset.with_format("torch").remove_columns(
             [
                 column
-                for column in prepared_dataset.column_names
+                for column in non_cached_dataset.column_names
                 if column != "input_ids"
             ]
         )
-        .select(range(8))
-    )  # TEMP
 
-    batch_size = 1 if isinstance(model, OpenAIModel) else benchmark_config.batch_size
-    dataloader = DataLoader(
-        dataset=torch_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=4,
-        collate_fn=data_collator,
-    )
+        if isinstance(model, OpenAIModel):
+            batch_size = 1
+        elif isinstance(model, VLLMModel):
+            batch_size = len(torch_dataset)
+        else:
+            batch_size = benchmark_config.batch_size
 
-    class GenerationModelWrapper(torch.nn.Module):
-        """Wrapper to enable distributed generation.
-
-        Args:
-            module:
-                The PyTorch module to wrap. Must have a `generate` method.
-        """
-
-        def __init__(self, module: torch.nn.Module) -> None:
-            super().__init__()
-            self.module = module
-
-        def forward(self, *args, **kwargs):
-            return self.module.generate(*args, **kwargs)
-
-    # Handle distributed training
-    if not isinstance(model, OpenAIModel):  # TODO: Only call if distributed
-        accelerator = Accelerator()
-        new_model, dataloader = accelerator.prepare(  # TODO: Should not be new_model
-            GenerationModelWrapper(module=model), dataloader  # type: ignore
+        dataloader = DataLoader(
+            dataset=torch_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4,
+            collate_fn=data_collator,
         )
 
-    # Generate all the completions
-    no_pbar = not benchmark_config.progress_bar or not benchmark_config.is_main_process
-    all_preds: list[str | list[str]] = list()
-    num_devices = torch.cuda.device_count() if torch.cuda.is_available() else 1
-    with tqdm(
-        total=len(dataloader) * num_devices, leave=False, disable=no_pbar
-    ) as pbar:
-        for batch_idx, batch in enumerate(dataloader):
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=UserWarning)
-                with torch.inference_mode():
-                    model_output = new_model(
-                        inputs=batch["input_ids"], generation_config=generation_config
-                    )
-                    scores = model_output.scores
+        with warnings.catch_warnings():
+            # This ignores the following warning, which is out of our control:
+            #   "os.fork() was called. os.fork() is incompatible with multithreaded
+            #   code, and JAX is multithreaded, so this will likely lead to a deadlock."
+            warnings.simplefilter("ignore", category=RuntimeWarning)
 
-            batch_start = batch_idx * batch_size
-            batch_end = (batch_idx + 1) * batch_size
-            input_batch = prepared_dataset[batch_start:batch_end]
-            extracted_labels: list = extract_labels_fn(
-                input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+            itr = (
+                dataloader
+                if isinstance(model, VLLMModel)
+                else tqdm(
+                    iterable=dataloader,
+                    leave=False,
+                    disable=hasattr(sys, "_called_from_test"),
+                )
             )
-            all_preds.extend(extracted_labels)
-            pbar.update(num_devices)
 
-    # Collect the predictions across all processes
-    if not isinstance(model, OpenAIModel):  # TODO: Only call if distributed
-        accelerator.wait_for_everyone()
-        scores = accelerator.gather(scores)
-        breakpoint()
-        scores = scores.cpu().tolist()
-        extracted_labels = extract_labels_fn(
-            input_batch=dict(),
-            model_output=ModelOutput(scores=scores),
-            tokenizer=tokenizer,
+            # Generate the completions for the non-cached examples
+            for batch_idx, batch in enumerate(itr):
+                model_output, extracted_labels = generate_batch(
+                    batch=batch,
+                    batch_idx=batch_idx,
+                    batch_size=batch_size,
+                    non_cached_dataset=non_cached_dataset,
+                    model=model,
+                    tokenizer=tokenizer,
+                    stopping_criteria=stopping_criteria,
+                    generation_config=generation_config,
+                    extract_labels_fn=extract_labels_fn,
+                    prefix_allowed_tokens_fn=get_prefix_allowed_fn(
+                        dataset_config=dataset_config, tokenizer=tokenizer
+                    ),
+                )
+                cache.add_to_cache(
+                    model_input=batch["input_ids"],
+                    model_output=model_output,
+                    tokenizer=tokenizer,
+                )
+                all_preds.extend(extracted_labels)
+
+        if isinstance(itr, tqdm):
+            itr.close()
+
+        # Store the cache to disk
+        cache.save()
+
+    # Fetch the cached predictions for the cached examples
+    if len(cached_dataset) > 0:
+        model_output = load_cached_model_outputs(
+            cached_dataset=cached_dataset, cache=cache, tokenizer=tokenizer
         )
-        all_preds = extracted_labels
+        extracted_labels = extract_labels_fn(
+            input_batch=cached_dataset, model_output=model_output, tokenizer=tokenizer
+        )
+        all_preds.extend(extracted_labels)
 
-    if "label" in prepared_dataset.column_names:
+    if "label" in non_cached_dataset.column_names:
         ground_truth = [
             label.lower() if isinstance(label, str) else label
-            for label in prepared_dataset["label"]
+            for label in non_cached_dataset["label"] + cached_dataset["label"]
         ]
-    elif "labels" in prepared_dataset.column_names:
+    elif "labels" in non_cached_dataset.column_names:
         ground_truth = [
             [label.lower() if isinstance(label, str) else label for label in label_list]
-            for label_list in prepared_dataset["labels"]
+            for label_list in non_cached_dataset["labels"] + cached_dataset["labels"]
         ]
-    elif "target_text" in prepared_dataset.column_names:
-        ground_truth = prepared_dataset["target_text"]
+    elif "target_text" in non_cached_dataset.column_names:
+        ground_truth = non_cached_dataset["target_text"] + cached_dataset["target_text"]
     else:
         raise ValueError(
             "The dataset must have either a 'label', 'labels', or 'target_text' column"
@@ -301,10 +365,197 @@ def generate_single_iteration(
     return itr_scores
 
 
-def extract_raw_predictions(
-    generated_sequences: torch.Tensor,
+def get_prefix_allowed_fn(
+    dataset_config: DatasetConfig, tokenizer: Tokenizer
+) -> Callable[[int, torch.Tensor], torch.Tensor] | None:
+    """Return the prefix allowed function to use for structured generation.
+
+    Args:
+        dataset_config:
+            The dataset config.
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The prefix allowed function.
+    """
+    if build_transformers_prefix_allowed_tokens_fn is None:
+        raise NeedsExtraInstalled(extra="generative")
+
+    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
+        parser = get_ner_parser(dataset_config=dataset_config)
+        json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
+            tokenizer_data=tokenizer, character_level_parser=parser
+        )
+
+        forbidden_token_ids = list()
+        forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
+        for forbidden_token in forbidden_tokens:
+            forbidden_token_ids.extend(
+                list(tokenizer(forbidden_token, add_special_tokens=False).input_ids)
+            )
+        forbidden_token_ids = list(set(forbidden_token_ids))
+
+        def ner_prefix_allowed_tokens_fn(
+            batch_id: int, input_ids: torch.Tensor
+        ) -> torch.Tensor:
+            """Return the tokens allowed for the current batch.
+
+            Args:
+                batch_id:
+                    The batch index.
+                input_ids:
+                    The input ids.
+
+            Returns:
+                The tokens allowed for the current batch.
+            """
+            return torch.tensor(
+                [
+                    token_id
+                    for token_id in json_prefix_allowed_tokens_fn(batch_id, input_ids)
+                    if token_id not in forbidden_token_ids
+                ]
+            )
+
+        return ner_prefix_allowed_tokens_fn
+
+    return None
+
+
+class StopWordCriteria(StoppingCriteria):
+    """Stopping criteria for generation based on stop words.
+
+    Attributes:
+        stop_word_id_lists:
+            A list of lists of token IDs that are used to determine whether generation
+            should stop.
+        indices_done:
+            A list of indices of the examples for which generation has already stopped.
+            Resets every batch.
+    """
+
+    def __init__(self, stop_word_id_lists: list[list[int]]):
+        """Initialize the stopping criteria.
+
+        Args:
+            stop_word_id_lists:
+                A list of lists of token IDs that are used to determine whether
+                generation should stop.
+        """
+        super().__init__()
+        self.stop_word_id_lists = stop_word_id_lists
+        self.indices_done: list[int] = list()
+
+    def clear(self) -> None:
+        """Clear the example indices for which generation has already stopped."""
+        self.indices_done = list()
+
+    def __call__(
+        self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs
+    ) -> bool:
+        """Determine whether generation should stop.
+
+        Args:
+            input_ids:
+                The input IDs of the generated sequences.
+            scores:
+                The scores of the generated sequences. Not used.
+            **kwargs:
+                Additional keyword arguments. Not used.
+
+        Returns:
+            Whether generation should stop.
+        """
+        for stop_word_id_list in self.stop_word_id_lists:
+            for batch_idx in range(input_ids.shape[0]):
+                inputs = input_ids[batch_idx].tolist()
+                sample_ends_with_stop_word = (
+                    inputs[-len(stop_word_id_list) :] == stop_word_id_list
+                )
+                if sample_ends_with_stop_word:
+                    self.indices_done.append(batch_idx)
+                if all(idx in self.indices_done for idx in range(input_ids.shape[0])):
+                    return True
+        return False
+
+
+def generate_batch(
+    batch: dict[str, torch.Tensor],
+    batch_idx: int,
+    batch_size: int,
+    non_cached_dataset: Dataset,
+    model: GenerativeModel,
     tokenizer: Tokenizer,
-    dataset_config: DatasetConfig,
+    stopping_criteria: StopWordCriteria,
+    generation_config: GenerationConfig,
+    extract_labels_fn: Callable[..., list[str]],
+    prefix_allowed_tokens_fn: Callable[[int, torch.Tensor], torch.Tensor] | None,
+) -> tuple[ModelOutput, list[str | list[str]]]:
+    """Evaluate a model on a single batch of examples through generation.
+
+    Args:
+        batch:
+            The batch of examples to evaluate on.
+        batch_idx:
+            The index of the batch.
+        batch_size:
+            The size of the batch.
+        non_cached_dataset:
+            The dataset to evaluate on.
+        model:
+            The model to evaluate.
+        tokenizer:
+            The tokenizer used to encode the examples.
+        stopping_criteria:
+            The stopping criteria to use to stop generation.
+        generation_config:
+            The generation configuration to use.
+        extract_labels_fn:
+            The function to use to extract the labels from the model output.
+        prefix_allowed_tokens_fn:
+            The function to use to determine which tokens are allowed as a prefix to
+            the generated sequence.
+
+    Returns:
+        The predictions generated so far, with the predictions for the current batch
+        appended.
+    """
+    # Generate the completions of the documents in the batch
+    with warnings.catch_warnings(), torch.inference_mode():
+        warnings.simplefilter("ignore", category=UserWarning)
+        inputs = batch["input_ids"].to(model.device)
+        stopping_criteria.clear()
+
+        model_output = model.generate(
+            inputs=inputs,
+            generation_config=generation_config,
+            stopping_criteria=[stopping_criteria],
+            prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
+        )
+        assert isinstance(model_output, ModelOutput)
+
+    # Hugging Face models include the input in the generated sequence, so we
+    # need to remove it in that case
+    inputs = inputs.detach().cpu()
+    model_output.sequences = model_output.sequences.detach().cpu()
+    if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
+        model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
+
+    # Extract the labels from the model output and store them for metric
+    # computation later
+    batch_start = batch_idx * batch_size
+    batch_end = (batch_idx + 1) * batch_size
+    input_batch = non_cached_dataset[batch_start:batch_end]
+    extracted_labels: list = extract_labels_fn(
+        input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
+    )
+
+    return model_output, extracted_labels
+
+
+def extract_raw_predictions(
+    generated_sequences: torch.Tensor, tokenizer: Tokenizer
 ) -> list[str]:
     """Get the raw predictions from the generated sequences.
 
@@ -315,41 +566,22 @@ def extract_raw_predictions(
             consisting of token IDs.
         tokenizer:
             The tokenizer used to generate the tokens.
-        dataset_config:
-            The dataset config.
 
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
-    completion_ids_lists = [
-        [
-            token_id
-            for token_id in completion_ids
-            if token_id not in [tokenizer.bos_token_id, tokenizer.eos_token_id]
-        ]
-        for completion_ids in generated_sequences
+    raw_predictions: list[str] = [
+        tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True)
+        .split("\n\n")[0]
+        .strip()
+        for completion_ids in generated_sequences.long()
     ]
-
-    # For some models the generated tokens also includes the input tokens, so we need
-    # to deal with both cases when extracting the predicted labels
-    prompt_prefix_exists = dataset_config.prompt_prefix != ""
-    pred_idx = dataset_config.num_few_shot_examples + int(prompt_prefix_exists)
-    raw_predictions: list[str] = list()
-    for completion_ids_list in completion_ids_lists:
-        decoded = tokenizer.decode(completion_ids_list)
-        few_shots = decoded.split("\n\n")
-        answer_exists = len(few_shots) > pred_idx
-        answer = few_shots[pred_idx] if answer_exists else few_shots[-1]
-        answer = answer.split("\n")[-1]
-        answer = answer.strip()
-        raw_predictions.append(answer)
     return raw_predictions
 
 
 def get_generation_stopping_criteria(
-    tokenizer: Tokenizer,
-    model: GenerativeModel,
-) -> list[StoppingCriteria]:
+    tokenizer: Tokenizer, model: GenerativeModel
+) -> StopWordCriteria:
     """Get the stopping criteria for generation.
 
     Args:
@@ -364,7 +596,7 @@ def get_generation_stopping_criteria(
         The stopping criteria for generation.
     """
     if isinstance(model, OpenAIModel):
-        return list()
+        return StopWordCriteria(stop_word_id_lists=[])
 
     double_newline_ids: list[int] = tokenizer(
         text=["\n\n"], add_special_tokens=False
@@ -396,16 +628,4 @@ def get_generation_stopping_criteria(
         eos_token_ids,
     ]
 
-    return [StopWordCriteria(stop_word_id_lists=stop_word_id_lists)]
-
-
-class StopWordCriteria(StoppingCriteria):
-    def __init__(self, stop_word_id_lists: list[list[int]]):
-        super().__init__()
-        self.stop_word_id_lists = stop_word_id_lists
-
-    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> bool:
-        for stop_word_id_list in self.stop_word_id_lists:
-            if stop_word_id_list == input_ids[0][-len(stop_word_id_list) :].tolist():
-                return True
-        return False
+    return StopWordCriteria(stop_word_id_lists=stop_word_id_lists)

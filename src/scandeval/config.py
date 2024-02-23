@@ -41,9 +41,13 @@ class MetricConfig:
         default_factory=lambda: lambda raw_score: (100 * raw_score, f"{raw_score:.2%}")
     )
 
+    def __hash__(self) -> int:
+        """Return a hash of the metric configuration."""
+        return hash(self.name)
+
 
 @dataclass
-class DatasetTask:
+class Task:
     """A dataset task.
 
     Attributes:
@@ -62,6 +66,10 @@ class DatasetTask:
     metrics: list[MetricConfig]
     labels: list[str]
 
+    def __hash__(self) -> int:
+        """Return a hash of the task."""
+        return hash(self.name)
+
 
 @dataclass
 class Language:
@@ -77,6 +85,10 @@ class Language:
     code: str
     name: str
 
+    def __hash__(self) -> int:
+        """Return a hash of the language."""
+        return hash(self.code)
+
 
 @dataclass
 class BenchmarkConfig:
@@ -87,11 +99,13 @@ class BenchmarkConfig:
             The languages of the models to benchmark.
         dataset_languages:
             The languages of the datasets in the benchmark.
-        dataset_tasks:
-            The tasks to benchmark.
+        tasks:
+            The tasks benchmark the model(s) on.
+        datasets:
+            The datasets to benchmark on.
         framework:
-            The framework of the models to benchmark. If None then the framework will
-            be inferred.
+            The framework of the models to benchmark. If None then the framework will be
+            inferred.
         batch_size:
             The batch size to use.
         raise_errors:
@@ -108,40 +122,50 @@ class BenchmarkConfig:
         openai_api_key:
             The API key for the OpenAI API. If None then OpenAI models will not be
             benchmarked.
+        force:
+            Whether to force the benchmark to run even if the results are already
+            cached.
         progress_bar:
             Whether to show a progress bar.
         save_results:
-            Whether to save the benchmark results to
-            'scandeval_benchmark_results.json'.
+            Whether to save the benchmark results to 'scandeval_benchmark_results.json'.
         device:
             The device to use for benchmarking.
         verbose:
             Whether to print verbose output.
         trust_remote_code:
-            Whether to trust remote code when loading models from the Hugging Face
-            Hub.
+            Whether to trust remote code when loading models from the Hugging Face Hub.
         load_in_4bit:
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model.
         use_flash_attention:
             Whether to use Flash Attention.
+        clear_model_cache:
+            Whether to clear the model cache after benchmarking each model.
+        only_validation_split:
+            Whether to only evaluate on the validation split.
+        few_shot:
+            Whether to only evaluate the model using few-shot evaluation. Only relevant
+            if the model is generative.
+        num_iterations:
+            The number of iterations each model should be evaluated for.
         is_main_process:
             Whether the current process is the main process. Only relevant when
             running in a distributed setting. Defaults to True.
-        testing:
-            Whether a unit test is being run. Defaults to False.
     """
 
     model_languages: list[Language]
     dataset_languages: list[Language]
-    dataset_tasks: list[DatasetTask]
-    framework: Framework | str | None
+    tasks: list[Task]
+    datasets: list[str]
+    framework: Framework | None
     batch_size: int
     raise_errors: bool
     cache_dir: str
     evaluate_train: bool
     token: bool | str
     openai_api_key: str | None
+    force: bool
     progress_bar: bool
     save_results: bool
     device: torch.device
@@ -149,8 +173,11 @@ class BenchmarkConfig:
     trust_remote_code: bool
     load_in_4bit: bool | None
     use_flash_attention: bool
+    clear_model_cache: bool
+    only_validation_split: bool
+    few_shot: bool
+    num_iterations: int
     is_main_process: bool = True
-    testing: bool = False
 
 
 @dataclass
@@ -195,7 +222,7 @@ class DatasetConfig:
     name: str
     pretty_name: str
     huggingface_id: str
-    task: DatasetTask
+    task: Task
     languages: list[Language]
     prompt_template: str
     max_generated_tokens: int
@@ -205,15 +232,22 @@ class DatasetConfig:
 
     @property
     def id2label(self) -> list[str]:
+        """The mapping from ID to label."""
         return [label for label in self.task.labels]
 
     @property
     def label2id(self) -> dict[str, int]:
+        """The mapping from label to ID."""
         return {label: i for i, label in enumerate(self.task.labels)}
 
     @property
     def num_labels(self) -> int:
+        """The number of labels in the dataset."""
         return len(self.task.labels)
+
+    def __hash__(self) -> int:
+        """Return a hash of the dataset configuration."""
+        return hash(self.name)
 
 
 @dataclass
@@ -239,8 +273,12 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: Framework | str
+    framework: Framework
     task: str
     languages: list[Language]
     model_type: ModelType | str
     model_cache_dir: str
+
+    def __hash__(self) -> int:
+        """Return a hash of the model configuration."""
+        return hash(self.model_id)

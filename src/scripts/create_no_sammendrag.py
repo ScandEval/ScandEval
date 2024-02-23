@@ -1,14 +1,14 @@
 """Create the NoSammendrag-mini summarisation dataset."""
 
-from huggingface_hub import HfApi
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
+from huggingface_hub import HfApi
 from requests import HTTPError
+from scripts.constants import MAX_NUM_CHARS_IN_ARTICLE, MIN_NUM_CHARS_IN_ARTICLE
 
 
 def main():
     """Create the NoSammendrag-mini summarisation dataset and upload to HF Hub."""
-
     dataset_id = "norkart/no-sammendrag"
 
     dataset = load_dataset(dataset_id, split="train", token=True)
@@ -20,6 +20,12 @@ def main():
 
     df = dataset.to_pandas()
     assert isinstance(df, pd.DataFrame)
+
+    # Only work with samples where the text is not very large or small
+    lengths = df.text.str.len()
+    lower_bound = MIN_NUM_CHARS_IN_ARTICLE
+    upper_bound = MAX_NUM_CHARS_IN_ARTICLE
+    df = df[lengths.between(lower_bound, upper_bound)]
 
     # Create validation split
     val_size = 256

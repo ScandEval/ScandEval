@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 
 from .config import MetricConfig
-from .types import SCORE_DICT
+from .types import ScoreDict
 
 logger = logging.getLogger(__package__)
 
@@ -17,7 +17,7 @@ def log_scores(
     scores: dict[str, list[dict[str, float]]],
     model_id: str,
     is_main_process: bool,
-) -> SCORE_DICT:
+) -> ScoreDict:
     """Log the scores.
 
     Args:
@@ -109,9 +109,11 @@ def aggregate_scores(
 
         if "train" in scores.keys():
             train_scores = [
-                dct[metric_config.name]
-                if metric_config.name in dct
-                else dct[f"train_{metric_config.name}"]
+                (
+                    dct[metric_config.name]
+                    if metric_config.name in dct
+                    else dct[f"train_{metric_config.name}"]
+                )
                 for dct in scores["train"]
             ]
             train_score = np.mean(train_scores)
@@ -126,9 +128,11 @@ def aggregate_scores(
 
         if "test" in scores.keys():
             test_scores = [
-                dct[metric_config.name]
-                if metric_config.name in dct
-                else dct[f"test_{metric_config.name}"]
+                (
+                    dct[metric_config.name]
+                    if metric_config.name in dct
+                    else dct[f"test_{metric_config.name}"]
+                )
                 for dct in scores["test"]
             ]
             test_score = np.mean(test_scores)

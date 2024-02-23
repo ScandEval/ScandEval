@@ -3,10 +3,10 @@
 import itertools as it
 import logging
 import random
+import re
 from functools import partial
 from typing import Any
 
-import Levenshtein
 import numpy as np
 import torch
 from datasets.arrow_dataset import Dataset
@@ -16,10 +16,21 @@ from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
 from .config import DatasetConfig
-from .exceptions import InvalidBenchmark
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
-from .utils import GENERATIVE_MODEL_TASKS, get_special_token_metadata
+from .types import Labels, Predictions
+from .utils import (
+    GENERATIVE_MODEL_TASKS,
+    get_special_token_metadata,
+    raise_if_model_output_contains_nan_values,
+    should_prefix_space_be_added_to_labels,
+)
+
+try:
+    import Levenshtein
+except ImportError:
+    Levenshtein = None
 
 logger = logging.getLogger(__package__)
 
@@ -87,7 +98,10 @@ class SequenceClassification(BenchmarkDataset):
                 label2id=kwargs["hf_model_config"].label2id,
             )
             return tokenised.map(
-                numericalise, batched=True, load_from_cache_file=False
+                numericalise,
+                batched=True,
+                load_from_cache_file=False,
+                keep_in_memory=True,
             ).remove_columns(["text"])
         else:
             return tokenised
@@ -123,9 +137,7 @@ class SequenceClassification(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer, padding="longest")
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[np.ndarray, np.ndarray],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -142,6 +154,8 @@ class SequenceClassification(BenchmarkDataset):
         """
         model_outputs, labels = model_outputs_and_labels
 
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
+
         model_output_dtype = np.asarray(model_outputs).dtype
         if model_output_dtype in [np.float16, np.float32, np.float64]:
             predictions = np.asarray(model_outputs).argmax(axis=-1)
@@ -153,9 +167,11 @@ class SequenceClassification(BenchmarkDataset):
             for label, prompt_label in self.dataset_config.prompt_label_mapping.items()
         }
         predictions = [
-            id2label.index(prompt_label_to_label_mapping[pred.lower()])
-            if isinstance(pred, str)
-            else pred
+            (
+                id2label.index(prompt_label_to_label_mapping[pred.lower()])
+                if isinstance(pred, str)
+                else pred
+            )
             for pred in predictions
         ]
 
@@ -168,9 +184,7 @@ class SequenceClassification(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
+                predictions=predictions, references=labels, **cfg.compute_kwargs
             )
 
             # The metric returns None if we are running on multi-GPU and the current
@@ -180,6 +194,7 @@ class SequenceClassification(BenchmarkDataset):
                 if isinstance(scores, list):
                     scores = sum(scores) / len(scores)
                 results[cfg.name] = scores
+
         return results
 
     def _extract_few_shot_examples(
@@ -207,9 +222,12 @@ class SequenceClassification(BenchmarkDataset):
         # examples
         while len(few_shot_examples) < num_few_shots:
             label = next(labels)
-            example = shuffled_train.filter(
+            possible_examples = shuffled_train.filter(
                 lambda x: x["label"].lower() == label.lower()
-            ).select(range(1))[0]
+            )
+            if len(possible_examples) == 0:
+                continue
+            example = possible_examples.select(range(1))[0]
             few_shot_examples.append(example)
             shuffled_train = shuffled_train.filter(
                 lambda x: x["text"] != example["text"]
@@ -220,7 +238,7 @@ class SequenceClassification(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -229,6 +247,8 @@ class SequenceClassification(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.
@@ -237,7 +257,7 @@ class SequenceClassification(BenchmarkDataset):
         label_mapping = self.dataset_config.prompt_label_mapping
         few_shot_prompts = [
             self.dataset_config.prompt_template.format(
-                text=example["text"].replace("\n", " ").strip(),
+                text=re.sub(r"\n+", "\n", example["text"]).strip(),
                 label=label_mapping[example["label"].lower()],
             )
             for example in few_shot_examples
@@ -252,14 +272,16 @@ class SequenceClassification(BenchmarkDataset):
         # from one another
         new_prompts = [
             self.dataset_config.prompt_template.format(
-                text=text.replace("\n", " ").strip(), label=""
-            ).strip()
+                text=re.sub(r"\n+", "\n", text).strip(), label=""
+            )
             for text in examples["text"]
         ]
 
-        examples["text"] = [
+        final_prompts = [
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
+
+        examples["text"] = final_prompts
 
         return examples
 
@@ -284,8 +306,12 @@ class SequenceClassification(BenchmarkDataset):
             The predicted labels.
         """
         if "scores" in model_output:
+            if isinstance(model_output["scores"], tuple):
+                all_logprobs = torch.stack(model_output["scores"], dim=1)
+            else:
+                all_logprobs = model_output["scores"]
             return get_closest_logprobs_labels(
-                generation_logprobs=model_output["scores"],
+                generation_logprobs=all_logprobs,
                 tokenizer=tokenizer,
                 dataset_config=self.dataset_config,
             )
@@ -298,7 +324,7 @@ class SequenceClassification(BenchmarkDataset):
 
 
 def get_closest_logprobs_labels(
-    generation_logprobs: tuple[torch.Tensor],
+    generation_logprobs: torch.Tensor,
     tokenizer: Tokenizer,
     dataset_config: DatasetConfig,
 ) -> list[str]:
@@ -326,22 +352,28 @@ def get_closest_logprobs_labels(
         dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
     ]
 
-    # Shape: [batch_size, num_generated_tokens, vocab_size]
-    all_logprobs = torch.stack(generation_logprobs, dim=1)
+    add_prefix_space_to_labels = should_prefix_space_be_added_to_labels(
+        labels_to_be_generated=candidate_labels, tokenizer=tokenizer
+    )
 
     # Shape: [batch_size, num_candidate_labels]
     pred_logprobs = torch.empty(
-        all_logprobs.shape[0], len(candidate_labels), device=all_logprobs.device
+        generation_logprobs.shape[0],
+        len(candidate_labels),
+        device=generation_logprobs.device,
     )
 
     for idx, candidate_label in enumerate(candidate_labels):
         # We only use the first token to represent the logprob value of the entire
         # label.
+        label_ready_for_tokenization = candidate_label.lower()
+        if add_prefix_space_to_labels:
+            label_ready_for_tokenization = " " + label_ready_for_tokenization
         candidate_label_ids: list[list[int]] = tokenizer(
-            [candidate_label.lower()], add_special_tokens=False
+            [label_ready_for_tokenization.lower()], add_special_tokens=False
         )["input_ids"]
         candidate_label_id: int = candidate_label_ids[0][0]
-        pred_logprobs[:, idx] = all_logprobs[:, 0, candidate_label_id]
+        pred_logprobs[:, idx] = generation_logprobs[:, 0, candidate_label_id]
 
     # Shape: [batch_size,]
     predicted_label_ids = pred_logprobs.argmax(dim=1)
@@ -369,10 +401,11 @@ def get_closest_word_edit_labels(
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
+    if Levenshtein is None:
+        raise NeedsExtraInstalled(extra="openai")
+
     raw_predictions = extract_raw_predictions(
-        generated_sequences=generated_sequences,
-        tokenizer=tokenizer,
-        dataset_config=dataset_config,
+        generated_sequences=generated_sequences, tokenizer=tokenizer
     )
 
     candidate_labels = [

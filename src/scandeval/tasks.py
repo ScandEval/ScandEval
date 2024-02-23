@@ -1,18 +1,18 @@
 """All benchmarks tasks used in ScandEval."""
 
-from .config import DatasetTask, MetricConfig
+from .config import MetricConfig, Task
 
 
-def get_all_dataset_tasks() -> dict[str, DatasetTask]:
+def get_all_tasks() -> dict[str, Task]:
     """Get a list of all the dataset tasks.
 
     Returns:
         A mapping between names of dataset tasks and their configurations.
     """
-    return {cfg.name: cfg for cfg in globals().values() if isinstance(cfg, DatasetTask)}
+    return {cfg.name: cfg for cfg in globals().values() if isinstance(cfg, Task)}
 
 
-LA = DatasetTask(
+LA = Task(
     name="linguistic-acceptability",
     supertask="sequence-classification",
     metrics=[
@@ -34,19 +34,19 @@ LA = DatasetTask(
 )
 
 
-NER = DatasetTask(
+NER = Task(
     name="named-entity-recognition",
     supertask="token-classification",
     metrics=[
         MetricConfig(
-            name="micro_f1",
-            pretty_name="Micro-average F1-score",
+            name="micro_f1_no_misc",
+            pretty_name="Micro-average F1-score without MISC tags",
             huggingface_id="seqeval",
             results_key="overall_f1",
         ),
         MetricConfig(
-            name="micro_f1_no_misc",
-            pretty_name="Micro-average F1-score without MISC tags",
+            name="micro_f1",
+            pretty_name="Micro-average F1-score with MISC tags",
             huggingface_id="seqeval",
             results_key="overall_f1",
         ),
@@ -65,7 +65,7 @@ NER = DatasetTask(
 )
 
 
-QA = DatasetTask(
+QA = Task(
     name="question-answering",
     supertask="question-answering",
     metrics=[
@@ -88,7 +88,7 @@ QA = DatasetTask(
 )
 
 
-SENT = DatasetTask(
+SENT = Task(
     name="sentiment-classification",
     supertask="sequence-classification",
     metrics=[
@@ -110,7 +110,7 @@ SENT = DatasetTask(
 )
 
 
-SUMMARIZATION = DatasetTask(
+SUMM = Task(
     name="summarization",
     supertask="text-to-text",
     metrics=[
@@ -119,61 +119,25 @@ SUMMARIZATION = DatasetTask(
             pretty_name="BERTScore",
             huggingface_id="bertscore",
             results_key="f1",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
-            compute_kwargs=dict(model_type="microsoft/mdeberta-v3-base", device="cpu"),
+            compute_kwargs=dict(
+                model_type="microsoft/mdeberta-v3-base", device="auto", batch_size=32
+            ),
         ),
         MetricConfig(
-            name="rouge-1",
-            pretty_name="ROUGE-1",
-            huggingface_id="rouge",
-            results_key="rouge1",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
-        ),
-        MetricConfig(
-            name="rouge-2",
-            pretty_name="ROUGE-2",
-            huggingface_id="rouge",
-            results_key="rouge2",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
-        ),
-        MetricConfig(
-            name="rouge-l",
+            name="rouge_l",
             pretty_name="ROUGE-L",
             huggingface_id="rouge",
             results_key="rougeL",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
-        ),
-        MetricConfig(
-            name="bleu",
-            pretty_name="BLEU",
-            huggingface_id="bleu",
-            results_key="bleu",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
-        ),
-        MetricConfig(
-            name="chrf++",
-            pretty_name="chrF++",
-            huggingface_id="chrf",
-            results_key="score",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
-            compute_kwargs=dict(word_order=2),
-        ),
-        MetricConfig(
-            name="character",
-            pretty_name="CharacTER",
-            huggingface_id="character",
-            results_key="cer_score",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2%}"),
         ),
     ],
     labels=[],
 )
 
 
-MULTIPLE_CHOICE = DatasetTask(
-    name="multiple-choice",
-    supertask="multiple-choice",
-    metrics=[  # Not sure
+KNOW = Task(
+    name="knowledge",
+    supertask="sequence-classification",
+    metrics=[
         MetricConfig(
             name="mcc",
             pretty_name="Matthew's Correlation Coefficient",
@@ -181,18 +145,38 @@ MULTIPLE_CHOICE = DatasetTask(
             results_key="matthews_correlation",
         ),
         MetricConfig(
-            name="macro_f1",
-            pretty_name="Macro-average F1-score",
-            huggingface_id="f1",
-            results_key="f1",
-            compute_kwargs=dict(average="macro"),
+            name="accuracy",
+            pretty_name="Accuracy",
+            huggingface_id="accuracy",
+            results_key="accuracy",
         ),
     ],
-    labels=[],  # Maybe add?
+    labels=["a", "b", "c", "d"],
 )
 
 
-TEXT_MODELLING = DatasetTask(
+COMMON_SENSE = Task(
+    name="common-sense-reasoning",
+    supertask="sequence-classification",
+    metrics=[
+        MetricConfig(
+            name="accuracy",
+            pretty_name="Accuracy",
+            huggingface_id="accuracy",
+            results_key="accuracy",
+        ),
+        MetricConfig(
+            name="mcc",
+            pretty_name="Matthew's Correlation Coefficient",
+            huggingface_id="matthews_correlation",
+            results_key="matthews_correlation",
+        ),
+    ],
+    labels=["a", "b", "c", "d"],
+)
+
+
+TEXT_MODELLING = Task(
     name="text-modelling",
     supertask="text-modelling",
     metrics=[
@@ -201,13 +185,13 @@ TEXT_MODELLING = DatasetTask(
             pretty_name="Perplexity",
             huggingface_id="perplexity",
             results_key="mean_perplexity",
-        ),
+        )
     ],
     labels=[],
 )
 
 
-SPEED = DatasetTask(
+SPEED = Task(
     name="speed",
     supertask="sequence-classification",
     metrics=[

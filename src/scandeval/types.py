@@ -2,7 +2,11 @@
 
 from typing import Any, TypeGuard
 
-SCORE_DICT = dict[str, dict[str, float] | dict[str, list[dict[str, float]]]]
+import numpy as np
+
+ScoreDict = dict[str, dict[str, float] | dict[str, list[dict[str, float]]]]
+Predictions = np.ndarray | list[str] | list[list[str]]
+Labels = np.ndarray | list[str] | list[list[str]]
 
 
 def is_list_of_int(x: Any) -> TypeGuard[list[int]]:

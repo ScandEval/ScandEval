@@ -10,9 +10,17 @@ from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.utils import ModelOutput
 
-from .generation import extract_raw_predictions
+from scandeval.exceptions import InvalidBenchmark
+
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
+from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
+from .utils import (
+    METRIC_ATTRIBUTES_TAKING_UP_MEMORY,
+    HiddenPrints,
+    clear_memory,
+    raise_if_model_output_contains_nan_values,
+)
 
 logger = logging.getLogger(__package__)
 
@@ -51,7 +59,9 @@ class TextToText(BenchmarkDataset):
         def tokenise(examples: dict) -> BatchEncoding:
             return tokenizer(text=examples["text"], truncation=True, padding=False)
 
-        tokenised = dataset.map(tokenise, batched=True, load_from_cache_file=False)
+        tokenised = dataset.map(
+            tokenise, batched=True, load_from_cache_file=False, keep_in_memory=True
+        )
 
         return tokenised
 
@@ -76,9 +86,7 @@ class TextToText(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer, padding="longest")
 
     def _compute_metrics(
-        self,
-        model_outputs_and_labels: tuple[Predictions, Labels],
-        id2label: list[str],
+        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -95,6 +103,8 @@ class TextToText(BenchmarkDataset):
         """
         model_outputs, labels = model_outputs_and_labels
 
+        raise_if_model_output_contains_nan_values(model_output=model_outputs)
+
         model_output_dtype = np.asarray(model_outputs).dtype
         output_is_prob = model_output_dtype in [np.float16, np.float32, np.float64]
         if output_is_prob:
@@ -105,11 +115,60 @@ class TextToText(BenchmarkDataset):
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
-            score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions,
-                references=labels,
-                **cfg.compute_kwargs,
-            )
+
+            # Some metrics can be computed on hardware accelerators. In this case we
+            # start by setting the device to the same device as the model
+            if cfg.compute_kwargs.get("device", None) == "auto":
+                cfg.compute_kwargs["device"] = self.benchmark_config.device.type
+
+            while True:
+                try:
+                    with HiddenPrints():
+                        score_dict: dict[str, float] | None = metric.compute(
+                            predictions=predictions,
+                            references=labels,
+                            **cfg.compute_kwargs,
+                        )
+
+                    # Clear the cache of the BERTScorer to avoid memory leaks
+                    for attribute in METRIC_ATTRIBUTES_TAKING_UP_MEMORY:
+                        if hasattr(metric, attribute):
+                            delattr(metric, attribute)
+
+                    clear_memory()
+                    break
+                except Exception as e:
+                    # Clear the cache of the BERTScorer to avoid memory leaks
+                    if hasattr(metric, "cached_bertscorer"):
+                        del metric.cached_bertscorer
+                        clear_memory()
+
+                    oom_error = [
+                        "CUDA out of memory",
+                        "CUDA error",
+                        "MPS backend out of memory",
+                    ]
+                    if not any(error in str(e) for error in oom_error):
+                        raise InvalidBenchmark(str(e))
+
+                    if cfg.compute_kwargs.get("batch_size", 1) > 1:
+                        batch_size = cfg.compute_kwargs["batch_size"]
+                        cfg.compute_kwargs["batch_size"] = batch_size // 2
+                        logger.debug(
+                            "Out of memory error occurred during the computation of "
+                            f"the metric {cfg.pretty_name}. Reducing the batch size to "
+                            f"{cfg.compute_kwargs['batch_size']}."
+                        )
+                    elif cfg.compute_kwargs.get("device", "cpu") != "cpu":
+                        cfg.compute_kwargs["batch_size"] = 32
+                        cfg.compute_kwargs["device"] = "cpu"
+                        logger.debug(
+                            "Out of memory error occurred during the computation of "
+                            f"the metric {cfg.pretty_name}. Moving the computation to "
+                            "the CPU."
+                        )
+                    else:
+                        raise InvalidBenchmark(str(e))
 
             # The metric returns None if we are running on multi-GPU and the current
             # process is not the main process
@@ -118,6 +177,7 @@ class TextToText(BenchmarkDataset):
                 if isinstance(scores, list):
                     scores = sum(scores) / len(scores)
                 results[cfg.name] = scores
+
         return results
 
     def _extract_few_shot_examples(
@@ -154,7 +214,7 @@ class TextToText(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict]
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -163,6 +223,8 @@ class TextToText(BenchmarkDataset):
                 The examples to apply the prompt to.
             few_shot_examples:
                 The examples to be included in the few-shot prompt.
+            tokenizer:
+                The tokenizer to use to encode the few-shot prompt.
 
         Returns:
             The examples with the few-shot prompt applied.
@@ -217,8 +279,6 @@ class TextToText(BenchmarkDataset):
             The predicted labels.
         """
         raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output.sequences,
-            tokenizer=tokenizer,
-            dataset_config=self.dataset_config,
+            generated_sequences=model_output.sequences, tokenizer=tokenizer
         )
         return raw_predictions

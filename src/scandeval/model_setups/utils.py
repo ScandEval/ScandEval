@@ -4,10 +4,10 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-from transformers import PreTrainedModel, PreTrainedTokenizer
+from transformers import PreTrainedModel, PreTrainedTokenizerBase
 
-from ..exceptions import InvalidBenchmark
-from ..utils import model_is_generative
+from ..exceptions import InvalidModel
+from ..utils import DUMMY_FILL_VALUE, model_is_generative
 
 
 def get_children_of_module(
@@ -16,14 +16,13 @@ def get_children_of_module(
     """Get the children of a module.
 
     Args:
-        name (str):
+        name:
             The name of the module.
-        module (nn.Module):
+        module:
             The module to get the children of.
 
     Returns:
-        nn.Module, dict[str, Any] or None:
-            The children of the module, or None if the module has no children.
+        The children of the module, or None if the module has no children.
     """
     if len(list(module.children())) == 0:
         if name == "token_type_embeddings":
@@ -43,14 +42,12 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
     """Setup a model for question answering.
 
     Args:
-        model (PreTrainedModel):
+        model:
             The model to setup.
 
     Returns:
-        PreTrainedModel:
-            The setup model.
+        The setup model.
     """
-
     # Get the models' token type embedding children, if they exist
     children = get_children_of_module(name="model", module=model)
 
@@ -93,26 +90,25 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
 
 def align_model_and_tokenizer(
     model: PreTrainedModel,
-    tokenizer: PreTrainedTokenizer,
+    tokenizer: PreTrainedTokenizerBase,
     generation_length: int,
     raise_errors: bool = False,
-) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
+) -> tuple[PreTrainedModel, PreTrainedTokenizerBase]:
     """Aligns the model and the tokenizer.
 
     Args:
-        model (PreTrainedModel):
+        model:
             The model to fix.
-        tokenizer (PreTrainedTokenizer):
+        tokenizer:
             The tokenizer to fix.
-        generation_length (int):
+        generation_length:
             The length of the generation, which depends on the benchmark dataset. Only
             relevant if the model is a generative model.
-        raise_errors (bool, optional):
+        raise_errors:
             Whether to raise errors instead of trying to fix them silently.
 
     Returns:
-        pair of (model, tokenizer):
-            The fixed model and tokenizer.
+        The fixed model and tokenizer.
     """
     # Get all possible maximal lengths
     all_max_lengths: list[int] = []
@@ -156,9 +152,9 @@ def align_model_and_tokenizer(
     initial_max_length = tokenizer.model_max_length
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
-        dummy_inputs = torch.zeros(
-            1,
-            max_length,
+        dummy_inputs = torch.full(
+            size=(1, max_length),
+            fill_value=DUMMY_FILL_VALUE,
             dtype=torch.long,
             device=model.device,
         )
@@ -172,8 +168,7 @@ def align_model_and_tokenizer(
             except ValueError as e:
                 if "decoder_input_ids" not in str(e):
                     raise e
-                with torch.inference_mode():
-                    model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long())
+                model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long())
                 break
 
             # This happens if `max_length` is too large
@@ -185,7 +180,7 @@ def align_model_and_tokenizer(
     if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
         if model.config.vocab_size < tokenizer.vocab_size:
             if raise_errors:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     "The vocab size of the tokenizer is larger than the vocab size of "
                     "the model. As the --raise-errors option was specified, the "
                     "embeddings of the model will not be automatically adjusted."
@@ -204,10 +199,14 @@ def align_model_and_tokenizer(
             if tokenizer.sep_token is not None:
                 tokenizer.pad_token = tokenizer.sep_token
             else:
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     "The tokenizer does not have a padding token and does not have a "
                     "SEP token or EOS token to use as a padding token."
                 )
         model.config.pad_token_id = tokenizer.pad_token_id
+
+    if tokenizer.bos_token is None and tokenizer.eos_token is not None:
+        tokenizer.bos_token = tokenizer.eos_token
+        tokenizer.bos_token_id = tokenizer.eos_token_id
 
     return model, tokenizer

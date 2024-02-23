@@ -1,14 +1,12 @@
-"""
-.. include:: ../../README.md
-"""
+"""ScandEval - A benchmarking framework for language models."""
 
 import importlib.metadata
 import logging
 import os
+import sys
 
 from dotenv import load_dotenv
 from termcolor import colored
-
 
 # Fetches the version of the package as defined in pyproject.toml
 __version__ = importlib.metadata.version(__package__)
@@ -20,7 +18,11 @@ load_dotenv()
 
 # Set up logging
 fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
-logging.basicConfig(level=logging.INFO, format=fmt, datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.CRITICAL if hasattr(sys, "_called_from_test") else logging.INFO,
+    format=fmt,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 # Disable parallelisation when tokenizing, as that can lead to errors
@@ -43,7 +45,6 @@ if os.getenv("WORLD_SIZE") is None and False:  # TEMP
 # `torch`, which needs to be imported after setting the environment variables
 from .benchmarker import Benchmarker  # noqa: E402
 from .utils import block_terminal_output  # noqa: E402
-
 
 # Block unwanted terminal outputs
 block_terminal_output()

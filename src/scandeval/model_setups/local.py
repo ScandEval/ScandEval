@@ -7,9 +7,9 @@ from transformers import AutoConfig, PreTrainedModel
 
 from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import InvalidBenchmark
-from ..utils import create_model_cache_dir
+from ..exceptions import InvalidModel
 from ..protocols import GenerativeModel, Tokenizer
+from ..utils import create_model_cache_dir
 from .hf import HFModelSetup
 
 logger = logging.getLogger(__package__)
@@ -18,31 +18,30 @@ logger = logging.getLogger(__package__)
 class LocalModelSetup:
     """Model setup for local Hugging Face Hub models.
 
-    Args:
-        benchmark_config (BenchmarkConfig):
-            The benchmark configuration.
-
     Attributes:
-        benchmark_config (BenchmarkConfig):
+        benchmark_config:
             The benchmark configuration.
     """
 
-    def __init__(
-        self,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
+    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+        """Initialize the LocalModelSetup class.
+
+        Args:
+            benchmark_config:
+                The benchmark configuration.
+        """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool:
+    def model_exists(self, model_id: str) -> bool | str:
         """Check if a model exists locally.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID.
 
         Returns:
-            bool:
-                Whether the model exists locally.
+            Whether the model exists locally, or the name of an extra that needs to be
+            installed to check if the model exists.
         """
         # Ensure that `model_id` is a Path object
         model_dir = Path(model_id)
@@ -67,12 +66,11 @@ class LocalModelSetup:
         """Fetches configuration for a local Hugging Face model.
 
         Args:
-            model_id (str):
+            model_id:
                 The model ID of the model.
 
         Returns:
-            ModelConfig:
-                The model configuration.
+            The model configuration.
         """
         framework = self.benchmark_config.framework
         if framework is None:
@@ -83,9 +81,9 @@ class LocalModelSetup:
                 elif ".msgpack" in exts:
                     framework = Framework.JAX
                 elif ".whl" in exts:
-                    raise InvalidBenchmark("SpaCy models are not supported.")
+                    raise InvalidModel("SpaCy models are not supported.")
                 elif ".h5" in exts:
-                    raise InvalidBenchmark("TensorFlow/Keras models are not supported.")
+                    raise InvalidModel("TensorFlow/Keras models are not supported.")
             except OSError as e:
                 logger.info(f"Cannot list files for local model `{model_id}`!")
                 if self.benchmark_config.raise_errors:
@@ -117,8 +115,7 @@ class LocalModelSetup:
             languages=list(),
             model_type=ModelType.LOCAL,
             model_cache_dir=create_model_cache_dir(
-                cache_dir=self.benchmark_config.cache_dir,
-                model_id=model_id,
+                cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
         )
         return model_config
@@ -129,17 +126,15 @@ class LocalModelSetup:
         """Load a local Hugging Face model.
 
         Args:
-            model_config (ModelConfig):
+            model_config:
                 The model configuration.
-            dataset_config (DatasetConfig):
+            dataset_config:
                 The dataset configuration.
 
         Returns:
-            pair of (tokenizer, model):
-                The tokenizer and model.
+            The tokenizer and model.
         """
         hf_model_setup = HFModelSetup(benchmark_config=self.benchmark_config)
         return hf_model_setup.load_model(
-            model_config=model_config,
-            dataset_config=dataset_config,
+            model_config=model_config, dataset_config=dataset_config
         )

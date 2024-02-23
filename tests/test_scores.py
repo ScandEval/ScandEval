@@ -1,26 +1,17 @@
 """Unit tests for the `scores` module."""
 
 from copy import deepcopy
+from typing import Generator
 
 import numpy as np
 import pytest
-
-from scandeval.config import MetricConfig
 from scandeval.scores import aggregate_scores, log_scores
+from scandeval.types import ScoreDict
 
 
 @pytest.fixture(scope="module")
-def metric_config():
-    yield MetricConfig(
-        name="metric_name",
-        pretty_name="Metric name",
-        huggingface_id="metric",
-        results_key="metric",
-    )
-
-
-@pytest.fixture(scope="module")
-def scores(metric_config):
+def scores(metric_config) -> Generator[dict[str, list[dict[str, float]]], None, None]:
+    """Yield a dictionary of scores."""
     yield dict(
         train=[
             {f"train_{metric_config.name}": 0.70},
@@ -36,7 +27,10 @@ def scores(metric_config):
 
 
 class TestAggregateScores:
+    """Unit tests for the `aggregate_scores` function."""
+
     def test_only_train_scores(self, scores, metric_config):
+        """Test that `aggregate_scores` works when only train scores are provided."""
         # Remove the test scores from the scores
         scores_only_train = deepcopy(scores)
         scores_only_train.pop("test")
@@ -57,6 +51,7 @@ class TestAggregateScores:
         assert agg_scores == dict(train=(mean, se))
 
     def test_only_test_scores(self, scores, metric_config):
+        """Test that `aggregate_scores` works when only test scores are provided."""
         # Remove the train scores from the scores
         scores_only_test = deepcopy(scores)
         scores_only_test.pop("train")
@@ -77,6 +72,7 @@ class TestAggregateScores:
         assert agg_scores == dict(test=(mean, se))
 
     def test_all_scores(self, scores, metric_config):
+        """Test that `aggregate_scores` works when train/test scores are provided."""
         # Aggregate scores using the `agg_scores` function
         agg_scores = aggregate_scores(scores=scores, metric_config=metric_config)
 
@@ -96,6 +92,7 @@ class TestAggregateScores:
         )
 
     def test_no_scores(self, scores, metric_config):
+        """Test that `aggregate_scores` works when no scores are provided."""
         empty_scores = deepcopy(scores)
         empty_scores.pop("train")
         empty_scores.pop("test")
@@ -104,8 +101,11 @@ class TestAggregateScores:
 
 
 class TestLogScores:
+    """Unit tests for the `log_scores` function."""
+
     @pytest.fixture(scope="class")
-    def logged_scores(self, metric_config, scores):
+    def logged_scores(self, metric_config, scores) -> Generator[ScoreDict, None, None]:
+        """Yields the logged scores."""
         yield log_scores(
             dataset_name="dataset",
             metric_configs=[metric_config],
@@ -115,18 +115,23 @@ class TestLogScores:
         )
 
     def test_is_correct_type(self, logged_scores):
+        """Test that `log_scores` returns a dictionary."""
         assert isinstance(logged_scores, dict)
 
     def test_has_correct_keys(self, logged_scores):
+        """Test that `log_scores` returns a dictionary with the correct keys."""
         assert sorted(logged_scores.keys()) == ["raw", "total"]
 
     def test_raw_scores_are_identical_to_input(self, logged_scores, scores):
+        """Test that `log_scores` returns the same raw scores as the input."""
         assert logged_scores["raw"] == scores
 
     def test_total_scores_is_dict(self, logged_scores):
+        """Test that `log_scores` returns a dictionary for the total scores."""
         assert isinstance(logged_scores["total"], dict)
 
     def test_total_scores_keys(self, logged_scores, metric_config):
+        """Test that `log_scores` returns a dictionary with the correct keys."""
         assert sorted(logged_scores["total"].keys()) == [
             f"test_{metric_config.name}",
             f"test_{metric_config.name}_se",
@@ -135,5 +140,6 @@ class TestLogScores:
         ]
 
     def test_total_scores_values_are_floats(self, logged_scores):
+        """Test that `log_scores` returns a dictionary with float values."""
         for val in logged_scores["total"].values():
             assert isinstance(val, float)

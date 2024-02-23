@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 
 
-def load_ddt_pos() -> Dict[str, pd.DataFrame]:
+def load_dadt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Danish Dependency Treebank.
 
     Returns:
@@ -26,7 +26,7 @@ def load_ddt_pos() -> Dict[str, pd.DataFrame]:
     return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
 
 
-def load_fdt_pos() -> Dict[str, pd.DataFrame]:
+def load_fodt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Faroese Dependency Treebank.
 
     Returns:
@@ -44,7 +44,7 @@ def load_fdt_pos() -> Dict[str, pd.DataFrame]:
     return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
 
 
-def load_idt_pos() -> Dict[str, pd.DataFrame]:
+def load_isdt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Icelandic Dependency Treebank.
 
     Returns:
@@ -62,7 +62,7 @@ def load_idt_pos() -> Dict[str, pd.DataFrame]:
     return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
 
 
-def load_ndt_nb_pos() -> Dict[str, pd.DataFrame]:
+def load_nodt_nb_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Norwegian Bokmål Dependency Treebank.
 
     Returns:
@@ -80,7 +80,7 @@ def load_ndt_nb_pos() -> Dict[str, pd.DataFrame]:
     return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
 
 
-def load_ndt_nn_pos() -> Dict[str, pd.DataFrame]:
+def load_nodt_nn_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Norwegian Nynorsk Dependency Treebank.
 
     Returns:
@@ -98,7 +98,7 @@ def load_ndt_nn_pos() -> Dict[str, pd.DataFrame]:
     return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
 
 
-def load_sdt_pos() -> Dict[str, pd.DataFrame]:
+def load_svdt_pos() -> Dict[str, pd.DataFrame]:
     """Load the part-of-speech part of the Swedish Dependency Treebank.
 
     Returns:
@@ -145,6 +145,60 @@ def load_sdt_pos() -> Dict[str, pd.DataFrame]:
     )
 
 
+def load_dedt_pos() -> Dict[str, pd.DataFrame]:
+    """Load the part-of-speech part of the German Dependency Treebank.
+
+    Returns:
+        The dataframes, stored in the keys `train`, `val` and `test`.
+    """
+    # Define download URLs
+    base_url = (
+        "https://raw.githubusercontent.com/UniversalDependencies/UD_German-GSD/master/"
+        "de_gsd-ud-{}.conllu"
+    )
+    train_url = base_url.format("train")
+    val_url = base_url.format("dev")
+    test_url = base_url.format("test")
+
+    return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
+
+
+def load_nldt_pos() -> Dict[str, pd.DataFrame]:
+    """Load the part-of-speech part of the Dutch Dependency Treebank.
+
+    Returns:
+        The dataframes, stored in the keys `train`, `val` and `test`.
+    """
+    # Define download URLs
+    base_url = (
+        "https://raw.githubusercontent.com/UniversalDependencies/UD_Dutch-Alpino/"
+        "master/nl_alpino-ud-{}.conllu"
+    )
+    train_url = base_url.format("train")
+    val_url = base_url.format("dev")
+    test_url = base_url.format("test")
+
+    return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
+
+
+def load_endt_pos() -> Dict[str, pd.DataFrame]:
+    """Load the part-of-speech part of the English Dependency Treebank.
+
+    Returns:
+        The dataframes, stored in the keys `train`, `val` and `test`.
+    """
+    # Define download URLs
+    base_url = (
+        "https://raw.githubusercontent.com/UniversalDependencies/UD_English-GUM/"
+        "master/en_gum-ud-{}.conllu"
+    )
+    train_url = base_url.format("train")
+    val_url = base_url.format("dev")
+    test_url = base_url.format("test")
+
+    return load_ud_pos(train_url=train_url, val_url=val_url, test_url=test_url)
+
+
 def load_ud_pos(
     train_url: str,
     val_url: str,
@@ -160,7 +214,8 @@ def load_ud_pos(
             The URL of the validation data.
         test_url:
             The URL of the test data.
-
+        doc_process_fn:
+            A function to apply to each document before parsing it.
 
     Returns:
         The dataframes, stored in the keys `train`, `val` and `test`.
