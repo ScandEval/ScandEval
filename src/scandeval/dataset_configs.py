@@ -399,6 +399,56 @@ CONLL_EN_CONFIG = DatasetConfig(
     max_generated_tokens=128,
 )
 
+DANE_CONFIG = DatasetConfig(
+    name="dane",
+    pretty_name="the truncated version of the Danish named entity recognition "
+    "dataset DaNE",
+    huggingface_id="ScandEval/dane-mini",
+    task=NER,
+    languages=[DA],
+    prompt_prefix="Følgende er sætninger og JSON-ordbøger med de navngivne enheder, "
+    "som forekommer i den givne sætning.",
+    prompt_template="Sætning: {text}\nNavngivne enheder: {label}",
+    prompt_label_mapping={
+        "b-per": "person",
+        "i-per": "person",
+        "b-loc": "sted",
+        "i-loc": "sted",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "diverse",
+        "i-misc": "diverse",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+    unofficial=True,
+)
+
+WIKIANN_FO_CONFIG = DatasetConfig(
+    name="wikiann-fo",
+    pretty_name="the truncated version of the Faroese part of the named entity "
+    "recognition dataset WikiANN",
+    huggingface_id="ScandEval/wikiann-fo-mini",
+    task=NER,
+    languages=[FO],
+    prompt_prefix="Her eru nakrir setningar og nakrar JSON orðabøkur við nevndar "
+    "eindir, sum eru í setningunum.",
+    prompt_template="Setningur: {text}\nNevndar eindir: {label}",
+    prompt_label_mapping={
+        "b-per": "persónur",
+        "i-per": "persónur",
+        "b-loc": "staður",
+        "i-loc": "staður",
+        "b-org": "felagsskapur",
+        "i-org": "felagsskapur",
+        "b-misc": "ymiskt",
+        "i-misc": "ymiskt",
+    },
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+    unofficial=True,
+)
+
 
 ### LINGUISTIC ACCEPTABILITY DATASETS ###
 
@@ -841,6 +891,125 @@ MMLU_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
     max_generated_tokens=3,
+)
+
+MMLU_DA_CONFIG = DatasetConfig(
+    name="mmlu-no",
+    pretty_name="the truncated version of the Danish knowledge dataset MMLU-da, "
+    "translated from the English MMLU dataset",
+    huggingface_id="ScandEval/mmlu-da-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="Spørgsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+ARC_DA_CONFIG = DatasetConfig(
+    name="arc-no",
+    pretty_name="the truncated version of the Danish knowledge dataset ARC-da, "
+    "translated from the English ARC dataset",
+    huggingface_id="ScandEval/arc-da-mini",
+    task=KNOW,
+    languages=[DA],
+    prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
+    prompt_template="Spørgsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+ARC_NO_CONFIG = DatasetConfig(
+    name="arc-no",
+    pretty_name="the truncated version of the Norwegian knowledge dataset ARC-no, "
+    "translated from the English ARC dataset",
+    huggingface_id="ScandEval/arc-no-mini",
+    task=KNOW,
+    languages=[NB, NN],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+ARC_SV_CONFIG = DatasetConfig(
+    name="arc-sv",
+    pretty_name="the truncated version of the Swedish knowledge dataset ARC-sv, "
+    "translated from the English ARC dataset",
+    huggingface_id="ScandEval/arc-sv-mini",
+    task=KNOW,
+    languages=[SV],
+    prompt_prefix="Följande är flervalsfrågor (med svar).",
+    prompt_template="Fråga: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+ARC_IS_CONFIG = DatasetConfig(
+    name="arc-is",
+    pretty_name="the truncated version of the Icelandic knowledge dataset ARC-is, "
+    "translated from the English ARC dataset",
+    huggingface_id="ScandEval/arc-is-mini",
+    task=KNOW,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
+    prompt_template="Spurningar: {text}\nSvara: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+ARC_DE_CONFIG = DatasetConfig(
+    name="arc-de",
+    pretty_name="the truncated version of the German knowledge dataset ARC-de, "
+    "translated from the English ARC dataset",
+    huggingface_id="ScandEval/arc-de-mini",
+    task=KNOW,
+    languages=[DE],
+    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
+    prompt_template="Frage: {text}\nAntwort: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+ARC_NL_CONFIG = DatasetConfig(
+    name="arc-nl",
+    pretty_name="the truncated version of the Dutch knowledge dataset ARC-nl, "
+    "translated from the English ARC dataset",
+    huggingface_id="ScandEval/arc-nl-mini",
+    task=KNOW,
+    languages=[NL],
+    prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
+    prompt_template="Vraag: {text}\nAntwoord: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+ARC_CONFIG = DatasetConfig(
+    name="arc",
+    pretty_name="the truncated version of the English knowledge dataset ARC",
+    huggingface_id="ScandEval/arc-mini",
+    task=KNOW,
+    languages=[EN],
+    prompt_prefix="The following are multiple choice questions (with answers).",
+    prompt_template="Question: {text}\nAnswer: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
 )
 
 # TODO: Faroese knowledge
