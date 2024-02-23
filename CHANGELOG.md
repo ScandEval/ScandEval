@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - When using the `Benchmarker` API, the `save_results` argument now defaults to True.
 - The `Benchmarker.benchmark` method now only returns the list of benchmark results
   from the given run, rather than all historic benchmark results as well.
+- The framework now defaults to using a Hugging Face Hub token when accessing models,
+  if available.
 
 
 ## [v11.0.0] - 2024-02-16
