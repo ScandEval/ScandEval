@@ -506,6 +506,7 @@ class HFModelSetup:
                 )
             except OSError as e:
                 gated_model = "You are trying to access a gated repo" in str(e)
+                breakpoint()
                 if gated_model:
                     try:
                         hf_whoami()
