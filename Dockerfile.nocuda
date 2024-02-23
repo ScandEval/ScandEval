@@ -14,7 +14,11 @@ COPY scandeval_benchmark_results* /project
 
 # Set the environment variable with the evaluation arguments. These can be overridden
 # when running the container
-ENV args="missing-args"
+ENV args=""
 
 # Run the script
-CMD scandeval $args
+CMD if [ -z "$args" ]; then \
+        echo "No arguments provided. Please run the container as, e.g., \"docker run -e args='-m <model-id>' <image>\""; \
+    else \
+        scandeval $args; \
+    fi
