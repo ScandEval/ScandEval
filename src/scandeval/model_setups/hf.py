@@ -12,7 +12,7 @@ import torch
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
-from huggingface_hub.utils import LocalTokenNotFoundError
+from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
 from requests.exceptions import RequestException
 from transformers import (
     AutoConfig,
@@ -95,19 +95,32 @@ class HFModelSetup:
 
         # Get the model info, and return it
         try:
-            if isinstance(self.benchmark_config.token, bool):
-                token = None
-            else:
-                token = self.benchmark_config.token
-            hf_api.model_info(repo_id=model_id, revision=revision, token=token)
+            hf_api.model_info(
+                repo_id=model_id, revision=revision, token=self.benchmark_config.token
+            )
             return True
 
+        except GatedRepoError:
+            try:
+                hf_whoami()
+                raise NeedsAdditionalArgument(
+                    cli_argument="--use-token",
+                    script_argument="token=True",
+                    run_with_cli=self.benchmark_config.run_with_cli,
+                )
+            except LocalTokenNotFoundError:
+                raise MissingHuggingFaceToken(
+                    run_with_cli=self.benchmark_config.run_with_cli
+                )
+
+        # GatedRepoError is a subclass of RepositoryNotFoundError, so this catches
+        # other ways that the model could not be found
         except RepositoryNotFoundError:
             return False
 
         # If fetching from the Hugging Face Hub failed in a different way then throw a
         # reasonable exception
-        except RequestException:
+        except OSError:
             if internet_connection_available():
                 raise HuggingFaceHubDown()
             else:
@@ -505,21 +518,6 @@ class HFModelSetup:
                     f"loaded, as the key {key!r} was not found in the config."
                 )
             except OSError as e:
-                gated_model = "You are trying to access a gated repo" in str(e)
-                breakpoint()
-                if gated_model:
-                    try:
-                        hf_whoami()
-                        raise NeedsAdditionalArgument(
-                            cli_argument="--use-token",
-                            script_argument="use_token=True",
-                            run_with_cli=self.benchmark_config.run_with_cli,
-                        )
-                    except LocalTokenNotFoundError:
-                        raise MissingHuggingFaceToken(
-                            run_with_cli=self.benchmark_config.run_with_cli
-                        )
-
                 raise InvalidModel(
                     f"Couldn't load model config for {model_id!r}. The error was "
                     f"{e!r}. Skipping"
