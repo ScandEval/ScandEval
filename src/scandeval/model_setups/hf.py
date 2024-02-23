@@ -515,7 +515,7 @@ class HFModelSetup:
                             run_with_cli=self.benchmark_config.run_with_cli,
                         )
                     except LocalTokenNotFoundError:
-                        MissingHuggingFaceToken(
+                        raise MissingHuggingFaceToken(
                             run_with_cli=self.benchmark_config.run_with_cli
                         )
 
