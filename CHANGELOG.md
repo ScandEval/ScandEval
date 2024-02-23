@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - A more informative error message is now being thrown if additional arguments need to
   be supplied to evaluate the model, such as
   `--trust-remote-code`/`trust_remote_code=True`.
+- When determining a model's maximum sequence length, we now also look at the
+  `max_sequence_length` attribute of the Hugging Face model configuration.
 
 ### Changed
 - Computation of the BERTScore metric for summarisation tasks are now using the device
