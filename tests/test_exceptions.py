@@ -81,7 +81,7 @@ def test_needs_additional_argument(cli_argument, script_argument, run_with_cli):
         exception_regex = f".*`{cli_argument}`.*`scandeval` command.*"
     else:
         exception_regex = f".*`{script_argument}`.*`Benchmarker` class.*"
-    with pytest.raises(NeedsExtraInstalled, match=exception_regex):
+    with pytest.raises(NeedsAdditionalArgument, match=exception_regex):
         raise NeedsAdditionalArgument(
             cli_argument=cli_argument,
             script_argument=script_argument,
@@ -93,8 +93,8 @@ def test_needs_additional_argument(cli_argument, script_argument, run_with_cli):
 def test_missing_hugging_face_token(run_with_cli):
     """Test that `NeedsExtraInstalled` is an exception."""
     if run_with_cli:
-        exception_regex = ".*``huggingface-cli login`.*"
+        exception_regex = ".*`huggingface-cli login`.*"
     else:
-        exception_regex = ".*``Benchmarker` class.*"
-    with pytest.raises(NeedsExtraInstalled, match=exception_regex):
+        exception_regex = ".*`Benchmarker` class.*"
+    with pytest.raises(MissingHuggingFaceToken, match=exception_regex):
         raise MissingHuggingFaceToken(run_with_cli=run_with_cli)
