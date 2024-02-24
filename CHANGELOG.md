@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     7. ARC
     8. DaNE
     9. WikiANN-fo
+- A more informative error message is now being thrown if additional arguments need to
+  be supplied to evaluate the model, such as
+  `--trust-remote-code`/`trust_remote_code=True`.
+- When determining a model's maximum sequence length, we now also look at the
+  `max_sequence_length` attribute of the Hugging Face model configuration.
 
 ### Changed
 - Computation of the BERTScore metric for summarisation tasks are now using the device
@@ -35,6 +40,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   scores are computed on CPU, as before.
 - Updated `transformers` dependency to `>=4.38.1,<4.39.0`, and `vllm` dependency to
   `>=0.3.2,<0.4.0`. This allows the benchmarking of the new Gemma and OLMO models.
+- When using the `Benchmarker` API, the `save_results` argument now defaults to True.
+- The `Benchmarker.benchmark` method now only returns the list of benchmark results
+  from the given run, rather than all historic benchmark results as well.
+- The framework now defaults to using a Hugging Face Hub token when accessing models,
+  if available.
 
 
 ## [v11.0.0] - 2024-02-16

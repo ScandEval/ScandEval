@@ -38,6 +38,7 @@ def build_benchmark_config(
     only_validation_split: bool,
     few_shot: bool,
     num_iterations: int,
+    run_with_cli: bool,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -99,6 +100,8 @@ def build_benchmark_config(
             Whether to use few-shot learning for the models.
         num_iterations:
             The number of iterations each model should be evaluated for.
+        run_with_cli:
+            Whether the benchmark is being run with the CLI.
 
     Returns:
         The benchmark configuration.
@@ -146,6 +149,7 @@ def build_benchmark_config(
         only_validation_split=only_validation_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        run_with_cli=run_with_cli,
     )
 
 

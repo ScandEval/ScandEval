@@ -149,6 +149,8 @@ class BenchmarkConfig:
             if the model is generative.
         num_iterations:
             The number of iterations each model should be evaluated for.
+        run_with_cli:
+            Whether the benchmark is being run with the CLI.
     """
 
     model_languages: list[Language]
@@ -174,6 +176,7 @@ class BenchmarkConfig:
     only_validation_split: bool
     few_shot: bool
     num_iterations: int
+    run_with_cli: bool
 
 
 @dataclass

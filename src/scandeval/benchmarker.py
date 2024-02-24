@@ -53,6 +53,7 @@ class BenchmarkConfigParams(BaseModel):
     only_validation_split: bool
     few_shot: bool
     num_iterations: int
+    run_with_cli: bool
 
 
 class BenchmarkResult(BaseModel):
@@ -136,7 +137,7 @@ class Benchmarker:
     def __init__(
         self,
         progress_bar: bool = True,
-        save_results: bool = False,
+        save_results: bool = True,
         task: str | list[str] | None = None,
         dataset: list[str] | str | None = None,
         language: str | list[str] = "all",
@@ -148,7 +149,7 @@ class Benchmarker:
         evaluate_train: bool = False,
         raise_errors: bool = False,
         cache_dir: str = ".scandeval_cache",
-        token: bool | str = False,
+        token: bool | str = True,
         openai_api_key: str | None = None,
         force: bool = False,
         verbose: bool = False,
@@ -159,6 +160,7 @@ class Benchmarker:
         only_validation_split: bool = False,
         few_shot: bool = True,
         num_iterations: int = 10,
+        run_with_cli: bool = False,
     ) -> None:
         """Initialise the benchmarker.
 
@@ -167,7 +169,7 @@ class Benchmarker:
                 Whether progress bars should be shown. Defaults to True.
             save_results:
                 Whether to save the benchmark results to
-                'scandeval_benchmark_results.jsonl'. Defaults to False.
+                'scandeval_benchmark_results.jsonl'. Defaults to True.
             task:
                 The tasks benchmark the model(s) on. Mutually exclusive with `dataset`.
                 If both `task` and `dataset` are None then all datasets will be
@@ -207,7 +209,7 @@ class Benchmarker:
                 is specified then the token will be fetched from the Hugging Face CLI,
                 where the user has logged in through `huggingface-cli login`. If a
                 string is specified then it will be used as the token. Defaults to
-                False.
+                True.
             openai_api_key:
                 The OpenAI API key to use for authentication. If None, then no OpenAI
                 models will be evaluated. Defaults to None.
@@ -236,7 +238,10 @@ class Benchmarker:
             num_iterations:
                 The number of times each model should be evaluated. This is only meant
                 to be used for power users, and scores will not be allowed on the
-                leaderboards if this is changed.
+                leaderboards if this is changed. Defaults to 10.
+            run_with_cli:
+                Whether the benchmarker is being run from the command-line interface.
+                Defaults to False.
 
         Raises:
             ValueError:
@@ -270,6 +275,7 @@ class Benchmarker:
             only_validation_split=only_validation_split,
             few_shot=few_shot,
             num_iterations=num_iterations,
+            run_with_cli=run_with_cli,
         )
 
         self.benchmark_config = build_benchmark_config(
@@ -282,22 +288,21 @@ class Benchmarker:
         # Set up the results path
         self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
 
-        # Set up the benchmark results variable, which will be populated with the
-        # contents of the results file if it exists. If not, then it will be an empty
-        # list
-        self.benchmark_results: list[BenchmarkResult] = list()
+        adjust_logging_level(verbose=self.benchmark_config.verbose)
+        self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
+
+    @property
+    def benchmark_results(self) -> list[BenchmarkResult]:
+        """The benchmark results."""
         if self.results_path.exists():
             with self.results_path.open() as f:
-                self.benchmark_results = [
+                return [
                     BenchmarkResult.from_dict(json.loads(line))
                     for line in f
                     if line.strip()
                 ]
         else:
-            self.benchmark_results = list()
-
-        adjust_logging_level(verbose=self.benchmark_config.verbose)
-        self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
+            return list()
 
     def benchmark(
         self,
@@ -505,7 +510,7 @@ class Benchmarker:
             dataset_names=benchmark_config.datasets
         )
 
-        # Iterate over all the models and datasets
+        current_benchmark_results: list[BenchmarkResult] = list()
         for m_id in model_ids:
             m_id = m_id.rstrip(" /")
 
@@ -548,18 +553,16 @@ class Benchmarker:
                     )
                     continue
 
-                # Add the record to the benchmark results
-                assert isinstance(record, BenchmarkResult)
-                self.benchmark_results.append(record)
-
                 # Save the benchmark results
+                assert isinstance(record, BenchmarkResult)
+                current_benchmark_results.append(record)
                 if benchmark_config.save_results:
                     record.append_to_results(results_path=self.results_path)
 
             if benchmark_config.clear_model_cache:
                 clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
 
-        return self.benchmark_results
+        return current_benchmark_results
 
     def _prepare_model_ids(
         self,

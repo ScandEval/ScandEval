@@ -78,6 +78,7 @@ def benchmark_config(
         only_validation_split=False,
         few_shot=True,
         num_iterations=10,
+        run_with_cli=True,
     )
 
 

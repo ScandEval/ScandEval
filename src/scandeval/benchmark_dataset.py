@@ -274,6 +274,8 @@ class BenchmarkDataset(ABC):
 
         if hasattr(model.config, "model_max_length"):
             max_seq_length = getattr(model.config, "model_max_length")
+        elif hasattr(model.config, "max_sequence_length"):
+            max_seq_length = getattr(model.config, "max_sequence_length")
         elif hasattr(
             tokenizer, "model_max_length"
         ) and tokenizer.model_max_length < int(1e30):
