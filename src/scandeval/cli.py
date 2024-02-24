@@ -129,7 +129,7 @@ from .tasks import get_all_tasks
 )
 @click.option(
     "--use-token/--no-use-token",
-    default=False,
+    default=True,
     show_default=True,
     help="""Whether an authentication token should be used, enabling evaluation of
     private models. Requires that you are logged in via the `huggingface-cli login`
@@ -275,6 +275,7 @@ def benchmark(
         only_validation_split=only_validation_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        run_with_cli=True,
     )
 
     # Perform the benchmark evaluation

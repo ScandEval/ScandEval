@@ -78,6 +78,7 @@ def benchmark_config(
         only_validation_split=False,
         few_shot=True,
         num_iterations=10,
+        run_with_cli=True,
     )
 
 
@@ -148,3 +149,16 @@ def model_config(language) -> Generator[ModelConfig, None, None]:
 def generative_dataset_config() -> Generator[DatasetConfig, None, None]:
     """Yields a generative dataset configuration used in tests."""
     yield MMLU_CONFIG
+
+
+@pytest.fixture(scope="session")
+def all_dataset_configs() -> Generator[list[DatasetConfig], None, None]:
+    """Yields all dataset configurations used in tests."""
+    if os.getenv("TEST_ALL_DATASETS", "0") == "1":
+        yield list(get_all_dataset_configs().values())
+    else:
+        yield [
+            dataset_config
+            for dataset_config in get_all_dataset_configs().values()
+            if not dataset_config.unofficial
+        ]

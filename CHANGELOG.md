@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Now automatically uses multiple GPUs when evaluating generative models with vLLM.
+- Now allows "unofficial" datasets, which are datasets which are not included on the
+  official leaderboards and models will only be benchmarked on them if they have been
+  explicitly set using the `--dataset` argument (or `dataset` argument if using the
+  `Benchmarker` API). This allows the inclusion of more datasets, without bloating the
+  evaluation time of "official" evaluations, as well as removing the need to remove old
+  datasets when they are replaced by newer ones.
+- The following datasets have been added as unofficial, all datasets that used to be
+  part of ScandEval but has since been replaced:
+    1. ARC-da
+    2. ARC-no
+    3. ARC-sv
+    4. ARC-is
+    5. ARC-de
+    6. ARC-nl
+    7. ARC
+    8. DaNE
+    9. WikiANN-fo
+- A more informative error message is now being thrown if additional arguments need to
+  be supplied to evaluate the model, such as
+  `--trust-remote-code`/`trust_remote_code=True`.
+- When determining a model's maximum sequence length, we now also look at the
+  `max_sequence_length` attribute of the Hugging Face model configuration.
 
 ### Changed
 - Computation of the BERTScore metric for summarisation tasks are now using the device
@@ -16,6 +38,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   a GPU is being used. This defaults to processing 32 samples at a time, which is
   reduced if OOM errors occur. If OOM errors occur with a batch size of 1 then the
   scores are computed on CPU, as before.
+- Updated `transformers` dependency to `>=4.38.1,<4.39.0`, and `vllm` dependency to
+  `>=0.3.2,<0.4.0`. This allows the benchmarking of the new Gemma and OLMO models.
+- When using the `Benchmarker` API, the `save_results` argument now defaults to True.
+- The `Benchmarker.benchmark` method now only returns the list of benchmark results
+  from the given run, rather than all historic benchmark results as well.
+- The framework now defaults to using a Hugging Face Hub token when accessing models,
+  if available.
 
 
 ## [v11.0.0] - 2024-02-16

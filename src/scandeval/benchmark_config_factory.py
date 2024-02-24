@@ -38,6 +38,7 @@ def build_benchmark_config(
     only_validation_split: bool,
     few_shot: bool,
     num_iterations: int,
+    run_with_cli: bool,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -99,6 +100,8 @@ def build_benchmark_config(
             Whether to use few-shot learning for the models.
         num_iterations:
             The number of iterations each model should be evaluated for.
+        run_with_cli:
+            Whether the benchmark is being run with the CLI.
 
     Returns:
         The benchmark configuration.
@@ -146,6 +149,7 @@ def build_benchmark_config(
         only_validation_split=only_validation_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        run_with_cli=run_with_cli,
     )
 
 
@@ -260,12 +264,17 @@ def prepare_tasks_and_datasets(
     except KeyError as e:
         raise InvalidBenchmark(f"Task {e} not found in the benchmark tasks.") from e
 
-    all_datasets = list(all_dataset_configs.keys())
+    all_official_datasets = [
+        dataset_name
+        for dataset_name, dataset_config in all_dataset_configs.items()
+        if not dataset_config.unofficial
+    ]
     if dataset is None:
-        dataset = all_datasets
+        dataset = all_official_datasets
     elif isinstance(dataset, str):
         dataset = [dataset]
 
+    all_datasets = list(all_dataset_configs.keys())
     invalid_datasets = set(dataset) - set(all_datasets)
     if invalid_datasets:
         raise InvalidBenchmark(
