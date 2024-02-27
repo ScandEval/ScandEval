@@ -596,14 +596,14 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
 
 
 def get_ner_schema(dataset_config: DatasetConfig) -> type[BaseModel]:
-    """Get the Pydantic model used for structured generation for the NER task.
+    """Get the schema used for structured generation for the NER task.
 
     Args:
         dataset_config:
             The dataset configuration.
 
     Returns:
-        The JSON schema parser.
+        The schema used for structured generation for the NER task.
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
     keys_and_their_types: dict[str, Any] = {
