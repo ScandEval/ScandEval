@@ -20,10 +20,7 @@ from .utils import clear_memory, get_ner_parser
 logger = logging.getLogger(__package__)
 
 try:
-    from lmformatenforcer.integrations.vllm import (
-        build_vllm_logits_processor,
-        build_vllm_token_enforcer_tokenizer_data,
-    )
+    from lmformatenforcer.integrations.vllm import build_vllm_logits_processor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
@@ -294,9 +291,8 @@ class VLLMModel:
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
             parser = get_ner_parser(dataset_config=self.dataset_config)
-            tokenizer_data = build_vllm_token_enforcer_tokenizer_data(llm=self._model)
             logits_processor = build_vllm_logits_processor(
-                llm=tokenizer_data, character_level_parser=parser
+                llm=self._model, character_level_parser=parser
             )
             logits_processors.append(logits_processor)
 
