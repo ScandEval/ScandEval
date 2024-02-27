@@ -195,7 +195,7 @@ class VLLMModel:
         # limit is that in `get_logits_processors` we use a recursive function to
         # process the tokenizer vocabulary, and the depth of the recursion corresponds
         # to repeated characters in the vocabulary.
-        sys.setrecursionlimit(10_000)
+        # sys.setrecursionlimit(10_000)
 
         # The inputs are tokenised, so we decode them to get the original text, which
         # is the input to the vLLM model
@@ -295,7 +295,11 @@ class VLLMModel:
             logits_processor = JSONLogitsProcessor(
                 schema=schema, llm=self._model.llm_engine
             )
-            breakpoint()
+
+            # Convert the vocabulary from dict_values to a list, since the former is
+            # not pickleable, making `copy.deepcopy` fail during vLLM generation
+            logits_processor.fsm.vocabulary = list(logits_processor.fsm.vocabulary)
+
             logits_processors.append(logits_processor)
 
             assert self.tokenizer is not None
