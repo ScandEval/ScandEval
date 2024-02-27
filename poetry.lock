@@ -1993,13 +1993,13 @@ rapidfuzz = ">=3.1.0,<4.0.0"
 
 [[package]]
 name = "lm-format-enforcer"
-version = "0.8.3"
+version = "0.9.0"
 description = "Enforce the output format (JSON Schema, Regex etc) of a language model"
 optional = true
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "lm_format_enforcer-0.8.3-py3-none-any.whl", hash = "sha256:d12364a90d8dd3a824c3b6a2cdbc8ec40dd6fff12f5e566100f4a9e79a847092"},
-    {file = "lm_format_enforcer-0.8.3.tar.gz", hash = "sha256:3f9eac9f14af43ec77ebe99b251793bbbbffd3566dacffadd4a217d8be90760c"},
+    {file = "lm_format_enforcer-0.9.0-py3-none-any.whl", hash = "sha256:a703e58529b824cb261cc702ea53c365228b940ec54fcffa45d22122c6383e0d"},
+    {file = "lm_format_enforcer-0.9.0.tar.gz", hash = "sha256:778fa1bdabb13feb840de4dca6526d9ffdf60c10dfb55aef475bfbe6f1ce7961"},
 ]
 
 [package.dependencies]
@@ -5598,4 +5598,4 @@ openai = ["levenshtein", "openai", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "f4ded2c5a3a23444537d202698ff04e377d6b1dc87e6068173f717e605e60a39"
+content-hash = "9ccea7e5ef656e7e516742615d861745ad077702a712d53d087b5ffd0bd5075e"
