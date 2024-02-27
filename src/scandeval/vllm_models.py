@@ -8,6 +8,9 @@ from types import MethodType
 from typing import Callable
 
 import torch
+from lmformatenforcer.integrations.transformers import _build_regular_tokens_list
+from lmformatenforcer.tokenenforcer import TokenizerPrefixTreeNode
+from lmformatenforcer.tokenizerprefixtree import JsonFreetextTokenCache
 from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizerBase
 from transformers.utils import ModelOutput
@@ -285,6 +288,29 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
+            # TEMP
+            def add_token_to_tree(
+                token_str: str, token_idx: int, node: TokenizerPrefixTreeNode
+            ):
+                for character in token_str:
+                    if character not in node.children:
+                        node.children[character] = TokenizerPrefixTreeNode()
+                    node = node.children[character]
+                node.tokens.append(token_idx)
+
+            # TEMP
+            breakpoint()
+            regular_tokens = _build_regular_tokens_list(self.tokenizer)
+            root = TokenizerPrefixTreeNode()
+            json_freetext_tokens = JsonFreetextTokenCache()
+            new_word_tokens: set[int] = set()
+            for token_idx, decoded, is_new_word in regular_tokens:
+                add_token_to_tree(decoded, token_idx, root)
+                json_freetext_tokens.add_token(decoded, token_idx)
+                if is_new_word:
+                    new_word_tokens.add(token_idx)
+            json_freetext_tokens.freeze()
+
             parser = get_ner_parser(dataset_config=self.dataset_config)
             tokenizer_data = build_vllm_token_enforcer_tokenizer_data(llm=self._model)
             logits_processor = build_vllm_logits_processor(
