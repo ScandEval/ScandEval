@@ -21,16 +21,9 @@ logger = logging.getLogger(__package__)
 
 try:
     # from lmformatenforcer.integrations.vllm import build_vllm_logits_processor
-    import vllm.model_executor.layers.sampler as sampler
-    from outlines.serve.vllm import (
-        JSONLogitsProcessor,
-        _patched_apply_logits_processors,
-    )
+    from outlines.serve.vllm import JSONLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
-
-    # Patch the _apply_logits_processors so it is compatible with `JSONLogitsProcessor`
-    sampler._apply_logits_processors = _patched_apply_logits_processors
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
     breakpoint()
