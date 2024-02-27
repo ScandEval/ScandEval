@@ -75,7 +75,7 @@ jax = [
 ]
 generative = [
     "demjson3",
-    "lm-format-enforcer",
+    "outlines",
     "bitsandbytes",
     "vllm",
     "rouge-score",
@@ -98,7 +98,7 @@ all = [
     "rouge-score",
     "bert-score",
     "demjson3",
-    "lm-format-enforcer",
+    "outlines",
     "bitsandbytes",
     "vllm",
     "rouge-score",
