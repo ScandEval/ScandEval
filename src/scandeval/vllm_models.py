@@ -304,11 +304,12 @@ class VLLMModel:
             root = TokenizerPrefixTreeNode()
             json_freetext_tokens = JsonFreetextTokenCache()
             new_word_tokens: set[int] = set()
-            for token_idx, decoded, is_new_word in regular_tokens:
+            for token_idx, decoded, is_new_word in tqdm(regular_tokens):
                 add_token_to_tree(decoded, token_idx, root)
                 json_freetext_tokens.add_token(decoded, token_idx)
                 if is_new_word:
                     new_word_tokens.add(token_idx)
+            breakpoint()
             json_freetext_tokens.freeze()
 
             parser = get_ner_parser(dataset_config=self.dataset_config)
