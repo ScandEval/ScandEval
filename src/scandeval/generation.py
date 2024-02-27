@@ -262,82 +262,70 @@ def generate_single_iteration(
         )
         non_cached_dataset = non_cached_dataset.sort("length", reverse=True)
 
-        if isinstance(model, VLLMModel):
-            model_output, extracted_labels = generate_batch(
-                batch=non_cached_dataset,
-                batch_idx=0,
-                batch_size=len(non_cached_dataset),
-                non_cached_dataset=non_cached_dataset,
-                model=model,
-                tokenizer=tokenizer,
-                stopping_criteria=stopping_criteria,
-                generation_config=generation_config,
-                extract_labels_fn=extract_labels_fn,
-                dataset_config=dataset_config,
-            )
-            cache.add_to_cache(
-                model_input=non_cached_dataset["input_ids"],
-                model_output=model_output,
-                tokenizer=tokenizer,
-            )
-            all_preds.extend(extracted_labels)
+        # Enable batching by building a dataloader. The dataloader cannot deal with
+        # text columns, so we create a copy of the dataset without these
+        torch_dataset = non_cached_dataset.with_format("torch").remove_columns(
+            [
+                column
+                for column in non_cached_dataset.column_names
+                if column != "input_ids"
+            ]
+        )
 
+        if isinstance(model, OpenAIModel):
+            batch_size = 1
+        elif isinstance(model, VLLMModel):
+            batch_size = len(torch_dataset)
         else:
-            torch_dataset = non_cached_dataset.with_format("torch").remove_columns(
-                [
-                    column
-                    for column in non_cached_dataset.column_names
-                    if column != "input_ids"
-                ]
-            )
+            batch_size = benchmark_config.batch_size
 
-            batch_size = (
-                1 if isinstance(model, OpenAIModel) else benchmark_config.batch_size
-            )
+        dataloader = DataLoader(
+            dataset=torch_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=0 if isinstance(model, VLLMModel) else 4,
+            collate_fn=data_collator,
+        )
 
-            dataloader = DataLoader(
-                dataset=torch_dataset,
-                batch_size=batch_size,
-                shuffle=False,
-                num_workers=0 if isinstance(model, VLLMModel) else 4,
-                collate_fn=data_collator,
-            )
+        with warnings.catch_warnings():
+            # This ignores the following warning, which is out of our control:
+            #   "os.fork() was called. os.fork() is incompatible with multithreaded
+            #   code, and JAX is multithreaded, so this will likely lead to a deadlock."
+            warnings.simplefilter("ignore", category=RuntimeWarning)
 
-            with warnings.catch_warnings():
-                # This ignores the following warning, which is out of our control:
-                #   "os.fork() was called. os.fork() is incompatible with multithreaded
-                #   code, and JAX is multithreaded, so this will likely lead to a deadlock."
-                warnings.simplefilter("ignore", category=RuntimeWarning)
-
-                itr = tqdm(
+            itr = (
+                dataloader
+                if isinstance(model, VLLMModel)
+                else tqdm(
                     iterable=dataloader,
                     leave=False,
                     disable=hasattr(sys, "_called_from_test"),
                 )
+            )
 
-                # Generate the completions for the non-cached examples
-                for batch_idx, batch in enumerate(itr):
-                    model_output, extracted_labels = generate_batch(
-                        batch=batch,
-                        batch_idx=batch_idx,
-                        batch_size=batch_size,
-                        non_cached_dataset=non_cached_dataset,
-                        model=model,
-                        tokenizer=tokenizer,
-                        stopping_criteria=stopping_criteria,
-                        generation_config=generation_config,
-                        extract_labels_fn=extract_labels_fn,
-                        dataset_config=dataset_config,
-                    )
-                    cache.add_to_cache(
-                        model_input=batch["input_ids"],
-                        model_output=model_output,
-                        tokenizer=tokenizer,
-                    )
-                    all_preds.extend(extracted_labels)
+            # Generate the completions for the non-cached examples
+            for batch_idx, batch in enumerate(itr):
+                model_output, extracted_labels = generate_batch(
+                    batch=batch,
+                    batch_idx=batch_idx,
+                    batch_size=batch_size,
+                    non_cached_dataset=non_cached_dataset,
+                    model=model,
+                    tokenizer=tokenizer,
+                    stopping_criteria=stopping_criteria,
+                    generation_config=generation_config,
+                    extract_labels_fn=extract_labels_fn,
+                    dataset_config=dataset_config,
+                )
+                cache.add_to_cache(
+                    model_input=batch["input_ids"],
+                    model_output=model_output,
+                    tokenizer=tokenizer,
+                )
+                all_preds.extend(extracted_labels)
 
-            if isinstance(itr, tqdm):
-                itr.close()
+        if isinstance(itr, tqdm):
+            itr.close()
 
         # Store the cache to disk
         cache.save()
@@ -533,7 +521,7 @@ def generate_batch(
     # Generate the completions of the documents in the batch
     with warnings.catch_warnings(), torch.inference_mode():
         warnings.simplefilter("ignore", category=UserWarning)
-        inputs = torch.tensor(batch["input_ids"]).to(model.device)
+        inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
         if isinstance(model, PreTrainedModel):
