@@ -595,7 +595,7 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
                 raise NaNValueInModelOutput()
 
 
-def get_ner_pydantic_model(dataset_config: DatasetConfig) -> type[BaseModel]:
+def get_ner_schema(dataset_config: DatasetConfig) -> type[BaseModel]:
     """Get the Pydantic model used for structured generation for the NER task.
 
     Args:

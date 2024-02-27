@@ -15,7 +15,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import clear_memory, get_ner_pydantic_model
+from .utils import clear_memory, get_ner_schema
 
 logger = logging.getLogger(__package__)
 
@@ -26,7 +26,6 @@ try:
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
-    breakpoint()
 
     class LLM:  # type: ignore[no-redef]
         """Dummy class."""
@@ -292,8 +291,9 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            pydantic_model = get_ner_pydantic_model(dataset_config=self.dataset_config)
-            logits_processor = JSONLogitsProcessor(pydantic_model, self._model)
+            schema = get_ner_schema(dataset_config=self.dataset_config)
+            breakpoint()
+            logits_processor = JSONLogitsProcessor(schema=schema, llm=self._model)
             logits_processors.append(logits_processor)
 
             assert self.tokenizer is not None
