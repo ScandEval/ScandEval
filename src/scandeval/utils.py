@@ -20,31 +20,17 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
-from pydantic import conlist, create_model
+from pydantic import BaseModel, conlist, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
 
 from .config import DatasetConfig, Language
 from .enums import Framework
-from .exceptions import NaNValueInModelOutput, NeedsExtraInstalled
+from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .protocols import GenerativeModel, Tokenizer
 from .types import Predictions
-
-try:
-    from lmformatenforcer import JsonSchemaParser
-
-    _lmformatenforcer_available = True
-except ImportError:
-
-    class JsonSchemaParser:  # type: ignore[no-redef]
-        """Dummy class."""
-
-        pass
-
-    _lmformatenforcer_available = False
-
 
 logger = logging.getLogger(__package__)
 
@@ -609,8 +595,8 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
                 raise NaNValueInModelOutput()
 
 
-def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
-    """Get the JSON schema parser used for structured generation for the NER task.
+def get_ner_pydantic_model(dataset_config: DatasetConfig) -> type[BaseModel]:
+    """Get the Pydantic model used for structured generation for the NER task.
 
     Args:
         dataset_config:
@@ -619,16 +605,12 @@ def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
     Returns:
         The JSON schema parser.
     """
-    if not _lmformatenforcer_available:
-        raise NeedsExtraInstalled(extra="generative")
-
     tag_names = set(dataset_config.prompt_label_mapping.values())
     keys_and_their_types: dict[str, Any] = {
         tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
     }
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
-    parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
-    return parser
+    return AnswerFormat
 
 
 def should_prompts_be_stripped(

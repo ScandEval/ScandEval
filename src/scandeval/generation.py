@@ -15,7 +15,6 @@ from transformers import (
     DataCollator,
     GenerationConfig,
     PreTrainedModel,
-    PreTrainedTokenizerBase,
     StoppingCriteria,
     StoppingCriteriaList,
 )
@@ -30,8 +29,7 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
-from .tasks import NER
-from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
 from .vllm_models import VLLMModel
 
 try:
@@ -382,41 +380,41 @@ def get_prefix_allowed_fn(
     if build_transformers_prefix_allowed_tokens_fn is None:
         raise NeedsExtraInstalled(extra="generative")
 
-    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
-        parser = get_ner_parser(dataset_config=dataset_config)
-        json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
-            tokenizer_data=tokenizer, character_level_parser=parser
-        )
+    # if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
+    #     parser = get_ner_parser(dataset_config=dataset_config)
+    #     json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
+    #         tokenizer_data=tokenizer, character_level_parser=parser
+    #     )
 
-        forbidden_token_ids = list()
-        forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
-        for forbidden_token in forbidden_tokens:
-            forbidden_token_ids.extend(
-                list(tokenizer(forbidden_token, add_special_tokens=False).input_ids)
-            )
-        forbidden_token_ids = list(set(forbidden_token_ids))
+    #     forbidden_token_ids = list()
+    #     forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
+    #     for forbidden_token in forbidden_tokens:
+    #         forbidden_token_ids.extend(
+    #             list(tokenizer(forbidden_token, add_special_tokens=False).input_ids)
+    #         )
+    #     forbidden_token_ids = list(set(forbidden_token_ids))
 
-        def ner_prefix_allowed_tokens_fn(
-            batch_id: int, input_ids: torch.Tensor
-        ) -> list[int]:
-            """Return the tokens allowed for the current batch.
+    #     def ner_prefix_allowed_tokens_fn(
+    #         batch_id: int, input_ids: torch.Tensor
+    #     ) -> list[int]:
+    #         """Return the tokens allowed for the current batch.
 
-            Args:
-                batch_id:
-                    The batch index.
-                input_ids:
-                    The input ids.
+    #         Args:
+    #             batch_id:
+    #                 The batch index.
+    #             input_ids:
+    #                 The input ids.
 
-            Returns:
-                The tokens allowed for the current batch.
-            """
-            return [
-                token_id
-                for token_id in json_prefix_allowed_tokens_fn(batch_id, input_ids)
-                if token_id not in forbidden_token_ids
-            ]
+    #         Returns:
+    #             The tokens allowed for the current batch.
+    #         """
+    #         return [
+    #             token_id
+    #             for token_id in json_prefix_allowed_tokens_fn(batch_id, input_ids)
+    #             if token_id not in forbidden_token_ids
+    #         ]
 
-        return ner_prefix_allowed_tokens_fn
+    #     return ner_prefix_allowed_tokens_fn
 
     return None
 

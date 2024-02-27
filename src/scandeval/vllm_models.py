@@ -15,14 +15,22 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import clear_memory, get_ner_parser
+from .utils import clear_memory, get_ner_pydantic_model
 
 logger = logging.getLogger(__package__)
 
 try:
-    from lmformatenforcer.integrations.vllm import build_vllm_logits_processor
+    # from lmformatenforcer.integrations.vllm import build_vllm_logits_processor
+    import vllm.model_executor.layers.sampler as sampler
+    from outlines.serve.vllm import (
+        JSONLogitsProcessor,
+        _patched_apply_logits_processors,
+    )
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+
+    # Patch the _apply_logits_processors so it is compatible with `JSONLogitsProcessor`
+    sampler._apply_logits_processors = _patched_apply_logits_processors
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
@@ -213,8 +221,6 @@ class VLLMModel:
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
-        if not input_is_a_test:
-            breakpoint()
         raw_outputs = self._model.generate(
             prompts=prompts,
             use_tqdm=(not input_is_a_test),
@@ -292,10 +298,8 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            parser = get_ner_parser(dataset_config=self.dataset_config)
-            logits_processor = build_vllm_logits_processor(
-                llm=self._model, character_level_parser=parser
-            )
+            pydantic_model = get_ner_pydantic_model(dataset_config=self.dataset_config)
+            logits_processor = JSONLogitsProcessor(pydantic_model, self._model)
             logits_processors.append(logits_processor)
 
             assert self.tokenizer is not None
