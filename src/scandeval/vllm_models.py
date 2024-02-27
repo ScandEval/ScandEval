@@ -298,8 +298,8 @@ class VLLMModel:
             regex = build_regex_from_schema(
                 schema=json.dumps(schema.model_json_schema()), whitespace_pattern=""
             )
-            print(regex)
-            breakpoint()
+            print(f"Regex: {regex}")
+            print(f"Length of regex: {len(regex):,}")
 
             logits_processor = JSONLogitsProcessor(
                 schema=schema, llm=self._model.llm_engine, whitespace_pattern=""
