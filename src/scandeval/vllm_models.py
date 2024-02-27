@@ -190,7 +190,6 @@ class VLLMModel:
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             logits_processors=self.get_logits_processors(),
         )
-        breakpoint()
 
         # The inputs are tokenised, so we decode them to get the original text, which
         # is the input to the vLLM model
