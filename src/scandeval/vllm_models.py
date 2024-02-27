@@ -296,7 +296,7 @@ class VLLMModel:
             schema = get_ner_schema(dataset_config=self.dataset_config)
 
             regex = build_regex_from_schema(
-                schema=json.dumps(schema.model_json_schema())
+                schema=json.dumps(schema.model_json_schema()), whitespace_pattern=""
             )
             print(regex)
             breakpoint()
