@@ -606,7 +606,6 @@ def get_ner_schema(dataset_config: DatasetConfig) -> type[BaseModel]:
         The schema used for structured generation for the NER task.
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
-    tag_names = {list(tag_names)[0]}  # TEMP
     keys_and_their_types: dict[str, Any] = {
         tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
     }
