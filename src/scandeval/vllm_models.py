@@ -21,7 +21,6 @@ from .utils import clear_memory, get_ner_schema
 logger = logging.getLogger(__package__)
 
 try:
-    # from lmformatenforcer.integrations.vllm import build_vllm_logits_processor
     from outlines.fsm.json_schema import build_regex_from_schema
     from outlines.serve.vllm import JSONLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams

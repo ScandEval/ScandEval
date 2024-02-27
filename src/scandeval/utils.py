@@ -173,9 +173,6 @@ def block_terminal_output():
     logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.CRITICAL)
 
-    # The `lmformatenforcer` uses the root logger, so we need to set the level of that
-    logging.getLogger("root").setLevel(logging.CRITICAL)
-
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the CRITICAL level."""
         vllm_logger = logging.getLogger(name)
@@ -607,7 +604,7 @@ def get_ner_schema(dataset_config: DatasetConfig) -> type[BaseModel]:
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
     keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
+        tag_name: (conlist(str), ...) for tag_name in tag_names
     }
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
     return AnswerFormat
