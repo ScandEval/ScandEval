@@ -292,8 +292,9 @@ class VLLMModel:
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
             schema = get_ner_schema(dataset_config=self.dataset_config)
-            breakpoint()
-            logits_processor = JSONLogitsProcessor(schema=schema, llm=self._model)
+            logits_processor = JSONLogitsProcessor(
+                schema=schema, llm=self._model.llm_engine
+            )
             logits_processors.append(logits_processor)
 
             assert self.tokenizer is not None
