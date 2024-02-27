@@ -302,7 +302,7 @@ class VLLMModel:
             breakpoint()
 
             logits_processor = JSONLogitsProcessor(
-                schema=schema, llm=self._model.llm_engine
+                schema=schema, llm=self._model.llm_engine, whitespace_pattern=""
             )
 
             # Convert the vocabulary from dict_values to a list, since the former is
