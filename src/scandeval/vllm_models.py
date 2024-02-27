@@ -116,8 +116,6 @@ class VLLMModel:
                 _run_engine_with_fixed_progress_bars, self._model
             )
 
-            self.logits_processors = self.get_logits_processors()
-
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
@@ -345,6 +343,15 @@ class VLLMModel:
         """
         self.tokenizer = tokenizer
         self._model.set_tokenizer(tokenizer)
+
+    def build_logits_processors(self) -> None:
+        """Build the logits processors to use for structured generation.
+
+        This requires the model and tokenizer to be set.
+        """
+        if self.tokenizer is None:
+            raise ValueError("Tokenizer must be set to build logits processors.")
+        self.logits_processors = self.get_logits_processors()
 
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
