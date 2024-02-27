@@ -188,7 +188,6 @@ class VLLMModel:
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             logits_processors=self.get_logits_processors(),
         )
-        breakpoint()
 
         # This ensures that the SamplingParams can be deepcopied, which happens during
         # vLLM generation. The reason why it is necessary to increase the recursion
@@ -214,6 +213,8 @@ class VLLMModel:
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
+        if not input_is_a_test:
+            breakpoint()
         raw_outputs = self._model.generate(
             prompts=prompts,
             use_tqdm=(not input_is_a_test),
