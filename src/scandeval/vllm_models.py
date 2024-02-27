@@ -117,6 +117,8 @@ class VLLMModel:
                 _run_engine_with_fixed_progress_bars, self._model
             )
 
+            self.logits_processors = self.get_logits_processors()
+
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
@@ -189,7 +191,7 @@ class VLLMModel:
             stop=stop_tokens,
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            logits_processors=self.get_logits_processors(),
+            logits_processors=self.logits_processors,
         )
 
         # This ensures that the SamplingParams can be deepcopied, which happens during
@@ -295,6 +297,7 @@ class VLLMModel:
         if self.dataset_config.task == NER:
             schema = get_ner_schema(dataset_config=self.dataset_config)
 
+            # TEMP
             regex = build_regex_from_schema(
                 schema=json.dumps(schema.model_json_schema()), whitespace_pattern=""
             )
