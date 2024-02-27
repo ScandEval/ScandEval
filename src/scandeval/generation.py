@@ -531,6 +531,7 @@ def generate_batch(
         else:
             prefix_allowed_tokens_fn = None
 
+        breakpoint()
         model_output = model.generate(
             inputs=inputs,
             generation_config=generation_config,
