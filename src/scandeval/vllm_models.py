@@ -295,6 +295,7 @@ class VLLMModel:
             logits_processor = JSONLogitsProcessor(
                 schema=schema, llm=self._model.llm_engine
             )
+            breakpoint()
             logits_processors.append(logits_processor)
 
             assert self.tokenizer is not None
