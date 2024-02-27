@@ -20,7 +20,7 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
-from pydantic import BaseModel, conlist, create_model
+from pydantic import BaseModel, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
@@ -607,7 +607,7 @@ def get_ner_schema(dataset_config: DatasetConfig) -> type[BaseModel]:
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
     keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
+        tag_name: (list, ...) for tag_name in tag_names
     }
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
     return AnswerFormat
