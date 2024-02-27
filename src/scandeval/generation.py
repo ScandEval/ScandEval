@@ -283,7 +283,7 @@ def generate_single_iteration(
             dataset=torch_dataset,
             batch_size=batch_size,
             shuffle=False,
-            num_workers=4,
+            num_workers=0 if isinstance(model, VLLMModel) else 4,
             collate_fn=data_collator,
         )
 
