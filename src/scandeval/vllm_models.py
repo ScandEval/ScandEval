@@ -1,5 +1,6 @@
 """A wrapper for vLLM models."""
 
+import json
 import logging
 import math
 import sys
@@ -21,6 +22,7 @@ logger = logging.getLogger(__package__)
 
 try:
     # from lmformatenforcer.integrations.vllm import build_vllm_logits_processor
+    from outlines.fsm.json_schema import build_regex_from_schema
     from outlines.serve.vllm import JSONLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
@@ -292,6 +294,13 @@ class VLLMModel:
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
             schema = get_ner_schema(dataset_config=self.dataset_config)
+
+            regex = build_regex_from_schema(
+                schema=json.dumps(schema.model_json_schema())
+            )
+            print(regex)
+            breakpoint()
+
             logits_processor = JSONLogitsProcessor(
                 schema=schema, llm=self._model.llm_engine
             )
