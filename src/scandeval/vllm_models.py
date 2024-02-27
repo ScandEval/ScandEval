@@ -190,7 +190,13 @@ class VLLMModel:
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             logits_processors=self.get_logits_processors(),
         )
-        breakpoint()
+
+        # This ensures that the SamplingParams can be deepcopied, which happens during
+        # vLLM generation. The reason why it is necessary to increase the recursion
+        # limit is that in `get_logits_processors` we use a recursive function to
+        # process the tokenizer vocabulary, and the depth of the recursion corresponds
+        # to repeated characters in the vocabulary.
+        sys.setrecursionlimit(10_000)
 
         # The inputs are tokenised, so we decode them to get the original text, which
         # is the input to the vLLM model
