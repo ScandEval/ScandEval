@@ -296,12 +296,12 @@ class VLLMModel:
         if self.dataset_config.task == NER:
             schema = get_ner_schema(dataset_config=self.dataset_config)
 
-            # TEMP
             regex = build_regex_from_schema(
                 schema=json.dumps(schema.model_json_schema()), whitespace_pattern=""
             )
-            print(f"Regex: {regex}")
-            print(f"Length of regex: {len(regex):,}")
+            logger.debug(
+                f"Structured generation regex, of length {len(regex):,}: {regex!r}"
+            )
 
             logits_processor = JSONLogitsProcessor(
                 schema=schema, llm=self._model.llm_engine, whitespace_pattern=""
