@@ -262,20 +262,9 @@ def generate_single_iteration(
         )
         non_cached_dataset = non_cached_dataset.sort("length", reverse=True)
 
-        # Enable batching by building a dataloader. The dataloader cannot deal with
-        # text columns, so we create a copy of the dataset without these
-        torch_dataset = non_cached_dataset.with_format("torch").remove_columns(
-            [
-                column
-                for column in non_cached_dataset.column_names
-                if column != "input_ids"
-            ]
-        )
-
         if isinstance(model, VLLMModel):
-            breakpoint()
             model_output, extracted_labels = generate_batch(
-                batch=torch_dataset,
+                batch=non_cached_dataset,
                 batch_idx=0,
                 batch_size=len(non_cached_dataset),
                 non_cached_dataset=non_cached_dataset,
@@ -287,13 +276,21 @@ def generate_single_iteration(
                 dataset_config=dataset_config,
             )
             cache.add_to_cache(
-                model_input=torch_dataset["input_ids"],
+                model_input=non_cached_dataset["input_ids"],
                 model_output=model_output,
                 tokenizer=tokenizer,
             )
             all_preds.extend(extracted_labels)
 
         else:
+            torch_dataset = non_cached_dataset.with_format("torch").remove_columns(
+                [
+                    column
+                    for column in non_cached_dataset.column_names
+                    if column != "input_ids"
+                ]
+            )
+
             batch_size = (
                 1 if isinstance(model, OpenAIModel) else benchmark_config.batch_size
             )
@@ -536,7 +533,7 @@ def generate_batch(
     # Generate the completions of the documents in the batch
     with warnings.catch_warnings(), torch.inference_mode():
         warnings.simplefilter("ignore", category=UserWarning)
-        inputs = batch["input_ids"].to(model.device)
+        inputs = torch.tensor(batch["input_ids"]).to(model.device)
         stopping_criteria.clear()
 
         if isinstance(model, PreTrainedModel):

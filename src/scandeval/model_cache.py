@@ -117,7 +117,10 @@ class ModelCache:
         return [key for key in self.cache.keys()]
 
     def add_to_cache(
-        self, model_input: torch.Tensor, model_output: ModelOutput, tokenizer: Tokenizer
+        self,
+        model_input: torch.Tensor | list[list[int]],
+        model_output: ModelOutput,
+        tokenizer: Tokenizer,
     ) -> None:
         """Add the model input/output to the cache.
 
@@ -129,7 +132,8 @@ class ModelCache:
             tokenizer:
                 The tokenizer used to generate the tokens.
         """
-        model_input = model_input.detach().cpu()
+        if isinstance(model_input, torch.Tensor):
+            model_input = model_input.detach().cpu()
 
         # Extract the scores from the model output, to be cached. We only store the
         # indices of the top scores, to save space. Further, we only store the scores
