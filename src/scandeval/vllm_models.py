@@ -33,6 +33,7 @@ try:
     sampler._apply_logits_processors = _patched_apply_logits_processors
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
+    breakpoint()
 
     class LLM:  # type: ignore[no-redef]
         """Dummy class."""
