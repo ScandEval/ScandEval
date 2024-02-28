@@ -8,11 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- The evaluation of many generative models on NER tasks crashed, which was due to a
-  bottleneck in the `lm-format-enforcer` package. This has now been updated, which
-  solves this. Further, a `RecursionError` appeared as well when using vLLM with that
-  package, caused by repeated characters - this has also been fixed, by upping the
-  recursion depth from 1000 to 10,000.
+- TODO
 
 
 ## [v12.0.0] - 2024-02-26
