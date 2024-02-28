@@ -13,7 +13,7 @@ from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer
 from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
-from .dataset_tasks import NER
+from .tasks import NER
 from .utils import clear_memory, get_ner_parser
 
 logger = logging.getLogger(__package__)
@@ -31,7 +31,9 @@ except ImportError:
     class LLM:  # type: ignore[no-redef]
         """Dummy class."""
 
-        pass
+        def __init__(self, **_) -> None:
+            """Dummy method, to avoid typing issues during initialisation."""
+            pass
 
     class RequestOutput:  # type: ignore[no-redef]
         """Dummy class."""
@@ -79,9 +81,10 @@ class VLLMModel:
         self.tokenizer = tokenizer
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
+            warnings.simplefilter("ignore", category=RuntimeWarning)
 
-            # This is required to be able to re-initialize the model, in case we
-            # have already initialized it once
+            # This is required to be able to re-initialize the model, in case we have
+            # already initialized it once
             destroy_model_parallel()
             clear_memory()
 
@@ -106,6 +109,8 @@ class VLLMModel:
                 trust_remote_code=trust_remote_code,
                 revision=self.model_config.revision,
                 seed=4242,
+                tensor_parallel_size=torch.cuda.device_count(),
+                disable_custom_all_reduce=True,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
@@ -114,8 +119,8 @@ class VLLMModel:
             # Temporary fix until this vLLM PR is part of a release (should be any
             # release after 0.3.0):
             # https://github.com/vllm-project/vllm/pull/2741
-            self._model.get_tokenizer = MethodType(_get_tokenizer, self._model)
-            self._model.set_tokenizer = MethodType(_set_tokenizer, self._model)
+            # self._model.get_tokenizer = MethodType(_get_tokenizer, self._model)
+            # self._model.set_tokenizer = MethodType(_set_tokenizer, self._model)
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
@@ -326,22 +331,6 @@ class VLLMModel:
         self.tokenizer = tokenizer
         self._model.set_tokenizer(tokenizer)
 
-        # TODO: Remove this block if it's not needed
-        # This sets the internal tokenizer in the vLLM model. The
-        # `LLM.llm_engine.tokenizer` is a `TokenizerGroup` object, which has a
-        # `tokenizer` attribute that is the actual tokenizer. This is a new change from
-        # `vllm` version 0.3.0, which is a breaking change since the `TokenizerGroup`
-        # doesn't have the same properties and methods as a Hugging Face
-        # `PreTrainedTokenizer` object. To resolve this, we copy all properties and
-        # methods from the `PreTrainedTokenizer` object to the `TokenizerGroup` object,
-        # unless the property or method already exists in the `TokenizerGroup` object.
-        # vLLM issue on this: https://github.com/vllm-project/vllm/issues/2713
-        # self._model.llm_engine.tokenizer.tokenizer = tokenizer
-        # for attr in dir(tokenizer):
-        #     if attr.startswith("_") or hasattr(self._model.llm_engine.tokenizer, attr):
-        #         continue
-        #     setattr(self._model.llm_engine.tokenizer, attr, getattr(tokenizer, attr))
-
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
         pass
@@ -384,9 +373,9 @@ def _run_engine_with_fixed_progress_bars(
     return outputs
 
 
-def _get_tokenizer(self: LLM) -> PreTrainedTokenizerBase:
-    return self.llm_engine.tokenizer.tokenizer
-
-
-def _set_tokenizer(self: LLM, tokenizer: PreTrainedTokenizerBase) -> None:
-    self.llm_engine.tokenizer.tokenizer = tokenizer
+# def _get_tokenizer(self: LLM) -> PreTrainedTokenizerBase:
+#     return self.llm_engine.tokenizer.tokenizer
+#
+#
+# def _set_tokenizer(self: LLM, tokenizer: PreTrainedTokenizerBase) -> None:
+#     self.llm_engine.tokenizer.tokenizer = tokenizer

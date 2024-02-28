@@ -204,7 +204,7 @@ class ModelSetup(Protocol):
         """
         ...
 
-    def model_exists(self, model_id: str) -> bool:
+    def model_exists(self, model_id: str) -> bool | str:
         """Check whether a model exists.
 
         Args:
@@ -212,7 +212,8 @@ class ModelSetup(Protocol):
                 The model ID.
 
         Returns:
-            Whether the model exists.
+            Whether the model exist, or the name of an extra that needs to be installed
+            to check if the model exists.
         """
         ...
 

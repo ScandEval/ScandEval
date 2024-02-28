@@ -1,31 +1,31 @@
-"""Unit tests for the `dataset_tasks` module."""
+"""Unit tests for the `tasks` module."""
 
 from typing import Generator
 
 import pytest
-from scandeval.config import DatasetTask
-from scandeval.dataset_tasks import get_all_dataset_tasks
+from scandeval.config import Task
+from scandeval.tasks import get_all_tasks
 
 
-class TestGetAllDatasetTasks:
-    """Unit tests for the `get_all_dataset_tasks` function."""
+class TestGetAllTasks:
+    """Unit tests for the `get_all_tasks` function."""
 
     @pytest.fixture(scope="class")
-    def dataset_tasks(self) -> Generator[dict[str, DatasetTask], None, None]:
+    def tasks(self) -> Generator[dict[str, Task], None, None]:
         """Yields all dataset tasks."""
-        yield get_all_dataset_tasks()
+        yield get_all_tasks()
 
-    def test_dataset_tasks_is_dict(self, dataset_tasks):
+    def test_tasks_is_dict(self, tasks):
         """Tests that the dataset tasks are a dictionary."""
-        assert isinstance(dataset_tasks, dict)
+        assert isinstance(tasks, dict)
 
-    def test_dataset_tasks_are_objects(self, dataset_tasks):
+    def test_tasks_are_objects(self, tasks):
         """Tests that the dataset tasks are objects."""
-        for dataset_task in dataset_tasks.values():
-            assert isinstance(dataset_task, DatasetTask)
+        for task in tasks.values():
+            assert isinstance(task, Task)
 
     @pytest.mark.parametrize(
-        "dataset_task_name",
+        "task_name",
         [
             "linguistic-acceptability",
             "named-entity-recognition",
@@ -38,6 +38,6 @@ class TestGetAllDatasetTasks:
             "speed",
         ],
     )
-    def test_get_task(self, dataset_tasks, dataset_task_name):
+    def test_get_task(self, tasks, task_name):
         """Tests that the dataset task can be retrieved by name."""
-        assert dataset_task_name in dataset_tasks
+        assert task_name in tasks

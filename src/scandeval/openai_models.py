@@ -332,10 +332,10 @@ class OpenAIModel:
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
-        self.is_chat_model = self._is_chat_model()
         self.client = OpenAI(
             api_key=self.benchmark_config.openai_api_key, max_retries=60
         )
+        self.is_chat_model = self._is_chat_model()
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""

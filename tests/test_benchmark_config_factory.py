@@ -1,16 +1,31 @@
 """Unit tests for the `benchmark_config_factory` module."""
 
+from typing import Generator
+
 import pytest
 import torch
 from scandeval.benchmark_config_factory import (
     get_correct_language_codes,
-    prepare_dataset_tasks,
     prepare_device,
     prepare_languages,
+    prepare_tasks_and_datasets,
 )
-from scandeval.dataset_tasks import LA, NER, get_all_dataset_tasks
 from scandeval.enums import Device
+from scandeval.exceptions import InvalidBenchmark
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
+from scandeval.tasks import LA, NER, SENT, get_all_tasks
+
+
+@pytest.fixture(scope="module")
+def all_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
+    """Fixture for all linguistic acceptability dataset configurations."""
+    yield [cfg.name for cfg in all_dataset_configs]
+
+
+@pytest.fixture(scope="module")
+def all_la_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
+    """Fixture for all linguistic acceptability dataset configurations."""
+    yield [cfg.name for cfg in all_dataset_configs if LA == cfg.task]
 
 
 @pytest.mark.parametrize(
@@ -73,19 +88,111 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
 
 
 @pytest.mark.parametrize(
-    argnames=["input_task", "expected_task"],
-    argvalues=[
-        (None, list(get_all_dataset_tasks().values())),
-        ("linguistic-acceptability", [LA]),
-        (["linguistic-acceptability"], [LA]),
-        (["linguistic-acceptability", "named-entity-recognition"], [LA, NER]),
+    argnames=[
+        "input_task",
+        "input_dataset",
+        "input_languages",
+        "expected_task",
+        "expected_dataset",
     ],
-    ids=["all tasks", "single task", "single task as list", "multiple tasks"],
+    argvalues=[
+        (
+            None,
+            None,
+            list(get_all_languages().values()),
+            list(get_all_tasks().values()),
+            "all_dataset_names",
+        ),
+        (
+            "linguistic-acceptability",
+            None,
+            list(get_all_languages().values()),
+            [LA],
+            "all_la_dataset_names",
+        ),
+        (
+            None,
+            "scala-da",
+            list(get_all_languages().values()),
+            list(get_all_tasks().values()),
+            ["scala-da"],
+        ),
+        (
+            "linguistic-acceptability",
+            ["scala-da", "angry-tweets"],
+            list(get_all_languages().values()),
+            [LA],
+            ["scala-da"],
+        ),
+        (
+            ["linguistic-acceptability", "named-entity-recognition"],
+            "scala-da",
+            list(get_all_languages().values()),
+            [LA, NER],
+            ["scala-da"],
+        ),
+        (
+            ["linguistic-acceptability", "sentiment-classification"],
+            ["scala-da", "angry-tweets", "scandiqa-da"],
+            list(get_all_languages().values()),
+            [LA, SENT],
+            ["scala-da", "angry-tweets"],
+        ),
+        (
+            ["linguistic-acceptability", "sentiment-classification"],
+            ["scala-da", "angry-tweets", "scandiqa-sv"],
+            [DA],
+            [LA, SENT],
+            ["scala-da", "angry-tweets"],
+        ),
+        (
+            ["linguistic-acceptability", "sentiment-classification"],
+            None,
+            [DA],
+            [LA, SENT],
+            ["scala-da", "angry-tweets"],
+        ),
+    ],
+    ids=[
+        "all tasks and datasets",
+        "single task",
+        "single dataset",
+        "single task and multiple datasets",
+        "multiple tasks and single dataset",
+        "multiple tasks and datasets",
+        "multiple tasks and datasets, filtered by language",
+        "multiple tasks, filtered by language",
+    ],
 )
-def test_prepare_dataset_tasks(input_task, expected_task):
-    """Test the output of `prepare_dataset_tasks`."""
-    prepared_tasks = prepare_dataset_tasks(dataset_task=input_task)
-    assert prepared_tasks == expected_task
+def test_prepare_tasks_and_datasets(
+    input_task, input_dataset, input_languages, expected_task, expected_dataset, request
+):
+    """Test the output of `prepare_tasks_and_datasets`."""
+    # This replaces the string with the actual fixture
+    if isinstance(expected_dataset, str):
+        expected_dataset = request.getfixturevalue(expected_dataset)
+
+    prepared_tasks, prepared_datasets = prepare_tasks_and_datasets(
+        task=input_task, dataset=input_dataset, dataset_languages=input_languages
+    )
+    assert set(prepared_tasks) == set(expected_task)
+    assert set(prepared_datasets) == set(expected_dataset)
+
+
+def test_prepare_tasks_and_datasets_invalid_task():
+    """Test that an invalid task raises an error."""
+    with pytest.raises(InvalidBenchmark):
+        prepare_tasks_and_datasets(
+            task="invalid-task", dataset=None, dataset_languages=[DA]
+        )
+
+
+def test_prepare_tasks_and_datasets_invalid_dataset():
+    """Test that an invalid dataset raises an error."""
+    with pytest.raises(InvalidBenchmark):
+        prepare_tasks_and_datasets(
+            task=None, dataset="invalid-dataset", dataset_languages=[DA]
+        )
 
 
 @pytest.mark.parametrize(

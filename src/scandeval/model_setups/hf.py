@@ -10,7 +10,9 @@ from typing import Type
 
 import torch
 from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
+from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
 from requests.exceptions import RequestException
 from transformers import (
     AutoConfig,
@@ -28,6 +30,8 @@ from ..exceptions import (
     HuggingFaceHubDown,
     InvalidBenchmark,
     InvalidModel,
+    MissingHuggingFaceToken,
+    NeedsAdditionalArgument,
     NeedsExtraInstalled,
     NoInternetConnection,
 )
@@ -70,15 +74,16 @@ class HFModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool:
-        """Check if a model ID denotes an OpenAI model.
+    def model_exists(self, model_id: str) -> bool | str:
+        """Check if a model ID denotes a model on the Hugging Face Hub.
 
         Args:
             model_id:
                 The model ID.
 
         Returns:
-            Whether the model exists on OpenAI.
+            Whether the model exists on the Hugging Face Hub, or the name of an extra
+            that needs to be installed to check if the model exists.
         """
         # Extract the revision from the model_id, if present
         model_id, revision = (
@@ -90,19 +95,30 @@ class HFModelSetup:
 
         # Get the model info, and return it
         try:
-            if isinstance(self.benchmark_config.token, bool):
-                token = None
-            else:
-                token = self.benchmark_config.token
-            hf_api.model_info(repo_id=model_id, revision=revision, token=token)
+            hf_api.model_info(
+                repo_id=model_id, revision=revision, token=self.benchmark_config.token
+            )
             return True
+
+        except (GatedRepoError, LocalTokenNotFoundError):
+            try:
+                hf_whoami()
+                raise NeedsAdditionalArgument(
+                    cli_argument="--use-token",
+                    script_argument="token=True",
+                    run_with_cli=self.benchmark_config.run_with_cli,
+                )
+            except LocalTokenNotFoundError:
+                raise MissingHuggingFaceToken(
+                    run_with_cli=self.benchmark_config.run_with_cli
+                )
 
         except RepositoryNotFoundError:
             return False
 
         # If fetching from the Hugging Face Hub failed in a different way then throw a
         # reasonable exception
-        except RequestException:
+        except OSError:
             if internet_connection_available():
                 raise HuggingFaceHubDown()
             else:
@@ -504,6 +520,15 @@ class HFModelSetup:
                 logger.info(f"Couldn't load model config for {model_id!r}. Retrying.")
                 sleep(5)
                 continue
+            except ValueError as e:
+                requires_trust_remote_code = "trust_remote_code" in str(e)
+                if requires_trust_remote_code:
+                    raise NeedsAdditionalArgument(
+                        cli_argument="--trust-remote-code",
+                        script_argument="trust_remote_code=True",
+                        run_with_cli=self.benchmark_config.run_with_cli,
+                    )
+                raise e
 
     def _load_tokenizer(
         self, model: PreTrainedModel | GenerativeModel, model_id: str

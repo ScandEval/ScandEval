@@ -1,21 +1,15 @@
 """Unit tests for the `question_answering` module."""
 
+import os
 from contextlib import nullcontext as does_not_raise
 from typing import Generator
 
 import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
-from scandeval.dataset_configs import (
-    GERMANQUAD_CONFIG,
-    NORQUAD_CONFIG,
-    NQII_CONFIG,
-    SCANDIQA_DA_CONFIG,
-    SCANDIQA_SV_CONFIG,
-    SQUAD_CONFIG,
-    SQUAD_NL_CONFIG,
-)
+from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.question_answering import QuestionAnswering, prepare_train_examples
+from scandeval.tasks import QA
 from scandeval.utils import GENERATIVE_DATASET_TASKS
 from transformers import AutoTokenizer
 
@@ -23,23 +17,14 @@ from transformers import AutoTokenizer
 @pytest.fixture(
     scope="module",
     params=[
-        SCANDIQA_DA_CONFIG,
-        SCANDIQA_SV_CONFIG,
-        NORQUAD_CONFIG,
-        NQII_CONFIG,
-        GERMANQUAD_CONFIG,
-        SQUAD_CONFIG,
-        SQUAD_NL_CONFIG,
+        dataset_config
+        for dataset_config in get_all_dataset_configs().values()
+        if dataset_config.task == QA
+        and (
+            os.getenv("TEST_ALL_DATASETS", "0") == "1" or not dataset_config.unofficial
+        )
     ],
-    ids=[
-        "scandiqa-da",
-        "scandiqa-sv",
-        "norquad",
-        "nqii",
-        "germanquad",
-        "squad",
-        "squad-nl",
-    ],
+    ids=lambda dataset_config: dataset_config.name,
 )
 def benchmark_dataset(
     benchmark_config, request
@@ -50,6 +35,7 @@ def benchmark_dataset(
     )
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_encoder_benchmarking(benchmark_dataset, model_id):
     """Test that encoder models can be benchmarked on question answering datasets."""
     if benchmark_dataset.dataset_config.task.name in GENERATIVE_DATASET_TASKS:
@@ -60,6 +46,7 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
             benchmark_dataset.benchmark(model_id)
 
 
+@pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
     """Test that decoder models can be benchmarked on question answering datasets."""
     with does_not_raise():

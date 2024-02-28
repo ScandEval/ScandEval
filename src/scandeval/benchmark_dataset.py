@@ -21,7 +21,6 @@ from transformers import PretrainedConfig, Trainer
 from transformers.modeling_utils import ModelOutput, PreTrainedModel
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .dataset_tasks import SPEED
 from .exceptions import InvalidBenchmark
 from .finetuning import finetune
 from .generation import generate
@@ -31,6 +30,7 @@ from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
+from .tasks import SPEED
 from .types import Labels, Predictions, ScoreDict
 from .utils import (
     GENERATIVE_MODEL_TASKS,
@@ -149,7 +149,10 @@ class BenchmarkDataset(ABC):
         )
 
         # Set variable with number of iterations
-        num_iter = 2 if hasattr(sys, "_called_from_test") else 10
+        if hasattr(sys, "_called_from_test"):
+            num_iter = 2
+        else:
+            num_iter = self.benchmark_config.num_iterations
 
         if self.dataset_config.task != SPEED:
             train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
@@ -271,6 +274,8 @@ class BenchmarkDataset(ABC):
 
         if hasattr(model.config, "model_max_length"):
             max_seq_length = getattr(model.config, "model_max_length")
+        elif hasattr(model.config, "max_sequence_length"):
+            max_seq_length = getattr(model.config, "max_sequence_length")
         elif hasattr(
             tokenizer, "model_max_length"
         ) and tokenizer.model_max_length < int(1e30):

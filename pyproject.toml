@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ScandEval"
-version = "10.0.1"
+version = "12.0.0"
 description = "Evaluation of pretrained language models on mono- or multilingual language tasks."
 authors = ["Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>"]
 maintainers = [
@@ -19,7 +19,7 @@ python = ">=3.10,<3.12"
 torch = "^2.1.1"
 pandas = "^2.2.0"
 numpy = "^1.23.0"
-transformers = "~4.37.1"  # Only patch upgrades allowed as breaking changes happen often
+transformers = "~4.38.1"  # Only patch upgrades allowed as breaking changes happen often
 accelerate = "^0.26.0"
 evaluate = "^0.4.1"
 datasets = "^2.15.0"
@@ -41,7 +41,7 @@ bert-score = { version = "^0.3.13", optional = true }
 demjson3 = { version = "^3.0.6", optional = true }
 lm-format-enforcer = { version = "^0.8.2", optional = true }
 bitsandbytes = { markers = "sys_platform != 'darwin' or platform_machine != 'arm64'", version = "^0.42.0", optional = true }
-vllm = { markers = "sys_platform != 'darwin'", version = "^0.3.0", optional = true }
+vllm = { markers = "sys_platform != 'darwin'", version = "^0.3.2", optional = true }
 
 # Needed for loading OLMO based models
 ai2-olmo = { version = "^0.2.4", optional = true }

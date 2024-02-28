@@ -4,9 +4,9 @@ import click
 
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
-from .dataset_tasks import get_all_dataset_tasks
 from .enums import Device, Framework
 from .languages import get_all_languages
+from .tasks import get_all_tasks
 
 
 @click.command()
@@ -28,13 +28,13 @@ from .languages import get_all_languages
     default=None,
     show_default=True,
     multiple=True,
-    type=click.Choice(list(get_all_dataset_tasks().keys())),
+    type=click.Choice(list(get_all_tasks().keys())),
     help="The dataset tasks to benchmark the model(s) on.",
 )
 @click.option(
     "--language",
     "-l",
-    default=["da", "sv", "no"],
+    default=["all"],
     show_default=True,
     multiple=True,
     metavar="ISO 639-1 LANGUAGE CODE",
@@ -129,7 +129,7 @@ from .languages import get_all_languages
 )
 @click.option(
     "--use-token/--no-use-token",
-    default=False,
+    default=True,
     show_default=True,
     help="""Whether an authentication token should be used, enabling evaluation of
     private models. Requires that you are logged in via the `huggingface-cli login`
@@ -203,6 +203,14 @@ from .languages import get_all_languages
     help="Whether to only evaluate the model using few-shot evaluation. Only relevant "
     "if the model is generative.",
 )
+@click.option(
+    "--num-iterations",
+    default=10,
+    show_default=True,
+    help="""The number of times each model should be evaluated. This is only meant to
+    be used for power users, and scores will not be allowed on the leaderboards if this
+    is changed.""",
+)
 def benchmark(
     model: tuple[str],
     dataset: tuple[str],
@@ -228,6 +236,7 @@ def benchmark(
     clear_model_cache: bool,
     only_validation_split: bool,
     few_shot: bool,
+    num_iterations: int,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
     # Set up language variables
@@ -247,6 +256,7 @@ def benchmark(
         model_language=model_languages,
         dataset_language=dataset_languages,
         task=tasks,
+        dataset=datasets,
         batch_size=batch_size_int,
         progress_bar=progress_bar,
         save_results=save_results,
@@ -264,10 +274,12 @@ def benchmark(
         clear_model_cache=clear_model_cache,
         only_validation_split=only_validation_split,
         few_shot=few_shot,
+        num_iterations=num_iterations,
+        run_with_cli=True,
     )
 
     # Perform the benchmark evaluation
-    benchmarker(model=models, dataset=datasets)
+    benchmarker(model=models)
 
 
 if __name__ == "__main__":

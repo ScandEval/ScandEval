@@ -9,14 +9,14 @@ import torch
 from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,
-    DatasetTask,
     Language,
     MetricConfig,
     ModelConfig,
+    Task,
 )
-from scandeval.dataset_configs import MMLU_DA_CONFIG
-from scandeval.dataset_tasks import SPEED
-from scandeval.enums import ModelType
+from scandeval.dataset_configs import MMLU_CONFIG, get_all_dataset_configs
+from scandeval.enums import Framework, ModelType
+from scandeval.tasks import SPEED
 
 
 def pytest_configure() -> None:
@@ -45,19 +45,20 @@ def auth() -> Generator[str | bool, None, None]:
 @pytest.fixture(scope="session")
 def device() -> Generator[torch.device, None, None]:
     """Yields the device to use for the tests."""
-    device = torch.device("cuda" if os.getenv("USE_CUDA", False) else "cpu")
+    device = torch.device("cuda" if os.getenv("USE_CUDA", "0") == "1" else "cpu")
     yield device
 
 
 @pytest.fixture(scope="session")
 def benchmark_config(
-    language, dataset_task, auth, device
+    language, task, auth, device
 ) -> Generator[BenchmarkConfig, None, None]:
     """Yields a benchmark configuration used in tests."""
     yield BenchmarkConfig(
         model_languages=[language],
         dataset_languages=[language],
-        dataset_tasks=[dataset_task],
+        tasks=[task],
+        datasets=list(get_all_dataset_configs().keys()),
         framework=None,
         batch_size=32,
         raise_errors=False,
@@ -65,6 +66,7 @@ def benchmark_config(
         evaluate_train=False,
         token=auth,
         openai_api_key=None,
+        force=False,
         progress_bar=False,
         save_results=True,
         device=device,
@@ -75,6 +77,8 @@ def benchmark_config(
         clear_model_cache=False,
         only_validation_split=False,
         few_shot=True,
+        num_iterations=10,
+        run_with_cli=True,
     )
 
 
@@ -90,7 +94,7 @@ def metric_config() -> Generator[MetricConfig, None, None]:
 
 
 @pytest.fixture(scope="session")
-def dataset_task() -> Generator[DatasetTask, None, None]:
+def task() -> Generator[Task, None, None]:
     """Yields a dataset task used in tests."""
     yield SPEED
 
@@ -114,13 +118,13 @@ def generative_model_id() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
-def dataset_config(language, dataset_task) -> Generator[DatasetConfig, None, None]:
+def dataset_config(language, task) -> Generator[DatasetConfig, None, None]:
     """Yields a dataset configuration used in tests."""
     yield DatasetConfig(
         name="dataset_name",
         pretty_name="Dataset name",
         huggingface_id="dataset_id",
-        task=dataset_task,
+        task=task,
         languages=[language],
         prompt_template="{text}\n{label}",
         max_generated_tokens=1,
@@ -133,7 +137,7 @@ def model_config(language) -> Generator[ModelConfig, None, None]:
     yield ModelConfig(
         model_id="model_id",
         revision="revision",
-        framework="framework",
+        framework=Framework.PYTORCH,
         task="task",
         languages=[language],
         model_type=ModelType.FRESH,
@@ -144,4 +148,17 @@ def model_config(language) -> Generator[ModelConfig, None, None]:
 @pytest.fixture(scope="session")
 def generative_dataset_config() -> Generator[DatasetConfig, None, None]:
     """Yields a generative dataset configuration used in tests."""
-    yield MMLU_DA_CONFIG
+    yield MMLU_CONFIG
+
+
+@pytest.fixture(scope="session")
+def all_dataset_configs() -> Generator[list[DatasetConfig], None, None]:
+    """Yields all dataset configurations used in tests."""
+    if os.getenv("TEST_ALL_DATASETS", "0") == "1":
+        yield list(get_all_dataset_configs().values())
+    else:
+        yield [
+            dataset_config
+            for dataset_config in get_all_dataset_configs().values()
+            if not dataset_config.unofficial
+        ]

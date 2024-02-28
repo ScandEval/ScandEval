@@ -41,9 +41,13 @@ class MetricConfig:
         default_factory=lambda: lambda raw_score: (100 * raw_score, f"{raw_score:.2%}")
     )
 
+    def __hash__(self) -> int:
+        """Return a hash of the metric configuration."""
+        return hash(self.name)
+
 
 @dataclass
-class DatasetTask:
+class Task:
     """A dataset task.
 
     Attributes:
@@ -62,6 +66,10 @@ class DatasetTask:
     metrics: list[MetricConfig]
     labels: list[str]
 
+    def __hash__(self) -> int:
+        """Return a hash of the task."""
+        return hash(self.name)
+
 
 @dataclass
 class Language:
@@ -77,6 +85,10 @@ class Language:
     code: str
     name: str
 
+    def __hash__(self) -> int:
+        """Return a hash of the language."""
+        return hash(self.code)
+
 
 @dataclass
 class BenchmarkConfig:
@@ -87,8 +99,10 @@ class BenchmarkConfig:
             The languages of the models to benchmark.
         dataset_languages:
             The languages of the datasets in the benchmark.
-        dataset_tasks:
-            The tasks to benchmark.
+        tasks:
+            The tasks benchmark the model(s) on.
+        datasets:
+            The datasets to benchmark on.
         framework:
             The framework of the models to benchmark. If None then the framework will be
             inferred.
@@ -108,6 +122,9 @@ class BenchmarkConfig:
         openai_api_key:
             The API key for the OpenAI API. If None then OpenAI models will not be
             benchmarked.
+        force:
+            Whether to force the benchmark to run even if the results are already
+            cached.
         progress_bar:
             Whether to show a progress bar.
         save_results:
@@ -130,11 +147,16 @@ class BenchmarkConfig:
         few_shot:
             Whether to only evaluate the model using few-shot evaluation. Only relevant
             if the model is generative.
+        num_iterations:
+            The number of iterations each model should be evaluated for.
+        run_with_cli:
+            Whether the benchmark is being run with the CLI.
     """
 
     model_languages: list[Language]
     dataset_languages: list[Language]
-    dataset_tasks: list[DatasetTask]
+    tasks: list[Task]
+    datasets: list[str]
     framework: Framework | None
     batch_size: int
     raise_errors: bool
@@ -142,6 +164,7 @@ class BenchmarkConfig:
     evaluate_train: bool
     token: bool | str
     openai_api_key: str | None
+    force: bool
     progress_bar: bool
     save_results: bool
     device: torch.device
@@ -152,6 +175,8 @@ class BenchmarkConfig:
     clear_model_cache: bool
     only_validation_split: bool
     few_shot: bool
+    num_iterations: int
+    run_with_cli: bool
 
 
 @dataclass
@@ -191,18 +216,21 @@ class DatasetConfig:
         prompt_label_mapping (optional):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
+        unofficial (optional):
+            Whether the dataset is unofficial. Defaults to False.
     """
 
     name: str
     pretty_name: str
     huggingface_id: str
-    task: DatasetTask
+    task: Task
     languages: list[Language]
     prompt_template: str
     max_generated_tokens: int
     prompt_prefix: str = ""
     num_few_shot_examples: int = 0
     prompt_label_mapping: dict[str, str] = field(default_factory=dict)
+    unofficial: bool = False
 
     @property
     def id2label(self) -> list[str]:
@@ -218,6 +246,10 @@ class DatasetConfig:
     def num_labels(self) -> int:
         """The number of labels in the dataset."""
         return len(self.task.labels)
+
+    def __hash__(self) -> int:
+        """Return a hash of the dataset configuration."""
+        return hash(self.name)
 
 
 @dataclass
@@ -248,3 +280,7 @@ class ModelConfig:
     languages: list[Language]
     model_type: ModelType | str
     model_cache_dir: str
+
+    def __hash__(self) -> int:
+        """Return a hash of the model configuration."""
+        return hash(self.model_id)

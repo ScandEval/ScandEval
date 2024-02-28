@@ -20,7 +20,6 @@ from transformers import (
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .dataset_tasks import NER
 from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .model_cache import (
     ModelCache,
@@ -29,6 +28,7 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
+from .tasks import NER
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
 from .vllm_models import VLLMModel
 
@@ -114,55 +114,76 @@ def generate(
         prepared_test = prepared_tests[idx]
         assert isinstance(prepared_test, Dataset)
 
-        while True:
-            try:
-                test_scores = generate_single_iteration(
-                    prepared_dataset=prepared_test,
-                    model=model,
-                    tokenizer=tokenizer,
-                    data_collator=data_collator,
-                    compute_metrics=compute_metrics,
-                    extract_labels_fn=extract_labels_fn,
-                    benchmark_config=benchmark_config,
-                    dataset_config=dataset_config,
-                    cache=cache,
-                )
-                break
-            except Exception as e:
-                oom_error = [
-                    "CUDA out of memory",
-                    "CUDA error",
-                    "MPS backend out of memory",
-                    "Too many parallel completions requested.",  # OpenAI specific
-                ]
-                if all(error not in str(e) for error in oom_error):
-                    raise InvalidBenchmark(str(e))
-                clear_memory()
-                benchmark_config.batch_size //= 2
-                if benchmark_config.batch_size < 1:
-                    raise InvalidBenchmark(
-                        "GPU out of memory, even with a batch size of 1!"
-                    )
+        generation_kwargs = dict(
+            model=model,
+            tokenizer=tokenizer,
+            data_collator=data_collator,
+            compute_metrics=compute_metrics,
+            extract_labels_fn=extract_labels_fn,
+            dataset_config=dataset_config,
+            cache=cache,
+        )
 
-        logger.debug(f"Test scores for iteration {idx}: {test_scores}")
-        scores["test"].append(test_scores)
-        clear_memory()
+        def update_scores(
+            scores: dict[str, list[dict[str, float]]], benchmark_config: BenchmarkConfig
+        ) -> dict[str, list[dict[str, float]]]:
+            """Perform a single iteration of generation and update the scores.
 
-        if benchmark_config.evaluate_train:
-            train_scores = generate_single_iteration(
-                prepared_dataset=prepared_train,
-                model=model,
-                tokenizer=tokenizer,
-                data_collator=data_collator,
-                compute_metrics=compute_metrics,
-                extract_labels_fn=extract_labels_fn,
+            Args:
+                scores:
+                    The scores so far.
+                benchmark_config:
+                    The configuration of the benchmark.
+
+            Returns:
+                The updated scores.
+            """
+            test_scores = generate_single_iteration(
+                prepared_dataset=prepared_test,
                 benchmark_config=benchmark_config,
-                dataset_config=dataset_config,
-                cache=cache,
+                **generation_kwargs,
             )
-            logger.debug(f"Train scores for iteration {idx}: {train_scores}")
-            scores["train"].append(train_scores)
+            logger.debug(f"Test scores for iteration {idx}: {test_scores}")
+            scores["test"].append(test_scores)
+
+            if benchmark_config.evaluate_train:
+                train_scores = generate_single_iteration(
+                    prepared_dataset=prepared_train,
+                    benchmark_config=benchmark_config,
+                    **generation_kwargs,
+                )
+                logger.debug(f"Train scores for iteration {idx}: {train_scores}")
+                scores["train"].append(train_scores)
+
             clear_memory()
+            return scores
+
+        if isinstance(model, VLLMModel):
+            scores = update_scores(scores=scores, benchmark_config=benchmark_config)
+        else:
+            while True:
+                try:
+                    scores = update_scores(
+                        scores=scores, benchmark_config=benchmark_config
+                    )
+                    break
+                except Exception as e:
+                    oom_error = [
+                        "CUDA out of memory",
+                        "CUDA error",
+                        "MPS backend out of memory",
+                        "Too many parallel completions requested.",  # OpenAI specific
+                    ]
+                    if isinstance(model, VLLMModel) or all(
+                        error not in str(e) for error in oom_error
+                    ):
+                        raise InvalidBenchmark(str(e))
+                    clear_memory()
+                    benchmark_config.batch_size //= 2
+                    if benchmark_config.batch_size < 1:
+                        raise InvalidBenchmark(
+                            "GPU out of memory, even with a batch size of 1!"
+                        )
 
     cache.remove()
     return scores

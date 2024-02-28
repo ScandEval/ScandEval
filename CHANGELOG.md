@@ -6,6 +6,89 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [v12.0.0] - 2024-02-26
+### Added
+- Now automatically uses multiple GPUs when evaluating generative models with vLLM.
+- Now allows "unofficial" datasets, which are datasets which are not included on the
+  official leaderboards and models will only be benchmarked on them if they have been
+  explicitly set using the `--dataset` argument (or `dataset` argument if using the
+  `Benchmarker` API). This allows the inclusion of more datasets, without bloating the
+  evaluation time of "official" evaluations, as well as removing the need to remove old
+  datasets when they are replaced by newer ones.
+- The following datasets have been added as unofficial, all datasets that used to be
+  part of ScandEval but has since been replaced:
+    1. ARC-da
+    2. ARC-no
+    3. ARC-sv
+    4. ARC-is
+    5. ARC-de
+    6. ARC-nl
+    7. ARC
+    8. DaNE
+    9. WikiANN-fo
+- A more informative error message is now being thrown if additional arguments need to
+  be supplied to evaluate the model, such as
+  `--trust-remote-code`/`trust_remote_code=True`.
+- When determining a model's maximum sequence length, we now also look at the
+  `max_sequence_length` attribute of the Hugging Face model configuration.
+
+### Changed
+- Computation of the BERTScore metric for summarisation tasks are now using the device
+  stated in the benchmark config, making the metric computation significantly faster if
+  a GPU is being used. This defaults to processing 32 samples at a time, which is
+  reduced if OOM errors occur. If OOM errors occur with a batch size of 1 then the
+  scores are computed on CPU, as before.
+- Updated `transformers` dependency to `>=4.38.1,<4.39.0`, and `vllm` dependency to
+  `>=0.3.2,<0.4.0`. This allows the benchmarking of the new Gemma and OLMO models.
+- When using the `Benchmarker` API, the `save_results` argument now defaults to True.
+- The `Benchmarker.benchmark` method now only returns the list of benchmark results
+  from the given run, rather than all historic benchmark results as well.
+- The framework now defaults to using a Hugging Face Hub token when accessing models,
+  if available.
+
+
+## [v11.0.0] - 2024-02-16
+### Added
+- Added arguments to `Benchmarker.benchmark` (or simply `Benchmarker.__call_`),
+  corresponding to the same arguments during initialisation. The idea here is that the
+  default parameters are set during initialisation, and then any of these can be
+  changed if needed when performing a concrete evaluation, without having to
+  re-initialise the `Benchmarker`.
+- Added the Danish knowledge datasets `danske-talemaader` and `danish-citizen-tests`.
+  Both are multiple choice datasets, where the first one tests knowledge about Danish
+  idioms, and the second one tests knowledge about the Danish society. These replace
+  the machine translated MMLU-da dataset.
+- Added a `--num-iterations` flag (`num_iterations` in the Python CLI), which controls
+  the number of times each model should be evaluated, defaulting to the usual 10
+  iterations. This is only meant to be changed for power users, and if it is changed
+  then the resulting scores will not be included in the leaderboards.
+
+### Changed
+- The default value of the languages are now all languages, rather than only Danish,
+  Swedish and Norwegian.
+- Changed all summarisation datasets to use one few-shot example (some were set to 2),
+  and increased the maximum amount of generated tokens to 256 rather than the previous
+  128, since many of the gold standard summaries are around 200 tokens.
+
+### Fixed
+- There was an error caused if an old version of the `openai` package was installed and
+  if the `scandeval` package was checking if a model exists as an OpenAI model. Now an
+  informative error is thrown if the model is not found on any available platforms, as
+  well as noting the extras that are missing, which prevents the package from checking
+  existence on those platforms.
+- Changed the prompt for the English sentiment classification dataset SST5, where it
+  previously stated that the documents were tweets - these have now been renamed to
+  "texts".
+- Correctly assess whether the `openai` extra should be used, which made it impossible
+  to benchmark OpenAI models.
+- Disabled `lmformatenforcer` logging, which happens in the rare case when we're
+  few-shot evaluating a model on NER and there are no JSON-valid tokens to generate.
+
+### Removed
+- Removed all machine translated ARC datasets, as they had a near 100% correlation with
+  the machine translated version of the MMLU datasets.
+
+
 ## [v10.0.1] - 2024-02-12
 ### Fixed
 - A prefix space was added to labels in sequence classification tasks that
