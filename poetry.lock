@@ -5256,15 +5256,16 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "vllm"
-version = "0.3.2"
+version = "0.3.1"
 description = "A high-throughput and memory-efficient inference and serving engine for LLMs"
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "vllm-0.3.2-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:29d250c38719b6b7d4436f7ad319cdc5696eedf5a9abab77fc55b7d177540fa4"},
-    {file = "vllm-0.3.2-cp311-cp311-manylinux1_x86_64.whl", hash = "sha256:82b974b5c26c5d2db126f7ebc6e863227d654e4da7c878cc808e25dde827e687"},
-    {file = "vllm-0.3.2-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:9e05dbbf9fcbcd29e14497d45163eac7c7be532bc08cf4fc8fda8f6228be96bc"},
-    {file = "vllm-0.3.2-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:ab1df996cc117e54f1fb6ede8b0b0b61f4cf398d908f4f79eefa2e35177771cd"},
+    {file = "vllm-0.3.1-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:d86fa826c4c62ac7a654fb98f47e5693eadb1708ea3e8fa5333c8361b9bed663"},
+    {file = "vllm-0.3.1-cp311-cp311-manylinux1_x86_64.whl", hash = "sha256:88776a0360d2b66039bf6a88ed4885826fda2fe1829c25f4291f898f909adf0c"},
+    {file = "vllm-0.3.1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:5c9391a01be4aa2bc53dc95a5dd7b71b31725e8ae7493a15caa38b5ba80e9cb9"},
+    {file = "vllm-0.3.1-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:45d3d46a6d577c517a9760e17f18a0c4a902d2207a2187b841d20e5b51699291"},
+    {file = "vllm-0.3.1.tar.gz", hash = "sha256:c61cf77c40ab9a3d0658f9cbe5a63d72f60ccbfed16624b224b78bd5c8cba60a"},
 ]
 
 [package.dependencies]
@@ -5279,7 +5280,7 @@ pynvml = "11.5.0"
 ray = ">=2.9"
 sentencepiece = "*"
 torch = "2.1.2"
-transformers = ">=4.38.0"
+transformers = ">=4.37.0"
 triton = ">=2.1.0"
 uvicorn = {version = "*", extras = ["standard"]}
 xformers = "0.0.23.post1"
@@ -5719,4 +5720,4 @@ openai = ["levenshtein", "openai", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "2fc3bed8a974933c1c02c7835be99016156930d2eeddd73cd2c686aa2aeb3277"
+content-hash = "ce0eb2d34c9dced475faca373ba8edb25b792a0f1b8138b2a0d19e09c865036d"
