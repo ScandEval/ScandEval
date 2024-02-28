@@ -602,7 +602,9 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
         The schema used for structured generation for the NER task.
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
-    regex = r"\{\"(" + "|".join(tag_names) + r")\": \[\"[^\"]+\"\]\}"
+    regex = (
+        r"\{\"(" + "|".join(tag_names) + r")\": \[(\"[^\"]+\"\)(,\"[^\"]+\"\){0,4}\]\}"
+    )
     return regex
     # keys_and_their_types: dict[str, Any] = {
     #     tag_name: (conlist(str), ...) for tag_name in tag_names
