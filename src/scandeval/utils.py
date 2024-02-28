@@ -603,7 +603,10 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
     regex = (
-        r"\{\"(" + "|".join(tag_names) + r")\": \[(\"[^\"]+\"\)(,\"[^\"]+\"\){0,4}\]\}"
+        r"\{"
+        r"(\"(" + "|".join(tag_names) + r")\": "
+        r"\[(\"[^\"]+\"\)(,\"[^\"]+\"\){0,4}\]\})+"
+        r"\}"
     )
     return regex
     # keys_and_their_types: dict[str, Any] = {
