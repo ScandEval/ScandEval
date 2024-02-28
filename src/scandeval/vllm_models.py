@@ -190,6 +190,7 @@ class VLLMModel:
             logits_processors=self.logits_processors,
         )
 
+        # TEMP
         # This ensures that the SamplingParams can be deepcopied, which happens during
         # vLLM generation. The reason why it is necessary to increase the recursion
         # limit is that in `get_logits_processors` we use a recursive function to
@@ -297,6 +298,7 @@ class VLLMModel:
         if self.dataset_config.task == NER:
             regex = get_ner_schema(dataset_config=self.dataset_config)
 
+            # TEMP
             # regex = build_regex_from_schema(
             #     schema=json.dumps(schema.model_json_schema()), whitespace_pattern=r" ?"
             # )
@@ -308,6 +310,7 @@ class VLLMModel:
             logits_processor = RegexLogitsProcessor(
                 regex_string=regex, llm=self._model.llm_engine
             )
+            # TEMP
             # logits_processor = JSONLogitsProcessor(
             #     schema=schema, llm=self._model.llm_engine, whitespace_pattern=r" ?"
             # )

@@ -609,6 +609,7 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
         r"\}"
     )
     return regex
+    # TEMP
     # keys_and_their_types: dict[str, Any] = {
     #     tag_name: (conlist(str), ...) for tag_name in tag_names
     # }
