@@ -14,7 +14,7 @@ from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import clear_memory, get_ner_schema
+from .utils import clear_memory, get_ner_regex
 
 logger = logging.getLogger(__package__)
 
@@ -293,7 +293,7 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            regex = get_ner_schema(dataset_config=self.dataset_config)
+            regex = get_ner_regex(dataset_config=self.dataset_config)
 
             logger.debug(
                 "Using the following regular expression for structured generation "
