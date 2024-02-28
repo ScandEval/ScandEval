@@ -607,7 +607,7 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
     tag_names = set(dataset_config.prompt_label_mapping.values())
     regex = (
         r"\{"
-        r"(\"(" + "|".join(tag_names) + r')": ?'
+        r'("(' + "|".join(tag_names) + r')": ?'
         r'\[("[^"]+"\)(, ?"[^"]+"){0,4}\])+'
         r"\}"
     )
