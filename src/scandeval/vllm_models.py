@@ -304,8 +304,8 @@ class VLLMModel:
             # )
             logger.debug(
                 "Using the following regular expression for structured generation "
-                "regex, of length {len(regex):,}, to ensure that the generated "
-                "outputs are JSON dictionaries: {regex!r}"
+                f"regex, of length {len(regex):,}, to ensure that the generated "
+                f"outputs are JSON dictionaries: {regex!r}"
             )
 
             logits_processor = RegexLogitsProcessor(
