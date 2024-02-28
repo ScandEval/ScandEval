@@ -2,6 +2,7 @@
 
 import gc
 import importlib
+import json
 import logging
 import os
 import random
@@ -11,7 +12,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Type
+from typing import Any, Type
 
 import numpy as np
 import pkg_resources
@@ -20,6 +21,8 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
+from outlines.fsm.json_schema import build_regex_from_schema
+from pydantic import conlist, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
@@ -608,6 +611,19 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
         r"\[(\"[^\"]+\"\)(,\"[^\"]+\"\){0,4}\])+"
         r"\}"
     )
+
+    keys_and_their_types: dict[str, Any] = {
+        tag_name: (conlist(str), ...) for tag_name in tag_names
+    }
+    AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
+    pydantic_regex = build_regex_from_schema(
+        schema=json.dumps(AnswerFormat.model_json_schema()), whitespace_pattern=r" ?"
+    )
+
+    print(regex)
+    print(pydantic_regex)
+    breakpoint()
+
     return regex
     # keys_and_their_types: dict[str, Any] = {
     #     tag_name: (conlist(str), ...) for tag_name in tag_names
