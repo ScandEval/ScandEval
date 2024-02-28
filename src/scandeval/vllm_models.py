@@ -6,7 +6,6 @@ import sys
 import warnings
 from pathlib import Path
 from types import MethodType
-from typing import Callable
 
 import torch
 from tqdm import tqdm
@@ -190,14 +189,6 @@ class VLLMModel:
             logits_processors=self.logits_processors,
         )
 
-        # TEMP
-        # This ensures that the SamplingParams can be deepcopied, which happens during
-        # vLLM generation. The reason why it is necessary to increase the recursion
-        # limit is that in `get_logits_processors` we use a recursive function to
-        # process the tokenizer vocabulary, and the depth of the recursion corresponds
-        # to repeated characters in the vocabulary.
-        # sys.setrecursionlimit(10_000)
-
         # The inputs are tokenised, so we decode them to get the original text, which
         # is the input to the vLLM model
         prompts = self.tokenizer.batch_decode(
@@ -286,18 +277,24 @@ class VLLMModel:
             inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
 
-    def get_logits_processors(self) -> list[Callable] | None:
-        """Return the logits processors to use for structured generation."""
+    def build_logits_processors(self) -> None:
+        """Return the logits processors to use for structured generation.
+
+        This requires the model and tokenizer to be set.
+
+        Raises:
+            ValueError:
+                If the model or tokenizer is not set.
+        """
+        if self.tokenizer is None:
+            raise ValueError("Tokenizer must be set to build logits processors.")
+
         logits_processors = list()
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
             regex = get_ner_schema(dataset_config=self.dataset_config)
 
-            # TEMP
-            # regex = build_regex_from_schema(
-            #     schema=json.dumps(schema.model_json_schema()), whitespace_pattern=r" ?"
-            # )
             logger.debug(
                 "Using the following regular expression for structured generation "
                 f"regex, of length {len(regex):,}, to ensure that the generated "
@@ -307,10 +304,6 @@ class VLLMModel:
             logits_processor = RegexLogitsProcessor(
                 regex_string=regex, llm=self._model.llm_engine
             )
-            # TEMP
-            # logits_processor = JSONLogitsProcessor(
-            #     schema=schema, llm=self._model.llm_engine, whitespace_pattern=r" ?"
-            # )
 
             # Convert the vocabulary from dict_values to a list, since the former is
             # not pickleable, making `copy.deepcopy` fail during vLLM generation
@@ -339,7 +332,7 @@ class VLLMModel:
 
             logits_processors.append(no_tabs_or_newlines)
 
-        return logits_processors
+        self.logits_processors = logits_processors
 
     def set_tokenizer(self, tokenizer: PreTrainedTokenizerBase) -> None:
         """Set the tokenizer to use for generation.
@@ -350,15 +343,6 @@ class VLLMModel:
         """
         self.tokenizer = tokenizer
         self._model.set_tokenizer(tokenizer)
-
-    def build_logits_processors(self) -> None:
-        """Build the logits processors to use for structured generation.
-
-        This requires the model and tokenizer to be set.
-        """
-        if self.tokenizer is None:
-            raise ValueError("Tokenizer must be set to build logits processors.")
-        self.logits_processors = self.get_logits_processors()
 
     def to(self, _: torch.device) -> None:
         """Dummy method to make the model compatible with the benchmarking script."""
