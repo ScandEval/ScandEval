@@ -231,10 +231,6 @@ class VLLMModel:
             padding_value=float(self.tokenizer.pad_token_id),
         )
 
-        # TEMP
-        if not input_is_a_test:
-            logger.debug(f"Generated sequences: {output}")
-
         if generation_config.return_dict_in_generate:
             # Add logprobs scores to the output
             if generation_config.output_scores:
