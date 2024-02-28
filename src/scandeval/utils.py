@@ -613,7 +613,7 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
     )
 
     keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str), ...) for tag_name in tag_names
+        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
     }
     AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
     pydantic_regex = build_regex_from_schema(
