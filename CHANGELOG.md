@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Flash attention will now default to being used if `flash_attn` has been installed. If
+  the `--use-flash-attention/no-use-flash-attention` hasn't been set and the
+  `flash_attn` package hasn't been installed, then a logging message will be displayed,
+  informing the user.
+
 ### Fixed
 - TODO
 
