@@ -19,9 +19,12 @@ from .utils import clear_memory, get_ner_regex
 logger = logging.getLogger(__package__)
 
 try:
+    import outlines.caching
     from outlines.serve.vllm import RegexLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+
+    outlines.caching._caching_enabled = False
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
@@ -92,9 +95,8 @@ class VLLMModel:
                 trust_remote_code=self.trust_remote_code,
                 revision=self.model_config.revision,
                 seed=4242,
-                # tensor_parallel_size=torch.cuda.device_count(),
-                # disable_custom_all_reduce=True,
-                enforce_eager=True,
+                tensor_parallel_size=torch.cuda.device_count(),
+                disable_custom_all_reduce=True,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
