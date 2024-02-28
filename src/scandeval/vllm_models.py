@@ -230,6 +230,10 @@ class VLLMModel:
             padding_value=float(self.tokenizer.pad_token_id),
         )
 
+        # TEMP
+        if not input_is_a_test:
+            logger.debug(f"Generated sequences: {output}")
+
         if generation_config.return_dict_in_generate:
             # Add logprobs scores to the output
             if generation_config.output_scores:
@@ -375,7 +379,10 @@ def _run_engine_with_fixed_progress_bars(
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
         pbar = tqdm(
-            total=num_requests, leave=False, disable=hasattr(sys, "_called_from_test")
+            desc="Samples",
+            total=num_requests,
+            leave=False,
+            disable=hasattr(sys, "_called_from_test"),
         )
 
     # Run the engine.
