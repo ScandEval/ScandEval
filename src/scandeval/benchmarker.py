@@ -48,7 +48,7 @@ class BenchmarkConfigParams(BaseModel):
     verbose: bool
     trust_remote_code: bool
     load_in_4bit: bool | None
-    use_flash_attention: bool
+    use_flash_attention: bool | None
     clear_model_cache: bool
     only_validation_split: bool
     few_shot: bool
@@ -155,7 +155,7 @@ class Benchmarker:
         verbose: bool = False,
         trust_remote_code: bool = False,
         load_in_4bit: bool | None = None,
-        use_flash_attention: bool = False,
+        use_flash_attention: bool | None = None,
         clear_model_cache: bool = False,
         only_validation_split: bool = False,
         few_shot: bool = True,
@@ -225,7 +225,8 @@ class Benchmarker:
                 done if CUDA is available and the model is a decoder model. Defaults to
                 None.
             use_flash_attention:
-                Whether to use Flash Attention. Defaults to False.
+                Whether to use Flash Attention. If None then it will be used if it is
+                installed and the model is a decoder model. Defaults to None.
             clear_model_cache:
                 Whether to clear the model cache after benchmarking each model.
                 Defaults to False.

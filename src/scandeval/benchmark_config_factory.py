@@ -1,14 +1,14 @@
 """Factory class for creating dataset configurations."""
 
+import importlib.util
 import os
 
 import torch
 
-from scandeval.dataset_configs import get_all_dataset_configs
-from scandeval.exceptions import InvalidBenchmark
-
 from .config import BenchmarkConfig, Language, Task
+from .dataset_configs import get_all_dataset_configs
 from .enums import Device, Framework
+from .exceptions import InvalidBenchmark
 from .languages import get_all_languages
 from .tasks import get_all_tasks
 
@@ -33,7 +33,7 @@ def build_benchmark_config(
     verbose: bool,
     trust_remote_code: bool,
     load_in_4bit: bool | None,
-    use_flash_attention: bool,
+    use_flash_attention: bool | None,
     clear_model_cache: bool,
     only_validation_split: bool,
     few_shot: bool,
@@ -91,7 +91,8 @@ def build_benchmark_config(
         load_in_4bit:
             Whether to load the models in 4-bit precision.
         use_flash_attention:
-            Whether to use Flash Attention for the models.
+            Whether to use Flash Attention for the models. If None then it will be used
+            if it is available.
         clear_model_cache:
             Whether to clear the model cache before running the benchmark.
         only_validation_split:
@@ -124,6 +125,9 @@ def build_benchmark_config(
         openai_api_key = os.getenv("OPENAI_API_KEY")
 
     framework_obj = Framework(framework) if framework is not None else None
+
+    if use_flash_attention is None:
+        use_flash_attention = importlib.util.find_spec("flash_attn") is not None
 
     return BenchmarkConfig(
         model_languages=model_languages,
