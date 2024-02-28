@@ -136,12 +136,15 @@ def build_benchmark_config(
                 "Flash Attention has not been installed, so this will not be used. "
                 "To install it, run `pip install -U wheel && "
                 "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn "
-                "--no-build-isolation`. You can disable this message by setting "
+                "--no-build-isolation`. Alternatively, you can disable this message "
+                "by setting "
             )
             if run_with_cli:
-                message += "`--use-flash-attention` or `--no-use-flash-attention`."
+                message += "the flag ``--no-use-flash-attention`."
             else:
-                message += "`use_flash_attention=True/False` in the `Benchmarker`."
+                message += (
+                    "the argument `use_flash_attention=False` in the `Benchmarker`."
+                )
             logger.info(message)
 
     return BenchmarkConfig(
