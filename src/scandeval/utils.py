@@ -608,7 +608,7 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
     regex = (
         r"\{"
         r"(\"(" + "|".join(tag_names) + r")\": "
-        r"\[(\"[^\"]+\"\)(,\"[^\"]+\"\){0,4}\])+"
+        r"\[(\"[^\"]+\"\)(,\"[^\"]+\"){0,4}\])+"
         r"\}"
     )
 
@@ -620,8 +620,8 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
         schema=json.dumps(AnswerFormat.model_json_schema()), whitespace_pattern=r" ?"
     )
 
-    print(regex)
-    print(pydantic_regex)
+    print(regex, len(regex))
+    print(pydantic_regex, len(pydantic_regex))
     breakpoint()
 
     return regex
