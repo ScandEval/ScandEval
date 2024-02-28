@@ -293,7 +293,7 @@ def generate_single_iteration(
 
             itr = (
                 dataloader
-                if isinstance(model, VLLMModel)
+                if batch_size == len(torch_dataset)
                 else tqdm(
                     iterable=dataloader,
                     leave=False,
