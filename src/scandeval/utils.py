@@ -11,7 +11,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Type
+from typing import Type
 
 import numpy as np
 import pkg_resources
@@ -20,7 +20,6 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
-from pydantic import BaseModel, conlist, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
@@ -592,7 +591,7 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
                 raise NaNValueInModelOutput()
 
 
-def get_ner_schema(dataset_config: DatasetConfig) -> type[BaseModel]:
+def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
     """Get the schema used for structured generation for the NER task.
 
     Args:
@@ -603,11 +602,13 @@ def get_ner_schema(dataset_config: DatasetConfig) -> type[BaseModel]:
         The schema used for structured generation for the NER task.
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
-    keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str), ...) for tag_name in tag_names
-    }
-    AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
-    return AnswerFormat
+    regex = r"\{\"(" + "|".join(tag_names) + r")\": \[\"[^\"]+\"\]\}"
+    return regex
+    # keys_and_their_types: dict[str, Any] = {
+    #     tag_name: (conlist(str), ...) for tag_name in tag_names
+    # }
+    # AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
+    # return AnswerFormat
 
 
 def should_prompts_be_stripped(

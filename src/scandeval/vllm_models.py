@@ -1,6 +1,5 @@
 """A wrapper for vLLM models."""
 
-import json
 import logging
 import math
 import sys
@@ -21,8 +20,8 @@ from .utils import clear_memory, get_ner_schema
 logger = logging.getLogger(__package__)
 
 try:
-    from outlines.fsm.json_schema import build_regex_from_schema
-    from outlines.serve.vllm import JSONLogitsProcessor
+    # from outlines.fsm.json_schema import build_regex_from_schema
+    from outlines.serve.vllm import RegexLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
@@ -292,19 +291,22 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            schema = get_ner_schema(dataset_config=self.dataset_config)
+            regex = get_ner_schema(dataset_config=self.dataset_config)
 
-            regex = build_regex_from_schema(
-                schema=json.dumps(schema.model_json_schema()), whitespace_pattern=""
-            )
+            # regex = build_regex_from_schema(
+            #     schema=json.dumps(schema.model_json_schema()), whitespace_pattern=r" ?"
+            # )
             logger.debug(
                 "Using the following structured generation regex, of length "
                 f"{len(regex):,}: {regex!r}"
             )
 
-            logits_processor = JSONLogitsProcessor(
-                schema=schema, llm=self._model.llm_engine, whitespace_pattern=""
+            logits_processor = RegexLogitsProcessor(
+                regex_string=regex, llm=self._model.llm_engine
             )
+            # logits_processor = JSONLogitsProcessor(
+            #     schema=schema, llm=self._model.llm_engine, whitespace_pattern=r" ?"
+            # )
 
             # Convert the vocabulary from dict_values to a list, since the former is
             # not pickleable, making `copy.deepcopy` fail during vLLM generation
