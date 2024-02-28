@@ -303,8 +303,9 @@ class VLLMModel:
             #     schema=json.dumps(schema.model_json_schema()), whitespace_pattern=r" ?"
             # )
             logger.debug(
-                "Using the following structured generation regex, of length "
-                f"{len(regex):,}: {regex!r}"
+                "Using the following regular expression for structured generation "
+                "regex, of length {len(regex):,}, to ensure that the generated "
+                "outputs are JSON dictionaries: {regex!r}"
             )
 
             logits_processor = RegexLogitsProcessor(
