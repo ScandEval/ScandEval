@@ -58,6 +58,8 @@ class VLLMModel:
         self.model_config = model_config
         self.config = hf_model_config
         self.dataset_config = dataset_config
+        self.model_cache_dir = model_cache_dir
+        self.trust_remote_code = trust_remote_code
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
         with warnings.catch_warnings():
@@ -69,7 +71,7 @@ class VLLMModel:
             destroy_model_parallel()
             clear_memory()
 
-            max_model_len = 10_000
+            self.max_model_len = 10_000
             potential_max_model_length_config_names = [
                 "max_position_embeddings",
                 "max_sequence_length",
@@ -78,20 +80,21 @@ class VLLMModel:
             ]
             for config_name in potential_max_model_length_config_names:
                 if hasattr(hf_model_config, config_name):
-                    max_model_len = min(
-                        max_model_len, getattr(hf_model_config, config_name)
+                    self.max_model_len = min(
+                        self.max_model_len, getattr(hf_model_config, config_name)
                     )
 
             self._model = LLM(
-                model=model_config.model_id,
+                model=self.model_config.model_id,
                 gpu_memory_utilization=0.9,
-                max_model_len=max_model_len,
-                download_dir=str(model_cache_dir),
-                trust_remote_code=trust_remote_code,
+                max_model_len=self.max_model_len,
+                download_dir=str(self.model_cache_dir),
+                trust_remote_code=self.trust_remote_code,
                 revision=self.model_config.revision,
                 seed=4242,
-                tensor_parallel_size=torch.cuda.device_count(),
-                disable_custom_all_reduce=True,
+                # tensor_parallel_size=torch.cuda.device_count(),
+                # disable_custom_all_reduce=True,
+                enforce_eager=True,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
