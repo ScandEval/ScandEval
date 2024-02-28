@@ -14,14 +14,13 @@ from tqdm.auto import tqdm
 from transformers import (
     DataCollator,
     GenerationConfig,
-    PreTrainedModel,
     StoppingCriteria,
     StoppingCriteriaList,
 )
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .exceptions import InvalidBenchmark
 from .model_cache import (
     ModelCache,
     load_cached_model_outputs,
@@ -378,8 +377,9 @@ def get_prefix_allowed_fn(
     Returns:
         The prefix allowed function.
     """
-    if build_transformers_prefix_allowed_tokens_fn is None:
-        raise NeedsExtraInstalled(extra="generative")
+    # TEMP: Handle this
+    # if build_transformers_prefix_allowed_tokens_fn is None:
+    #     raise NeedsExtraInstalled(extra="generative")
 
     # if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
     #     parser = get_ner_parser(dataset_config=dataset_config)
@@ -523,12 +523,9 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
-        if isinstance(model, PreTrainedModel):
-            prefix_allowed_tokens_fn = get_prefix_allowed_fn(
-                dataset_config=dataset_config, tokenizer=tokenizer
-            )
-        else:
-            prefix_allowed_tokens_fn = None
+        prefix_allowed_tokens_fn = get_prefix_allowed_fn(
+            dataset_config=dataset_config, tokenizer=tokenizer
+        )
 
         model_output = model.generate(
             inputs=inputs,
