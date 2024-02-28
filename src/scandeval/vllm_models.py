@@ -196,9 +196,6 @@ class VLLMModel:
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
-        if not input_is_a_test:
-            breakpoint()
-            pass
         raw_outputs = self._model.generate(
             prompts=prompts,
             use_tqdm=(not input_is_a_test),
