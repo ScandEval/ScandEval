@@ -6,21 +6,23 @@ import sys
 import warnings
 from pathlib import Path
 from types import MethodType
+from typing import Any
 
 import torch
+from pydantic import conlist, create_model
 from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizerBase
 from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
 from .tasks import NER
-from .utils import clear_memory, get_ner_regex
+from .utils import clear_memory
 
 logger = logging.getLogger(__package__)
 
 try:
     import outlines.caching
-    from outlines.serve.vllm import RegexLogitsProcessor
+    from outlines.serve.vllm import JSONLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
@@ -284,16 +286,21 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            regex = get_ner_regex(dataset_config=self.dataset_config)
+            # regex = get_ner_regex(dataset_config=self.dataset_config)
 
-            logger.debug(
-                f"Using the following regular expression of length {len(regex):,} for "
-                "structured generation, to ensure that the generated outputs are "
-                f"JSON dictionaries: {regex!r}"
-            )
+            # logger.debug(
+            #     f"Using the following regular expression of length {len(regex):,} for "
+            #     "structured generation, to ensure that the generated outputs are "
+            #     f"JSON dictionaries: {regex!r}"
+            # )
 
-            logits_processor = RegexLogitsProcessor(
-                regex_string=regex, llm=self._model.llm_engine
+            tag_names = sorted(set(self.dataset_config.prompt_label_mapping.values()))
+            keys_and_their_types: dict[str, Any] = {
+                tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
+            }
+            schema = create_model("AnswerFormat", **keys_and_their_types)
+            logits_processor = JSONLogitsProcessor(
+                schema=schema, llm=self._model.llm_engine, whitespace_pattern=r" ?"
             )
 
             # Convert the vocabulary from dict_values to a list, since the former is

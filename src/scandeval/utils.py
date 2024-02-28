@@ -594,6 +594,7 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
                 raise NaNValueInModelOutput()
 
 
+# TODO: Remove this
 def get_ner_regex(dataset_config: DatasetConfig) -> str:
     """Get the regex used for structured generation for the NER task.
 
