@@ -19,28 +19,11 @@ from .utils import clear_memory, get_ner_regex
 logger = logging.getLogger(__package__)
 
 try:
-    # from outlines.fsm.json_schema import build_regex_from_schema
     from outlines.serve.vllm import RegexLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
-
-    class LLM:  # type: ignore[no-redef]
-        """Dummy class."""
-
-        def __init__(self, **_) -> None:
-            """Dummy method, to avoid typing issues during initialisation."""
-            pass
-
-    class RequestOutput:  # type: ignore[no-redef]
-        """Dummy class."""
-
-        pass
-
-    def destroy_model_parallel():  #  type: ignore[no-redef]
-        """Dummy function."""
-        pass
 
 
 class VLLMModel:
@@ -206,6 +189,9 @@ class VLLMModel:
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
+        if not input_is_a_test:
+            breakpoint()
+            pass
         raw_outputs = self._model.generate(
             prompts=prompts,
             use_tqdm=(not input_is_a_test),
