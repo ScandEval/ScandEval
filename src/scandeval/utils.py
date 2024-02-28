@@ -602,6 +602,7 @@ def get_ner_regex(dataset_config: DatasetConfig) -> str:
         The regex used for structured generation for the NER task.
     """
     tag_names = set(dataset_config.prompt_label_mapping.values())
+    tag_names = {list(tag_names)[0]}
     regex = r"\{"
     for idx, tag_name in enumerate(tag_names):
         if idx > 0:
