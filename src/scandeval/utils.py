@@ -605,13 +605,6 @@ def get_ner_regex(dataset_config: DatasetConfig) -> str:
         The regex used for structured generation for the NER task.
     """
     tag_names = sorted(set(dataset_config.prompt_label_mapping.values()))
-    # regex = r"\{"
-    # for idx, tag_name in enumerate(tag_names):
-    #     if idx > 0:
-    #         regex += r", ?"
-    #     regex += r'"' + tag_name + r'": ?\[(("[^"]+")(, ?"[^"]+"){0,4})?\]'
-    # regex += r"\}"
-    # return regex
     keys_and_their_types: dict[str, Any] = {
         tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
     }
