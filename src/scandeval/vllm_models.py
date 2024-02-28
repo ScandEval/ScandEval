@@ -366,10 +366,7 @@ def _run_engine_with_fixed_progress_bars(
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
         pbar = tqdm(
-            desc="Samples",
-            total=num_requests,
-            leave=False,
-            disable=hasattr(sys, "_called_from_test"),
+            total=num_requests, leave=False, disable=hasattr(sys, "_called_from_test")
         )
 
     # Run the engine.
