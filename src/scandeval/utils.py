@@ -605,7 +605,7 @@ def get_ner_schema(dataset_config: DatasetConfig) -> str:  # type[BaseModel]:
     regex = (
         r"\{"
         r"(\"(" + "|".join(tag_names) + r")\": "
-        r"\[(\"[^\"]+\"\)(,\"[^\"]+\"\){0,4}\]\})+"
+        r"\[(\"[^\"]+\"\)(,\"[^\"]+\"\){0,4}\])+"
         r"\}"
     )
     return regex
