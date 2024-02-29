@@ -1,4 +1,14 @@
 repos:
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-use-type-annotations
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: debug-statements
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.13
     hooks:
