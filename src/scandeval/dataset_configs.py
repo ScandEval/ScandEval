@@ -894,7 +894,7 @@ MMLU_CONFIG = DatasetConfig(
 )
 
 MMLU_DA_CONFIG = DatasetConfig(
-    name="mmlu-no",
+    name="mmlu-da",
     pretty_name="the truncated version of the Danish knowledge dataset MMLU-da, "
     "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-da-mini",
