@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.1.0] - 2024-02-29
 ### Changed
 - Flash attention will now default to being used if `flash_attn` has been installed. If
   the `--use-flash-attention/no-use-flash-attention` hasn't been set and the
