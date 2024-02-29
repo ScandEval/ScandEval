@@ -171,7 +171,7 @@ def get_ner_prefix_allowed_tokens_fn(
 
 
 def get_ner_logits_processors(
-    ner_tag_names: list[str], llm: LLM
+    ner_tag_names: list[str], llm: "LLM"
 ) -> list[Callable[[list[int], torch.Tensor], torch.Tensor]]:
     """Get the logits processors for the NER task, used in vLLM.
 
