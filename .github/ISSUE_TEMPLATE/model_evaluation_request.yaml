@@ -40,8 +40,8 @@ body:
     label: Merged model
     description: Is the model a merge of other models, or built on top of a merged model?
     options:
-      - label: Not a merged model
-      - label: Merged model
+      - Not a merged model
+      - Merged model
   validations:
     required: true
 - type: markdown
