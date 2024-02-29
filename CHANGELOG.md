@@ -14,7 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   informing the user.
 
 ### Fixed
-- TODO
+- Evaluating models on NER tasks used excessive amounts of memory and took very long.
+  This was due to a bug in vLLM v0.3.2, and will be fixed in vLLM v0.3.3. We thus
+  forbid v0.3.2, making it fast again, and we'll remain compatible with the new v0.3.3
+  when it is released.
 
 
 ## [v12.0.0] - 2024-02-26
