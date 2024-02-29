@@ -142,6 +142,34 @@ class JSONPrefixAllowedTokens:
         return tokenizer
 
 
+def get_ner_prefix_allowed_tokens_fn(
+    ner_tag_names: list[str], tokenizer: PreTrainedTokenizerBase
+) -> JSONPrefixAllowedTokens:
+    """Get the prefix allowed tokens function for the NER task, used in `transformers`.
+
+    Args:
+        ner_tag_names:
+            The NER tag names.
+        tokenizer:
+            The tokenizer to use for tokenizing the JSON Schema.
+
+    Returns:
+        The prefix allowed tokens function for the NER task.
+    """
+    forbidden_token_ids = list()
+    forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
+    for forbidden_token in forbidden_tokens:
+        forbidden_token_ids.extend(
+            list(tokenizer(forbidden_token, add_special_tokens=False).input_ids)
+        )
+    forbidden_token_ids = list(set(forbidden_token_ids))
+    return JSONPrefixAllowedTokens(
+        ner_tag_names=ner_tag_names,
+        tokenizer=tokenizer,
+        forbidden_token_ids=forbidden_token_ids,
+    )
+
+
 def get_ner_logits_processors(
     ner_tag_names: list[str], llm: LLM
 ) -> list[Callable[[list[int], torch.Tensor], torch.Tensor]]:

@@ -14,7 +14,6 @@ from tqdm.auto import tqdm
 from transformers import (
     DataCollator,
     GenerationConfig,
-    PreTrainedTokenizerBase,
     StoppingCriteria,
     StoppingCriteriaList,
 )
@@ -29,7 +28,7 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
-from .structured_generation_utils import JSONPrefixAllowedTokens
+from .structured_generation_utils import get_ner_prefix_allowed_tokens_fn
 from .tasks import NER
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
 from .vllm_models import VLLMModel
@@ -358,38 +357,6 @@ def generate_single_iteration(
     return itr_scores
 
 
-def get_prefix_allowed_fn(
-    dataset_config: DatasetConfig, tokenizer: Tokenizer
-) -> Callable[[int, torch.Tensor], list[int]] | None:
-    """Return the prefix allowed function to use for structured generation.
-
-    Args:
-        dataset_config:
-            The dataset config.
-        tokenizer:
-            The tokenizer.
-
-    Returns:
-        The prefix allowed function.
-    """
-    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
-        forbidden_token_ids = list()
-        forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
-        for forbidden_token in forbidden_tokens:
-            forbidden_token_ids.extend(
-                list(tokenizer(forbidden_token, add_special_tokens=False).input_ids)
-            )
-        forbidden_token_ids = list(set(forbidden_token_ids))
-        ner_tag_names = list(dataset_config.prompt_label_mapping.values())
-        return JSONPrefixAllowedTokens(
-            ner_tag_names=ner_tag_names,
-            tokenizer=tokenizer,
-            forbidden_token_ids=forbidden_token_ids,
-        )
-
-    return None
-
-
 class StopWordCriteria(StoppingCriteria):
     """Stopping criteria for generation based on stop words.
 
@@ -493,9 +460,13 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
-        prefix_allowed_tokens_fn = get_prefix_allowed_fn(
-            dataset_config=dataset_config, tokenizer=tokenizer
-        )
+        if dataset_config.task == NER:
+            prefix_allowed_tokens_fn = get_ner_prefix_allowed_tokens_fn(
+                ner_tag_names=list(dataset_config.prompt_label_mapping.values()),
+                tokenizer=tokenizer,
+            )
+        else:
+            prefix_allowed_tokens_fn = None
 
         model_output = model.generate(
             inputs=inputs,
