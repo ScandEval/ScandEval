@@ -280,7 +280,7 @@ class Benchmarker:
         )
 
         self.benchmark_config = build_benchmark_config(
-            **self.benchmark_config_default_params.model_dump()
+            first_time=True, **self.benchmark_config_default_params.model_dump()
         )
 
         # Initialise variable storing model lists, so we only have to fetch it once
@@ -569,7 +569,7 @@ class Benchmarker:
         self,
         model: list[str] | str | None,
         model_languages: list[Language],
-        token: bool | str,
+        token: bool | str | None,
     ) -> list[str]:
         """Prepare the model ID(s) to be benchmarked.
 
@@ -688,7 +688,9 @@ class Benchmarker:
         """Call the benchmarker. See `Benchmarker.benchmark`."""
         return self.benchmark(*args, **kwargs)
 
-    def _get_model_ids(self, languages: list[Language], token: bool | str) -> list[str]:
+    def _get_model_ids(
+        self, languages: list[Language], token: bool | str | None
+    ) -> list[str]:
         """Get list of model IDs from the Hugging Face Hub.
 
         Args:

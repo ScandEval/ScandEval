@@ -30,7 +30,7 @@ def build_benchmark_config(
     evaluate_train: bool,
     raise_errors: bool,
     cache_dir: str,
-    token: bool | str,
+    token: bool | str | None,
     openai_api_key: str | None,
     force: bool,
     verbose: bool,
@@ -42,6 +42,7 @@ def build_benchmark_config(
     few_shot: bool,
     num_iterations: int,
     run_with_cli: bool,
+    first_time: bool = False,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -106,6 +107,9 @@ def build_benchmark_config(
             The number of iterations each model should be evaluated for.
         run_with_cli:
             Whether the benchmark is being run with the CLI.
+        first_time:
+            Whether this is the first time the benchmark configuration is being created.
+            Defaults to False.
 
     Returns:
         The benchmark configuration.
@@ -129,11 +133,14 @@ def build_benchmark_config(
 
     framework_obj = Framework(framework) if framework is not None else None
 
+    if token is True:
+        token = None
+
     if use_flash_attention is None:
         use_flash_attention = importlib.util.find_spec("flash_attn") is not None
-        if not use_flash_attention:
+        if not use_flash_attention and first_time:
             message = (
-                "Flash Attention has not been installed, so this will not be used. "
+                "Flash attention has not been installed, so this will not be used. "
                 "To install it, run `pip install -U wheel && "
                 "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn "
                 "--no-build-isolation`. Alternatively, you can disable this message "

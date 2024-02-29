@@ -326,7 +326,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 
 
 def get_huggingface_model_lists(
-    languages: list[Language] | None, token: bool | str
+    languages: list[Language] | None, token: bool | str | None
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -338,7 +338,7 @@ def get_huggingface_model_lists(
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token. Defaults to False.
+            specified then it will be used as the token.
 
     Returns:
         The keys are filterings of the list, which includes all language codes,
