@@ -11,9 +11,14 @@ def get_all_dataset_configs() -> dict[str, DatasetConfig]:
     Returns:
         A mapping between names of datasets and their configurations.
     """
-    return {
-        cfg.name: cfg for cfg in globals().values() if isinstance(cfg, DatasetConfig)
-    }
+    dataset_configs = [
+        cfg for cfg in globals().values() if isinstance(cfg, DatasetConfig)
+    ]
+    assert len(dataset_configs) == len({cfg.name for cfg in dataset_configs}), (
+        "There are duplicate dataset configurations. Please ensure that each dataset "
+        "has a unique name."
+    )
+    return {cfg.name: cfg for cfg in dataset_configs}
 
 
 def get_dataset_config(dataset_name: str) -> DatasetConfig:
