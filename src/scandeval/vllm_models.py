@@ -21,12 +21,9 @@ from .utils import clear_memory
 logger = logging.getLogger(__package__)
 
 try:
-    import outlines.caching
     from outlines.serve.vllm import JSONLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
-
-    outlines.caching._caching_enabled = False
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
