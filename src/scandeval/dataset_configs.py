@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .config import DatasetConfig
-from .languages import DA, DE, EN, FO, IS, NB, NL, NN, SV, get_all_languages
+from .languages import DA, DE, EN, FO, IS, NB, NL, NN, NO, SV, get_all_languages
 from .tasks import COMMON_SENSE, KNOW, LA, NER, QA, SENT, SPEED, SUMM
 
 
@@ -83,7 +83,7 @@ NOREC_CONFIG = DatasetConfig(
     "dataset NoReC",
     huggingface_id="ScandEval/norec-mini",
     task=SENT,
-    languages=[NB, NN],
+    languages=[NB, NN, NO],
     prompt_prefix="Følgende er anmeldelser og deres sentiment, som kan være 'positiv', "
     "'nøytral' eller 'negativ'.",
     prompt_template="Anmeldelse: {text}\nSentiment: {label}",
@@ -237,7 +237,7 @@ NORNE_NB_CONFIG = DatasetConfig(
     "entity recognition dataset NorNE",
     huggingface_id="ScandEval/norne-nb-mini",
     task=NER,
-    languages=[NB],
+    languages=[NB, NO],
     prompt_prefix="Følgende er fraser og JSON-ordbøker med de navngitte enhetene "
     "som forekommer i den gitte frasen.",
     prompt_template="Frase: {text}\nNavngitte enheter: {label}",
@@ -483,7 +483,7 @@ SCALA_NB_CONFIG = DatasetConfig(
     pretty_name="the Bokmål part of the linguistic acceptability dataset ScaLA",
     huggingface_id="ScandEval/scala-nb",
     task=LA,
-    languages=[NB],
+    languages=[NB, NO],
     prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
     prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
@@ -594,7 +594,7 @@ NORQUAD_CONFIG = DatasetConfig(
     "dataset NorQuAD",
     huggingface_id="ScandEval/norquad-mini",
     task=QA,
-    languages=[NB, NN],
+    languages=[NB, NN, NO],
     prompt_prefix="Her følger tekster med tilhørende spørsmål og svar.",
     prompt_template="Tekst: {text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
     num_few_shot_examples=2,
@@ -733,7 +733,7 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     "Norske Sammendrag",
     huggingface_id="ScandEval/no-sammendrag-mini",
     task=SUMM,
-    languages=[NB, NN],
+    languages=[NB, NN, NO],
     prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
     prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
     num_few_shot_examples=1,
@@ -816,7 +816,7 @@ MMLU_NO_CONFIG = DatasetConfig(
     "translated from the English MMLU dataset",
     huggingface_id="ScandEval/mmlu-no-mini",
     task=KNOW,
-    languages=[NB, NN],
+    languages=[NB, NN, NO],
     prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
@@ -929,7 +929,7 @@ ARC_NO_CONFIG = DatasetConfig(
     "translated from the English ARC dataset",
     huggingface_id="ScandEval/arc-no-mini",
     task=KNOW,
-    languages=[NB, NN],
+    languages=[NB, NN, NO],
     prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
@@ -1037,7 +1037,7 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
     "HellaSwag-no, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-no-mini",
     task=COMMON_SENSE,
-    languages=[NB, NN],
+    languages=[NB, NN, NO],
     prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
