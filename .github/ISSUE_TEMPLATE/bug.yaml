@@ -1,6 +1,6 @@
 name: 🐛 Bug Report
 description: Have you experienced a bug using the `scandeval` package?
-title: "[BUG] <your-bug-here>"
+title: "[BUG] <name-of-bug>"
 labels: bug
 
 body:

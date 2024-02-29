@@ -1,6 +1,6 @@
 name: 📊 Model Evaluation Request
 description: Would you like to have a particular model included in the leaderboards?
-title: "[MODEL EVALUATION REQUEST] <your-model-name-here>"
+title: "[MODEL EVALUATION REQUEST] <model-id>"
 labels: "model evaluation request"
 
 body:

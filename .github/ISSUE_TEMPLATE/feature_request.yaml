@@ -1,6 +1,6 @@
 name: 🚀 Feature Request
 description: Is the ScandEval benchmark missing a feature?
-title: "[FEATURE REQUEST] <your-feature-here>"
+title: "[FEATURE REQUEST] <name-of-feature>"
 labels: enhancement
 
 body:
