@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   This was due to a bug in vLLM v0.3.2, and will be fixed in vLLM v0.3.3. We thus
   forbid v0.3.2, making it fast again, and we'll remain compatible with the new v0.3.3
   when it is released.
+- A name clash has been fixed, which caused the MMLU-no dataset to not be run when
+  running all Norwegian datasets.
 
 
 ## [v12.0.0] - 2024-02-26
