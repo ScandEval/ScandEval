@@ -2,7 +2,6 @@
 
 import gc
 import importlib
-import json
 import logging
 import os
 import random
@@ -12,7 +11,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Type
+from typing import Type
 
 import numpy as np
 import pkg_resources
@@ -21,13 +20,11 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
-from outlines.fsm.json_schema import build_regex_from_schema
-from pydantic import conlist, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
 
-from .config import DatasetConfig, Language
+from .config import Language
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
@@ -592,28 +589,6 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
         elif len(model_output[0]) > 0:
             if any(x != x for sublist in model_output for x in sublist):
                 raise NaNValueInModelOutput()
-
-
-# TODO: Remove this
-def get_ner_regex(dataset_config: DatasetConfig) -> str:
-    """Get the regex used for structured generation for the NER task.
-
-    Args:
-        dataset_config:
-            The dataset configuration.
-
-    Returns:
-        The regex used for structured generation for the NER task.
-    """
-    tag_names = sorted(set(dataset_config.prompt_label_mapping.values()))
-    keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
-    }
-    AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
-    regex = build_regex_from_schema(
-        schema=json.dumps(AnswerFormat.model_json_schema()), whitespace_pattern=r" ?"
-    )
-    return regex
 
 
 def should_prompts_be_stripped(

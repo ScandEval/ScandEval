@@ -283,14 +283,6 @@ class VLLMModel:
 
         # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            # regex = get_ner_regex(dataset_config=self.dataset_config)
-
-            # logger.debug(
-            #     f"Using the following regular expression of length {len(regex):,} for "
-            #     "structured generation, to ensure that the generated outputs are "
-            #     f"JSON dictionaries: {regex!r}"
-            # )
-
             tag_names = sorted(set(self.dataset_config.prompt_label_mapping.values()))
             keys_and_their_types: dict[str, Any] = {
                 tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
@@ -299,13 +291,6 @@ class VLLMModel:
             logits_processor = JSONLogitsProcessor(
                 schema=schema, llm=self._model.llm_engine, whitespace_pattern=r" ?"
             )
-
-            # Convert the vocabulary from dict_values to a list, since the former is
-            # not pickleable, making `copy.deepcopy` fail during vLLM generation
-            # NOTE: This was fixed in this PR, and should be removed when that's part
-            # of a release:
-            # https://github.com/outlines-dev/outlines/pull/711
-            logits_processor.fsm.vocabulary = list(logits_processor.fsm.vocabulary)
 
             logits_processors.append(logits_processor)
 
