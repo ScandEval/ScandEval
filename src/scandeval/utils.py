@@ -2,6 +2,7 @@
 
 import gc
 import importlib
+import importlib.util
 import logging
 import os
 import random
@@ -34,11 +35,12 @@ from .types import Predictions
 logger = logging.getLogger(__package__)
 
 
-try:
+if importlib.util.find_spec("ray") is not None:
     import ray
+
+
+if importlib.util.find_spec("vllm") is not None:
     import vllm
-except ImportError:
-    logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
 
 # This is used as input to generative models; it cannot be a special token
@@ -178,11 +180,11 @@ def block_terminal_output():
         vllm_logger.setLevel(logging.CRITICAL)
         return vllm_logger
 
-    try:
+    if importlib.util.find_spec("vllm") is not None:
         vllm.logger.init_logger = init_vllm_logger
+
+    if importlib.util.find_spec("ray") is not None:
         ray._private.worker._worker_logs_enabled = False
-    except NameError:
-        pass
 
     # Disable the tokeniser progress bars
     disable_progress_bar()

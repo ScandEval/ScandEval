@@ -6,22 +6,20 @@ import sys
 import warnings
 from pathlib import Path
 from types import MethodType
-from typing import Any
 
 import torch
-from pydantic import conlist, create_model
 from tqdm import tqdm
 from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizerBase
 from transformers.utils import ModelOutput
 
 from .config import DatasetConfig, ModelConfig
+from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
 from .utils import clear_memory
 
 logger = logging.getLogger(__package__)
 
 try:
-    from outlines.serve.vllm import JSONLogitsProcessor
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
@@ -278,39 +276,12 @@ class VLLMModel:
 
         logits_processors = list()
 
-        # Add JSON generation constraint if we are benchmarking the NER task
         if self.dataset_config.task == NER:
-            tag_names = sorted(set(self.dataset_config.prompt_label_mapping.values()))
-            keys_and_their_types: dict[str, Any] = {
-                tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
-            }
-            schema = create_model("AnswerFormat", **keys_and_their_types)
-            logits_processor = JSONLogitsProcessor(
-                schema=schema, llm=self._model.llm_engine, whitespace_pattern=r" ?"
+            ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
+            ner_logits_processors = get_ner_logits_processors(
+                ner_tag_names=ner_tag_names, llm=self._model
             )
-
-            logits_processors.append(logits_processor)
-
-            assert self.tokenizer is not None
-            forbidden_token_ids = list()
-            forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
-            for forbidden_token in forbidden_tokens:
-                forbidden_token_ids.extend(
-                    list(
-                        self.tokenizer(
-                            forbidden_token, add_special_tokens=False
-                        ).input_ids
-                    )
-                )
-            forbidden_token_ids = list(set(forbidden_token_ids))
-
-            def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
-                mask = torch.zeros_like(scores)
-                for forbidden_token_id in forbidden_token_ids:
-                    mask[forbidden_token_id] = -math.inf
-                return scores + mask
-
-            logits_processors.append(no_tabs_or_newlines)
+            logits_processors.extend(ner_logits_processors)
 
         self.logits_processors = logits_processors
 
