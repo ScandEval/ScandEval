@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the `--use-flash-attention/no-use-flash-attention` hasn't been set and the
   `flash_attn` package hasn't been installed, then a logging message will be displayed,
   informing the user.
+- Changed backend structured generation framework to `outlines` from
+  `lm-format-enforcer`.
 
 ### Fixed
 - Evaluating models on NER tasks used excessive amounts of memory and took very long.
