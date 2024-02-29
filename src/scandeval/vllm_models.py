@@ -6,6 +6,7 @@ import sys
 import warnings
 from pathlib import Path
 from types import MethodType
+from typing import TYPE_CHECKING
 
 import torch
 from tqdm import tqdm
@@ -20,10 +21,13 @@ from .utils import clear_memory
 logger = logging.getLogger(__package__)
 
 try:
-    from vllm import LLM, RequestOutput, SamplingParams
+    from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 except ImportError:
     logger.debug("Failed to import vLLM, assuming that it is not needed.")
+
+if TYPE_CHECKING:
+    from vllm import LLM, RequestOutput
 
 
 class VLLMModel:
@@ -309,8 +313,8 @@ class VLLMModel:
 
 
 def _run_engine_with_fixed_progress_bars(
-    self: LLM, use_tqdm: bool
-) -> list[RequestOutput]:
+    self: "LLM", use_tqdm: bool
+) -> list["RequestOutput"]:
     if use_tqdm:
         num_requests = self.llm_engine.get_num_unfinished_requests()
         pbar = tqdm(
@@ -318,7 +322,7 @@ def _run_engine_with_fixed_progress_bars(
         )
 
     # Run the engine.
-    outputs: list[RequestOutput] = list()
+    outputs: list["RequestOutput"] = list()
     while self.llm_engine.has_unfinished_requests():
         step_outputs = self.llm_engine.step()
         for output in step_outputs:
