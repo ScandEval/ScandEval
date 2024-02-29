@@ -2,6 +2,7 @@
 
 import gc
 import importlib
+import importlib.util
 import logging
 import os
 import random
@@ -11,7 +12,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Type
+from typing import Type
 
 import numpy as np
 import pkg_resources
@@ -20,40 +21,26 @@ import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub.hf_api import ModelInfo
-from pydantic import conlist, create_model
 from requests.exceptions import RequestException
 from transformers import GenerationConfig, PreTrainedModel
 from transformers import logging as tf_logging
 
-from .config import DatasetConfig, Language
+from .config import Language
 from .enums import Framework
-from .exceptions import NaNValueInModelOutput, NeedsExtraInstalled
+from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .protocols import GenerativeModel, Tokenizer
 from .types import Predictions
 
-try:
-    from lmformatenforcer import JsonSchemaParser
-
-    _lmformatenforcer_available = True
-except ImportError:
-
-    class JsonSchemaParser:  # type: ignore[no-redef]
-        """Dummy class."""
-
-        pass
-
-    _lmformatenforcer_available = False
-
-
 logger = logging.getLogger(__package__)
 
 
-try:
+if importlib.util.find_spec("ray") is not None:
     import ray
+
+
+if importlib.util.find_spec("vllm") is not None:
     import vllm
-except ImportError:
-    logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
 
 # This is used as input to generative models; it cannot be a special token
@@ -187,20 +174,17 @@ def block_terminal_output():
     logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.CRITICAL)
 
-    # The `lmformatenforcer` uses the root logger, so we need to set the level of that
-    logging.getLogger("root").setLevel(logging.CRITICAL)
-
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the CRITICAL level."""
         vllm_logger = logging.getLogger(name)
         vllm_logger.setLevel(logging.CRITICAL)
         return vllm_logger
 
-    try:
+    if importlib.util.find_spec("vllm") is not None:
         vllm.logger.init_logger = init_vllm_logger
+
+    if importlib.util.find_spec("ray") is not None:
         ray._private.worker._worker_logs_enabled = False
-    except NameError:
-        pass
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
@@ -342,7 +326,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 
 
 def get_huggingface_model_lists(
-    languages: list[Language] | None, token: bool | str
+    languages: list[Language] | None, token: bool | str | None
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -354,7 +338,7 @@ def get_huggingface_model_lists(
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token. Defaults to False.
+            specified then it will be used as the token.
 
     Returns:
         The keys are filterings of the list, which includes all language codes,
@@ -607,28 +591,6 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
         elif len(model_output[0]) > 0:
             if any(x != x for sublist in model_output for x in sublist):
                 raise NaNValueInModelOutput()
-
-
-def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
-    """Get the JSON schema parser used for structured generation for the NER task.
-
-    Args:
-        dataset_config:
-            The dataset configuration.
-
-    Returns:
-        The JSON schema parser.
-    """
-    if not _lmformatenforcer_available:
-        raise NeedsExtraInstalled(extra="generative")
-
-    tag_names = set(dataset_config.prompt_label_mapping.values())
-    keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
-    }
-    AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
-    parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
-    return parser
 
 
 def should_prompts_be_stripped(

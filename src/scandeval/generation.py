@@ -14,13 +14,13 @@ from tqdm.auto import tqdm
 from transformers import (
     DataCollator,
     GenerationConfig,
-    PreTrainedTokenizerBase,
     StoppingCriteria,
+    StoppingCriteriaList,
 )
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .exceptions import InvalidBenchmark
 from .model_cache import (
     ModelCache,
     load_cached_model_outputs,
@@ -28,17 +28,10 @@ from .model_cache import (
 )
 from .openai_models import OpenAIModel
 from .protocols import GenerativeModel, Tokenizer
+from .structured_generation_utils import get_ner_prefix_allowed_tokens_fn
 from .tasks import NER
-from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_ner_parser
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
 from .vllm_models import VLLMModel
-
-try:
-    from lmformatenforcer.integrations.transformers import (
-        build_transformers_prefix_allowed_tokens_fn,
-    )
-except ImportError:
-    build_transformers_prefix_allowed_tokens_fn = None
-
 
 logger = logging.getLogger(__package__)
 
@@ -293,8 +286,9 @@ def generate_single_iteration(
 
             itr = (
                 dataloader
-                if isinstance(model, VLLMModel)
+                if batch_size == len(torch_dataset)
                 else tqdm(
+                    desc="Batches",
                     iterable=dataloader,
                     leave=False,
                     disable=hasattr(sys, "_called_from_test"),
@@ -313,9 +307,7 @@ def generate_single_iteration(
                     stopping_criteria=stopping_criteria,
                     generation_config=generation_config,
                     extract_labels_fn=extract_labels_fn,
-                    prefix_allowed_tokens_fn=get_prefix_allowed_fn(
-                        dataset_config=dataset_config, tokenizer=tokenizer
-                    ),
+                    dataset_config=dataset_config,
                 )
                 cache.add_to_cache(
                     model_input=batch["input_ids"],
@@ -363,64 +355,6 @@ def generate_single_iteration(
     )
 
     return itr_scores
-
-
-def get_prefix_allowed_fn(
-    dataset_config: DatasetConfig, tokenizer: Tokenizer
-) -> Callable[[int, torch.Tensor], torch.Tensor] | None:
-    """Return the prefix allowed function to use for structured generation.
-
-    Args:
-        dataset_config:
-            The dataset config.
-        tokenizer:
-            The tokenizer.
-
-    Returns:
-        The prefix allowed function.
-    """
-    if build_transformers_prefix_allowed_tokens_fn is None:
-        raise NeedsExtraInstalled(extra="generative")
-
-    if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
-        parser = get_ner_parser(dataset_config=dataset_config)
-        json_prefix_allowed_tokens_fn = build_transformers_prefix_allowed_tokens_fn(
-            tokenizer_data=tokenizer, character_level_parser=parser
-        )
-
-        forbidden_token_ids = list()
-        forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
-        for forbidden_token in forbidden_tokens:
-            forbidden_token_ids.extend(
-                list(tokenizer(forbidden_token, add_special_tokens=False).input_ids)
-            )
-        forbidden_token_ids = list(set(forbidden_token_ids))
-
-        def ner_prefix_allowed_tokens_fn(
-            batch_id: int, input_ids: torch.Tensor
-        ) -> torch.Tensor:
-            """Return the tokens allowed for the current batch.
-
-            Args:
-                batch_id:
-                    The batch index.
-                input_ids:
-                    The input ids.
-
-            Returns:
-                The tokens allowed for the current batch.
-            """
-            return torch.tensor(
-                [
-                    token_id
-                    for token_id in json_prefix_allowed_tokens_fn(batch_id, input_ids)
-                    if token_id not in forbidden_token_ids
-                ]
-            )
-
-        return ner_prefix_allowed_tokens_fn
-
-    return None
 
 
 class StopWordCriteria(StoppingCriteria):
@@ -490,7 +424,7 @@ def generate_batch(
     stopping_criteria: StopWordCriteria,
     generation_config: GenerationConfig,
     extract_labels_fn: Callable[..., list[str]],
-    prefix_allowed_tokens_fn: Callable[[int, torch.Tensor], torch.Tensor] | None,
+    dataset_config: DatasetConfig,
 ) -> tuple[ModelOutput, list[str | list[str]]]:
     """Evaluate a model on a single batch of examples through generation.
 
@@ -513,9 +447,8 @@ def generate_batch(
             The generation configuration to use.
         extract_labels_fn:
             The function to use to extract the labels from the model output.
-        prefix_allowed_tokens_fn:
-            The function to use to determine which tokens are allowed as a prefix to
-            the generated sequence.
+        dataset_config:
+            The configuration of the dataset.
 
     Returns:
         The predictions generated so far, with the predictions for the current batch
@@ -527,23 +460,31 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
+        if dataset_config.task == NER:
+            prefix_allowed_tokens_fn = get_ner_prefix_allowed_tokens_fn(
+                ner_tag_names=list(dataset_config.prompt_label_mapping.values()),
+                tokenizer=tokenizer,
+            )
+        else:
+            prefix_allowed_tokens_fn = None
+
         model_output = model.generate(
             inputs=inputs,
             generation_config=generation_config,
-            stopping_criteria=[stopping_criteria],
+            stopping_criteria=StoppingCriteriaList([stopping_criteria]),
             prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
         )
         assert isinstance(model_output, ModelOutput)
 
-    # Hugging Face models include the input in the generated sequence, so we
-    # need to remove it in that case
+    # Some models include the input in the generated sequence, so we need to remove the
+    # input if it is present
     inputs = inputs.detach().cpu()
     model_output.sequences = model_output.sequences.detach().cpu()
     if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
         model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
 
-    # Extract the labels from the model output and store them for metric
-    # computation later
+    # Extract the labels from the model output and store them for metric computation
+    # later
     batch_start = batch_idx * batch_size
     batch_end = (batch_idx + 1) * batch_size
     input_batch = non_cached_dataset[batch_start:batch_end]

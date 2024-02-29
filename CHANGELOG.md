@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Flash attention will now default to being used if `flash_attn` has been installed. If
+  the `--use-flash-attention/no-use-flash-attention` hasn't been set and the
+  `flash_attn` package hasn't been installed, then a logging message will be displayed,
+  informing the user.
+- Changed backend structured generation framework to `outlines` from
+  `lm-format-enforcer`.
+
+### Fixed
+- Evaluating models on NER tasks used excessive amounts of memory and took very long.
+  This was due to a bug in vLLM v0.3.2, and will be fixed in vLLM v0.3.3. We thus
+  forbid v0.3.2, making it fast again, and we'll remain compatible with the new v0.3.3
+  when it is released.
+- A name clash has been fixed, which caused the MMLU-no dataset to not be run when
+  running all Norwegian datasets.
+
+
 ## [v12.0.0] - 2024-02-26
 ### Added
 - Now automatically uses multiple GPUs when evaluating generative models with vLLM.

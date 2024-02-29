@@ -175,7 +175,7 @@ from .tasks import get_all_tasks
 )
 @click.option(
     "--use-flash-attention/--no-use-flash-attention",
-    default=False,
+    default=None,
     show_default=True,
     help="""Whether to use Flash Attention. If not specified then the model will use
     Flash Attention if possible.""",
@@ -232,7 +232,7 @@ def benchmark(
     device: str | None,
     trust_remote_code: bool,
     load_in_4bit: bool | None,
-    use_flash_attention: bool,
+    use_flash_attention: bool | None,
     clear_model_cache: bool,
     only_validation_split: bool,
     few_shot: bool,

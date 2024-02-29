@@ -162,7 +162,7 @@ class BenchmarkConfig:
     raise_errors: bool
     cache_dir: str
     evaluate_train: bool
-    token: bool | str
+    token: bool | str | None
     openai_api_key: str | None
     force: bool
     progress_bar: bool

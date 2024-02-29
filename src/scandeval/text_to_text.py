@@ -10,9 +10,8 @@ from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
 from transformers.utils import ModelOutput
 
-from scandeval.exceptions import InvalidBenchmark
-
 from .benchmark_dataset import BenchmarkDataset, Labels, Predictions
+from .exceptions import InvalidBenchmark
 from .generation import extract_raw_predictions
 from .protocols import GenerativeModel, Tokenizer
 from .utils import (

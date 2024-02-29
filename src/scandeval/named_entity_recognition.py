@@ -1,5 +1,6 @@
 """Named entity recognition benchmark dataset."""
 
+import importlib.util
 import itertools as it
 import json
 import logging
@@ -27,10 +28,9 @@ from .utils import (
     raise_if_model_output_contains_nan_values,
 )
 
-try:
+if importlib.util.find_spec("demjson3") is not None:
     import demjson3
-except ImportError:
-    demjson3 = None
+
 
 logger = logging.getLogger(__package__)
 
@@ -536,11 +536,11 @@ class NamedEntityRecognition(BenchmarkDataset):
         Returns:
             The examples with the few-shot prompt applied.
         """
+        prompt_labels = sorted(set(self.dataset_config.prompt_label_mapping.values()))
 
         def create_label(example: dict) -> str:
             labels: dict[str, list[str]] = {
-                prompt_label: list()
-                for prompt_label in self.dataset_config.prompt_label_mapping.values()
+                prompt_label: list() for prompt_label in prompt_labels
             }
             for token, label in zip(example["tokens"], example["labels"]):
                 label = label.lower()
@@ -600,7 +600,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             list:
                 The predicted labels.
         """
-        if demjson3 is None:
+        if importlib.util.find_spec("demjson3") is None:
             raise NeedsExtraInstalled(extra="generative")
 
         raw_predictions = extract_raw_predictions(

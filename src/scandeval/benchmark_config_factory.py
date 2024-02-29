@@ -1,16 +1,19 @@
 """Factory class for creating dataset configurations."""
 
+import importlib.util
+import logging
 import os
 
 import torch
 
-from scandeval.dataset_configs import get_all_dataset_configs
-from scandeval.exceptions import InvalidBenchmark
-
 from .config import BenchmarkConfig, Language, Task
+from .dataset_configs import get_all_dataset_configs
 from .enums import Device, Framework
+from .exceptions import InvalidBenchmark
 from .languages import get_all_languages
 from .tasks import get_all_tasks
+
+logger = logging.getLogger(__package__)
 
 
 def build_benchmark_config(
@@ -27,18 +30,19 @@ def build_benchmark_config(
     evaluate_train: bool,
     raise_errors: bool,
     cache_dir: str,
-    token: bool | str,
+    token: bool | str | None,
     openai_api_key: str | None,
     force: bool,
     verbose: bool,
     trust_remote_code: bool,
     load_in_4bit: bool | None,
-    use_flash_attention: bool,
+    use_flash_attention: bool | None,
     clear_model_cache: bool,
     only_validation_split: bool,
     few_shot: bool,
     num_iterations: int,
     run_with_cli: bool,
+    first_time: bool = False,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
 
@@ -91,7 +95,8 @@ def build_benchmark_config(
         load_in_4bit:
             Whether to load the models in 4-bit precision.
         use_flash_attention:
-            Whether to use Flash Attention for the models.
+            Whether to use Flash Attention for the models. If None then it will be used
+            if it is available.
         clear_model_cache:
             Whether to clear the model cache before running the benchmark.
         only_validation_split:
@@ -102,6 +107,9 @@ def build_benchmark_config(
             The number of iterations each model should be evaluated for.
         run_with_cli:
             Whether the benchmark is being run with the CLI.
+        first_time:
+            Whether this is the first time the benchmark configuration is being created.
+            Defaults to False.
 
     Returns:
         The benchmark configuration.
@@ -124,6 +132,27 @@ def build_benchmark_config(
         openai_api_key = os.getenv("OPENAI_API_KEY")
 
     framework_obj = Framework(framework) if framework is not None else None
+
+    if token is True:
+        token = None
+
+    if use_flash_attention is None:
+        use_flash_attention = importlib.util.find_spec("flash_attn") is not None
+        if not use_flash_attention and first_time:
+            message = (
+                "Flash attention has not been installed, so this will not be used. "
+                "To install it, run `pip install -U wheel && "
+                "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn "
+                "--no-build-isolation`. Alternatively, you can disable this message "
+                "by setting "
+            )
+            if run_with_cli:
+                message += "the flag ``--no-use-flash-attention`."
+            else:
+                message += (
+                    "the argument `use_flash_attention=False` in the `Benchmarker`."
+                )
+            logger.info(message)
 
     return BenchmarkConfig(
         model_languages=model_languages,

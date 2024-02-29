@@ -258,8 +258,6 @@ class HFModelSetup:
             else None
         )
 
-        use_flash_attention = self.benchmark_config.use_flash_attention
-
         config = self._load_hf_model_config(
             model_id=model_id,
             num_labels=dataset_config.num_labels,
@@ -317,7 +315,9 @@ class HFModelSetup:
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
                 attn_implementation=(
-                    "flash_attention_2" if use_flash_attention else None
+                    "flash_attention_2"
+                    if self.benchmark_config.use_flash_attention
+                    else None
                 ),
             )
 
@@ -430,6 +430,7 @@ class HFModelSetup:
 
         if use_vllm:
             model.set_tokenizer(tokenizer=tokenizer)
+            model.build_logits_processors()
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
