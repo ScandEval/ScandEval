@@ -914,7 +914,7 @@ MMLU_DA_CONFIG = DatasetConfig(
 )
 
 ARC_DA_CONFIG = DatasetConfig(
-    name="arc-no",
+    name="arc-da",
     pretty_name="the truncated version of the Danish knowledge dataset ARC-da, "
     "translated from the English ARC dataset",
     huggingface_id="ScandEval/arc-da-mini",
