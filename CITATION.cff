@@ -1,0 +1,24 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Nielsen
+    given-names: Dan Saattrup
+    orcid: https://orcid.org/0000-0001-9227-1470
+title: "ScandEval"
+version: 12.1.0
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.1234
+date-released: 2021-08-11
+preferred-citation:
+  type: inproceedings
+  authors:
+  - family-names: "Nielsen"
+    given-names: "Dan Saattrup"
+    orcid: https://orcid.org/0000-0001-9227-1470
+  journal: "Proceedings of the 24th Nordic Conference on Computational Linguistics (NoDaLiDa)"
+  month: 5
+  start: 185 # First page number
+  end: 201 # Last page number
+  title: "ScandEval: A Benchmark for Scandinavian Natural Language Processing"
+  year: 2023
