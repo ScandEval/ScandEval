@@ -28,7 +28,7 @@ preferred-citation:
   - family-names: "Nielsen"
     given-names: "Dan Saattrup"
     orcid: https://orcid.org/0000-0001-9227-1470
-  conference: "Proceedings of the 24th Nordic Conference on Computational Linguistics (NoDaLiDa)"
+  collection-title: "Proceedings of the 24th Nordic Conference on Computational Linguistics (NoDaLiDa)"
   month: 5
   start: 185 # First page number
   end: 201 # Last page number
