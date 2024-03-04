@@ -1,14 +1,27 @@
-cff-version: 1.0.0
-message: "If you use this software, please cite it as below."
+cff-version: 1.2.0
+title: ScandEval
+message: If you use this software, please cite it using the metadata from this file.
+type: software
 authors:
-  - family-names: Nielsen
-    given-names: Dan Saattrup
-    orcid: https://orcid.org/0000-0001-9227-1470
-title: "ScandEval"
+  - given-names: Dan Saattrup
+    family-names: Nielsen
+    email: dan.nielsen@alexandra.dk
+    affiliation: Alexandra Institute
+    orcid: 'https://orcid.org/0000-0001-9227-1470'
 identifiers:
-  - type: doi
-    value: 10.5281/zenodo.1234
-date-released: 2021-08-11
+  - type: url
+    value: 'https://aclanthology.org/2023.nodalida-1.20'
+    description: Paper regarding evaluation of Scandinavian encoders.
+repository-code: 'https://github.com/ScandEval/ScandEval'
+url: 'https://scandeval.com/'
+abstract: Evaluation of language models on mono- or multilingual tasks.
+keywords:
+  - nlp
+  - evaluation
+license: MIT
+commit: 4ddb04b419498f015a1ed2a4c5623de0eafb17c1
+version: 12.1.0
+date-released: '2024-02-29'
 preferred-citation:
   type: conference-paper
   authors:
