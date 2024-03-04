@@ -19,9 +19,6 @@ keywords:
   - nlp
   - evaluation
 license: MIT
-commit: 4ddb04b419498f015a1ed2a4c5623de0eafb17c1
-version: 12.1.0
-date-released: '2024-02-29'
 preferred-citation:
   type: conference-paper
   authors:
