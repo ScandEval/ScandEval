@@ -95,10 +95,12 @@ If you want to cite the framework then feel free to use this:
 
 ```
 @inproceedings{nielsen2023scandeval,
-  title={ScandEval: A Benchmark for Scandinavian Natural Language Processing},
-  author={Nielsen, Dan Saattrup},
-  booktitle={The 24rd Nordic Conference on Computational Linguistics},
-  year={2023}
+  author = {Nielsen, Dan Saattrup},
+  booktitle = {Proceedings of the 24th Nordic Conference on Computational Linguistics (NoDaLiDa)},
+  month = may,
+  pages = {185--201},
+  title = {{ScandEval: A Benchmark for Scandinavian Natural Language Processing}},
+  year = {2023}
 }
 ```
 
