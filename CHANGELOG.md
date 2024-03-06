@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the Icelandic common sense reasoning dataset Winogrande-is, being a manually
   translated version of the English Winogrande dataset.
 
-### Changed
+### Fixed
 - Do not show message regarding missing flash attention if CUDA is not available.
 
 
