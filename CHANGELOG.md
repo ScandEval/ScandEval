@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the Icelandic common sense reasoning dataset Winogrande-is, being a manually
   translated version of the English Winogrande dataset.
 
+### Changed
+- Updated `vllm` dependency to `>=0.3.3,<0.4.0`, which allows the benchmarking of the
+  new Gemma and OLMO models, without the bug from vLLM v0.3.2.
+
 ### Fixed
 - Do not show message regarding missing flash attention if CUDA is not available.
 
