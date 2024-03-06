@@ -66,6 +66,7 @@ pytest-cov = ">=4.1.0"
 readme-coverage-badger = ">=0.1.2"
 ruff = ">=0.1.13"
 mypy = ">=1.8.0"
+pyinstaller = "^6.4.0"
 
 [tool.poetry.extras]
 jax = [

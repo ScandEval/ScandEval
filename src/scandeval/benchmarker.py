@@ -4,6 +4,7 @@ import importlib.metadata
 import json
 import logging
 import re
+import subprocess
 import sys
 from copy import deepcopy
 from pathlib import Path
@@ -554,8 +555,20 @@ class Benchmarker:
                     )
                     continue
 
-                # Save the benchmark results
                 assert isinstance(record, BenchmarkResult)
+
+                # Upload the results to the leaderboard
+                # TODO: Make it possible to turn this off
+                scandeval_dir = Path(__file__).parent
+                subprocess.run(
+                    [
+                        str(scandeval_dir / "upload_results"),
+                        json.dumps(record.model_dump(mode="json")),
+                        str(scandeval_dir),
+                    ]
+                )
+
+                # Save the benchmark results
                 current_benchmark_results.append(record)
                 if benchmark_config.save_results:
                     record.append_to_results(results_path=self.results_path)

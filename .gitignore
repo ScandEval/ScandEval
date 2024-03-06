@@ -101,3 +101,6 @@ scandeval_benchmark_results.jsonl
 # Experiments
 gai-experiments.xlsx
 ~$gai-experiments.xlsx
+
+# Files related to upload to the leaderboard server
+src/upload/*
