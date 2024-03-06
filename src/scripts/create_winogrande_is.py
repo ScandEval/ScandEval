@@ -39,6 +39,9 @@ def main() -> None:
         inplace=True,
     )
 
+    # Change the label from 1/2 to a/b
+    df.label = df.label.map({"1": "a", "2": "b"})
+
     # Remove the samples with overly short or long texts
     df = df[
         (df.instruction.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
