@@ -3,6 +3,7 @@
 import importlib.util
 import logging
 import os
+import sys
 
 import torch
 
@@ -153,6 +154,10 @@ def build_benchmark_config(
                     "the argument `use_flash_attention=False` in the `Benchmarker`."
                 )
             logger.info(message)
+
+    # Set variable with number of iterations
+    if hasattr(sys, "_called_from_test"):
+        num_iterations = 2
 
     return BenchmarkConfig(
         model_languages=model_languages,

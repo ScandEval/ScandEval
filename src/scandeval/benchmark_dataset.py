@@ -148,14 +148,8 @@ class BenchmarkDataset(ABC):
             benchmarking_generative_model=benchmarking_generative_model,
         )
 
-        # Set variable with number of iterations
-        if hasattr(sys, "_called_from_test"):
-            num_iter = 2
-        else:
-            num_iter = self.benchmark_config.num_iterations
-
         if self.dataset_config.task != SPEED:
-            train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
+            train, val, tests = self._load_data(rng=rng)
             prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
                 train=train,
                 val=val,
@@ -168,7 +162,7 @@ class BenchmarkDataset(ABC):
 
         # Set up progress bar
         itr = tqdm(
-            iterable=range(num_iter),
+            iterable=range(self.benchmark_config.num_iterations),
             desc="Benchmarking",
             disable=not self.benchmark_config.progress_bar,
         )
@@ -333,13 +327,11 @@ class BenchmarkDataset(ABC):
         return metadata_dict
 
     def _load_data(
-        self, num_iter: int, rng: np.random.Generator
+        self, rng: np.random.Generator
     ) -> tuple[Dataset, Dataset, list[Dataset]]:
         """Load the raw bootstrapped datasets.
 
         Args:
-            num_iter:
-                The number of iterations to run.
             rng:
                 The random number generator to use.
 
@@ -390,7 +382,9 @@ class BenchmarkDataset(ABC):
             test = test.select(range(2))
 
         # Bootstrap the test set
-        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
+        test_bidxs = rng.integers(
+            0, len(test), size=(self.benchmark_config.num_iterations, len(test))
+        )
         tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
 
         return train, val, tests
@@ -436,7 +430,7 @@ class BenchmarkDataset(ABC):
 
         # Prepare the train and validation datasets
         with tqdm(
-            total=4 if hasattr(sys, "_called_from_test") else 12,
+            total=2 + self.benchmark_config.num_iterations,
             desc="Preprocessing data splits",
             disable=hasattr(sys, "_called_from_test"),
         ) as pbar:
