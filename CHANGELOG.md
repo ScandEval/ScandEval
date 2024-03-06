@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Do not show message regarding missing flash attention if CUDA is not available.
+- Only use bfloat16 as quantisation compute type if it is available and that
+  `torch_dtype` is set to "bfloat16" in the Hugging Face configuration - otherwise we
+  use float16.
 
 
 ## [v12.1.0] - 2024-02-29
