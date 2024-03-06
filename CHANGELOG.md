@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added the Icelandic common sense reasoning dataset Winogrande-is, being a manually
+  translated version of the English Winogrande dataset.
+
+### Changed
+- Do not show message regarding missing flash attention if CUDA is not available.
+
+
 ## [v12.1.0] - 2024-02-29
 ### Changed
 - Flash attention will now default to being used if `flash_attn` has been installed. If
