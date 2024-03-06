@@ -256,7 +256,8 @@ class HFModelSetup:
         )
 
         use_bf16 = (
-            torch.cuda.is_bf16_supported()
+            self.benchmark_config.device == torch.device("cuda")
+            and torch.cuda.is_bf16_supported()
             and config.to_dict().get("torch_dtype") == "bfloat16"
         )
         bnb_config = (
