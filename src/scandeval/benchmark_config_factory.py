@@ -138,7 +138,7 @@ def build_benchmark_config(
 
     if use_flash_attention is None:
         use_flash_attention = importlib.util.find_spec("flash_attn") is not None
-        if not use_flash_attention and first_time:
+        if not use_flash_attention and first_time and torch_device.type == "cuda":
             message = (
                 "Flash attention has not been installed, so this will not be used. "
                 "To install it, run `pip install -U wheel && "
