@@ -748,7 +748,7 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
     pretty_name="the Dutch part of the truncated version of the summarisation dataset "
-    " WikiLingua",
+    "WikiLingua",
     huggingface_id="ScandEval/wiki-lingua-nl-mini",
     task=SUMM,
     languages=[NL],
