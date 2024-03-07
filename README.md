@@ -22,8 +22,12 @@ ______________________________________________________________________
 ## Installation
 To install the package simply write the following command in your favorite terminal:
 ```
-$ pip install scandeval
+$ pip install scandeval[all]
 ```
+
+This will install the ScandEval package with all extras. You can also install the
+minimal version by leaving out the `[all]`, in which case the package will let you know
+when an evaluation requires a certain extra dependency, and how you install it.
 
 ## Quickstart
 ### Benchmarking from the Command Line
