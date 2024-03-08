@@ -3,6 +3,7 @@
 import importlib.util
 import logging
 import os
+import sys
 
 import torch
 
@@ -138,7 +139,7 @@ def build_benchmark_config(
 
     if use_flash_attention is None:
         use_flash_attention = importlib.util.find_spec("flash_attn") is not None
-        if not use_flash_attention and first_time:
+        if not use_flash_attention and first_time and torch_device.type == "cuda":
             message = (
                 "Flash attention has not been installed, so this will not be used. "
                 "To install it, run `pip install -U wheel && "
@@ -153,6 +154,10 @@ def build_benchmark_config(
                     "the argument `use_flash_attention=False` in the `Benchmarker`."
                 )
             logger.info(message)
+
+    # Set variable with number of iterations
+    if hasattr(sys, "_called_from_test"):
+        num_iterations = 2
 
     return BenchmarkConfig(
         model_languages=model_languages,

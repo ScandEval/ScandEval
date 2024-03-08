@@ -748,7 +748,7 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
     pretty_name="the Dutch part of the truncated version of the summarisation dataset "
-    " WikiLingua",
+    "WikiLingua",
     huggingface_id="ScandEval/wiki-lingua-nl-mini",
     task=SUMM,
     languages=[NL],
@@ -1069,6 +1069,21 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
     pretty_name="the truncated version of the Icelandic common-sense reasoning dataset "
     "HellaSwag-is, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-is-mini",
+    task=COMMON_SENSE,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
+    prompt_template="Spurningar: {text}\nSvara: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+WINOGRANDE_IS = DatasetConfig(
+    name="winogrande-is",
+    pretty_name="the Icelandic common-sense reasoning dataset "
+    "Winogrande-is, manually translated from the English Winogrande dataset",
+    huggingface_id="ScandEval/winogrande-is",
     task=COMMON_SENSE,
     languages=[IS],
     prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",

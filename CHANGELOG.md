@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added the Icelandic common sense reasoning dataset Winogrande-is, being a manually
+  translated version of the English Winogrande dataset. This also means that the
+  HellaSwag-is dataset has been marked as unofficial, and will thus not automatically
+  be included when benchmarking models on the Icelandic common sense reasoning task.
+
+### Changed
+- Updated `vllm` dependency to `>=0.3.3,<0.4.0`, which allows the benchmarking of the
+  new Gemma and OLMO models, without the bug from vLLM v0.3.2.
+
+### Fixed
+- Do not show message regarding missing flash attention if CUDA is not available.
+- Only use bfloat16 as quantisation compute type if it is available and that
+  `torch_dtype` is set to "bfloat16" in the Hugging Face configuration - otherwise we
+  use float16.
+
+
 ## [v12.1.0] - 2024-02-29
 ### Changed
 - Flash attention will now default to being used if `flash_attn` has been installed. If

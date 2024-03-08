@@ -1,6 +1,6 @@
 # This ensures that we can call `make <target>` even if `<target>` exists as a file or
 # directory.
-.PHONY: docs help
+.PHONY: help
 
 # Exports all variables defined in the makefile available to scripts
 .EXPORT_ALL_VARIABLES:
@@ -85,21 +85,6 @@ setup-git:
 	@git config --local user.name ${GIT_NAME}
 	@git config --local user.email ${GIT_EMAIL}
 	@poetry run pre-commit install
-
-docs:  ## Generate documentation
-	@poetry run pdoc --docformat google src/scandeval -o docs
-	@echo "Saved documentation."
-
-view-docs:  ## View documentation
-	@echo "Viewing API documentation..."
-	@uname=$$(uname); \
-		case $${uname} in \
-			(*Linux*) openCmd='xdg-open'; ;; \
-			(*Darwin*) openCmd='open'; ;; \
-			(*CYGWIN*) openCmd='cygstart'; ;; \
-			(*) echo 'Error: Unsupported platform: $${uname}'; exit 2; ;; \
-		esac; \
-		"$${openCmd}" docs/{{ cookiecutter.project_name }}.html
 
 test:  ## Run tests
 	@$(MAKE) --quiet test-cuda-vllm
