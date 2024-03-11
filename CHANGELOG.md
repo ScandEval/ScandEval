@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now includes the `transformers` integration with `outlines` directly in the code,
   which caused issues as they weren't part of the newest `outlines` release. When it
   does get included then we will import these as before.
+- When evaluating OpenAI models we now do not perform any structured generation, as we
+  do not have access to the logits.
 
 
 ## [v12.2.0] - 2024-03-11
