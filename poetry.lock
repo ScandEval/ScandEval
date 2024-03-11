@@ -3007,7 +3007,7 @@ testing = ["flax", "pytest", "pytest-xdist"]
 
 [[package]]
 name = "outlines"
-version = "0.1.dev588+gbabf479"
+version = "0.1.dev609+g81b4fa1"
 description = "Probabilistic Generative Model Programming"
 optional = true
 python-versions = ">=3.8"
@@ -3022,7 +3022,7 @@ jinja2 = "*"
 joblib = "*"
 jsonschema = "*"
 lark = "*"
-nest-asyncio = "*"
+nest_asyncio = "*"
 numba = "*"
 numpy = "*"
 pydantic = ">=2.0"
@@ -3034,13 +3034,13 @@ transformers = "*"
 
 [package.extras]
 serve = ["fastapi", "pydantic (>=2.0)", "ray (==2.9.0)", "uvicorn", "vllm (>=0.3.0)"]
-test = ["accelerate", "beartype (<0.16.0)", "coverage[toml] (>=5.1)", "datasets", "diff-cover", "huggingface-hub", "llama-cpp-python", "openai (>=1.0.0)", "pre-commit", "pytest", "pytest-benchmark", "pytest-cov", "pytest-mock", "responses", "transformers"]
+test = ["accelerate", "beartype (<0.16.0)", "coverage[toml] (>=5.1)", "datasets", "diff-cover", "huggingface_hub", "llama-cpp-python", "openai (>=1.0.0)", "pre-commit", "pytest", "pytest-benchmark", "pytest-cov", "pytest-mock", "responses", "transformers"]
 
 [package.source]
 type = "git"
 url = "https://github.com/saattrupdan/outlines"
-reference = "babf479cf6409d39c959c79067bb21fc78580440"
-resolved_reference = "babf479cf6409d39c959c79067bb21fc78580440"
+reference = "HEAD"
+resolved_reference = "81b4fa11b171fa3c45aed044798be6e12f394a08"
 
 [[package]]
 name = "packaging"
@@ -5650,4 +5650,4 @@ openai = ["levenshtein", "openai", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "c5f5d233388d93517e169dcc57db0a7ca3263537f40b5a6a9d060b60e8a40815"
+content-hash = "c3d22887d2446d0c315614bedf05f5d8956add469c11d06ea50a8b8114512beb"
