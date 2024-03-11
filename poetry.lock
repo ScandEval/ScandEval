@@ -3007,12 +3007,14 @@ testing = ["flax", "pytest", "pytest-xdist"]
 
 [[package]]
 name = "outlines"
-version = "0.1.dev609+g81b4fa1"
+version = "0.0.34"
 description = "Probabilistic Generative Model Programming"
 optional = true
 python-versions = ">=3.8"
-files = []
-develop = false
+files = [
+    {file = "outlines-0.0.34-py3-none-any.whl", hash = "sha256:911588a7e64a4f193b97fb4c501d98ccfd4e95a98f6a3ada67a280bf0c373c50"},
+    {file = "outlines-0.0.34.tar.gz", hash = "sha256:594e7204c770b47a62eb5c2ba7d25ea0ab2e16882b5f04556712a0228d3d3309"},
+]
 
 [package.dependencies]
 cloudpickle = "*"
@@ -3022,7 +3024,7 @@ jinja2 = "*"
 joblib = "*"
 jsonschema = "*"
 lark = "*"
-nest_asyncio = "*"
+nest-asyncio = "*"
 numba = "*"
 numpy = "*"
 pydantic = ">=2.0"
@@ -3034,13 +3036,7 @@ transformers = "*"
 
 [package.extras]
 serve = ["fastapi", "pydantic (>=2.0)", "ray (==2.9.0)", "uvicorn", "vllm (>=0.3.0)"]
-test = ["accelerate", "beartype (<0.16.0)", "coverage[toml] (>=5.1)", "datasets", "diff-cover", "huggingface_hub", "llama-cpp-python", "openai (>=1.0.0)", "pre-commit", "pytest", "pytest-benchmark", "pytest-cov", "pytest-mock", "responses", "transformers"]
-
-[package.source]
-type = "git"
-url = "https://github.com/saattrupdan/outlines"
-reference = "HEAD"
-resolved_reference = "81b4fa11b171fa3c45aed044798be6e12f394a08"
+test = ["accelerate", "beartype (<0.16.0)", "coverage[toml] (>=5.1)", "datasets", "diff-cover", "huggingface-hub", "llama-cpp-python (>=0.2.42)", "pre-commit", "pytest", "pytest-benchmark", "pytest-cov", "pytest-mock", "responses", "transformers"]
 
 [[package]]
 name = "packaging"
@@ -5650,4 +5646,4 @@ openai = ["levenshtein", "openai", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "c3d22887d2446d0c315614bedf05f5d8956add469c11d06ea50a8b8114512beb"
+content-hash = "ba4c4fc59f9556caff8153fbb799dc1c99b69be39cf4629e38311893f85c7361"

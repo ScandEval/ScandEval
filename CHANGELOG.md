@@ -16,11 +16,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Updated `vllm` dependency to `>=0.3.3,<0.4.0`, which allows the benchmarking of the
   new Gemma and OLMO models, without the bug from vLLM v0.3.2.
-- Updated `outlines` dependency to a specific revision that fixes two issues:
-  - https://github.com/outlines-dev/outlines/issues/716
-  - https://github.com/outlines-dev/outlines/issues/713
-  The dependency will change back to an official release when when these are included
-  in one such.
 
 ### Fixed
 - Do not show message regarding missing flash attention if CUDA is not available.
