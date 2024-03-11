@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Only use bfloat16 as quantisation compute type if it is available and that
   `torch_dtype` is set to "bfloat16" in the Hugging Face configuration - otherwise we
   use float16.
+- Since flash attention is now enabled by default, some models couldn't be loaded due
+  to them not supporting it. For these models, flash attention will now be disabled
+  during model loading.
+- Now uses a single GPU when finetuning, as previously evaluation would just freeze in
+  this case. In the future we might support multi-GPU finetuning, but since encoder
+  models usually doesn't require multiple GPUs, this is currently not prioritised.
 
 
 ## [v12.1.0] - 2024-02-29
