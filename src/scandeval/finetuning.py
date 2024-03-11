@@ -436,4 +436,8 @@ def get_training_args(
             ddp_find_unused_parameters=False,
         )
 
+        # TEMP: Use only 1 GPU for now for finetuning
+        if benchmark_config.device == torch.device("cuda"):
+            training_args._n_gpu = 1
+
     return training_args
