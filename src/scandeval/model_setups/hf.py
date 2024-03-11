@@ -307,7 +307,6 @@ class HFModelSetup:
                 )
 
         if not use_vllm:
-            # TEMP: When not using vLLM we force a single GPU to be used
             model_kwargs = dict(
                 config=config,
                 from_flax=from_flax,
