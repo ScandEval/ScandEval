@@ -307,6 +307,7 @@ class HFModelSetup:
                 )
 
         if not use_vllm:
+            # TEMP: When not using vLLM we force a single GPU to be used
             model_kwargs = dict(
                 config=config,
                 from_flax=from_flax,
@@ -402,6 +403,9 @@ class HFModelSetup:
                                 model_or_tuple = model_cls_or_none.from_pretrained(
                                     model_config.model_id, **model_kwargs
                                 )
+                            elif "does not support Flash Attention" in str(e):
+                                model_kwargs["attn_implementation"] = None
+                                continue
                             else:
                                 raise e
 
