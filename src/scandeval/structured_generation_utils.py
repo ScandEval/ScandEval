@@ -186,13 +186,13 @@ class RegexPrefixAllowedTokens:
         """
         if isinstance(tokenizer_or_pipe, Pipeline):
             tokenizer = tokenizer_or_pipe.tokenizer
-        else:  # if isinstance(tokenizer_or_pipe, PreTrainedTokenizerBase):
+        elif isinstance(tokenizer_or_pipe, PreTrainedTokenizerBase):
             tokenizer = tokenizer_or_pipe
-        # else:
-        #     raise ValueError(
-        #         "The tokenizer_or_pipe parameter must be a tokenizer or a pipeline."
-        #     )
-        # assert isinstance(tokenizer, PreTrainedTokenizerBase)
+        else:
+            raise ValueError(
+                "The tokenizer_or_pipe parameter must be a tokenizer or a pipeline."
+            )
+        assert isinstance(tokenizer, PreTrainedTokenizerBase)
         tokenizer = adapt_tokenizer(tokenizer=tokenizer)
         self.fsm = RegexFSM(regex_string=regex_string, tokenizer=tokenizer)
         self._fsm_state: DefaultDict[int, int] = defaultdict(int)

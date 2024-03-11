@@ -14,6 +14,7 @@ from tqdm.auto import tqdm
 from transformers import (
     DataCollator,
     GenerationConfig,
+    PreTrainedTokenizerBase,
     StoppingCriteria,
     StoppingCriteriaList,
 )
@@ -459,7 +460,9 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
-        if dataset_config.task == NER:
+        if dataset_config.task == NER and isinstance(
+            tokenizer, PreTrainedTokenizerBase
+        ):
             prefix_allowed_tokens_fn = get_ner_prefix_allowed_tokens_fn(
                 ner_tag_names=list(dataset_config.prompt_label_mapping.values()),
                 tokenizer=tokenizer,
