@@ -130,20 +130,30 @@ def get_ner_logits_processors(
     return logits_processors
 
 
-def adapt_tokenizer(tokenizer):
-    """Adapt tokenizer to use to compile the FSM.
+def adapt_tokenizer(tokenizer: PreTrainedTokenizerBase) -> PreTrainedTokenizerBase:
+    """Adapt a tokenizer to use to compile the FSM.
 
     The API of Outlines tokenizers is slightly different to that of `transformers`. In
     addition we need to handle the missing spaces to Llama's tokenizer to be able to
     compile FSMs for this model.
+
+    Args:
+        tokenizer:
+            The tokenizer of the model.
+
+    Returns:
+        The adapted tokenizer.
     """
     tokenizer.vocabulary = tokenizer.get_vocab()
     tokenizer.special_tokens = set(tokenizer.all_special_tokens)
 
     def convert_token_to_string(token: str) -> str:
         string = tokenizer.convert_tokens_to_string([token])
+
+        # A hack to handle missing spaces to HF's Llama tokenizers
         if token.startswith(SPIECE_UNDERLINE) or token == "<0x20>":
             return " " + string
+
         return string
 
     tokenizer.convert_token_to_string = convert_token_to_string
@@ -176,7 +186,7 @@ class RegexPrefixAllowedTokens:
         """
         if isinstance(tokenizer_or_pipe, Pipeline):
             tokenizer = tokenizer_or_pipe.tokenizer
-        elif isinstance(tokenizer_or_pipe, PreTrainedTokenizerBase):
+        else:  # if isinstance(tokenizer_or_pipe, PreTrainedTokenizerBase):
             tokenizer = tokenizer_or_pipe
         # else:
         #     raise ValueError(
