@@ -1,20 +1,20 @@
 """Utility functions related to structured generation."""
 
 import importlib.util
+import json
 import math
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, DefaultDict, Type
 
 import torch
-from outlines.fsm.fsm import FSMState, RegexFSM
-from outlines.fsm.json_schema import build_regex_from_schema
-from outlines.integrations.utils import adapt_tokenizer, convert_json_schema_to_str
 from pydantic import BaseModel, conlist, create_model
-from transformers import Pipeline, PreTrainedTokenizerBase
+from transformers import SPIECE_UNDERLINE, Pipeline, PreTrainedTokenizerBase
 
 if importlib.util.find_spec("outlines") is not None:
     # from outlines.integrations.transformers import JSONPrefixAllowedTokens
-    from outlines.integrations.vllm import JSONLogitsProcessor
+    from outlines.fsm.fsm import FSMState, RegexFSM
+    from outlines.fsm.json_schema import build_regex_from_schema
+    from outlines.serve.vllm import JSONLogitsProcessor
 
 if TYPE_CHECKING:
     # from outlines.integrations.transformers import JSONPrefixAllowedTokens
@@ -130,6 +130,27 @@ def get_ner_logits_processors(
     return logits_processors
 
 
+def adapt_tokenizer(tokenizer):
+    """Adapt tokenizer to use to compile the FSM.
+
+    The API of Outlines tokenizers is slightly different to that of `transformers`. In
+    addition we need to handle the missing spaces to Llama's tokenizer to be able to
+    compile FSMs for this model.
+    """
+    tokenizer.vocabulary = tokenizer.get_vocab()
+    tokenizer.special_tokens = set(tokenizer.all_special_tokens)
+
+    def convert_token_to_string(token: str) -> str:
+        string = tokenizer.convert_tokens_to_string([token])
+        if token.startswith(SPIECE_UNDERLINE) or token == "<0x20>":
+            return " " + string
+        return string
+
+    tokenizer.convert_token_to_string = convert_token_to_string
+
+    return tokenizer
+
+
 class RegexPrefixAllowedTokens:
     """Bias transformers generation based on a regular expression.
 
@@ -237,6 +258,20 @@ class JSONPrefixAllowedTokens(RegexPrefixAllowedTokens):
                 literals). For example, to allow only a single space or newline with
                 `whitespace_pattern=r"[\n ]?"`
         """
-        schema_str = convert_json_schema_to_str(json_schema=schema)
-        regex_string = build_regex_from_schema(schema_str, whitespace_pattern)
+        if isinstance(schema, dict):
+            schema_str = json.dumps(schema)
+        elif isinstance(schema, str):
+            schema_str = schema
+        elif issubclass(schema, BaseModel):
+            schema_str = json.dumps(schema.model_json_schema())
+        else:
+            raise ValueError(
+                f"Cannot parse schema {schema}. The schema must be either "
+                + "a Pydantic class, a dictionary or a string that contains the JSON "
+                + "schema specification"
+            )
+
+        regex_string = build_regex_from_schema(
+            schema=schema_str, whitespace_pattern=whitespace_pattern
+        )
         super().__init__(regex_string=regex_string, tokenizer_or_pipe=tokenizer_or_pipe)
