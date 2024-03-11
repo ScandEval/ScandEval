@@ -288,7 +288,6 @@ def generate_single_iteration(
                 dataloader
                 if batch_size == len(torch_dataset)
                 else tqdm(
-                    desc="Batches",
                     iterable=dataloader,
                     leave=False,
                     disable=hasattr(sys, "_called_from_test"),
