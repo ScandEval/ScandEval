@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.2.1] - 2024-03-12
 ### Fixed
 - Now includes the `transformers` integration with `outlines` directly in the code,
   which caused issues as they weren't part of the newest `outlines` release. When it
