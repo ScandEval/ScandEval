@@ -76,7 +76,7 @@ def benchmark_speed(
 
 def benchmark_speed_single_iteration(
     tokenizer: "Tokenizer",
-    model: PreTrainedModel | "GenerativeModel",
+    model: "PreTrainedModel | GenerativeModel",
     itr_idx: int,
     model_config: "ModelConfig",
     dataset_config: "DatasetConfig",

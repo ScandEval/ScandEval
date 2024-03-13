@@ -27,7 +27,7 @@ class DatasetFactory:
         """
         self.benchmark_config = benchmark_config
 
-    def build_dataset(self, dataset: str | "DatasetConfig") -> "BenchmarkDataset":
+    def build_dataset(self, dataset: "str | DatasetConfig") -> "BenchmarkDataset":
         """Build a dataset from a configuration or a name.
 
         Args:

@@ -231,7 +231,7 @@ class BenchmarkDataset(ABC):
     def _get_metadata(
         self,
         model_id: str,
-        model: PreTrainedModel | "GenerativeModel",
+        model: "PreTrainedModel | GenerativeModel",
         tokenizer: "Tokenizer",
         benchmarking_generative_model: bool,
     ) -> dict[str, int]:
