@@ -17,12 +17,12 @@ from .benchmark_config_factory import build_benchmark_config
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .exceptions import InvalidBenchmark, InvalidModel
+from .types import ScoreDict
 from .utils import get_huggingface_model_lists
 
 if TYPE_CHECKING:
     from .config import DatasetConfig, Language
     from .enums import Device, Framework
-    from .types import ScoreDict
 
 
 logger = logging.getLogger(__package__)
@@ -67,7 +67,7 @@ class BenchmarkResult(BaseModel):
     task: str
     dataset_languages: list[str]
     model: str
-    results: "ScoreDict"
+    results: ScoreDict
     num_model_parameters: int
     max_sequence_length: int
     vocabulary_size: int
