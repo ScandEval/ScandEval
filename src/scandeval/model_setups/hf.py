@@ -215,7 +215,7 @@ class HFModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: "DatasetConfig"
-    ) -> tuple["Tokenizer", "PreTrainedModel" | "GenerativeModel"]:
+    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
         """Load an OpenAI model.
 
         Args:

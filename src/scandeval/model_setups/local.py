@@ -129,7 +129,7 @@ class LocalModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: "DatasetConfig"
-    ) -> tuple["Tokenizer", "PreTrainedModel" | "GenerativeModel"]:
+    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
         """Load a local Hugging Face model.
 
         Args:
