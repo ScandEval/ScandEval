@@ -158,7 +158,7 @@ class BenchmarkConfig:
     dataset_languages: list[Language]
     tasks: list[Task]
     datasets: list[str]
-    framework: "Framework" | None
+    framework: "Framework | None"
     batch_size: int
     raise_errors: bool
     cache_dir: str
@@ -279,7 +279,7 @@ class ModelConfig:
     framework: "Framework"
     task: str
     languages: list[Language]
-    model_type: "ModelType" | str
+    model_type: "ModelType | str"
     model_cache_dir: str
 
     def __hash__(self) -> int:

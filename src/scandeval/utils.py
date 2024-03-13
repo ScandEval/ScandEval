@@ -544,7 +544,7 @@ class HiddenPrints:
         sys.stderr = self._original_stderr
 
 
-def model_is_generative(model: "PreTrainedModel" | "GenerativeModel") -> bool:
+def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
     """Check if a model is generative or not.
 
     Args:

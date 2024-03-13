@@ -41,9 +41,9 @@ class VLLMModel:
         model_config: "ModelConfig",
         hf_model_config: "PretrainedConfig",
         dataset_config: "DatasetConfig",
-        model_cache_dir: str | "Path",
+        model_cache_dir: "str | Path",
         trust_remote_code: bool,
-        tokenizer: "PreTrainedTokenizerBase" | None = None,
+        tokenizer: "PreTrainedTokenizerBase | None" = None,
     ) -> None:
         """Initialize a vLLM model.
 

@@ -28,8 +28,8 @@ class QuestionAnsweringTrainer(Trainer):
 
     def evaluate(
         self,
-        eval_dataset: "Dataset" | None = None,
-        orig_eval_dataset: "Dataset" | None = None,
+        eval_dataset: "Dataset | None" = None,
+        orig_eval_dataset: "Dataset | None" = None,
         ignore_keys: list[str] | None = None,
         metric_key_prefix: str = "eval",
     ) -> dict[str, float] | None:

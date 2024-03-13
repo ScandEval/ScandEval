@@ -227,7 +227,7 @@ def finetune_single_iteration(
     dataset_config: "DatasetConfig",
     data_collator: "DataCollator",
     compute_metrics: Callable,
-    tokenizer: "Tokenizer" | None,
+    tokenizer: "Tokenizer | None",
     model: PreTrainedModel | None,
     trainer_class: Type["Trainer"],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],

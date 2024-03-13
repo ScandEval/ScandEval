@@ -40,8 +40,8 @@ class BenchmarkConfigParams(BaseModel):
     language: str | list[str]
     model_language: str | list[str] | None
     dataset_language: str | list[str] | None
-    framework: "Framework" | str | None
-    device: "Device" | None
+    framework: "Framework | str | None"
+    device: "Device | None"
     batch_size: int
     evaluate_train: bool
     raise_errors: bool
@@ -147,8 +147,8 @@ class Benchmarker:
         language: str | list[str] = "all",
         model_language: str | list[str] | None = None,
         dataset_language: str | list[str] | None = None,
-        framework: "Framework" | str | None = None,
-        device: "Device" | None = None,
+        framework: "Framework | str | None" = None,
+        device: "Device | None" = None,
         batch_size: int = 32,
         evaluate_train: bool = False,
         raise_errors: bool = False,
@@ -319,8 +319,8 @@ class Benchmarker:
         language: str | list[str] | None = None,
         model_language: str | list[str] | None = None,
         dataset_language: str | list[str] | None = None,
-        framework: "Framework" | str | None = None,
-        device: "Device" | None = None,
+        framework: "Framework | str | None" = None,
+        device: "Device | None" = None,
         batch_size: int | None = None,
         evaluate_train: bool | None = None,
         raise_errors: bool | None = None,

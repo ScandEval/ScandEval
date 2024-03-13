@@ -540,7 +540,7 @@ class HFModelSetup:
                 raise e
 
     def _load_tokenizer(
-        self, model: "PreTrainedModel" | "GenerativeModel", model_id: str
+        self, model: "PreTrainedModel | GenerativeModel", model_id: str
     ) -> "Tokenizer":
         """Load the tokenizer.
 

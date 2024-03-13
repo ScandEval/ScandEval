@@ -71,8 +71,8 @@ class TextToText(BenchmarkDataset):
 
     def _load_data_collator(
         self,
-        tokenizer: "Tokenizer" | None = None,
-        model: "PreTrainedModel" | "GenerativeModel" | None = None,
+        tokenizer: "Tokenizer | None" = None,
+        model: "PreTrainedModel | GenerativeModel | None" = None,
     ):
         """Load the data collator used to prepare samples during finetuning.
 

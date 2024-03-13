@@ -174,9 +174,9 @@ class GenerativeModel(Protocol):
     def generate(
         self,
         inputs: "Tensor",
-        generation_config: "GenerationConfig" | None = None,
+        generation_config: "GenerationConfig | None" = None,
         **generation_kwargs,
-    ) -> "ModelOutput" | "Tensor":
+    ) -> "ModelOutput | Tensor":
         """Generate text.
 
         Args:
