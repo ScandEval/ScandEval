@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Updated `outlines` dependency to `>=0.0.36,<0.1`. This fixes a race condition caused
+  during evaluation of NER datasets and also includes integration with the
+  `transformers` library. The existing hardcoded integration has now been removed in
+  favour of the integration in that package.
+
+
 ## [v12.2.1] - 2024-03-12
 ### Fixed
 - Now includes the `transformers` integration with `outlines` directly in the code,

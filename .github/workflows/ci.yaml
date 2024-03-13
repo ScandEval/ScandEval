@@ -47,6 +47,9 @@ jobs:
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
 
+      - name: Delete ScandEval cache
+        run: rm -rf .scandeval_cache
+
   pytest-macos:
     if: github.event.pull_request.draft == false && contains(github.event.pull_request.labels.*.name, 'macos')
     runs-on: macos-latest
@@ -71,3 +74,6 @@ jobs:
         run: poetry run pytest
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
+
+      - name: Delete ScandEval cache
+        run: rm -rf .scandeval_cache

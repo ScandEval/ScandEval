@@ -1,13 +1,15 @@
 """Utility functions related to setting up models."""
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import torch
 import torch.nn as nn
-from transformers import PreTrainedModel, PreTrainedTokenizerBase
 
 from ..exceptions import InvalidModel
 from ..utils import DUMMY_FILL_VALUE, model_is_generative
+
+if TYPE_CHECKING:
+    from transformers import PreTrainedModel, PreTrainedTokenizerBase
 
 
 def get_children_of_module(
@@ -38,7 +40,7 @@ def get_children_of_module(
         return submodules
 
 
-def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedModel:
+def setup_model_for_question_answering(model: "PreTrainedModel") -> "PreTrainedModel":
     """Setup a model for question answering.
 
     Args:
@@ -89,11 +91,11 @@ def setup_model_for_question_answering(model: PreTrainedModel) -> PreTrainedMode
 
 
 def align_model_and_tokenizer(
-    model: PreTrainedModel,
-    tokenizer: PreTrainedTokenizerBase,
+    model: "PreTrainedModel",
+    tokenizer: "PreTrainedTokenizerBase",
     generation_length: int,
     raise_errors: bool = False,
-) -> tuple[PreTrainedModel, PreTrainedTokenizerBase]:
+) -> tuple["PreTrainedModel", "PreTrainedTokenizerBase"]:
     """Aligns the model and the tokenizer.
 
     Args:

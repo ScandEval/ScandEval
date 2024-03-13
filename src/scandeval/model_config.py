@@ -1,14 +1,19 @@
 """Functions related to getting the model configuration."""
 
 import importlib.util
+from typing import TYPE_CHECKING
 
-from .config import BenchmarkConfig, ModelConfig
 from .enums import Framework
 from .exceptions import InvalidModel, NeedsExtraInstalled
 from .model_setups import MODEL_SETUP_CLASSES
 
+if TYPE_CHECKING:
+    from .config import BenchmarkConfig, ModelConfig
 
-def get_model_config(model_id: str, benchmark_config: BenchmarkConfig) -> ModelConfig:
+
+def get_model_config(
+    model_id: str, benchmark_config: "BenchmarkConfig"
+) -> "ModelConfig":
     """Fetches configuration for a model.
 
     Args:

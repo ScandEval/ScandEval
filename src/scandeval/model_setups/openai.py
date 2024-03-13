@@ -1,28 +1,35 @@
 """Model setup for OpenAI models."""
 
+import importlib.util
 import logging
 import re
+from typing import TYPE_CHECKING
 
-from transformers import PretrainedConfig, PreTrainedModel
+from transformers import PretrainedConfig
 
-from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..openai_models import OpenAIModel, OpenAITokenizer
-from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
 
-logger = logging.getLogger(__package__)
+if TYPE_CHECKING:
+    from transformers import PreTrainedModel
 
-try:
+    from ..config import BenchmarkConfig, DatasetConfig
+    from ..protocols import GenerativeModel, Tokenizer
+
+if importlib.util.find_spec("openai") is not None:
     import openai
-    import tiktoken
 
     # Older versions of `openai` doesn't have the `models` module, so we need to check
     # that, as it will cause errors later otherwise
     openai.models
-except (ImportError, AttributeError):
-    openai = None
-    tiktoken = None
+
+if importlib.util.find_spec("tiktoken") is not None:
+    import tiktoken
+
+
+logger = logging.getLogger(__package__)
 
 
 VOCAB_SIZE_MAPPING = {
@@ -64,7 +71,7 @@ class OpenAIModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+    def __init__(self, benchmark_config: "BenchmarkConfig") -> None:
         """Initialize the model setup.
 
         Args:
@@ -113,8 +120,8 @@ class OpenAIModelSetup:
         )
 
     def load_model(
-        self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+        self, model_config: ModelConfig, dataset_config: "DatasetConfig"
+    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
         """Load an OpenAI model.
 
         Args:

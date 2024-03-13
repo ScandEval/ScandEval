@@ -5,14 +5,13 @@ import sys
 import warnings
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 import torch
 from datasets import Dataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import (
-    DataCollator,
     GenerationConfig,
     PreTrainedTokenizerBase,
     StoppingCriteria,
@@ -20,7 +19,6 @@ from transformers import (
 )
 from transformers.modeling_utils import ModelOutput
 
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_cache import (
     ModelCache,
@@ -28,11 +26,16 @@ from .model_cache import (
     split_dataset_into_cached_and_non_cached,
 )
 from .openai_models import OpenAIModel
-from .protocols import GenerativeModel, Tokenizer
 from .structured_generation_utils import get_ner_prefix_allowed_tokens_fn
 from .tasks import NER
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
 from .vllm_models import VLLMModel
+
+if TYPE_CHECKING:
+    from transformers import DataCollator
+
+    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+    from .protocols import GenerativeModel, Tokenizer
 
 logger = logging.getLogger(__package__)
 
@@ -41,14 +44,14 @@ def generate(
     itr: tqdm,
     prepared_train: Dataset,
     prepared_tests: list[Dataset],
-    model: GenerativeModel,
-    model_config: ModelConfig,
-    tokenizer: Tokenizer,
-    data_collator: DataCollator,
+    model: "GenerativeModel",
+    model_config: "ModelConfig",
+    tokenizer: "Tokenizer",
+    data_collator: "DataCollator",
     compute_metrics: Callable,
     extract_labels_fn: Callable[..., list[Any]],
-    benchmark_config: BenchmarkConfig,
-    dataset_config: DatasetConfig,
+    benchmark_config: "BenchmarkConfig",
+    dataset_config: "DatasetConfig",
 ) -> dict[str, list[dict[str, float]]]:
     """Evaluate a model on a dataset through generation.
 
@@ -119,7 +122,8 @@ def generate(
         )
 
         def update_scores(
-            scores: dict[str, list[dict[str, float]]], benchmark_config: BenchmarkConfig
+            scores: dict[str, list[dict[str, float]]],
+            benchmark_config: "BenchmarkConfig",
         ) -> dict[str, list[dict[str, float]]]:
             """Perform a single iteration of generation and update the scores.
 
@@ -185,13 +189,13 @@ def generate(
 
 def generate_single_iteration(
     prepared_dataset: Dataset,
-    model: GenerativeModel,
-    tokenizer: Tokenizer,
-    data_collator: DataCollator,
+    model: "GenerativeModel",
+    tokenizer: "Tokenizer",
+    data_collator: "DataCollator",
     compute_metrics: Callable,
     extract_labels_fn: Callable[..., list[Any]],
-    dataset_config: DatasetConfig,
-    benchmark_config: BenchmarkConfig,
+    dataset_config: "DatasetConfig",
+    benchmark_config: "BenchmarkConfig",
     cache: ModelCache,
 ) -> dict[str, float]:
     """Evaluate a model on a dataset in a single iteration through generation.
@@ -419,12 +423,12 @@ def generate_batch(
     batch_idx: int,
     batch_size: int,
     non_cached_dataset: Dataset,
-    model: GenerativeModel,
-    tokenizer: Tokenizer,
+    model: "GenerativeModel",
+    tokenizer: "Tokenizer",
     stopping_criteria: StopWordCriteria,
     generation_config: GenerationConfig,
     extract_labels_fn: Callable[..., list[str]],
-    dataset_config: DatasetConfig,
+    dataset_config: "DatasetConfig",
 ) -> tuple[ModelOutput, list[str | list[str]]]:
     """Evaluate a model on a single batch of examples through generation.
 
@@ -503,7 +507,7 @@ def generate_batch(
 
 
 def extract_raw_predictions(
-    generated_sequences: torch.Tensor, tokenizer: Tokenizer
+    generated_sequences: torch.Tensor, tokenizer: "Tokenizer"
 ) -> list[str]:
     """Get the raw predictions from the generated sequences.
 
@@ -528,7 +532,7 @@ def extract_raw_predictions(
 
 
 def get_generation_stopping_criteria(
-    tokenizer: Tokenizer, model: GenerativeModel
+    tokenizer: "Tokenizer", model: "GenerativeModel"
 ) -> StopWordCriteria:
     """Get the stopping criteria for generation.
 

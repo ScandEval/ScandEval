@@ -12,7 +12,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 import numpy as np
 import pkg_resources
@@ -20,17 +20,21 @@ import requests
 import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
-from huggingface_hub.hf_api import ModelInfo
 from requests.exceptions import RequestException
-from transformers import GenerationConfig, PreTrainedModel
+from transformers import GenerationConfig
 from transformers import logging as tf_logging
 
-from .config import Language
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
-from .protocols import GenerativeModel, Tokenizer
-from .types import Predictions
+
+if TYPE_CHECKING:
+    from huggingface_hub.hf_api import ModelInfo
+    from transformers import PreTrainedModel
+
+    from .config import Language
+    from .protocols import GenerativeModel, Tokenizer
+    from .types import Predictions
 
 logger = logging.getLogger(__package__)
 
@@ -273,7 +277,7 @@ def internet_connection_available() -> bool:
         return False
 
 
-def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
+def get_special_token_metadata(tokenizer: "Tokenizer") -> dict:
     """Get the special token metadata for a tokenizer.
 
     Args:
@@ -326,7 +330,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 
 
 def get_huggingface_model_lists(
-    languages: list[Language] | None, token: bool | str | None
+    languages: list["Language"] | None, token: bool | str | None
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -380,7 +384,7 @@ def get_huggingface_model_lists(
     model_lists = defaultdict(list)
 
     # Do not iterate over all the languages if we are not filtering on language
-    language_itr: list[Language | None]
+    language_itr: list["Language | None"]
     if {lang.code for lang in language_list} == {lang.code for lang in all_languages}:
         language_itr = [None]
     else:
@@ -395,7 +399,7 @@ def get_huggingface_model_lists(
             language_str = None
 
         # Fetch the model list
-        models: list[ModelInfo] = list(
+        models: list["ModelInfo"] = list(
             api.list_models(filter=ModelFilter(language=language_str), token=token)
         )
 
@@ -540,7 +544,7 @@ class HiddenPrints:
         sys.stderr = self._original_stderr
 
 
-def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
+def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
     """Check if a model is generative or not.
 
     Args:
@@ -571,7 +575,7 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
         return False
 
 
-def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None:
+def raise_if_model_output_contains_nan_values(model_output: "Predictions") -> None:
     """Raise an exception if the model output contains NaN values.
 
     Args:
@@ -594,7 +598,7 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
 
 
 def should_prompts_be_stripped(
-    labels_to_be_generated: list[str], tokenizer: Tokenizer
+    labels_to_be_generated: list[str], tokenizer: "Tokenizer"
 ) -> bool:
     """Determine if we should strip the prompts for few-shot evaluation.
 
@@ -632,7 +636,7 @@ def should_prompts_be_stripped(
 
 
 def should_prefix_space_be_added_to_labels(
-    labels_to_be_generated: list[str], tokenizer: Tokenizer
+    labels_to_be_generated: list[str], tokenizer: "Tokenizer"
 ) -> bool:
     """Determine if we should add a prefix space to the labels.
 

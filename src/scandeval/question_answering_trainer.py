@@ -1,12 +1,15 @@
 """Question answering Trainer subclass."""
 
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 import numpy as np
-from datasets.arrow_dataset import Dataset
 from transformers.trainer import Trainer
 
 from .utils import get_special_token_metadata
+
+if TYPE_CHECKING:
+    from datasets.arrow_dataset import Dataset
 
 
 class QuestionAnsweringTrainer(Trainer):
@@ -25,8 +28,8 @@ class QuestionAnsweringTrainer(Trainer):
 
     def evaluate(
         self,
-        eval_dataset: Dataset | None = None,
-        orig_eval_dataset: Dataset | None = None,
+        eval_dataset: "Dataset | None" = None,
+        orig_eval_dataset: "Dataset | None" = None,
         ignore_keys: list[str] | None = None,
         metric_key_prefix: str = "eval",
     ) -> dict[str, float] | None:
@@ -98,7 +101,10 @@ class QuestionAnsweringTrainer(Trainer):
 
 
 def postprocess_predictions_and_labels(
-    predictions: list, dataset: Dataset, prepared_dataset: Dataset, cls_token_index: int
+    predictions: list,
+    dataset: "Dataset",
+    prepared_dataset: "Dataset",
+    cls_token_index: int,
 ) -> tuple[list[dict], list[dict]]:
     """Postprocess the predictions and labels, to allow easier metric computation.
 
@@ -174,7 +180,7 @@ def postprocess_predictions_and_labels(
 def find_best_answer(
     all_start_logits: np.ndarray,
     all_end_logits: np.ndarray,
-    prepared_dataset: Dataset,
+    prepared_dataset: "Dataset",
     feature_indices: list[int],
     context: str,
     max_answer_length: int,

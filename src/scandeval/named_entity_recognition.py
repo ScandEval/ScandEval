@@ -8,25 +8,29 @@ import random
 import re
 from copy import deepcopy
 from functools import partial
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from datasets.arrow_dataset import Dataset
-from datasets.dataset_dict import DatasetDict
-from transformers import BatchEncoding, DataCollatorWithPadding, PreTrainedModel
+from transformers import DataCollatorWithPadding
 from transformers.data.data_collator import DataCollatorForTokenClassification
-from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
 from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
-from .protocols import GenerativeModel, Tokenizer
-from .types import Labels, Predictions
 from .utils import (
     GENERATIVE_MODEL_TASKS,
     model_is_generative,
     raise_if_model_output_contains_nan_values,
 )
+
+if TYPE_CHECKING:
+    from datasets.arrow_dataset import Dataset
+    from datasets.dataset_dict import DatasetDict
+    from transformers import BatchEncoding, PreTrainedModel
+    from transformers.modeling_utils import ModelOutput
+
+    from .protocols import GenerativeModel, Tokenizer
+    from .types import Labels, Predictions
 
 if importlib.util.find_spec("demjson3") is not None:
     import demjson3
@@ -51,7 +55,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             The configuration of the benchmark.
     """
 
-    def _process_data(self, dataset_dict: DatasetDict) -> DatasetDict:
+    def _process_data(self, dataset_dict: "DatasetDict") -> "DatasetDict":
         """Process the data.
 
         Args:
@@ -71,7 +75,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         return dataset_dict
 
     def _compute_metrics(
-        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
+        self,
+        model_outputs_and_labels: tuple["Predictions", "Labels"],
+        id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -206,8 +212,8 @@ class NamedEntityRecognition(BenchmarkDataset):
         )
 
     def _tokenize_and_align_labels(
-        self, examples: dict, tokenizer: Tokenizer, label2id: dict[str, int]
-    ) -> BatchEncoding:
+        self, examples: dict, tokenizer: "Tokenizer", label2id: dict[str, int]
+    ) -> "BatchEncoding":
         """Tokenise all texts and align the labels with them.
 
         Args:
@@ -341,7 +347,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         return tokenized_inputs
 
     def _handle_unk_tokens(
-        self, tokenizer: Tokenizer, tokens: list[str], words: list[str]
+        self, tokenizer: "Tokenizer", tokens: list[str], words: list[str]
     ) -> list[str]:
         """Replace unknown tokens in the tokens with the corresponding word.
 
@@ -399,7 +405,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         # Return the tokens
         return tokens
 
-    def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
+    def _preprocess_data(self, dataset: "Dataset", **kwargs) -> "Dataset":
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
@@ -426,7 +432,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                     keep_in_memory=True,
                 )
 
-            def tokenise(examples: dict) -> BatchEncoding:
+            def tokenise(examples: dict) -> "BatchEncoding":
                 return kwargs["tokenizer"](
                     text=examples["text"], truncation=True, padding=False
                 )
@@ -449,8 +455,8 @@ class NamedEntityRecognition(BenchmarkDataset):
 
     def _load_data_collator(
         self,
-        tokenizer: Tokenizer | None = None,
-        model: PreTrainedModel | GenerativeModel | None = None,
+        tokenizer: "Tokenizer | None" = None,
+        model: "PreTrainedModel | GenerativeModel | None" = None,
     ):
         """Load the data collator used to prepare samples during finetuning.
 
@@ -474,7 +480,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             )
 
     def _extract_few_shot_examples(
-        self, train_dataset: Dataset, random_seed: int
+        self, train_dataset: "Dataset", random_seed: int
     ) -> list[dict[str, Any]]:
         """Extract few-shot examples from the training dataset.
 
@@ -521,7 +527,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: "Tokenizer"
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -582,8 +588,8 @@ class NamedEntityRecognition(BenchmarkDataset):
     def _extract_labels_from_generation(
         self,
         input_batch: dict[str, list],
-        model_output: ModelOutput,
-        tokenizer: Tokenizer,
+        model_output: "ModelOutput",
+        tokenizer: "Tokenizer",
     ) -> list[Any]:
         """Extract the predicted labels from the generated output.
 

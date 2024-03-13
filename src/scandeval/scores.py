@@ -2,21 +2,23 @@
 
 import logging
 import warnings
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .config import MetricConfig
-from .types import ScoreDict
+if TYPE_CHECKING:
+    from .config import MetricConfig
+    from .types import ScoreDict
 
 logger = logging.getLogger(__package__)
 
 
 def log_scores(
     dataset_name: str,
-    metric_configs: list[MetricConfig],
+    metric_configs: list["MetricConfig"],
     scores: dict[str, list[dict[str, float]]],
     model_id: str,
-) -> ScoreDict:
+) -> "ScoreDict":
     """Log the scores.
 
     Args:
@@ -78,7 +80,7 @@ def log_scores(
 
 
 def aggregate_scores(
-    scores: dict[str, list[dict[str, float]]], metric_config: MetricConfig
+    scores: dict[str, list[dict[str, float]]], metric_config: "MetricConfig"
 ) -> dict[str, tuple[float, float]]:
     """Helper function to compute the mean with confidence intervals.
 
