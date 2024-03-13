@@ -26,7 +26,7 @@ def load_model(
     model_config: "ModelConfig",
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
-) -> tuple["Tokenizer", "PreTrainedModel" | "GenerativeModel"]:
+) -> "tuple[Tokenizer, PreTrainedModel | GenerativeModel]":
     """Load a model.
 
     Args:

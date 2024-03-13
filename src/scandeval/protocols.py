@@ -1,6 +1,6 @@
 """Protocols used throughout the project."""
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, Union, runtime_checkable
 
 if TYPE_CHECKING:
     from torch import Tensor, device
@@ -134,13 +134,13 @@ class Tokenizer(Protocol):
 
     def pad(
         self,
-        encoded_inputs: (
-            "BatchEncoding"
-            | list["BatchEncoding"]
-            | dict[str, list[str]]
-            | dict[str, list[list[str]]]
-            | list[dict[str, list[str]]]
-        ),
+        encoded_inputs: Union[
+            "BatchEncoding",
+            list["BatchEncoding"],
+            dict[str, list[str]],
+            dict[str, list[list[str]]],
+            list[dict[str, list[str]]],
+        ],
         **kwargs,
     ) -> "BatchEncoding":
         """Pad a batch of encoded inputs.
@@ -232,7 +232,7 @@ class ModelSetup(Protocol):
 
     def load_model(
         self, model_config: "ModelConfig", dataset_config: "DatasetConfig"
-    ) -> tuple[Tokenizer, "PreTrainedModel" | GenerativeModel]:
+    ) -> tuple[Tokenizer, "PreTrainedModel | GenerativeModel"]:
         """Load a model.
 
         Args:

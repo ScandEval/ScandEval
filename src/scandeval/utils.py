@@ -384,7 +384,7 @@ def get_huggingface_model_lists(
     model_lists = defaultdict(list)
 
     # Do not iterate over all the languages if we are not filtering on language
-    language_itr: list["Language" | None]
+    language_itr: list["Language | None"]
     if {lang.code for lang in language_list} == {lang.code for lang in all_languages}:
         language_itr = [None]
     else:
