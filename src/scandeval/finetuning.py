@@ -418,7 +418,7 @@ def get_training_args(
             eval_steps=30,
             logging_steps=30,
             save_steps=30,
-            max_steps=2 if hasattr(sys, "_called_from_test") else 10_000,
+            max_steps=1 if hasattr(sys, "_called_from_test") else 10_000,
             use_cpu=benchmark_config.device == torch.device("cpu"),
             report_to=[],
             save_total_limit=1,

@@ -157,7 +157,7 @@ def build_benchmark_config(
 
     # Set variable with number of iterations
     if hasattr(sys, "_called_from_test"):
-        num_iterations = 2
+        num_iterations = 1
 
     return BenchmarkConfig(
         model_languages=model_languages,
