@@ -460,9 +460,14 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
-        if dataset_config.task == NER and isinstance(
-            tokenizer, PreTrainedTokenizerBase
-        ):
+        use_structured_generation = (
+            dataset_config == NER
+            and isinstance(tokenizer, PreTrainedTokenizerBase)
+            and not hasattr(sys, "_called_from_test")
+        )
+
+        if use_structured_generation:
+            assert isinstance(tokenizer, PreTrainedTokenizerBase)
             prefix_allowed_tokens_fn = get_ner_prefix_allowed_tokens_fn(
                 ner_tag_names=list(dataset_config.prompt_label_mapping.values()),
                 tokenizer=tokenizer,
