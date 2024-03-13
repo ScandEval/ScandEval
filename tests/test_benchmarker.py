@@ -6,7 +6,11 @@ from typing import Generator, TypedDict
 
 import pytest
 from scandeval import __version__
-from scandeval.benchmarker import BenchmarkResult, model_has_been_benchmarked
+from scandeval.benchmarker import (
+    Benchmarker,
+    BenchmarkResult,
+    model_has_been_benchmarked,
+)
 from scandeval.types import ScoreDict
 
 
@@ -29,6 +33,11 @@ DATA_KWARGS = DataKwargs(
     task="task",
     results=dict(),
 )
+
+
+def test_benchmarker_initialisation():
+    """Test that the `Benchmarker` class can be initialised."""
+    Benchmarker()
 
 
 class TestBenchmarkResult:
