@@ -360,7 +360,7 @@ class OpenAIModel:
         inputs: "Tensor",
         generation_config: GenerationConfig | None = None,
         **generation_kwargs,
-    ) -> "Tensor" | LongTensor | ModelOutput:
+    ) -> "Tensor | LongTensor | ModelOutput":
         """Generate text using the model.
 
         Args:
