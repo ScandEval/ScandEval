@@ -5,13 +5,14 @@ import math
 from typing import TYPE_CHECKING, Any, Callable
 
 import torch
-from pydantic import BaseModel, conlist, create_model
+from pydantic import conlist, create_model
 
 if importlib.util.find_spec("outlines") is not None:
     from outlines.integrations.transformers import JSONPrefixAllowedTokens
     from outlines.integrations.vllm import JSONLogitsProcessor
 
 if TYPE_CHECKING:
+    from pydantic import BaseModel
     from transformers import PreTrainedTokenizerBase
     from vllm import LLM
 

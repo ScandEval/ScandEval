@@ -1,25 +1,20 @@
 """Sequence classification benchmark dataset."""
 
+import importlib.util
 import itertools as it
 import logging
 import random
 import re
 from functools import partial
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import torch
-from datasets.arrow_dataset import Dataset
-from transformers import BatchEncoding, PreTrainedModel
 from transformers.data.data_collator import DataCollatorWithPadding
-from transformers.modeling_utils import ModelOutput
 
 from .benchmark_dataset import BenchmarkDataset
-from .config import DatasetConfig
 from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
-from .protocols import GenerativeModel, Tokenizer
-from .types import Labels, Predictions
 from .utils import (
     GENERATIVE_MODEL_TASKS,
     get_special_token_metadata,
@@ -27,10 +22,18 @@ from .utils import (
     should_prefix_space_be_added_to_labels,
 )
 
-try:
+if TYPE_CHECKING:
+    from datasets.arrow_dataset import Dataset
+    from transformers import BatchEncoding, PreTrainedModel
+    from transformers.modeling_utils import ModelOutput
+
+    from .config import DatasetConfig
+    from .protocols import GenerativeModel, Tokenizer
+    from .types import Labels, Predictions
+
+if importlib.util.find_spec("Levenshtein") is not None:
     import Levenshtein
-except ImportError:
-    Levenshtein = None
+
 
 logger = logging.getLogger(__package__)
 
@@ -51,7 +54,7 @@ class SequenceClassification(BenchmarkDataset):
             The configuration of the benchmark.
     """
 
-    def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
+    def _preprocess_data(self, dataset: "Dataset", **kwargs) -> "Dataset":
         """Preprocess a dataset by tokenizing and aligning the labels.
 
         Args:
@@ -64,7 +67,7 @@ class SequenceClassification(BenchmarkDataset):
         Returns:
             The preprocessed dataset.
         """
-        tokenizer: Tokenizer = kwargs["tokenizer"]
+        tokenizer: "Tokenizer" = kwargs["tokenizer"]
 
         # Extract special token metadata from the tokenizer
         special_token_metadata = get_special_token_metadata(tokenizer=tokenizer)
@@ -73,7 +76,7 @@ class SequenceClassification(BenchmarkDataset):
         cls_token = special_token_metadata["cls_token"]
         sep_token = special_token_metadata["sep_token"]
 
-        def tokenise(examples: dict) -> BatchEncoding:
+        def tokenise(examples: dict) -> "BatchEncoding":
             # If the tokenizer is not adding special tokens, then we add them manually.
             # We don't need this when performing few-shot evaluations, so in that case
             # we don't add the special tokens.
@@ -118,8 +121,8 @@ class SequenceClassification(BenchmarkDataset):
 
     def _load_data_collator(
         self,
-        tokenizer: Tokenizer | None = None,
-        model: PreTrainedModel | GenerativeModel | None = None,
+        tokenizer: "Tokenizer" | None = None,
+        model: "PreTrainedModel" | "GenerativeModel" | None = None,
     ):
         """Load the data collator used to prepare samples during finetuning.
 
@@ -137,7 +140,9 @@ class SequenceClassification(BenchmarkDataset):
         return DataCollatorWithPadding(tokenizer, padding="longest")
 
     def _compute_metrics(
-        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
+        self,
+        model_outputs_and_labels: tuple["Predictions", "Labels"],
+        id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -198,7 +203,7 @@ class SequenceClassification(BenchmarkDataset):
         return results
 
     def _extract_few_shot_examples(
-        self, train_dataset: Dataset, random_seed: int
+        self, train_dataset: "Dataset", random_seed: int
     ) -> list[dict[str, Any]]:
         """Extract few-shot examples from the training dataset.
 
@@ -238,7 +243,7 @@ class SequenceClassification(BenchmarkDataset):
         return few_shot_examples
 
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: "Tokenizer"
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -288,8 +293,8 @@ class SequenceClassification(BenchmarkDataset):
     def _extract_labels_from_generation(
         self,
         input_batch: dict[str, list],
-        model_output: ModelOutput,
-        tokenizer: Tokenizer,
+        model_output: "ModelOutput",
+        tokenizer: "Tokenizer",
     ) -> list[Any]:
         """Extract the predicted labels from the generated output.
 
@@ -325,8 +330,8 @@ class SequenceClassification(BenchmarkDataset):
 
 def get_closest_logprobs_labels(
     generation_logprobs: torch.Tensor,
-    tokenizer: Tokenizer,
-    dataset_config: DatasetConfig,
+    tokenizer: "Tokenizer",
+    dataset_config: "DatasetConfig",
 ) -> list[str]:
     """Get the labels with the highest predicted logprob value.
 
@@ -383,8 +388,8 @@ def get_closest_logprobs_labels(
 
 def get_closest_word_edit_labels(
     generated_sequences: torch.Tensor,
-    tokenizer: Tokenizer,
-    dataset_config: DatasetConfig,
+    tokenizer: "Tokenizer",
+    dataset_config: "DatasetConfig",
 ) -> list[str]:
     """Get the labels with the smallest edit distance to the predicted labels.
 

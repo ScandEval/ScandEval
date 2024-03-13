@@ -9,17 +9,21 @@ from copy import deepcopy
 from pathlib import Path
 from shutil import rmtree
 from time import sleep
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict
 
 from .benchmark_config_factory import build_benchmark_config
-from .config import DatasetConfig, Language
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
-from .enums import Device, Framework
 from .exceptions import InvalidBenchmark, InvalidModel
-from .types import ScoreDict
 from .utils import get_huggingface_model_lists
+
+if TYPE_CHECKING:
+    from .config import DatasetConfig, Language
+    from .enums import Device, Framework
+    from .types import ScoreDict
+
 
 logger = logging.getLogger(__package__)
 
@@ -36,8 +40,8 @@ class BenchmarkConfigParams(BaseModel):
     language: str | list[str]
     model_language: str | list[str] | None
     dataset_language: str | list[str] | None
-    framework: Framework | str | None
-    device: Device | None
+    framework: "Framework" | str | None
+    device: "Device" | None
     batch_size: int
     evaluate_train: bool
     raise_errors: bool
@@ -63,7 +67,7 @@ class BenchmarkResult(BaseModel):
     task: str
     dataset_languages: list[str]
     model: str
-    results: ScoreDict
+    results: "ScoreDict"
     num_model_parameters: int
     max_sequence_length: int
     vocabulary_size: int
@@ -143,8 +147,8 @@ class Benchmarker:
         language: str | list[str] = "all",
         model_language: str | list[str] | None = None,
         dataset_language: str | list[str] | None = None,
-        framework: Framework | str | None = None,
-        device: Device | None = None,
+        framework: "Framework" | str | None = None,
+        device: "Device" | None = None,
         batch_size: int = 32,
         evaluate_train: bool = False,
         raise_errors: bool = False,
@@ -315,8 +319,8 @@ class Benchmarker:
         language: str | list[str] | None = None,
         model_language: str | list[str] | None = None,
         dataset_language: str | list[str] | None = None,
-        framework: Framework | str | None = None,
-        device: Device | None = None,
+        framework: "Framework" | str | None = None,
+        device: "Device" | None = None,
         batch_size: int | None = None,
         evaluate_train: bool | None = None,
         raise_errors: bool | None = None,
@@ -568,7 +572,7 @@ class Benchmarker:
     def _prepare_model_ids(
         self,
         model: list[str] | str | None,
-        model_languages: list[Language],
+        model_languages: list["Language"],
         token: bool | str | None,
     ) -> list[str]:
         """Prepare the model ID(s) to be benchmarked.
@@ -613,7 +617,7 @@ class Benchmarker:
         return model_ids_sorted
 
     def _benchmark_single(
-        self, dataset_config: DatasetConfig, model_id: str, raise_errors: bool
+        self, dataset_config: "DatasetConfig", model_id: str, raise_errors: bool
     ) -> BenchmarkResult | dict[str, str]:
         """Benchmark a single model on a single dataset.
 
@@ -689,7 +693,7 @@ class Benchmarker:
         return self.benchmark(*args, **kwargs)
 
     def _get_model_ids(
-        self, languages: list[Language], token: bool | str | None
+        self, languages: list["Language"], token: bool | str | None
     ) -> list[str]:
         """Get list of model IDs from the Hugging Face Hub.
 
@@ -797,7 +801,7 @@ def clear_model_cache_fn(cache_dir: str) -> None:
                     rmtree(sub_model_dir)
 
 
-def prepare_dataset_configs(dataset_names: list[str]) -> list[DatasetConfig]:
+def prepare_dataset_configs(dataset_names: list[str]) -> list["DatasetConfig"]:
     """Prepare the dataset configuration(s) to be benchmarked.
 
     Args:

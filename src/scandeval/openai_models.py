@@ -1,23 +1,29 @@
 """Model and tokenizer wrapper for OpenAI models."""
 
+import importlib.util
 import logging
+from typing import TYPE_CHECKING
 
 import torch
-from torch import LongTensor, Tensor
+from torch import LongTensor
 from torch.nn.utils.rnn import pad_sequence
-from transformers import BatchEncoding, GenerationConfig, PretrainedConfig
+from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, ModelConfig
 from .exceptions import NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
-try:
+if TYPE_CHECKING:
+    from torch import Tensor
+    from transformers import PretrainedConfig
+
+if importlib.util.find_spec("tiktoken") is not None:
     import tiktoken
+
+if importlib.util.find_spec("openai") is not None:
     from openai import NotFoundError, OpenAI
-except ImportError:
-    OpenAI = None
-    tiktoken = None
+
 
 logger = logging.getLogger(__package__)
 
@@ -41,7 +47,7 @@ class OpenAITokenizer:
     is_fast = False
 
     def __init__(
-        self, model_config: ModelConfig, hf_model_config: PretrainedConfig
+        self, model_config: ModelConfig, hf_model_config: "PretrainedConfig"
     ) -> None:
         """Initialize the tokenizer.
 
@@ -264,7 +270,7 @@ class OpenAITokenizer:
 
         # Flip the token IDs in the lists, since `pad_sequence` pads to the right by
         # default, and we want padding to the left
-        flipped_input_ids: list[Tensor] = []
+        flipped_input_ids: list["Tensor"] = []
         for input_id_list in input_ids:
             input_id_list.reverse()
             flipped_input_ids.append(LongTensor(input_id_list))
@@ -308,7 +314,7 @@ class OpenAIModel:
     def __init__(
         self,
         model_config: ModelConfig,
-        hf_model_config: PretrainedConfig,
+        hf_model_config: "PretrainedConfig",
         benchmark_config: BenchmarkConfig,
         tokenizer: OpenAITokenizer,
     ) -> None:
@@ -351,10 +357,10 @@ class OpenAIModel:
 
     def generate(
         self,
-        inputs: Tensor,
+        inputs: "Tensor",
         generation_config: GenerationConfig | None = None,
         **generation_kwargs,
-    ) -> Tensor | LongTensor | ModelOutput:
+    ) -> "Tensor" | LongTensor | ModelOutput:
         """Generate text using the model.
 
         Args:

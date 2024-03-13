@@ -1,33 +1,36 @@
 """A wrapper for vLLM models."""
 
+import importlib.util
 import logging
 import math
 import sys
 import warnings
-from pathlib import Path
 from types import MethodType
 from typing import TYPE_CHECKING
 
 import torch
 from tqdm import tqdm
-from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizerBase
+from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
-from .config import DatasetConfig, ModelConfig
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
 from .utils import clear_memory
 
-logger = logging.getLogger(__package__)
+if TYPE_CHECKING:
+    from pathlib import Path
 
-try:
+    from transformers import PretrainedConfig, PreTrainedTokenizerBase
+    from vllm import LLM, RequestOutput
+
+    from .config import DatasetConfig, ModelConfig
+
+if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
-except ImportError:
-    logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
-if TYPE_CHECKING:
-    from vllm import LLM, RequestOutput
+
+logger = logging.getLogger(__package__)
 
 
 class VLLMModel:
@@ -35,12 +38,12 @@ class VLLMModel:
 
     def __init__(
         self,
-        model_config: ModelConfig,
-        hf_model_config: PretrainedConfig,
-        dataset_config: DatasetConfig,
-        model_cache_dir: str | Path,
+        model_config: "ModelConfig",
+        hf_model_config: "PretrainedConfig",
+        dataset_config: "DatasetConfig",
+        model_cache_dir: str | "Path",
         trust_remote_code: bool,
-        tokenizer: PreTrainedTokenizerBase | None = None,
+        tokenizer: "PreTrainedTokenizerBase" | None = None,
     ) -> None:
         """Initialize a vLLM model.
 
@@ -289,7 +292,7 @@ class VLLMModel:
 
         self.logits_processors = logits_processors
 
-    def set_tokenizer(self, tokenizer: PreTrainedTokenizerBase) -> None:
+    def set_tokenizer(self, tokenizer: "PreTrainedTokenizerBase") -> None:
         """Set the tokenizer to use for generation.
 
         Args:

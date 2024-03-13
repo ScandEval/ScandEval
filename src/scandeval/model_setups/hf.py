@@ -6,7 +6,7 @@ import os
 import warnings
 from json import JSONDecodeError
 from time import sleep
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 import torch
 from huggingface_hub import HfApi, ModelFilter
@@ -14,16 +14,10 @@ from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
 from requests.exceptions import RequestException
-from transformers import (
-    AutoConfig,
-    AutoTokenizer,
-    BitsAndBytesConfig,
-    PretrainedConfig,
-    PreTrainedModel,
-)
+from transformers import AutoConfig, AutoTokenizer, BitsAndBytesConfig
 from urllib3.exceptions import RequestError
 
-from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import (
     FlashAttentionNotInstalled,
@@ -36,7 +30,6 @@ from ..exceptions import (
     NoInternetConnection,
 )
 from ..languages import get_all_languages
-from ..protocols import GenerativeModel, Tokenizer
 from ..utils import (
     GENERATIVE_DATASET_SUPERTASKS,
     GENERATIVE_DATASET_TASKS,
@@ -49,6 +42,13 @@ from ..utils import (
 )
 from ..vllm_models import VLLMModel
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
+
+if TYPE_CHECKING:
+    from transformers import PretrainedConfig, PreTrainedModel
+
+    from ..config import BenchmarkConfig, DatasetConfig
+    from ..protocols import GenerativeModel, Tokenizer
+
 
 logger = logging.getLogger(__package__)
 
@@ -65,7 +65,7 @@ class HFModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+    def __init__(self, benchmark_config: "BenchmarkConfig") -> None:
         """Initialize the model setup.
 
         Args:
@@ -214,8 +214,8 @@ class HFModelSetup:
         return model_config
 
     def load_model(
-        self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+        self, model_config: ModelConfig, dataset_config: "DatasetConfig"
+    ) -> tuple["Tokenizer", "PreTrainedModel" | "GenerativeModel"]:
         """Load an OpenAI model.
 
         Args:
@@ -227,7 +227,7 @@ class HFModelSetup:
         Returns:
             The tokenizer and model.
         """
-        config: PretrainedConfig
+        config: "PretrainedConfig"
         block_terminal_output()
 
         model_id = model_config.model_id
@@ -344,7 +344,9 @@ class HFModelSetup:
                         )
                     else:
                         model_cls_supertask = supertask
-                    model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
+                    model_cls_or_none: Type[
+                        "PreTrainedModel"
+                    ] | None = get_class_by_name(
                         class_name=f"auto-model-for-{model_cls_supertask}",
                         module_name="transformers",
                     )
@@ -451,11 +453,11 @@ class HFModelSetup:
 
         return tokenizer, model
 
-    def _get_torch_dtype(self, config: PretrainedConfig) -> str | None:
+    def _get_torch_dtype(self, config: "PretrainedConfig") -> str | None:
         """Get the torch dtype, used for loading the model.
 
         Args:
-            config (PretrainedConfig):
+            config:
                 The Hugging Face model configuration.
 
         Returns:
@@ -474,7 +476,7 @@ class HFModelSetup:
         label2id: dict[str, int],
         revision: str,
         model_cache_dir: str,
-    ) -> PretrainedConfig:
+    ) -> "PretrainedConfig":
         """Load the Hugging Face model configuration.
 
         Args:
@@ -538,20 +540,19 @@ class HFModelSetup:
                 raise e
 
     def _load_tokenizer(
-        self, model: PreTrainedModel | GenerativeModel, model_id: str
-    ) -> Tokenizer:
+        self, model: "PreTrainedModel" | "GenerativeModel", model_id: str
+    ) -> "Tokenizer":
         """Load the tokenizer.
 
         Args:
-            model (PreTrainedModel or GenerativeModel):
+            model:
                 The model, which is used to determine whether to add a prefix space to
                 the tokens.
-            model_id (str):
+            model_id:
                 The model identifier. Used for logging.
 
         Returns:
-            Tokenizer:
-                The loaded tokenizer.
+            The loaded tokenizer.
         """
         # If the model is a subclass of a RoBERTa model then we have to add a prefix
         # space to the tokens, by the way the model is constructed.

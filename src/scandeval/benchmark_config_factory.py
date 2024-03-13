@@ -4,15 +4,20 @@ import importlib.util
 import logging
 import os
 import sys
+from typing import TYPE_CHECKING
 
 import torch
 
-from .config import BenchmarkConfig, Language, Task
+from .config import BenchmarkConfig
 from .dataset_configs import get_all_dataset_configs
 from .enums import Device, Framework
 from .exceptions import InvalidBenchmark
 from .languages import get_all_languages
 from .tasks import get_all_tasks
+
+if TYPE_CHECKING:
+    from .config import Language, Task
+
 
 logger = logging.getLogger(__package__)
 
@@ -222,7 +227,7 @@ def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
 
 def prepare_languages(
     language_codes: str | list[str] | None, default_language_codes: list[str]
-) -> list[Language]:
+) -> list["Language"]:
     """Prepare language(s) for benchmarking.
 
     Args:
@@ -259,9 +264,9 @@ def prepare_languages(
 
 def prepare_tasks_and_datasets(
     task: str | list[str] | None,
-    dataset_languages: list[Language],
+    dataset_languages: list["Language"],
     dataset: str | list[str] | None,
-) -> tuple[list[Task], list[str]]:
+) -> tuple[list["Task"], list[str]]:
     """Prepare task(s) and dataset(s) for benchmarking.
 
     Args:

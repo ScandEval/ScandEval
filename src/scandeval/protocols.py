@@ -1,17 +1,18 @@
 """Protocols used throughout the project."""
 
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-import torch
-from transformers import (
-    BatchEncoding,
-    GenerationConfig,
-    PretrainedConfig,
-    PreTrainedModel,
-)
-from transformers.utils import ModelOutput
+if TYPE_CHECKING:
+    from torch import Tensor, device
+    from transformers import (
+        BatchEncoding,
+        GenerationConfig,
+        PretrainedConfig,
+        PreTrainedModel,
+    )
+    from transformers.utils import ModelOutput
 
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 
 
 @runtime_checkable
@@ -32,7 +33,7 @@ class Tokenizer(Protocol):
     unk_token_id: int
     is_fast: bool
 
-    def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
+    def __call__(self, text: str | list[str], **kwargs) -> "BatchEncoding":
         """Call the tokenizer.
 
         Args:
@@ -134,14 +135,14 @@ class Tokenizer(Protocol):
     def pad(
         self,
         encoded_inputs: (
-            BatchEncoding
-            | list[BatchEncoding]
+            "BatchEncoding"
+            | list["BatchEncoding"]
             | dict[str, list[str]]
             | dict[str, list[list[str]]]
             | list[dict[str, list[str]]]
         ),
         **kwargs,
-    ) -> BatchEncoding:
+    ) -> "BatchEncoding":
         """Pad a batch of encoded inputs.
 
         Args:
@@ -161,21 +162,21 @@ class GenerativeModel(Protocol):
     """A protocol for a generative model."""
 
     @property
-    def config(self) -> PretrainedConfig:
+    def config(self) -> "PretrainedConfig":
         """The Hugging Face model configuration."""
         ...
 
     @property
-    def device(self) -> torch.device:
+    def device(self) -> "device":
         """The device on which the model is running."""
         ...
 
     def generate(
         self,
-        inputs: torch.Tensor,
-        generation_config: GenerationConfig | None = None,
+        inputs: "Tensor",
+        generation_config: "GenerationConfig" | None = None,
         **generation_kwargs,
-    ) -> ModelOutput | torch.Tensor:
+    ) -> "ModelOutput" | "Tensor":
         """Generate text.
 
         Args:
@@ -195,7 +196,7 @@ class GenerativeModel(Protocol):
 class ModelSetup(Protocol):
     """A protocol for a general model setup."""
 
-    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+    def __init__(self, benchmark_config: "BenchmarkConfig") -> None:
         """Initialize the model setup.
 
         Args:
@@ -217,7 +218,7 @@ class ModelSetup(Protocol):
         """
         ...
 
-    def get_model_config(self, model_id: str) -> ModelConfig:
+    def get_model_config(self, model_id: str) -> "ModelConfig":
         """Get the model configuration.
 
         Args:
@@ -230,8 +231,8 @@ class ModelSetup(Protocol):
         ...
 
     def load_model(
-        self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+        self, model_config: "ModelConfig", dataset_config: "DatasetConfig"
+    ) -> tuple[Tokenizer, "PreTrainedModel" | GenerativeModel]:
         """Load a model.
 
         Args:

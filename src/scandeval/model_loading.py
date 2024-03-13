@@ -1,10 +1,7 @@
 """Functions related to the loading of models."""
 
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
-from transformers import PreTrainedModel
-
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_setups import (
     FreshModelSetup,
@@ -12,19 +9,24 @@ from .model_setups import (
     LocalModelSetup,
     OpenAIModelSetup,
 )
-from .protocols import GenerativeModel, ModelSetup, Tokenizer
 from .utils import (
     GENERATIVE_DATASET_SUPERTASKS,
     GENERATIVE_DATASET_TASKS,
     model_is_generative,
 )
 
+if TYPE_CHECKING:
+    from transformers import PreTrainedModel
+
+    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+    from .protocols import GenerativeModel, ModelSetup, Tokenizer
+
 
 def load_model(
-    model_config: ModelConfig,
-    dataset_config: DatasetConfig,
-    benchmark_config: BenchmarkConfig,
-) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+    model_config: "ModelConfig",
+    dataset_config: "DatasetConfig",
+    benchmark_config: "BenchmarkConfig",
+) -> tuple["Tokenizer", "PreTrainedModel" | "GenerativeModel"]:
     """Load a model.
 
     Args:
@@ -38,7 +40,7 @@ def load_model(
     Returns:
         The tokenizer and model.
     """
-    model_type_to_model_setup_mapping: dict[str, Type[ModelSetup]] = dict(
+    model_type_to_model_setup_mapping: dict[str, Type["ModelSetup"]] = dict(
         fresh=FreshModelSetup,
         hf=HFModelSetup,
         local=LocalModelSetup,
