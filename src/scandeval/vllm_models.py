@@ -100,7 +100,7 @@ class VLLMModel:
                 revision=self.model_config.revision,
                 seed=4242,
                 tensor_parallel_size=torch.cuda.device_count(),
-                disable_custom_all_reduce=False,
+                disable_custom_all_reduce=True,
             )
             self._model._run_engine = MethodType(
                 _run_engine_with_fixed_progress_bars, self._model
