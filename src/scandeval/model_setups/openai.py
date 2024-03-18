@@ -32,6 +32,16 @@ if importlib.util.find_spec("tiktoken") is not None:
 logger = logging.getLogger(__package__)
 
 
+# This is a list of the major models that OpenAI has released
+CACHED_OPENAI_MODEL_IDS: list[str] = [
+    "ada|babbage|curie|davinci",
+    "(code|text)-(ada|babbage|curie|davinci)-[0-9]{3}",
+    "gpt-3.5-turbo(-16k|-instruct)?(-[0-9]{4})?",
+    "gpt-4(-[0-9]{4})?",
+    "gpt-4-32k(-[0-9]{4})?",
+]
+
+
 VOCAB_SIZE_MAPPING = {
     "(text-)?(ada|babbage|curie|davinci)(-001)?": 50_257,
     "(code|text)-davinci-00[2-9]": 50_281,
@@ -80,7 +90,7 @@ class OpenAIModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model ID denotes an OpenAI model.
 
         Args:
@@ -88,13 +98,25 @@ class OpenAIModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists on OpenAI, or the name of an extra that needs to
-            be installed to check if the model exists.
+            Whether the model exist, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
-        if openai is None:
-            return "openai"
+        if importlib.util.find_spec("openai") is None:
+            return dict(missing_extra="openai")
 
-        all_models: list[openai.models.Model] = list(openai.models.list())
+        all_models: list[openai.models.Model] = list()
+        try:
+            all_models = list(openai.models.list())
+        except openai.OpenAIError as e:
+            model_exists = any(
+                [
+                    re.match(pattern=model_pattern, string=model_id) is not None
+                    for model_pattern in CACHED_OPENAI_MODEL_IDS
+                ]
+            )
+            if not model_exists and "OPENAI_API_KEY" in str(e):
+                return dict(missing_env_var="OPENAI_API_KEY")
+
         return model_id in [model.id for model in all_models]
 
     def get_model_config(self, model_id: str) -> ModelConfig:

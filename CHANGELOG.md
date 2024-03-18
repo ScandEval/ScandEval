@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
+- Issue when checking if the `openai` extra needed to be installed, or when the
+  `OPENAI_API_KEY` needs to be set.
 - Setting `add_prefix_space=False` caused an error during the loading of some
   tokenizers. To fix this, we only supply the `add_prefix_space` keyword argument
   during the loading of the tokenizer if it is True.

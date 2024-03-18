@@ -406,7 +406,7 @@ def get_closest_word_edit_labels(
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
-    if Levenshtein is None:
+    if importlib.util.find_spec("Levenshtein") is None:
         raise NeedsExtraInstalled(extra="openai")
 
     raw_predictions = extract_raw_predictions(

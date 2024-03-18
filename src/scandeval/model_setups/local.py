@@ -39,7 +39,7 @@ class LocalModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model exists locally.
 
         Args:
@@ -47,8 +47,8 @@ class LocalModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists locally, or the name of an extra that needs to be
-            installed to check if the model exists.
+            Whether the model exist, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
         # Ensure that `model_id` is a Path object
         model_dir = Path(model_id)
