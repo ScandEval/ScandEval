@@ -166,7 +166,6 @@ class VLLMModel:
         temperature = (
             0.0 if not generation_config.do_sample else generation_config.temperature
         )
-        breakpoint()
         sampling_params = SamplingParams(
             # What to output
             max_tokens=max_tokens,
@@ -204,6 +203,7 @@ class VLLMModel:
             use_tqdm=(not input_is_a_test),
             sampling_params=sampling_params,
         )
+        breakpoint()
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
