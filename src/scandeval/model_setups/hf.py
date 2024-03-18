@@ -554,25 +554,31 @@ class HFModelSetup:
         Returns:
             The loaded tokenizer.
         """
-        # If the model is a subclass of a RoBERTa model then we have to add a prefix
-        # space to the tokens, by the way the model is constructed.
+        loading_kwargs: dict[str, bool | str] = dict(
+            use_fast=True,
+            verbose=False,
+            trust_remote_code=self.benchmark_config.trust_remote_code,
+        )
+
+        # If the model is a subclass of a certain model types then we have to add a
+        # prefix space to the tokens, by the way the model is constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
-        prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
+        add_prefix = any(
+            model_type in type(model).__name__ for model_type in prefix_models
+        )
+        if add_prefix:
+            loading_kwargs["add_prefix_space"] = True
+
         padding_side = "left" if model_is_generative(model=model) else "right"
+        loading_kwargs["padding_side"] = padding_side
+        loading_kwargs["truncation_side"] = padding_side
+
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             warnings.filterwarnings("ignore", category=FutureWarning)
             while True:
                 try:
-                    return AutoTokenizer.from_pretrained(
-                        model_id,
-                        add_prefix_space=prefix,
-                        use_fast=True,
-                        verbose=False,
-                        padding_side=padding_side,
-                        truncation_side=padding_side,
-                        trust_remote_code=self.benchmark_config.trust_remote_code,
-                    )
+                    return AutoTokenizer.from_pretrained(model_id, **loading_kwargs)
                 except (JSONDecodeError, OSError, TypeError):
                     raise InvalidModel(
                         f"Could not load tokenizer for model {model_id!r}."
