@@ -74,7 +74,7 @@ class HFModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model ID denotes a model on the Hugging Face Hub.
 
         Args:
@@ -82,8 +82,8 @@ class HFModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists on the Hugging Face Hub, or the name of an extra
-            that needs to be installed to check if the model exists.
+            Whether the model exist, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
         # Extract the revision from the model_id, if present
         model_id, revision = (

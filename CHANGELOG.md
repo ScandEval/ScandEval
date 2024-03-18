@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Issue when checking if the `openai` extra needed to be installed, or when the
+  `OPENAI_API_KEY` needs to be set.
+
+
 ## [v12.3.1] - 2024-03-13
 ### Fixed
 - An issue with Pydantic typing, causing initialisation of `Benchmarker` to throw an

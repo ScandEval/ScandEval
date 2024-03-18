@@ -53,7 +53,7 @@ class FreshModelSetup:
     def _strip_model_id(model_id: str) -> str:
         return re.sub("(@.*$|^fresh-)", "", model_id)
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model ID denotes a fresh model.
 
         Args:
@@ -61,8 +61,8 @@ class FreshModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists as a fresh model, or the name of an extra that
-            needs to be installed to check if the model exists.
+            Whether the model exist, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
         return self._strip_model_id(model_id=model_id) in FRESH_MODELS
 

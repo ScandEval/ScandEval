@@ -330,7 +330,7 @@ class OpenAIModel:
             tokenizer:
                 The tokenizer.
         """
-        if OpenAI is None:
+        if importlib.util.find_spec("openai") is None:
             raise NeedsExtraInstalled(extra="openai")
 
         self.model_config = model_config
