@@ -203,6 +203,7 @@ class VLLMModel:
             use_tqdm=(not input_is_a_test),
             sampling_params=sampling_params,
         )
+        breakpoint()
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
