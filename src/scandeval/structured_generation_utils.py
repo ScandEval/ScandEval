@@ -1,7 +1,6 @@
 """Utility functions related to structured generation."""
 
 import importlib.util
-import math
 from typing import TYPE_CHECKING, Any, Callable
 
 import torch
@@ -104,22 +103,22 @@ def get_ner_logits_processors(
     )
     logits_processors.append(logits_processor)
 
-    forbidden_token_ids = list()
-    forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
-    for forbidden_token in forbidden_tokens:
-        forbidden_token_ids.extend(
-            list(
-                llm.get_tokenizer()(forbidden_token, add_special_tokens=False).input_ids
-            )
-        )
-    forbidden_token_ids = list(set(forbidden_token_ids))
+    # forbidden_token_ids = list()
+    # forbidden_tokens = ["\n", "\n\n", "\n\n\n", "\t", "\t\t", "\t\t\t"]
+    # for forbidden_token in forbidden_tokens:
+    #     forbidden_token_ids.extend(
+    #         list(
+    #             llm.get_tokenizer()(forbidden_token, add_special_tokens=False).input_ids
+    #         )
+    #     )
+    # forbidden_token_ids = list(set(forbidden_token_ids))
 
-    def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
-        mask = torch.zeros_like(scores)
-        for forbidden_token_id in forbidden_token_ids:
-            mask[forbidden_token_id] = -math.inf
-        return scores + mask
+    # def no_tabs_or_newlines(_: list[int], scores: torch.Tensor) -> torch.Tensor:
+    #     mask = torch.zeros_like(scores)
+    #     for forbidden_token_id in forbidden_token_ids:
+    #         mask[forbidden_token_id] = -math.inf
+    #     return scores + mask
 
-    logits_processors.append(no_tabs_or_newlines)
+    # logits_processors.append(no_tabs_or_newlines)
 
     return logits_processors
