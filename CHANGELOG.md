@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
+- There is an issue with the underlying `outlines` package that we use for structured
+  generation, where many of the generations stop prematurely when the batch is too
+  large. We fix this temporarily by lowering the batch size from the entire dataset to
+  the standard 32. This will be changed back when the bug is fixed. Follow the progress
+  in [this `outlines` issue](https://github.com/outlines-dev/outlines/issues/757).
 - Issue when checking if the `openai` extra needed to be installed, or when the
   `OPENAI_API_KEY` needs to be set.
 - Setting `add_prefix_space=False` caused an error during the loading of some
