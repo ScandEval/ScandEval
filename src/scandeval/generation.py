@@ -270,8 +270,8 @@ def generate_single_iteration(
 
         if isinstance(model, OpenAIModel):
             batch_size = 1
-        elif isinstance(model, VLLMModel):
-            batch_size = len(torch_dataset)
+        # elif isinstance(model, VLLMModel):
+        #     batch_size = len(torch_dataset)
         else:
             batch_size = benchmark_config.batch_size
 
