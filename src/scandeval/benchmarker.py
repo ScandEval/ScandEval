@@ -48,6 +48,9 @@ class BenchmarkConfigParams(BaseModel):
     cache_dir: str
     token: bool | str
     openai_api_key: str | None
+    prefer_azure: bool
+    azure_openai_api_key: str | None
+    azure_openai_endpoint: str | None
     force: bool
     verbose: bool
     trust_remote_code: bool
@@ -155,6 +158,9 @@ class Benchmarker:
         cache_dir: str = ".scandeval_cache",
         token: bool | str = True,
         openai_api_key: str | None = None,
+        prefer_azure: bool = False,
+        azure_openai_api_key: str | None = None,
+        azure_openai_endpoint: str | None = None,
         force: bool = False,
         verbose: bool = False,
         trust_remote_code: bool = False,
@@ -215,8 +221,20 @@ class Benchmarker:
                 string is specified then it will be used as the token. Defaults to
                 True.
             openai_api_key:
-                The OpenAI API key to use for authentication. If None, then no OpenAI
-                models will be evaluated. Defaults to None.
+                The OpenAI API key to use for authentication. If None, then this will
+                be loaded from the environment variable `OPENAI_API_KEY`. Defaults to
+                None.
+            prefer_azure:
+                In the case where both OpenAI and Azure OpenAI models are available,
+                whether to use the Azure OpenAI models. Defaults to False.
+            azure_openai_api_key:
+                The Azure OpenAI API key to use for authentication. If None, then this
+                will be loaded from the environment variable `AZURE_OPENAI_API_KEY`.
+                Defaults to None.
+            azure_openai_endpoint:
+                The Azure OpenAI endpoint to use for authentication. If None, then this
+                will be loaded from the environment variable `AZURE_OPENAI_ENDPOINT`.
+                Defaults to None.
             force:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to False.
@@ -271,6 +289,9 @@ class Benchmarker:
             cache_dir=cache_dir,
             token=token,
             openai_api_key=openai_api_key,
+            prefer_azure=prefer_azure,
+            azure_openai_api_key=azure_openai_api_key,
+            azure_openai_endpoint=azure_openai_endpoint,
             force=force,
             verbose=verbose,
             trust_remote_code=trust_remote_code,
@@ -327,6 +348,8 @@ class Benchmarker:
         cache_dir: str | None = None,
         token: bool | str | None = None,
         openai_api_key: str | None = None,
+        azure_openai_api_key: str | None = None,
+        azure_openai_endpoint: str | None = None,
         force: bool | None = None,
         verbose: bool | None = None,
         trust_remote_code: bool | None = None,
@@ -400,9 +423,17 @@ class Benchmarker:
                 specified then it will be used as the token. Defaults to the value
                 specified when initialising the benchmarker.
             openai_api_key:
-                The OpenAI API key to use for authentication. If None, then no OpenAI
-                models will be evaluated. Defaults to the value specified when
-                initialising the benchmarker.
+                The OpenAI API key to use for authentication. If None, then this will be
+                loaded from the environment variable `OPENAI_API_KEY`. Defaults to the
+                value specified when initialising the benchmarker.
+            azure_openai_api_key:
+                The Azure OpenAI API key to use for authentication. If None, then this
+                will be loaded from the environment variable `AZURE_OPENAI_API_KEY`.
+                Defaults to the value specified when initialising the benchmarker.
+            azure_openai_endpoint:
+                The Azure OpenAI endpoint to use for authentication. If None, then this
+                will be loaded from the environment variable `AZURE_OPENAI_ENDPOINT`.
+                Defaults to the value specified when initialising the benchmarker.
             force:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to the value specified when initialising
@@ -479,6 +510,10 @@ class Benchmarker:
             benchmark_config_params.token = token
         if openai_api_key is not None:
             benchmark_config_params.openai_api_key = openai_api_key
+        if azure_openai_api_key is not None:
+            benchmark_config_params.azure_openai_api_key = azure_openai_api_key
+        if azure_openai_endpoint is not None:
+            benchmark_config_params.azure_openai_endpoint = azure_openai_endpoint
         if force is not None:
             benchmark_config_params.force = force
         if verbose is not None:

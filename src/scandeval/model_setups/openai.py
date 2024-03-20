@@ -98,7 +98,7 @@ class OpenAIModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exist, or a dictionary explaining why we cannot check
+            Whether the model exists, or a dictionary explaining why we cannot check
             whether the model exists.
         """
         if importlib.util.find_spec("openai") is None:
@@ -114,8 +114,13 @@ class OpenAIModelSetup:
                     for model_pattern in CACHED_OPENAI_MODEL_IDS
                 ]
             )
-            if not model_exists and "OPENAI_API_KEY" in str(e):
-                return dict(missing_env_var="OPENAI_API_KEY")
+            if not model_exists:
+                if "OPENAI_API_KEY" in str(e):
+                    return dict(missing_env_var="OPENAI_API_KEY")
+                elif "AZURE_OPENAI_API_KEY" in str(e):
+                    return dict(missing_env_var="AZURE_OPENAI_API_KEY")
+                elif "AZURE_OPENAI_ENDPOINT" in str(e):
+                    return dict(missing_env_var="AZURE_OPENAI_ENDPOINT")
 
         return model_id in [model.id for model in all_models]
 

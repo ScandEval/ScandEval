@@ -11,7 +11,7 @@ from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, ModelConfig
-from .exceptions import NeedsExtraInstalled
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ if importlib.util.find_spec("tiktoken") is not None:
     import tiktoken
 
 if importlib.util.find_spec("openai") is not None:
-    from openai import NotFoundError, OpenAI
+    from openai import AzureOpenAI, NotFoundError, OpenAI
 
 
 logger = logging.getLogger(__package__)
@@ -338,10 +338,59 @@ class OpenAIModel:
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
-        self.client = OpenAI(
-            api_key=self.benchmark_config.openai_api_key, max_retries=60
-        )
+        self.client = self._initialize_openai_client()
         self.is_chat_model = self._is_chat_model()
+
+    def _initialize_openai_client(self) -> OpenAI | AzureOpenAI:
+        """Initialize and return the OpenAI client.
+
+        Returns:
+            The OpenAI client.
+
+        Raises:
+            InvalidBenchmark:
+                If the OpenAI API key is not specified.
+        """
+        if self.benchmark_config.openai_api_key is not None:
+            return OpenAI(api_key=self.benchmark_config.openai_api_key, max_retries=60)
+        elif self.benchmark_config.azure_openai_api_key is not None:
+            if self.benchmark_config.azure_openai_endpoint is None:
+                if self.benchmark_config.run_with_cli:
+                    raise InvalidBenchmark(
+                        "Azure OpenAI models require an endpoint to be specified. "
+                        "Please specify the endpoint with the "
+                        "`--azure-openai-endpoint` flag, or specify the environment "
+                        "variable `AZURE_OPENAI_ENDPOINT`."
+                    )
+                else:
+                    raise InvalidBenchmark(
+                        "Azure OpenAI models require an endpoint to be specified. "
+                        "Please specify the endpoint with the `azure_openai_endpoint` "
+                        "argument in the `Benchmarker` class, or specify the "
+                        "environment variable `AZURE_OPENAI_ENDPOINT`."
+                    )
+            return AzureOpenAI(
+                api_key=self.benchmark_config.azure_openai_api_key,
+                azure_endpoint=self.benchmark_config.azure_openai_endpoint,
+                api_version="2024-02-01",
+                max_retries=60,
+            )
+        elif self.benchmark_config.run_with_cli:
+            raise InvalidBenchmark(
+                "OpenAI models require an API key to be specified. Please specify the "
+                "`--openai-api-key` argument (or `--azure-openai-api-key` and "
+                "`--azure-openai-endpoint` arguments) or specify the environment "
+                "variables `OPENAI_API_KEY` (or `AZURE_OPENAI_API_KEY` and "
+                "`AZURE_OPENAI_ENDPOINT`)."
+            )
+        else:
+            raise InvalidBenchmark(
+                "OpenAI models require an API key to be specified. Please specify the "
+                "`openai_api_key` argument to the `Benchmarker` class (or "
+                "`azure_openai_api_key` and `azure_openai_endpoint` arguments) or "
+                "specify the environment variables `OPENAI_API_KEY` (or "
+                "`AZURE_OPENAI_API_KEY` and `AZURE_OPENAI_ENDPOINT`)."
+            )
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""

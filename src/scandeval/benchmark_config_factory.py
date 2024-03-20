@@ -38,6 +38,9 @@ def build_benchmark_config(
     cache_dir: str,
     token: bool | str | None,
     openai_api_key: str | None,
+    prefer_azure: bool,
+    azure_openai_api_key: str | None,
+    azure_openai_endpoint: str | None,
     force: bool,
     verbose: bool,
     trust_remote_code: bool,
@@ -91,6 +94,13 @@ def build_benchmark_config(
             The token to use for running the models.
         openai_api_key:
             The OpenAI API key to use for running the models.
+        prefer_azure:
+            Whether to prefer the Azure OpenAI API for running the models, over the
+            OpenAI API.
+        azure_openai_api_key:
+            The Azure OpenAI API key to use for running the models.
+        azure_openai_endpoint:
+            The Azure OpenAI endpoint to use for running the models.
         force:
             Whether to force the benchmark to run even if the results are already
             cached.
@@ -136,6 +146,37 @@ def build_benchmark_config(
 
     if openai_api_key is None:
         openai_api_key = os.getenv("OPENAI_API_KEY")
+    if azure_openai_api_key is None:
+        azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+    if azure_openai_endpoint is None:
+        azure_openai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+
+    # Ensure that we are not using both OpenAI and Azure OpenAI API keys
+    if all(
+        value is not None
+        for value in (openai_api_key, azure_openai_api_key, azure_openai_endpoint)
+    ):
+        if prefer_azure:
+            logger.info(
+                "Both OpenAI and Azure OpenAI API keys are set. Using Azure OpenAI."
+            )
+            openai_api_key = None
+        else:
+            if run_with_cli:
+                logger.info(
+                    "Both OpenAI and Azure OpenAI API keys are set. Using OpenAI since "
+                    "the `--prefer-azure` flag is not set."
+                )
+            else:
+                logger.info(
+                    "Both OpenAI and Azure OpenAI API keys are set. Using OpenAI since "
+                    "the `prefer_azure` argument is not set to True."
+                )
+            azure_openai_api_key = None
+            azure_openai_endpoint = None
+
+    # Sanity check
+    assert not (openai_api_key is not None and azure_openai_api_key is not None)
 
     framework_obj = Framework(framework) if framework is not None else None
 
@@ -175,6 +216,8 @@ def build_benchmark_config(
         evaluate_train=evaluate_train,
         token=token,
         openai_api_key=openai_api_key,
+        azure_openai_api_key=azure_openai_api_key,
+        azure_openai_endpoint=azure_openai_endpoint,
         force=force,
         progress_bar=progress_bar,
         save_results=save_results,

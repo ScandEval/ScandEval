@@ -136,6 +136,30 @@ from .tasks import get_all_tasks
     command.""",
 )
 @click.option(
+    "--openai-api-key",
+    type=str,
+    default=None,
+    show_default=True,
+    help="""The API key for the OpenAI API. If not specified then the environment
+    variable `OPENAI_API_KEY` will be used.""",
+)
+@click.option(
+    "--azure-openai-api-key",
+    type=str,
+    default=None,
+    show_default=True,
+    help="""The API key for the Azure OpenAI API. If not specified then the environment
+    variable `AZURE_OPENAI_API_KEY` will be used.""",
+)
+@click.option(
+    "--azure-openai-endpoint",
+    type=str,
+    default=None,
+    show_default=True,
+    help="""The endpoint for the Azure OpenAI API. If not specified then the environment
+    variable `AZURE_OPENAI_ENDPOINT` will be used.""",
+)
+@click.option(
     "--force/--no-force",
     "-f",
     default=False,
@@ -226,6 +250,9 @@ def benchmark(
     cache_dir: str,
     use_token: bool,
     token: str,
+    openai_api_key: str | None,
+    azure_openai_api_key: str | None,
+    azure_openai_endpoint: str | None,
     force: bool,
     verbose: bool,
     framework: str | None,
@@ -264,6 +291,9 @@ def benchmark(
         raise_errors=raise_errors,
         verbose=verbose,
         token=token_str_bool,
+        openai_api_key=openai_api_key,
+        azure_openai_api_key=azure_openai_api_key,
+        azure_openai_endpoint=azure_openai_endpoint,
         force=force,
         cache_dir=cache_dir,
         framework=framework,
