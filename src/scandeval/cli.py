@@ -144,6 +144,13 @@ from .tasks import get_all_tasks
     variable `OPENAI_API_KEY` will be used.""",
 )
 @click.option(
+    "--prefer-azure/--no-prefer-azure",
+    default=False,
+    show_default=True,
+    help="""Whether to prefer the Azure OpenAI API over the OpenAI API, if both are
+    available.""",
+)
+@click.option(
     "--azure-openai-api-key",
     type=str,
     default=None,
@@ -251,6 +258,7 @@ def benchmark(
     use_token: bool,
     token: str,
     openai_api_key: str | None,
+    prefer_azure: bool,
     azure_openai_api_key: str | None,
     azure_openai_endpoint: str | None,
     force: bool,
@@ -292,6 +300,7 @@ def benchmark(
         verbose=verbose,
         token=token_str_bool,
         openai_api_key=openai_api_key,
+        prefer_azure=prefer_azure,
         azure_openai_api_key=azure_openai_api_key,
         azure_openai_endpoint=azure_openai_endpoint,
         force=force,
