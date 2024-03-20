@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Support for Azure OpenAI models! These can now be benchmarked as with any other
+  model, where either the environment variables `AZURE_OPENAI_API_KEY` and
+  `AZURE_OPENAI_ENDPOINT` need to have been set, or alternatively through the
+  `--azure-openai-api-key` and `--azure-openai-endpoint` arguments.
+
+
 ## [v12.3.2] - 2024-03-19
 ### Fixed
 - There is an issue with the underlying `outlines` package that we use for structured
