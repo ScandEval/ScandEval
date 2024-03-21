@@ -22,8 +22,7 @@ if importlib.util.find_spec("tiktoken") is not None:
     import tiktoken
 
 if importlib.util.find_spec("openai") is not None:
-    from openai import AzureOpenAI, NotFoundError, OpenAI
-
+    from openai import AzureOpenAI, NotFoundError, OpenAI, BadRequestError
 
 logger = logging.getLogger(__package__)
 
@@ -74,7 +73,12 @@ class OpenAITokenizer:
     @property
     def encoding(self) -> "tiktoken.Encoding":
         """Return the underlying tiktoken encoding."""
-        return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
+        try:
+            return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
+        except KeyError:
+            # For Azure, the model_id is the deployment name. I do not know how to dynamically
+            # get the currently deployed model so assuming Azure only supports the latest models.
+            return tiktoken.get_encoding("cl100k_base")
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.
@@ -354,25 +358,26 @@ class OpenAIModel:
         if self.benchmark_config.openai_api_key is not None:
             return OpenAI(api_key=self.benchmark_config.openai_api_key, max_retries=60)
         elif self.benchmark_config.azure_openai_api_key is not None:
-            if self.benchmark_config.azure_openai_endpoint is None:
+            if self.benchmark_config.azure_openai_endpoint is None or self.benchmark_config.azure_openai_api_version is None:
                 if self.benchmark_config.run_with_cli:
                     raise InvalidBenchmark(
-                        "Azure OpenAI models require an endpoint to be specified. "
+                        "Azure OpenAI models require an endpoint and api version to be specified. "
                         "Please specify the endpoint with the "
-                        "`--azure-openai-endpoint` flag, or specify the environment "
-                        "variable `AZURE_OPENAI_ENDPOINT`."
+                        "`--azure-openai-endpoint` and `--azure_openai_api_version` flags, or specify the environment "
+                        "variables `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_VERSION`."
                     )
                 else:
                     raise InvalidBenchmark(
                         "Azure OpenAI models require an endpoint to be specified. "
                         "Please specify the endpoint with the `azure_openai_endpoint` "
-                        "argument in the `Benchmarker` class, or specify the "
-                        "environment variable `AZURE_OPENAI_ENDPOINT`."
+                        "and `azure_openai_api_version`"
+                        "arguments in the `Benchmarker` class, or specify the "
+                        "environment variables `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_VERSION`."
                     )
             return AzureOpenAI(
                 api_key=self.benchmark_config.azure_openai_api_key,
                 azure_endpoint=self.benchmark_config.azure_openai_endpoint,
-                api_version="2024-02-01",
+                api_version=self.benchmark_config.azure_openai_api_version,
                 max_retries=60,
             )
         elif self.benchmark_config.run_with_cli:
@@ -399,8 +404,8 @@ class OpenAIModel:
                 model=self.model_config.model_id, prompt="Test", max_tokens=1
             )
             return False
-        except NotFoundError as e:
-            if "This is a chat model" in str(e):
+        except (NotFoundError, BadRequestError) as e:
+            if "This is a chat model" in str(e) or "The completion operation does not work with the specified model" in str(e):
                 return True
             raise e
 

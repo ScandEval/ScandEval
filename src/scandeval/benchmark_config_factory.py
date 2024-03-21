@@ -41,6 +41,7 @@ def build_benchmark_config(
     prefer_azure: bool,
     azure_openai_api_key: str | None,
     azure_openai_endpoint: str | None,
+    azure_openai_api_version: str | None,
     force: bool,
     verbose: bool,
     trust_remote_code: bool,
@@ -101,6 +102,8 @@ def build_benchmark_config(
             The Azure OpenAI API key to use for running the models.
         azure_openai_endpoint:
             The Azure OpenAI endpoint to use for running the models.
+        azure_openai_api_version:
+            The Azure OpenAI api version to use for running the models.
         force:
             Whether to force the benchmark to run even if the results are already
             cached.
@@ -150,11 +153,13 @@ def build_benchmark_config(
         azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
     if azure_openai_endpoint is None:
         azure_openai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    if azure_openai_api_version is None:
+        azure_openai_api_version = os.getenv("AZURE_OPENAI_API_VERSION")
 
     # Ensure that we are not using both OpenAI and Azure OpenAI API keys
     if all(
         value is not None
-        for value in (openai_api_key, azure_openai_api_key, azure_openai_endpoint)
+        for value in (openai_api_key, azure_openai_api_key, azure_openai_endpoint, azure_openai_api_version)
     ):
         if prefer_azure:
             logger.info(
@@ -218,6 +223,7 @@ def build_benchmark_config(
         openai_api_key=openai_api_key,
         azure_openai_api_key=azure_openai_api_key,
         azure_openai_endpoint=azure_openai_endpoint,
+        azure_openai_api_version=azure_openai_api_version,
         force=force,
         progress_bar=progress_bar,
         save_results=save_results,

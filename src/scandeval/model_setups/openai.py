@@ -104,6 +104,11 @@ class OpenAIModelSetup:
         if importlib.util.find_spec("openai") is None:
             return dict(missing_extra="openai")
 
+        if self.benchmark_config.azure_openai_endpoint:
+            # The model ID for the Azure OpenAI API is the deployment name and therefore different
+            # from the model ID used in the OpenAI API. We'll just assume that the model exists.
+            return True
+
         all_models: list[openai.models.Model] = list()
         try:
             all_models = list(openai.models.list())
@@ -193,7 +198,12 @@ class OpenAIModelSetup:
         hf_model_config.pad_token_id = hf_model_config.vocab_size - 1
 
         # Check if the vocab size is correct, and if not then correct it
-        tok = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        try:
+            tok = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        except KeyError:
+            # For Azure, the model_id is the deployment name. I do not know how to dynamically
+            # get the currently deployed model so assuming Azure only supports the latest models.
+            tok = tiktoken.get_encoding("cl100k_base")
         for idx in range(hf_model_config.vocab_size - 1, 0, -1):
             try:
                 tok.decode([idx])
