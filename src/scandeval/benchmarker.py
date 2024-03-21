@@ -51,6 +51,7 @@ class BenchmarkConfigParams(BaseModel):
     prefer_azure: bool
     azure_openai_api_key: str | None
     azure_openai_endpoint: str | None
+    azure_openai_api_version: str | None
     force: bool
     verbose: bool
     trust_remote_code: bool
@@ -161,6 +162,7 @@ class Benchmarker:
         prefer_azure: bool = False,
         azure_openai_api_key: str | None = None,
         azure_openai_endpoint: str | None = None,
+        azure_openai_api_version: str |None = None,
         force: bool = False,
         verbose: bool = False,
         trust_remote_code: bool = False,
@@ -235,6 +237,10 @@ class Benchmarker:
                 The Azure OpenAI endpoint to use for authentication. If None, then this
                 will be loaded from the environment variable `AZURE_OPENAI_ENDPOINT`.
                 Defaults to None.
+            azure_openai_api_version:
+                The Azure OpenAI API version to use for authentication. If None, then this
+                will be loaded from the environment variable `AZURE_OPENAI_API_VERSION`.
+                Defaults to None.
             force:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to False.
@@ -292,6 +298,7 @@ class Benchmarker:
             prefer_azure=prefer_azure,
             azure_openai_api_key=azure_openai_api_key,
             azure_openai_endpoint=azure_openai_endpoint,
+            azure_openai_api_version=azure_openai_api_version,
             force=force,
             verbose=verbose,
             trust_remote_code=trust_remote_code,
@@ -350,6 +357,7 @@ class Benchmarker:
         openai_api_key: str | None = None,
         azure_openai_api_key: str | None = None,
         azure_openai_endpoint: str | None = None,
+        azure_openai_api_version: str |None = None,
         force: bool | None = None,
         verbose: bool | None = None,
         trust_remote_code: bool | None = None,
@@ -434,6 +442,10 @@ class Benchmarker:
                 The Azure OpenAI endpoint to use for authentication. If None, then this
                 will be loaded from the environment variable `AZURE_OPENAI_ENDPOINT`.
                 Defaults to the value specified when initialising the benchmarker.
+            azure_openai_api_version:
+                The api version for the Azure OpenAI API, e.g. "2023-12-01-preview". If
+                None then the environment varaible `AZURE_OPENAI_API_VERSION` will be used.
+                Defaults to the value specified when initialising the benchmarker.
             force:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to the value specified when initialising
@@ -514,6 +526,8 @@ class Benchmarker:
             benchmark_config_params.azure_openai_api_key = azure_openai_api_key
         if azure_openai_endpoint is not None:
             benchmark_config_params.azure_openai_endpoint = azure_openai_endpoint
+        if azure_openai_api_version is not None:
+            benchmark_config_params.azure_openai_api_version = azure_openai_api_version
         if force is not None:
             benchmark_config_params.force = force
         if verbose is not None:

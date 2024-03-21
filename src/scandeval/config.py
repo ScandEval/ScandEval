@@ -129,6 +129,9 @@ class BenchmarkConfig:
         azure_openai_endpoint:
             The endpoint for the Azure OpenAI API. If None then Azure OpenAI models will
             not be benchmarked.
+        azure_openai_api_version:
+            The api version for the Azure OpenAI API, e.g. "2023-12-01-preview". If
+            None then Azure OpenAI models will not be benchmarked.
         force:
             Whether to force the benchmark to run even if the results are already
             cached.
@@ -173,6 +176,7 @@ class BenchmarkConfig:
     openai_api_key: str | None
     azure_openai_api_key: str | None
     azure_openai_endpoint: str | None
+    azure_openai_api_version: str | None
     force: bool
     progress_bar: bool
     save_results: bool
