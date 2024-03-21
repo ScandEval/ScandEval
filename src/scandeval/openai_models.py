@@ -508,24 +508,20 @@ class OpenAIModel:
         if self.dataset_config.task == NER and self.supports_json_mode:
             generation_kwargs["response_format"] = dict(type="json_object")
 
-        if not self.is_chat_model:
-            model_output = self.client.completions.create(
-                prompt=prompt, **generation_kwargs
-            )
-        else:
-            model_output = self.client.chat.completions.create(
-                messages=[dict(role="user", content=prompt)], **generation_kwargs
-            )
-
-        if isinstance(model_output, dict) and "error" in model_output:
-            logger.debug(
-                f"Encountered error during OpenAI generation: {model_output['error']}"
-            )
+        try:
+            if not self.is_chat_model:
+                model_output = self.client.completions.create(
+                    prompt=prompt, **generation_kwargs
+                )
+                generation_output = model_output.choices[0].text.strip()
+            else:
+                model_output = self.client.chat.completions.create(
+                    messages=[dict(role="user", content=prompt)], **generation_kwargs
+                )
+                generation_output = model_output.choices[0].message.content.strip()
+        except BadRequestError as e:
+            logger.debug(f"Encountered error during OpenAI generation: {e}")
             generation_output = " "
-        elif not self.is_chat_model:
-            generation_output = model_output.choices[0].text.strip()
-        else:
-            generation_output = model_output.choices[0].message.content.strip()
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
