@@ -68,6 +68,7 @@ def benchmark_config(
         openai_api_key=None,
         azure_openai_api_key=None,
         azure_openai_endpoint=None,
+        azure_openai_api_version=None,
         force=False,
         progress_bar=False,
         save_results=True,
