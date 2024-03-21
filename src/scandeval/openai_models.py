@@ -3,6 +3,7 @@
 import importlib.util
 import logging
 from typing import TYPE_CHECKING
+from openai.types.chat.completion_create_params import ResponseFormat
 
 import torch
 from torch import LongTensor
@@ -10,7 +11,9 @@ from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
-from .config import BenchmarkConfig, ModelConfig
+from scandeval.tasks import NER
+
+from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
@@ -306,6 +309,8 @@ class OpenAIModel:
             The model configuration.
         config:
             The Hugging Face model configuration.
+        dataset_config:
+            The dataset configuration.
         benchmark_config:
             The benchmark configuration.
         tokenizer:
@@ -320,6 +325,7 @@ class OpenAIModel:
         self,
         model_config: ModelConfig,
         hf_model_config: "PretrainedConfig",
+        dataset_config: DatasetConfig,
         benchmark_config: BenchmarkConfig,
         tokenizer: OpenAITokenizer,
     ) -> None:
@@ -340,11 +346,13 @@ class OpenAIModel:
 
         self.model_config = model_config
         self.config = hf_model_config
+        self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
         self.client = self._initialize_openai_client()
         self.is_chat_model = self._is_chat_model()
+        self.supports_json_mode = self._supports_json_mode()
 
     def _initialize_openai_client(self) -> OpenAI | AzureOpenAI:
         """Initialize and return the OpenAI client.
@@ -418,6 +426,24 @@ class OpenAIModel:
                 return True
             raise e
 
+    def _supports_json_mode(self) -> bool:
+        """Returns whether the model supports JSON mode."""
+        if not self.is_chat_model:
+            return False
+        try:
+            self.client.chat.completions.create(
+                model=self.model_config.model_id,
+                messages=[dict(role="user", content="Test json")],
+                max_tokens=1,
+                response_format=ResponseFormat(type="json_object"),
+            )
+            return True
+        except BadRequestError as e:
+            no_json_mode_strings = ["not supported with this model"]
+            if any(string in str(e) for string in no_json_mode_strings):
+                return False
+            raise e
+
     def generate(
         self,
         inputs: "Tensor",
@@ -478,6 +504,9 @@ class OpenAIModel:
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
         )
+
+        if self.dataset_config.task == NER and self.supports_json_mode:
+            generation_kwargs["response_format"] = dict(type="json_object")
 
         if not self.is_chat_model:
             model_output = self.client.completions.create(

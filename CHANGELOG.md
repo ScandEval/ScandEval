@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_VERSION` need to have been set, or
   alternatively through the `--azure-openai-api-key`, `--azure-openai-endpoint` and
   `--azure-openai-api-version` arguments.
+- We now use the new JSON mode for newer OpenAI models for the NER task, to ensure
+  better JSON generation.
 
 
 ## [v12.3.2] - 2024-03-19
