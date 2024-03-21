@@ -37,6 +37,7 @@ def test_cli_param_names(params):
         "prefer_azure",
         "azure_openai_api_key",
         "azure_openai_endpoint",
+        "azure_openai_api_version",
         "force",
         "framework",
         "device",
@@ -72,6 +73,7 @@ def test_cli_param_types(params):
     assert params["prefer_azure"] == BOOL
     assert params["azure_openai_api_key"] == STRING
     assert params["azure_openai_endpoint"] == STRING
+    assert params["azure_openai_api_version"] == STRING
     assert params["force"] == BOOL
     assert isinstance(params["framework"], Choice)
     assert isinstance(params["device"], Choice)
