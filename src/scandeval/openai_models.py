@@ -520,7 +520,10 @@ class OpenAIModel:
                 )
                 generation_output = model_output.choices[0].message.content.strip()
         except BadRequestError as e:
-            logger.debug(f"Encountered error during OpenAI generation: {e}")
+            logger.debug(
+                "Encountered error during OpenAI generation - returning blank string "
+                f"instead. The error thrown was {str(e)!r}"
+            )
             generation_output = " "
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
