@@ -522,7 +522,8 @@ class OpenAIModel:
         except BadRequestError as e:
             logger.debug(
                 "Encountered error during OpenAI generation - returning blank string "
-                f"instead. The error thrown was {str(e)!r}"
+                f"instead. The error thrown was {str(e)!r}, and the prompt causing "
+                f"it was {prompt!r}."
             )
             generation_output = " "
 
