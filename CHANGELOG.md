@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Support for Azure OpenAI models! These can now be benchmarked as with any other
-  model, where either the environment variables `AZURE_OPENAI_API_KEY` and
-  `AZURE_OPENAI_ENDPOINT` need to have been set, or alternatively through the
-  `--azure-openai-api-key` and `--azure-openai-endpoint` arguments.
+  model, where either the environment variables `AZURE_OPENAI_API_KEY`,
+  `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_VERSION` need to have been set, or
+  alternatively through the `--azure-openai-api-key`, `--azure-openai-endpoint` and
+  `--azure-openai-api-version` arguments.
 
 
 ## [v12.3.2] - 2024-03-19
