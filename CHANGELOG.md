@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `--azure-openai-api-version` arguments.
 - We now use the new JSON mode for newer OpenAI models for the NER task, to ensure
   better JSON generation.
+- If an OpenAI prompt is caught by the content filter then we simply return a blank
+  string.
 
 
 ## [v12.3.2] - 2024-03-19

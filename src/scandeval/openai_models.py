@@ -512,11 +512,19 @@ class OpenAIModel:
             model_output = self.client.completions.create(
                 prompt=prompt, **generation_kwargs
             )
-            generation_output = model_output.choices[0].text.strip()
         else:
             model_output = self.client.chat.completions.create(
                 messages=[dict(role="user", content=prompt)], **generation_kwargs
             )
+
+        if isinstance(model_output, dict) and "error" in model_output:
+            logger.debug(
+                f"Encountered error during OpenAI generation: {model_output['error']}"
+            )
+            generation_output = " "
+        elif not self.is_chat_model:
+            generation_output = model_output.choices[0].text.strip()
+        else:
             generation_output = model_output.choices[0].message.content.strip()
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
