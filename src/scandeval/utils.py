@@ -226,13 +226,13 @@ def get_class_by_name(
     for name in class_name:
         # Get the snake_case and PascalCase version of the class name
         name_snake = name.replace("-", "_")
-        name_pascal = kebab_to_pascal(name)
+        name_pascal = kebab_to_pascal(kebab_string=name)
 
         # Import the module
         try:
             if not module_name:
                 module_name = f"scandeval.{name_snake}"
-            module = importlib.import_module(module_name)
+            module = importlib.import_module(name=module_name)
         except ModuleNotFoundError:
             module_name = None
             continue

@@ -45,15 +45,19 @@ class DatasetFactory:
             dataset_config = dataset
 
         # Get the benchmark class based on the task
+        potential_class_names = [
+            dataset_config.name,
+            dataset_config.task.name,
+            dataset_config.task.supertask,
+        ]
         benchmark_cls: Type["BenchmarkDataset"] | None = get_class_by_name(
-            [
-                dataset_config.name,
-                dataset_config.task.name,
-                dataset_config.task.supertask,
-            ]
+            class_name=potential_class_names
         )
         if not benchmark_cls:
-            raise ValueError(f"Unknown dataset task: {dataset_config.task}")
+            raise ValueError(
+                "Could not find a benchmark class for any of the following potential "
+                f"names: {', '.join(potential_class_names)}."
+            )
 
         # Create the dataset
         dataset_obj = benchmark_cls(
