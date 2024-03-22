@@ -4,8 +4,9 @@ FROM nvidia/cuda:12.2.0-base-ubuntu22.04
 RUN apt-get -y update && \
     apt-get -y upgrade && \
     apt-get install -y gcc python3.11 python3-pip python3-dev && \
-    python3 -m pip install --upgrade pip && \
-    python3 -m pip install scandeval[all]
+    python3 -m pip install --upgrade pip wheel && \
+    python3 -m pip install scandeval[all] && \
+    FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE python3 -m pip install flash-attn --no-build-isolation
 
 # Move the existing evaluation results into the container, to avoid re-running the
 # evaluation
