@@ -115,7 +115,7 @@ $ docker build --pull -t scandeval -f Dockerfile.cuda .
 
 With the Docker image built, we can now evaluate any model as follows:
 ```
-$ docker run -e args="<scandeval-arguments>" --gpus all --name scandeval --rm scandeval
+$ docker run -e args="<scandeval-arguments>" --gpus 1 --name scandeval --rm scandeval
 ```
 
 Here `<scandeval-arguments>` consists of the arguments added to the `scandeval` CLI
