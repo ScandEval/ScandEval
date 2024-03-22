@@ -4,12 +4,10 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, Type
+from typing import TYPE_CHECKING, Any, Type
 
 import evaluate
-import numpy as np
 import torch
-from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from datasets.load import load_dataset
 from huggingface_hub import HfApi
@@ -17,27 +15,35 @@ from huggingface_hub.hf_api import ModelInfo
 from huggingface_hub.utils import HfHubHTTPError, HFValidationError
 from requests import RequestException
 from tqdm.auto import tqdm
-from transformers import PretrainedConfig, Trainer
-from transformers.modeling_utils import ModelOutput, PreTrainedModel
+from transformers import Trainer
+from transformers.modeling_utils import PreTrainedModel
 
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .finetuning import finetune
 from .generation import generate
 from .model_config import get_model_config
 from .model_loading import load_model
 from .openai_models import OpenAIModel
-from .protocols import GenerativeModel, Tokenizer
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .tasks import SPEED
-from .types import Labels, Predictions, ScoreDict
 from .utils import (
     GENERATIVE_MODEL_TASKS,
     enforce_reproducibility,
     model_is_generative,
     should_prompts_be_stripped,
 )
+
+if TYPE_CHECKING:
+    from datasets.arrow_dataset import Dataset
+    from numpy.random import Generator
+    from transformers import PretrainedConfig
+    from transformers.modeling_utils import ModelOutput
+
+    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+    from .protocols import GenerativeModel, Tokenizer
+    from .types import Labels, Predictions, ScoreDict
+
 
 logger = logging.getLogger(__package__)
 
@@ -59,7 +65,7 @@ class BenchmarkDataset(ABC):
     """
 
     def __init__(
-        self, dataset_config: DatasetConfig, benchmark_config: BenchmarkConfig
+        self, dataset_config: "DatasetConfig", benchmark_config: "BenchmarkConfig"
     ) -> None:
         """Initialise the dataset.
 
@@ -92,7 +98,7 @@ class BenchmarkDataset(ABC):
             logging_level = logging.INFO
         logger.setLevel(logging_level)
 
-    def benchmark(self, model_id: str) -> tuple[ScoreDict, dict[str, bool | int]]:
+    def benchmark(self, model_id: str) -> tuple["ScoreDict", dict[str, bool | int]]:
         """Benchmark a model.
 
         Args:
@@ -148,14 +154,8 @@ class BenchmarkDataset(ABC):
             benchmarking_generative_model=benchmarking_generative_model,
         )
 
-        # Set variable with number of iterations
-        if hasattr(sys, "_called_from_test"):
-            num_iter = 2
-        else:
-            num_iter = self.benchmark_config.num_iterations
-
         if self.dataset_config.task != SPEED:
-            train, val, tests = self._load_data(num_iter=num_iter, rng=rng)
+            train, val, tests = self._load_data(rng=rng)
             prepared_train, prepared_val, prepared_tests = self._load_prepared_data(
                 train=train,
                 val=val,
@@ -168,7 +168,7 @@ class BenchmarkDataset(ABC):
 
         # Set up progress bar
         itr = tqdm(
-            iterable=range(num_iter),
+            iterable=range(self.benchmark_config.num_iterations),
             desc="Benchmarking",
             disable=not self.benchmark_config.progress_bar,
         )
@@ -231,8 +231,8 @@ class BenchmarkDataset(ABC):
     def _get_metadata(
         self,
         model_id: str,
-        model: PreTrainedModel | GenerativeModel,
-        tokenizer: Tokenizer,
+        model: "PreTrainedModel | GenerativeModel",
+        tokenizer: "Tokenizer",
         benchmarking_generative_model: bool,
     ) -> dict[str, int]:
         """Get metadata about the model.
@@ -333,13 +333,11 @@ class BenchmarkDataset(ABC):
         return metadata_dict
 
     def _load_data(
-        self, num_iter: int, rng: np.random.Generator
-    ) -> tuple[Dataset, Dataset, list[Dataset]]:
+        self, rng: "Generator"
+    ) -> tuple["Dataset", "Dataset", list["Dataset"]]:
         """Load the raw bootstrapped datasets.
 
         Args:
-            num_iter:
-                The number of iterations to run.
             rng:
                 The random number generator to use.
 
@@ -387,24 +385,26 @@ class BenchmarkDataset(ABC):
 
         # If we are testing then truncate the test set
         if hasattr(sys, "_called_from_test"):
-            test = test.select(range(2))
+            test = test.select(range(1))
 
         # Bootstrap the test set
-        test_bidxs = rng.integers(0, len(test), size=(num_iter, len(test)))
+        test_bidxs = rng.integers(
+            0, len(test), size=(self.benchmark_config.num_iterations, len(test))
+        )
         tests = [test.select(test_bidxs[idx]) for idx in range(test_bidxs.shape[0])]
 
         return train, val, tests
 
     def _load_prepared_data(
         self,
-        train: Dataset,
-        val: Dataset,
-        tests: list[Dataset],
-        model_config: ModelConfig,
-        hf_model_config: PretrainedConfig,
-        tokenizer: Tokenizer,
+        train: "Dataset",
+        val: "Dataset",
+        tests: list["Dataset"],
+        model_config: "ModelConfig",
+        hf_model_config: "PretrainedConfig",
+        tokenizer: "Tokenizer",
         benchmarking_generative_model: bool,
-    ) -> tuple[Dataset, Dataset, list[Dataset]]:
+    ) -> tuple["Dataset", "Dataset", list["Dataset"]]:
         """Load the data and prepare it for training.
 
         Args:
@@ -436,7 +436,7 @@ class BenchmarkDataset(ABC):
 
         # Prepare the train and validation datasets
         with tqdm(
-            total=4 if hasattr(sys, "_called_from_test") else 12,
+            total=2 + self.benchmark_config.num_iterations,
             desc="Preprocessing data splits",
             disable=hasattr(sys, "_called_from_test"),
         ) as pbar:
@@ -469,7 +469,7 @@ class BenchmarkDataset(ABC):
                 )
 
             try:
-                prepared_tests: list[Dataset] = list()
+                prepared_tests: list["Dataset"] = list()
                 for itr_idx, test in enumerate(tests):
                     if benchmarking_generative_model:
                         itr_seed = 4242 + itr_idx
@@ -582,7 +582,7 @@ class BenchmarkDataset(ABC):
         return Trainer
 
     def _get_evaluate_inputs(
-        self, dataset: Dataset, prepared_dataset: Dataset, metric_key_prefix: str
+        self, dataset: "Dataset", prepared_dataset: "Dataset", metric_key_prefix: str
     ) -> dict[str, Any]:
         """Returns the inputs to the `Trainer.evaluate` method.
 
@@ -597,7 +597,7 @@ class BenchmarkDataset(ABC):
         return dict(eval_dataset=prepared_dataset, metric_key_prefix=metric_key_prefix)
 
     @abstractmethod
-    def _preprocess_data(self, dataset: Dataset, **kwargs) -> Dataset:
+    def _preprocess_data(self, dataset: "Dataset", **kwargs) -> "Dataset":
         """Preprocess a dataset.
 
         Args:
@@ -615,8 +615,8 @@ class BenchmarkDataset(ABC):
     @abstractmethod
     def _load_data_collator(
         self,
-        tokenizer: Tokenizer | None = None,
-        model: PreTrainedModel | GenerativeModel | None = None,
+        tokenizer: "Tokenizer | None" = None,
+        model: "PreTrainedModel | GenerativeModel | None" = None,
     ):
         """Load the data collator used to prepare samples during finetuning.
 
@@ -635,7 +635,9 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _compute_metrics(
-        self, model_outputs_and_labels: tuple[Predictions, Labels], id2label: list[str]
+        self,
+        model_outputs_and_labels: tuple["Predictions", "Labels"],
+        id2label: list[str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -654,7 +656,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _extract_few_shot_examples(
-        self, train_dataset: Dataset, random_seed: int
+        self, train_dataset: "Dataset", random_seed: int
     ) -> list[dict[str, Any]]:
         """Extract few-shot examples from the training dataset.
 
@@ -671,7 +673,7 @@ class BenchmarkDataset(ABC):
 
     @abstractmethod
     def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict], tokenizer: Tokenizer
+        self, examples: dict, few_shot_examples: list[dict], tokenizer: "Tokenizer"
     ) -> dict:
         """Apply a few-shot prompt to the examples.
 
@@ -692,8 +694,8 @@ class BenchmarkDataset(ABC):
     def _extract_labels_from_generation(
         self,
         input_batch: dict[str, list],
-        model_output: ModelOutput,
-        tokenizer: Tokenizer,
+        model_output: "ModelOutput",
+        tokenizer: "Tokenizer",
     ) -> list[Any]:
         """Extract the predicted labels from the generated output.
 

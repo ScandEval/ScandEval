@@ -2,6 +2,7 @@
 
 import gc
 import importlib
+import importlib.util
 import logging
 import os
 import random
@@ -11,7 +12,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Type
+from typing import TYPE_CHECKING, Type
 
 import numpy as np
 import pkg_resources
@@ -19,41 +20,31 @@ import requests
 import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
-from huggingface_hub.hf_api import ModelInfo
-from pydantic import conlist, create_model
 from requests.exceptions import RequestException
-from transformers import GenerationConfig, PreTrainedModel
+from transformers import GenerationConfig
 from transformers import logging as tf_logging
 
-from .config import DatasetConfig, Language
 from .enums import Framework
-from .exceptions import NaNValueInModelOutput, NeedsExtraInstalled
+from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
-from .protocols import GenerativeModel, Tokenizer
-from .types import Predictions
 
-try:
-    from lmformatenforcer import JsonSchemaParser
+if TYPE_CHECKING:
+    from huggingface_hub.hf_api import ModelInfo
+    from transformers import PreTrainedModel
 
-    _lmformatenforcer_available = True
-except ImportError:
-
-    class JsonSchemaParser:  # type: ignore[no-redef]
-        """Dummy class."""
-
-        pass
-
-    _lmformatenforcer_available = False
-
+    from .config import Language
+    from .protocols import GenerativeModel, Tokenizer
+    from .types import Predictions
 
 logger = logging.getLogger(__package__)
 
 
-try:
+if importlib.util.find_spec("ray") is not None:
     import ray
+
+
+if importlib.util.find_spec("vllm") is not None:
     import vllm
-except ImportError:
-    logger.debug("Failed to import vLLM, assuming that it is not needed.")
 
 
 # This is used as input to generative models; it cannot be a special token
@@ -187,20 +178,17 @@ def block_terminal_output():
     logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.CRITICAL)
 
-    # The `lmformatenforcer` uses the root logger, so we need to set the level of that
-    logging.getLogger("root").setLevel(logging.CRITICAL)
-
     def init_vllm_logger(name: str):
         """Dummy function to initialise vLLM loggers with the CRITICAL level."""
         vllm_logger = logging.getLogger(name)
         vllm_logger.setLevel(logging.CRITICAL)
         return vllm_logger
 
-    try:
+    if importlib.util.find_spec("vllm") is not None:
         vllm.logger.init_logger = init_vllm_logger
+
+    if importlib.util.find_spec("ray") is not None:
         ray._private.worker._worker_logs_enabled = False
-    except NameError:
-        pass
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
@@ -289,7 +277,7 @@ def internet_connection_available() -> bool:
         return False
 
 
-def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
+def get_special_token_metadata(tokenizer: "Tokenizer") -> dict:
     """Get the special token metadata for a tokenizer.
 
     Args:
@@ -342,7 +330,7 @@ def get_special_token_metadata(tokenizer: Tokenizer) -> dict:
 
 
 def get_huggingface_model_lists(
-    languages: list[Language] | None, token: bool | str
+    languages: list["Language"] | None, token: bool | str | None
 ) -> dict[str, list[str]]:
     """Fetches up-to-date model lists from the Hugging Face Hub.
 
@@ -354,7 +342,7 @@ def get_huggingface_model_lists(
             The authentication token for the Hugging Face Hub. If a boolean value is
             specified then the token will be fetched from the Hugging Face CLI, where
             the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token. Defaults to False.
+            specified then it will be used as the token.
 
     Returns:
         The keys are filterings of the list, which includes all language codes,
@@ -396,7 +384,7 @@ def get_huggingface_model_lists(
     model_lists = defaultdict(list)
 
     # Do not iterate over all the languages if we are not filtering on language
-    language_itr: list[Language | None]
+    language_itr: list["Language | None"]
     if {lang.code for lang in language_list} == {lang.code for lang in all_languages}:
         language_itr = [None]
     else:
@@ -411,7 +399,7 @@ def get_huggingface_model_lists(
             language_str = None
 
         # Fetch the model list
-        models: list[ModelInfo] = list(
+        models: list["ModelInfo"] = list(
             api.list_models(filter=ModelFilter(language=language_str), token=token)
         )
 
@@ -556,7 +544,7 @@ class HiddenPrints:
         sys.stderr = self._original_stderr
 
 
-def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
+def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
     """Check if a model is generative or not.
 
     Args:
@@ -587,7 +575,7 @@ def model_is_generative(model: PreTrainedModel | GenerativeModel) -> bool:
         return False
 
 
-def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None:
+def raise_if_model_output_contains_nan_values(model_output: "Predictions") -> None:
     """Raise an exception if the model output contains NaN values.
 
     Args:
@@ -609,30 +597,8 @@ def raise_if_model_output_contains_nan_values(model_output: Predictions) -> None
                 raise NaNValueInModelOutput()
 
 
-def get_ner_parser(dataset_config: DatasetConfig) -> JsonSchemaParser:
-    """Get the JSON schema parser used for structured generation for the NER task.
-
-    Args:
-        dataset_config:
-            The dataset configuration.
-
-    Returns:
-        The JSON schema parser.
-    """
-    if not _lmformatenforcer_available:
-        raise NeedsExtraInstalled(extra="generative")
-
-    tag_names = set(dataset_config.prompt_label_mapping.values())
-    keys_and_their_types: dict[str, Any] = {
-        tag_name: (conlist(str, max_length=5), ...) for tag_name in tag_names
-    }
-    AnswerFormat = create_model("AnswerFormat", **keys_and_their_types)
-    parser = JsonSchemaParser(json_schema=AnswerFormat.schema())
-    return parser
-
-
 def should_prompts_be_stripped(
-    labels_to_be_generated: list[str], tokenizer: Tokenizer
+    labels_to_be_generated: list[str], tokenizer: "Tokenizer"
 ) -> bool:
     """Determine if we should strip the prompts for few-shot evaluation.
 
@@ -670,7 +636,7 @@ def should_prompts_be_stripped(
 
 
 def should_prefix_space_be_added_to_labels(
-    labels_to_be_generated: list[str], tokenizer: Tokenizer
+    labels_to_be_generated: list[str], tokenizer: "Tokenizer"
 ) -> bool:
     """Determine if we should add a prefix space to the labels.
 

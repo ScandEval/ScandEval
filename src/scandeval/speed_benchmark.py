@@ -2,29 +2,34 @@
 
 import logging
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 import pyinfer
 import torch
 from tqdm.auto import tqdm
 from transformers.modeling_utils import GenerationConfig, PreTrainedModel
-from transformers.tokenization_utils import PreTrainedTokenizer
 
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark
 from .model_loading import load_model
-from .protocols import GenerativeModel, Tokenizer
 from .utils import clear_memory, model_is_generative
+
+if TYPE_CHECKING:
+    from transformers.tokenization_utils import PreTrainedTokenizer
+
+    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+    from .protocols import GenerativeModel, Tokenizer
+
 
 logger = logging.getLogger(__package__)
 
 
 def benchmark_speed(
     itr: tqdm,
-    tokenizer: PreTrainedTokenizer,
+    tokenizer: "PreTrainedTokenizer",
     model: PreTrainedModel,
-    model_config: ModelConfig,
-    dataset_config: DatasetConfig,
-    benchmark_config: BenchmarkConfig,
+    model_config: "ModelConfig",
+    dataset_config: "DatasetConfig",
+    benchmark_config: "BenchmarkConfig",
 ) -> dict[str, list[dict[str, float]]]:
     """Benchmark model inference speed.
 
@@ -70,12 +75,12 @@ def benchmark_speed(
 
 
 def benchmark_speed_single_iteration(
-    tokenizer: Tokenizer,
-    model: PreTrainedModel | GenerativeModel,
+    tokenizer: "Tokenizer",
+    model: "PreTrainedModel | GenerativeModel",
     itr_idx: int,
-    model_config: ModelConfig,
-    dataset_config: DatasetConfig,
-    benchmark_config: BenchmarkConfig,
+    model_config: "ModelConfig",
+    dataset_config: "DatasetConfig",
+    benchmark_config: "BenchmarkConfig",
 ) -> dict[str, dict[str, float]] | Exception:
     """Run a single iteration of the speed benchmark.
 

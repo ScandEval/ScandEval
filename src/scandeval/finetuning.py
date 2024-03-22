@@ -6,30 +6,32 @@ import sys
 import warnings
 from collections import defaultdict
 from functools import partial
-from typing import Any, Callable, Type
+from typing import TYPE_CHECKING, Any, Callable, Type
 
 import torch
 from datasets import Dataset
 from tqdm.auto import tqdm
 from transformers import (
-    DataCollator,
     EarlyStoppingCallback,
     IntervalStrategy,
     PreTrainedModel,
     PrinterCallback,
     ProgressCallback,
-    Trainer,
     TrainingArguments,
 )
 from transformers.trainer import OptimizerNames
 
 from .callbacks import NeverLeaveProgressCallback
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .enums import DataType
 from .exceptions import InvalidBenchmark, NaNValueInModelOutput
 from .model_loading import load_model
-from .protocols import Tokenizer
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
+
+if TYPE_CHECKING:
+    from transformers import DataCollator, Trainer
+
+    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+    from .protocols import Tokenizer
 
 logger = logging.getLogger(__package__)
 
@@ -43,13 +45,13 @@ def finetune(
     prepared_val: Dataset,
     prepared_tests: list[Dataset],
     model: PreTrainedModel,
-    tokenizer: Tokenizer,
-    model_config: ModelConfig,
-    benchmark_config: BenchmarkConfig,
-    dataset_config: DatasetConfig,
+    tokenizer: "Tokenizer",
+    model_config: "ModelConfig",
+    benchmark_config: "BenchmarkConfig",
+    dataset_config: "DatasetConfig",
     compute_metrics: Callable,
-    data_collator: DataCollator,
-    trainer_class: Type[Trainer],
+    data_collator: "DataCollator",
+    trainer_class: Type["Trainer"],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],
     preprocess_logits_for_metrics: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
 ) -> dict[str, list[dict[str, float]]]:
@@ -214,20 +216,20 @@ def finetune(
 
 def finetune_single_iteration(
     iteration_idx: int,
-    model_config: ModelConfig,
+    model_config: "ModelConfig",
     train: Dataset,
     test: Dataset,
     prepared_train: Dataset,
     prepared_val: Dataset,
     prepared_test: Dataset,
     training_args: TrainingArguments,
-    benchmark_config: BenchmarkConfig,
-    dataset_config: DatasetConfig,
-    data_collator: DataCollator,
+    benchmark_config: "BenchmarkConfig",
+    dataset_config: "DatasetConfig",
+    data_collator: "DataCollator",
     compute_metrics: Callable,
-    tokenizer: Tokenizer | None,
+    tokenizer: "Tokenizer | None",
     model: PreTrainedModel | None,
-    trainer_class: Type[Trainer],
+    trainer_class: Type["Trainer"],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],
     preprocess_logits_for_metrics: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
 ) -> dict[str, dict[str, float]]:
@@ -363,8 +365,8 @@ def finetune_single_iteration(
 
 
 def get_training_args(
-    benchmark_config: BenchmarkConfig,
-    model_config: ModelConfig,
+    benchmark_config: "BenchmarkConfig",
+    model_config: "ModelConfig",
     iteration_idx: int,
     dtype: DataType,
     batch_size: int | None = None,
@@ -418,7 +420,7 @@ def get_training_args(
             eval_steps=30,
             logging_steps=30,
             save_steps=30,
-            max_steps=2 if hasattr(sys, "_called_from_test") else 10_000,
+            max_steps=1 if hasattr(sys, "_called_from_test") else 10_000,
             use_cpu=benchmark_config.device == torch.device("cpu"),
             report_to=[],
             save_total_limit=1,
@@ -435,5 +437,9 @@ def get_training_args(
             disable_tqdm=not benchmark_config.progress_bar,
             ddp_find_unused_parameters=False,
         )
+
+        # TEMP: Use only 1 GPU for now for finetuning
+        if benchmark_config.device == torch.device("cuda"):
+            training_args._n_gpu = 1
 
     return training_args

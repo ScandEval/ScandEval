@@ -2,15 +2,22 @@
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from transformers import AutoConfig, PreTrainedModel
+from transformers import AutoConfig
 
-from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidModel
-from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
 from .hf import HFModelSetup
+
+if TYPE_CHECKING:
+    from transformers import PreTrainedModel
+
+    from ..config import BenchmarkConfig, DatasetConfig
+    from ..protocols import GenerativeModel, Tokenizer
+
 
 logger = logging.getLogger(__package__)
 
@@ -23,7 +30,7 @@ class LocalModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+    def __init__(self, benchmark_config: "BenchmarkConfig") -> None:
         """Initialize the LocalModelSetup class.
 
         Args:
@@ -32,7 +39,7 @@ class LocalModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model exists locally.
 
         Args:
@@ -40,8 +47,8 @@ class LocalModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists locally, or the name of an extra that needs to be
-            installed to check if the model exists.
+            Whether the model exist, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
         # Ensure that `model_id` is a Path object
         model_dir = Path(model_id)
@@ -121,8 +128,8 @@ class LocalModelSetup:
         return model_config
 
     def load_model(
-        self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+        self, model_config: ModelConfig, dataset_config: "DatasetConfig"
+    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
         """Load a local Hugging Face model.
 
         Args:

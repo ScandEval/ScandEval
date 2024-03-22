@@ -6,7 +6,7 @@ import os
 import warnings
 from json import JSONDecodeError
 from time import sleep
-from typing import Type
+from typing import TYPE_CHECKING, Type
 
 import torch
 from huggingface_hub import HfApi, ModelFilter
@@ -14,16 +14,10 @@ from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
 from requests.exceptions import RequestException
-from transformers import (
-    AutoConfig,
-    AutoTokenizer,
-    BitsAndBytesConfig,
-    PretrainedConfig,
-    PreTrainedModel,
-)
+from transformers import AutoConfig, AutoTokenizer, BitsAndBytesConfig
 from urllib3.exceptions import RequestError
 
-from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import (
     FlashAttentionNotInstalled,
@@ -36,7 +30,6 @@ from ..exceptions import (
     NoInternetConnection,
 )
 from ..languages import get_all_languages
-from ..protocols import GenerativeModel, Tokenizer
 from ..utils import (
     GENERATIVE_DATASET_SUPERTASKS,
     GENERATIVE_DATASET_TASKS,
@@ -49,6 +42,13 @@ from ..utils import (
 )
 from ..vllm_models import VLLMModel
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
+
+if TYPE_CHECKING:
+    from transformers import PretrainedConfig, PreTrainedModel
+
+    from ..config import BenchmarkConfig, DatasetConfig
+    from ..protocols import GenerativeModel, Tokenizer
+
 
 logger = logging.getLogger(__package__)
 
@@ -65,7 +65,7 @@ class HFModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+    def __init__(self, benchmark_config: "BenchmarkConfig") -> None:
         """Initialize the model setup.
 
         Args:
@@ -74,7 +74,7 @@ class HFModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model ID denotes a model on the Hugging Face Hub.
 
         Args:
@@ -82,8 +82,8 @@ class HFModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists on the Hugging Face Hub, or the name of an extra
-            that needs to be installed to check if the model exists.
+            Whether the model exist, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
         # Extract the revision from the model_id, if present
         model_id, revision = (
@@ -214,8 +214,8 @@ class HFModelSetup:
         return model_config
 
     def load_model(
-        self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+        self, model_config: ModelConfig, dataset_config: "DatasetConfig"
+    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
         """Load an OpenAI model.
 
         Args:
@@ -227,7 +227,7 @@ class HFModelSetup:
         Returns:
             The tokenizer and model.
         """
-        config: PretrainedConfig
+        config: "PretrainedConfig"
         block_terminal_output()
 
         model_id = model_config.model_id
@@ -246,24 +246,6 @@ class HFModelSetup:
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
             raise NeedsExtraInstalled(extra="generative")
 
-        bnb_config = (
-            BitsAndBytesConfig(
-                load_in_4bit=load_in_4bit,
-                bnb_4bit_compute_dtype=(
-                    torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-                ),
-                bnb_4bit_use_double_quant=True,
-            )
-            if load_in_4bit
-            else None
-        )
-
-        # We hardcode that we're using flash attention for models with "mistral" in
-        # their name, as this is currently one of the only ones that support it
-        use_flash_attention = (
-            self.benchmark_config.use_flash_attention or "mistral" in model_id.lower()
-        )
-
         config = self._load_hf_model_config(
             model_id=model_id,
             num_labels=dataset_config.num_labels,
@@ -271,6 +253,21 @@ class HFModelSetup:
             label2id=dataset_config.label2id,
             revision=model_config.revision,
             model_cache_dir=model_config.model_cache_dir,
+        )
+
+        use_bf16 = (
+            self.benchmark_config.device == torch.device("cuda")
+            and torch.cuda.is_bf16_supported()
+            and config.to_dict().get("torch_dtype") == "bfloat16"
+        )
+        bnb_config = (
+            BitsAndBytesConfig(
+                load_in_4bit=load_in_4bit,
+                bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
+                bnb_4bit_use_double_quant=True,
+            )
+            if load_in_4bit
+            else None
         )
 
         use_vllm = (
@@ -321,7 +318,9 @@ class HFModelSetup:
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
                 attn_implementation=(
-                    "flash_attention_2" if use_flash_attention else None
+                    "flash_attention_2"
+                    if self.benchmark_config.use_flash_attention
+                    else None
                 ),
             )
 
@@ -345,7 +344,9 @@ class HFModelSetup:
                         )
                     else:
                         model_cls_supertask = supertask
-                    model_cls_or_none: Type[PreTrainedModel] | None = get_class_by_name(
+                    model_cls_or_none: Type[
+                        "PreTrainedModel"
+                    ] | None = get_class_by_name(
                         class_name=f"auto-model-for-{model_cls_supertask}",
                         module_name="transformers",
                     )
@@ -403,6 +404,9 @@ class HFModelSetup:
                                 model_or_tuple = model_cls_or_none.from_pretrained(
                                     model_config.model_id, **model_kwargs
                                 )
+                            elif "does not support Flash Attention" in str(e):
+                                model_kwargs["attn_implementation"] = None
+                                continue
                             else:
                                 raise e
 
@@ -434,6 +438,7 @@ class HFModelSetup:
 
         if use_vllm:
             model.set_tokenizer(tokenizer=tokenizer)
+            model.build_logits_processors()
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
@@ -448,11 +453,11 @@ class HFModelSetup:
 
         return tokenizer, model
 
-    def _get_torch_dtype(self, config: PretrainedConfig) -> str | None:
+    def _get_torch_dtype(self, config: "PretrainedConfig") -> str | None:
         """Get the torch dtype, used for loading the model.
 
         Args:
-            config (PretrainedConfig):
+            config:
                 The Hugging Face model configuration.
 
         Returns:
@@ -471,7 +476,7 @@ class HFModelSetup:
         label2id: dict[str, int],
         revision: str,
         model_cache_dir: str,
-    ) -> PretrainedConfig:
+    ) -> "PretrainedConfig":
         """Load the Hugging Face model configuration.
 
         Args:
@@ -535,40 +540,45 @@ class HFModelSetup:
                 raise e
 
     def _load_tokenizer(
-        self, model: PreTrainedModel | GenerativeModel, model_id: str
-    ) -> Tokenizer:
+        self, model: "PreTrainedModel | GenerativeModel", model_id: str
+    ) -> "Tokenizer":
         """Load the tokenizer.
 
         Args:
-            model (PreTrainedModel or GenerativeModel):
+            model:
                 The model, which is used to determine whether to add a prefix space to
                 the tokens.
-            model_id (str):
+            model_id:
                 The model identifier. Used for logging.
 
         Returns:
-            Tokenizer:
-                The loaded tokenizer.
+            The loaded tokenizer.
         """
-        # If the model is a subclass of a RoBERTa model then we have to add a prefix
-        # space to the tokens, by the way the model is constructed.
+        loading_kwargs: dict[str, bool | str] = dict(
+            use_fast=True,
+            verbose=False,
+            trust_remote_code=self.benchmark_config.trust_remote_code,
+        )
+
+        # If the model is a subclass of a certain model types then we have to add a
+        # prefix space to the tokens, by the way the model is constructed.
         prefix_models = ["Roberta", "GPT", "Deberta"]
-        prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
+        add_prefix = any(
+            model_type in type(model).__name__ for model_type in prefix_models
+        )
+        if add_prefix:
+            loading_kwargs["add_prefix_space"] = True
+
         padding_side = "left" if model_is_generative(model=model) else "right"
+        loading_kwargs["padding_side"] = padding_side
+        loading_kwargs["truncation_side"] = padding_side
+
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             warnings.filterwarnings("ignore", category=FutureWarning)
             while True:
                 try:
-                    return AutoTokenizer.from_pretrained(
-                        model_id,
-                        add_prefix_space=prefix,
-                        use_fast=True,
-                        verbose=False,
-                        padding_side=padding_side,
-                        truncation_side=padding_side,
-                        trust_remote_code=self.benchmark_config.trust_remote_code,
-                    )
+                    return AutoTokenizer.from_pretrained(model_id, **loading_kwargs)
                 except (JSONDecodeError, OSError, TypeError):
                     raise InvalidModel(
                         f"Could not load tokenizer for model {model_id!r}."

@@ -1,11 +1,12 @@
 """Configuration classes used throughout the project."""
 
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 import torch
 
-from .enums import Framework, ModelType
+if TYPE_CHECKING:
+    from .enums import Framework, ModelType
 
 
 @dataclass
@@ -122,6 +123,15 @@ class BenchmarkConfig:
         openai_api_key:
             The API key for the OpenAI API. If None then OpenAI models will not be
             benchmarked.
+        azure_openai_api_key:
+            The API key for the Azure OpenAI API. If None then Azure OpenAI models will
+            not be benchmarked.
+        azure_openai_endpoint:
+            The endpoint for the Azure OpenAI API. If None then Azure OpenAI models will
+            not be benchmarked.
+        azure_openai_api_version:
+            The api version for the Azure OpenAI API, e.g. "2023-12-01-preview". If
+            None then Azure OpenAI models will not be benchmarked.
         force:
             Whether to force the benchmark to run even if the results are already
             cached.
@@ -157,13 +167,16 @@ class BenchmarkConfig:
     dataset_languages: list[Language]
     tasks: list[Task]
     datasets: list[str]
-    framework: Framework | None
+    framework: "Framework | None"
     batch_size: int
     raise_errors: bool
     cache_dir: str
     evaluate_train: bool
-    token: bool | str
+    token: bool | str | None
     openai_api_key: str | None
+    azure_openai_api_key: str | None
+    azure_openai_endpoint: str | None
+    azure_openai_api_version: str | None
     force: bool
     progress_bar: bool
     save_results: bool
@@ -275,10 +288,10 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: Framework
+    framework: "Framework"
     task: str
     languages: list[Language]
-    model_type: ModelType | str
+    model_type: "ModelType | str"
     model_cache_dir: str
 
     def __hash__(self) -> int:

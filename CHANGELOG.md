@@ -8,6 +8,100 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Support for Azure OpenAI models! These can now be benchmarked as with any other
+  model, where either the environment variables `AZURE_OPENAI_API_KEY`,
+  `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_VERSION` need to have been set, or
+  alternatively through the `--azure-openai-api-key`, `--azure-openai-endpoint` and
+  `--azure-openai-api-version` arguments.
+- We now use the new JSON mode for newer OpenAI models for the NER task, to ensure
+  better JSON generation.
+- If an error is thrown during generation with an OpenAI model, which for instance
+  happens when the prompt is caught by the content filter, then we simply return a
+  blank string instead.
+
+
+## [v12.3.2] - 2024-03-19
+### Fixed
+- There is an issue with the underlying `outlines` package that we use for structured
+  generation, where many of the generations stop prematurely when the batch is too
+  large. We fix this temporarily by lowering the batch size from the entire dataset to
+  the standard 32 when vLLM is used for NER tasks. This will be changed back when the
+  bug is fixed. Follow the progress in [this `outlines`
+  issue](https://github.com/outlines-dev/outlines/issues/757).
+- Issue when checking if the `openai` extra needed to be installed, or when the
+  `OPENAI_API_KEY` needs to be set.
+- Setting `add_prefix_space=False` caused an error during the loading of some
+  tokenizers. To fix this, we only supply the `add_prefix_space` keyword argument
+  during the loading of the tokenizer if it is True.
+
+
+## [v12.3.1] - 2024-03-13
+### Fixed
+- An issue with Pydantic typing, causing initialisation of `Benchmarker` to throw an
+  error.
+
+
+## [v12.3.0] - 2024-03-13
+### Changed
+- Updated `outlines` dependency to `>=0.0.36,<0.1`. This fixes a race condition caused
+  during evaluation of NER datasets and also includes integration with the
+  `transformers` library. The existing hardcoded integration has now been removed in
+  favour of the integration in that package.
+
+
+## [v12.2.1] - 2024-03-12
+### Fixed
+- Now includes the `transformers` integration with `outlines` directly in the code,
+  which caused issues as they weren't part of the newest `outlines` release. When it
+  does get included then we will import these as before.
+- When evaluating OpenAI models we now do not perform any structured generation, as we
+  do not have access to the logits.
+
+
+## [v12.2.0] - 2024-03-11
+### Added
+- Added the Icelandic common sense reasoning dataset Winogrande-is, being a manually
+  translated version of the English Winogrande dataset. This also means that the
+  HellaSwag-is dataset has been marked as unofficial, and will thus not automatically
+  be included when benchmarking models on the Icelandic common sense reasoning task.
+
+### Changed
+- Updated `vllm` dependency to `>=0.3.3,<0.4.0`, which allows the benchmarking of the
+  new Gemma and OLMO models, without the bug from vLLM v0.3.2.
+
+### Fixed
+- Do not show message regarding missing flash attention if CUDA is not available.
+- Only use bfloat16 as quantisation compute type if it is available and that
+  `torch_dtype` is set to "bfloat16" in the Hugging Face configuration - otherwise we
+  use float16.
+- Since flash attention is now enabled by default, some models couldn't be loaded due
+  to them not supporting it. For these models, flash attention will now be disabled
+  during model loading.
+- Now uses a single GPU when finetuning, as previously evaluation would just freeze in
+  this case. In the future we might support multi-GPU finetuning, but since encoder
+  models usually doesn't require multiple GPUs, this is currently not prioritised.
+
+
+## [v12.1.0] - 2024-02-29
+### Changed
+- Flash attention will now default to being used if `flash_attn` has been installed. If
+  the `--use-flash-attention/no-use-flash-attention` hasn't been set and the
+  `flash_attn` package hasn't been installed, then a logging message will be displayed,
+  informing the user.
+- Changed backend structured generation framework to `outlines` from
+  `lm-format-enforcer`.
+
+### Fixed
+- Evaluating models on NER tasks used excessive amounts of memory and took very long.
+  This was due to a bug in vLLM v0.3.2, and will be fixed in vLLM v0.3.3. We thus
+  forbid v0.3.2, making it fast again, and we'll remain compatible with the new v0.3.3
+  when it is released.
+- A name clash has been fixed, which caused the MMLU-no dataset to not be run when
+  running all Norwegian datasets.
+
+
+## [v12.0.0] - 2024-02-26
+### Added
 - Now automatically uses multiple GPUs when evaluating generative models with vLLM.
 - Now allows "unofficial" datasets, which are datasets which are not included on the
   official leaderboards and models will only be benchmarked on them if they have been

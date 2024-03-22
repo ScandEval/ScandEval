@@ -8,6 +8,7 @@ import pytest
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.exceptions import InvalidBenchmark
+from scandeval.languages import DA
 from scandeval.named_entity_recognition import NamedEntityRecognition
 from scandeval.tasks import NER
 from scandeval.utils import GENERATIVE_DATASET_TASKS
@@ -20,7 +21,8 @@ from scandeval.utils import GENERATIVE_DATASET_TASKS
         for dataset_config in get_all_dataset_configs().values()
         if dataset_config.task == NER
         and (
-            os.getenv("TEST_ALL_DATASETS", "0") == "1" or not dataset_config.unofficial
+            os.getenv("TEST_ALL_DATASETS", "0") == "1"
+            or (not dataset_config.unofficial and dataset_config.languages == [DA])
         )
     ],
     ids=lambda dataset_config: dataset_config.name,

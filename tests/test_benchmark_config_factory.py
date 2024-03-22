@@ -17,15 +17,19 @@ from scandeval.tasks import LA, NER, SENT, get_all_tasks
 
 
 @pytest.fixture(scope="module")
-def all_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
+def all_official_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
     """Fixture for all linguistic acceptability dataset configurations."""
-    yield [cfg.name for cfg in all_dataset_configs]
+    yield [cfg.name for cfg in all_dataset_configs if not cfg.unofficial]
 
 
 @pytest.fixture(scope="module")
-def all_la_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
+def all_official_la_dataset_names(
+    all_dataset_configs,
+) -> Generator[list[str], None, None]:
     """Fixture for all linguistic acceptability dataset configurations."""
-    yield [cfg.name for cfg in all_dataset_configs if LA == cfg.task]
+    yield [
+        cfg.name for cfg in all_dataset_configs if LA == cfg.task and not cfg.unofficial
+    ]
 
 
 @pytest.mark.parametrize(
@@ -101,14 +105,14 @@ def test_prepare_languages(input_language_codes, input_language, expected_langua
             None,
             list(get_all_languages().values()),
             list(get_all_tasks().values()),
-            "all_dataset_names",
+            "all_official_dataset_names",
         ),
         (
             "linguistic-acceptability",
             None,
             list(get_all_languages().values()),
             [LA],
-            "all_la_dataset_names",
+            "all_official_la_dataset_names",
         ),
         (
             None,

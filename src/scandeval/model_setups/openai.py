@@ -1,28 +1,42 @@
 """Model setup for OpenAI models."""
 
+import importlib.util
 import logging
 import re
+from typing import TYPE_CHECKING
 
-from transformers import PretrainedConfig, PreTrainedModel
+from transformers import PretrainedConfig
 
-from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..openai_models import OpenAIModel, OpenAITokenizer
-from ..protocols import GenerativeModel, Tokenizer
 from ..utils import create_model_cache_dir
 
-logger = logging.getLogger(__package__)
+if TYPE_CHECKING:
+    from transformers import PreTrainedModel
 
-try:
+    from ..config import BenchmarkConfig, DatasetConfig
+    from ..protocols import GenerativeModel, Tokenizer
+
+if importlib.util.find_spec("openai") is not None:
     import openai
-    import tiktoken
 
     # Older versions of `openai` doesn't have the `models` module, so we need to check
     # that, as it will cause errors later otherwise
     openai.models
-except (ImportError, AttributeError):
-    openai = None
-    tiktoken = None
+
+
+logger = logging.getLogger(__package__)
+
+
+# This is a list of the major models that OpenAI has released
+CACHED_OPENAI_MODEL_IDS: list[str] = [
+    "ada|babbage|curie|davinci",
+    "(code|text)-(ada|babbage|curie|davinci)-[0-9]{3}",
+    "gpt-3.5-turbo(-16k|-instruct)?(-[0-9]{4})?",
+    "gpt-4(-[0-9]{4})?",
+    "gpt-4-32k(-[0-9]{4})?",
+]
 
 
 VOCAB_SIZE_MAPPING = {
@@ -64,7 +78,7 @@ class OpenAIModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+    def __init__(self, benchmark_config: "BenchmarkConfig") -> None:
         """Initialize the model setup.
 
         Args:
@@ -73,7 +87,7 @@ class OpenAIModelSetup:
         """
         self.benchmark_config = benchmark_config
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model ID denotes an OpenAI model.
 
         Args:
@@ -81,13 +95,36 @@ class OpenAIModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists on OpenAI, or the name of an extra that needs to
-            be installed to check if the model exists.
+            Whether the model exists, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
-        if openai is None:
-            return "openai"
+        if importlib.util.find_spec("openai") is None:
+            return dict(missing_extra="openai")
 
-        all_models: list[openai.models.Model] = list(openai.models.list())
+        # The model ID for the Azure OpenAI API is the deployment name and therefore
+        # different from the model ID used in the OpenAI API. We'll just assume that
+        # the model exists in this case.
+        if self.benchmark_config.azure_openai_api_key is not None:
+            return True
+
+        all_models: list[openai.models.Model] = list()
+        try:
+            all_models = list(openai.models.list())
+        except openai.OpenAIError as e:
+            model_exists = any(
+                [
+                    re.match(pattern=model_pattern, string=model_id) is not None
+                    for model_pattern in CACHED_OPENAI_MODEL_IDS
+                ]
+            )
+            if not model_exists:
+                if "OPENAI_API_KEY" in str(e):
+                    return dict(missing_env_var="OPENAI_API_KEY")
+                elif "AZURE_OPENAI_API_KEY" in str(e):
+                    return dict(missing_env_var="AZURE_OPENAI_API_KEY")
+                elif "AZURE_OPENAI_ENDPOINT" in str(e):
+                    return dict(missing_env_var="AZURE_OPENAI_ENDPOINT")
+
         return model_id in [model.id for model in all_models]
 
     def get_model_config(self, model_id: str) -> ModelConfig:
@@ -113,8 +150,8 @@ class OpenAIModelSetup:
         )
 
     def load_model(
-        self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+        self, model_config: ModelConfig, dataset_config: "DatasetConfig"
+    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
         """Load an OpenAI model.
 
         Args:
@@ -159,7 +196,9 @@ class OpenAIModelSetup:
         hf_model_config.pad_token_id = hf_model_config.vocab_size - 1
 
         # Check if the vocab size is correct, and if not then correct it
-        tok = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        tok = OpenAITokenizer(
+            model_config=model_config, hf_model_config=hf_model_config
+        )
         for idx in range(hf_model_config.vocab_size - 1, 0, -1):
             try:
                 tok.decode([idx])
@@ -178,6 +217,7 @@ class OpenAIModelSetup:
         model = OpenAIModel(
             model_config=model_config,
             hf_model_config=hf_model_config,
+            dataset_config=dataset_config,
             benchmark_config=self.benchmark_config,
             tokenizer=tokenizer,
         )

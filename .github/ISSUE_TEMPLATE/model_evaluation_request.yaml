@@ -1,6 +1,6 @@
 name: 📊 Model Evaluation Request
 description: Would you like to have a particular model included in the leaderboards?
-title: "[MODEL EVALUATION REQUEST] "
+title: "[MODEL EVALUATION REQUEST] <model-name>"
 labels: "model evaluation request"
 
 body:
@@ -33,6 +33,15 @@ body:
       - label: German
       - label: Dutch
       - label: English
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Merged model
+    description: Is the model a merge of other models, or built on top of a merged model?
+    options:
+      - Not a merged model
+      - Merged model
   validations:
     required: true
 - type: markdown

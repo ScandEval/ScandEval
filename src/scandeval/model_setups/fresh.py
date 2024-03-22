@@ -3,6 +3,7 @@
 import re
 import warnings
 from json import JSONDecodeError
+from typing import TYPE_CHECKING
 
 from transformers import (
     AutoConfig,
@@ -10,20 +11,23 @@ from transformers import (
     ElectraForQuestionAnswering,
     ElectraForSequenceClassification,
     ElectraForTokenClassification,
-    PretrainedConfig,
-    PreTrainedModel,
-    PreTrainedTokenizerBase,
     XLMRobertaForQuestionAnswering,
     XLMRobertaForSequenceClassification,
     XLMRobertaForTokenClassification,
 )
 
-from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark, InvalidModel
-from ..protocols import GenerativeModel, Tokenizer
 from ..utils import block_terminal_output, create_model_cache_dir
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
+
+if TYPE_CHECKING:
+    from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizerBase
+
+    from ..config import BenchmarkConfig, DatasetConfig
+    from ..protocols import GenerativeModel, Tokenizer
+
 
 FRESH_MODELS: list[str] = ["electra-small", "xlm-roberta-base"]
 
@@ -36,7 +40,7 @@ class FreshModelSetup:
             The benchmark configuration.
     """
 
-    def __init__(self, benchmark_config: BenchmarkConfig) -> None:
+    def __init__(self, benchmark_config: "BenchmarkConfig") -> None:
         """Initialize the FreshModelSetup class.
 
         Args:
@@ -49,7 +53,7 @@ class FreshModelSetup:
     def _strip_model_id(model_id: str) -> str:
         return re.sub("(@.*$|^fresh-)", "", model_id)
 
-    def model_exists(self, model_id: str) -> bool | str:
+    def model_exists(self, model_id: str) -> bool | dict[str, str]:
         """Check if a model ID denotes a fresh model.
 
         Args:
@@ -57,8 +61,8 @@ class FreshModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exists as a fresh model, or the name of an extra that
-            needs to be installed to check if the model exists.
+            Whether the model exist, or a dictionary explaining why we cannot check
+            whether the model exists.
         """
         return self._strip_model_id(model_id=model_id) in FRESH_MODELS
 
@@ -85,8 +89,8 @@ class FreshModelSetup:
         )
 
     def load_model(
-        self, model_config: ModelConfig, dataset_config: DatasetConfig
-    ) -> tuple[Tokenizer, PreTrainedModel | GenerativeModel]:
+        self, model_config: ModelConfig, dataset_config: "DatasetConfig"
+    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
         """Load a fresh model.
 
         Args:
@@ -98,7 +102,7 @@ class FreshModelSetup:
         Returns:
             The tokenizer and model.
         """
-        config: PretrainedConfig
+        config: "PretrainedConfig"
         block_terminal_output()
 
         model_id = model_config.model_id
@@ -152,7 +156,7 @@ class FreshModelSetup:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             try:
-                tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
+                tokenizer: "PreTrainedTokenizerBase" = AutoTokenizer.from_pretrained(
                     model_id,
                     revision=model_config.revision,
                     token=self.benchmark_config.token,
