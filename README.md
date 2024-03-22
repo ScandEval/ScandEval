@@ -110,7 +110,7 @@ Ensure that the the CUDA version stated at the top of the Dockerfile matches the
 version installed (which you can check using `nvidia-smi`). After that, we build the
 image as follows:
 ```
-$ docker build -t scandeval -f Dockerfile.cuda .
+$ docker build --pull -t scandeval -f Dockerfile.cuda .
 ```
 
 With the Docker image built, we can now evaluate any model as follows:
