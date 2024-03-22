@@ -3,6 +3,7 @@
 import importlib.util
 import logging
 from typing import TYPE_CHECKING
+from openai.types.chat.completion_create_params import ResponseFormat
 
 import torch
 from torch import LongTensor
@@ -10,8 +11,10 @@ from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
-from .config import BenchmarkConfig, ModelConfig
-from .exceptions import NeedsExtraInstalled
+from scandeval.tasks import NER
+
+from .config import BenchmarkConfig, DatasetConfig, ModelConfig
+from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 if TYPE_CHECKING:
@@ -22,8 +25,7 @@ if importlib.util.find_spec("tiktoken") is not None:
     import tiktoken
 
 if importlib.util.find_spec("openai") is not None:
-    from openai import NotFoundError, OpenAI
-
+    from openai import AzureOpenAI, NotFoundError, OpenAI, BadRequestError
 
 logger = logging.getLogger(__package__)
 
@@ -74,7 +76,13 @@ class OpenAITokenizer:
     @property
     def encoding(self) -> "tiktoken.Encoding":
         """Return the underlying tiktoken encoding."""
-        return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
+        try:
+            return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
+        except KeyError:
+            # For Azure, the model_id is the deployment name. I do not know how to
+            # dynamically get the currently deployed model so assuming Azure only
+            # supports the latest models.
+            return tiktoken.get_encoding("cl100k_base")
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
         """Tokenize text.
@@ -301,6 +309,8 @@ class OpenAIModel:
             The model configuration.
         config:
             The Hugging Face model configuration.
+        dataset_config:
+            The dataset configuration.
         benchmark_config:
             The benchmark configuration.
         tokenizer:
@@ -315,6 +325,7 @@ class OpenAIModel:
         self,
         model_config: ModelConfig,
         hf_model_config: "PretrainedConfig",
+        dataset_config: DatasetConfig,
         benchmark_config: BenchmarkConfig,
         tokenizer: OpenAITokenizer,
     ) -> None:
@@ -335,13 +346,69 @@ class OpenAIModel:
 
         self.model_config = model_config
         self.config = hf_model_config
+        self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
-        self.client = OpenAI(
-            api_key=self.benchmark_config.openai_api_key, max_retries=60
-        )
+        self.client = self._initialize_openai_client()
         self.is_chat_model = self._is_chat_model()
+        self.supports_json_mode = self._supports_json_mode()
+
+    def _initialize_openai_client(self) -> OpenAI | AzureOpenAI:
+        """Initialize and return the OpenAI client.
+
+        Returns:
+            The OpenAI client.
+
+        Raises:
+            InvalidBenchmark:
+                If the OpenAI API key is not specified.
+        """
+        if self.benchmark_config.openai_api_key is not None:
+            return OpenAI(api_key=self.benchmark_config.openai_api_key, max_retries=60)
+        elif self.benchmark_config.azure_openai_api_key is not None:
+            if (
+                self.benchmark_config.azure_openai_endpoint is None
+                or self.benchmark_config.azure_openai_api_version is None
+            ):
+                if self.benchmark_config.run_with_cli:
+                    argument_message = (
+                        "`--azure-openai-endpoint` and `--azure_openai_api_version` "
+                        "flags"
+                    )
+                else:
+                    argument_message = (
+                        "`azure_openai_endpoint` and `azure_openai_api_version` "
+                        "arguments in the `Benchmarker` class"
+                    )
+                raise InvalidBenchmark(
+                    "Azure OpenAI models require an endpoint and API version to be "
+                    "specified. Please specify the endpoint with the "
+                    f"{argument_message}, or specify the environment variables "
+                    "`AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_VERSION`."
+                )
+            return AzureOpenAI(
+                api_key=self.benchmark_config.azure_openai_api_key,
+                azure_endpoint=self.benchmark_config.azure_openai_endpoint,
+                api_version=self.benchmark_config.azure_openai_api_version,
+                max_retries=60,
+            )
+        elif self.benchmark_config.run_with_cli:
+            raise InvalidBenchmark(
+                "OpenAI models require an API key to be specified. Please specify the "
+                "`--openai-api-key` argument (or `--azure-openai-api-key` and "
+                "`--azure-openai-endpoint` arguments) or specify the environment "
+                "variables `OPENAI_API_KEY` (or `AZURE_OPENAI_API_KEY` and "
+                "`AZURE_OPENAI_ENDPOINT`)."
+            )
+        else:
+            raise InvalidBenchmark(
+                "OpenAI models require an API key to be specified. Please specify the "
+                "`openai_api_key` argument to the `Benchmarker` class (or "
+                "`azure_openai_api_key` and `azure_openai_endpoint` arguments) or "
+                "specify the environment variables `OPENAI_API_KEY` (or "
+                "`AZURE_OPENAI_API_KEY` and `AZURE_OPENAI_ENDPOINT`)."
+            )
 
     def _is_chat_model(self) -> bool:
         """Returns whether the model is a chat model."""
@@ -350,9 +417,31 @@ class OpenAIModel:
                 model=self.model_config.model_id, prompt="Test", max_tokens=1
             )
             return False
-        except NotFoundError as e:
-            if "This is a chat model" in str(e):
+        except (NotFoundError, BadRequestError) as e:
+            chat_model_strings = [
+                "This is a chat model",
+                "The completion operation does not work with the specified model",
+            ]
+            if any(string in str(e) for string in chat_model_strings):
                 return True
+            raise e
+
+    def _supports_json_mode(self) -> bool:
+        """Returns whether the model supports JSON mode."""
+        if not self.is_chat_model:
+            return False
+        try:
+            self.client.chat.completions.create(
+                model=self.model_config.model_id,
+                messages=[dict(role="user", content="Test json")],
+                max_tokens=1,
+                response_format=ResponseFormat(type="json_object"),
+            )
+            return True
+        except BadRequestError as e:
+            no_json_mode_strings = ["not supported with this model"]
+            if any(string in str(e) for string in no_json_mode_strings):
+                return False
             raise e
 
     def generate(
@@ -416,16 +505,27 @@ class OpenAIModel:
             stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
         )
 
-        if not self.is_chat_model:
-            model_output = self.client.completions.create(
-                prompt=prompt, **generation_kwargs
+        if self.dataset_config.task == NER and self.supports_json_mode:
+            generation_kwargs["response_format"] = dict(type="json_object")
+
+        try:
+            if not self.is_chat_model:
+                model_output = self.client.completions.create(
+                    prompt=prompt, **generation_kwargs
+                )
+                generation_output = model_output.choices[0].text.strip()
+            else:
+                model_output = self.client.chat.completions.create(
+                    messages=[dict(role="user", content=prompt)], **generation_kwargs
+                )
+                generation_output = model_output.choices[0].message.content.strip()
+        except BadRequestError as e:
+            logger.debug(
+                "Encountered error during OpenAI generation - returning blank string "
+                f"instead. The error thrown was {str(e)!r}, and the prompt causing "
+                f"it was {prompt!r}."
             )
-            generation_output = model_output.choices[0].text.strip()
-        else:
-            model_output = self.client.chat.completions.create(
-                messages=[dict(role="user", content=prompt)], **generation_kwargs
-            )
-            generation_output = model_output.choices[0].message.content.strip()
+            generation_output = " "
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)

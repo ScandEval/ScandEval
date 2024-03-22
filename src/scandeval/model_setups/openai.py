@@ -25,9 +25,6 @@ if importlib.util.find_spec("openai") is not None:
     # that, as it will cause errors later otherwise
     openai.models
 
-if importlib.util.find_spec("tiktoken") is not None:
-    import tiktoken
-
 
 logger = logging.getLogger(__package__)
 
@@ -98,11 +95,17 @@ class OpenAIModelSetup:
                 The model ID.
 
         Returns:
-            Whether the model exist, or a dictionary explaining why we cannot check
+            Whether the model exists, or a dictionary explaining why we cannot check
             whether the model exists.
         """
         if importlib.util.find_spec("openai") is None:
             return dict(missing_extra="openai")
+
+        # The model ID for the Azure OpenAI API is the deployment name and therefore
+        # different from the model ID used in the OpenAI API. We'll just assume that
+        # the model exists in this case.
+        if self.benchmark_config.azure_openai_api_key is not None:
+            return True
 
         all_models: list[openai.models.Model] = list()
         try:
@@ -114,8 +117,13 @@ class OpenAIModelSetup:
                     for model_pattern in CACHED_OPENAI_MODEL_IDS
                 ]
             )
-            if not model_exists and "OPENAI_API_KEY" in str(e):
-                return dict(missing_env_var="OPENAI_API_KEY")
+            if not model_exists:
+                if "OPENAI_API_KEY" in str(e):
+                    return dict(missing_env_var="OPENAI_API_KEY")
+                elif "AZURE_OPENAI_API_KEY" in str(e):
+                    return dict(missing_env_var="AZURE_OPENAI_API_KEY")
+                elif "AZURE_OPENAI_ENDPOINT" in str(e):
+                    return dict(missing_env_var="AZURE_OPENAI_ENDPOINT")
 
         return model_id in [model.id for model in all_models]
 
@@ -188,7 +196,9 @@ class OpenAIModelSetup:
         hf_model_config.pad_token_id = hf_model_config.vocab_size - 1
 
         # Check if the vocab size is correct, and if not then correct it
-        tok = tiktoken.encoding_for_model(model_name=model_config.model_id)
+        tok = OpenAITokenizer(
+            model_config=model_config, hf_model_config=hf_model_config
+        )
         for idx in range(hf_model_config.vocab_size - 1, 0, -1):
             try:
                 tok.decode([idx])
@@ -207,6 +217,7 @@ class OpenAIModelSetup:
         model = OpenAIModel(
             model_config=model_config,
             hf_model_config=hf_model_config,
+            dataset_config=dataset_config,
             benchmark_config=self.benchmark_config,
             tokenizer=tokenizer,
         )

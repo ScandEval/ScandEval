@@ -136,6 +136,45 @@ from .tasks import get_all_tasks
     command.""",
 )
 @click.option(
+    "--openai-api-key",
+    type=str,
+    default=None,
+    show_default=True,
+    help="""The API key for the OpenAI API. If not specified then the environment
+    variable `OPENAI_API_KEY` will be used.""",
+)
+@click.option(
+    "--prefer-azure/--no-prefer-azure",
+    default=False,
+    show_default=True,
+    help="""Whether to prefer the Azure OpenAI API over the OpenAI API, if both are
+    available.""",
+)
+@click.option(
+    "--azure-openai-api-key",
+    type=str,
+    default=None,
+    show_default=True,
+    help="""The API key for the Azure OpenAI API. If not specified then the environment
+    variable `AZURE_OPENAI_API_KEY` will be used.""",
+)
+@click.option(
+    "--azure-openai-endpoint",
+    type=str,
+    default=None,
+    show_default=True,
+    help="""The endpoint for the Azure OpenAI API. If not specified then the environment
+    variable `AZURE_OPENAI_ENDPOINT` will be used.""",
+)
+@click.option(
+    "--azure-openai-api-version",
+    type=str,
+    default=None,
+    show_default=True,
+    help="""The api version for the Azure OpenAI API, e.g. "2023-12-01-preview". If
+            None then the environment varaible `AZURE_OPENAI_API_VERSION` will be used.""",
+)
+@click.option(
     "--force/--no-force",
     "-f",
     default=False,
@@ -226,6 +265,11 @@ def benchmark(
     cache_dir: str,
     use_token: bool,
     token: str,
+    openai_api_key: str | None,
+    prefer_azure: bool,
+    azure_openai_api_key: str | None,
+    azure_openai_endpoint: str | None,
+    azure_openai_api_version: str |None,
     force: bool,
     verbose: bool,
     framework: str | None,
@@ -264,6 +308,11 @@ def benchmark(
         raise_errors=raise_errors,
         verbose=verbose,
         token=token_str_bool,
+        openai_api_key=openai_api_key,
+        prefer_azure=prefer_azure,
+        azure_openai_api_key=azure_openai_api_key,
+        azure_openai_endpoint=azure_openai_endpoint,
+        azure_openai_api_version=azure_openai_api_version,
         force=force,
         cache_dir=cache_dir,
         framework=framework,
