@@ -275,9 +275,6 @@ def generate_single_iteration(
         else:
             batch_size = benchmark_config.batch_size
 
-        # TEMP
-        logger.debug(f"Batch size: {batch_size}")
-
         dataloader = DataLoader(
             dataset=torch_dataset,
             batch_size=batch_size,
