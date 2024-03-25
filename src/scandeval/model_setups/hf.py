@@ -255,9 +255,6 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
-        # TEMP
-        logger.info("Loading quantization config")
-
         # use_bf16 = (
         #     self.benchmark_config.device == torch.device("cuda")
         #     and torch.cuda.is_bf16_supported()
@@ -272,9 +269,6 @@ class HFModelSetup:
             if load_in_4bit
             else None
         )
-
-        # TEMP
-        logger.info("Loaded quantization config")
 
         use_vllm = (
             model_config.task in GENERATIVE_MODEL_TASKS
@@ -447,6 +441,9 @@ class HFModelSetup:
             model.set_tokenizer(tokenizer=tokenizer)
             model.build_logits_processors()
 
+        # TEMP
+        logger.info("Aligning model with tokenizer")
+
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,
@@ -457,6 +454,9 @@ class HFModelSetup:
         model.eval()
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
+
+        # TEMP
+        logger.info("Loaded model")
 
         return tokenizer, model
 
