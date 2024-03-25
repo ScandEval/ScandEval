@@ -18,7 +18,7 @@ from transformers import (
 from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark, InvalidModel
-from ..utils import block_terminal_output, create_model_cache_dir
+from ..utils import block_terminal_output, create_model_cache_dir, model_is_generative
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 if TYPE_CHECKING:
@@ -170,6 +170,7 @@ class FreshModelSetup:
             tokenizer=tokenizer,
             generation_length=dataset_config.max_generated_tokens,
             raise_errors=self.benchmark_config.raise_errors,
+            generative_model=model_is_generative(model=model),
         )
 
         return tokenizer, model

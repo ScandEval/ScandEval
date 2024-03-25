@@ -425,20 +425,17 @@ class HFModelSetup:
 
                     self._handle_loading_exception(exception=e, model_id=model_id)
 
-        # TEMP
-        assert isinstance(model, PreTrainedModel)
-        logger.info(f"{next(model.parameters()).dtype = }")
-        logger.info(f"{next(model.parameters()).device = }")
-
         model.eval()
+        generative_model = model_is_generative(model=model)
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
-        logger.info(f"{next(model.parameters()).device = }")
 
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
-        tokenizer = self._load_tokenizer(model=model, model_id=model_id)
+        tokenizer = self._load_tokenizer(
+            model=model, model_id=model_id, generative_model=generative_model
+        )
 
         if use_vllm:
             model.set_tokenizer(tokenizer=tokenizer)
@@ -447,6 +444,7 @@ class HFModelSetup:
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,
+            generative_model=generative_model,
             generation_length=dataset_config.max_generated_tokens,
             raise_errors=self.benchmark_config.raise_errors,
         )
@@ -537,7 +535,10 @@ class HFModelSetup:
                 raise e
 
     def _load_tokenizer(
-        self, model: "PreTrainedModel | GenerativeModel", model_id: str
+        self,
+        model: "PreTrainedModel | GenerativeModel",
+        model_id: str,
+        generative_model: bool,
     ) -> "Tokenizer":
         """Load the tokenizer.
 
@@ -547,6 +548,8 @@ class HFModelSetup:
                 the tokens.
             model_id:
                 The model identifier. Used for logging.
+            generative_model:
+                Whether the model is a generative model.
 
         Returns:
             The loaded tokenizer.
@@ -566,7 +569,7 @@ class HFModelSetup:
         if add_prefix:
             loading_kwargs["add_prefix_space"] = True
 
-        padding_side = "left" if model_is_generative(model=model) else "right"
+        padding_side = "left" if generative_model else "right"
         loading_kwargs["padding_side"] = padding_side
         loading_kwargs["truncation_side"] = padding_side
 

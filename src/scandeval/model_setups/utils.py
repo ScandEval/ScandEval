@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 from ..exceptions import InvalidModel
-from ..utils import DUMMY_FILL_VALUE, model_is_generative
+from ..utils import DUMMY_FILL_VALUE
 
 if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizerBase
@@ -93,6 +93,7 @@ def setup_model_for_question_answering(model: "PreTrainedModel") -> "PreTrainedM
 def align_model_and_tokenizer(
     model: "PreTrainedModel",
     tokenizer: "PreTrainedTokenizerBase",
+    generative_model: bool,
     generation_length: int,
     raise_errors: bool = False,
 ) -> tuple["PreTrainedModel", "PreTrainedTokenizerBase"]:
@@ -103,6 +104,8 @@ def align_model_and_tokenizer(
             The model to fix.
         tokenizer:
             The tokenizer to fix.
+        generative_model:
+            Whether the model is a generative model.
         generation_length:
             The length of the generation, which depends on the benchmark dataset. Only
             relevant if the model is a generative model.
@@ -135,7 +138,7 @@ def align_model_and_tokenizer(
 
     # If the model is a generative model then we need to subtract the generation length
     # from the maximum length, to allow it to keep generating
-    if model_is_generative(model=model):
+    if generative_model:
         all_max_lengths = [
             max_length - generation_length for max_length in all_max_lengths
         ]
@@ -193,7 +196,7 @@ def align_model_and_tokenizer(
     # identical to the eos token, if the latter exists. Otherwise, if both the pad and
     # eos token are not defined, then we attempt to set the padding token to the sep
     # token. If a sep token doesn't exist either, we raise an error.
-    if model_is_generative(model=model):
+    if generative_model:
         tokenizer.padding_side = "left"
         if tokenizer.eos_token is not None:
             tokenizer.pad_token = tokenizer.eos_token
