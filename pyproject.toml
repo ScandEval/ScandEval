@@ -41,7 +41,7 @@ bert-score = { version = "^0.3.13", optional = true }
 demjson3 = { version = "^3.0.6", optional = true }
 bitsandbytes = { markers = "sys_platform != 'darwin' or platform_machine != 'arm64'", version = "^0.42.0", optional = true }
 vllm = { markers = "sys_platform != 'darwin'", version = ">=0.3.3,<0.4.0", optional = true }
-outlines = { version = "^0.0.36", optional = true }
+outlines = { version = "^0.0.37", optional = true }
 
 # Needed for loading OLMO based models
 ai2-olmo = { version = "^0.2.4", optional = true }
@@ -83,11 +83,23 @@ generative = [
     "bert-score",
 ]
 olmo = [
+    "demjson3",
+    "outlines",
+    "bitsandbytes",
+    "vllm",
+    "rouge-score",
+    "bert-score",
     "ai2-olmo",
     "boto3",
     "huggingface-hub",
 ]
 openai = [
+    "demjson3",
+    "outlines",
+    "bitsandbytes",
+    "vllm",
+    "rouge-score",
+    "bert-score",
     "openai",
     "tiktoken",
     "levenshtein",
