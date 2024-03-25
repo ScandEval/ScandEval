@@ -428,6 +428,11 @@ class HFModelSetup:
         # TEMP
         assert isinstance(model, PreTrainedModel)
         logger.info(f"{next(model.parameters()).dtype = }")
+        logger.info(f"{next(model.parameters()).device = }")
+
+        model.eval()
+        if not load_in_4bit:
+            model.to(self.benchmark_config.device)
 
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
@@ -444,10 +449,6 @@ class HFModelSetup:
             generation_length=dataset_config.max_generated_tokens,
             raise_errors=self.benchmark_config.raise_errors,
         )
-
-        model.eval()
-        if not load_in_4bit:
-            model.to(self.benchmark_config.device)
 
         return tokenizer, model
 
