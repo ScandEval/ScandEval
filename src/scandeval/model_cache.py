@@ -137,7 +137,7 @@ class ModelCache:
             tokenizer:
                 The tokenizer used to generate the tokens.
         """
-        model_input = model_input.detach().cpu()
+        model_input = model_input.detach().cpu().float()
 
         # Extract the scores from the model output, to be cached. We only store the
         # indices of the top scores, to save space. Further, we only store the scores
@@ -146,7 +146,8 @@ class ModelCache:
         if store_scores:
             scores = torch.stack(
                 tensors=[
-                    score_tensor.detach().cpu() for score_tensor in model_output.scores
+                    score_tensor.detach().cpu().float()
+                    for score_tensor in model_output.scores
                 ],
                 dim=1,
             )
