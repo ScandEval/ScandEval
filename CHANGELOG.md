@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   happens when the prompt is caught by the content filter, then we simply return a
   blank string instead.
 
+### Changed
+- Updated `outlines` dependency to v0.0.37, which can now correctly deal with a larger
+  batch size when integrated with vLLM. This results in faster NER evaluation.
+
 
 ## [v12.3.2] - 2024-03-19
 ### Fixed
