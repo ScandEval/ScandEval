@@ -441,22 +441,19 @@ class HFModelSetup:
             model.set_tokenizer(tokenizer=tokenizer)
             model.build_logits_processors()
 
-        # TEMP
-        logger.info("Aligning model with tokenizer")
-
-        model, tokenizer = align_model_and_tokenizer(
-            model=model,
-            tokenizer=tokenizer,
-            generation_length=dataset_config.max_generated_tokens,
-            raise_errors=self.benchmark_config.raise_errors,
-        )
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            model, tokenizer = align_model_and_tokenizer(
+                model=model,
+                tokenizer=tokenizer,
+                generation_length=dataset_config.max_generated_tokens,
+                raise_errors=self.benchmark_config.raise_errors,
+            )
 
         model.eval()
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
-
-        # TEMP
-        logger.info("Loaded model")
 
         return tokenizer, model
 
