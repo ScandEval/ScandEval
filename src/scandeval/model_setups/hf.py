@@ -242,9 +242,6 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
-        # TEMP
-        load_in_4bit = False
-
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
             raise NeedsExtraInstalled(extra="generative")
 
@@ -257,16 +254,16 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
-        # use_bf16 = (
-        #     self.benchmark_config.device == torch.device("cuda")
-        #     and torch.cuda.is_bf16_supported()
-        #     and config.to_dict().get("torch_dtype") == "bfloat16"
-        # )
+        use_bf16 = (
+            self.benchmark_config.device == torch.device("cuda")
+            and torch.cuda.is_bf16_supported()
+            and config.to_dict().get("torch_dtype") == "bfloat16"
+        )
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
-                bnb_4bit_use_double_quant=True,
-                # bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
+                # bnb_4bit_use_double_quant=True,
+                bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
             )
             if load_in_4bit
             else None

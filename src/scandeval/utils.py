@@ -561,9 +561,6 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
         return True
 
     try:
-        # TEMP
-        logger.info("Checking if model is generative by generating a dummy sequence.")
-
         dummy_inputs = torch.tensor(
             [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
         )
@@ -573,15 +570,8 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
             eos_token_id=model.config.eos_token_id,
         )
         model.generate(inputs=dummy_inputs, generation_config=generation_config)
-
-        # TEMP
-        logger.info("Succeeded!")
-
         return True
     except (NotImplementedError, TypeError):
-        # TEMP
-        logger.info("Failed!")
-
         return False
 
 
