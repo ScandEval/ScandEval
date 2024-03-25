@@ -240,6 +240,7 @@ class HFModelSetup:
             load_in_4bit = (
                 model_config.task in GENERATIVE_MODEL_TASKS
                 and self.benchmark_config.device == torch.device("cuda")
+                and False
             )
 
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
@@ -265,7 +266,7 @@ class HFModelSetup:
                 bnb_4bit_use_double_quant=True,
                 # bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
             )
-            if load_in_4bit and False
+            if load_in_4bit
             else None
         )
 
