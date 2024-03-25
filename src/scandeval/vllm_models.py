@@ -70,8 +70,9 @@ class VLLMModel:
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            warnings.simplefilter("ignore", category=RuntimeWarning)
+            # This ignores the following warning, which is out of our control:
+            #   "TODO"
+            # warnings.simplefilter("ignore", category=RuntimeWarning)
 
             # This is required to be able to re-initialize the model, in case we have
             # already initialized it once

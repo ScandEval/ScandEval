@@ -3,7 +3,6 @@
 import importlib.util
 import logging
 import os
-import warnings
 from json import JSONDecodeError
 from time import sleep
 from typing import TYPE_CHECKING, Type
@@ -364,52 +363,46 @@ class HFModelSetup:
                     if config.model_type == "deberta-v2":
                         config.pooler_hidden_size = config.hidden_size
 
-                    with warnings.catch_warnings():
-                        warnings.filterwarnings("ignore", category=UserWarning)
-                        warnings.filterwarnings("ignore", category=FutureWarning)
-
-                        try:
+                    try:
+                        model_or_tuple = model_cls_or_none.from_pretrained(
+                            model_config.model_id, **model_kwargs
+                        )
+                    except ImportError as e:
+                        if "flash attention" in str(e).lower():
+                            raise FlashAttentionNotInstalled()
+                        else:
+                            raise e
+                    except (KeyError, RuntimeError) as e:
+                        if not model_kwargs["ignore_mismatched_sizes"]:
+                            logger.debug(
+                                f"{type(e).__name__} occurred during the loading "
+                                f"of the {model_id!r} model. Retrying with "
+                                "`ignore_mismatched_sizes` set to True."
+                            )
+                            model_kwargs["ignore_mismatched_sizes"] = True
+                            continue
+                        else:
+                            raise InvalidModel(str(e))
+                    except (TimeoutError, RequestError):
+                        attempts_left -= 1
+                        if attempts_left == 0:
+                            raise InvalidModel(
+                                "The model could not be loaded after 5 attempts."
+                            )
+                        logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
+                        sleep(5)
+                        continue
+                    except ValueError as e:
+                        if "already quantized" in str(e):
+                            model_kwargs["quantization_config"] = None
                             model_or_tuple = model_cls_or_none.from_pretrained(
                                 model_config.model_id, **model_kwargs
                             )
-                        except ImportError as e:
-                            if "flash attention" in str(e).lower():
-                                raise FlashAttentionNotInstalled()
-                            else:
-                                raise e
-                        except (KeyError, RuntimeError) as e:
-                            if not model_kwargs["ignore_mismatched_sizes"]:
-                                logger.debug(
-                                    f"{type(e).__name__} occurred during the loading "
-                                    f"of the {model_id!r} model. Retrying with "
-                                    "`ignore_mismatched_sizes` set to True."
-                                )
-                                model_kwargs["ignore_mismatched_sizes"] = True
-                                continue
-                            else:
-                                raise InvalidModel(str(e))
-                        except (TimeoutError, RequestError):
-                            attempts_left -= 1
-                            if attempts_left == 0:
-                                raise InvalidModel(
-                                    "The model could not be loaded after 5 attempts."
-                                )
-                            logger.info(
-                                f"Couldn't load the model {model_id!r}. Retrying."
-                            )
-                            sleep(5)
+                        elif "does not support Flash Attention" in str(e):
+                            model_kwargs["attn_implementation"] = None
                             continue
-                        except ValueError as e:
-                            if "already quantized" in str(e):
-                                model_kwargs["quantization_config"] = None
-                                model_or_tuple = model_cls_or_none.from_pretrained(
-                                    model_config.model_id, **model_kwargs
-                                )
-                            elif "does not support Flash Attention" in str(e):
-                                model_kwargs["attn_implementation"] = None
-                                continue
-                            else:
-                                raise e
+                        else:
+                            raise e
 
                     if isinstance(model_or_tuple, tuple):
                         model = model_or_tuple[0]
@@ -496,19 +489,16 @@ class HFModelSetup:
         """
         while True:
             try:
-                with warnings.catch_warnings():
-                    warnings.filterwarnings("ignore", category=UserWarning)
-                    warnings.filterwarnings("ignore", category=FutureWarning)
-                    config = AutoConfig.from_pretrained(
-                        model_id,
-                        num_labels=num_labels,
-                        id2label=id2label,
-                        label2id=label2id,
-                        revision=revision,
-                        cache_dir=model_cache_dir,
-                        token=self.benchmark_config.token,
-                        trust_remote_code=self.benchmark_config.trust_remote_code,
-                    )
+                config = AutoConfig.from_pretrained(
+                    model_id,
+                    num_labels=num_labels,
+                    id2label=id2label,
+                    label2id=label2id,
+                    revision=revision,
+                    cache_dir=model_cache_dir,
+                    token=self.benchmark_config.token,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
+                )
                 if config.eos_token_id is not None and config.pad_token_id is None:
                     config.pad_token_id = config.eos_token_id
                 return config
@@ -571,20 +561,15 @@ class HFModelSetup:
         loading_kwargs["padding_side"] = padding_side
         loading_kwargs["truncation_side"] = padding_side
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            warnings.filterwarnings("ignore", category=FutureWarning)
-            while True:
-                try:
-                    return AutoTokenizer.from_pretrained(model_id, **loading_kwargs)
-                except (JSONDecodeError, OSError, TypeError):
-                    raise InvalidModel(
-                        f"Could not load tokenizer for model {model_id!r}."
-                    )
-                except (TimeoutError, RequestError):
-                    logger.info(f"Couldn't load tokenizer for {model_id!r}. Retrying.")
-                    sleep(5)
-                    continue
+        while True:
+            try:
+                return AutoTokenizer.from_pretrained(model_id, **loading_kwargs)
+            except (JSONDecodeError, OSError, TypeError):
+                raise InvalidModel(f"Could not load tokenizer for model {model_id!r}.")
+            except (TimeoutError, RequestError):
+                logger.info(f"Couldn't load tokenizer for {model_id!r}. Retrying.")
+                sleep(5)
+                continue
 
     @staticmethod
     def _handle_loading_exception(exception: Exception, model_id: str) -> None:
