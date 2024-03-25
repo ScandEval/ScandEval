@@ -573,8 +573,10 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
             eos_token_id=model.config.eos_token_id,
         )
         model.generate(inputs=dummy_inputs, generation_config=generation_config)
+        logger.info("Succeeded!")
         return True
     except (NotImplementedError, TypeError):
+        logger.info("Failed!")
         return False
 
 
