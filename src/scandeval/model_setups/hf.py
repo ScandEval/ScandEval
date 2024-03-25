@@ -240,8 +240,10 @@ class HFModelSetup:
             load_in_4bit = (
                 model_config.task in GENERATIVE_MODEL_TASKS
                 and self.benchmark_config.device == torch.device("cuda")
-                and False
             )
+
+        # TEMP
+        load_in_4bit = False
 
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
             raise NeedsExtraInstalled(extra="generative")
