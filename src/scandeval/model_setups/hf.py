@@ -429,21 +429,19 @@ class HFModelSetup:
 
                     self._handle_loading_exception(exception=e, model_id=model_id)
 
-        if supertask == "question-answering":
-            model = setup_model_for_question_answering(model=model)
-
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             warnings.filterwarnings("ignore", category=FutureWarning)
+
+            if supertask == "question-answering":
+                model = setup_model_for_question_answering(model=model)
+
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
-        if use_vllm:
-            model.set_tokenizer(tokenizer=tokenizer)
-            model.build_logits_processors()
+            if use_vllm:
+                model.set_tokenizer(tokenizer=tokenizer)
+                model.build_logits_processors()
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            warnings.filterwarnings("ignore", category=FutureWarning)
             model, tokenizer = align_model_and_tokenizer(
                 model=model,
                 tokenizer=tokenizer,
@@ -451,9 +449,9 @@ class HFModelSetup:
                 raise_errors=self.benchmark_config.raise_errors,
             )
 
-        model.eval()
-        if not load_in_4bit:
-            model.to(self.benchmark_config.device)
+            model.eval()
+            if not load_in_4bit:
+                model.to(self.benchmark_config.device)
 
         return tokenizer, model
 
