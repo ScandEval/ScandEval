@@ -19,7 +19,7 @@ ENV args=""
 
 # Run the script
 CMD if [ -z "$args" ]; then \
-        echo "No arguments provided. Please run the container as, e.g., \"docker run --gpus a -e args='-m <model-id>' <image>\""; \
+        echo "No arguments provided. Please run the container as, e.g., \"docker run --gpus 1 -e args='-m <model-id>' <image>\""; \
     else \
         scandeval $args; \
     fi
