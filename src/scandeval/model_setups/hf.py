@@ -246,6 +246,9 @@ class HFModelSetup:
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
             raise NeedsExtraInstalled(extra="generative")
 
+        # TEMP
+        logger.debug(f"Loading model config for {model_id!r}.")
+
         config = self._load_hf_model_config(
             model_id=model_id,
             num_labels=dataset_config.num_labels,
@@ -255,6 +258,9 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
+        # TEMP
+        logger.debug(f"Initialising quantisation config for {model_id!r}.")
+
         # use_bf16 = (
         #     self.benchmark_config.device == torch.device("cuda")
         #     and torch.cuda.is_bf16_supported()
@@ -262,8 +268,7 @@ class HFModelSetup:
         # )
         bnb_config = (
             BitsAndBytesConfig(
-                load_in_8bit=load_in_4bit
-                # load_in_4bit=load_in_4bit
+                load_in_4bit=load_in_4bit
                 # bnb_4bit_use_double_quant=True,
                 # bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
             )
@@ -368,6 +373,10 @@ class HFModelSetup:
                     with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", category=UserWarning)
                         warnings.filterwarnings("ignore", category=FutureWarning)
+
+                        # TEMP
+                        logger.debug(f"Loading model for {model_id!r}.")
+
                         try:
                             model_or_tuple = model_cls_or_none.from_pretrained(
                                 model_config.model_id, **model_kwargs
@@ -435,11 +444,18 @@ class HFModelSetup:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             warnings.filterwarnings("ignore", category=FutureWarning)
+
+            # TEMP
+            logger.debug(f"Loading tokenizer for {model_id!r}.")
+
             tokenizer = self._load_tokenizer(model=model, model_id=model_id)
 
         if use_vllm:
             model.set_tokenizer(tokenizer=tokenizer)
             model.build_logits_processors()
+
+        # TEMP
+        logger.debug(f"Aligning model and tokenizer for {model_id!r}.")
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
@@ -451,6 +467,9 @@ class HFModelSetup:
         model.eval()
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
+
+        # TEMP
+        logger.debug(f"Done loading {model_id!r}.")
 
         return tokenizer, model
 
