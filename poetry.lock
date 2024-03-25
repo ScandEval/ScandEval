@@ -3079,13 +3079,13 @@ testing = ["flax", "pytest", "pytest-xdist"]
 
 [[package]]
 name = "outlines"
-version = "0.0.36"
+version = "0.0.37"
 description = "Probabilistic Generative Model Programming"
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "outlines-0.0.36-py3-none-any.whl", hash = "sha256:afa02ca5c449c47731fa06af66d13c2f5ee8b30f8b82b4db90e08215d6f111d1"},
-    {file = "outlines-0.0.36.tar.gz", hash = "sha256:3cffb43143548cd78c6061990feb461cffd5479999391b8390471ea839c2d46e"},
+    {file = "outlines-0.0.37-py3-none-any.whl", hash = "sha256:795ef2b3bcf58f6ddb44012f66d943385a7a1ba5efea205bc36745f82e7f597f"},
+    {file = "outlines-0.0.37.tar.gz", hash = "sha256:0d2708587c98822469c40994308590929afebeaba36611f8db970752fd283c7d"},
 ]
 
 [package.dependencies]
@@ -5751,10 +5751,10 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 all = ["ai2-olmo", "bert-score", "bert-score", "bitsandbytes", "boto3", "demjson3", "flax", "huggingface-hub", "jax", "jaxlib", "levenshtein", "openai", "outlines", "rouge-score", "rouge-score", "tiktoken", "vllm"]
 generative = ["bert-score", "bitsandbytes", "demjson3", "outlines", "rouge-score", "vllm"]
 jax = ["flax", "jax", "jaxlib"]
-olmo = ["ai2-olmo", "boto3", "huggingface-hub"]
-openai = ["levenshtein", "openai", "tiktoken"]
+olmo = ["ai2-olmo", "bert-score", "bitsandbytes", "boto3", "demjson3", "huggingface-hub", "outlines", "rouge-score", "vllm"]
+openai = ["bert-score", "bitsandbytes", "demjson3", "levenshtein", "openai", "outlines", "rouge-score", "tiktoken", "vllm"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "8b3759cfaf1687ff9b838d53a731a298d452fe6342c30db35660ca2f33050760"
+content-hash = "76e0a05196bf3e8edb709e80d0d264fcec18e32a29d020ba2a32c172b55dc2b5"

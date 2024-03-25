@@ -270,16 +270,8 @@ def generate_single_iteration(
 
         if isinstance(model, OpenAIModel):
             batch_size = 1
-
-        # VLLM models handle batching efficiently and do not require a fixed batch
-        # size. However, for the NER task we use the `outlines` package (with vLLM) for
-        # structured generation, and there is currently a bug causing outputs to be
-        # truncated when using a large batch size. So in this case we use the standard
-        # batch size. This will be reverted once the bug is fixed.
-        # Outlines issue: https://github.com/outlines-dev/outlines/issues/757
-        elif isinstance(model, VLLMModel) and not dataset_config.task == NER:
+        elif isinstance(model, VLLMModel):
             batch_size = len(torch_dataset)
-
         else:
             batch_size = benchmark_config.batch_size
 
