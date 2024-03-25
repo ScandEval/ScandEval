@@ -124,7 +124,8 @@ sentiment-classification`.
 
 
 ## Special Thanks
-Thanks to [UWV](https://www.uwv.nl/) for sponsoring the Azure OpenAI credits for this.
+- Thanks to [UWV](https://www.uwv.nl/) for sponsoring the Azure OpenAI credits used to
+  evaluate GPT-4 in Dutch.
 
 
 ## Citing ScandEval
