@@ -155,6 +155,8 @@ def block_terminal_output():
     disables most of the logging from the `transformers` library.
     """
     # Ignore miscellaneous warnings
+    warnings.filterwarnings("ignore", category=UserWarning)
+    warnings.filterwarnings("ignore", category=FutureWarning)
     warnings.filterwarnings(
         "ignore",
         module="torch.nn.parallel*",
