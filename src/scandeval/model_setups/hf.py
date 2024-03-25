@@ -433,6 +433,7 @@ class HFModelSetup:
         model.eval()
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
+        logger.info(f"{next(model.parameters()).dtype = }")
 
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
