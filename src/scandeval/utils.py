@@ -561,6 +561,9 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
         return True
 
     try:
+        # TEMP
+        logger.info("Checking if model is generative by generating a dummy sequence.")
+
         dummy_inputs = torch.tensor(
             [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
         )
