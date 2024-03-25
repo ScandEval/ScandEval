@@ -13,7 +13,7 @@ from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
 from requests.exceptions import RequestException
-from transformers import AutoConfig, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoConfig, AutoTokenizer, BitsAndBytesConfig, PreTrainedModel
 from urllib3.exceptions import RequestError
 
 from ..config import ModelConfig
