@@ -123,6 +123,11 @@ argument. This could for instance be `--model <model-id> --task
 sentiment-classification`.
 
 
+## Special Thanks
+- Thanks to [UWV](https://www.uwv.nl/) for sponsoring the Azure OpenAI credits used to
+  evaluate GPT-4 in Dutch.
+
+
 ## Citing ScandEval
 If you want to cite the framework then feel free to use this:
 
@@ -136,7 +141,6 @@ If you want to cite the framework then feel free to use this:
   year = {2023}
 }
 ```
-
 
 ## Remarks
 The image used in the logo has been created by the amazing [Scandinavia and the
