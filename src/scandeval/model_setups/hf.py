@@ -255,6 +255,9 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
+        # TEMP
+        logger.info("Loading quantization config")
+
         # use_bf16 = (
         #     self.benchmark_config.device == torch.device("cuda")
         #     and torch.cuda.is_bf16_supported()
@@ -269,6 +272,9 @@ class HFModelSetup:
             if load_in_4bit
             else None
         )
+
+        # TEMP
+        logger.info("Loaded quantization config")
 
         use_vllm = (
             model_config.task in GENERATIVE_MODEL_TASKS
