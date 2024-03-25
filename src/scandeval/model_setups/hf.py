@@ -426,9 +426,10 @@ class HFModelSetup:
                     self._handle_loading_exception(exception=e, model_id=model_id)
 
         model.eval()
-        generative_model = model_is_generative(model=model)
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
+
+        generative_model = model_is_generative(model=model)
 
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
