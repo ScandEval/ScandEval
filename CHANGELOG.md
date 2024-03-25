@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated `outlines` dependency to v0.0.37, which can now correctly deal with a larger
   batch size when integrated with vLLM. This results in faster NER evaluation.
 
+### Fixed
+- Move models to the device before running any inference with it, as this causes issues
+  when flash attention is enabled.
+
 
 ## [v12.3.2] - 2024-03-19
 ### Fixed
