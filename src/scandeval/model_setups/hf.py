@@ -242,6 +242,9 @@ class HFModelSetup:
                 and self.benchmark_config.device == torch.device("cuda")
             )
 
+        # TEMP
+        load_in_4bit = False
+
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
             raise NeedsExtraInstalled(extra="generative")
 
@@ -254,6 +257,7 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
+        # TEMP
         # use_bf16 = (
         #     self.benchmark_config.device == torch.device("cuda")
         #     and torch.cuda.is_bf16_supported()
