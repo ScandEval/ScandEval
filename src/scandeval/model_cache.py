@@ -150,6 +150,7 @@ class ModelCache:
                 ],
                 dim=1,
             )
+            logger.info(f"{scores.dtype = }")
             top_scores = torch.topk(scores, k=10)
 
         # Store the generated sequences in the cache, one by one
