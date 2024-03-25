@@ -273,7 +273,7 @@ class HFModelSetup:
         use_vllm = (
             model_config.task in GENERATIVE_MODEL_TASKS
             and self.benchmark_config.device == torch.device("cuda")
-            and os.getenv("USE_VLLM", True)
+            and os.getenv("USE_VLLM", "1") == "1"
         )
 
         if use_vllm and importlib.util.find_spec("vllm") is None:
@@ -344,11 +344,11 @@ class HFModelSetup:
                         )
                     else:
                         model_cls_supertask = supertask
-                    model_cls_or_none: Type[
-                        "PreTrainedModel"
-                    ] | None = get_class_by_name(
-                        class_name=f"auto-model-for-{model_cls_supertask}",
-                        module_name="transformers",
+                    model_cls_or_none: Type["PreTrainedModel"] | None = (
+                        get_class_by_name(
+                            class_name=f"auto-model-for-{model_cls_supertask}",
+                            module_name="transformers",
+                        )
                     )
 
                     # If the model class could not be found then raise an error
