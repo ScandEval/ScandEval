@@ -254,7 +254,6 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
-        # TEMP
         use_bf16 = (
             self.benchmark_config.device == torch.device("cuda")
             and torch.cuda.is_bf16_supported()
@@ -263,7 +262,7 @@ class HFModelSetup:
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
-                # bnb_4bit_use_double_quant=True,
+                bnb_4bit_use_double_quant=True,
                 bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
             )
             if load_in_4bit
