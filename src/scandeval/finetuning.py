@@ -3,7 +3,6 @@
 import importlib.util
 import logging
 import sys
-import warnings
 from collections import defaultdict
 from functools import partial
 from typing import TYPE_CHECKING, Any, Callable, Type
@@ -330,9 +329,7 @@ def finetune_single_iteration(
         trainer.add_callback(NeverLeaveProgressCallback)
 
     try:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            trainer.train()
+        trainer.train()
 
         if benchmark_config.evaluate_train:
             with torch.inference_mode():
@@ -410,36 +407,34 @@ def get_training_args(
     else:
         optimizer = OptimizerNames.ADAMW_TORCH
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=UserWarning)
-        training_args = TrainingArguments(
-            output_dir=model_config.model_cache_dir,
-            evaluation_strategy=IntervalStrategy.STEPS,
-            logging_strategy=logging_strategy,
-            save_strategy=IntervalStrategy.STEPS,
-            eval_steps=30,
-            logging_steps=30,
-            save_steps=30,
-            max_steps=1 if hasattr(sys, "_called_from_test") else 10_000,
-            use_cpu=benchmark_config.device == torch.device("cpu"),
-            report_to=[],
-            save_total_limit=1,
-            per_device_train_batch_size=batch_size,
-            per_device_eval_batch_size=batch_size,
-            learning_rate=2e-5,
-            warmup_ratio=0.01,
-            gradient_accumulation_steps=32 // batch_size,
-            load_best_model_at_end=True,
-            optim=optimizer,
-            seed=seed,
-            fp16=dtype == DataType.FP16,
-            bf16=dtype == DataType.BF16,
-            disable_tqdm=not benchmark_config.progress_bar,
-            ddp_find_unused_parameters=False,
-        )
+    training_args = TrainingArguments(
+        output_dir=model_config.model_cache_dir,
+        evaluation_strategy=IntervalStrategy.STEPS,
+        logging_strategy=logging_strategy,
+        save_strategy=IntervalStrategy.STEPS,
+        eval_steps=30,
+        logging_steps=30,
+        save_steps=30,
+        max_steps=1 if hasattr(sys, "_called_from_test") else 10_000,
+        use_cpu=benchmark_config.device == torch.device("cpu"),
+        report_to=[],
+        save_total_limit=1,
+        per_device_train_batch_size=batch_size,
+        per_device_eval_batch_size=batch_size,
+        learning_rate=2e-5,
+        warmup_ratio=0.01,
+        gradient_accumulation_steps=32 // batch_size,
+        load_best_model_at_end=True,
+        optim=optimizer,
+        seed=seed,
+        fp16=dtype == DataType.FP16,
+        bf16=dtype == DataType.BF16,
+        disable_tqdm=not benchmark_config.progress_bar,
+        ddp_find_unused_parameters=False,
+    )
 
-        # TEMP: Use only 1 GPU for now for finetuning
-        if benchmark_config.device == torch.device("cuda"):
-            training_args._n_gpu = 1
+    # TEMP: Use only 1 GPU for now for finetuning
+    if benchmark_config.device == torch.device("cuda"):
+        training_args._n_gpu = 1
 
     return training_args

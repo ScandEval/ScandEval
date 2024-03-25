@@ -155,6 +155,8 @@ def block_terminal_output():
     disables most of the logging from the `transformers` library.
     """
     # Ignore miscellaneous warnings
+    warnings.filterwarnings("ignore", category=UserWarning)
+    warnings.filterwarnings("ignore", category=FutureWarning)
     warnings.filterwarnings(
         "ignore",
         module="torch.nn.parallel*",
@@ -559,18 +561,16 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
         return True
 
     try:
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            dummy_inputs = torch.tensor(
-                [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
-            )
-            generation_config = GenerationConfig(
-                max_new_tokens=1,
-                pad_token_id=model.config.pad_token_id,
-                eos_token_id=model.config.eos_token_id,
-            )
-            model.generate(inputs=dummy_inputs, generation_config=generation_config)
-            return True
+        dummy_inputs = torch.tensor(
+            [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
+        )
+        generation_config = GenerationConfig(
+            max_new_tokens=1,
+            pad_token_id=model.config.pad_token_id,
+            eos_token_id=model.config.eos_token_id,
+        )
+        model.generate(inputs=dummy_inputs, generation_config=generation_config)
+        return True
     except (NotImplementedError, TypeError):
         return False
 

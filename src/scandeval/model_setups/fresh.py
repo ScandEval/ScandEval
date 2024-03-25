@@ -1,7 +1,6 @@
 """Model setup for fresh models."""
 
 import re
-import warnings
 from json import JSONDecodeError
 from typing import TYPE_CHECKING
 
@@ -19,7 +18,7 @@ from transformers import (
 from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark, InvalidModel
-from ..utils import block_terminal_output, create_model_cache_dir
+from ..utils import block_terminal_output, create_model_cache_dir, model_is_generative
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 if TYPE_CHECKING:
@@ -153,26 +152,25 @@ class FreshModelSetup:
         # have to add a prefix space to the tokens, by the way the model is constructed
         prefix_models = ["Roberta", "GPT", "Deberta"]
         prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            try:
-                tokenizer: "PreTrainedTokenizerBase" = AutoTokenizer.from_pretrained(
-                    model_id,
-                    revision=model_config.revision,
-                    token=self.benchmark_config.token,
-                    add_prefix_space=prefix,
-                    cache_dir=model_config.model_cache_dir,
-                    use_fast=True,
-                    verbose=False,
-                )
-            except (JSONDecodeError, OSError):
-                raise InvalidModel(f"Could not load tokenizer for model {model_id!r}.")
+        try:
+            tokenizer: "PreTrainedTokenizerBase" = AutoTokenizer.from_pretrained(
+                model_id,
+                revision=model_config.revision,
+                token=self.benchmark_config.token,
+                add_prefix_space=prefix,
+                cache_dir=model_config.model_cache_dir,
+                use_fast=True,
+                verbose=False,
+            )
+        except (JSONDecodeError, OSError):
+            raise InvalidModel(f"Could not load tokenizer for model {model_id!r}.")
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,
             generation_length=dataset_config.max_generated_tokens,
             raise_errors=self.benchmark_config.raise_errors,
+            generative_model=model_is_generative(model=model),
         )
 
         return tokenizer, model
