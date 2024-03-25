@@ -265,7 +265,7 @@ class HFModelSetup:
                 bnb_4bit_use_double_quant=True,
                 # bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
             )
-            if load_in_4bit
+            if load_in_4bit and False
             else None
         )
 
@@ -421,6 +421,10 @@ class HFModelSetup:
                         continue
 
                     self._handle_loading_exception(exception=e, model_id=model_id)
+
+        # TEMP
+        assert isinstance(model, PreTrainedModel)
+        logger.info(f"{next(model.parameters()).dtype = }")
 
         if supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
