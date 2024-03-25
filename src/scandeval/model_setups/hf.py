@@ -262,8 +262,7 @@ class HFModelSetup:
         bnb_config = (
             BitsAndBytesConfig(
                 load_in_4bit=load_in_4bit,
-                bnb_4bit_quant_type="nf4",  # "fp4" or "nf4"
-                # bnb_4bit_use_double_quant=True,
+                bnb_4bit_use_double_quant=True,
                 # bnb_4bit_compute_dtype=torch.bfloat16 if use_bf16 else torch.float16,
             )
             if load_in_4bit
