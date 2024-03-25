@@ -505,7 +505,11 @@ class OpenAIModel:
             stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
         )
 
-        if self.dataset_config.task == NER and self.supports_json_mode:
+        if (
+            self.dataset_config.task == NER
+            and self.supports_json_mode
+            and "json" in prompt.lower()
+        ):
             generation_kwargs["response_format"] = dict(type="json_object")
 
         try:
