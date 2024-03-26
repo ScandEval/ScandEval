@@ -459,8 +459,7 @@ def generate_batch(
         appended.
     """
     # Generate the completions of the documents in the batch
-    with warnings.catch_warnings(), torch.inference_mode():
-        warnings.simplefilter("ignore", category=UserWarning)
+    with torch.inference_mode():
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 

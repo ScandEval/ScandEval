@@ -4,7 +4,6 @@ import importlib.util
 import logging
 import math
 import sys
-import warnings
 from types import MethodType
 from typing import TYPE_CHECKING
 
@@ -69,42 +68,39 @@ class VLLMModel:
         self.trust_remote_code = trust_remote_code
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            warnings.simplefilter("ignore", category=RuntimeWarning)
 
-            # This is required to be able to re-initialize the model, in case we have
-            # already initialized it once
-            destroy_model_parallel()
-            clear_memory()
+        # This is required to be able to re-initialize the model, in case we have
+        # already initialized it once
+        destroy_model_parallel()
+        clear_memory()
 
-            self.max_model_len = 10_000
-            potential_max_model_length_config_names = [
-                "max_position_embeddings",
-                "max_sequence_length",
-                "model_max_length",
-                "n_positions",
-            ]
-            for config_name in potential_max_model_length_config_names:
-                if hasattr(hf_model_config, config_name):
-                    self.max_model_len = min(
-                        self.max_model_len, getattr(hf_model_config, config_name)
-                    )
+        self.max_model_len = 10_000
+        potential_max_model_length_config_names = [
+            "max_position_embeddings",
+            "max_sequence_length",
+            "model_max_length",
+            "n_positions",
+        ]
+        for config_name in potential_max_model_length_config_names:
+            if hasattr(hf_model_config, config_name):
+                self.max_model_len = min(
+                    self.max_model_len, getattr(hf_model_config, config_name)
+                )
 
-            self._model = LLM(
-                model=self.model_config.model_id,
-                gpu_memory_utilization=0.9,
-                max_model_len=self.max_model_len,
-                download_dir=str(self.model_cache_dir),
-                trust_remote_code=self.trust_remote_code,
-                revision=self.model_config.revision,
-                seed=4242,
-                tensor_parallel_size=torch.cuda.device_count(),
-                disable_custom_all_reduce=True,
-            )
-            self._model._run_engine = MethodType(
-                _run_engine_with_fixed_progress_bars, self._model
-            )
+        self._model = LLM(
+            model=self.model_config.model_id,
+            gpu_memory_utilization=0.9,
+            max_model_len=self.max_model_len,
+            download_dir=str(self.model_cache_dir),
+            trust_remote_code=self.trust_remote_code,
+            revision=self.model_config.revision,
+            seed=4242,
+            tensor_parallel_size=torch.cuda.device_count(),
+            disable_custom_all_reduce=True,
+        )
+        self._model._run_engine = MethodType(
+            _run_engine_with_fixed_progress_bars, self._model
+        )
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""

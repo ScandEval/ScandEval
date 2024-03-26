@@ -146,7 +146,8 @@ class ModelCache:
         if store_scores:
             scores = torch.stack(
                 tensors=[
-                    score_tensor.detach().cpu() for score_tensor in model_output.scores
+                    score_tensor.detach().cpu().float()
+                    for score_tensor in model_output.scores
                 ],
                 dim=1,
             )
