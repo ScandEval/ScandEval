@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Instruction tuned models are now using chat templates. This assumes that the
+  tokenizer has the `chat_template` set in its configuration.
 - Support for Azure OpenAI models! These can now be benchmarked as with any other
   model, where either the environment variables `AZURE_OPENAI_API_KEY`,
   `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_VERSION` need to have been set, or
