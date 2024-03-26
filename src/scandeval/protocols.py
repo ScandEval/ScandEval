@@ -159,7 +159,7 @@ class Tokenizer(Protocol):
 
     def apply_chat_template(
         self, conversation: list[dict[Literal["role", "content"], str]], **kwargs
-    ) -> str:
+    ) -> str | list[int]:
         """Apply a chat template to a conversation.
 
         Args:

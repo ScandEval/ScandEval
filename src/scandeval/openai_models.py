@@ -302,7 +302,7 @@ class OpenAITokenizer:
 
     def apply_chat_template(
         self, conversation: list[dict[Literal["role", "content"], str]], **kwargs
-    ) -> str:
+    ) -> str | list[int]:
         raise NotImplementedError("Chat templates are not supported for OpenAI models.")
 
 

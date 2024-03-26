@@ -28,7 +28,7 @@ from .model_cache import (
 from .openai_models import OpenAIModel
 from .structured_generation_utils import get_ner_prefix_allowed_tokens_fn
 from .tasks import NER
-from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_chat_end_token_id
 from .vllm_models import VLLMModel
 
 if TYPE_CHECKING:
@@ -563,6 +563,12 @@ def get_generation_stopping_criteria(
         text=[tokenizer.eos_token], add_special_tokens=False
     ).input_ids[0]
 
+    end_chat_token_id = get_chat_end_token_id(tokenizer=tokenizer)
+    if end_chat_token_id is not None:
+        end_chat_token_ids: list[int] = [end_chat_token_id]
+    else:
+        end_chat_token_ids = []
+
     def remove_empty_tokens(token_id_list: list[int]) -> list[int]:
         return [
             token_id for token_id in token_id_list if tokenizer.decode([token_id]) != ""
@@ -578,6 +584,7 @@ def get_generation_stopping_criteria(
         single_newline_ids + single_newline_ids,
         bos_token_ids,
         eos_token_ids,
+        end_chat_token_ids,
     ]
 
     return StopWordCriteria(stop_word_id_lists=stop_word_id_lists)
