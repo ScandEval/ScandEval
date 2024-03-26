@@ -13,6 +13,7 @@ from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Type
+from jinja2 import TemplateError
 
 import numpy as np
 import pkg_resources
@@ -713,15 +714,37 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     if tokenizer.chat_template is None:
         return prompt
 
-    instruction_prompt = tokenizer.apply_chat_template(
-        conversation=[
-            dict(role="system", content=prompt.split("\n\n")[0]),
-            dict(role="user", content="\n".join(prompt.split("\n")[2:-1])),
-        ],
+    # Split up the prompt into its main components
+    prompt_prefix = prompt.split("\n\n")[0]
+    main_prompt = "\n".join(prompt.split("\n")[2:-1])
+    label_prefix = prompt.split("\n")[-1]
+
+    chat_template_kwargs = dict(
         chat_template=tokenizer.chat_template,
         add_generation_prompt=True,
         tokenize=False,
     )
+    try:
+        instruction_prompt = tokenizer.apply_chat_template(
+            conversation=[
+                dict(role="system", content=prompt_prefix),
+                dict(role="user", content=main_prompt),
+            ],
+            **chat_template_kwargs,
+        )
+    except TemplateError:
+        logger.debug(
+            "Failed to use a system prompt in the chat template. Using only the user "
+            "prompt."
+        )
+        instruction_prompt = tokenizer.apply_chat_template(
+            conversation=[
+                dict(role="user", content=prompt_prefix + "\n\n" + main_prompt)
+            ],
+            **chat_template_kwargs,
+        )
     assert isinstance(instruction_prompt, str)
-    instruction_prompt += prompt.split("\n")[-1]
+
+    instruction_prompt += label_prefix
+
     return instruction_prompt
