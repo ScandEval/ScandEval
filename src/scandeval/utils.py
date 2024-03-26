@@ -713,6 +713,9 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     ```
     <prefix prompt>
 
+    <example prefix>: <example>
+    <label prefix>: <label>
+
     [<example prefix>: <example>
     <label prefix>: <label>
 
@@ -745,16 +748,23 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
         tokenize=False,
     )
 
-    prompt_has_prefix = (
-        len(prompt.split("\n\n")) > 1 and len(prompt.split("\n\n")[0].split("\n")) == 1
+    prompt_has_prefix_and_few_shots = (
+        len(prompt.split("\n\n")) > 2 and len(prompt.split("\n\n")[0].split("\n")) == 1
     )
-    if not prompt_has_prefix:
-        raise ValueError("The prompt either doesn't have a prefix: {prompt!r}")
+    if not prompt_has_prefix_and_few_shots:
+        raise ValueError(
+            "The prompt either doesn't have a prefix or few-shot examples: {prompt!r}"
+        )
 
     # Split up the prompt into its main components
     prompt_prefix = prompt.split("\n\n")[0]
-    main_prompt = "\n".join(prompt.split("\n")[2:-1])
-    label_prefix = prompt.split("\n")[-1]
+    few_shot_examples = "\n\n".join(prompt.split("\n\n")[1:-1])
+    final_example = prompt.split("\n\n")[-1].split("\n")[0]
+    label_prefix = prompt.split("\n\n")[-1].split("\n")[-1]
+
+    # Add an explicit instruction to the prompt, after the few-shot examples
+    instruction = "Füllen Sie die folgenden Felder auf die gleiche Weise aus:"
+    main_prompt = f"{few_shot_examples}\n\n{instruction}\n\n{final_example}"
 
     try:
         instruction_prompt = tokenizer.apply_chat_template(

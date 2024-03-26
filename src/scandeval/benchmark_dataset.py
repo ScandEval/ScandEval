@@ -534,16 +534,16 @@ class BenchmarkDataset(ABC):
                             keep_in_memory=True,
                         )
 
-                    # TEMP
-                    logger.info("Example from the prepared test set: ")
-                    logger.info(prepared_test[0]["text"])
-
                     prepared_tests.append(prepared_test)
                     pbar.update(1)
             except ValueError:
                 raise InvalidBenchmark(
                     "Preprocessing of the test dataset could not be done."
                 )
+
+        # TEMP
+        logger.info("Example from the prepared test set: ")
+        logger.info(prepared_tests[0][0]["text"])
 
         return prepared_train, prepared_val, prepared_tests
 
