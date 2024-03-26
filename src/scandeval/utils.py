@@ -673,7 +673,7 @@ def should_prefix_space_be_added_to_labels(
     return True
 
 
-def get_chat_end_token_id(tokenizer: "Tokenizer") -> int | None:
+def get_end_of_chat_token_id(tokenizer: "Tokenizer") -> int | None:
     """Get the end token ID for chat models.
 
     This is only relevant for tokenizers with a chat template.
@@ -694,5 +694,5 @@ def get_chat_end_token_id(tokenizer: "Tokenizer") -> int | None:
     )
     assert isinstance(tokens, list)
     eos_token_index = tokens.index(tokenizer.eos_token_id)
-    chat_end_token_id = tokens[eos_token_index + 1]
-    return chat_end_token_id
+    end_of_chat_token_id = tokens[eos_token_index + 1]
+    return end_of_chat_token_id

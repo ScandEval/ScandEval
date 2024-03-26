@@ -28,7 +28,7 @@ from .model_cache import (
 from .openai_models import OpenAIModel
 from .structured_generation_utils import get_ner_prefix_allowed_tokens_fn
 from .tasks import NER
-from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_chat_end_token_id
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_end_of_chat_token_id
 from .vllm_models import VLLMModel
 
 if TYPE_CHECKING:
@@ -529,7 +529,7 @@ def extract_raw_predictions(
         for completion_ids in generated_sequences.long()
     ]
 
-    end_of_chat_token_id = get_chat_end_token_id(tokenizer=tokenizer)
+    end_of_chat_token_id = get_end_of_chat_token_id(tokenizer=tokenizer)
     if end_of_chat_token_id is not None:
         end_of_chat_token = tokenizer.decode([end_of_chat_token_id])
         raw_predictions = [
@@ -573,7 +573,7 @@ def get_generation_stopping_criteria(
         text=[tokenizer.eos_token], add_special_tokens=False
     ).input_ids[0]
 
-    end_chat_token_id = get_chat_end_token_id(tokenizer=tokenizer)
+    end_chat_token_id = get_end_of_chat_token_id(tokenizer=tokenizer)
     if end_chat_token_id is not None:
         end_chat_token_ids: list[int] = [end_chat_token_id]
     else:
