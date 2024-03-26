@@ -2,7 +2,7 @@
 
 import importlib.util
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 from openai.types.chat.completion_create_params import ResponseFormat
 
 import torch
@@ -11,8 +11,7 @@ from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
-from scandeval.tasks import NER
-
+from .tasks import NER
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
@@ -47,6 +46,7 @@ class OpenAITokenizer:
     pad_token = "<pad>"
     padding_side = "left"
     is_fast = False
+    chat_template: str | None = None
 
     def __init__(
         self, model_config: ModelConfig, hf_model_config: "PretrainedConfig"
@@ -299,6 +299,11 @@ class OpenAITokenizer:
     def vocab_size(self) -> int:
         """Return the size of the vocabulary."""
         return self.encoding.max_token_value + 1
+
+    def apply_chat_template(
+        self, conversation: list[dict[Literal["role", "content"], str]], **kwargs
+    ) -> str:
+        raise NotImplementedError("Chat templates are not supported for OpenAI models.")
 
 
 class OpenAIModel:

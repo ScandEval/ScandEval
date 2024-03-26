@@ -1,6 +1,6 @@
 """Protocols used throughout the project."""
 
-from typing import TYPE_CHECKING, Protocol, Union, runtime_checkable
+from typing import TYPE_CHECKING, Literal, Protocol, Union, runtime_checkable
 
 if TYPE_CHECKING:
     from torch import Tensor, device
@@ -32,6 +32,7 @@ class Tokenizer(Protocol):
     pad_token_id: int
     unk_token_id: int
     is_fast: bool
+    chat_template: str | None
 
     def __call__(self, text: str | list[str], **kwargs) -> "BatchEncoding":
         """Call the tokenizer.
@@ -153,6 +154,22 @@ class Tokenizer(Protocol):
 
         Returns:
             The padded encoded inputs.
+        """
+        ...
+
+    def apply_chat_template(
+        self, conversation: list[dict[Literal["role", "content"], str]], **kwargs
+    ) -> str:
+        """Apply a chat template to a conversation.
+
+        Args:
+            conversation:
+                The conversation.
+            **kwargs:
+                Keyword arguments to pass to the tokenizer.
+
+        Returns:
+            The conversation as a string.
         """
         ...
 
