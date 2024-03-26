@@ -296,7 +296,7 @@ class SequenceClassification(BenchmarkDataset):
                             dict(role="system", content=final_prompt.split("\n\n")[0]),
                             dict(
                                 role="user",
-                                content="\n".join(final_prompt.split("\n")[:-1]),
+                                content="\n".join(final_prompt.split("\n")[2:-1]),
                             ),
                         ],
                         chat_template=tokenizer.chat_template,
