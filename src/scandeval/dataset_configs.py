@@ -339,7 +339,7 @@ GERMEVAL_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/germeval-mini",
     task=NER,
     languages=[DE],
-    prompt_prefix="Im Folgenden sindSätze und JSON-Wörterbücher mit den benannten "
+    prompt_prefix="Es folgen Sätze und JSON-Wörterbücher mit den benannten "
     "Entitäten, die in der angegebenen Phrase vorkommen.",
     prompt_template="Satz: {text}\nBenannte Entitäten: {label}",
     prompt_label_mapping={
@@ -542,7 +542,7 @@ SCALA_DE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/scala-de",
     task=LA,
     languages=[DE],
-    prompt_prefix="Im Folgenden sind Sätze und ob sie grammatikalisch korrekt sind.",
+    prompt_prefix="Die folgenden Sätze und ob sie grammatikalisch korrekt sind.",
     prompt_template="Satz: {text}\nGrammatikalisch richtig: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nein"),
     num_few_shot_examples=12,
@@ -652,7 +652,8 @@ GERMANQUAD_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/germanquad-mini",
     task=QA,
     languages=[DE],
-    prompt_prefix="Im Folgenden sind Texte mit den dazugehörigen Fragen und Antworten.",
+    prompt_prefix="Im Folgenden finden Sie Texte mit den dazugehörigen Fragen und "
+    "Antworten.",
     prompt_template="Text: {text}\nFragen: {question}\nFragen Antwort in maximal 3 "
     "Wörtern: {label}",
     num_few_shot_examples=4,
@@ -711,7 +712,7 @@ MLSUM_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mlsum-mini",
     task=SUMM,
     languages=[DE],
-    prompt_prefix="Im Folgenden sind Nachrichtenartikel mit den dazugehörigen "
+    prompt_prefix="Im Folgenden finden Sie Nachrichtenartikel mit den dazugehörigen "
     "Zusammenfassungen.",
     prompt_template="Nachrichtenartikel: {text}\nZusammenfassung: {target_text}",
     num_few_shot_examples=1,
@@ -863,8 +864,7 @@ MMLU_DE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/mmlu-de-mini",
     task=KNOW,
     languages=[DE],
-    prompt_prefix="Im Folgenden sind Fragen sind Multiple-Choice-Fragen (mit "
-    "Antworten).",
+    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
@@ -980,8 +980,7 @@ ARC_DE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/arc-de-mini",
     task=KNOW,
     languages=[DE],
-    prompt_prefix="Im Folgenden sind Fragen sind Multiple-Choice-Fragen (mit "
-    "Antworten).",
+    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
@@ -1101,8 +1100,7 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/hellaswag-de-mini",
     task=COMMON_SENSE,
     languages=[DE],
-    prompt_prefix="Im Folgenden sind Fragen sind Multiple-Choice-Fragen (mit "
-    "Antworten).",
+    prompt_prefix="Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).",
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
