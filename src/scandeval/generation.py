@@ -523,11 +523,21 @@ def extract_raw_predictions(
         The candidate labels with the smallest edit distance to the predicted labels.
     """
     raw_predictions: list[str] = [
-        tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True)
-        .split("\n\n")[0]
-        .strip()
+        tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True).split(
+            "\n\n"
+        )[0]
         for completion_ids in generated_sequences.long()
     ]
+
+    end_of_chat_token_id = get_chat_end_token_id(tokenizer=tokenizer)
+    if end_of_chat_token_id is not None:
+        end_of_chat_token = tokenizer.decode([end_of_chat_token_id])
+        raw_predictions = [
+            raw_prediction.split(end_of_chat_token)[0]
+            for raw_prediction in raw_predictions
+        ]
+
+    raw_predictions = [raw_prediction.strip() for raw_prediction in raw_predictions]
     return raw_predictions
 
 
