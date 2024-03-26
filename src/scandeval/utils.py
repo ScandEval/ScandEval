@@ -713,10 +713,10 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     ```
     <prefix prompt>
 
-    <example prefix>: <example>
+    [<example prefix>: <example>
     <label prefix>: <label>
 
-    [<example prefix>: <example>
+    <example prefix>: <example>
     <label prefix>: <label>
 
     (...)
@@ -748,13 +748,11 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
         tokenize=False,
     )
 
-    prompt_has_prefix_and_few_shots = (
-        len(prompt.split("\n\n")) > 2 and len(prompt.split("\n\n")[0].split("\n")) == 1
+    prompt_has_prefix = (
+        len(prompt.split("\n\n")) > 1 and len(prompt.split("\n\n")[0].split("\n")) == 1
     )
-    if not prompt_has_prefix_and_few_shots:
-        raise ValueError(
-            "The prompt either doesn't have a prefix or few-shot examples: {prompt!r}"
-        )
+    if not prompt_has_prefix:
+        raise ValueError(f"The prompt doesn't have a prefix: {prompt!r}")
 
     # Split up the prompt into its main components
     prompt_prefix = prompt.split("\n\n")[0]
@@ -771,7 +769,9 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
         )
     except TemplateError:
         instruction_prompt = tokenizer.apply_chat_template(
-            conversation=[dict(role="user", content=main_prompt)],
+            conversation=[
+                dict(role="user", content=prompt_prefix + "\n\n" + main_prompt)
+            ],
             **chat_template_kwargs,
         )
     assert isinstance(instruction_prompt, str)
