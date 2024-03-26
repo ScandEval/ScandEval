@@ -541,10 +541,6 @@ class BenchmarkDataset(ABC):
                     "Preprocessing of the test dataset could not be done."
                 )
 
-        # TEMP
-        logger.info("Example from the prepared test set: ")
-        logger.info(prepared_tests[0][0]["text"])
-
         return prepared_train, prepared_val, prepared_tests
 
     def _preprocess_logits_for_metrics(
