@@ -538,9 +538,6 @@ def extract_raw_predictions(
 
     raw_predictions = [raw_prediction.strip() for raw_prediction in raw_predictions]
 
-    # TEMP
-    logger.info(f"Examples of raw predictions: {raw_predictions[:5]}")
-
     return raw_predictions
 
 
