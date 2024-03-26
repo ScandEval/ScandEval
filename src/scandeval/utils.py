@@ -757,6 +757,7 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     label_prefix = prompt.split("\n")[-1]
 
     try:
+        raise TemplateError("This is a test error.")
         instruction_prompt = tokenizer.apply_chat_template(
             conversation=[
                 dict(role="system", content=prompt_prefix),
