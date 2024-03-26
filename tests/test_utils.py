@@ -6,7 +6,9 @@ import numpy as np
 import pytest
 import torch
 from scandeval.utils import (
+    convert_prompt_to_instruction,
     enforce_reproducibility,
+    get_end_of_chat_token_ids,
     is_module_installed,
     should_prefix_space_be_added_to_labels,
     should_prompts_be_stripped,
@@ -105,3 +107,73 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected):
         labels_to_be_generated=labels, tokenizer=tokenizer
     )
     assert strip_prompts == expected
+
+
+@pytest.mark.parametrize(
+    argnames=["model_id", "expected"],
+    argvalues=[
+        ("mistralai/Mistral-7B-v0.1", None),
+        ("mistralai/Mistral-7B-Instruct-v0.1", [733, 28748, 16289, 28793]),
+        ("occiglot/occiglot-7b-de-en", None),
+        ("occiglot/occiglot-7b-de-en-instruct", [32001, 28705, 13]),
+        ("mhenrichsen/danskgpt-tiny", None),
+        ("mhenrichsen/danskgpt-tiny-chat", [32000, 29871, 13]),
+    ],
+)
+def test_get_end_of_chat_token_ids(model_id, expected):
+    """Test ability to get the chat token IDs of a model."""
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
+    assert end_of_chat_token_ids == expected
+
+
+@pytest.mark.parametrize(
+    argnames=["prompt", "model_id", "expected"],
+    argvalues=[
+        (
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "mistralai/Mistral-7B-Instruct-v0.1",
+            "<s>[INST] Do what you're told\n\nExample: This is a test [/INST]Label: ",
+        ),
+        (
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "occiglot/occiglot-7b-de-en-instruct",
+            "<s><|im_start|>system\nDo what you're told<|im_end|>\n<|im_start|>user\n"
+            "Example: This is a test<|im_end|>\n<|im_start|>assistant\nLabel: ",
+        ),
+        (
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "mhenrichsen/danskgpt-tiny-chat",
+            "<|im_start|>system\nDo what you're told<|im_end|>\n<|im_start|>user\n"
+            "Example: This is a test<|im_end|>\n<|im_start|>assistant\nLabel: ",
+        ),
+        (
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "mistralai/Mistral-7B-v0.1",
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+        ),
+        (
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "occiglot/occiglot-7b-de-en",
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+        ),
+        (
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "mhenrichsen/danskgpt-tiny",
+            "Do what you're told\n\nExample: This is a test\nLabel: ",
+        ),
+    ],
+    ids=[
+        "mistral-instruct",
+        "occiglot-instruct",
+        "danskgpt-instruct",
+        "mistral-no-instruct",
+        "occiglot-no-instruct",
+        "danskgpt-no-instruct",
+    ],
+)
+def test_convert_prompt_to_instruction(prompt, model_id, expected):
+    """Test that a prompt is correctly converted to an instruction."""
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    instruction = convert_prompt_to_instruction(prompt=prompt, tokenizer=tokenizer)
+    assert instruction == expected

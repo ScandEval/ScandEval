@@ -28,7 +28,7 @@ from .model_cache import (
 from .openai_models import OpenAIModel
 from .structured_generation_utils import get_ner_prefix_allowed_tokens_fn
 from .tasks import NER
-from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory
+from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_end_of_chat_token_ids
 from .vllm_models import VLLMModel
 
 if TYPE_CHECKING:
@@ -522,11 +522,22 @@ def extract_raw_predictions(
         The candidate labels with the smallest edit distance to the predicted labels.
     """
     raw_predictions: list[str] = [
-        tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True)
-        .split("\n\n")[0]
-        .strip()
+        tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True).split(
+            "\n\n"
+        )[0]
         for completion_ids in generated_sequences.long()
     ]
+
+    end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
+    if end_of_chat_token_ids is not None:
+        end_of_chat_token = tokenizer.decode(end_of_chat_token_ids).strip()
+        raw_predictions = [
+            raw_prediction.split(end_of_chat_token)[0]
+            for raw_prediction in raw_predictions
+        ]
+
+    raw_predictions = [raw_prediction.strip() for raw_prediction in raw_predictions]
+
     return raw_predictions
 
 
@@ -562,6 +573,10 @@ def get_generation_stopping_criteria(
         text=[tokenizer.eos_token], add_special_tokens=False
     ).input_ids[0]
 
+    end_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
+    if end_chat_token_ids is None:
+        end_chat_token_ids = []
+
     def remove_empty_tokens(token_id_list: list[int]) -> list[int]:
         return [
             token_id for token_id in token_id_list if tokenizer.decode([token_id]) != ""
@@ -577,6 +592,7 @@ def get_generation_stopping_criteria(
         single_newline_ids + single_newline_ids,
         bos_token_ids,
         eos_token_ids,
+        end_chat_token_ids,
     ]
 
     return StopWordCriteria(stop_word_id_lists=stop_word_id_lists)

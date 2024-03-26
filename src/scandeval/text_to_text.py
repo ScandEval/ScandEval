@@ -258,9 +258,11 @@ class TextToText(BenchmarkDataset):
             for text in examples["text"]
         ]
 
-        examples["text"] = [
+        final_prompts = [
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
+
+        examples["text"] = final_prompts
 
         return examples
 

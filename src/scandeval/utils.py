@@ -13,6 +13,7 @@ from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Type
+from jinja2 import TemplateError
 
 import numpy as np
 import pkg_resources
@@ -671,3 +672,110 @@ def should_prefix_space_be_added_to_labels(
         if has_prefix_space:
             return False
     return True
+
+
+def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
+    """Get the end token ID for chat models.
+
+    This is only relevant for tokenizers with a chat template.
+
+    Args:
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The token IDs used to end chats, or None if the tokenizer does not have a chat
+        template.
+    """
+    if tokenizer.chat_template is None:
+        return None
+
+    token_ids = tokenizer.apply_chat_template(
+        conversation=[dict(role="user", content="†")]
+    )
+    assert isinstance(token_ids, list)
+
+    for idx, token in enumerate(tokenizer.convert_ids_to_tokens(token_ids)):
+        if "†" in token:
+            x_token_index = idx
+            break
+    else:
+        raise ValueError("Could not find the 'x' token in the chat template.")
+
+    return token_ids[x_token_index + 1 :]
+
+
+def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
+    """Convert a prompt to an instruction.
+
+    Note that it is expected that the prompt has the following format:
+
+    ```
+    <prefix prompt>
+
+    [<example prefix>: <example>
+    <label prefix>: <label>
+
+    <example prefix>: <example>
+    <label prefix>: <label>
+
+    (...)
+
+    <example prefix>: <example>
+    <label prefix>: <label>]
+
+    <example prefix>: <example>
+    <label prefix>:
+    ```
+
+    Here the part in square brackets is optional, containing few-shot examples.
+
+    Args:
+        prompt:
+            The prompt.
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The instruction.
+    """
+    if tokenizer.chat_template is None:
+        return prompt
+
+    chat_template_kwargs = dict(
+        chat_template=tokenizer.chat_template,
+        add_generation_prompt=True,
+        tokenize=False,
+    )
+
+    prompt_has_prefix = (
+        len(prompt.split("\n\n")) > 1 and len(prompt.split("\n\n")[0].split("\n")) == 1
+    )
+    if not prompt_has_prefix:
+        raise ValueError(f"The prompt doesn't have a prefix: {prompt!r}")
+
+    # Split up the prompt into its main components
+    prompt_prefix = prompt.split("\n\n")[0]
+    main_prompt = "\n".join(prompt.split("\n")[2:-1])
+    label_prefix = prompt.split("\n")[-1]
+
+    try:
+        instruction_prompt = tokenizer.apply_chat_template(
+            conversation=[
+                dict(role="system", content=prompt_prefix),
+                dict(role="user", content=main_prompt),
+            ],
+            **chat_template_kwargs,
+        )
+    except TemplateError:
+        instruction_prompt = tokenizer.apply_chat_template(
+            conversation=[
+                dict(role="user", content=prompt_prefix + "\n\n" + main_prompt)
+            ],
+            **chat_template_kwargs,
+        )
+    assert isinstance(instruction_prompt, str)
+
+    instruction_prompt += label_prefix
+
+    return instruction_prompt
