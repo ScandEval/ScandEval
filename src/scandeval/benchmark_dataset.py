@@ -488,24 +488,6 @@ class BenchmarkDataset(ABC):
                             keep_in_memory=True,
                         )
 
-                        # Add chat template to the test dataset, if one is available
-                        has_chat_template = tokenizer.chat_template is not None
-                        if has_chat_template:
-                            test = test.map(
-                                lambda x: dict(
-                                    text=tokenizer.apply_chat_template(
-                                        conversation=[
-                                            dict(role="user", content=x["text"])
-                                        ],
-                                        chat_template=tokenizer.chat_template,
-                                        add_generation_prompt=True,
-                                        tokenize=False,
-                                    )
-                                ),
-                                load_from_cache_file=False,
-                                keep_in_memory=True,
-                            )
-
                         # Determine if we should strip the prompts. This is the case if
                         # the tokenizer needs to include the space as part of the label
                         # token
