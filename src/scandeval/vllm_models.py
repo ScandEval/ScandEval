@@ -15,7 +15,7 @@ from transformers.utils import ModelOutput
 
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
-from .utils import clear_memory
+from .utils import clear_memory, get_chat_end_token_id
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -160,6 +160,11 @@ class VLLMModel:
             self.tokenizer.pad_token_id = self.tokenizer.bos_token_id
             self.tokenizer.pad_token = self.tokenizer.bos_token
         assert self.tokenizer.pad_token_id is not None
+
+        # Add end of chat token as a stopping token, if it exists
+        end_of_chat_token = get_chat_end_token_id(tokenizer=self.tokenizer)
+        if end_of_chat_token is not None:
+            stop_tokens.append(self.tokenizer.decode([end_of_chat_token]))
 
         # Define the parameters used for vLLM generation
         max_tokens: int = generation_config.max_new_tokens or 1
