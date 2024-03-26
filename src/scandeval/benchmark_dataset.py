@@ -505,7 +505,6 @@ class BenchmarkDataset(ABC):
                                 load_from_cache_file=False,
                                 keep_in_memory=True,
                             )
-                            logger.info(f"Example from test set: {test[0]['text']}")
 
                         # Determine if we should strip the prompts. This is the case if
                         # the tokenizer needs to include the space as part of the label
