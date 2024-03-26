@@ -162,8 +162,9 @@ class VLLMModel:
         assert self.tokenizer.pad_token_id is not None
 
         # Add end of chat token as a stopping token, if it exists
-        end_of_chat_token = get_chat_end_token_id(tokenizer=self.tokenizer)
-        if end_of_chat_token is not None:
+        end_of_chat_token_id = get_chat_end_token_id(tokenizer=self.tokenizer)
+        if end_of_chat_token_id is not None:
+            end_of_chat_token = self.tokenizer.decode([end_of_chat_token_id])
             stop_tokens.append(self.tokenizer.decode([end_of_chat_token]))
 
         # Define the parameters used for vLLM generation
