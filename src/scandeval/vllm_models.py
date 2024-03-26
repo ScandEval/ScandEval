@@ -165,7 +165,7 @@ class VLLMModel:
         end_of_chat_token_id = get_chat_end_token_id(tokenizer=self.tokenizer)
         if end_of_chat_token_id is not None:
             end_of_chat_token = self.tokenizer.decode([end_of_chat_token_id])
-            stop_tokens.append(self.tokenizer.decode([end_of_chat_token]))
+            stop_tokens.append(end_of_chat_token)
 
         # Define the parameters used for vLLM generation
         max_tokens: int = generation_config.max_new_tokens or 1
