@@ -758,12 +758,12 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
 
     # Split up the prompt into its main components
     prompt_prefix = prompt.split("\n\n")[0]
-    few_shot_examples = "\n\n".join(prompt.split("\n\n")[1:-1])
-    final_example = prompt.split("\n\n")[-1].split("\n")[0]
-    label_prefix = prompt.split("\n\n")[-1].split("\n")[-1]
+    main_prompt = "\n".join(prompt.split("\n")[2:-1])
+    # few_shot_examples = "\n\n".join(prompt.split("\n\n")[1:-1])
+    # final_example = prompt.split("\n\n")[-1].split("\n")[0]
+    label_prefix = prompt.split("\n")[-1]
 
     try:
-        main_prompt = f"{few_shot_examples}\n\n{final_example}"
         instruction_prompt = tokenizer.apply_chat_template(
             conversation=[
                 dict(role="system", content=prompt_prefix),
@@ -772,7 +772,6 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
             **chat_template_kwargs,
         )
     except TemplateError:
-        main_prompt = f"{prompt_prefix}\n\n{few_shot_examples}\n\n{final_example}"
         instruction_prompt = tokenizer.apply_chat_template(
             conversation=[dict(role="user", content=main_prompt)],
             **chat_template_kwargs,
