@@ -739,7 +739,7 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     Returns:
         The instruction.
     """
-    if tokenizer.chat_template is None or False:
+    if tokenizer.chat_template is None:
         return prompt
 
     chat_template_kwargs = dict(
