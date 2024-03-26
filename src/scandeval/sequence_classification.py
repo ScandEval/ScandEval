@@ -293,10 +293,11 @@ class SequenceClassification(BenchmarkDataset):
                 str(
                     tokenizer.apply_chat_template(
                         conversation=[
+                            dict(role="system", content=final_prompt.split("\n\n")[0]),
                             dict(
                                 role="user",
                                 content="\n".join(final_prompt.split("\n")[:-1]),
-                            )
+                            ),
                         ],
                         chat_template=tokenizer.chat_template,
                         add_generation_prompt=True,
