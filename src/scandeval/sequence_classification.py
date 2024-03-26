@@ -286,31 +286,6 @@ class SequenceClassification(BenchmarkDataset):
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
 
-        # Add chat template to the test dataset, if one is available
-        has_chat_template = tokenizer.chat_template is not None
-        if has_chat_template:
-            final_prompts = [
-                str(
-                    tokenizer.apply_chat_template(
-                        conversation=[
-                            dict(role="system", content=final_prompt.split("\n\n")[0]),
-                            dict(
-                                role="user",
-                                content="\n".join(final_prompt.split("\n")[2:-1]),
-                            ),
-                        ],
-                        chat_template=tokenizer.chat_template,
-                        add_generation_prompt=True,
-                        tokenize=False,
-                    )
-                )
-                + final_prompt.split("\n")[-1]
-                for final_prompt in final_prompts
-            ]
-
-        logger.info("Sample prompt:")
-        logger.info(final_prompts[0])
-
         examples["text"] = final_prompts
 
         return examples

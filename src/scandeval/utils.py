@@ -696,3 +696,32 @@ def get_end_of_chat_token_id(tokenizer: "Tokenizer") -> int | None:
     eos_token_index = tokens.index(tokenizer.eos_token_id)
     end_of_chat_token_id = tokens[eos_token_index + 1]
     return end_of_chat_token_id
+
+
+def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
+    """Convert a prompt to an instruction.
+
+    Args:
+        prompt:
+            The prompt.
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The instruction.
+    """
+    if tokenizer.chat_template is None:
+        return prompt
+
+    instruction_prompt = tokenizer.apply_chat_template(
+        conversation=[
+            dict(role="system", content=prompt.split("\n\n")[0]),
+            dict(role="user", content="\n".join(prompt.split("\n")[2:-1])),
+        ],
+        chat_template=tokenizer.chat_template,
+        add_generation_prompt=True,
+        tokenize=False,
+    )
+    assert isinstance(instruction_prompt, str)
+    instruction_prompt += prompt.split("\n")[-1]
+    return instruction_prompt
