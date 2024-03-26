@@ -762,11 +762,8 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     final_example = prompt.split("\n\n")[-1].split("\n")[0]
     label_prefix = prompt.split("\n\n")[-1].split("\n")[-1]
 
-    # Add an explicit instruction to the prompt, after the few-shot examples
-    instruction = "Füllen Sie die folgenden Felder auf die gleiche Weise aus:"
-    main_prompt = f"{few_shot_examples}\n\n{instruction}\n\n{final_example}"
-
     try:
+        main_prompt = f"{few_shot_examples}\n\n{final_example}"
         instruction_prompt = tokenizer.apply_chat_template(
             conversation=[
                 dict(role="system", content=prompt_prefix),
@@ -775,10 +772,9 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
             **chat_template_kwargs,
         )
     except TemplateError:
+        main_prompt = f"{prompt_prefix}\n\n{few_shot_examples}\n\n{final_example}"
         instruction_prompt = tokenizer.apply_chat_template(
-            conversation=[
-                dict(role="user", content=prompt_prefix + "\n\n" + main_prompt)
-            ],
+            conversation=[dict(role="user", content=main_prompt)],
             **chat_template_kwargs,
         )
     assert isinstance(instruction_prompt, str)
