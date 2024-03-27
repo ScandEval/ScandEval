@@ -488,7 +488,9 @@ class BenchmarkDataset(ABC):
                             keep_in_memory=True,
                         )
 
-                        # Apply chat template, if one is available
+                        # NOTE: This applies the model's chat template if one is
+                        # available. However, all experiments have shown this to reduce
+                        # overall performance, so it is left out for now.
                         # test = test.map(
                         #     function=lambda x: dict(
                         #         text=convert_prompt_to_instruction(
