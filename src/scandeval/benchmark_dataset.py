@@ -29,7 +29,6 @@ from .speed_benchmark import benchmark_speed
 from .tasks import SPEED
 from .utils import (
     GENERATIVE_MODEL_TASKS,
-    convert_prompt_to_instruction,
     enforce_reproducibility,
     model_is_generative,
     should_prompts_be_stripped,
@@ -490,15 +489,15 @@ class BenchmarkDataset(ABC):
                         )
 
                         # Apply chat template, if one is available
-                        test = test.map(
-                            function=lambda x: dict(
-                                text=convert_prompt_to_instruction(
-                                    prompt=x["text"], tokenizer=tokenizer
-                                )
-                            ),
-                            load_from_cache_file=False,
-                            keep_in_memory=True,
-                        )
+                        # test = test.map(
+                        #     function=lambda x: dict(
+                        #         text=convert_prompt_to_instruction(
+                        #             prompt=x["text"], tokenizer=tokenizer
+                        #         )
+                        #     ),
+                        #     load_from_cache_file=False,
+                        #     keep_in_memory=True,
+                        # )
 
                         # Determine if we should strip the prompts. This is the case if
                         # the tokenizer needs to include the space as part of the label
