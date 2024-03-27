@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.4.0] - 2024-03-27
 ### Added
 - Support for Azure OpenAI models! These can now be benchmarked as with any other
   model, where either the environment variables `AZURE_OPENAI_API_KEY`,
