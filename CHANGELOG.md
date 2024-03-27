@@ -8,8 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Instruction tuned models are now using chat templates. This assumes that the
-  tokenizer has the `chat_template` set in its configuration.
 - Support for Azure OpenAI models! These can now be benchmarked as with any other
   model, where either the environment variables `AZURE_OPENAI_API_KEY`,
   `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_VERSION` need to have been set, or
@@ -30,6 +28,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Move models to the device before running any inference with it, as this causes issues
   when flash attention is enabled.
+- When benchmarking instruction tuned models, we now ensure that generation stops when
+  the end-of-chat token is reached (such as `<|im_end|>` and `[/INST]`). This had a
+  negative performance impact on question answering and summarization, but the
+  remaining tasks were not affected.
 
 
 ## [v12.3.2] - 2024-03-19
