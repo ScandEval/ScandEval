@@ -30,8 +30,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   when flash attention is enabled.
 - When benchmarking instruction tuned models, we now ensure that generation stops when
   the end-of-chat token is reached (such as `<|im_end|>` and `[/INST]`). This had a
-  negative performance impact on question answering, but the remaining tasks were not
-  affected.
+  negative performance impact on question answering and summarization, but the
+  remaining tasks were not affected.
 
 
 ## [v12.3.2] - 2024-03-19
