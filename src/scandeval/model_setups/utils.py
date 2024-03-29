@@ -173,7 +173,7 @@ def align_model_and_tokenizer(
             except ValueError as e:
                 if "decoder_input_ids" not in str(e):
                     raise e
-                model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long())
+                model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long().to(dummy_inputs.device))
                 break
 
             # This happens if `max_length` is too large
