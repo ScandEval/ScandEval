@@ -1,6 +1,7 @@
 """Unit tests for the `model_loading` module."""
 
 import pytest
+import torch
 from scandeval.config import ModelConfig
 from scandeval.enums import Framework
 from scandeval.exceptions import InvalidBenchmark, InvalidModel
@@ -102,6 +103,7 @@ def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_confi
         )
 
 
+@pytest.mark.skipif(condition=not torch.cuda.is_available(), reason="No GPU available.")
 def test_load_gptq_model(gptq_generative_model_id, dataset_config, benchmark_config):
     """Test loading a GPTQ quantised model."""
     model_config = get_model_config(
