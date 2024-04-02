@@ -118,6 +118,8 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected):
         ("occiglot/occiglot-7b-de-en-instruct", [32001, 28705, 13]),
         ("mhenrichsen/danskgpt-tiny", None),
         ("mhenrichsen/danskgpt-tiny-chat", [32000, 29871, 13]),
+        ("mayflowergmbh/Wiedervereinigung-7b-dpo", None),
+        ("Qwen/Qwen1.5-0.5B-Chat", None),
     ],
 )
 def test_get_end_of_chat_token_ids(model_id, expected):

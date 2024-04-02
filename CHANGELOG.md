@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Deals with the case where an instruction tuned model does not use any special token
+  at the end of the chat, such as `<|im_end|>`. This holds for, e.g., Qwen models.
+
+
 ## [v12.4.0] - 2024-03-27
 ### Added
 - Support for Azure OpenAI models! These can now be benchmarked as with any other
