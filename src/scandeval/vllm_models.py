@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 
     from .config import DatasetConfig, ModelConfig
 
+block_terminal_output()
 if importlib.util.find_spec("vllm") is not None:
-    block_terminal_output()
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 

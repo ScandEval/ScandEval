@@ -24,6 +24,7 @@ from huggingface_hub import HfApi, ModelFilter
 from requests.exceptions import RequestException
 from transformers import GenerationConfig
 from transformers import logging as tf_logging
+import vllm
 
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
@@ -44,8 +45,9 @@ if importlib.util.find_spec("ray") is not None:
     import ray
 
 
-if importlib.util.find_spec("vllm") is not None:
-    import vllm
+# TEMP
+# if importlib.util.find_spec("vllm") is not None:
+#     import vllm
 
 
 # This is used as input to generative models; it cannot be a special token
