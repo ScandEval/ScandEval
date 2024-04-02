@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Move tensor to the correct device when benchmarking seq-to-seq models (#363). Thanks
+  to [@ThomasKluiters](https://github.com/ThomasKluiters) for this contribution!
+- Better auto-detection of pipeline tag for models on the Hugging Face Hub, in case the
+  tag is not manually set.
+
+
 ## [v12.4.0] - 2024-03-27
 ### Added
 - Support for Azure OpenAI models! These can now be benchmarked as with any other
