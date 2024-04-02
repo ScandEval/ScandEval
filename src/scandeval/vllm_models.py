@@ -95,6 +95,10 @@ class VLLMModel:
         # float16 instead
         dtype = "auto"
         if quantization is not None and self.config.torch_dtype == "bfloat16":
+            logger.info(
+                "You are loading a quantized model with dtype bfloat16, which vLLM "
+                "does not support. Setting dtype to float16 instead."
+            )
             dtype = "float16"
 
         block_terminal_output()
