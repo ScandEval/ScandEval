@@ -121,6 +121,18 @@ def generative_model_id() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
+def awq_generative_model_id() -> Generator[str, None, None]:
+    """Yields a generative model ID used in tests."""
+    yield "TheBloke/Mistral-7B-v0.1-AWQ"
+
+
+@pytest.fixture(scope="session")
+def gptq_generative_model_id() -> Generator[str, None, None]:
+    """Yields a generative model ID used in tests."""
+    yield "TheBloke/Mistral-7B-v0.1-GPTQ"
+
+
+@pytest.fixture(scope="session")
 def dataset_config(language, task) -> Generator[DatasetConfig, None, None]:
     """Yields a dataset configuration used in tests."""
     yield DatasetConfig(

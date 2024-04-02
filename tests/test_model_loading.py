@@ -87,3 +87,29 @@ def test_load_non_existing_model(dataset_config, benchmark_config):
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
         )
+
+
+def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_config):
+    """Test loading an AWQ quantised model."""
+    model_config = get_model_config(
+        model_id=awq_generative_model_id, benchmark_config=benchmark_config
+    )
+    with pytest.raises(InvalidModel):
+        load_model(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
+
+
+def test_load_gptq_model(gptq_generative_model_id, dataset_config, benchmark_config):
+    """Test loading a GPTQ quantised model."""
+    model_config = get_model_config(
+        model_id=gptq_generative_model_id, benchmark_config=benchmark_config
+    )
+    with pytest.raises(InvalidModel):
+        load_model(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
