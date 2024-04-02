@@ -253,6 +253,42 @@ tests-mypy = ["mypy (>=1.6)", "pytest-mypy-plugins"]
 tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "pytest (>=4.3.0)", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "auto-gptq"
+version = "0.7.1"
+description = "An easy-to-use LLMs quantization package with user-friendly apis, based on GPTQ algorithm."
+optional = true
+python-versions = ">=3.8.0"
+files = [
+    {file = "auto_gptq-0.7.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:84efeb9527b2d49f3555b2ba9451018c5ff41722c0b0e2fde74f5183ba0c008d"},
+    {file = "auto_gptq-0.7.1-cp310-cp310-win_amd64.whl", hash = "sha256:5d0f3c1b4905e1f14f5b88a33d3dfaf313ebfa138f73c43315f80b40a2d8bb1f"},
+    {file = "auto_gptq-0.7.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a372d81d523b8d2f98639bbca63c0c427cab0ed55b8a57bb96706b0942aa01c9"},
+    {file = "auto_gptq-0.7.1-cp311-cp311-win_amd64.whl", hash = "sha256:8d9d3fbfff94e129bcde0432fd5f6ba09f26aeceea0890a68c898210ba448135"},
+    {file = "auto_gptq-0.7.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fc69a93ab8b24e7854abbb3adbdb3a8c28c8f4db9c82229341922a4b59e0eff1"},
+    {file = "auto_gptq-0.7.1-cp38-cp38-win_amd64.whl", hash = "sha256:d87cd69532bfeb81150a0f8db5ebb5f5f295fa72b5a0403102e791ccac44b933"},
+    {file = "auto_gptq-0.7.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4a1e5972b8ff65956f207908d8789c56fc0d521678ff37bd57e98f392971b3fd"},
+    {file = "auto_gptq-0.7.1-cp39-cp39-win_amd64.whl", hash = "sha256:57b4b284ca4ff4e060088252cbfb18a6f7332477fe57cf2b7ef9af158cce9730"},
+    {file = "auto_gptq-0.7.1.tar.gz", hash = "sha256:5c61ad380e9b4c603757c254765e9083a90a820cd0aff1b5d2c6f7fd96c85e80"},
+]
+
+[package.dependencies]
+accelerate = ">=0.26.0"
+datasets = "*"
+gekko = "*"
+numpy = "*"
+peft = ">=0.5.0"
+rouge = "*"
+safetensors = "*"
+sentencepiece = "*"
+torch = ">=1.13.0"
+tqdm = "*"
+transformers = ">=4.31.0"
+
+[package.extras]
+quality = ["ruff (==0.1.5)"]
+test = ["parameterized", "pytest"]
+triton = ["triton (==2.0.0)"]
+
+[[package]]
 name = "bert-score"
 version = "0.3.13"
 description = "PyTorch implementation of BERT score"
@@ -533,6 +569,23 @@ files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
+
+[[package]]
+name = "coloredlogs"
+version = "15.0.1"
+description = "Colored terminal output for Python's logging module"
+optional = true
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "coloredlogs-15.0.1-py2.py3-none-any.whl", hash = "sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934"},
+    {file = "coloredlogs-15.0.1.tar.gz", hash = "sha256:7c991aa71a4577af2f82600d8f8f3a89f936baeaf9b50a9c197da014e5bf16b0"},
+]
+
+[package.dependencies]
+humanfriendly = ">=9.1"
+
+[package.extras]
+cron = ["capturer (>=2.4)"]
 
 [[package]]
 name = "contourpy"
@@ -1250,6 +1303,20 @@ ssh = ["paramiko"]
 tqdm = ["tqdm"]
 
 [[package]]
+name = "gekko"
+version = "1.1.0"
+description = "Machine learning and optimization for dynamic systems"
+optional = true
+python-versions = ">=2.6"
+files = [
+    {file = "gekko-1.1.0-py3-none-any.whl", hash = "sha256:20d27cbeeb19c274c47fd1e7458f9cc84bc72fff5884792e9b7939d28d51fe39"},
+    {file = "gekko-1.1.0.tar.gz", hash = "sha256:7489887f9cd1e920b3b60ac56da46bcf89cb975673248c8f2c33462152e839d8"},
+]
+
+[package.dependencies]
+numpy = ">=1.8"
+
+[[package]]
 name = "google-api-core"
 version = "2.17.1"
 description = "Google API client core library"
@@ -1585,6 +1652,20 @@ tensorflow = ["graphviz", "pydot", "tensorflow"]
 testing = ["InquirerPy (==0.3.4)", "Jinja2", "Pillow", "aiohttp", "gradio", "jedi", "numpy", "pydantic (>1.1,<2.0)", "pydantic (>1.1,<3.0)", "pytest", "pytest-asyncio", "pytest-cov", "pytest-env", "pytest-vcr", "pytest-xdist", "soundfile", "urllib3 (<2.0)"]
 torch = ["torch"]
 typing = ["types-PyYAML", "types-requests", "types-simplejson", "types-toml", "types-tqdm", "types-urllib3", "typing-extensions (>=4.8.0)"]
+
+[[package]]
+name = "humanfriendly"
+version = "10.0"
+description = "Human friendly output for text interfaces using Python"
+optional = true
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "humanfriendly-10.0-py2.py3-none-any.whl", hash = "sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477"},
+    {file = "humanfriendly-10.0.tar.gz", hash = "sha256:6b0b831ce8f15f7300721aa49829fc4e83921a9a301cc7f606be6686a2288ddc"},
+]
+
+[package.dependencies]
+pyreadline3 = {version = "*", markers = "sys_platform == \"win32\" and python_version >= \"3.8\""}
 
 [[package]]
 name = "identify"
@@ -3051,6 +3132,50 @@ examples = ["dp_accounting (>=0.4)", "flax", "tensorflow (>=2.4.0)", "tensorflow
 test = ["dm-tree (>=0.1.7)", "flax (>=0.5.3)"]
 
 [[package]]
+name = "optimum"
+version = "1.18.0"
+description = "Optimum Library is an extension of the Hugging Face Transformers library, providing a framework to integrate third-party libraries from Hardware Partners and interface with their specific functionality."
+optional = true
+python-versions = ">=3.7.0"
+files = [
+    {file = "optimum-1.18.0-py3-none-any.whl", hash = "sha256:289035db5f88308af9387c7fefabe7dfa51187dfc8f02c96054614275688fd4a"},
+    {file = "optimum-1.18.0.tar.gz", hash = "sha256:28ea691515df6bfee92540fb0ef93a6614aa691f17c188dccd817719fea45936"},
+]
+
+[package.dependencies]
+coloredlogs = "*"
+datasets = "*"
+huggingface-hub = ">=0.8.0"
+numpy = "*"
+packaging = "*"
+sympy = "*"
+torch = ">=1.11"
+transformers = {version = ">=4.26.0,<4.40.0", extras = ["sentencepiece"]}
+
+[package.extras]
+amd = ["optimum-amd"]
+benchmark = ["evaluate (>=0.2.0)", "optuna", "scikit-learn", "seqeval", "torchvision", "tqdm"]
+dev = ["Pillow", "accelerate", "black (>=23.1,<24.0)", "diffusers (>=0.17.0)", "einops", "invisible-watermark", "parameterized", "pytest (<=8.0.0)", "pytest-xdist", "requests", "rjieba", "ruff (==0.1.5)", "sacremoses", "scikit-learn", "timm", "torchaudio", "torchvision"]
+diffusers = ["diffusers"]
+doc-build = ["accelerate"]
+exporters = ["onnx", "onnxruntime", "timm"]
+exporters-gpu = ["onnx", "onnxruntime-gpu", "timm"]
+exporters-tf = ["h5py", "numpy (<1.24.0)", "onnx", "onnxruntime", "tensorflow (>=2.4,<=2.12.1)", "tf2onnx", "timm", "transformers[sentencepiece] (>=4.26.0,<4.38.0)"]
+furiosa = ["optimum-furiosa"]
+graphcore = ["optimum-graphcore"]
+habana = ["optimum-habana", "transformers (>=4.37.0,<4.38.0)"]
+intel = ["optimum-intel (>=1.15.0)"]
+neural-compressor = ["optimum-intel[neural-compressor] (>=1.15.0)"]
+neuron = ["optimum-neuron[neuron]"]
+neuronx = ["optimum-neuron[neuronx]"]
+nncf = ["optimum-intel[nncf] (>=1.15.0)"]
+onnxruntime = ["datasets (>=1.2.1)", "evaluate", "onnx", "onnxruntime (>=1.11.0)", "protobuf (>=3.20.1)"]
+onnxruntime-gpu = ["accelerate", "datasets (>=1.2.1)", "evaluate", "onnx", "onnxruntime-gpu (>=1.11.0)", "protobuf (>=3.20.1)"]
+openvino = ["optimum-intel[openvino] (>=1.15.0)"]
+quality = ["black (>=23.1,<24.0)", "ruff (==0.1.5)"]
+tests = ["Pillow", "accelerate", "diffusers (>=0.17.0)", "einops", "invisible-watermark", "parameterized", "pytest (<=8.0.0)", "pytest-xdist", "requests", "rjieba", "sacremoses", "scikit-learn", "timm", "torchaudio", "torchvision"]
+
+[[package]]
 name = "orbax-checkpoint"
 version = "0.5.6"
 description = "Orbax Checkpoint"
@@ -3192,6 +3317,35 @@ spss = ["pyreadstat (>=1.2.0)"]
 sql-other = ["SQLAlchemy (>=2.0.0)", "adbc-driver-postgresql (>=0.8.0)", "adbc-driver-sqlite (>=0.8.0)"]
 test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.9.2)"]
+
+[[package]]
+name = "peft"
+version = "0.10.0"
+description = "Parameter-Efficient Fine-Tuning (PEFT)"
+optional = true
+python-versions = ">=3.8.0"
+files = [
+    {file = "peft-0.10.0-py3-none-any.whl", hash = "sha256:d5249c97e818d3e31f92553c73c2953acd0ec12649b8b749afff7152cbc86cbb"},
+    {file = "peft-0.10.0.tar.gz", hash = "sha256:36a7628c15f88d37abb26cfc74c22468f9037ee02e9c9b65de943cfe7c672049"},
+]
+
+[package.dependencies]
+accelerate = ">=0.21.0"
+huggingface-hub = ">=0.17.0"
+numpy = ">=1.17"
+packaging = ">=20.0"
+psutil = "*"
+pyyaml = "*"
+safetensors = "*"
+torch = ">=1.13.0"
+tqdm = "*"
+transformers = "*"
+
+[package.extras]
+dev = ["black", "hf-doc-builder", "ruff (>=0.2.1,<0.3.0)"]
+docs-specific = ["black", "hf-doc-builder"]
+quality = ["black", "hf-doc-builder", "ruff (>=0.2.1,<0.3.0)"]
+test = ["black", "datasets", "diffusers (<0.21.0)", "hf-doc-builder", "parameterized", "pytest", "pytest-cov", "pytest-xdist", "ruff (>=0.2.1,<0.3.0)", "scipy"]
 
 [[package]]
 name = "pillow"
@@ -3650,6 +3804,17 @@ files = [
 
 [package.extras]
 diagrams = ["jinja2", "railroad-diagrams"]
+
+[[package]]
+name = "pyreadline3"
+version = "3.4.1"
+description = "A python implementation of GNU readline."
+optional = true
+python-versions = "*"
+files = [
+    {file = "pyreadline3-3.4.1-py3-none-any.whl", hash = "sha256:b0efb6516fd4fb07b45949053826a62fa4cb353db5be2bbb4a7aa1fdd1e345fb"},
+    {file = "pyreadline3-3.4.1.tar.gz", hash = "sha256:6f3d1f7b8a31ba32b73917cefc1f28cc660562f39aea8646d30bd6eff21f7bae"},
+]
 
 [[package]]
 name = "pytest"
@@ -4147,6 +4312,20 @@ pygments = ">=2.13.0,<3.0.0"
 
 [package.extras]
 jupyter = ["ipywidgets (>=7.5.1,<9)"]
+
+[[package]]
+name = "rouge"
+version = "1.0.1"
+description = "Full Python ROUGE Score Implementation (not a wrapper)"
+optional = true
+python-versions = "*"
+files = [
+    {file = "rouge-1.0.1-py3-none-any.whl", hash = "sha256:28d118536e8c774dc47d1d15ec266479b4dd0914c4672ce117d4002789bdc644"},
+    {file = "rouge-1.0.1.tar.gz", hash = "sha256:12b48346ca47d6bcf3c45061f315452b9ccec0620ee895ec85b7efc3d54aae34"},
+]
+
+[package.dependencies]
+six = "*"
 
 [[package]]
 name = "rouge-score"
@@ -5084,10 +5263,12 @@ filelock = "*"
 huggingface-hub = ">=0.19.3,<1.0"
 numpy = ">=1.17"
 packaging = ">=20.0"
+protobuf = {version = "*", optional = true, markers = "extra == \"sentencepiece\""}
 pyyaml = ">=5.1"
 regex = "!=2019.12.17"
 requests = "*"
 safetensors = ">=0.4.1"
+sentencepiece = {version = ">=0.1.91,<0.1.92 || >0.1.92", optional = true, markers = "extra == \"sentencepiece\""}
 tokenizers = ">=0.14,<0.19"
 tqdm = ">=4.27"
 
@@ -5748,13 +5929,14 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [extras]
-all = ["ai2-olmo", "bert-score", "bert-score", "bitsandbytes", "boto3", "demjson3", "flax", "huggingface-hub", "jax", "jaxlib", "levenshtein", "openai", "outlines", "rouge-score", "rouge-score", "tiktoken", "vllm"]
+all = ["ai2-olmo", "auto-gptq", "bert-score", "bert-score", "bitsandbytes", "boto3", "demjson3", "flax", "huggingface-hub", "jax", "jaxlib", "levenshtein", "openai", "optimum", "outlines", "rouge-score", "rouge-score", "tiktoken", "vllm"]
 generative = ["bert-score", "bitsandbytes", "demjson3", "outlines", "rouge-score", "vllm"]
 jax = ["flax", "jax", "jaxlib"]
 olmo = ["ai2-olmo", "bert-score", "bitsandbytes", "boto3", "demjson3", "huggingface-hub", "outlines", "rouge-score", "vllm"]
 openai = ["bert-score", "bitsandbytes", "demjson3", "levenshtein", "openai", "outlines", "rouge-score", "tiktoken", "vllm"]
+quantization = ["auto-gptq", "optimum"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "76e0a05196bf3e8edb709e80d0d264fcec18e32a29d020ba2a32c172b55dc2b5"
+content-hash = "9a1c899f6956c22a7881f151448cfe05a1f1fe7e81ef424043ac13a8b9246333"

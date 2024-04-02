@@ -58,6 +58,11 @@ openai = { version = "^1.11.1", optional = true }
 tiktoken = { version = "^0.5.2", optional = true }
 levenshtein = { version = "^0.24.0", optional = true }
 
+# Needed for quantised models
+optimum = { version = "^1.18.0", optional = true }
+auto-gptq = { version = "^0.7.1", optional = true }
+
+
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.1.1"
 pre-commit = ">=3.6.2"
@@ -104,6 +109,10 @@ openai = [
     "tiktoken",
     "levenshtein",
 ]
+quantization = [
+    "optimum",
+    "auto-gptq",
+]
 all = [
     "jax",
     "jaxlib",
@@ -122,6 +131,8 @@ all = [
     "openai",
     "tiktoken",
     "levenshtein",
+    "optimum",
+    "auto-gptq",
 ]
 
 [tool.poetry.scripts]
