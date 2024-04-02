@@ -93,6 +93,7 @@ class VLLMModel:
         if hasattr(self.config, "quantization_config"):
             quantization = self.config.quantization_config.get("quant_method", None)
 
+        # The GPTQ quantised models require extra dependencies
         if quantization == "gptq" and (
             importlib.util.find_spec("auto_gptq") is None
             or importlib.util.find_spec("optimum") is None
