@@ -14,7 +14,7 @@ from transformers.utils import ModelOutput
 
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
-from .utils import clear_memory, get_end_of_chat_token_ids
+from .utils import block_terminal_output, clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from .config import DatasetConfig, ModelConfig
 
 if importlib.util.find_spec("vllm") is not None:
+    block_terminal_output()
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
