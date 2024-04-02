@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
+- Deals with the case where an instruction tuned model does not use any special token
+  at the end of the chat, such as `<|im_end|>`. This holds for, e.g., Qwen models.
 - Move tensor to the correct device when benchmarking seq-to-seq models (#363). Thanks
   to [@ThomasKluiters](https://github.com/ThomasKluiters) for this contribution!
 - Better auto-detection of pipeline tag for models on the Hugging Face Hub, in case the
