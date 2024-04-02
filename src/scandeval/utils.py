@@ -696,13 +696,19 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
     assert isinstance(token_ids, list)
 
     for idx, token in enumerate(tokenizer.convert_ids_to_tokens(token_ids)):
+        token_id = tokenizer.convert_tokens_to_ids(token)
+        assert isinstance(token_id, int)
+        token = tokenizer.decode([token_id])
         if "†" in token:
             x_token_index = idx
             break
     else:
         raise ValueError("Could not find the 'x' token in the chat template.")
 
-    return token_ids[x_token_index + 1 :]
+    end_of_chat_tokens = token_ids[x_token_index + 1 :]
+    if len(end_of_chat_tokens) == 0:
+        return None
+    return end_of_chat_tokens
 
 
 def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
