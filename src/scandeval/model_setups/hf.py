@@ -183,7 +183,16 @@ class HFModelSetup:
 
             model_task: str | None = models[0].pipeline_tag
             if model_task is None:
-                model_task = "fill-mask"
+                generative_tags = [
+                    "trl",
+                    "mistral",
+                    "text-generation-inference",
+                    "unsloth",
+                ]
+                if any(tag in models[0].tags for tag in generative_tags):
+                    model_task = "text-generation"
+                else:
+                    model_task = "fill-mask"
 
             language_mapping = get_all_languages()
             language_codes = list(language_mapping.keys())
