@@ -109,7 +109,7 @@ openai = [
     "tiktoken",
     "levenshtein",
 ]
-quantization = [
+gptq = [
     "optimum",
     "auto-gptq",
 ]

@@ -5931,12 +5931,12 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [extras]
 all = ["ai2-olmo", "auto-gptq", "bert-score", "bert-score", "bitsandbytes", "boto3", "demjson3", "flax", "huggingface-hub", "jax", "jaxlib", "levenshtein", "openai", "optimum", "outlines", "rouge-score", "rouge-score", "tiktoken", "vllm"]
 generative = ["bert-score", "bitsandbytes", "demjson3", "outlines", "rouge-score", "vllm"]
+gptq = ["auto-gptq", "optimum"]
 jax = ["flax", "jax", "jaxlib"]
 olmo = ["ai2-olmo", "bert-score", "bitsandbytes", "boto3", "demjson3", "huggingface-hub", "outlines", "rouge-score", "vllm"]
 openai = ["bert-score", "bitsandbytes", "demjson3", "levenshtein", "openai", "outlines", "rouge-score", "tiktoken", "vllm"]
-quantization = ["auto-gptq", "optimum"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "9a1c899f6956c22a7881f151448cfe05a1f1fe7e81ef424043ac13a8b9246333"
+content-hash = "fa87d5b900acbaf319b1c5eafc0dc968da91a2527e2197d97fdb2d30f6875f83"

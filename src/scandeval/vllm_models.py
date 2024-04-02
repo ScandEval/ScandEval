@@ -97,7 +97,7 @@ class VLLMModel:
             importlib.util.find_spec("auto_gptq") is None
             or importlib.util.find_spec("optimum") is None
         ):
-            raise NeedsExtraInstalled(extra="quantization")
+            raise NeedsExtraInstalled(extra="gptq")
 
         # Quantized models don't support bfloat16, so we need to set the dtype to
         # float16 instead
