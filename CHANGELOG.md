@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.5.0] - 2024-04-02
 ### Added
 - We now support evaluation of quantised models, such as GPTQ and AWQ, when the vLLM
   backend is being used (the default).
