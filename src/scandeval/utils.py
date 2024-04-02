@@ -24,7 +24,6 @@ from huggingface_hub import HfApi, ModelFilter
 from requests.exceptions import RequestException
 from transformers import GenerationConfig
 from transformers import logging as tf_logging
-import vllm
 
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
@@ -190,6 +189,8 @@ def block_terminal_output():
         return vllm_logger
 
     if importlib.util.find_spec("vllm") is not None:
+        import vllm
+
         vllm.logger.init_logger = init_vllm_logger
 
     if importlib.util.find_spec("ray") is not None:
