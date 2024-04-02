@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- We now support evaluation of quantised models, such as GPTQ and AWQ, when the vLLM
+  backend is being used (the default).
+
 ### Fixed
 - Move tensor to the correct device when benchmarking seq-to-seq models (#363). Thanks
   to [@ThomasKluiters](https://github.com/ThomasKluiters) for this contribution!

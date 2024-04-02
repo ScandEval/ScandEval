@@ -87,6 +87,10 @@ class VLLMModel:
                     self.max_model_len, getattr(hf_model_config, config_name)
                 )
 
+        quantization = None
+        if hasattr(self.config, "quantization_config"):
+            quantization = self.config.quantization_config.get("quant_method", None)
+
         self._model = LLM(
             model=self.model_config.model_id,
             gpu_memory_utilization=0.9,
@@ -97,6 +101,7 @@ class VLLMModel:
             seed=4242,
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
+            quantization=quantization,
         )
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
