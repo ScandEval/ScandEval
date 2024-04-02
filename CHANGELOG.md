@@ -12,10 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   backend is being used (the default).
 
 ### Fixed
+- Move tensor to the correct device when benchmarking seq-to-seq models (#363). Thanks
+  to [@ThomasKluiters](https://github.com/ThomasKluiters) for this contribution! :tada:
 - Deals with the case where an instruction tuned model does not use any special token
   at the end of the chat, such as `<|im_end|>`. This holds for, e.g., Qwen models.
-- Move tensor to the correct device when benchmarking seq-to-seq models (#363). Thanks
-  to [@ThomasKluiters](https://github.com/ThomasKluiters) for this contribution!
 - Better auto-detection of pipeline tag for models on the Hugging Face Hub, in case the
   tag is not manually set.
 
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   alternatively through the `--azure-openai-api-key`, `--azure-openai-endpoint` and
   `--azure-openai-api-version` arguments. Thanks to
   [@BramVanroy](https://github.com/BramVanroy) for all the help regarding the
-  implementation of this.
+  implementation of this :tada:
 - We now use the new JSON mode for newer OpenAI models for the NER task, to ensure
   better JSON generation.
 - If an error is thrown during generation with an OpenAI model, which for instance
@@ -537,8 +537,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   using `scandeval --dataset-task summarization --model-id <model_id>`.
 - A `--use-flash-attention` flag has been added, which enables Flash Attention 2.0,
   which is required by some models, such as Mistral-based ones. If `flash-attn` has not
-  been installed then an informative error message will be raised. Thanks to @peter-sk
-  for this contribution!
+  been installed then an informative error message will be raised. Thanks to
+  [@peter-sk](https://github.com/peter-sk) for this contribution! :tada:
 
 ### Changed
 - Now uses 8-bit AdamW whenever CUDA is available, as opposed to regular AdamW.
@@ -558,7 +558,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   OpenAI models. This currently happens automatically when specifying a generative
   model from the Hugging Face Hub, and with all OpenAI models.
 - Now stores model caches in separate directories, enabling parallel evaluations.
-  Thanks to @KennethEnevoldsen for this contribution! :tada:
+  Thanks to [@KennethEnevoldsen](https://github.com/KennethEnevoldsen) for this
+  contribution! :tada:
 - Added `--device` argument to the CLI, which can be used to overwrite the automatic
   detection of device (CPU, CUDA GPU, MPS GPU, TPU) to use.
 - Added `--trust-remote-code/--no-trust-remote-code` argument to the CLI, as some
@@ -626,7 +627,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now added support for benchmarking local models in the Hugging Face format (i.e.,
   saved with the `save_pretrained` method). This automatically detects the framework
   based on the file extension, but can also be set using the new `--model-framework`
-  argument. Thanks to @peter-sk for implementing this! :tada:
+  argument. Thanks to [@peter-sk](https://github.com/peter-sk) for implementing this!
+  :tada:
 
 ### Fixed
 - Now handles word-token alignment properly with SentencePiece tokenisers, which caused
@@ -924,7 +926,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Specific branches/commits/tags can now be benchmarked, using the `@`
   delimiter. For instance, `scandeval -m model_id@commit_hash` will benchmark
   the model with model ID `model_id`, stored at commit with hash `commit_hash`.
-  Thanks to [@versae](https://github.com/versae) for contributing!
+  Thanks to [@versae](https://github.com/versae) for contributing! :tada:
 
 
 ## [v2.2.0] - 2022-01-18
@@ -935,7 +937,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v2.1.0] - 2022-01-17
 ### Added
 - Added support for `flax` models. Thanks to
-  [@versae](https://github.com/versae) for contributing!
+  [@versae](https://github.com/versae) for contributing! :tada:
 
 
 ## [v2.0.0] - 2022-01-07
