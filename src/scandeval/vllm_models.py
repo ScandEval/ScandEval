@@ -12,9 +12,11 @@ from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
+from scandeval.exceptions import NeedsExtraInstalled
+
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
-from .utils import block_terminal_output, clear_memory, get_end_of_chat_token_ids
+from .utils import clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -24,7 +26,6 @@ if TYPE_CHECKING:
 
     from .config import DatasetConfig, ModelConfig
 
-block_terminal_output()
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
@@ -91,6 +92,12 @@ class VLLMModel:
         quantization = None
         if hasattr(self.config, "quantization_config"):
             quantization = self.config.quantization_config.get("quant_method", None)
+
+        if quantization == "gptq" and (
+            importlib.util.find_spec("auto-gptq") is None
+            or importlib.util.find_spec("optimum") is None
+        ):
+            raise NeedsExtraInstalled(extra="quantization")
 
         # Quantized models don't support bfloat16, so we need to set the dtype to
         # float16 instead
