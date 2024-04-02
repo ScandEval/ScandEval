@@ -189,6 +189,7 @@ def block_terminal_output():
         return vllm_logger
 
     if importlib.util.find_spec("vllm") is not None:
+        os.environ["LOG_LEVEL"] = "CRITICAL"
         import vllm.logger  # TEMP
 
         vllm.logger.init_logger = init_vllm_logger
