@@ -14,7 +14,7 @@ from transformers.utils import ModelOutput
 
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
-from .utils import clear_memory, get_end_of_chat_token_ids
+from .utils import block_terminal_output, clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -96,6 +96,8 @@ class VLLMModel:
         dtype = "auto"
         if quantization is not None and self.config.torch_dtype == "bfloat16":
             dtype = "float16"
+
+        block_terminal_output()
 
         self._model = LLM(
             model=self.model_config.model_id,
