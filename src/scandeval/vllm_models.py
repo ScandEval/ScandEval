@@ -95,7 +95,7 @@ class VLLMModel:
         # float16 instead
         dtype = "auto"
         if quantization is not None and self.config.torch_dtype == "bfloat16":
-            dtype = torch.bfloat16
+            dtype = "float16"
 
         self._model = LLM(
             model=self.model_config.model_id,
