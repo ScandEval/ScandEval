@@ -12,6 +12,8 @@ from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
+from scandeval.exceptions import NeedsExtraInstalled
+
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
 from .utils import clear_memory, get_end_of_chat_token_ids
@@ -87,6 +89,27 @@ class VLLMModel:
                     self.max_model_len, getattr(hf_model_config, config_name)
                 )
 
+        quantization = None
+        if hasattr(self.config, "quantization_config"):
+            quantization = self.config.quantization_config.get("quant_method", None)
+
+        # The GPTQ quantised models require extra dependencies
+        if quantization == "gptq" and (
+            importlib.util.find_spec("auto_gptq") is None
+            or importlib.util.find_spec("optimum") is None
+        ):
+            raise NeedsExtraInstalled(extra="gptq")
+
+        # Quantized models don't support bfloat16, so we need to set the dtype to
+        # float16 instead
+        dtype = "auto"
+        if quantization is not None and self.config.torch_dtype == torch.bfloat16:
+            logger.info(
+                "You are loading a quantized model with dtype bfloat16, which vLLM "
+                "does not support. Setting dtype to float16 instead."
+            )
+            dtype = "float16"
+
         self._model = LLM(
             model=self.model_config.model_id,
             gpu_memory_utilization=0.9,
@@ -97,6 +120,8 @@ class VLLMModel:
             seed=4242,
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
+            quantization=quantization,
+            dtype=dtype,
         )
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model

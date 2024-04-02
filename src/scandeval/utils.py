@@ -44,10 +44,6 @@ if importlib.util.find_spec("ray") is not None:
     import ray
 
 
-if importlib.util.find_spec("vllm") is not None:
-    import vllm
-
-
 # This is used as input to generative models; it cannot be a special token
 DUMMY_FILL_VALUE = 100
 
@@ -181,14 +177,8 @@ def block_terminal_output():
     logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.CRITICAL)
 
-    def init_vllm_logger(name: str):
-        """Dummy function to initialise vLLM loggers with the CRITICAL level."""
-        vllm_logger = logging.getLogger(name)
-        vllm_logger.setLevel(logging.CRITICAL)
-        return vllm_logger
-
-    if importlib.util.find_spec("vllm") is not None:
-        vllm.logger.init_logger = init_vllm_logger
+    # This suppresses vLLM logging
+    os.environ["LOG_LEVEL"] = "CRITICAL"
 
     if importlib.util.find_spec("ray") is not None:
         ray._private.worker._worker_logs_enabled = False

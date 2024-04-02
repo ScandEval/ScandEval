@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- We now support evaluation of quantised models, such as GPTQ and AWQ, when the vLLM
+  backend is being used (the default).
+
 ### Fixed
 - Deals with the case where an instruction tuned model does not use any special token
   at the end of the chat, such as `<|im_end|>`. This holds for, e.g., Qwen models.
