@@ -189,7 +189,7 @@ def block_terminal_output():
         return vllm_logger
 
     if importlib.util.find_spec("vllm") is not None:
-        import vllm
+        import vllm.logger  # TEMP
 
         vllm.logger.init_logger = init_vllm_logger
 
