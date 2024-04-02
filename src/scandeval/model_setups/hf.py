@@ -284,9 +284,8 @@ class HFModelSetup:
             and os.getenv("USE_VLLM", "1") == "1"
         )
 
-        # TEMP
-        # if use_vllm and importlib.util.find_spec("vllm") is None:
-        #     raise NeedsExtraInstalled(extra="generative")
+        if use_vllm and importlib.util.find_spec("vllm") is None:
+            raise NeedsExtraInstalled(extra="generative")
 
         if use_vllm:
             try:
