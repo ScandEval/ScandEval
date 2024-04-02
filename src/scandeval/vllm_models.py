@@ -100,6 +100,7 @@ class VLLMModel:
                 "does not support. Setting dtype to float16 instead."
             )
             dtype = "float16"
+        logger.info(f"{self.config.torch_dtype = }")
 
         block_terminal_output()
 
