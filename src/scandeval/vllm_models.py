@@ -91,6 +91,12 @@ class VLLMModel:
         if hasattr(self.config, "quantization_config"):
             quantization = self.config.quantization_config.get("quant_method", None)
 
+        # Quantized models don't support bfloat16, so we need to set the dtype to
+        # float16 instead
+        dtype = "auto"
+        if quantization is not None and self.config.torch_dtype == "bfloat16":
+            dtype = torch.bfloat16
+
         self._model = LLM(
             model=self.model_config.model_id,
             gpu_memory_utilization=0.9,
@@ -102,6 +108,7 @@ class VLLMModel:
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,
+            dtype=dtype,
         )
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
