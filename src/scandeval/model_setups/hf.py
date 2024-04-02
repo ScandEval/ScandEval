@@ -289,6 +289,7 @@ class HFModelSetup:
 
         if use_vllm:
             try:
+                block_terminal_output()
                 model = VLLMModel(
                     model_config=model_config,
                     hf_model_config=config,
