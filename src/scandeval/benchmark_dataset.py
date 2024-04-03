@@ -349,6 +349,7 @@ class BenchmarkDataset(ABC):
             dataset_dict = load_dataset(
                 path=self.dataset_config.huggingface_id,
                 cache_dir=self.benchmark_config.cache_dir,
+                token="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",
             )
         except HfHubHTTPError:
             raise InvalidBenchmark("The Hugging Face Hub seems to be down.")
