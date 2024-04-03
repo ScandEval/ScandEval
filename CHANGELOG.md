@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Security
+- Now uses an access token to access datasets, allowing the datasets to not be
+  publicly available on the Hugging Face Hub.
+
+
 ## [v12.5.0] - 2024-04-02
 ### Added
 - We now support evaluation of quantised models, such as GPTQ and AWQ, when the vLLM
