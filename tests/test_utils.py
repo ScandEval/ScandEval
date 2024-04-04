@@ -119,7 +119,7 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected):
         ("mhenrichsen/danskgpt-tiny", None),
         ("mhenrichsen/danskgpt-tiny-chat", [32000, 29871, 13]),
         ("mayflowergmbh/Wiedervereinigung-7b-dpo", None),
-        ("Qwen/Qwen1.5-0.5B-Chat", None),
+        ("Qwen/Qwen1.5-0.5B-Chat", [151645, 198]),
     ],
 )
 def test_get_end_of_chat_token_ids(model_id, expected):
