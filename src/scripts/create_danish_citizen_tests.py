@@ -1,6 +1,5 @@
 """Create the DanishCitizenTests-mini dataset and upload it to the HF Hub."""
 
-
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
@@ -89,7 +88,7 @@ def main() -> None:
         pass
 
     # Push the dataset to the Hugging Face Hub
-    dataset.push_to_hub(dataset_id)
+    dataset.push_to_hub(dataset_id, private=True)
 
 
 if __name__ == "__main__":
