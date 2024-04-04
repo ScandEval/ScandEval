@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.5.2] - 2024-04-04
 ### Fixed
 - Now using the same label order in the NER task as is in the dataset configuration.
   From v12.1.0 and onwards these were updated to sorting the labels, but this has
