@@ -68,9 +68,9 @@ def main():
         ]
         while invalid_i_ner_tags:
             for invalid_i_ner_tag in invalid_i_ner_tags:
-                ner_tag_list[
-                    ner_tag_list.index(invalid_i_ner_tag)
-                ] = f"B-{invalid_i_ner_tag[2:]}"
+                ner_tag_list[ner_tag_list.index(invalid_i_ner_tag)] = (
+                    f"B-{invalid_i_ner_tag[2:]}"
+                )
             invalid_i_ner_tags = [
                 ner_tag
                 for token_idx, ner_tag in enumerate(ner_tag_list)
@@ -136,7 +136,7 @@ def main():
         pass
 
     # Push the dataset to the Hugging Face Hub
-    dataset.push_to_hub(dataset_id)
+    dataset.push_to_hub(dataset_id, private=True)
 
 
 if __name__ == "__main__":

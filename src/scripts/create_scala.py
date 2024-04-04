@@ -124,7 +124,7 @@ def main():
                 pass
 
             # Push the dataset to the Hugging Face Hub
-            dataset.push_to_hub(dataset_id)
+            dataset.push_to_hub(dataset_id, private=True)
 
 
 def join_tokens(tokens: List[str]) -> str:
