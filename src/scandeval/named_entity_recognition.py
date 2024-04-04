@@ -544,6 +544,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         """
         prompt_labels = sorted(set(self.dataset_config.prompt_label_mapping.values()))
         # prompt_labels = self.dataset_config.prompt_label_mapping.values()
+        breakpoint()
 
         def create_label(example: dict) -> str:
             labels: dict[str, list[str]] = {
