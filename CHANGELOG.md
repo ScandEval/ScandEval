@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added GPT-4-turbo name variations to cached OpenAI model IDs. This means that we'll
   be able to see if a model ID should be an OpenAI model, without an OpenAI API key.
 
+### Fixed
+- Now using the same label order in the NER task as is in the dataset configuration.
+  From v12.1.0 and onwards these were updated to sorting the labels, but this has
+  resulted in significantly worse performance.
+
 
 ## [v12.5.1] - 2024-04-03
 ### Security
