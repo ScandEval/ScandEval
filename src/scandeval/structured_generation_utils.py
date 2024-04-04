@@ -10,10 +10,6 @@ if importlib.util.find_spec("outlines") is not None:
     from outlines.integrations.transformers import JSONPrefixAllowedTokens
     from outlines.integrations.vllm import JSONLogitsProcessor
 
-    # TEMP
-    from outlines.fsm.json_schema import build_regex_from_schema
-    from outlines.integrations.utils import convert_json_schema_to_str
-
 if TYPE_CHECKING:
     from transformers import PreTrainedTokenizerBase
     from vllm import LLM
@@ -78,12 +74,6 @@ def get_ner_logits_processors(
     Returns:
         The logit processors for the NER task.
     """
-    # TEMP
-    schema = get_ner_schema(ner_tag_names=ner_tag_names)
-    schema_str = convert_json_schema_to_str(json_schema=schema)
-    regex_string = build_regex_from_schema(schema_str, r" ?")  # noqa
-    breakpoint()
-
     logits_processor = JSONLogitsProcessor(
         schema=get_ner_schema(ner_tag_names=ner_tag_names),
         llm=llm,
