@@ -542,7 +542,7 @@ class NamedEntityRecognition(BenchmarkDataset):
         Returns:
             The examples with the few-shot prompt applied.
         """
-        prompt_labels = sorted(set(self.dataset_config.prompt_label_mapping.values()))
+        prompt_labels = self.dataset_config.prompt_label_mapping.values()
 
         def create_label(example: dict) -> str:
             labels: dict[str, list[str]] = {
