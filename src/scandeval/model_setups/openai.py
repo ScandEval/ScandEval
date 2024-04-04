@@ -33,9 +33,9 @@ logger = logging.getLogger(__package__)
 CACHED_OPENAI_MODEL_IDS: list[str] = [
     "ada|babbage|curie|davinci",
     "(code|text)-(ada|babbage|curie|davinci)-[0-9]{3}",
-    "gpt-3.5-turbo(-16k|-instruct)?(-[0-9]{4})?",
-    "gpt-4(-[0-9]{4})?",
-    "gpt-4-32k(-[0-9]{4})?",
+    "gpt-3.5-turbo(-16k|-instruct)?(-[0-9]{4})?(-preview)?",
+    "gpt-4(-[0-9]{4})?(-preview)?",
+    "gpt-4-32k(-[0-9]{4})?(-preview)?",
 ]
 
 
@@ -44,6 +44,8 @@ VOCAB_SIZE_MAPPING = {
     "(code|text)-davinci-00[2-9]": 50_281,
     "gpt-3.5-turbo(-16k)?(-[0-9]{4})?": 100_256,
     "gpt-4-(32k)?(-[0-9]{4})?": 100_256,
+    "gpt-4-[0-9]{4}-preview": 100_256,
+    "gpt-4-(vision|turbo)(-preview)?": 100_256,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": -1,
 }
 
@@ -56,6 +58,8 @@ MODEL_MAX_LENGTH_MAPPING = {
     "gpt-3.5-turbo-16k(-[0-9]{4})?": 16_384,
     "gpt-4(-[0-9]{4})?": 8_192,
     "gpt-4-32k(-[0-9]{4})?": 32_768,
+    "gpt-4-[0-9]{4}-preview": 128_000,
+    "gpt-4-(vision|turbo)(-preview)?": 128_000,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": -1,
 }
 
@@ -66,6 +70,8 @@ NUM_PARAMS_MAPPING = {
     "(text-)?curie(-001)?": 13_000_000_000,
     "((text|code)-)?davinci(-00[1-9])?": 175_000_000_000,
     "gpt-(3.5|4)-turbo-((16|32)k)?(-[0-9]{4})?": -1,
+    "gpt-4-[0-9]{4}-preview": -1,
+    "gpt-4-(vision|turbo)(-preview)?": -1,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": -1,
 }
 
