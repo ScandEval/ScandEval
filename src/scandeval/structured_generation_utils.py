@@ -25,15 +25,9 @@ def get_ner_schema(ner_tag_names: list[str]) -> type[BaseModel]:
     Returns:
         The schema for the NER answer format.
     """
-    # unique_ner_tag_names = list()
-    # for tag_name in ner_tag_names:
-    #     if tag_name not in unique_ner_tag_names:
-    #         unique_ner_tag_names.append(tag_name)
-
     keys_and_their_types: dict[str, Any] = {
         tag_name: (conlist(str, max_length=5), ...) for tag_name in ner_tag_names
     }
-    breakpoint()
     schema = create_model("AnswerFormat", **keys_and_their_types)
     return schema
 
