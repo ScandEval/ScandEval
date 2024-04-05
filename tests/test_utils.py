@@ -110,23 +110,26 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected):
 
 
 @pytest.mark.parametrize(
-    argnames=["model_id", "expected"],
+    argnames=["model_id", "expected_token_ids", "expected_string"],
     argvalues=[
-        ("mistralai/Mistral-7B-v0.1", None),
-        ("mistralai/Mistral-7B-Instruct-v0.1", [733, 28748, 16289, 28793]),
-        ("occiglot/occiglot-7b-de-en", None),
-        ("occiglot/occiglot-7b-de-en-instruct", [32001, 28705, 13]),
-        ("mhenrichsen/danskgpt-tiny", None),
-        ("mhenrichsen/danskgpt-tiny-chat", [32000, 29871, 13]),
-        ("mayflowergmbh/Wiedervereinigung-7b-dpo", None),
-        ("Qwen/Qwen1.5-0.5B-Chat", [151645, 198]),
+        ("mistralai/Mistral-7B-v0.1", None, None),
+        ("mistralai/Mistral-7B-Instruct-v0.1", [733, 28748, 16289, 28793], "[/INST]"),
+        ("occiglot/occiglot-7b-de-en", None, None),
+        ("occiglot/occiglot-7b-de-en-instruct", [32001, 28705, 13], "<|im_end|>"),
+        ("mhenrichsen/danskgpt-tiny", None, None),
+        ("mhenrichsen/danskgpt-tiny-chat", [32000, 29871, 13], "<|im_end|>"),
+        ("mayflowergmbh/Wiedervereinigung-7b-dpo", None, None),
+        ("Qwen/Qwen1.5-0.5B-Chat", [151645, 198], "<|im_end|>"),
     ],
 )
-def test_get_end_of_chat_token_ids(model_id, expected):
+def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string):
     """Test ability to get the chat token IDs of a model."""
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
-    assert end_of_chat_token_ids == expected
+    assert end_of_chat_token_ids == expected_token_ids
+    if expected_string is not None:
+        end_of_chat_string = tokenizer.decode(end_of_chat_token_ids).strip()
+        assert end_of_chat_string == expected_string
 
 
 @pytest.mark.parametrize(
