@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- The speed benchmark for OpenAI models was extremely slow, due to an issue with the
+  tokenizer. This has been fixed now.
+
+
 ## [v12.5.2] - 2024-04-04
 ### Fixed
 - Now using the same label order in the NER task as is in the dataset configuration.
