@@ -155,13 +155,13 @@ def benchmark_speed_single_iteration(
         speed_scores = pyinfer.InferenceReport(
             model=predict, inputs=doc, n_seconds=3
         ).run(print_report=False)
-        num_tokens = len(tokenizer(doc, truncation=True)["input_ids"])
+        num_tokens = len(tokenizer([doc], truncation=True)["input_ids"][0])
         tokens_per_second = speed_scores["Infer(p/sec)"] * num_tokens
 
         speed_scores_short = pyinfer.InferenceReport(
             model=predict, inputs=short_doc, n_seconds=3
         ).run(print_report=False)
-        num_tokens_short = len(tokenizer(short_doc, truncation=True)["input_ids"])
+        num_tokens_short = len(tokenizer([short_doc], truncation=True)["input_ids"][0])
         tokens_per_second_short = speed_scores_short["Infer(p/sec)"] * num_tokens_short
 
         scores["test"] = dict(
