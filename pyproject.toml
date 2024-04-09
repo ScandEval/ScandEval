@@ -178,7 +178,7 @@ indent-style = "space"
 docstring-code-format = true
 skip-magic-trailing-comma = true
 
-[tool.lint]
+[tool.ruff.lint]
 extend-select = [
     "I",
     "D",
