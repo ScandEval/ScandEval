@@ -13,7 +13,6 @@ from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Type
-from jinja2 import TemplateError
 
 import numpy as np
 import pkg_resources
@@ -21,6 +20,7 @@ import requests
 import torch
 from datasets.utils import disable_progress_bar
 from huggingface_hub import HfApi, ModelFilter
+from jinja2 import TemplateError
 from requests.exceptions import RequestException
 from transformers import GenerationConfig
 from transformers import logging as tf_logging
