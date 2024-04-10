@@ -142,7 +142,7 @@ class SequenceClassification(BenchmarkDataset):
     def _compute_metrics(
         self,
         model_outputs_and_labels: tuple["Predictions", "Labels"],
-        id2label: list[str],
+        id2label: dict[int, str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -150,7 +150,7 @@ class SequenceClassification(BenchmarkDataset):
             model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
-            id2label (list of str):
+            id2label:
                 Conversion of indices to labels.
 
         Returns:
@@ -158,6 +158,7 @@ class SequenceClassification(BenchmarkDataset):
             values.
         """
         model_outputs, labels = model_outputs_and_labels
+        label2id = {label: idx for idx, label in id2label.items()}
 
         raise_if_model_output_contains_nan_values(model_output=model_outputs)
 
@@ -173,7 +174,7 @@ class SequenceClassification(BenchmarkDataset):
         }
         predictions = [
             (
-                id2label.index(prompt_label_to_label_mapping[pred.lower()])
+                label2id[prompt_label_to_label_mapping[pred.lower()]]
                 if isinstance(pred, str)
                 else pred
             )
@@ -181,7 +182,7 @@ class SequenceClassification(BenchmarkDataset):
         ]
 
         labels = [
-            id2label.index(label.lower()) if isinstance(label, str) else label
+            label2id[label.lower()] if isinstance(label, str) else label
             for label in labels
         ]
 
@@ -354,7 +355,8 @@ def get_closest_logprobs_labels(
         The predicted labels.
     """
     candidate_labels = [
-        dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
+        dataset_config.prompt_label_mapping[lbl]
+        for lbl in dataset_config.id2label.values()
     ]
 
     add_prefix_space_to_labels = should_prefix_space_be_added_to_labels(
@@ -414,7 +416,8 @@ def get_closest_word_edit_labels(
     )
 
     candidate_labels = [
-        dataset_config.prompt_label_mapping[lbl] for lbl in dataset_config.id2label
+        dataset_config.prompt_label_mapping[lbl]
+        for lbl in dataset_config.id2label.values()
     ]
     new_predicted_labels: list[str] = list()
     for predicted_label in raw_predictions:

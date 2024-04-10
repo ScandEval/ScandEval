@@ -246,9 +246,9 @@ class DatasetConfig:
     unofficial: bool = False
 
     @property
-    def id2label(self) -> list[str]:
+    def id2label(self) -> dict[int, str]:
         """The mapping from ID to label."""
-        return [label for label in self.task.labels]
+        return {idx: label for idx, label in enumerate(self.task.labels)}
 
     @property
     def label2id(self) -> dict[str, int]:

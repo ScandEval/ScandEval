@@ -92,7 +92,7 @@ class TextToText(BenchmarkDataset):
     def _compute_metrics(
         self,
         model_outputs_and_labels: tuple["Predictions", "Labels"],
-        id2label: list[str],
+        id2label: dict[int, str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 

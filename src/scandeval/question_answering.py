@@ -138,7 +138,7 @@ class QuestionAnswering(BenchmarkDataset):
     def _compute_metrics(
         self,
         model_outputs_and_labels: tuple["Predictions", "Labels"],
-        id2label: list[str],
+        id2label: dict[int, str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -146,7 +146,7 @@ class QuestionAnswering(BenchmarkDataset):
             model_outputs_and_labels:
                 The first sequence contains the model outputs and the second sequence
                 contains the true labels.
-            id2label (list of str):
+            id2label:
                 Conversion of indices to labels.
 
         Returns:
