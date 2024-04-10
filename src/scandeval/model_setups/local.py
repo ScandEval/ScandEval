@@ -5,6 +5,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from transformers import AutoConfig
+from transformers.models.auto.modeling_auto import (
+    MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
+    MODEL_FOR_MASKED_LM_MAPPING_NAMES,
+    MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES,
+)
 
 from ..config import ModelConfig
 from ..enums import Framework, ModelType
@@ -50,14 +55,11 @@ class LocalModelSetup:
             Whether the model exist, or a dictionary explaining why we cannot check
             whether the model exists.
         """
-        # Ensure that `model_id` is a Path object
         model_dir = Path(model_id)
 
-        # Return False if the model folder does not exist
         if not model_dir.exists():
             return False
 
-        # Try to load the model config. If this fails, False is returned
         try:
             AutoConfig.from_pretrained(model_id)
         except OSError:
@@ -67,6 +69,7 @@ class LocalModelSetup:
             model_dir.glob("*.bin") is not None
             or model_dir.glob("*.pt") is not None
             or model_dir.glob("*.msgpack") is not None
+            or model_dir.glob("*.safetensors") is not None
         )
 
     def get_model_config(self, model_id: str) -> ModelConfig:
@@ -97,19 +100,27 @@ class LocalModelSetup:
                     raise e
 
         if framework is None:
-            logger.info(
-                f"Assuming 'pytorch' as the framework for local model `{model_id}`! "
-                "If this is in error, please use the --framework option to override."
-            )
+            msg = f"Assuming 'pytorch' as the framework for local model `{model_id}`. "
+            if self.benchmark_config.run_with_cli:
+                msg += (
+                    "If this is not the case then please use the --framework argument "
+                    "to override."
+                )
+            else:
+                msg += (
+                    "If this is not the case then please use the `framework` argument "
+                    "in the `Benchmarker` class to override."
+                )
+            logger.info(msg)
             framework = Framework.PYTORCH
 
         hf_model_config = AutoConfig.from_pretrained(model_id)
         model_type = hf_model_config.model_type.lower()
-        if "gpt" in model_type:
+        if model_type in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES:
             task = "text-generation"
-        elif "t5" in model_type or "bart" in model_type:
+        elif model_type in MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES:
             task = "text2text-generation"
-        elif "bert" in model_type:
+        elif model_type in MODEL_FOR_MASKED_LM_MAPPING_NAMES:
             task = "fill-mask"
         else:
             task = "unknown"
