@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Updated `transformers` dependency to `>=4.39.3,<4.40.0`.
+
 ### Fixed
 - Updated cached OpenAI model metadata.
+- When loading local models we now more robustly detect the task of the model (i.e.,
+  whether it is a generative model, encoder model or sequence-to-sequence model). This
+  previously prevented evaluation of some local models.
+- When detecting whether a local model exists, we now also look for the existence of
+  `*.safetensors` files.
 
 
 ## [v12.5.3] - 2024-04-05
