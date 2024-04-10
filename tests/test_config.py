@@ -126,7 +126,7 @@ class TestDatasetConfig:
 
     def test_id2label(self, dataset_config):
         """Test that the `id2label` attribute is correct."""
-        assert dataset_config.id2label == []
+        assert dataset_config.id2label == dict()
 
     def test_label2id(self, dataset_config):
         """Test that the `label2id` attribute is correct."""

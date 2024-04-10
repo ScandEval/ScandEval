@@ -3,17 +3,17 @@
 import importlib.util
 import logging
 from typing import TYPE_CHECKING, Literal
-from openai.types.chat.completion_create_params import ResponseFormat
 
 import torch
+from openai.types.chat.completion_create_params import ResponseFormat
 from torch import LongTensor
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
-from .tasks import NER
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .tasks import NER
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ if importlib.util.find_spec("tiktoken") is not None:
     import tiktoken
 
 if importlib.util.find_spec("openai") is not None:
-    from openai import AzureOpenAI, NotFoundError, OpenAI, BadRequestError
+    from openai import AzureOpenAI, BadRequestError, NotFoundError, OpenAI
 
 logger = logging.getLogger(__package__)
 
@@ -303,6 +303,17 @@ class OpenAITokenizer:
     def apply_chat_template(
         self, conversation: list[dict[Literal["role", "content"], str]], **kwargs
     ) -> str | list[int]:
+        """Apply a chat template to a conversation.
+
+        Args:
+            conversation:
+                The conversation to apply the chat template to.
+            **kwargs:
+                Additional keyword arguments.
+
+        Returns:
+            The chat template.
+        """
         raise NotImplementedError("Chat templates are not supported for OpenAI models.")
 
 
@@ -341,6 +352,8 @@ class OpenAIModel:
                 The model configuration.
             hf_model_config:
                 The Hugging Face model configuration.
+            dataset_config:
+                The dataset configuration.
             benchmark_config:
                 The benchmark configuration.
             tokenizer:

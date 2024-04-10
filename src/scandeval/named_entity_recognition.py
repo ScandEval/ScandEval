@@ -77,7 +77,7 @@ class NamedEntityRecognition(BenchmarkDataset):
     def _compute_metrics(
         self,
         model_outputs_and_labels: tuple["Predictions", "Labels"],
-        id2label: list[str],
+        id2label: dict[int, str],
     ) -> dict[str, float]:
         """Compute the metrics needed for evaluation.
 
@@ -116,7 +116,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             labels = [
                 [
                     (
-                        id2label[lbl_id]
+                        id2label[int(lbl_id)]
                         if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
                         else lbl_id
                     )
@@ -131,13 +131,15 @@ class NamedEntityRecognition(BenchmarkDataset):
 
         # Replace predicted tag with either MISC or O tags if they are not part of the
         # dataset
-        id2label_without_misc = set(self.dataset_config.id2label).difference(
-            {"b-misc", "i-misc"}
-        )
+        labels_without_misc = {
+            label
+            for label in self.dataset_config.id2label.values()
+            if label not in {"b-misc", "i-misc"}
+        }
         ner_tag: str
         for i, prediction_list in enumerate(predictions):
             for j, ner_tag in enumerate(prediction_list):
-                if ner_tag not in id2label_without_misc:
+                if ner_tag not in labels_without_misc:
                     if self.has_misc_tags and ner_tag[:2] == "b-":
                         predictions[i][j] = "b-misc"
                     elif self.has_misc_tags and ner_tag[:2] == "i-":
