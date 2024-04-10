@@ -11,7 +11,11 @@ import torch
 from huggingface_hub import HfApi, ModelFilter
 from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
-from huggingface_hub.utils import GatedRepoError, LocalTokenNotFoundError
+from huggingface_hub.utils import (
+    GatedRepoError,
+    HFValidationError,
+    LocalTokenNotFoundError,
+)
 from requests.exceptions import RequestException
 from transformers import AutoConfig, AutoTokenizer, BitsAndBytesConfig, PreTrainedModel
 from urllib3.exceptions import RequestError
@@ -112,7 +116,7 @@ class HFModelSetup:
                     run_with_cli=self.benchmark_config.run_with_cli
                 )
 
-        except RepositoryNotFoundError:
+        except (RepositoryNotFoundError, HFValidationError):
             return False
 
         # If fetching from the Hugging Face Hub failed in a different way then throw a
@@ -477,7 +481,7 @@ class HFModelSetup:
         self,
         model_id: str,
         num_labels: int,
-        id2label: dict[int, str] | list[str],
+        id2label: dict[int, str],
         label2id: dict[str, int],
         revision: str,
         model_cache_dir: str,
