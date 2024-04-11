@@ -114,7 +114,6 @@ quantization = [
     "optimum",
     "auto-gptq",
     "autoawq",
-    "transformers",
 ]
 all = [
     "jax",
@@ -137,7 +136,6 @@ all = [
     "optimum",
     "auto-gptq",
     "autoawq",
-    "transformers",
 ]
 
 [tool.poetry.scripts]
