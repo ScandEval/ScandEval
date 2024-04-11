@@ -114,7 +114,6 @@ class VLLMModel:
             model=self.model_config.model_id,
             gpu_memory_utilization=0.95,
             max_model_len=self.max_model_len,
-            max_rolling_batch_prefill_tokens=self.max_model_len,
             download_dir=str(self.model_cache_dir),
             trust_remote_code=self.trust_remote_code,
             revision=self.model_config.revision,
@@ -124,6 +123,8 @@ class VLLMModel:
             quantization=quantization,
             dtype=dtype,
             enforce_eager=True,
+            max_logprobs=10,
+            enable_prefix_caching=True,
         )
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
