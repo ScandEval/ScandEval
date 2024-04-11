@@ -99,7 +99,7 @@ class VLLMModel:
             or importlib.util.find_spec("optimum") is None
         ):
             raise NeedsExtraInstalled(extra="quantization")
-        if quantization == "awq" and importlib.util.find_spec("autoawq") is None:
+        if quantization == "awq" and importlib.util.find_spec("awq") is None:
             raise NeedsExtraInstalled(extra="quantization")
 
         # Quantized models don't support bfloat16, so we need to set the dtype to
