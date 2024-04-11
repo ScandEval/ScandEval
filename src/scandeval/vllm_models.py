@@ -110,7 +110,7 @@ class VLLMModel:
             )
             dtype = "float16"
 
-        self._model = LLM(
+        vllm_kwargs = dict(
             model=self.model_config.model_id,
             gpu_memory_utilization=0.95,
             max_model_len=self.max_model_len,
@@ -126,6 +126,15 @@ class VLLMModel:
             max_logprobs=10,
             enable_prefix_caching=True,
         )
+
+        # We do a try-except here since `max_logprobs` is introduced in vLLM v0.4.0,
+        # and we want to be able to use older versions of vLLM as well (for now)
+        try:
+            self._model = LLM(**vllm_kwargs)
+        except TypeError:
+            vllm_kwargs.pop("max_logprobs")
+            self._model = LLM(**vllm_kwargs)
+
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
         )
