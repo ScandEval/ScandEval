@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Changed vLLM inference parameters to limit the GPU memory usage during evaluation,
+  which makes it possible to evaluate larger models on the same hardware as previously.
+  Concretely, the `gpu_memory_utilization` has been raised from 0.9 to 0.95,
+  `enforce_eager` is set to True, the `max_model_len` has been reduced from (at most)
+  10,000 to (at most) 5,000, and the `max_rolling_batch_prefill_tokens` has been set to
+  the same value as `max_model_len`, where we previously had not set it (defaulting to
+  the maximum context length from the Hugging Face model configuration). See [this
+  issue](https://github.com/ScandEval/ScandEval/issues/383) for an overview of maximum
+  amount of tokens in each dataset (as of v12.6.0 of ScandEval).
+- Removed 1 sample from the Swedish sentiment classification dataset SweReC which was
+  abnormally long, to keep the maximum amount of tokens in the samples below 5,000.
+  Replaced the outlier sample with a new one.
+
+### Fixed
+- The number of allowed generated tokens for the Danish summarisation dataset
+  Nordjylland News was mistakenly set to 128, compared to 256 for all other
+  summarisation datasets. This has been fixed now.
+
+
 ## [v12.6.0] - 2024-04-10
 ### Changed
 - Updated `transformers` dependency to `>=4.39.3,<4.40.0`.
