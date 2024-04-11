@@ -127,7 +127,6 @@ class VLLMModel:
             enforce_eager=True,
             max_logprobs=10,
             enable_prefix_caching=True,
-            kv_cache_dtype="fp8_e5m2",
         )
 
         # We do a try-except here since some arguments are introduced in vLLM v0.4.0,
