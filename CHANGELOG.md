@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-### Changed
+### Fixed
 - Changed vLLM inference parameters to limit the GPU memory usage during evaluation,
   which makes it possible to evaluate larger models on the same hardware as previously.
   Concretely, the `gpu_memory_utilization` has been raised from 0.9 to 0.95,
@@ -18,8 +18,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed 1 sample from the Swedish sentiment classification dataset SweReC which was
   abnormally long, to keep the maximum amount of tokens in the samples below 5,000.
   Replaced the outlier sample with a new one.
-
-### Fixed
 - The number of allowed generated tokens for the Danish summarisation dataset
   Nordjylland News was mistakenly set to 128, compared to 256 for all other
   summarisation datasets. This has been fixed now.
