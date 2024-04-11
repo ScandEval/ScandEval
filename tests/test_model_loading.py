@@ -95,12 +95,11 @@ def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_confi
     model_config = get_model_config(
         model_id=awq_generative_model_id, benchmark_config=benchmark_config
     )
-    with pytest.raises(InvalidModel):
-        load_model(
-            model_config=model_config,
-            dataset_config=dataset_config,
-            benchmark_config=benchmark_config,
-        )
+    load_model(
+        model_config=model_config,
+        dataset_config=dataset_config,
+        benchmark_config=benchmark_config,
+    )
 
 
 @pytest.mark.skipif(condition=not torch.cuda.is_available(), reason="No GPU available.")
@@ -109,9 +108,8 @@ def test_load_gptq_model(gptq_generative_model_id, dataset_config, benchmark_con
     model_config = get_model_config(
         model_id=gptq_generative_model_id, benchmark_config=benchmark_config
     )
-    with pytest.raises(InvalidModel):
-        load_model(
-            model_config=model_config,
-            dataset_config=dataset_config,
-            benchmark_config=benchmark_config,
-        )
+    load_model(
+        model_config=model_config,
+        dataset_config=dataset_config,
+        benchmark_config=benchmark_config,
+    )

@@ -1,5 +1,10 @@
 """Constants used in the dataset creation scripts."""
 
+# Bounds on the size of texts in sequence classification datasets
+MIN_NUM_CHARS_IN_DOCUMENT = 2
+MAX_NUM_CHARS_IN_DOCUMENT = 5000
+
+
 # Bounds on the size of texts in question answering datasets
 MIN_NUM_CHARS_IN_CONTEXT = 30
 MAX_NUM_CHARS_IN_CONTEXT = 5000

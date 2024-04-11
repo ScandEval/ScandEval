@@ -247,17 +247,6 @@ class HFModelSetup:
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
 
-        if self.benchmark_config.load_in_4bit is not None:
-            load_in_4bit = self.benchmark_config.load_in_4bit
-        else:
-            load_in_4bit = (
-                model_config.task in GENERATIVE_MODEL_TASKS
-                and self.benchmark_config.device == torch.device("cuda")
-            )
-
-        if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
-            raise NeedsExtraInstalled(extra="generative")
-
         config = self._load_hf_model_config(
             model_id=model_id,
             num_labels=dataset_config.num_labels,
@@ -266,6 +255,21 @@ class HFModelSetup:
             revision=model_config.revision,
             model_cache_dir=model_config.model_cache_dir,
         )
+
+        if self.benchmark_config.load_in_4bit is not None:
+            load_in_4bit = self.benchmark_config.load_in_4bit
+        else:
+            load_in_4bit = (
+                model_config.task in GENERATIVE_MODEL_TASKS
+                and self.benchmark_config.device == torch.device("cuda")
+                and (
+                    not hasattr(config, "quantization_config")
+                    or config.quantization_config is None
+                )
+            )
+
+        if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
+            raise NeedsExtraInstalled(extra="generative")
 
         use_bf16 = (
             self.benchmark_config.device == torch.device("cuda")
@@ -332,6 +336,14 @@ class HFModelSetup:
                 attn_implementation=(
                     "flash_attention_2"
                     if self.benchmark_config.use_flash_attention
+                    else None
+                ),
+                device_map=(
+                    "cuda:0"
+                    if (
+                        hasattr(config, "quantization_config")
+                        and config.quantization_config.get("quant_method") == "gptq"
+                    )
                     else None
                 ),
             )

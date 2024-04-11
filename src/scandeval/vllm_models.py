@@ -76,7 +76,7 @@ class VLLMModel:
         destroy_model_parallel()
         clear_memory()
 
-        self.max_model_len = 10_000
+        self.max_model_len = 5_000
         potential_max_model_length_config_names = [
             "max_position_embeddings",
             "max_sequence_length",
@@ -93,12 +93,14 @@ class VLLMModel:
         if hasattr(self.config, "quantization_config"):
             quantization = self.config.quantization_config.get("quant_method", None)
 
-        # The GPTQ quantised models require extra dependencies
+        # The quantised models require extra dependencies
         if quantization == "gptq" and (
             importlib.util.find_spec("auto_gptq") is None
             or importlib.util.find_spec("optimum") is None
         ):
-            raise NeedsExtraInstalled(extra="gptq")
+            raise NeedsExtraInstalled(extra="quantization")
+        if quantization == "awq" and importlib.util.find_spec("awq") is None:
+            raise NeedsExtraInstalled(extra="quantization")
 
         # Quantized models don't support bfloat16, so we need to set the dtype to
         # float16 instead
@@ -110,9 +112,9 @@ class VLLMModel:
             )
             dtype = "float16"
 
-        self._model = LLM(
+        vllm_kwargs = dict(
             model=self.model_config.model_id,
-            gpu_memory_utilization=0.9,
+            gpu_memory_utilization=0.95,
             max_model_len=self.max_model_len,
             download_dir=str(self.model_cache_dir),
             trust_remote_code=self.trust_remote_code,
@@ -122,7 +124,21 @@ class VLLMModel:
             disable_custom_all_reduce=True,
             quantization=quantization,
             dtype=dtype,
+            enforce_eager=True,
+            max_logprobs=10,
+            enable_prefix_caching=True,
         )
+
+        # TEMP: We do a try-except here since some arguments are introduced in vLLM
+        # v0.4.0, and we want to be able to use older versions of vLLM as well (for
+        # now)
+        try:
+            self._model = LLM(**vllm_kwargs)
+        except TypeError:
+            vllm_kwargs.pop("max_logprobs")
+            vllm_kwargs.pop("enable_prefix_caching")
+            self._model = LLM(**vllm_kwargs)
+
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
         )

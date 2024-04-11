@@ -703,7 +703,7 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
     prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
     num_few_shot_examples=1,
-    max_generated_tokens=128,
+    max_generated_tokens=256,
 )
 
 MLSUM_CONFIG = DatasetConfig(
