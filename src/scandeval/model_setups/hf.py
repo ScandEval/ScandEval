@@ -338,6 +338,14 @@ class HFModelSetup:
                     if self.benchmark_config.use_flash_attention
                     else None
                 ),
+                device_map=(
+                    "cuda:0"
+                    if (
+                        hasattr(config, "quantization_config")
+                        and config.quantization_config.get("quant_method") == "gptq"
+                    )
+                    else None
+                ),
             )
 
             # These are used when a timeout occurs
