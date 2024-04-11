@@ -247,17 +247,6 @@ class HFModelSetup:
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
 
-        if self.benchmark_config.load_in_4bit is not None:
-            load_in_4bit = self.benchmark_config.load_in_4bit
-        else:
-            load_in_4bit = (
-                model_config.task in GENERATIVE_MODEL_TASKS
-                and self.benchmark_config.device == torch.device("cuda")
-            )
-
-        if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
-            raise NeedsExtraInstalled(extra="generative")
-
         config = self._load_hf_model_config(
             model_id=model_id,
             num_labels=dataset_config.num_labels,
@@ -266,6 +255,18 @@ class HFModelSetup:
             revision=model_config.revision,
             model_cache_dir=model_config.model_cache_dir,
         )
+
+        if self.benchmark_config.load_in_4bit is not None:
+            load_in_4bit = self.benchmark_config.load_in_4bit
+        else:
+            load_in_4bit = (
+                model_config.task in GENERATIVE_MODEL_TASKS
+                and self.benchmark_config.device == torch.device("cuda")
+                and config.quantization_config is not None
+            )
+
+        if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
+            raise NeedsExtraInstalled(extra="generative")
 
         use_bf16 = (
             self.benchmark_config.device == torch.device("cuda")
