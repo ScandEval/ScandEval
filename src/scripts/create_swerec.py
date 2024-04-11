@@ -53,6 +53,81 @@ def main() -> None:
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
 
+    # Only work with samples where the document is not very large or small
+    # We do it after we have made the splits to ensure that the dataset is minimally
+    # affected.
+    new_train_df = train_df.copy()
+    new_train_df["text_len"] = new_train_df.text.str.len()
+    new_train_df = new_train_df.query("text_len >= @MIN_NUM_CHARS_IN_DOCUMENT").query(
+        "text_len <= @MAX_NUM_CHARS_IN_DOCUMENT"
+    )
+    new_val_df = val_df.copy()
+    new_val_df["text_len"] = new_val_df.text.str.len()
+    new_val_df = new_val_df.query("text_len >= @MIN_NUM_CHARS_IN_DOCUMENT").query(
+        "text_len <= @MAX_NUM_CHARS_IN_DOCUMENT"
+    )
+    new_test_df = test_df.copy()
+    new_test_df["text_len"] = new_test_df.text.str.len()
+    new_test_df = new_test_df.query("text_len >= @MIN_NUM_CHARS_IN_DOCUMENT").query(
+        "text_len <= @MAX_NUM_CHARS_IN_DOCUMENT"
+    )
+
+    df["text_len"] = df.text.str.len()
+
+    # Add train samples back in, if we removed any
+    num_new_train_samples = len(train_df) - len(new_train_df)
+    if num_new_train_samples > 0:
+        new_samples = (
+            df.query("text not in @train_df.text")
+            .query("text not in @val_df.text")
+            .query("text not in @test_df.text")
+            .query("text_len >= @MIN_NUM_CHARS_IN_DOCUMENT")
+            .query("text_len <= @MAX_NUM_CHARS_IN_DOCUMENT")
+            .sample(num_new_train_samples, random_state=4242)
+            .drop(columns=["text_len"])
+        )
+        train_df = (
+            pd.concat([new_train_df, new_samples], ignore_index=True)
+            .drop(columns=["text_len"])
+            .reset_index(drop=True)
+        )
+
+    # Add validation samples back in, if we removed any
+    num_new_val_samples = len(val_df) - len(new_val_df)
+    if num_new_val_samples > 0:
+        new_samples = (
+            df.query("text not in @train_df.text")
+            .query("text not in @val_df.text")
+            .query("text not in @test_df.text")
+            .query("text_len >= @MIN_NUM_CHARS_IN_DOCUMENT")
+            .query("text_len <= @MAX_NUM_CHARS_IN_DOCUMENT")
+            .sample(num_new_val_samples, random_state=4242)
+            .drop(columns=["text_len"])
+        )
+        val_df = (
+            pd.concat([new_val_df, new_samples], ignore_index=True)
+            .drop(columns=["text_len"])
+            .reset_index(drop=True)
+        )
+
+    # Add test samples back in, if we removed any
+    num_new_test_samples = len(test_df) - len(new_test_df)
+    if num_new_test_samples > 0:
+        new_samples = (
+            df.query("text not in @train_df.text")
+            .query("text not in @val_df.text")
+            .query("text not in @test_df.text")
+            .query("text_len >= @MIN_NUM_CHARS_IN_DOCUMENT")
+            .query("text_len <= @MAX_NUM_CHARS_IN_DOCUMENT")
+            .sample(num_new_test_samples, random_state=4242)
+            .drop(columns=["text_len"])
+        )
+        test_df = (
+            pd.concat([new_test_df, new_samples], ignore_index=True)
+            .drop(columns=["text_len"])
+            .reset_index(drop=True)
+        )
+
     # Collect datasets in a dataset dictionary
     dataset = DatasetDict(
         train=Dataset.from_pandas(train_df, split=Split.TRAIN),
