@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.6.1] - 2024-04-11
 ### Fixed
 - Changed vLLM inference parameters to limit the GPU memory usage during evaluation,
   which makes it possible to evaluate larger models on the same hardware as previously.
