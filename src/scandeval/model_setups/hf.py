@@ -262,7 +262,7 @@ class HFModelSetup:
             load_in_4bit = (
                 model_config.task in GENERATIVE_MODEL_TASKS
                 and self.benchmark_config.device == torch.device("cuda")
-                and config.quantization_config is not None
+                and config.quantization_config is None
             )
 
         if load_in_4bit and importlib.util.find_spec("bitsandbytes") is None:
