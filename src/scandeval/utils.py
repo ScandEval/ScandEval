@@ -562,7 +562,10 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
         )
         model.generate(inputs=dummy_inputs, generation_config=generation_config)
         return True
-    except (NotImplementedError, TypeError):
+    except (NotImplementedError, TypeError) as e:
+        logger.debug(
+            f"The model was found not to be generative, as an error occurred: {e}"
+        )
         return False
 
 
