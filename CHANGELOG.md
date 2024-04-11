@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The number of allowed generated tokens for the Danish summarisation dataset
   Nordjylland News was mistakenly set to 128, compared to 256 for all other
   summarisation datasets. This has been fixed now.
+- Now correctly detects if `autoawq` should be installed, when evaluating an AWQ model.
+- Reduced `transformers` dependency to `4.38.x` again, as `autoawq` requires this.
 
 
 ## [v12.6.0] - 2024-04-10
