@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   summarisation datasets. This has been fixed now.
 - Now correctly detects if `autoawq` should be installed, when evaluating an AWQ model.
 - Reduced `transformers` dependency to `4.38.x` again, as `autoawq` requires this.
+- Do not use BitsAndBytes quantisation if the model is already quantised.
 
 
 ## [v12.6.0] - 2024-04-10
