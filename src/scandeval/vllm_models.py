@@ -129,8 +129,9 @@ class VLLMModel:
             enable_prefix_caching=True,
         )
 
-        # We do a try-except here since some arguments are introduced in vLLM v0.4.0,
-        # and we want to be able to use older versions of vLLM as well (for now)
+        # TEMP: We do a try-except here since some arguments are introduced in vLLM
+        # v0.4.0, and we want to be able to use older versions of vLLM as well (for
+        # now)
         try:
             self._model = LLM(**vllm_kwargs)
         except TypeError:
