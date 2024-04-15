@@ -153,7 +153,7 @@ def align_model_and_tokenizer(
         tokenizer.model_max_length = 512
 
     # TEMP
-    tokenizer.model_max_length = 40_000
+    tokenizer.model_max_length = 500_000
 
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
