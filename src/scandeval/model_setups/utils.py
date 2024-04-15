@@ -163,6 +163,8 @@ def align_model_and_tokenizer(
             dtype=torch.long,
             device=model.device,
         )
+        print(f"{max_length = }")
+        breakpoint()
         with torch.inference_mode():
             try:
                 model(dummy_inputs)
@@ -180,9 +182,7 @@ def align_model_and_tokenizer(
                 break
 
             # This happens if `max_length` is too large
-            except IndexError as e:
-                print(f"IndexError: {e}")
-                breakpoint()
+            except IndexError:
                 continue
 
     # If there is a mismatch between the vocab size according to the tokenizer and

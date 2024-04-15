@@ -19,7 +19,7 @@ from .utils import (
 
 if TYPE_CHECKING:
     from datasets.arrow_dataset import Dataset
-    from transformers import PreTrainedModel
+    from transformers import BatchEncoding, PreTrainedModel
     from transformers.utils import ModelOutput
 
     from .protocols import GenerativeModel, Tokenizer
@@ -60,22 +60,12 @@ class TextToText(BenchmarkDataset):
         """
         tokenizer: "Tokenizer" = kwargs["tokenizer"]
 
-        # def tokenise(examples: dict) -> "BatchEncoding":
-        #     return tokenizer(text=examples["text"], truncation=True, padding=False)
+        def tokenise(examples: dict) -> "BatchEncoding":
+            return tokenizer(text=examples["text"], truncation=True, padding=False)
 
-        # tokenised = dataset.map(
-        #     tokenise, batched=True, load_from_cache_file=False, keep_in_memory=True
-        # )
-
-        # TEMP
-        for example in dataset:
-            try:
-                tokenizer(text=example["text"], truncation=True, padding=False)
-            except Exception as e:
-                print(f"Encountered error: {e}")
-                breakpoint()
-                pass
-        tokenised = dataset
+        tokenised = dataset.map(
+            tokenise, batched=True, load_from_cache_file=False, keep_in_memory=True
+        )
 
         return tokenised
 
