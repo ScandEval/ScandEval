@@ -206,7 +206,6 @@ def finetune(
 
                 model_already_initialized = False
 
-                # Half batch size, and raise error if we've reached 0
                 bs //= 2
                 logger.debug(f"Reduced batch size to {bs}")
 
