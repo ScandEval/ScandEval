@@ -163,8 +163,7 @@ def align_model_and_tokenizer(
             dtype=torch.long,
             device=model.device,
         )
-        print(f"{max_length = }")
-        breakpoint()
+
         with torch.inference_mode():
             try:
                 model(dummy_inputs)
@@ -218,5 +217,13 @@ def align_model_and_tokenizer(
     if tokenizer.bos_token is None and tokenizer.eos_token is not None:
         tokenizer.bos_token = tokenizer.eos_token
         tokenizer.bos_token_id = tokenizer.eos_token_id
+
+    # TEMP
+    if tokenizer.model_max_length < 0:
+        import logging
+
+        logger = logging.getLogger(__package__)
+        logger.info(f"{tokenizer.model_max_length = }")
+        breakpoint()
 
     return model, tokenizer
