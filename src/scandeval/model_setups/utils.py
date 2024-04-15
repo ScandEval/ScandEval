@@ -136,6 +136,12 @@ def align_model_and_tokenizer(
             ]
         )
 
+    # To avoid models having artificially low max lengths, we remove any max lengths
+    # that are less than 512
+    all_max_lengths = [
+        max_length for max_length in all_max_lengths if max_length >= 512
+    ]
+
     # If the model is a generative model then we need to subtract the generation length
     # from the maximum length, to allow it to keep generating
     if generative_model:
@@ -149,11 +155,10 @@ def align_model_and_tokenizer(
         tokenizer.model_max_length = min_max_length
 
     # Otherwise, use the default maximal length
+    elif generative_model:
+        tokenizer.model_max_length = 32_768
     else:
         tokenizer.model_max_length = 512
-
-    # TEMP
-    tokenizer.model_max_length = 500_000
 
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
@@ -220,13 +225,5 @@ def align_model_and_tokenizer(
     if tokenizer.bos_token is None and tokenizer.eos_token is not None:
         tokenizer.bos_token = tokenizer.eos_token
         tokenizer.bos_token_id = tokenizer.eos_token_id
-
-    # TEMP
-    if tokenizer.model_max_length < 0:
-        import logging
-
-        logger = logging.getLogger(__package__)
-        logger.info(f"{tokenizer.model_max_length = }")
-        breakpoint()
 
     return model, tokenizer
