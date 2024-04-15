@@ -200,9 +200,15 @@ def finetune(
                     raise InvalidBenchmark(str(e))
 
                 if bs <= 1:
-                    raise InvalidBenchmark(
-                        "Could not benchmark the model, even with a batch size of 1!"
-                    )
+                    msg = "Could not benchmark the model, even with a batch size of 1!"
+                    if "MPS" in str(e):
+                        msg += (
+                            " As you are using MPS, you can try running the evaluation "
+                            "with the `PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0` "
+                            "environment variable set, as this removes the upper bound "
+                            "on the memory usage."
+                        )
+                    raise InvalidBenchmark(msg)
 
                 model_already_initialized = False
 
