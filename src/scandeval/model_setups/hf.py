@@ -336,6 +336,7 @@ class HFModelSetup:
                 attn_implementation=(
                     "flash_attention_2"
                     if self.benchmark_config.use_flash_attention
+                    and self.benchmark_config.device == torch.device("cuda")
                     else None
                 ),
                 device_map=(
@@ -474,7 +475,7 @@ class HFModelSetup:
 
         return tokenizer, model
 
-    def _get_torch_dtype(self, config: "PretrainedConfig") -> str | None:
+    def _get_torch_dtype(self, config: "PretrainedConfig") -> str | torch.dtype:
         """Get the torch dtype, used for loading the model.
 
         Args:
@@ -486,8 +487,14 @@ class HFModelSetup:
         """
         using_cuda = self.benchmark_config.device == torch.device("cuda")
         torch_dtype_is_set = config.to_dict().get("torch_dtype") is not None
-        torch_dtype = "auto" if using_cuda and torch_dtype_is_set else None
-        return torch_dtype
+        bf16_available = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+        if using_cuda and torch_dtype_is_set:
+            return "auto"
+        elif using_cuda and bf16_available:
+            return torch.bfloat16
+        elif using_cuda:
+            return torch.float16
+        return torch.float32
 
     def _load_hf_model_config(
         self,
