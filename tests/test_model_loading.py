@@ -90,6 +90,7 @@ def test_load_non_existing_model(dataset_config, benchmark_config):
         )
 
 
+@pytest.mark.skipif(condition=not torch.cuda.is_available(), reason="No GPU available.")
 def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_config):
     """Test loading an AWQ quantised model."""
     model_config = get_model_config(
