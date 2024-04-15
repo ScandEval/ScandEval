@@ -474,7 +474,7 @@ class HFModelSetup:
 
         return tokenizer, model
 
-    def _get_torch_dtype(self, config: "PretrainedConfig") -> str:
+    def _get_torch_dtype(self, config: "PretrainedConfig") -> str | torch.dtype:
         """Get the torch dtype, used for loading the model.
 
         Args:
@@ -489,9 +489,9 @@ class HFModelSetup:
         if using_cuda and torch_dtype_is_set:
             return "auto"
         elif using_cuda and torch.cuda.is_bf16_supported():
-            return "bfloat16"
+            return torch.bfloat16
         else:
-            return "float16"
+            return torch.float16
 
     def _load_hf_model_config(
         self,
