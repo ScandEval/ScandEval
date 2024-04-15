@@ -459,6 +459,7 @@ class HFModelSetup:
         tokenizer = self._load_tokenizer(
             model=model, model_id=model_id, generative_model=generative_model
         )
+        breakpoint()
 
         if use_vllm:
             model.set_tokenizer(tokenizer=tokenizer)
