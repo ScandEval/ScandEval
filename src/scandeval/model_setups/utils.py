@@ -136,6 +136,12 @@ def align_model_and_tokenizer(
             ]
         )
 
+    # To avoid models having artificially low max lengths, we remove any max lengths
+    # that are less than 512
+    all_max_lengths = [
+        max_length for max_length in all_max_lengths if max_length >= 512
+    ]
+
     # If the model is a generative model then we need to subtract the generation length
     # from the maximum length, to allow it to keep generating
     if generative_model:
@@ -149,6 +155,8 @@ def align_model_and_tokenizer(
         tokenizer.model_max_length = min_max_length
 
     # Otherwise, use the default maximal length
+    elif generative_model:
+        tokenizer.model_max_length = 32_768
     else:
         tokenizer.model_max_length = 512
 
@@ -163,6 +171,7 @@ def align_model_and_tokenizer(
             dtype=torch.long,
             device=model.device,
         )
+
         with torch.inference_mode():
             try:
                 model(dummy_inputs)
@@ -173,7 +182,10 @@ def align_model_and_tokenizer(
             except ValueError as e:
                 if "decoder_input_ids" not in str(e):
                     raise e
-                model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long().to(dummy_inputs.device))
+                model(
+                    input_ids=dummy_inputs,
+                    labels=torch.zeros(1, 1).long().to(dummy_inputs.device),
+                )
                 break
 
             # This happens if `max_length` is too large
