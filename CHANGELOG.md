@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - If a model has a very small maximal context length in its tokeniser configuration
   then we ignore this value and instead use the default value.
 - When a model is generative then we use default context length to be 32,768.
+- Now ensures that we use mixed precision when CUDA is available, as this is required
+  by Flash Attention.
 
 
 ## [v12.6.1] - 2024-04-11
