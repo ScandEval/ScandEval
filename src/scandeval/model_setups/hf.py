@@ -487,9 +487,10 @@ class HFModelSetup:
         """
         using_cuda = self.benchmark_config.device == torch.device("cuda")
         torch_dtype_is_set = config.to_dict().get("torch_dtype") is not None
+        bf16_available = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
         if using_cuda and torch_dtype_is_set:
             return "auto"
-        elif using_cuda and torch.cuda.is_bf16_supported():
+        elif using_cuda and bf16_available:
             return torch.bfloat16
         elif using_cuda:
             return torch.float16
