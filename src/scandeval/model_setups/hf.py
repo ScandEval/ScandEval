@@ -336,6 +336,7 @@ class HFModelSetup:
                 attn_implementation=(
                     "flash_attention_2"
                     if self.benchmark_config.use_flash_attention
+                    and self.benchmark_config.device == torch.device("cuda")
                     else None
                 ),
                 device_map=(
@@ -490,8 +491,9 @@ class HFModelSetup:
             return "auto"
         elif using_cuda and torch.cuda.is_bf16_supported():
             return torch.bfloat16
-        else:
+        elif using_cuda:
             return torch.float16
+        return torch.float32
 
     def _load_hf_model_config(
         self,
