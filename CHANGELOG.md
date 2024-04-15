@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- If a model has a very small maximal context length in its tokeniser configuration
+  then we ignore this value and instead use the default value.
+- When a model is generative then we use default context length to be 32,768.
+
+
 ## [v12.6.1] - 2024-04-11
 ### Fixed
 - Changed vLLM inference parameters to limit the GPU memory usage during evaluation,
