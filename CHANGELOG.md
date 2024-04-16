@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added a script to evaluate human performance on datasets. This is a Gradio app which
+  can be run using the command `human_evaluate --annotator-id <id>`, where
+  `annotator-id` is the ID of the human annotator (from 0 to 10, inclusive). They will
+  then annotate their answers for validation splits from the iteration corresponding to
+  their annotator ID. All of the annotated examples of dataset `<dataset>` are saved to
+  the CSV file `.scandeval_cache/human-evaluation/<dataset>/human-<id>.csv`.
+
 ### Fixed
 - If a model has a very small maximal context length in its tokeniser configuration
   then we ignore this value and instead use the default value.
