@@ -36,7 +36,7 @@ tasks.
 
 @click.command()
 @click.option(
-    "--annotator_id",
+    "--annotator-id",
     "-id",
     type=int,
     required=True,
