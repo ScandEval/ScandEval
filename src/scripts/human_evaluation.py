@@ -289,7 +289,7 @@ def submit_answer(
     )
     logger.info(
         f"User submitted the answer {answer!r} to the question {question!r}, with "
-        "sample index {sample_idx}."
+        f"sample index {sample_idx}."
     )
 
     dataset_path = (
