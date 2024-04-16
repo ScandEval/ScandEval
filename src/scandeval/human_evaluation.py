@@ -55,7 +55,11 @@ def main(annotator_id) -> None:
     if importlib.util.find_spec("gradio") is None:
         raise NeedsExtraInstalled(extra="human_evaluation")
 
-    dataset_configs = get_all_dataset_configs()
+    dataset_configs = {
+        name: cfg
+        for name, cfg in get_all_dataset_configs().items()
+        if not cfg.unofficial
+    }
     tasks = sorted(
         {
             cfg.task.name.replace("-", " ").title()
@@ -137,6 +141,7 @@ def update_dataset_choices(language: str, task: str) -> gr.Dropdown:
         for cfg in get_all_dataset_configs().values()
         if language in {language.name for language in cfg.languages}
         and task.lower().replace(" ", "-") == cfg.task.name
+        and not cfg.unofficial
     ]
     assert len(dataset_configs) > 0
 
@@ -177,6 +182,7 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
             language.code
             for cfg in get_all_dataset_configs().values()
             for language in cfg.languages
+            if not cfg.unofficial
         ],
         model_language=None,
         dataset_language=None,
