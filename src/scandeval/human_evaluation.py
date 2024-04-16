@@ -5,6 +5,7 @@ import importlib.util
 import logging
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
 from datasets import Dataset
@@ -21,6 +22,9 @@ from .utils import create_model_cache_dir, enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
+
+if TYPE_CHECKING:
+    from gradio import Dropdown, Markdown
 
 
 logging.basicConfig(level=logging.INFO)
@@ -50,7 +54,7 @@ tasks.
     help="""The annotator ID to use for the evaluation. Needs to be between 0 and 10,
     inclusive.""",
 )
-def main(annotator_id) -> None:
+def main(annotator_id: int) -> None:
     """Start the Gradio app for human evaluation."""
     if importlib.util.find_spec("gradio") is None:
         raise NeedsExtraInstalled(extra="human_evaluation")
@@ -88,7 +92,7 @@ def main(annotator_id) -> None:
             with gr.Column():
                 task_examples = gr.Markdown("Task Examples")
             with gr.Column():
-                question = gr.Markdown("Question")
+                question = gr.Markdown(label="Question")
                 answer = gr.Textbox(label="Answer", interactive=True)
                 submit_button = gr.Button("Submit")
 
@@ -121,7 +125,7 @@ def main(annotator_id) -> None:
     demo.launch()
 
 
-def update_dataset_choices(language: str, task: str) -> gr.Dropdown:
+def update_dataset_choices(language: str, task: str) -> "Dropdown":
     """Update the dataset choices based on the selected language and task.
 
     Args:
@@ -155,7 +159,7 @@ def update_dataset_choices(language: str, task: str) -> gr.Dropdown:
     return gr.Dropdown(label="Dataset", choices=choices, value=choices[0])
 
 
-def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
+def update_dataset(dataset_name: str, iteration: int) -> "tuple[str, Markdown, str]":
     """Update the dataset based on a selected dataset name.
 
     Args:
@@ -270,12 +274,16 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
         f"{task_examples}"
     )
 
-    return task_examples, question, answer
+    return (
+        task_examples,
+        gr.Markdown(f"Question {sample_idx}/256", value=question),
+        answer,
+    )
 
 
 def submit_answer(
     dataset_name: str, task_examples: str, question: str, answer: str, annotator_id: int
-) -> tuple[str, str]:
+) -> "tuple[Markdown, str]":
     """Submit an answer to the dataset.
 
     Args:
@@ -328,7 +336,7 @@ def submit_answer(
         gr.Info("No more questions left in this dataset. Please select a new dataset.")
         question = ""
 
-    return question, ""
+    return gr.Markdown(f"Question {sample_idx}/256", value=question), ""
 
 
 def example_to_markdown(example: dict) -> tuple[str, str]:
