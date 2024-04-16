@@ -294,6 +294,10 @@ def submit_answer(
         A tuple (question, answer), with `question` being the next question, and
         `answer` being an empty string.
     """
+    if not answer:
+        gr.Warning("Please provide an answer before submitting.")
+        return question, answer
+
     global active_dataset
     global sample_idx
 
