@@ -298,7 +298,8 @@ def submit_answer(
     global sample_idx
 
     samples_left = len(active_dataset) - sample_idx - 1
-    gr.Info(f"Submitted - {samples_left} to go!")
+    if samples_left:
+        gr.Info(f"Submitted - {samples_left} to go!")
 
     # Store the user's answer
     answers = active_dataset["answer"]
@@ -326,8 +327,8 @@ def submit_answer(
         _, question = example_to_markdown(example=active_dataset[sample_idx])
 
     except IndexError:
-        gr.Info("Finished with the dataset - take a break, you deserve it! :coffee:")
         gr.Info(
+            "Finished with the dataset - take a break, you deserve it! "
             "If you want to evaluate another dataset then please select a new one "
             "from the menus."
         )
