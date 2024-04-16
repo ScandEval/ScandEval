@@ -240,8 +240,10 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
         while active_dataset["answer"][sample_idx] is not None:
             sample_idx += 1
     else:
-        active_dataset = tests[iteration].add_column(
-            name="answer", column=[None] * len(tests[iteration])
+        active_dataset = (
+            tests[iteration]
+            .remove_columns(column_names=["input_ids", "attention_mask"])
+            .add_column(name="answer", column=[None] * len(tests[iteration]))
         )
 
     task_examples, question = example_to_markdown(example=active_dataset[0])
