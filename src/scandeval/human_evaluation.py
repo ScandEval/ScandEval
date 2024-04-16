@@ -38,6 +38,8 @@ proceeding with the task.
 
 Please do not use any additional aids (such as search engines) when completing these
 tasks.
+
+Note that the Enter key will also submit your answer!
 """
 
 
@@ -296,6 +298,7 @@ def submit_answer(
     """
     if not answer:
         gr.Warning("Please provide an answer before submitting.")
+        logger.info("User tried to submit without providing an answer.")
         return question, answer
 
     global active_dataset
