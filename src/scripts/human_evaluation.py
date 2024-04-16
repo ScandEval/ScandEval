@@ -4,6 +4,7 @@
 import logging
 from functools import partial
 from pathlib import Path
+from shutil import rmtree
 
 import click
 import gradio as gr
@@ -298,6 +299,7 @@ def submit_answer(
         / dataset_name
         / f"human-{annotator_id}"
     )
+    rmtree(path=dataset_path, ignore_errors=True)
     active_dataset.save_to_disk(dataset_path)
     logger.info(f"Saved the dataset to {dataset_path}.")
 
