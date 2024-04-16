@@ -63,6 +63,9 @@ optimum = { version = "^1.18.0", optional = true }
 auto-gptq = { version = "^0.7.1", optional = true }
 autoawq = { version = "^0.2.4", optional = true }
 
+# Needed for human evaluation
+gradio = { version = "^4.26.0", optional = true }
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.1.1"
@@ -73,7 +76,6 @@ readme-coverage-badger = ">=0.1.2"
 ruff = ">=0.3.2"
 mypy = ">=1.9.0"
 nbstripout = ">=0.7.1"
-gradio = ">=4.26.0"
 
 [tool.poetry.extras]
 jax = [
@@ -116,6 +118,9 @@ quantization = [
     "auto-gptq",
     "autoawq",
 ]
+human_evaluation = [
+    "gradio",
+]
 all = [
     "jax",
     "jaxlib",
@@ -137,10 +142,12 @@ all = [
     "optimum",
     "auto-gptq",
     "autoawq",
+    "gradio",
 ]
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"
+human_evaluate = "scandeval.human_evaluation:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

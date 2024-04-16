@@ -1,20 +1,27 @@
 """Gradio app for conducting human evaluation of the tasks."""
 # mypy: disable-error-code="name-defined"
 
+import importlib.util
 import logging
 from functools import partial
 from pathlib import Path
 
 import click
-import gradio as gr
 from datasets import Dataset
-from scandeval.benchmark_config_factory import build_benchmark_config
-from scandeval.config import ModelConfig
-from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
-from scandeval.dataset_factory import DatasetFactory
-from scandeval.enums import Framework, ModelType
-from scandeval.utils import create_model_cache_dir, enforce_reproducibility
 from transformers import AutoConfig, AutoTokenizer
+
+from scandeval.exceptions import NeedsExtraInstalled
+
+from .benchmark_config_factory import build_benchmark_config
+from .config import ModelConfig
+from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
+from .dataset_factory import DatasetFactory
+from .enums import Framework, ModelType
+from .utils import create_model_cache_dir, enforce_reproducibility
+
+if importlib.util.find_spec("gradio") is not None:
+    import gradio as gr
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,6 +52,9 @@ tasks.
 )
 def main(annotator_id) -> None:
     """Start the Gradio app for human evaluation."""
+    if importlib.util.find_spec("gradio") is None:
+        raise NeedsExtraInstalled(extra="human_evaluation")
+
     dataset_configs = get_all_dataset_configs()
     tasks = sorted(
         {
