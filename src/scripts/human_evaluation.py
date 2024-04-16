@@ -1,4 +1,5 @@
 """Gradio app for conducting human evaluation of the tasks."""
+# mypy: disable-error-code="name-defined"
 
 import logging
 from functools import partial
@@ -212,7 +213,7 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
 
     global active_dataset
     global sample_idx
-    sample_idx = 0  # type: ignore[name-defined]
+    sample_idx = 0
     benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)
     rng = enforce_reproducibility(framework=Framework.PYTORCH)
     train, val, tests = benchmark_dataset._load_data(rng=rng)
@@ -226,13 +227,11 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
         benchmarking_generative_model=True,
     )
 
-    active_dataset = tests[iteration].add_column(  # type: ignore[name-defined]
+    active_dataset = tests[iteration].add_column(
         name="answer", column=[None] * len(tests[iteration])
     )
 
-    task_examples, question = example_to_markdown(
-        example=active_dataset[0]  # type: ignore[name-defined]
-    )
+    task_examples, question = example_to_markdown(example=active_dataset[0])
     answer = ""
 
     logger.info(
@@ -270,17 +269,17 @@ def submit_answer(
     global sample_idx
 
     # Store the user's answer
-    answers = active_dataset["answer"]  # type: ignore[name-defined]
-    answers[sample_idx] = answer  # type: ignore[name-defined]
-    active_dataset = active_dataset.remove_columns("answer").add_column(  # type: ignore[name-defined]
+    answers = active_dataset["answer"]
+    answers[sample_idx] = answer
+    active_dataset = active_dataset.remove_columns("answer").add_column(
         name="answer", column=answers
     )
     logger.info(f"User submitted the answer {answer!r} to the question {question!r}.")
 
     try:
         # Attempt to get the next question
-        sample_idx += 1  # type: ignore[name-defined]
-        _, question = example_to_markdown(example=active_dataset[sample_idx])  # type: ignore[name-defined]
+        sample_idx += 1
+        _, question = example_to_markdown(example=active_dataset[sample_idx])
 
     except IndexError:
         gr.Info("No more questions left in this dataset. Please select a new dataset.")
