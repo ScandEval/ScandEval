@@ -4,7 +4,6 @@
 import logging
 from functools import partial
 from pathlib import Path
-from shutil import rmtree
 
 import click
 import gradio as gr
@@ -234,10 +233,10 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
         Path(".scandeval_cache")
         / "human-evaluation"
         / dataset_name
-        / f"human-{iteration}"
+        / f"human-{iteration}.csv"
     )
     if dataset_path.exists():
-        active_dataset = Dataset.load_from_disk(str(dataset_path))
+        active_dataset = Dataset.from_csv(str(dataset_path))
         while active_dataset["answer"][sample_idx] is not None:
             sample_idx += 1
     else:
@@ -297,10 +296,10 @@ def submit_answer(
         Path(".scandeval_cache")
         / "human-evaluation"
         / dataset_name
-        / f"human-{annotator_id}"
+        / f"human-{annotator_id}.csv"
     )
-    rmtree(path=dataset_path, ignore_errors=True)
-    active_dataset.save_to_disk(dataset_path)
+    dataset_path.parent.mkdir(parents=True, exist_ok=True)
+    active_dataset.to_csv(dataset_path)
 
     try:
         # Attempt to get the next question
