@@ -227,7 +227,7 @@ def generate_single_iteration(
 
     # Split up the prepared dataset into a cached and non-cached part
     cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
-        dataset=prepared_dataset, cache=cache
+        dataset=prepared_dataset, cache=cache, tokenizer=tokenizer
     )
 
     all_preds: list[str | list[str]] = list()

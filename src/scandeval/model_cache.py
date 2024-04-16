@@ -187,7 +187,7 @@ class ModelCache:
 
 
 def split_dataset_into_cached_and_non_cached(
-    dataset: "Dataset", cache: ModelCache
+    dataset: "Dataset", cache: ModelCache, tokenizer: "Tokenizer"
 ) -> tuple["Dataset", "Dataset"]:
     """Split a dataset into a cached and non-cached part.
 
@@ -196,13 +196,20 @@ def split_dataset_into_cached_and_non_cached(
             The dataset to split.
         cache:
             The model output cache.
+        tokenizer:
+            The tokenizer used to generate the tokens.
 
     Returns:
         The cached and non-cached parts of the dataset.
     """
     # Get the sample indices of the non-cached examples, which are unique with respect
-    # to the "text" column.
-    dataset_texts = pd.Series(dataset["text"])
+    # to the texts
+    dataset_texts = pd.Series(
+        [
+            tokenizer.decode(input_ids, skip_special_tokens=True)
+            for input_ids in dataset["input_ids"]
+        ]
+    )
     dataset_texts.drop_duplicates(inplace=True)
     unique_non_cached_ids = set(
         dataset_texts[~dataset_texts.isin(cache.cached_texts())].index.tolist()
