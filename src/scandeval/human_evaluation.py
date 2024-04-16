@@ -5,7 +5,6 @@ import importlib.util
 import logging
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import click
 from datasets import Dataset
@@ -22,9 +21,6 @@ from .utils import create_model_cache_dir, enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
-
-if TYPE_CHECKING:
-    from gradio import Dropdown, Markdown
 
 
 logging.basicConfig(level=logging.INFO)
@@ -125,7 +121,7 @@ def main(annotator_id: int) -> None:
     demo.launch()
 
 
-def update_dataset_choices(language: str, task: str) -> "Dropdown":
+def update_dataset_choices(language: str, task: str) -> "gr.Dropdown":
     """Update the dataset choices based on the selected language and task.
 
     Args:
@@ -159,7 +155,7 @@ def update_dataset_choices(language: str, task: str) -> "Dropdown":
     return gr.Dropdown(label="Dataset", choices=choices, value=choices[0])
 
 
-def update_dataset(dataset_name: str, iteration: int) -> "tuple[str, Markdown, str]":
+def update_dataset(dataset_name: str, iteration: int) -> "tuple[str, gr.Markdown, str]":
     """Update the dataset based on a selected dataset name.
 
     Args:
@@ -283,7 +279,7 @@ def update_dataset(dataset_name: str, iteration: int) -> "tuple[str, Markdown, s
 
 def submit_answer(
     dataset_name: str, task_examples: str, question: str, answer: str, annotator_id: int
-) -> "tuple[Markdown, str]":
+) -> "tuple[gr.Markdown, str]":
     """Submit an answer to the dataset.
 
     Args:
