@@ -191,7 +191,7 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
         clear_model_cache=False,
         only_validation_split=True,
         few_shot=True,
-        num_iterations=10,
+        num_iterations=iteration + 1,
         run_with_cli=True,
     )
     dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
@@ -301,7 +301,6 @@ def submit_answer(
     )
     rmtree(path=dataset_path, ignore_errors=True)
     active_dataset.save_to_disk(dataset_path)
-    logger.info(f"Saved the dataset to {dataset_path}.")
 
     try:
         # Attempt to get the next question
