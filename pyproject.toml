@@ -73,6 +73,7 @@ readme-coverage-badger = ">=0.1.2"
 ruff = ">=0.3.2"
 mypy = ">=1.9.0"
 nbstripout = ">=0.7.1"
+gradio = ">=4.26.0"
 
 [tool.poetry.extras]
 jax = [
