@@ -134,7 +134,7 @@ def update_dataset_choices(language: str, task: str) -> "gr.Dropdown":
         A list of dataset names that match the selected language and task.
     """
     if language is None or task is None:
-        return gr.Dropdown(label="Dataset", choices=[])
+        return gr.Dropdown(choices=[])
 
     dataset_configs = [
         cfg
@@ -152,10 +152,10 @@ def update_dataset_choices(language: str, task: str) -> "gr.Dropdown":
         f"{choices}, with {choices[0]} being chosen by default."
     )
 
-    return gr.Dropdown(label="Dataset", choices=choices, value=choices[0])
+    return gr.Dropdown(choices=choices, value=choices[0])
 
 
-def update_dataset(dataset_name: str, iteration: int) -> "tuple[str, gr.Markdown, str]":
+def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
     """Update the dataset based on a selected dataset name.
 
     Args:
@@ -270,16 +270,12 @@ def update_dataset(dataset_name: str, iteration: int) -> "tuple[str, gr.Markdown
         f"{task_examples}"
     )
 
-    return (
-        task_examples,
-        gr.Markdown(f"Question {sample_idx}/256", value=question),
-        answer,
-    )
+    return task_examples, question, answer
 
 
 def submit_answer(
     dataset_name: str, task_examples: str, question: str, answer: str, annotator_id: int
-) -> "tuple[gr.Markdown, str]":
+) -> tuple[str, str]:
     """Submit an answer to the dataset.
 
     Args:
@@ -298,10 +294,11 @@ def submit_answer(
         A tuple (question, answer), with `question` being the next question, and
         `answer` being an empty string.
     """
-    gr.Info("Submitted!")
-
     global active_dataset
     global sample_idx
+
+    samples_left = len(active_dataset) - sample_idx - 1
+    gr.Info(f"Submitted - {samples_left} to go!")
 
     # Store the user's answer
     answers = active_dataset["answer"]
@@ -329,10 +326,14 @@ def submit_answer(
         _, question = example_to_markdown(example=active_dataset[sample_idx])
 
     except IndexError:
-        gr.Info("No more questions left in this dataset. Please select a new dataset.")
+        gr.Info("Finished with the dataset - take a break, you deserve it! :coffee:")
+        gr.Info(
+            "If you want to evaluate another dataset then please select a new one "
+            "from the menus."
+        )
         question = ""
 
-    return gr.Markdown(f"Question {sample_idx}/256", value=question), ""
+    return question, ""
 
 
 def example_to_markdown(example: dict) -> tuple[str, str]:
