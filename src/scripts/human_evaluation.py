@@ -3,9 +3,11 @@
 
 import logging
 from functools import partial
+from pathlib import Path
 
 import click
 import gradio as gr
+from datasets import Dataset
 from scandeval.benchmark_config_factory import build_benchmark_config
 from scandeval.config import ModelConfig
 from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
@@ -227,9 +229,20 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
         benchmarking_generative_model=True,
     )
 
-    active_dataset = tests[iteration].add_column(
-        name="answer", column=[None] * len(tests[iteration])
+    dataset_path = (
+        Path(".scandeval_cache")
+        / "human-evaluation"
+        / dataset_name
+        / f"human-{iteration}"
     )
+    if dataset_path.exists():
+        active_dataset = Dataset.load_from_disk(str(dataset_path))
+        while active_dataset["answer"][sample_idx] is not None:
+            sample_idx += 1
+    else:
+        active_dataset = tests[iteration].add_column(
+            name="answer", column=[None] * len(tests[iteration])
+        )
 
     task_examples, question = example_to_markdown(example=active_dataset[0])
     answer = ""
@@ -274,7 +287,19 @@ def submit_answer(
     active_dataset = active_dataset.remove_columns("answer").add_column(
         name="answer", column=answers
     )
-    logger.info(f"User submitted the answer {answer!r} to the question {question!r}.")
+    logger.info(
+        f"User submitted the answer {answer!r} to the question {question!r}, with "
+        "sample index {sample_idx}."
+    )
+
+    dataset_path = (
+        Path(".scandeval_cache")
+        / "human-evaluation"
+        / dataset_name
+        / f"human-{annotator_id}"
+    )
+    active_dataset.save_to_disk(dataset_path)
+    logger.info(f"Saved the dataset to {dataset_path}.")
 
     try:
         # Attempt to get the next question
