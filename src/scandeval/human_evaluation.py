@@ -456,7 +456,7 @@ class HumanEvaluator:
         gr.Info("You have completed this dataset! Here are your scores:")
         logger.info(
             f"User completed the dataset {self.benchmark_dataset.dataset_config.name}, "
-            f"with the following scores:\n\n{itr_scores}"
+            f"with the following scores: {itr_scores}"
         )
 
 
