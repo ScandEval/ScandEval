@@ -40,11 +40,14 @@ class Framework(AutoStrEnum):
             JAX framework.
         API:
             Accessible via an API.
+        HUMAN:
+            Human evaluator.
     """
 
     PYTORCH = auto()
     JAX = auto()
     API = auto()
+    HUMAN = auto()
 
 
 class ModelType(AutoStrEnum):
@@ -59,12 +62,15 @@ class ModelType(AutoStrEnum):
             Locally stored Hugging Face model.
         OPENAI:
             Model from OpenAI.
+        HUMAN:
+            Human evaluator.
     """
 
     FRESH = auto()
     HF = auto()
     LOCAL = auto()
     OPENAI = auto()
+    HUMAN = auto()
 
 
 class DataType(AutoStrEnum):
