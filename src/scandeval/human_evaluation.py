@@ -1,5 +1,4 @@
 """Gradio app for conducting human evaluation of the tasks."""
-# mypy: disable-error-code="name-defined"
 
 import importlib.util
 import json
