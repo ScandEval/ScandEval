@@ -372,7 +372,7 @@ class OpenAIModel:
         self.is_chat_model = self._is_chat_model()
         self.supports_json_mode = self._supports_json_mode()
 
-    def _initialize_openai_client(self) -> OpenAI | AzureOpenAI:
+    def _initialize_openai_client(self) -> "OpenAI | AzureOpenAI":
         """Initialize and return the OpenAI client.
 
         Returns:
