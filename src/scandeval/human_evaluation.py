@@ -256,16 +256,7 @@ class HumanEvaluator:
                 while self.active_dataset["answer"][self.sample_idx] is not None:
                     self.sample_idx += 1
             except IndexError:
-                scores = self.compute_scores()
-                gr.Info(
-                    "If you want to evaluate another dataset then please select a new "
-                    "one from the menus."
-                )
-                for metric_name, score in scores.items():
-                    gr.Info(f"\n\n{metric_name}: {score:.2%}")
-                gr.Info(
-                    "You have already completed this dataset! Here are your scores:"
-                )
+                self.compute_and_log_scores()
                 return "", "", ""
         else:
             rng = enforce_reproducibility(framework=Framework.PYTORCH)
@@ -403,14 +394,7 @@ class HumanEvaluator:
                 answer = ""
 
         except IndexError:
-            scores = self.compute_scores()
-            gr.Info(
-                "If you want to evaluate another dataset then please select a new "
-                "one from the menus."
-            )
-            for metric_name, score in scores.items():
-                gr.Info(f"\n\n{metric_name}: {score:.2%}")
-            gr.Info("You have completed the dataset! Here are your scores:")
+            self.compute_and_log_scores()
             question = ""
             answer = ""
 
@@ -438,12 +422,8 @@ class HumanEvaluator:
 
         return task_examples, question
 
-    def compute_scores(self) -> dict[str, float]:
-        """Compute the scores for the dataset.
-
-        Returns:
-            The scores for the dataset.
-        """
+    def compute_and_log_scores(self) -> None:
+        """Computes and logs the scores for the dataset."""
         tokenizer = AutoTokenizer.from_pretrained(self.dummy_model_id)
         tokenizer.pad_token = tokenizer.eos_token
         sequences = tokenizer(
@@ -463,7 +443,17 @@ class HumanEvaluator:
             model_outputs_and_labels=(all_preds, ground_truth),
             id2label=self.benchmark_dataset.dataset_config.id2label,
         )
-        return itr_scores
+
+        # We reverse the order, as the Info messages are printed in reverse order
+        scores = list(itr_scores.items())
+        scores.reverse()
+        gr.Info(
+            "If you want to evaluate another dataset then please select a new "
+            "one from the menus."
+        )
+        for metric_name, score in scores:
+            gr.Info(f"\n\n{metric_name}: {score:.2%}")
+        gr.Info("You have completed this dataset! Here are your scores:")
 
 
 @click.command()
