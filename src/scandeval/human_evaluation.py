@@ -13,15 +13,17 @@ from datasets import Dataset
 from transformers import AutoConfig, AutoTokenizer
 from transformers.utils import ModelOutput
 
-from scandeval.benchmark_dataset import BenchmarkDataset
-
 from .benchmark_config_factory import build_benchmark_config
+from .benchmark_dataset import BenchmarkDataset
+from .benchmarker import BenchmarkResult
 from .config import ModelConfig
 from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Framework, ModelType
 from .exceptions import NeedsExtraInstalled
+from .scores import aggregate_scores
 from .tasks import NER
+from .types import ScoreDict
 from .utils import create_model_cache_dir, enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
@@ -458,6 +460,63 @@ class HumanEvaluator:
             f"User completed the dataset {self.benchmark_dataset.dataset_config.name!r}"
             f", with the following scores: {itr_scores}"
         )
+
+        # Load previous human results, if any. We do this since the human evaluation is
+        # only a single iteration, so the results from the current annotation should be
+        # added to the previous results.
+        results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
+        results: ScoreDict = dict(raw=dict(test=list()))  # type: ignore[dict-item]
+        if results_path.exists():
+            all_results = [
+                json.loads(line.strip())
+                for line in results_path.read_text().strip().split("\n")
+                if line.strip()
+            ]
+            human_result_candidates = [
+                result
+                for result in all_results
+                if result["model"] == "human"
+                and result["dataset"] == self.benchmark_dataset.dataset_config.name
+            ]
+            if human_result_candidates:
+                results = human_result_candidates[0]
+
+        # Append to results
+        results["raw"]["test"].append(  # type: ignore[union-attr]
+            {f"test_{metric_name}": score for metric_name, score in itr_scores.items()}
+        )
+
+        # Aggregate scores
+        total_dict: dict[str, float] = dict()
+        for metric_cfg in self.benchmark_dataset.dataset_config.task.metrics:
+            agg_scores = aggregate_scores(
+                scores=results["raw"],  # type: ignore[arg-type]
+                metric_config=metric_cfg,
+            )
+            test_score, test_se = agg_scores["test"]
+            test_score, _ = metric_cfg.postprocessing_fn(test_score)
+            test_se, _ = metric_cfg.postprocessing_fn(test_se)
+            total_dict[f"test_{metric_cfg.name}"] = test_score
+            total_dict[f"test_{metric_cfg.name}_se"] = test_se
+        results["total"] = total_dict
+
+        benchmark_result = BenchmarkResult(
+            dataset=self.benchmark_dataset.dataset_config.name,
+            task=self.benchmark_dataset.dataset_config.task.name,
+            dataset_languages=[
+                language.code
+                for language in self.benchmark_dataset.dataset_config.languages
+            ],
+            model="human",
+            results=results,
+            num_model_parameters=-1,
+            max_sequence_length=-1,
+            vocabulary_size=-1,
+            generative=True,
+            few_shot=True,
+            validation_split=True,
+        )
+        benchmark_result.append_to_results(results_path=results_path)
 
 
 @click.command()
