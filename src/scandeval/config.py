@@ -149,7 +149,8 @@ class BenchmarkConfig:
             Whether to load models in 4-bit precision. If None then this will be done
             if CUDA is available and the model is a decoder model.
         use_flash_attention:
-            Whether to use Flash Attention.
+            Whether to use Flash Attention. If None then this will be used for
+            generative models.
         clear_model_cache:
             Whether to clear the model cache after benchmarking each model.
         only_validation_split:
@@ -184,7 +185,7 @@ class BenchmarkConfig:
     verbose: bool
     trust_remote_code: bool
     load_in_4bit: bool | None
-    use_flash_attention: bool
+    use_flash_attention: bool | None
     clear_model_cache: bool
     only_validation_split: bool
     few_shot: bool

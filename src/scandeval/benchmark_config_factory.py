@@ -159,7 +159,12 @@ def build_benchmark_config(
     # Ensure that we are not using both OpenAI and Azure OpenAI API keys
     if all(
         value is not None
-        for value in (openai_api_key, azure_openai_api_key, azure_openai_endpoint, azure_openai_api_version)
+        for value in (
+            openai_api_key,
+            azure_openai_api_key,
+            azure_openai_endpoint,
+            azure_openai_api_version,
+        )
     ):
         if prefer_azure:
             logger.info(
@@ -189,22 +194,25 @@ def build_benchmark_config(
         token = None
 
     if use_flash_attention is None:
-        use_flash_attention = importlib.util.find_spec("flash_attn") is not None
-        if not use_flash_attention and first_time and torch_device.type == "cuda":
-            message = (
-                "Flash attention has not been installed, so this will not be used. "
-                "To install it, run `pip install -U wheel && "
-                "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn "
-                "--no-build-isolation`. Alternatively, you can disable this message "
-                "by setting "
-            )
-            if run_with_cli:
-                message += "the flag ``--no-use-flash-attention`."
-            else:
-                message += (
-                    "the argument `use_flash_attention=False` in the `Benchmarker`."
+        if torch_device.type != "cuda":
+            use_flash_attention = False
+        elif importlib.util.find_spec("flash_attn") is None:
+            use_flash_attention = False
+            if first_time and torch_device.type == "cuda":
+                message = (
+                    "Flash attention has not been installed, so this will not be used. "
+                    "To install it, run `pip install -U wheel && "
+                    "FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn "
+                    "--no-build-isolation`. Alternatively, you can disable this "
+                    "message by setting "
                 )
-            logger.info(message)
+                if run_with_cli:
+                    message += "the flag ``--no-use-flash-attention`."
+                else:
+                    message += (
+                        "the argument `use_flash_attention=False` in the `Benchmarker`."
+                    )
+                logger.info(message)
 
     # Set variable with number of iterations
     if hasattr(sys, "_called_from_test"):
