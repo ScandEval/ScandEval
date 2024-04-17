@@ -6,10 +6,12 @@ import json
 import logging
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
 from datasets import Dataset
 from transformers import AutoConfig, AutoTokenizer
+from transformers.utils import ModelOutput
 
 from .benchmark_config_factory import build_benchmark_config
 from .config import ModelConfig
@@ -22,6 +24,9 @@ from .utils import create_model_cache_dir, enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
+
+if TYPE_CHECKING:
+    from .protocols import Tokenizer
 
 
 logging.basicConfig(level=logging.INFO)
@@ -232,8 +237,9 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
     dummy_hf_config = AutoConfig.from_pretrained(dummy_hf_model_id)
     dummy_tokenizer = AutoTokenizer.from_pretrained(dummy_hf_model_id)
 
-    global active_dataset
     global sample_idx
+    global benchmark_dataset
+    global active_dataset
     sample_idx = 0
     benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)
     rng = enforce_reproducibility(framework=Framework.PYTORCH)
@@ -256,8 +262,20 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
     )
     if dataset_path.exists():
         active_dataset = Dataset.from_csv(str(dataset_path))
-        while active_dataset["answer"][sample_idx] is not None:
-            sample_idx += 1
+        try:
+            while active_dataset["answer"][sample_idx] is not None:
+                sample_idx += 1
+        except IndexError:
+            scores = compute_scores(tokenizer=dummy_tokenizer)
+            gr.Info(
+                "You have already completed this dataset! Here are your scores:\n\n"
+                f"**Scores**\n\n{json.dumps(scores, indent=2)}"
+            )
+            gr.Info(
+                "If you want to evaluate another dataset then please select a new "
+                "one from the menus."
+            )
+            return "", "", ""
     else:
         active_dataset = (
             tests[iteration]
@@ -378,8 +396,14 @@ def submit_answer(
             answer = ""
 
     except IndexError:
+        dummy_hf_model_id = "mistralai/Mistral-7B-v0.1"
+        dummy_tokenizer = AutoTokenizer.from_pretrained(dummy_hf_model_id)
+        scores = compute_scores(tokenizer=dummy_tokenizer)
         gr.Info(
-            "Finished with the dataset - take a break, you deserve it! "
+            "You have completed the dataset! Here are your scores:\n\n"
+            f"**Scores**\n\n{json.dumps(scores, indent=2)}"
+        )
+        gr.Info(
             "If you want to evaluate another dataset then please select a new one "
             "from the menus."
         )
@@ -409,6 +433,33 @@ def example_to_markdown(example: dict) -> tuple[str, str]:
     question += "\n\n" + example["text"].split("\n\n")[-1].split("\n")[-1]
 
     return task_examples, question
+
+
+def compute_scores(tokenizer: "Tokenizer") -> dict[str, float]:
+    """Compute the scores for the dataset.
+
+    Args:
+        tokenizer:
+            The tokenizer to use for the dataset.
+
+    Returns:
+        The scores for the dataset.
+    """
+    global benchmark_dataset
+    global active_dataset
+    sequences = tokenizer(active_dataset["answer"], add_special_tokens=False).input_ids
+    model_output = ModelOutput(sequences=sequences)
+    all_preds = benchmark_dataset._extract_labels_from_generation(
+        input_batch=active_dataset.to_dict(),
+        model_output=model_output,
+        tokenizer=tokenizer,
+    )
+    ground_truth = active_dataset["label"]
+    itr_scores: dict[str, float] = benchmark_dataset._compute_metrics(
+        model_outputs_and_labels=(all_preds, ground_truth),
+        id2label=benchmark_dataset.dataset_config.id2label,
+    )
+    return itr_scores
 
 
 if __name__ == "__main__":
