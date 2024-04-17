@@ -2,6 +2,7 @@
 # mypy: disable-error-code="name-defined"
 
 import importlib.util
+import json
 import logging
 from functools import partial
 from pathlib import Path
@@ -16,6 +17,7 @@ from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Framework, ModelType
 from .exceptions import NeedsExtraInstalled
+from .tasks import NER
 from .utils import create_model_cache_dir, enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
@@ -150,7 +152,7 @@ def update_dataset_choices(language: str, task: str) -> "gr.Dropdown":
 
     logger.info(
         f"User selected {language} and {task}, which resulted in the datasets "
-        f"{choices}, with {choices[0]} being chosen by default."
+        f"{choices}, with {choices[0]!r} being chosen by default."
     )
 
     return gr.Dropdown(choices=choices, value=choices[0])
@@ -264,7 +266,15 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
         )
 
     task_examples, question = example_to_markdown(example=active_dataset[0])
-    answer = ""
+
+    if dataset_config.task == NER:
+        ner_tags = list()
+        for ner_tag in dataset_config.prompt_label_mapping.values():
+            if ner_tag not in ner_tags:
+                ner_tags.append(ner_tag)
+        answer = json.dumps({ner_tag: [] for ner_tag in ner_tags})
+    else:
+        answer = ""
 
     logger.info(
         f"Loaded dataset {dataset_name}, with the following task examples:\n\n"
@@ -300,6 +310,32 @@ def submit_answer(
         logger.info("User tried to submit without providing an answer.")
         return question, answer
 
+    # Custom NER validation
+    dataset_config = get_all_dataset_configs()[dataset_name]
+    if dataset_config.task == NER:
+        try:
+            json.loads(answer)
+        except json.JSONDecodeError:
+            gr.Warning("Please provide a valid JSON object as an answer.")
+            logger.info("User tried to submit an invalid JSON object as an answer.")
+            return question, answer
+
+        if not isinstance(json.loads(answer), dict):
+            gr.Warning("Please provide a JSON object with a dictionary as an answer.")
+            logger.info(
+                "User tried to submit a JSON object without a dictionary as an answer."
+            )
+            return question, answer
+
+        ner_tags = list(dataset_config.prompt_label_mapping.values())
+        for ner_tag in ner_tags:
+            if ner_tag not in json.loads(answer).keys():
+                gr.Warning(f"Please provide a JSON object with the key {ner_tag!r}.")
+                logger.info(
+                    f"User tried to submit a JSON object without the key {ner_tag!r}."
+                )
+                return question, answer
+
     global active_dataset
     global sample_idx
 
@@ -332,6 +368,15 @@ def submit_answer(
         sample_idx += 1
         _, question = example_to_markdown(example=active_dataset[sample_idx])
 
+        if dataset_config.task == NER:
+            ner_tags = list()
+            for ner_tag in dataset_config.prompt_label_mapping.values():
+                if ner_tag not in ner_tags:
+                    ner_tags.append(ner_tag)
+            answer = json.dumps({ner_tag: [] for ner_tag in ner_tags})
+        else:
+            answer = ""
+
     except IndexError:
         gr.Info(
             "Finished with the dataset - take a break, you deserve it! "
@@ -339,8 +384,9 @@ def submit_answer(
             "from the menus."
         )
         question = ""
+        answer = ""
 
-    return question, ""
+    return question, answer
 
 
 def example_to_markdown(example: dict) -> tuple[str, str]:
