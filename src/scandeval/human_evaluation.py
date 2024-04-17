@@ -475,7 +475,7 @@ class HumanEvaluator:
                 and result["dataset"] == self.benchmark_dataset.dataset_config.name
             ]
             if human_result_candidates:
-                results = human_result_candidates[0]
+                results = human_result_candidates[0]["results"]
 
         # Append to results
         results["raw"]["test"].append(  # type: ignore[union-attr]
