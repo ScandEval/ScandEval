@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Use the decoded token IDs as keys in the model cache, rather than the original texts.
   This caused issues when evaluating models with low context length, whose tokenizer
   doesn't decode the token IDs back to the original texts.
+- By default we only use flash attention for generative models, as it leads to errors
+  with several encoder models.
 
 
 ## [v12.6.1] - 2024-04-11
