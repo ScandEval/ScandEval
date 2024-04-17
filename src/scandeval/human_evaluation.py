@@ -245,10 +245,10 @@ class HumanEvaluator:
         dummy_tokenizer = AutoTokenizer.from_pretrained(self.dummy_model_id)
 
         self.sample_idx = 0
-        benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)
+        self.benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)
         rng = enforce_reproducibility(framework=Framework.PYTORCH)
-        train, val, tests = benchmark_dataset._load_data(rng=rng)
-        _, _, tests = benchmark_dataset._load_prepared_data(
+        train, val, tests = self.benchmark_dataset._load_data(rng=rng)
+        _, _, tests = self.benchmark_dataset._load_prepared_data(
             train=train,
             val=val,
             tests=tests,
