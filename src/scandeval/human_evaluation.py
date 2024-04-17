@@ -454,6 +454,10 @@ class HumanEvaluator:
         for metric_name, score in scores:
             gr.Info(f"\n\n{metric_name}: {score:.2%}")
         gr.Info("You have completed this dataset! Here are your scores:")
+        logger.info(
+            f"User completed the dataset {self.benchmark_dataset.dataset_config.name}, "
+            f"with the following scores:\n\n{itr_scores}"
+        )
 
 
 @click.command()
