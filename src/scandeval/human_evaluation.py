@@ -10,13 +10,12 @@ import click
 from datasets import Dataset
 from transformers import AutoConfig, AutoTokenizer
 
-from scandeval.exceptions import NeedsExtraInstalled
-
 from .benchmark_config_factory import build_benchmark_config
 from .config import ModelConfig
 from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Framework, ModelType
+from .exceptions import NeedsExtraInstalled
 from .utils import create_model_cache_dir, enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
