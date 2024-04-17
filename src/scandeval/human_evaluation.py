@@ -28,7 +28,6 @@ if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
 
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__package__)
 
 
