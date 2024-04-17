@@ -12,8 +12,7 @@ from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
-from scandeval.exceptions import NeedsExtraInstalled
-
+from .exceptions import NeedsExtraInstalled
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
 from .utils import clear_memory, get_end_of_chat_token_ids
