@@ -242,8 +242,14 @@ def load_cached_model_outputs(
         The model output containing the cached sequences.
     """
     # Load the raw model outputs from the cache
+    dataset_texts = pd.Series(
+        [
+            tokenizer.decode(input_ids, skip_special_tokens=True)
+            for input_ids in cached_dataset["input_ids"]
+        ]
+    )
     cached_model_outputs: list[GenerativeModelOutput] = [
-        cache[prompt] for prompt in cached_dataset["text"]
+        cache[prompt] for prompt in dataset_texts
     ]
 
     # Tokenize the cached sequences
