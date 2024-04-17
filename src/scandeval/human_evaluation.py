@@ -267,10 +267,10 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
                 sample_idx += 1
         except IndexError:
             scores = compute_scores(tokenizer=dummy_tokenizer)
-            gr.Info(
-                "You have already completed this dataset! Here are your scores:\n\n"
-                f"**Scores**\n\n{json.dumps(scores, indent=2)}"
-            )
+            msg = "You have already completed this dataset! Here are your scores:"
+            for metric_name, score in scores.items():
+                msg += f"\n{metric_name}: {score:.2%}"
+            gr.Info(msg)
             gr.Info(
                 "If you want to evaluate another dataset then please select a new "
                 "one from the menus."
@@ -399,10 +399,10 @@ def submit_answer(
         dummy_hf_model_id = "mistralai/Mistral-7B-v0.1"
         dummy_tokenizer = AutoTokenizer.from_pretrained(dummy_hf_model_id)
         scores = compute_scores(tokenizer=dummy_tokenizer)
-        gr.Info(
-            "You have completed the dataset! Here are your scores:\n\n"
-            f"**Scores**\n\n{json.dumps(scores, indent=2)}"
-        )
+        msg = "You have completed the dataset! Here are your scores:"
+        for metric_name, score in scores.items():
+            msg += f"\n{metric_name}: {score:.2%}"
+        gr.Info(msg)
         gr.Info(
             "If you want to evaluate another dataset then please select a new one "
             "from the menus."
@@ -454,7 +454,6 @@ def compute_scores(tokenizer: "Tokenizer") -> dict[str, float]:
         padding=True,
         return_tensors="pt",
     ).input_ids
-    breakpoint()
     model_output = ModelOutput(sequences=sequences)
     all_preds = benchmark_dataset._extract_labels_from_generation(
         input_batch=active_dataset.to_dict(),
