@@ -29,7 +29,7 @@ if importlib.util.find_spec("gradio") is not None:
 
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__package__)
 
 
 class HumanEvaluator:
@@ -372,8 +372,8 @@ class HumanEvaluator:
         dataset_path.parent.mkdir(parents=True, exist_ok=True)
         self.active_dataset.to_csv(dataset_path)
 
+        # Attempt to get the next question
         try:
-            # Attempt to get the next question
             self.sample_idx += 1
             _, question = self.example_to_markdown(
                 example=self.active_dataset[self.sample_idx]
@@ -390,6 +390,8 @@ class HumanEvaluator:
             else:
                 answer = ""
 
+        # If we fail to get the next question it means that the user has finished
+        # annotating the dataset, so we compute and log the scores
         except IndexError:
             self.compute_and_log_scores()
             question = ""
