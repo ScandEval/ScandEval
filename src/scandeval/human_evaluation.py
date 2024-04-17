@@ -232,10 +232,10 @@ class HumanEvaluator:
         model_config = ModelConfig(
             model_id=model_id,
             revision="main",
-            framework=Framework.API,
+            framework=Framework.HUMAN,
             task="text-generation",
             languages=dataset_config.languages,
-            model_type=ModelType.LOCAL,
+            model_type=ModelType.HUMAN,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),
