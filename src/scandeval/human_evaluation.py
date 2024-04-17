@@ -447,6 +447,7 @@ def compute_scores(tokenizer: "Tokenizer") -> dict[str, float]:
     """
     global benchmark_dataset
     global active_dataset
+    tokenizer.pad_token = tokenizer.eos_token
     sequences = tokenizer(
         active_dataset["answer"],
         add_special_tokens=False,
