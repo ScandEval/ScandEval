@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Literal
 
 import torch
-from openai.types.chat.completion_create_params import ResponseFormat
 from torch import LongTensor
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
@@ -25,6 +24,7 @@ if importlib.util.find_spec("tiktoken") is not None:
 
 if importlib.util.find_spec("openai") is not None:
     from openai import AzureOpenAI, BadRequestError, NotFoundError, OpenAI
+    from openai.types.chat.completion_create_params import ResponseFormat
 
 logger = logging.getLogger(__package__)
 
@@ -372,7 +372,7 @@ class OpenAIModel:
         self.is_chat_model = self._is_chat_model()
         self.supports_json_mode = self._supports_json_mode()
 
-    def _initialize_openai_client(self) -> OpenAI | AzureOpenAI:
+    def _initialize_openai_client(self) -> "OpenAI | AzureOpenAI":
         """Initialize and return the OpenAI client.
 
         Returns:
