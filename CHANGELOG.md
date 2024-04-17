@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   doesn't decode the token IDs back to the original texts.
 - By default we only use flash attention for generative models, as it leads to errors
   with several encoder models.
+- Add missing OpenAI models to the model cache, to checking model existence when no
+  OpenAI key is specified.
 
 
 ## [v12.6.1] - 2024-04-11
