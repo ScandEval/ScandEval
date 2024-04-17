@@ -323,6 +323,11 @@ class HFModelSetup:
                 )
 
         if not use_vllm:
+            if self.benchmark_config.use_flash_attention is None:
+                flash_attention = model_config.task in GENERATIVE_MODEL_TASKS
+            else:
+                flash_attention = self.benchmark_config.use_flash_attention
+
             model_kwargs = dict(
                 config=config,
                 from_flax=from_flax,
@@ -333,12 +338,7 @@ class HFModelSetup:
                 trust_remote_code=self.benchmark_config.trust_remote_code,
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
-                attn_implementation=(
-                    "flash_attention_2"
-                    if self.benchmark_config.use_flash_attention
-                    and self.benchmark_config.device == torch.device("cuda")
-                    else None
-                ),
+                attn_implementation="flash_attention_2" if flash_attention else None,
                 device_map=(
                     "cuda:0"
                     if (

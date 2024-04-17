@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - When a model is generative then we use default context length to be 32,768.
 - Now ensures that we use mixed precision when CUDA is available, as this is required
   by Flash Attention.
+- By default we only use flash attention for generative models, as it leads to errors
+  with several encoder models.
 
 
 ## [v12.6.1] - 2024-04-11

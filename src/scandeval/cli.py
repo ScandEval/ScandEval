@@ -217,7 +217,8 @@ from .tasks import get_all_tasks
     default=None,
     show_default=True,
     help="""Whether to use Flash Attention. If not specified then the model will use
-    Flash Attention if possible.""",
+    Flash Attention for generative models, if a CUDA GPU is availabel and `flash-attn`
+    is installed.""",
 )
 @click.option(
     "--clear-model-cache/--no-clear-model-cache",
@@ -269,7 +270,7 @@ def benchmark(
     prefer_azure: bool,
     azure_openai_api_key: str | None,
     azure_openai_endpoint: str | None,
-    azure_openai_api_version: str |None,
+    azure_openai_api_version: str | None,
     force: bool,
     verbose: bool,
     framework: str | None,
