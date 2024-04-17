@@ -122,6 +122,7 @@ class OpenAIModelSetup:
         try:
             all_models = list(openai.models.list())
         except openai.OpenAIError as e:
+            logger.debug(f"Couldn't list OpenAI models: {e}")
             model_exists = any(
                 [
                     re.match(pattern=model_pattern, string=model_id) is not None
