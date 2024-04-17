@@ -5,7 +5,6 @@ import json
 import logging
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import click
 from datasets import Dataset
@@ -27,9 +26,6 @@ from .utils import create_model_cache_dir, enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
-
-if TYPE_CHECKING:
-    pass
 
 
 logging.basicConfig(level=logging.INFO)
