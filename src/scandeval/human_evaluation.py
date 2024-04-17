@@ -189,81 +189,13 @@ class HumanEvaluator:
 
         logger.info(f"User selected dataset {dataset_name} - loading dataset...")
 
-        benchmark_config = build_benchmark_config(
-            progress_bar=False,
-            save_results=True,
-            task=None,
-            dataset=None,
-            language=[
-                language.code
-                for cfg in get_all_dataset_configs().values()
-                for language in cfg.languages
-                if not cfg.unofficial
-            ],
-            model_language=None,
-            dataset_language=None,
-            framework=None,
-            device=None,
-            batch_size=1,
-            evaluate_train=False,
-            raise_errors=False,
-            cache_dir=".scandeval_cache",
-            token=None,
-            openai_api_key=None,
-            prefer_azure=False,
-            azure_openai_api_key=None,
-            azure_openai_endpoint=None,
-            azure_openai_api_version=None,
-            force=False,
-            verbose=False,
-            trust_remote_code=False,
-            load_in_4bit=None,
-            use_flash_attention=None,
-            clear_model_cache=False,
-            only_validation_split=True,
-            few_shot=True,
-            num_iterations=iteration + 1,
-            run_with_cli=True,
-        )
-        dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
-        dataset_config = get_all_dataset_configs()[dataset_name]
-
-        model_id = f"human-{iteration}"
-        model_config = ModelConfig(
-            model_id=model_id,
-            revision="main",
-            framework=Framework.API,
-            task="text-generation",
-            languages=dataset_config.languages,
-            model_type=ModelType.LOCAL,
-            model_cache_dir=create_model_cache_dir(
-                cache_dir=benchmark_config.cache_dir, model_id=model_id
-            ),
-        )
-
-        dummy_hf_config = AutoConfig.from_pretrained(self.dummy_model_id)
-        dummy_tokenizer = AutoTokenizer.from_pretrained(self.dummy_model_id)
-
-        self.sample_idx = 0
-        self.benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)
-        rng = enforce_reproducibility(framework=Framework.PYTORCH)
-        train, val, tests = self.benchmark_dataset._load_data(rng=rng)
-        _, _, tests = self.benchmark_dataset._load_prepared_data(
-            train=train,
-            val=val,
-            tests=tests,
-            model_config=model_config,
-            hf_model_config=dummy_hf_config,
-            tokenizer=dummy_tokenizer,
-            benchmarking_generative_model=True,
-        )
-
         dataset_path = (
             Path(".scandeval_cache")
             / "human-evaluation"
             / dataset_name
             / f"human-{iteration}.csv"
         )
+        self.sample_idx = 0
         if dataset_path.exists():
             self.active_dataset = Dataset.from_csv(str(dataset_path))
             try:
@@ -282,6 +214,76 @@ class HumanEvaluator:
                 )
                 return "", "", ""
         else:
+            benchmark_config = build_benchmark_config(
+                progress_bar=False,
+                save_results=True,
+                task=None,
+                dataset=None,
+                language=[
+                    language.code
+                    for cfg in get_all_dataset_configs().values()
+                    for language in cfg.languages
+                    if not cfg.unofficial
+                ],
+                model_language=None,
+                dataset_language=None,
+                framework=None,
+                device=None,
+                batch_size=1,
+                evaluate_train=False,
+                raise_errors=False,
+                cache_dir=".scandeval_cache",
+                token=None,
+                openai_api_key=None,
+                prefer_azure=False,
+                azure_openai_api_key=None,
+                azure_openai_endpoint=None,
+                azure_openai_api_version=None,
+                force=False,
+                verbose=False,
+                trust_remote_code=False,
+                load_in_4bit=None,
+                use_flash_attention=None,
+                clear_model_cache=False,
+                only_validation_split=True,
+                few_shot=True,
+                num_iterations=iteration + 1,
+                run_with_cli=True,
+            )
+            dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
+            dataset_config = get_all_dataset_configs()[dataset_name]
+
+            model_id = f"human-{iteration}"
+            model_config = ModelConfig(
+                model_id=model_id,
+                revision="main",
+                framework=Framework.API,
+                task="text-generation",
+                languages=dataset_config.languages,
+                model_type=ModelType.LOCAL,
+                model_cache_dir=create_model_cache_dir(
+                    cache_dir=benchmark_config.cache_dir, model_id=model_id
+                ),
+            )
+
+            dummy_hf_config = AutoConfig.from_pretrained(self.dummy_model_id)
+            dummy_tokenizer = AutoTokenizer.from_pretrained(self.dummy_model_id)
+
+            self.benchmark_dataset = dataset_factory.build_dataset(
+                dataset=dataset_config
+            )
+            rng = enforce_reproducibility(framework=Framework.PYTORCH)
+            train, val, tests = self.benchmark_dataset._load_data(rng=rng)
+            _, _, tests = self.benchmark_dataset._load_prepared_data(
+                train=train,
+                val=val,
+                tests=tests,
+                model_config=model_config,
+                hf_model_config=dummy_hf_config,
+                tokenizer=dummy_tokenizer,
+                benchmarking_generative_model=True,
+            )
+
             self.active_dataset = (
                 tests[iteration]
                 .remove_columns(column_names=["input_ids", "attention_mask"])
