@@ -448,7 +448,10 @@ def compute_scores(tokenizer: "Tokenizer") -> dict[str, float]:
     global benchmark_dataset
     global active_dataset
     sequences = tokenizer(
-        active_dataset["answer"], add_special_tokens=False, return_tensors="pt"
+        active_dataset["answer"],
+        add_special_tokens=False,
+        padding=True,
+        return_tensors="pt",
     ).input_ids
     model_output = ModelOutput(sequences=sequences)
     all_preds = benchmark_dataset._extract_labels_from_generation(
