@@ -269,12 +269,12 @@ def update_dataset(dataset_name: str, iteration: int) -> tuple[str, str, str]:
             scores = compute_scores(tokenizer=dummy_tokenizer)
             msg = "You have already completed this dataset! Here are your scores:"
             for metric_name, score in scores.items():
-                msg += f"\n{metric_name}: {score:.2%}"
-            gr.Info(msg)
-            gr.Info(
-                "If you want to evaluate another dataset then please select a new "
+                msg += f"\n\n{metric_name}: {score:.2%}"
+            msg += (
+                "\n\nIf you want to evaluate another dataset then please select a new "
                 "one from the menus."
             )
+            gr.Info(msg)
             return "", "", ""
     else:
         active_dataset = (
