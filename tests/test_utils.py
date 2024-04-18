@@ -120,6 +120,8 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected):
         ("mhenrichsen/danskgpt-tiny-chat", [32000, 29871, 13], "<|im_end|>"),
         ("mayflowergmbh/Wiedervereinigung-7b-dpo", None, None),
         ("Qwen/Qwen1.5-0.5B-Chat", [151645, 198], "<|im_end|>"),
+        ("norallm/normistral-7b-warm", None, None),
+        ("norallm/normistral-7b-warm-instruct", [4, 217], "<|im_end|>"),
     ],
 )
 def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string):
