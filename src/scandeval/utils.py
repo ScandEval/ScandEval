@@ -688,7 +688,7 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
         return None
 
     token_ids = tokenizer.apply_chat_template(
-        conversation=[dict(role="user", content="†")]
+        conversation=[dict(role="user", content="X")]
     )
     assert isinstance(token_ids, list)
 
@@ -696,11 +696,10 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
         token_id = tokenizer.convert_tokens_to_ids(token)
         assert isinstance(token_id, int)
         token = tokenizer.decode([token_id])
-        if "†" in token:
+        if "X" in token:
             x_token_index = idx
             break
     else:
-        breakpoint()
         raise ValueError("Could not locate the end-of-chat token for the model.")
 
     end_of_chat_tokens = token_ids[x_token_index + 1 :]
