@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add missing OpenAI models to the model cache, to checking model existence when no
   OpenAI key is specified.
 - Only imports from the `openai` package if it has been installed.
+- Improved detection of the end-of-chat tokens for instruction tuned models, which
+  previously caused errors when evaluating some instruction tuned models.
 
 
 ## [v12.6.1] - 2024-04-11
