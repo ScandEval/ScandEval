@@ -126,9 +126,11 @@ sentiment-classification`.
 ## Special Thanks :pray:
 - Thanks to [UWV](https://www.uwv.nl/) and [KU
   Leuven](https://www.arts.kuleuven.be/ling/ccl) for sponsoring the Azure OpenAI
-  credits used to evaluate GPT-4 in Dutch.
+  credits used to evaluate GPT-4-turbo in Dutch.
 - Thanks to [Miðeind](https://mideind.is/english.html) for sponsoring the OpenAI
-  credits used to evaluate GPT-4 in Icelandic and Faroese.
+  credits used to evaluate GPT-4-turbo in Icelandic and Faroese.
+- Thanks to [CHC](https://chc.au.dk/) for sponsoring the OpenAI credits used to
+  evaluate GPT-4-turbo in German.
 
 
 ## Citing ScandEval

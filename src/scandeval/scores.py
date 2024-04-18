@@ -39,7 +39,6 @@ def log_scores(
     """
     logger.info(f"Finished evaluation of {model_id} on {dataset_name}.")
 
-    # Initialise the total dict
     total_dict: dict[str, float] = dict()
 
     # Logging of the aggregated scores
