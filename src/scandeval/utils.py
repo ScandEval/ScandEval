@@ -679,6 +679,10 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
     Returns:
         The token IDs used to end chats, or None if the tokenizer does not have a chat
         template.
+
+    Raises:
+        ValueError:
+            If the end-of-chat token could not be located.
     """
     if tokenizer.chat_template is None:
         return None
@@ -696,7 +700,8 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
             x_token_index = idx
             break
     else:
-        raise ValueError("Could not find the 'x' token in the chat template.")
+        breakpoint()
+        raise ValueError("Could not locate the end-of-chat token for the model.")
 
     end_of_chat_tokens = token_ids[x_token_index + 1 :]
     if len(end_of_chat_tokens) == 0:
