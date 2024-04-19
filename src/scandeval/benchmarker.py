@@ -681,7 +681,7 @@ class Benchmarker:
         model: "GenerativeModel | None",
         tokenizer: "Tokenizer | None",
     ) -> (
-        "tuple[BenchmarkResult, GenerativeModel | None, Tokenizer | None]"
+        tuple[BenchmarkResult, "GenerativeModel | None", "Tokenizer | None"]
         | dict[str, str]
     ):
         """Benchmark a single model on a single dataset.
