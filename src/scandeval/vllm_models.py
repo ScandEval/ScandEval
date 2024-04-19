@@ -79,7 +79,7 @@ class VLLMModel:
         breakpoint()
         destroy_model_parallel()
         os.system("ray stop --force --grace-period 0")
-        ray.init()
+        ray.init(ignore_reinit_error=True)
         clear_memory()
 
         self.max_model_len = 5_000
