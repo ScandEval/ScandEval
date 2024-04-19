@@ -362,7 +362,7 @@ class HumanEvaluator:
                 gr.Dropdown(label="Entity type", choices=[], visible=False),
                 gr.Textbox(label="Entity", interactive=True, visible=False),
                 gr.Button("Add entity", visible=False),
-                gr.Button("Reset entities", visible=True),
+                gr.Button("Reset entities", visible=False),
                 gr.Textbox("", interactive=True, visible=True),
                 gr.Button("Submit", visible=True),
             )
@@ -674,7 +674,7 @@ def main(annotator_id: int) -> None:
         Note that the Enter key will also submit your answer!
         """,
     )
-    evaluator.create_app().launch()
+    evaluator.create_app().queue().launch()
 
 
 if __name__ == "__main__":
