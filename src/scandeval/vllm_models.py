@@ -136,7 +136,6 @@ class VLLMModel:
         # TEMP: We do a try-except here since some arguments are introduced in vLLM
         # v0.4.0, and we want to be able to use older versions of vLLM as well (for
         # now)
-        breakpoint()
         try:
             self._model = LLM(**vllm_kwargs)
         except TypeError:
@@ -411,7 +410,8 @@ def _initialize_ray_cluster(
     import ray
 
     # Connect to a ray cluster.
-    ray.init(address=ray_address, ignore_reinit_error=True, num_cpus=mp.cpu_count() - 1)
+    num_cpus = min(mp.cpu_count() - 1, 32)
+    ray.init(address=ray_address, ignore_reinit_error=True, num_cpus=num_cpus)
 
     if parallel_config.placement_group:
         # Placement group is already set.
