@@ -389,7 +389,7 @@ class HumanEvaluator:
             return gr.Textbox(""), gr.Textbox("")
 
         if entity not in question:
-            gr.Error(
+            gr.Warning(
                 f"The entity {entity!r} is not present in the question. Please "
                 "write it *exactly* as it appears in the question."
             )
