@@ -136,6 +136,7 @@ class VLLMModel:
         # TEMP: We do a try-except here since some arguments are introduced in vLLM
         # v0.4.0, and we want to be able to use older versions of vLLM as well (for
         # now)
+        breakpoint()
         try:
             self._model = LLM(**vllm_kwargs)
         except TypeError:
