@@ -31,7 +31,7 @@ if importlib.util.find_spec("vllm") is not None:
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
 if importlib.util.find_spec("ray") is not None:
-    pass
+    import ray
 
 
 logger = logging.getLogger(__package__)
@@ -78,6 +78,7 @@ class VLLMModel:
         # already initialized it once
         destroy_model_parallel()
         os.system("ray stop --force")
+        ray.init()
         clear_memory()
 
         self.max_model_len = 5_000
