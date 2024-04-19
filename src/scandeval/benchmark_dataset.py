@@ -98,7 +98,12 @@ class BenchmarkDataset(ABC):
             logging_level = logging.INFO
         logger.setLevel(logging_level)
 
-    def benchmark(self, model_id: str) -> tuple["ScoreDict", dict[str, bool | int]]:
+    def benchmark(
+        self,
+        model_id: str,
+        model: "GenerativeModel | None" = None,
+        tokenizer: "Tokenizer | None" = None,
+    ) -> "tuple[ScoreDict, dict[str, bool | int], GenerativeModel | None, Tokenizer | None]":
         """Benchmark a model.
 
         Args:
@@ -107,15 +112,20 @@ class BenchmarkDataset(ABC):
                 specific model version to use can be added after the suffix '@':
                 "model_id@v1.0.0". It can be a branch name, a tag name, or a commit id,
                 and defaults to the latest version if not specified.
+            model:
+                The model to benchmark. If not provided, the model will be loaded.
+            tokenizer:
+                The tokenizer to use with the model. If not provided, the tokenizer will
+                be loaded.
 
         Returns:
-            A pair (scores, metadata_dict), with `scores` being a dictionary
-            containing the scores, and `metadata_dict` being a dictionary
-            containing various model metadata, such as the number of model
-            parameters, the model's maximum sequence length and the size of the
-            model's vocabulary. The keys in `score_dict` are 'raw' and 'total',
-            with all the raw scores in the first dictionary and the aggregated
-            scores in the second.
+            A pair (scores, metadata_dict, model, tokenizer), with `scores` being a
+            dictionary containing the scores, and `metadata_dict` being a dictionary
+            containing various model metadata, such as the number of model parameters,
+            the model's maximum sequence length and the size of the model's vocabulary.
+            The keys in `score_dict` are 'raw' and 'total', with all the raw scores in
+            the first dictionary and the aggregated scores in the second. The tokenizer
+            and model are only not `None` if the model is generative.
 
         Raises:
             RuntimeError:
@@ -129,12 +139,13 @@ class BenchmarkDataset(ABC):
         # weights
         rng = enforce_reproducibility(framework=model_config.framework)
 
-        logger.info("Loading model and tokenizer...")
-        tokenizer, model = load_model(
-            model_config=model_config,
-            dataset_config=self.dataset_config,
-            benchmark_config=self.benchmark_config,
-        )
+        if model is None or tokenizer is None:
+            logger.info("Loading model and tokenizer...")
+            tokenizer, model = load_model(
+                model_config=model_config,
+                dataset_config=self.dataset_config,
+                benchmark_config=self.benchmark_config,
+            )
 
         benchmarking_generative_model = model_is_generative(model=model)
 
@@ -226,7 +237,10 @@ class BenchmarkDataset(ABC):
             model_id=model_config.model_id,
         )
 
-        return all_scores, metadata_dict
+        if benchmarking_generative_model:
+            return all_scores, metadata_dict, model, tokenizer
+        else:
+            return all_scores, metadata_dict, None, None
 
     def _get_metadata(
         self,
