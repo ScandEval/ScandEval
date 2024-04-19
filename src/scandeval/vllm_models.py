@@ -76,8 +76,9 @@ class VLLMModel:
 
         # This is required to be able to re-initialize the model, in case we have
         # already initialized it once
+        breakpoint()
         destroy_model_parallel()
-        os.system("ray stop --force")
+        os.system("ray stop --force --grace-period 0")
         ray.init()
         clear_memory()
 
@@ -151,7 +152,7 @@ class VLLMModel:
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
-        os.system("ray stop --force")
+        os.system("ray stop --force --grace-period 0")
         if hasattr(self, "_model"):
             del self._model
         del self
