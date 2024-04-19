@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Only imports from the `openai` package if it has been installed.
 - Improved detection of the end-of-chat tokens for instruction tuned models, which
   previously caused errors when evaluating some instruction tuned models.
+- Loading of a pretrained model configuration from the Hugging Face Hub failed when the
+  model is gated and when the `cache_dir` is specified in `AutoConfig.from_pretrained`.
+  We now do not set that argument if the model is gated, as a temporary fix.
 
 
 ## [v12.6.1] - 2024-04-11

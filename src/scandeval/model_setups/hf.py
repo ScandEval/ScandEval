@@ -503,7 +503,7 @@ class HFModelSetup:
         id2label: dict[int, str],
         label2id: dict[str, int],
         revision: str,
-        model_cache_dir: str,
+        model_cache_dir: str | None,
     ) -> "PretrainedConfig":
         """Load the Hugging Face model configuration.
 
@@ -532,9 +532,9 @@ class HFModelSetup:
                     id2label=id2label,
                     label2id=label2id,
                     revision=revision,
-                    cache_dir=model_cache_dir,
                     token=self.benchmark_config.token,
                     trust_remote_code=self.benchmark_config.trust_remote_code,
+                    cache_dir=model_cache_dir,
                 )
                 if config.eos_token_id is not None and config.pad_token_id is None:
                     config.pad_token_id = config.eos_token_id
@@ -546,6 +546,12 @@ class HFModelSetup:
                     f"loaded, as the key {key!r} was not found in the config."
                 )
             except OSError as e:
+                # TEMP: When the model is gated then we cannot set cache dir, for some
+                # reason (transformers==4.38.2). This should be included back in when
+                # this is fixed.
+                if "gated repo" in str(e):
+                    model_cache_dir = None
+                    continue
                 raise InvalidModel(
                     f"Couldn't load model config for {model_id!r}. The error was "
                     f"{e!r}. Skipping"
