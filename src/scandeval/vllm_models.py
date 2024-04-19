@@ -3,7 +3,6 @@
 import importlib.util
 import logging
 import math
-import os
 import sys
 from types import MethodType
 from typing import TYPE_CHECKING
@@ -29,9 +28,6 @@ if TYPE_CHECKING:
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
-
-if importlib.util.find_spec("ray") is not None:
-    import ray
 
 
 logger = logging.getLogger(__package__)
@@ -76,10 +72,7 @@ class VLLMModel:
 
         # This is required to be able to re-initialize the model, in case we have
         # already initialized it once
-        breakpoint()
         destroy_model_parallel()
-        os.system("ray stop --force --grace-period 0")
-        ray.init(ignore_reinit_error=True)
         clear_memory()
 
         self.max_model_len = 5_000
@@ -152,7 +145,6 @@ class VLLMModel:
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
         destroy_model_parallel()
-        os.system("ray stop --force --grace-period 0")
         if hasattr(self, "_model"):
             del self._model
         del self
