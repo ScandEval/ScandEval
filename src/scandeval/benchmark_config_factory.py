@@ -207,7 +207,7 @@ def build_benchmark_config(
                     "message by setting "
                 )
                 if run_with_cli:
-                    message += "the flag ``--no-use-flash-attention`."
+                    message += "the flag `--no-use-flash-attention`."
                 else:
                     message += (
                         "the argument `use_flash_attention=False` in the `Benchmarker`."
