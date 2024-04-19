@@ -101,11 +101,27 @@ class HumanEvaluator:
                 dataset_dropdown = gr.Dropdown(label="Dataset", choices=[""])
             with gr.Row(variant="panel"):
                 with gr.Column():
-                    task_examples = gr.Markdown("Task Examples")
+                    task_examples = gr.Markdown("Task Examples", visible=False)
                 with gr.Column():
-                    question = gr.Markdown(label="Question")
-                    answer = gr.Textbox(label="Answer", interactive=True)
-                    submit_button = gr.Button("Submit")
+                    question = gr.Markdown(label="Question", visible=False)
+                    with gr.Row():
+                        ner_tag_dropdown = gr.Dropdown(
+                            label="Entity type",
+                            choices=[""],
+                            interactive=True,
+                            visible=False,
+                            scale=0.5,
+                        )
+                        ner_tag_answer = gr.Textbox(
+                            label="Entity", interactive=True, visible=False, scale=1
+                        )
+                        with gr.Column(scale=0.2):
+                            ner_tag_add_button = gr.Button("Add entity", visible=False)
+                            ner_tag_reset_button = gr.Button(
+                                "Reset entities", visible=False
+                            )
+                    answer = gr.Textbox(label="Answer", visible=False)
+                    submit_button = gr.Button("Submit", visible=False)
 
             language_dropdown.change(
                 fn=self.update_dataset_choices,
@@ -120,8 +136,28 @@ class HumanEvaluator:
             dataset_dropdown.change(
                 fn=partial(self.update_dataset, iteration=self.annotator_id),
                 inputs=dataset_dropdown,
-                outputs=[task_examples, question, answer],
+                outputs=[
+                    task_examples,
+                    question,
+                    ner_tag_dropdown,
+                    ner_tag_answer,
+                    ner_tag_add_button,
+                    ner_tag_reset_button,
+                    answer,
+                    submit_button,
+                ],
             )
+            ner_tag_add_button.click(
+                fn=self.add_entity_to_answer,
+                inputs=[question, ner_tag_dropdown, ner_tag_answer, answer],
+                outputs=[ner_tag_answer, answer],
+            )
+            ner_tag_answer.submit(
+                fn=self.add_entity_to_answer,
+                inputs=[question, ner_tag_dropdown, ner_tag_answer, answer],
+                outputs=[ner_tag_answer, answer],
+            )
+            ner_tag_reset_button.click(fn=self.reset_entities, outputs=answer)
             submit_button.click(
                 fn=partial(self.submit_answer, annotator_id=self.annotator_id),
                 inputs=[dataset_dropdown, question, answer],
@@ -167,7 +203,9 @@ class HumanEvaluator:
 
         return gr.Dropdown(choices=choices, value=choices[0])
 
-    def update_dataset(self, dataset_name: str, iteration: int) -> tuple[str, str, str]:
+    def update_dataset(
+        self, dataset_name: str, iteration: int
+    ) -> "tuple[gr.Markdown, gr.Markdown, gr.Dropdown, gr.Textbox, gr.Button, gr.Button, gr.Textbox, gr.Button]":
         """Update the dataset based on a selected dataset name.
 
         Args:
@@ -177,13 +215,25 @@ class HumanEvaluator:
                 The iteration index of the datasets to evaluate.
 
         Returns:
-            A tuple (task_examples, question, answer) for the selected
-            dataset.
+            A tuple (task_examples, question, entity_type, entity, entity_add_button,
+            entity_reset_button, answer, submit_button) for the selected dataset.
         """
+        blank_answer = (
+            gr.Markdown("", visible=False),
+            gr.Markdown("", visible=False),
+            gr.Dropdown(visible=False),
+            gr.Textbox(visible=False),
+            gr.Button(visible=False),
+            gr.Button(visible=False),
+            gr.Textbox("", visible=False),
+            gr.Button(visible=False),
+        )
+
         if not dataset_name:
-            return "", "", ""
+            return blank_answer
 
         logger.info(f"User selected dataset {dataset_name} - loading dataset...")
+        gr.Info(f"Loading dataset {dataset_name}...")
 
         benchmark_config = build_benchmark_config(
             progress_bar=False,
@@ -253,7 +303,7 @@ class HumanEvaluator:
                     self.sample_idx += 1
             except IndexError:
                 self.compute_and_log_scores()
-                return "", "", ""
+                return blank_answer
         else:
             rng = enforce_reproducibility(framework=Framework.PYTORCH)
             train, val, tests = self.benchmark_dataset._load_data(rng=rng)
@@ -276,21 +326,95 @@ class HumanEvaluator:
             example=self.active_dataset[self.sample_idx]
         )
 
-        if self.benchmark_dataset.dataset_config.task == NER:
-            ner_tags = list()
-            for ner_tag in dataset_config.prompt_label_mapping.values():
-                if ner_tag not in ner_tags:
-                    ner_tags.append(ner_tag)
-            answer = json.dumps({ner_tag: [] for ner_tag in ner_tags})
-        else:
-            answer = ""
-
         logger.info(
             f"Loaded dataset {dataset_name}, with the following task examples:\n\n"
             f"{task_examples}"
         )
 
-        return task_examples, question, answer
+        if self.benchmark_dataset.dataset_config.task == NER:
+            ner_tags = list()
+            for ner_tag in dataset_config.prompt_label_mapping.values():
+                if ner_tag not in ner_tags:
+                    ner_tags.append(ner_tag)
+            return (
+                gr.Markdown(task_examples, visible=True),
+                gr.Markdown(question, visible=True),
+                gr.Dropdown(
+                    label="Entity type",
+                    choices=ner_tags,
+                    value=ner_tags[0],
+                    visible=True,
+                ),
+                gr.Textbox(label="Entity", interactive=True, visible=True),
+                gr.Button("Add entity", visible=True),
+                gr.Button("Reset entities", visible=True),
+                gr.Textbox(
+                    json.dumps({ner_tag: [] for ner_tag in ner_tags}),
+                    interactive=False,
+                    visible=True,
+                ),
+                gr.Button("Submit", visible=True),
+            )
+        else:
+            return (
+                gr.Markdown(task_examples, visible=True),
+                gr.Markdown(question, visible=True),
+                gr.Dropdown(label="Entity type", choices=[], visible=False),
+                gr.Textbox(label="Entity", interactive=True, visible=False),
+                gr.Button("Add entity", visible=False),
+                gr.Button("Reset entities", visible=True),
+                gr.Textbox("", interactive=True, visible=True),
+                gr.Button("Submit", visible=True),
+            )
+
+    def add_entity_to_answer(
+        self, question: str, entity_type: str, entity: str, answer: str
+    ) -> "tuple[gr.Textbox, gr.Textbox]":
+        """Add an entity to the answer.
+
+        Args:
+            question:
+                The current question.
+            entity_type:
+                The entity type selected by the user.
+            entity:
+                The entity provided by the user.
+            answer:
+                The current answer.
+
+        Returns:
+            A tuple (entity, answer) with a (blank) entity and answer.
+        """
+        if not entity_type or not entity:
+            return gr.Textbox(""), gr.Textbox("")
+
+        if entity not in question:
+            gr.Error(
+                f"The entity {entity!r} is not present in the question. Please "
+                "write it *exactly* as it appears in the question."
+            )
+            return gr.Textbox(entity), gr.Textbox(answer)
+
+        current_answer_obj = json.loads(answer)
+        if entity not in current_answer_obj[entity_type]:
+            current_answer_obj[entity_type].append(entity)
+
+        answer = json.dumps(current_answer_obj)
+        return gr.Textbox(""), gr.Textbox(answer)
+
+    def reset_entities(self) -> "gr.Textbox":
+        """Reset the entities in the answer.
+
+        Returns:
+            A blank answer.
+        """
+        ner_tags = list()
+        for (
+            ner_tag
+        ) in self.benchmark_dataset.dataset_config.prompt_label_mapping.values():
+            if ner_tag not in ner_tags:
+                ner_tags.append(ner_tag)
+        return gr.Textbox(json.dumps({ner_tag: [] for ner_tag in ner_tags}))
 
     def submit_answer(
         self, dataset_name: str, question: str, answer: str, annotator_id: int
@@ -343,7 +467,8 @@ class HumanEvaluator:
                         f"Please provide a JSON object with the key {ner_tag!r}."
                     )
                     logger.info(
-                        f"User tried to submit a JSON object without the key {ner_tag!r}."
+                        "User tried to submit a JSON object without the key "
+                        f"{ner_tag!r}."
                     )
                     return question, answer
 
@@ -542,6 +667,9 @@ def main(annotator_id: int) -> None:
 
         Please do not use any additional aids (such as search engines) when completing
         these tasks.
+
+        Note that several examples appear more than once - this is intentional, as it
+        allows us to compare your performance across multiple examples.
 
         Note that the Enter key will also submit your answer!
         """,
