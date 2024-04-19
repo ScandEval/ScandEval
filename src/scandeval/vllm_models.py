@@ -76,6 +76,7 @@ class VLLMModel:
         # This is required to be able to re-initialize the model, in case we have
         # already initialized it once
         destroy_model_parallel()
+        ray.shutdown()
         clear_memory()
 
         self.max_model_len = 5_000
