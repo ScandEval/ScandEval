@@ -227,7 +227,7 @@ class HFModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: "DatasetConfig"
-    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
+    ) -> tuple["PreTrainedModel | GenerativeModel", "Tokenizer"]:
         """Load an OpenAI model.
 
         Args:
@@ -473,7 +473,7 @@ class HFModelSetup:
             raise_errors=self.benchmark_config.raise_errors,
         )
 
-        return tokenizer, model
+        return model, tokenizer
 
     def _get_torch_dtype(self, config: "PretrainedConfig") -> str | torch.dtype:
         """Get the torch dtype, used for loading the model.

@@ -108,7 +108,7 @@ def benchmark_speed_single_iteration(
     try:
         # Reinitialise a new model
         if tokenizer is None or model is None:
-            tokenizer, model = load_model(
+            model, tokenizer = load_model(
                 model_config=model_config,
                 dataset_config=dataset_config,
                 benchmark_config=benchmark_config,

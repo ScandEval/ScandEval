@@ -26,7 +26,7 @@ def load_model(
     model_config: "ModelConfig",
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
-) -> "tuple[Tokenizer, PreTrainedModel | GenerativeModel]":
+) -> tuple["PreTrainedModel | GenerativeModel", "Tokenizer"]:
     """Load a model.
 
     Args:
@@ -49,7 +49,7 @@ def load_model(
     setup_class = model_type_to_model_setup_mapping[model_config.model_type]
     setup = setup_class(benchmark_config=benchmark_config)
 
-    tokenizer, model = setup.load_model(
+    model, tokenizer = setup.load_model(
         model_config=model_config, dataset_config=dataset_config
     )
 
@@ -69,4 +69,4 @@ def load_model(
 
     # TODO: XMOD model setup: https://huggingface.co/facebook/xmod-base#input-language
 
-    return tokenizer, model
+    return model, tokenizer

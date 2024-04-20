@@ -292,7 +292,7 @@ def finetune_single_iteration(
     enforce_reproducibility(framework=model_config.framework, seed=seed)
 
     if tokenizer is None or model is None:
-        tokenizer, model_or_generative_model = load_model(
+        model_or_generative_model, tokenizer = load_model(
             model_config=model_config,
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,

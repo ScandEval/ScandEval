@@ -141,7 +141,7 @@ class BenchmarkDataset(ABC):
 
         if model is None or tokenizer is None:
             logger.info("Loading model and tokenizer...")
-            tokenizer, model = load_model(
+            model, tokenizer = load_model(
                 model_config=model_config,
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
