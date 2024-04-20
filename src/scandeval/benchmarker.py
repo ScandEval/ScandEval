@@ -589,6 +589,10 @@ class Benchmarker:
 
                 # Benchmark a single model on a single dataset
                 try:
+                    # TEMP
+                    logger.info(f"{loaded_model = }")
+                    logger.info(f"{loaded_tokenizer = }")
+
                     benchmark_output = self._benchmark_single(
                         dataset_config=dataset_config,
                         model_id=m_id,
@@ -711,7 +715,9 @@ class Benchmarker:
         while True:
             try:
                 dataset = self.dataset_factory.build_dataset(dataset_config)
-                results, metadata_dict, model, tokenizer = dataset(model_id)
+                results, metadata_dict, model, tokenizer = dataset(
+                    model_id=model_id, model=model, tokenizer=tokenizer
+                )
                 record = BenchmarkResult(
                     dataset=dataset_config.name,
                     task=dataset_config.task.name,
