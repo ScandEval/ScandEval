@@ -62,9 +62,6 @@ class VLLMModel:
                 A Hugging Face tokenizer. If None, the tokenizer will need to be
                 loaded separately.
         """
-        # TEMP
-        logger.info("Loading vLLM model.")
-
         self.model_config = model_config
         self.config = hf_model_config
         self.dataset_config = dataset_config
@@ -147,9 +144,6 @@ class VLLMModel:
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
-        # TEMP
-        logger.info("Deleting vLLM model.")
-
         destroy_model_parallel()
         if hasattr(self, "_model"):
             del self._model

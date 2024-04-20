@@ -589,10 +589,6 @@ class Benchmarker:
 
                 # Benchmark a single model on a single dataset
                 try:
-                    # TEMP
-                    logger.info(f"{loaded_model = }")
-                    logger.info(f"{loaded_tokenizer = }")
-
                     benchmark_output = self._benchmark_single(
                         dataset_config=dataset_config,
                         model_id=m_id,
