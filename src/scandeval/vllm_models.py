@@ -28,11 +28,13 @@ if TYPE_CHECKING:
 if importlib.util.find_spec("ray") is not None:
     import ray
 
+    old_ray_remote = ray.remote
+
     # TEMP: Remove this once `max_calls=1` is added to `ray.remote` calls in vLLM.
     # Related vLLM issue: https://github.com/vllm-project/vllm/issues/4241
     def _ray_remote_replacement(*args, **kwargs) -> Callable:
         kwargs.pop("max_calls", None)
-        return ray.remote(max_calls=1, *args, **kwargs)
+        return old_ray_remote(max_calls=1, *args, **kwargs)
 
     ray.remote = _ray_remote_replacement
 
