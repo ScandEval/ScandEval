@@ -289,42 +289,6 @@ tests-mypy = ["mypy (>=1.6)", "pytest-mypy-plugins"]
 tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "pytest (>=4.3.0)", "pytest-xdist[psutil]"]
 
 [[package]]
-name = "auto-gptq"
-version = "0.7.1"
-description = "An easy-to-use LLMs quantization package with user-friendly apis, based on GPTQ algorithm."
-optional = true
-python-versions = ">=3.8.0"
-files = [
-    {file = "auto_gptq-0.7.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:84efeb9527b2d49f3555b2ba9451018c5ff41722c0b0e2fde74f5183ba0c008d"},
-    {file = "auto_gptq-0.7.1-cp310-cp310-win_amd64.whl", hash = "sha256:5d0f3c1b4905e1f14f5b88a33d3dfaf313ebfa138f73c43315f80b40a2d8bb1f"},
-    {file = "auto_gptq-0.7.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a372d81d523b8d2f98639bbca63c0c427cab0ed55b8a57bb96706b0942aa01c9"},
-    {file = "auto_gptq-0.7.1-cp311-cp311-win_amd64.whl", hash = "sha256:8d9d3fbfff94e129bcde0432fd5f6ba09f26aeceea0890a68c898210ba448135"},
-    {file = "auto_gptq-0.7.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fc69a93ab8b24e7854abbb3adbdb3a8c28c8f4db9c82229341922a4b59e0eff1"},
-    {file = "auto_gptq-0.7.1-cp38-cp38-win_amd64.whl", hash = "sha256:d87cd69532bfeb81150a0f8db5ebb5f5f295fa72b5a0403102e791ccac44b933"},
-    {file = "auto_gptq-0.7.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4a1e5972b8ff65956f207908d8789c56fc0d521678ff37bd57e98f392971b3fd"},
-    {file = "auto_gptq-0.7.1-cp39-cp39-win_amd64.whl", hash = "sha256:57b4b284ca4ff4e060088252cbfb18a6f7332477fe57cf2b7ef9af158cce9730"},
-    {file = "auto_gptq-0.7.1.tar.gz", hash = "sha256:5c61ad380e9b4c603757c254765e9083a90a820cd0aff1b5d2c6f7fd96c85e80"},
-]
-
-[package.dependencies]
-accelerate = ">=0.26.0"
-datasets = "*"
-gekko = "*"
-numpy = "*"
-peft = ">=0.5.0"
-rouge = "*"
-safetensors = "*"
-sentencepiece = "*"
-torch = ">=1.13.0"
-tqdm = "*"
-transformers = ">=4.31.0"
-
-[package.extras]
-quality = ["ruff (==0.1.5)"]
-test = ["parameterized", "pytest"]
-triton = ["triton (==2.0.0)"]
-
-[[package]]
 name = "bert-score"
 version = "0.3.13"
 description = "PyTorch implementation of BERT score"
@@ -1250,20 +1214,6 @@ sftp = ["paramiko"]
 smb = ["smbprotocol"]
 ssh = ["paramiko"]
 tqdm = ["tqdm"]
-
-[[package]]
-name = "gekko"
-version = "1.1.1"
-description = "Machine learning and optimization for dynamic systems"
-optional = true
-python-versions = ">=2.6"
-files = [
-    {file = "gekko-1.1.1-py3-none-any.whl", hash = "sha256:f4a959e5bef728920336bfb91609f455e0ef6365af86b1220d45717dade43797"},
-    {file = "gekko-1.1.1.tar.gz", hash = "sha256:c5ce8d7cf0af904623506f3642616a0eebb4d9037029fa12e830e991d68c589f"},
-]
-
-[package.dependencies]
-numpy = ">=1.8"
 
 [[package]]
 name = "google-api-core"
@@ -3406,35 +3356,6 @@ test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.9.2)"]
 
 [[package]]
-name = "peft"
-version = "0.10.0"
-description = "Parameter-Efficient Fine-Tuning (PEFT)"
-optional = true
-python-versions = ">=3.8.0"
-files = [
-    {file = "peft-0.10.0-py3-none-any.whl", hash = "sha256:d5249c97e818d3e31f92553c73c2953acd0ec12649b8b749afff7152cbc86cbb"},
-    {file = "peft-0.10.0.tar.gz", hash = "sha256:36a7628c15f88d37abb26cfc74c22468f9037ee02e9c9b65de943cfe7c672049"},
-]
-
-[package.dependencies]
-accelerate = ">=0.21.0"
-huggingface-hub = ">=0.17.0"
-numpy = ">=1.17"
-packaging = ">=20.0"
-psutil = "*"
-pyyaml = "*"
-safetensors = "*"
-torch = ">=1.13.0"
-tqdm = "*"
-transformers = "*"
-
-[package.extras]
-dev = ["black", "hf-doc-builder", "ruff (>=0.2.1,<0.3.0)"]
-docs-specific = ["black", "hf-doc-builder"]
-quality = ["black", "hf-doc-builder", "ruff (>=0.2.1,<0.3.0)"]
-test = ["black", "datasets", "diffusers (<0.21.0)", "hf-doc-builder", "parameterized", "pytest", "pytest-cov", "pytest-xdist", "ruff (>=0.2.1,<0.3.0)", "scipy"]
-
-[[package]]
 name = "pillow"
 version = "10.3.0"
 description = "Python Imaging Library (Fork)"
@@ -4442,20 +4363,6 @@ pygments = ">=2.13.0,<3.0.0"
 
 [package.extras]
 jupyter = ["ipywidgets (>=7.5.1,<9)"]
-
-[[package]]
-name = "rouge"
-version = "1.0.1"
-description = "Full Python ROUGE Score Implementation (not a wrapper)"
-optional = true
-python-versions = "*"
-files = [
-    {file = "rouge-1.0.1-py3-none-any.whl", hash = "sha256:28d118536e8c774dc47d1d15ec266479b4dd0914c4672ce117d4002789bdc644"},
-    {file = "rouge-1.0.1.tar.gz", hash = "sha256:12b48346ca47d6bcf3c45061f315452b9ccec0620ee895ec85b7efc3d54aae34"},
-]
-
-[package.dependencies]
-six = "*"
 
 [[package]]
 name = "rouge-score"
@@ -6091,15 +5998,14 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [extras]
-all = ["ai2-olmo", "auto-gptq", "bert-score", "bert-score", "bitsandbytes", "boto3", "demjson3", "flax", "gradio", "huggingface-hub", "jax", "jaxlib", "levenshtein", "openai", "outlines", "rouge-score", "rouge-score", "vllm"]
+all = ["ai2-olmo", "bert-score", "bert-score", "bitsandbytes", "boto3", "demjson3", "flax", "gradio", "huggingface-hub", "jax", "jaxlib", "levenshtein", "openai", "outlines", "rouge-score", "rouge-score", "vllm"]
 generative = ["bert-score", "bitsandbytes", "demjson3", "outlines", "rouge-score", "vllm"]
 human-evaluation = ["gradio", "levenshtein"]
 jax = ["flax", "jax", "jaxlib"]
 olmo = ["ai2-olmo", "bert-score", "bitsandbytes", "boto3", "demjson3", "huggingface-hub", "outlines", "rouge-score", "vllm"]
 openai = ["bert-score", "bitsandbytes", "demjson3", "levenshtein", "openai", "outlines", "rouge-score", "vllm"]
-quantization = ["auto-gptq"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "0424e7e83ecb7ba994f0e211c27fb44acec6ba76eaaf7b039af26c5cdfb90f99"
+content-hash = "3b1d3e0f2dd50a8b7c8c258020235ae57044bc7a71c6f975d8d9450e91f6692c"

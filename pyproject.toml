@@ -58,9 +58,9 @@ openai = { version = "^1.11.1", optional = true }
 levenshtein = { version = "^0.24.0", optional = true }  # This is also used for human evaluation
 
 # Needed for quantised models
-#optimum = { version = "^1.18.0", optional = true }
-auto-gptq = { version = "^0.7.1", optional = true }
-#autoawq = { version = "^0.2.4", optional = true }
+# optimum = { version = "^1.18.0", optional = true }
+# auto-gptq = { version = "^0.7.1", optional = true }
+# autoawq = { version = "^0.2.4", optional = true }
 
 # Needed for human evaluation
 gradio = { version = "^4.26.0", optional = true }
@@ -112,11 +112,11 @@ openai = [
     "tiktoken",
     "levenshtein",
 ]
-quantization = [
-    #"optimum",
-    "auto-gptq",
-    #"autoawq",
-]
+# quantization = [
+#     "optimum",
+#     "auto-gptq",
+#     "autoawq",
+# ]
 human_evaluation = [
     "gradio",
     "levenshtein",

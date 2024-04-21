@@ -12,7 +12,7 @@ from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
-from .exceptions import NeedsExtraInstalled
+from .exceptions import InvalidModel
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
 from .utils import clear_memory, get_end_of_chat_token_ids
@@ -101,9 +101,21 @@ class VLLMModel:
             importlib.util.find_spec("auto_gptq") is None
             or importlib.util.find_spec("optimum") is None
         ):
-            raise NeedsExtraInstalled(extra="quantization")
+            # raise NeedsExtraInstalled(extra="quantization")
+            # TEMP: Remove this once `optimum` allows `transformers>=4.40.0`
+            raise InvalidModel(
+                "To evaluate GPTQ models you need to install the `optimum` package. "
+                "Please install this package with `pip install -U optimum` and try "
+                "again."
+            )
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
-            raise NeedsExtraInstalled(extra="quantization")
+            # raise NeedsExtraInstalled(extra="quantization")
+            # TEMP: Remove this once `autoawq` allows `transformers>=4.40.0`
+            raise InvalidModel(
+                "To evaluate AWQ models you need to install the `autoawq` package. "
+                "Please install this package with `pip install -U autoawq` and try "
+                "again."
+            )
 
         # Quantized models don't support bfloat16, so we need to set the dtype to
         # float16 instead
