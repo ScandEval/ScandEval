@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
     from transformers import PretrainedConfig, PreTrainedTokenizerBase
     from vllm import LLM, RequestOutput
+    from vllm.engine.llm_engine import LLMEngine
+    from vllm.worker.worker_base import WorkerWrapperBase
 
     from .config import DatasetConfig, ModelConfig
 
@@ -32,9 +34,11 @@ if importlib.util.find_spec("ray") is not None:
 
     # TEMP: Remove this once `max_calls=1` is added to `ray.remote` calls in vLLM.
     # Related vLLM issue: https://github.com/vllm-project/vllm/issues/4241
-    def _ray_remote_replacement(*args, **kwargs) -> Callable:
-        kwargs.pop("max_calls", None)
-        return old_ray_remote(max_calls=1, *args, **kwargs)
+    def _ray_remote_replacement(fn, *args, **kwargs) -> Callable:
+        if issubclass(fn, WorkerWrapperBase) or issubclass(fn, LLMEngine):
+            kwargs.pop("max_calls", None)
+            return old_ray_remote(max_calls=1, *args, **kwargs)
+        return old_ray_remote(*args, **kwargs)
 
     ray.remote = _ray_remote_replacement
 
