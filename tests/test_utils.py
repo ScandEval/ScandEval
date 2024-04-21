@@ -79,6 +79,7 @@ def test_module_is_installed(module_name, expected):
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
         ("01-ai/Yi-6B", True),
         ("bert-base-uncased", False),
+        ("meta-llama/Meta-Llama-3-8B", True),
     ],
 )
 def test_should_prompts_be_stripped(model_id, expected):
@@ -97,6 +98,7 @@ def test_should_prompts_be_stripped(model_id, expected):
         ("mistralai/Mistral-7B-v0.1", False),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", False),
         ("01-ai/Yi-6B", True),
+        ("meta-llama/Meta-Llama-3-8B", True),
     ],
 )
 def test_should_prefix_space_be_added_to_labels(model_id, expected):
