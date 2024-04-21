@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   when the underlying Ray cluster has to be re-initialised, and unfortunately this
   still happens in between the evaluation of multiple models. Related to [this vLLM
   issue](https://github.com/vllm-project/vllm/issues/1058).
+- Handle the change from having `float` logprobs in vLLM to the new `Logprob` objects.
 
 
 ## [v12.7.0] - 2024-04-19
