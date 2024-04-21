@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from .config import DatasetConfig, ModelConfig
 
 if importlib.util.find_spec("vllm") is not None:
+    import vllm
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
@@ -281,7 +282,10 @@ class VLLMModel:
                     for gen_token_idx in range(seq_len):
                         logprobs_dict = raw_output.outputs[0].logprobs[gen_token_idx]
                         for token_idx, logprob in logprobs_dict.items():
-                            breakpoint()
+                            if hasattr(vllm.sequence, "Logprob") and isinstance(
+                                logprob, vllm.sequence.Logprob
+                            ):
+                                logprob = logprob.logprob
                             scores[gen_token_idx][sample_idx, token_idx] = logprob
 
                 output = ModelOutput(dict(sequences=output, scores=tuple(scores)))
