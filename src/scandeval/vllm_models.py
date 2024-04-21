@@ -30,6 +30,9 @@ if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
+if importlib.util.find_spec("ray") is not None:
+    import ray
+
 
 logger = logging.getLogger(__package__)
 
@@ -73,9 +76,9 @@ class VLLMModel:
 
         # This is required to be able to re-initialize the model, in case we have
         # already initialized it once
-        breakpoint()
         destroy_model_parallel()
         clear_memory()
+        ray.shutdown()
 
         self.max_model_len = 5_000
         potential_max_model_length_config_names = [
@@ -151,6 +154,7 @@ class VLLMModel:
             del self._model
         del self
         clear_memory()
+        ray.shutdown()
 
     def generate(
         self,
