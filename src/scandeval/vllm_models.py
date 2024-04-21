@@ -84,19 +84,10 @@ class VLLMModel:
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
 
-        @ray.remote(max_calls=1)
-        def clear_memory_ray():
-            clear_memory()
-
         # This is required to be able to re-initialize the model, in case we have
         # already initialized it once
-        breakpoint()
         destroy_model_parallel()
         clear_memory()
-        try:
-            ray.get(clear_memory_ray.remote(), timeout=0)
-        except ray.exceptions.GetTimeoutError:
-            pass
         ray.shutdown()
 
         self.max_model_len = 5_000
@@ -172,12 +163,12 @@ class VLLMModel:
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
-        ray.shutdown()
         destroy_model_parallel()
         if hasattr(self, "_model"):
             del self._model
         del self
         clear_memory()
+        ray.shutdown()
 
     def generate(
         self,
