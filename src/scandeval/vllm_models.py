@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from .config import DatasetConfig, ModelConfig
 
 if importlib.util.find_spec("vllm") is not None:
-    import vllm
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
 
@@ -133,15 +132,7 @@ class VLLMModel:
             enable_prefix_caching=True,
         )
 
-        # TEMP: We do a try-except here since some arguments are introduced in vLLM
-        # v0.4.0, and we want to be able to use older versions of vLLM as well (for
-        # now)
-        try:
-            self._model = LLM(**vllm_kwargs)
-        except TypeError:
-            vllm_kwargs.pop("max_logprobs")
-            vllm_kwargs.pop("enable_prefix_caching")
-            self._model = LLM(**vllm_kwargs)
+        self._model = LLM(**vllm_kwargs)
 
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
@@ -285,11 +276,8 @@ class VLLMModel:
                     seq_len = len(raw_output.outputs[0].logprobs)
                     for gen_token_idx in range(seq_len):
                         logprobs_dict = raw_output.outputs[0].logprobs[gen_token_idx]
-                        for token_idx, logprob in logprobs_dict.items():
-                            if hasattr(vllm.sequence, "Logprob") and isinstance(
-                                logprob, vllm.sequence.Logprob
-                            ):
-                                logprob = logprob.logprob
+                        for token_idx, logprob_obj in logprobs_dict.items():
+                            logprob = logprob_obj.logprob
                             scores[gen_token_idx][sample_idx, token_idx] = logprob
 
                 output = ModelOutput(dict(sequences=output, scores=tuple(scores)))
