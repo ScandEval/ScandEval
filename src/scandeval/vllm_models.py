@@ -32,11 +32,9 @@ if importlib.util.find_spec("ray") is not None:
 
     # TEMP: Remove this once `max_calls=1` is added to `ray.remote` calls in vLLM.
     # Related vLLM issue: https://github.com/vllm-project/vllm/issues/4241
-    def _ray_remote_replacement(fn, *args, **kwargs) -> Callable:
-        if fn.__name__ in {"RayWorkerWrapper", "_AsyncLLMEngine"}:
-            kwargs.pop("max_calls", None)
-            return old_ray_remote(fn, max_calls=1, *args, **kwargs)
-        return old_ray_remote(fn, *args, **kwargs)
+    def _ray_remote_replacement(*args, **kwargs) -> Callable:
+        kwargs.pop("max_calls", None)
+        return old_ray_remote(max_calls=1, *args, **kwargs)
 
     ray.remote = _ray_remote_replacement
 
