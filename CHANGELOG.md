@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Updated `vllm` to `>=0.4.0,<0.5.0`, which both fixes an issue with multi-gpu
+  benchmarking as well as supporting more models.
+- Updated `transformers` to `>=4.40.0,<4.41.0`, to support more models.
+
 ### Fixed
 - Now does not reload generative models between each evaluation. This both saves some
-  evaluation time, but it also prevents a bug when using multiple GPUs. The bug happens
-  when the underlying Ray cluster has to be re-initialised, and unfortunately this
-  still happens in between the evaluation of multiple models. Related to [this vLLM
-  issue](https://github.com/vllm-project/vllm/issues/1058).
+  evaluation time, but it also prevents a bug when using multiple GPUs.
 - Handle the change from having `float` logprobs in vLLM to the new `Logprob` objects.
 
 
