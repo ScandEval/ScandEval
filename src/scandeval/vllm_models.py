@@ -93,7 +93,10 @@ class VLLMModel:
         breakpoint()
         destroy_model_parallel()
         clear_memory()
-        ray.get(clear_memory_ray.remote())
+        try:
+            ray.get(clear_memory_ray.remote(), timeout=0)
+        except ray.exceptions.GetTimeoutError:
+            pass
         ray.shutdown()
 
         self.max_model_len = 5_000
