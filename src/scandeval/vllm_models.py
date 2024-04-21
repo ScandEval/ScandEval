@@ -72,6 +72,7 @@ class VLLMModel:
 
         # This is required to be able to re-initialize the model, in case we have
         # already initialized it once
+        breakpoint()
         destroy_model_parallel()
         clear_memory()
 
