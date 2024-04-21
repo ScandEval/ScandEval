@@ -281,6 +281,7 @@ class VLLMModel:
                     for gen_token_idx in range(seq_len):
                         logprobs_dict = raw_output.outputs[0].logprobs[gen_token_idx]
                         for token_idx, logprob in logprobs_dict.items():
+                            breakpoint()
                             scores[gen_token_idx][sample_idx, token_idx] = logprob
 
                 output = ModelOutput(dict(sequences=output, scores=tuple(scores)))
