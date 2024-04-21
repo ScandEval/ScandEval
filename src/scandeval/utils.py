@@ -226,7 +226,8 @@ def get_class_by_name(
             if not module_name:
                 module_name = f"scandeval.{name_snake}"
             module = importlib.import_module(name=module_name)
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
+            logger.debug(f"Could not import module {module_name!r}: {e}")
             module_name = None
             continue
 
