@@ -30,7 +30,7 @@ if importlib.util.find_spec("ray") is not None:
 
     # TEMP: Remove this once `max_calls=1` is added to `ray.remote` calls in vLLM.
     # Related vLLM issue: https://github.com/vllm-project/vllm/issues/4241
-    ray._private.ray_option_utils.validate_actor_options = lambda _: None
+    ray._private.ray_option_utils.validate_actor_options = lambda *args, **kwargs: None
     old_ray_remote = ray.remote
 
     def _ray_remote_replacement(*args, **kwargs) -> Callable:
