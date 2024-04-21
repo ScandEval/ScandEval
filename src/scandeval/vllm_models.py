@@ -40,12 +40,12 @@ if importlib.util.find_spec("ray") is not None:
     # ray.remote = _ray_remote_replacement
 
 if importlib.util.find_spec("vllm") is not None:
-    from vllm.engine.ray_utils import RayWorkerWrapper
+    from vllm.engine.ray_utils import RayWorkerVllm
 
-    RayWorkerWrapper.__del__ = MethodType(lambda self: clear_memory(), RayWorkerWrapper)
+    RayWorkerVllm.__del__ = MethodType(lambda self: clear_memory(), RayWorkerVllm)
     import vllm
 
-    vllm.engine.ray_utils.RayWorkerWrapper = RayWorkerWrapper
+    vllm.engine.ray_utils.RayWorkerVllm = RayWorkerVllm
 
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
