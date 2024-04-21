@@ -5,7 +5,7 @@ import logging
 import math
 import sys
 from types import MethodType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import torch
 from tqdm import tqdm
@@ -25,12 +25,17 @@ if TYPE_CHECKING:
 
     from .config import DatasetConfig, ModelConfig
 
+if importlib.util.find_spec("ray") is not None:
+    import ray
+
+    def _ray_remote_replacement(*args, **kwargs) -> Callable:
+        return ray.remote(max_calls=1, *args, **kwargs)
+
+    ray.remote = _ray_remote_replacement
+
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
     from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
-
-if importlib.util.find_spec("ray") is not None:
-    import ray
 
 
 logger = logging.getLogger(__package__)
@@ -75,7 +80,6 @@ class VLLMModel:
 
         # This is required to be able to re-initialize the model, in case we have
         # already initialized it once
-        breakpoint()
         destroy_model_parallel()
         clear_memory()
         ray.shutdown()
