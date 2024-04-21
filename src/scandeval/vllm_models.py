@@ -5,7 +5,7 @@ import logging
 import math
 import sys
 from types import MethodType
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import torch
 from tqdm import tqdm
@@ -30,16 +30,16 @@ if importlib.util.find_spec("ray") is not None:
 
     # TEMP: Remove this once `max_calls=1` is added to `ray.remote` calls in vLLM.
     # Related vLLM issue: https://github.com/vllm-project/vllm/issues/4241
-    ray._private.ray_option_utils.validate_actor_options = lambda *args, **kwargs: None
-    old_ray_remote = ray.remote
+    # ray._private.ray_option_utils.validate_actor_options = lambda *args, **kwargs: None
+    # old_ray_remote = ray.remote
 
-    def _ray_remote_replacement(*args, **kwargs) -> Callable:
-        if "num_cpus" in kwargs:
-            kwargs.pop("max_calls", None)
-            return old_ray_remote(max_calls=1, *args, **kwargs)
-        return old_ray_remote(*args, **kwargs)
+    # def _ray_remote_replacement(*args, **kwargs) -> Callable:
+    #     if "num_cpus" in kwargs:
+    #         kwargs.pop("max_calls", None)
+    #         return old_ray_remote(max_calls=1, *args, **kwargs)
+    #     return old_ray_remote(*args, **kwargs)
 
-    ray.remote = _ray_remote_replacement
+    # ray.remote = _ray_remote_replacement
 
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
