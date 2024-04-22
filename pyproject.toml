@@ -44,9 +44,9 @@ vllm = { markers = "sys_platform != 'darwin'", version = "^0.4.0", optional = tr
 outlines = { version = "^0.0.34", optional = true }
 
 # Needed for loading OLMO based models
-ai2-olmo = { version = "^0.2.4", optional = true }
-boto3 = { version = "^1.34.0", optional = true }
-huggingface-hub = { version = "^0.19.0", optional = true }
+# ai2-olmo = { version = "^0.2.4", optional = true }
+# boto3 = { version = "^1.34.0", optional = true }
+# huggingface-hub = { version = "^0.19.0", optional = true }
 
 # Needed for loading JAX based encoder models
 jax = { version = "^0.4.24", optional = true }
@@ -58,9 +58,9 @@ openai = { version = "^1.11.1", optional = true }
 levenshtein = { version = "^0.24.0", optional = true }  # This is also used for human evaluation
 
 # Needed for quantised models
-# optimum = { version = "^1.18.0", optional = true }
-# auto-gptq = { version = "^0.7.1", optional = true }
-# autoawq = { version = "^0.2.4", optional = true }
+optimum = { version = "1.17.1", optional = true }
+auto-gptq = { version = "^0.7.1", optional = true }
+#autoawq = { version = "^0.2.4", optional = true }
 
 # Needed for human evaluation
 gradio = { version = "^4.26.0", optional = true }
@@ -90,17 +90,17 @@ generative = [
     "rouge-score",
     "bert-score",
 ]
-olmo = [
-    "demjson3",
-    "outlines",
-    "bitsandbytes",
-    "vllm",
-    "rouge-score",
-    "bert-score",
-    "ai2-olmo",
-    "boto3",
-    "huggingface-hub",
-]
+# olmo = [
+#     "demjson3",
+#     "outlines",
+#     "bitsandbytes",
+#     "vllm",
+#     "rouge-score",
+#     "bert-score",
+#     "ai2-olmo",
+#     "boto3",
+#     "huggingface-hub",
+# ]
 openai = [
     "demjson3",
     "outlines",
@@ -112,11 +112,11 @@ openai = [
     "tiktoken",
     "levenshtein",
 ]
-# quantization = [
-#     "optimum",
-#     "auto-gptq",
-#     "autoawq",
-# ]
+quantization = [
+    "optimum",
+    "auto-gptq",
+#    "autoawq",
+]
 human_evaluation = [
     "gradio",
     "levenshtein",
@@ -133,13 +133,13 @@ all = [
     "vllm",
     "rouge-score",
     "bert-score",
-    "ai2-olmo",
-    "boto3",
-    "huggingface-hub",
+#     "ai2-olmo",
+#     "boto3",
+#     "huggingface-hub",
     "openai",
     "tiktoken",
     "levenshtein",
-    #"optimum",
+    "optimum",
     "auto-gptq",
     #"autoawq",
     "gradio",
