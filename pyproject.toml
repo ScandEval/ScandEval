@@ -58,8 +58,12 @@ openai = { version = "^1.11.1", optional = true }
 levenshtein = { version = "^0.24.0", optional = true }  # This is also used for human evaluation
 
 # Needed for quantised models
-optimum = { version = "1.17.1", optional = true }
 auto-gptq = { version = "^0.7.1", optional = true }
+# We can allow future versions of `optimum` when they allow `transformers>=4.40.0`.
+# Check https://github.com/huggingface/optimum/blob/main/setup.py#L18
+optimum = { version = "1.17.1", optional = true }
+# We can allow future versions of `autoawq` when the following PR has been published:
+# https://github.com/casper-hansen/AutoAWQ/pull/418
 autoawq = { version = "0.2.3", optional = true }
 
 # Needed for human evaluation
