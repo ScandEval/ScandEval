@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated `vllm` to `>=0.4.0,<0.5.0`, which both fixes an issue with multi-gpu
   benchmarking as well as supporting more models.
 - Updated `transformers` to `>=4.40.0,<4.41.0`, to support more models.
+- Removed the `olmo` extra, as it is now included in `transformers`.
+- Downgraded `outlines` to `v0.0.34` as any newer version is currently incompatible
+  with `vllm`. This will be changed back to newer versions when [this vLLM
+  PR](https://github.com/vllm-project/vllm/pull/4109) has been merged and released.
 
 ### Fixed
 - Now does not reload generative models between each evaluation. This both saves some
