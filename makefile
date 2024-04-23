@@ -72,7 +72,7 @@ install-poetry:
 
 setup-poetry:
 	@if [ "$(shell which nvidia-smi)" = "" ]; then \
-	    poetry env use python3.10 && poetry install --extras jax --extras generative --extras olmo --extras openai --extras human_evaluation; \
+	    poetry env use python3.10 && poetry install --extras jax --extras generative --extras openai --extras human_evaluation; \
 	else \
 	    poetry env use python3.10 && poetry install --extras all; \
 	fi

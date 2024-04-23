@@ -249,7 +249,7 @@ class ModelSetup(Protocol):
 
     def load_model(
         self, model_config: "ModelConfig", dataset_config: "DatasetConfig"
-    ) -> tuple[Tokenizer, "PreTrainedModel | GenerativeModel"]:
+    ) -> tuple["PreTrainedModel | GenerativeModel", "Tokenizer"]:
         """Load a model.
 
         Args:

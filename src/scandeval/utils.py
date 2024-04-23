@@ -216,6 +216,7 @@ def get_class_by_name(
         class_name = [class_name]
 
     # Loop over the class names
+    error_messages = list()
     for name in class_name:
         # Get the snake_case and PascalCase version of the class name
         name_snake = name.replace("-", "_")
@@ -226,7 +227,8 @@ def get_class_by_name(
             if not module_name:
                 module_name = f"scandeval.{name_snake}"
             module = importlib.import_module(name=module_name)
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
+            error_messages.append(str(e))
             module_name = None
             continue
 
@@ -239,6 +241,13 @@ def get_class_by_name(
 
         # Return the class
         return class_
+
+    if error_messages:
+        errors = "\n- " + "\n- ".join(error_messages)
+        logger.debug(
+            f"Could not find the class with the name(s) {', '.join(class_name)}. The "
+            f"following error messages were raised: {errors}"
+        )
 
     # If the class could not be found, return None
     return None

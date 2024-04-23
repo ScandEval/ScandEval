@@ -89,7 +89,7 @@ class FreshModelSetup:
 
     def load_model(
         self, model_config: ModelConfig, dataset_config: "DatasetConfig"
-    ) -> tuple["Tokenizer", "PreTrainedModel | GenerativeModel"]:
+    ) -> tuple["PreTrainedModel | GenerativeModel", "Tokenizer"]:
         """Load a fresh model.
 
         Args:
@@ -173,4 +173,4 @@ class FreshModelSetup:
             generative_model=model_is_generative(model=model),
         )
 
-        return tokenizer, model
+        return model, tokenizer

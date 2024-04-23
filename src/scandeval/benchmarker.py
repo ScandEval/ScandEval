@@ -23,6 +23,7 @@ from .utils import get_huggingface_model_lists
 
 if TYPE_CHECKING:
     from .config import DatasetConfig, Language
+    from .protocols import GenerativeModel, Tokenizer
 
 
 logger = logging.getLogger(__package__)
@@ -162,7 +163,7 @@ class Benchmarker:
         prefer_azure: bool = False,
         azure_openai_api_key: str | None = None,
         azure_openai_endpoint: str | None = None,
-        azure_openai_api_version: str |None = None,
+        azure_openai_api_version: str | None = None,
         force: bool = False,
         verbose: bool = False,
         trust_remote_code: bool = False,
@@ -357,7 +358,7 @@ class Benchmarker:
         openai_api_key: str | None = None,
         azure_openai_api_key: str | None = None,
         azure_openai_endpoint: str | None = None,
-        azure_openai_api_version: str |None = None,
+        azure_openai_api_version: str | None = None,
         force: bool | None = None,
         verbose: bool | None = None,
         trust_remote_code: bool | None = None,
@@ -567,6 +568,8 @@ class Benchmarker:
         current_benchmark_results: list[BenchmarkResult] = list()
         for m_id in model_ids:
             m_id = m_id.rstrip(" /")
+            loaded_model = None
+            loaded_tokenizer = None
 
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
@@ -586,10 +589,12 @@ class Benchmarker:
 
                 # Benchmark a single model on a single dataset
                 try:
-                    record = self._benchmark_single(
+                    benchmark_output = self._benchmark_single(
                         dataset_config=dataset_config,
                         model_id=m_id,
                         raise_errors=benchmark_config.raise_errors,
+                        model=loaded_model,
+                        tokenizer=loaded_tokenizer,
                     )
                 except InvalidModel as e:
                     if benchmark_config.raise_errors:
@@ -598,14 +603,17 @@ class Benchmarker:
                     break
 
                 # If the benchmark was unsuccessful then skip
-                if isinstance(record, dict) and "error" in record:
-                    error_msg = record["error"]
+                if isinstance(benchmark_output, dict) and "error" in benchmark_output:
+                    error_msg = benchmark_output["error"]
                     logger.info(
                         f"{m_id} could not be benchmarked on "
                         f"{dataset_config.pretty_name}. Skipping. The error message "
                         f"raised was {error_msg!r}."
                     )
                     continue
+
+                assert isinstance(benchmark_output, tuple)
+                record, loaded_model, loaded_tokenizer = benchmark_output
 
                 # Save the benchmark results
                 assert isinstance(record, BenchmarkResult)
@@ -666,8 +674,16 @@ class Benchmarker:
         return model_ids_sorted
 
     def _benchmark_single(
-        self, dataset_config: "DatasetConfig", model_id: str, raise_errors: bool
-    ) -> BenchmarkResult | dict[str, str]:
+        self,
+        dataset_config: "DatasetConfig",
+        model_id: str,
+        raise_errors: bool,
+        model: "GenerativeModel | None",
+        tokenizer: "Tokenizer | None",
+    ) -> (
+        tuple[BenchmarkResult, "GenerativeModel | None", "Tokenizer | None"]
+        | dict[str, str]
+    ):
         """Benchmark a single model on a single dataset.
 
         Args:
@@ -677,6 +693,10 @@ class Benchmarker:
                 The model ID to use.
             raise_errors:
                 Whether to raise errors instead of skipping the model evaluation.
+            model:
+                The pre-loaded model, if available.
+            tokenizer:
+                The pre-loaded tokenizer, if available.
 
         Returns:
             The benchmark result, or a dictionary containing an error message.
@@ -691,7 +711,9 @@ class Benchmarker:
         while True:
             try:
                 dataset = self.dataset_factory.build_dataset(dataset_config)
-                results, metadata_dict = dataset(model_id)
+                results, metadata_dict, model, tokenizer = dataset(
+                    model_id=model_id, model=model, tokenizer=tokenizer
+                )
                 record = BenchmarkResult(
                     dataset=dataset_config.name,
                     task=dataset_config.task.name,
@@ -703,7 +725,7 @@ class Benchmarker:
                     **metadata_dict,
                 )
                 logger.debug(f"Results:\n{results}")
-                return record
+                return record, model, tokenizer
 
             except InvalidBenchmark as e:
                 # If the model ID is not valid then raise an error, if specified
