@@ -12,7 +12,7 @@ from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
-from .exceptions import InvalidModel
+from .exceptions import NeedsExtraInstalled
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
 from .utils import clear_memory, get_end_of_chat_token_ids
@@ -27,19 +27,6 @@ if TYPE_CHECKING:
 
 if importlib.util.find_spec("ray") is not None:
     import ray
-
-    # TEMP: Remove this once `max_calls=1` is added to `ray.remote` calls in vLLM.
-    # Related vLLM issue: https://github.com/vllm-project/vllm/issues/4241
-    # ray._private.ray_option_utils.validate_actor_options = lambda *args, **kwargs: None
-    # old_ray_remote = ray.remote
-
-    # def _ray_remote_replacement(*args, **kwargs) -> Callable:
-    #     if "num_cpus" in kwargs:
-    #         kwargs.pop("max_calls", None)
-    #         return old_ray_remote(max_calls=1, *args, **kwargs)
-    #     return old_ray_remote(*args, **kwargs)
-
-    # ray.remote = _ray_remote_replacement
 
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
@@ -114,21 +101,9 @@ class VLLMModel:
             importlib.util.find_spec("auto_gptq") is None
             or importlib.util.find_spec("optimum") is None
         ):
-            # raise NeedsExtraInstalled(extra="quantization")
-            # TEMP: Remove this once `optimum` allows `transformers>=4.40.0`
-            raise InvalidModel(
-                "To evaluate GPTQ models you need to install the `optimum` package. "
-                "Please install this package with `pip install -U optimum` and try "
-                "again."
-            )
+            raise NeedsExtraInstalled(extra="quantization")
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
-            # raise NeedsExtraInstalled(extra="quantization")
-            # TEMP: Remove this once `autoawq` allows `transformers>=4.40.0`
-            raise InvalidModel(
-                "To evaluate AWQ models you need to install the `autoawq` package. "
-                "Please install this package with `pip install -U autoawq` and try "
-                "again."
-            )
+            raise NeedsExtraInstalled(extra="quantization")
 
         # Quantized models don't support bfloat16, so we need to set the dtype to
         # float16 instead

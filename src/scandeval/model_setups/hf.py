@@ -256,8 +256,6 @@ class HFModelSetup:
             model_cache_dir=model_config.model_cache_dir,
         )
 
-        # TEMP: Remove this block once both `optimum` and `autoawq` allow
-        # `transformers>=4.40.0`
         quantization = None
         if hasattr(config, "quantization_config"):
             quantization = config.quantization_config.get("quant_method", None)
@@ -265,21 +263,9 @@ class HFModelSetup:
             importlib.util.find_spec("auto_gptq") is None
             or importlib.util.find_spec("optimum") is None
         ):
-            # raise NeedsExtraInstalled(extra="quantization")
-            # TEMP: Remove this once `optimum` allows `transformers>=4.40.0`
-            raise InvalidModel(
-                "To evaluate GPTQ models you need to install the `optimum` package. "
-                "Please install this package with `pip install -U optimum` and try "
-                "again."
-            )
+            raise NeedsExtraInstalled(extra="quantization")
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
-            # raise NeedsExtraInstalled(extra="quantization")
-            # TEMP: Remove this once `autoawq` allows `transformers>=4.40.0`
-            raise InvalidModel(
-                "To evaluate AWQ models you need to install the `autoawq` package. "
-                "Please install this package with `pip install -U autoawq` and try "
-                "again."
-            )
+            raise NeedsExtraInstalled(extra="quantization")
 
         if self.benchmark_config.load_in_4bit is not None:
             load_in_4bit = self.benchmark_config.load_in_4bit
