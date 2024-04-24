@@ -112,6 +112,7 @@ class VLLMModel:
             raise NeedsExtraInstalled(extra="quantization")
 
         dtype = "auto"
+        logger.info(f"Loading model with dtype {dtype}.")
         if quantization is not None and self.config.torch_dtype != torch.float32:
             logger.info(
                 "You are loading a quantized model with dtype "
