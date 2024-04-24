@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Pin `vllm` to `v0.4.0`, since `v0.4.1` has breaking changes and is causing issues
   with flash attention.
+- Catch vLLM error when prefix caching is set for models with sliding window attention,
+  as this is not supported yet in vLLM.
 
 
 ## [v12.8.0] - 2024-04-23
