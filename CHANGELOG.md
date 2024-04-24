@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Update `optimum` dependency to `>=1.19.1,<2.0.0`, as it is now compatible with
+  `transformers>=4.40.0,<4.41.0`.
+
 ### Fixed
 - Pin `vllm` to `v0.4.0`, since `v0.4.1` has breaking changes and is causing issues
   with flash attention.
