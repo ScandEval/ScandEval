@@ -8,10 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- Updated `vllm` to `>=0.4.1,<0.5.0`, since a breaking change was included in `0.4.1`,
-  regarding the import of `destroy_model_parallel`, causing evaluation of generative
-  models to fail. The import statement has now been updated to fit the new module
-  structure of vLLM.
+- Pin `vllm` to `v0.4.0`, since `v0.4.1` has breaking changes and is causing issues
+  with flash attention.
 
 
 ## [v12.8.0] - 2024-04-23
