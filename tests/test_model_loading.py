@@ -93,10 +93,11 @@ def test_load_non_existing_model(dataset_config, benchmark_config):
 @pytest.mark.skipif(condition=not torch.cuda.is_available(), reason="No GPU available.")
 def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_config):
     """Test loading an AWQ quantised model."""
+    if benchmark_config.device.type != "cuda":
+        pytest.skip("Skipping test because the device is not a GPU.")
     model_config = get_model_config(
         model_id=awq_generative_model_id, benchmark_config=benchmark_config
     )
-    breakpoint()
     load_model(
         model_config=model_config,
         dataset_config=dataset_config,
@@ -107,6 +108,8 @@ def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_confi
 @pytest.mark.skipif(condition=not torch.cuda.is_available(), reason="No GPU available.")
 def test_load_gptq_model(gptq_generative_model_id, dataset_config, benchmark_config):
     """Test loading a GPTQ quantised model."""
+    if benchmark_config.device.type != "cuda":
+        pytest.skip("Skipping test because the device is not a GPU.")
     model_config = get_model_config(
         model_id=gptq_generative_model_id, benchmark_config=benchmark_config
     )
