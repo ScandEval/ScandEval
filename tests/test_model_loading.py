@@ -96,6 +96,7 @@ def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_confi
     model_config = get_model_config(
         model_id=awq_generative_model_id, benchmark_config=benchmark_config
     )
+    breakpoint()
     load_model(
         model_config=model_config,
         dataset_config=dataset_config,

@@ -11,12 +11,7 @@ from shutil import rmtree
 from time import sleep
 from typing import TYPE_CHECKING
 
-import torch
 from pydantic import BaseModel, ConfigDict
-
-from scandeval.config import BenchmarkConfig
-from scandeval.languages import DA
-from scandeval.tasks import SENT
 
 from .benchmark_config_factory import build_benchmark_config
 from .dataset_configs import get_all_dataset_configs
@@ -320,38 +315,6 @@ class Benchmarker:
         self.benchmark_config = build_benchmark_config(
             first_time=True, **self.benchmark_config_default_params.model_dump()
         )
-
-        # TEMP
-        self.benchmark_config = BenchmarkConfig(
-            model_languages=[DA],
-            dataset_languages=[DA],
-            tasks=[SENT],
-            datasets=list(get_all_dataset_configs().keys()),
-            framework=None,
-            batch_size=32,
-            raise_errors=False,
-            cache_dir=".scandeval_cache",
-            evaluate_train=False,
-            token=True,
-            openai_api_key=None,
-            azure_openai_api_key=None,
-            azure_openai_endpoint=None,
-            azure_openai_api_version=None,
-            force=False,
-            progress_bar=False,
-            save_results=True,
-            device=torch.device("cuda"),
-            verbose=False,
-            trust_remote_code=True,
-            load_in_4bit=None,
-            use_flash_attention=False,
-            clear_model_cache=False,
-            only_validation_split=False,
-            few_shot=True,
-            num_iterations=10,
-            run_with_cli=True,
-        )
-        breakpoint()
 
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: dict[str, list[str]] | None = None
