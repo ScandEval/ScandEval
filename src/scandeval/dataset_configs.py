@@ -564,7 +564,7 @@ SCALA_NL_CONFIG = DatasetConfig(
 
 DUTCH_COLA_CONFIG = DatasetConfig(
     name="dutch-cola",
-    pretty_name="a linguistic acceptability dataset for Dutch, inspired by the CoLA dataset",
+    pretty_name="a linguistic acceptability dataset for Dutch, Dutch CoLA, inspired by the original CoLA dataset",
     huggingface_id="BramVanroy/dutch-cola",
     task=LA,
     languages=[NL],
