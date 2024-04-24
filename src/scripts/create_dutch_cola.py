@@ -1,6 +1,6 @@
 """Create the Dutch CoLA test set and upload it to the HF Hub."""
 
-from datasets import Dataset, load_dataset
+from datasets import Dataset, DatasetDict, load_dataset
 from huggingface_hub import HfApi
 from requests import HTTPError
 
@@ -11,8 +11,9 @@ def main() -> None:
     repo_id = "GroNLP/dutch-cola"
 
     # Download the dataset
-    dataset = load_dataset(path=repo_id, token=True, split="test")
-    assert isinstance(dataset, Dataset)
+    dataset = load_dataset(path=repo_id, token=True)
+    del dataset["train"]
+    assert isinstance(dataset, DatasetDict)
 
     dataset = dataset.select_columns(["Sentence", "Acceptability"]).rename_columns({"Sentence": "text", "Acceptability": "label"})
 
