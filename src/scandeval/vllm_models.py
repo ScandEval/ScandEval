@@ -111,15 +111,14 @@ class VLLMModel:
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
             raise NeedsExtraInstalled(extra="quantization")
 
-        # Quantized models don't support bfloat16, so we need to set the dtype to
-        # float16 instead
         dtype = "auto"
-        if quantization is not None and self.config.torch_dtype == torch.bfloat16:
+        if quantization is not None and self.config.torch_dtype != torch.float32:
             logger.info(
-                "You are loading a quantized model with dtype bfloat16, which vLLM "
-                "does not support. Setting dtype to float16 instead."
+                "You are loading a quantized model with dtype "
+                f"{self.config.torch_dtype}, which vLLM does not support. Setting "
+                "dtype to float32 instead."
             )
-            dtype = "float16"
+            dtype = torch.float32
 
         vllm_kwargs = dict(
             model=self.model_config.model_id,
