@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Updated `vllm` to `>=0.4.1,<0.5.0`, since a breaking change was included in `0.4.1`,
+  regarding the import of `destroy_model_parallel`, causing evaluation of generative
+  models to fail. The import statement has now been updated to fit the new module
+  structure of vLLM.
+
+
 ## [v12.8.0] - 2024-04-23
 ### Changed
 - Updated `vllm` to `>=0.4.0,<0.5.0`, which both fixes an issue with multi-gpu

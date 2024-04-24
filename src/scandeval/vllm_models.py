@@ -30,7 +30,7 @@ if importlib.util.find_spec("ray") is not None:
 
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
-    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+    from vllm.distributed.parallel_state import destroy_model_parallel
 
 
 logger = logging.getLogger(__package__)
