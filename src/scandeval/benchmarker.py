@@ -315,6 +315,7 @@ class Benchmarker:
         self.benchmark_config = build_benchmark_config(
             first_time=True, **self.benchmark_config_default_params.model_dump()
         )
+        breakpoint()
 
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: dict[str, list[str]] | None = None
