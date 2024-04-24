@@ -137,7 +137,16 @@ class VLLMModel:
             enable_prefix_caching=True,
         )
 
-        self._model = LLM(**vllm_kwargs)
+        while True:
+            try:
+                self._model = LLM(**vllm_kwargs)
+                break
+            except NotImplementedError as e:
+                if "prefix caching" in str(e):
+                    vllm_kwargs.pop("enable_prefix_caching")
+                    self._model = LLM(**vllm_kwargs)
+                    continue
+                raise e
 
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
