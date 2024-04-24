@@ -112,14 +112,13 @@ class VLLMModel:
             raise NeedsExtraInstalled(extra="quantization")
 
         dtype = "auto"
-        logger.info(f"Loading model with dtype {dtype}.")
-        if quantization is not None and self.config.torch_dtype != torch.float32:
+        if quantization is not None and self.config.torch_dtype != torch.float16:
             logger.info(
                 "You are loading a quantized model with dtype "
                 f"{self.config.torch_dtype}, which vLLM does not support. Setting "
-                "dtype to float32 instead."
+                "dtype to float16 instead."
             )
-            dtype = torch.float32
+            dtype = torch.float16
 
         vllm_kwargs = dict(
             model=self.model_config.model_id,
