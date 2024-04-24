@@ -10,8 +10,8 @@ from scandeval.model_setups.hf import HFModelSetup
 @pytest.mark.parametrize(
     argnames=["test_device", "model_id", "expected"],
     argvalues=[
-        ("cuda", "microsoft/mdeberta-v3-base", torch.float16),
-        ("cuda", "jonfd/electra-small-nordic", torch.float16),
+        ("cuda", "microsoft/mdeberta-v3-base", torch.bfloat16),
+        ("cuda", "jonfd/electra-small-nordic", torch.bfloat16),
         ("cuda", "mistralai/Mistral-7B-v0.1", "auto"),
         ("cuda", "microsoft/phi-2", "auto"),
         ("mps", "microsoft/mdeberta-v3-base", torch.float32),
