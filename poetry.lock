@@ -5958,7 +5958,7 @@ cffi = ["cffi (>=1.11)"]
 
 [extras]
 all = ["auto-gptq", "autoawq", "bert-score", "bert-score", "bitsandbytes", "demjson3", "flax", "gradio", "jax", "jaxlib", "levenshtein", "openai", "optimum", "outlines", "rouge-score", "rouge-score", "vllm"]
-cpu-all = ["auto-gptq", "autoawq", "bert-score", "bert-score", "bitsandbytes", "demjson3", "flax", "gradio", "jax", "jaxlib", "levenshtein", "openai", "optimum", "outlines", "rouge-score", "rouge-score"]
+cpu-all = ["auto-gptq", "autoawq", "bert-score", "bert-score", "demjson3", "flax", "gradio", "jax", "jaxlib", "levenshtein", "openai", "optimum", "outlines", "rouge-score", "rouge-score"]
 generative = ["bert-score", "bitsandbytes", "demjson3", "outlines", "rouge-score", "vllm"]
 human-evaluation = ["gradio", "levenshtein"]
 jax = ["flax", "jax", "jaxlib"]
@@ -5968,4 +5968,4 @@ quantization = ["auto-gptq", "autoawq", "optimum"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "a3e983cfcaa50c0fd33f239acc8d401584f4ba02565dfe71c041bfb5f3d1fa06"
+content-hash = "16b6b0e6895e7bff592c355f6b04619e179b5e69a77bd63fdc16086702cdcf03"
