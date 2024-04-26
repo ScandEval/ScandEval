@@ -140,9 +140,6 @@ cpu_all = [
     "openai",
     "tiktoken",
     "levenshtein",
-    "optimum",
-    "auto-gptq",
-    "autoawq",
     "gradio",
 ]
 
