@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Poetry
-        run: pipx install poetry==1.7.1
+        run: pipx install poetry==1.8.2
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -40,7 +40,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install
+          poetry install --extras cpu_all && poetry run pip install -U "outlines>=0.0.35"
 
       - name: Test with pytest
         run: poetry run pytest
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Poetry
-        run: pipx install poetry
+        run: pipx install poetry==1.8.2
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -68,7 +68,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install --extras all
+          poetry install --extras cpu_all && poetry run pip install -U "outlines>=0.0.35"
 
       - name: Test with pytest
         run: poetry run pytest

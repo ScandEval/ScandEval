@@ -30,7 +30,13 @@ if importlib.util.find_spec("ray") is not None:
 
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
-    from vllm.model_executor.parallel_utils.parallel_state import destroy_model_parallel
+
+    try:
+        from vllm.model_executor.parallel_utils.parallel_state import (
+            destroy_model_parallel,
+        )
+    except ImportError:
+        from vllm.distributed.parallel_state import destroy_model_parallel
 
 
 logger = logging.getLogger(__package__)
@@ -105,15 +111,14 @@ class VLLMModel:
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
             raise NeedsExtraInstalled(extra="quantization")
 
-        # Quantized models don't support bfloat16, so we need to set the dtype to
-        # float16 instead
         dtype = "auto"
-        if quantization is not None and self.config.torch_dtype == torch.bfloat16:
+        if quantization is not None and self.config.torch_dtype != torch.float16:
             logger.info(
-                "You are loading a quantized model with dtype bfloat16, which vLLM "
-                "does not support. Setting dtype to float16 instead."
+                "You are loading a quantized model with dtype "
+                f"{self.config.torch_dtype}, which vLLM does not support. Setting "
+                "dtype to float16 instead."
             )
-            dtype = "float16"
+            dtype = torch.float16
 
         vllm_kwargs = dict(
             model=self.model_config.model_id,
@@ -132,7 +137,16 @@ class VLLMModel:
             enable_prefix_caching=True,
         )
 
-        self._model = LLM(**vllm_kwargs)
+        while True:
+            try:
+                self._model = LLM(**vllm_kwargs)
+                break
+            except NotImplementedError as e:
+                if "prefix caching" in str(e):
+                    vllm_kwargs.pop("enable_prefix_caching")
+                    self._model = LLM(**vllm_kwargs)
+                    continue
+                raise e
 
         self._model._run_engine = MethodType(
             _run_engine_with_fixed_progress_bars, self._model
