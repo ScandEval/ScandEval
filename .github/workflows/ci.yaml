@@ -40,7 +40,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install --extras cpu_all && pip install -U outlines
+          poetry install --extras cpu_all && pip install -U "outlines>=0.0.35"
 
       - name: Test with pytest
         run: poetry run pytest
@@ -68,7 +68,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install --extras cpu_all && pip install -U outlines
+          poetry install --extras cpu_all && pip install -U "outlines>=0.0.35"
 
       - name: Test with pytest
         run: poetry run pytest
