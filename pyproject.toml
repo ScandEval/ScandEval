@@ -127,6 +127,25 @@ all = [
     "autoawq",
     "gradio",
 ]
+cpu_all = [
+    "jax",
+    "jaxlib",
+    "flax",
+    "rouge-score",
+    "bert-score",
+    "demjson3",
+    "outlines",
+    "bitsandbytes",
+    "rouge-score",
+    "bert-score",
+    "openai",
+    "tiktoken",
+    "levenshtein",
+    "optimum",
+    "auto-gptq",
+    "autoawq",
+    "gradio",
+]
 
 [tool.poetry.scripts]
 scandeval = "scandeval.cli:benchmark"

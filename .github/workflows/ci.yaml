@@ -40,7 +40,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install --extras all
+          poetry install --extras cpu_all
 
       - name: Test with pytest
         run: poetry run pytest
@@ -68,7 +68,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install --extras all
+          poetry install --extras cpu_all
 
       - name: Test with pytest
         run: poetry run pytest
