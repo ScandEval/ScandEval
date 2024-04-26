@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.9.0] - 2024-04-26
 ### Changed
 - Update `optimum` dependency to `>=1.19.1,<2.0.0`, as it is now compatible with
   `transformers>=4.40.0,<4.41.0`.
