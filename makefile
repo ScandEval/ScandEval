@@ -91,8 +91,10 @@ setup-git:
 	@poetry run pre-commit install
 
 test:  ## Run tests
-	@$(MAKE) --quiet test-cuda-vllm
-	@$(MAKE) --quiet test-cuda-no-vllm
+	@if [ "$(shell which nvidia-smi)" != "" ]; then \
+		$(MAKE) --quiet test-cuda-vllm; \
+		$(MAKE) --quiet test-cuda-no-vllm; \
+	fi
 	@$(MAKE) --quiet test-cpu
 	@$(MAKE) --quiet update-coverage-badge
 	@date "+%H:%M:%S ⋅ All done!"
