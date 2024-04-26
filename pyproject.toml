@@ -135,7 +135,6 @@ cpu_all = [
     "bert-score",
     "demjson3",
     "outlines",
-    "bitsandbytes",
     "rouge-score",
     "bert-score",
     "openai",
