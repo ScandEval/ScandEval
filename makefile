@@ -64,15 +64,15 @@ install-pipx:
 	fi
 
 install-poetry:
-	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.7.1)" ]; then \
+	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.8.2)" ]; then \
 		python3 -m pip uninstall -y poetry poetry-core poetry-plugin-export; \
-		pipx install --force poetry==1.7.1; \
+		pipx install --force poetry==1.8.2; \
 		echo "Installed Poetry."; \
 	fi
 
 setup-poetry:
 	@if [ "$(shell which nvidia-smi)" = "" ]; then \
-	    poetry env use python3.10 && poetry install --extras jax --extras generative --extras openai --extras human_evaluation; \
+	    poetry env use python3.10 && poetry install --extras cpu_all; \
 	else \
 	    poetry env use python3.10 && poetry install --extras all; \
 	fi
@@ -91,8 +91,10 @@ setup-git:
 	@poetry run pre-commit install
 
 test:  ## Run tests
-	@$(MAKE) --quiet test-cuda-vllm
-	@$(MAKE) --quiet test-cuda-no-vllm
+	@if [ "$(shell which nvidia-smi)" != "" ]; then \
+		$(MAKE) --quiet test-cuda-vllm; \
+		$(MAKE) --quiet test-cuda-no-vllm; \
+	fi
 	@$(MAKE) --quiet test-cpu
 	@$(MAKE) --quiet update-coverage-badge
 	@date "+%H:%M:%S ⋅ All done!"

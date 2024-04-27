@@ -123,13 +123,13 @@ def generative_model_id() -> Generator[str, None, None]:
 @pytest.fixture(scope="session")
 def awq_generative_model_id() -> Generator[str, None, None]:
     """Yields a generative model ID used in tests."""
-    yield "TheBloke/Mistral-7B-v0.1-AWQ"
+    yield "casperhansen/opt-125m-awq"
 
 
 @pytest.fixture(scope="session")
 def gptq_generative_model_id() -> Generator[str, None, None]:
     """Yields a generative model ID used in tests."""
-    yield "TheBloke/Mistral-7B-v0.1-GPTQ"
+    yield "ybelkada/opt-125m-gptq-4bit"
 
 
 @pytest.fixture(scope="session")

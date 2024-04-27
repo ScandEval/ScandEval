@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [v12.9.0] - 2024-04-26
+### Changed
+- Update `optimum` dependency to `>=1.19.1,<2.0.0`, as it is now compatible with
+  `transformers>=4.40.0,<4.41.0`.
+
+### Fixed
+- Pin `vllm` to `v0.4.0`, since `v0.4.1` has breaking changes and is causing issues
+  with flash attention.
+- Catch vLLM error when prefix caching is set for models with sliding window attention,
+  as this is not supported yet in vLLM.
+
+
 ## [v12.8.0] - 2024-04-23
 ### Changed
 - Updated `vllm` to `>=0.4.0,<0.5.0`, which both fixes an issue with multi-gpu

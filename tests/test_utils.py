@@ -82,9 +82,9 @@ def test_module_is_installed(module_name, expected):
         ("meta-llama/Meta-Llama-3-8B", True),
     ],
 )
-def test_should_prompts_be_stripped(model_id, expected):
+def test_should_prompts_be_stripped(model_id, expected, auth):
     """Test that a model ID is a generative model."""
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
     labels = ["positiv", "negativ"]
     strip_prompts = should_prompts_be_stripped(
         labels_to_be_generated=labels, tokenizer=tokenizer
@@ -101,9 +101,9 @@ def test_should_prompts_be_stripped(model_id, expected):
         ("meta-llama/Meta-Llama-3-8B", True),
     ],
 )
-def test_should_prefix_space_be_added_to_labels(model_id, expected):
+def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
     """Test that a model ID is a generative model."""
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
     labels = ["positiv", "negativ"]
     strip_prompts = should_prefix_space_be_added_to_labels(
         labels_to_be_generated=labels, tokenizer=tokenizer
@@ -126,9 +126,9 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected):
         ("norallm/normistral-7b-warm-instruct", [4, 217], "<|im_end|>"),
     ],
 )
-def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string):
+def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string, auth):
     """Test ability to get the chat token IDs of a model."""
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
     end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
     assert end_of_chat_token_ids == expected_token_ids
     if expected_string is not None:
@@ -181,8 +181,8 @@ def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string
         "danskgpt-no-instruct",
     ],
 )
-def test_convert_prompt_to_instruction(prompt, model_id, expected):
+def test_convert_prompt_to_instruction(prompt, model_id, expected, auth):
     """Test that a prompt is correctly converted to an instruction."""
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
     instruction = convert_prompt_to_instruction(prompt=prompt, tokenizer=tokenizer)
     assert instruction == expected
