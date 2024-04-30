@@ -128,7 +128,7 @@ class VLLMModel:
             dtype=dtype,
             enforce_eager=True,
             max_logprobs=10,
-            enable_prefix_caching=True,
+            enable_prefix_caching=False,  # TODO: We will support this in the future
         )
 
         self._model = self._initialise(vllm_kwargs=vllm_kwargs)
@@ -143,21 +143,10 @@ class VLLMModel:
         Returns:
             The initialised vLLM model.
         """
-        breakpoint()
-        while True:
-            try:
-                clear_vllm()
-                model = LLM(**vllm_kwargs)
-            except NotImplementedError as e:
-                if "prefix caching" in str(e):
-                    vllm_kwargs.pop("enable_prefix_caching")
-                    continue
-                raise e
-            else:
-                model._run_engine = MethodType(
-                    _run_engine_with_fixed_progress_bars, model
-                )
-                return model
+        clear_vllm()
+        model = LLM(**vllm_kwargs)
+        model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
+        return model
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""

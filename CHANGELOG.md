@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- Now clears memory properly when re-initialising vLLM models, in the case where prefix
-  caching errors are caught.
+- Disables the prefix caching of vLLMs, as it has not been implemented with sliding
+  window attention yet, causing re-initialisation errors.
 - Updates `vllm` to `>=0.4.1,<0.5.0`, as this fixes an issue with benchmarking
   freezing.
 
