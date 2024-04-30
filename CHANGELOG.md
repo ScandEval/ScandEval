@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- When overriding benchmark configuration parameters in `Benchmarker.benchmark` then
+  these overridden parameters are now correctly used when building datasets.
+
+
 ## [v12.9.1] - 2024-04-30
 ### Fixed
 - Disables the prefix caching of vLLMs, as it has not been implemented with sliding
