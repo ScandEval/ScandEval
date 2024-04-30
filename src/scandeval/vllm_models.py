@@ -79,12 +79,6 @@ class VLLMModel:
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
 
-        # This is required to be able to re-initialize the model, in case we have
-        # already initialized it once
-        destroy_model_parallel()
-        clear_memory()
-        ray.shutdown()
-
         self.max_model_len = 5_000
         potential_max_model_length_config_names = [
             "max_position_embeddings",
@@ -137,29 +131,39 @@ class VLLMModel:
             enable_prefix_caching=True,
         )
 
+        self._model = self._initialise(vllm_kwargs=vllm_kwargs)
+
+    def _initialise(self, vllm_kwargs: dict) -> "LLM":
+        """Initialise the vLLM model.
+
+        Args:
+            vllm_kwargs:
+                The keyword arguments to pass to the vLLM
+
+        Returns:
+            The initialised vLLM model.
+        """
         while True:
             try:
-                self._model = LLM(**vllm_kwargs)
-                break
+                clear_vllm()
+                model = LLM(**vllm_kwargs)
             except NotImplementedError as e:
                 if "prefix caching" in str(e):
                     vllm_kwargs.pop("enable_prefix_caching")
-                    self._model = LLM(**vllm_kwargs)
                     continue
                 raise e
-
-        self._model._run_engine = MethodType(
-            _run_engine_with_fixed_progress_bars, self._model
-        )
+            else:
+                model._run_engine = MethodType(
+                    _run_engine_with_fixed_progress_bars, model
+                )
+                return model
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
-        destroy_model_parallel()
         if hasattr(self, "_model"):
             del self._model
         del self
-        clear_memory()
-        ray.shutdown()
+        clear_vllm()
 
     def generate(
         self,
@@ -396,3 +400,10 @@ def _run_engine_with_fixed_progress_bars(
     outputs = sorted(outputs, key=lambda x: int(x.request_id))
 
     return outputs
+
+
+def clear_vllm() -> None:
+    """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
+    destroy_model_parallel()
+    clear_memory()
+    ray.shutdown()
