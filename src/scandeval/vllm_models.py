@@ -143,6 +143,7 @@ class VLLMModel:
         Returns:
             The initialised vLLM model.
         """
+        breakpoint()
         while True:
             try:
                 clear_vllm()
