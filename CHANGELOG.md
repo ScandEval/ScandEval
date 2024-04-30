@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now clears memory properly when re-initialising vLLM models, in the case where prefix
+  caching errors are caught.
+- Updates `vllm` to `>=0.4.1,<0.5.0`, as this fixes an issue with benchmarking
+  freezing.
+
+
 ## [v12.9.0] - 2024-04-26
 ### Changed
 - Update `optimum` dependency to `>=1.19.1,<2.0.0`, as it is now compatible with
