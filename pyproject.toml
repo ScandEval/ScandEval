@@ -16,7 +16,7 @@ repository = "https://github.com/ScandEval/ScandEval"
 python = ">=3.10,<3.12"
 
 # Core packages
-torch = "~2.1.1"
+torch = "^2.2.1"
 pandas = "^2.2.0"
 numpy = "^1.23.0"
 transformers = "~4.40.0"
@@ -40,7 +40,7 @@ rouge-score = { version = "^0.1.2", optional = true }
 bert-score = { version = "^0.3.13", optional = true }
 demjson3 = { version = "^3.0.6", optional = true }
 bitsandbytes = { markers = "sys_platform != 'darwin' or platform_machine != 'arm64'", version = "^0.43.1", optional = true }
-vllm = { markers = "sys_platform != 'darwin'", version = "0.4.0", optional = true }
+vllm = { markers = "sys_platform != 'darwin'", version = "^0.4.1", optional = true }
 outlines = { version = "^0.0.34", optional = true }
 
 # Needed for loading JAX based encoder models
@@ -61,7 +61,6 @@ autoawq = { version = "0.2.3", optional = true }
 
 # Needed for human evaluation
 gradio = { version = "^4.26.0", optional = true }
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.1.1"
