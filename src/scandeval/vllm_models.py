@@ -143,17 +143,23 @@ class VLLMModel:
         Returns:
             The initialised vLLM model.
         """
-        clear_vllm()
+        self.clear_vllm()
         model = LLM(**vllm_kwargs)
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
         return model
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
+        self.clear_vllm()
+        del self
+
+    def clear_vllm(self) -> None:
+        """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
+        destroy_model_parallel()
+        ray.shutdown()
         if hasattr(self, "_model"):
             del self._model
-        del self
-        clear_vllm()
+        clear_memory()
 
     def generate(
         self,
@@ -390,10 +396,3 @@ def _run_engine_with_fixed_progress_bars(
     outputs = sorted(outputs, key=lambda x: int(x.request_id))
 
     return outputs
-
-
-def clear_vllm() -> None:
-    """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
-    destroy_model_parallel()
-    clear_memory()
-    ray.shutdown()
