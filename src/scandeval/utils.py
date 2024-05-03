@@ -92,6 +92,7 @@ def clear_memory():
         torch.cuda.empty_cache()
     if torch.backends.mps.is_available():
         torch.mps.empty_cache()
+    gc.collect()
 
 
 def enforce_reproducibility(framework: Framework | str, seed: int = 4242):
