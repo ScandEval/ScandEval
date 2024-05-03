@@ -288,19 +288,19 @@ triton = ["triton (==2.0.0)"]
 
 [[package]]
 name = "autoawq"
-version = "0.2.3"
+version = "0.2.5"
 description = "AutoAWQ implements the AWQ algorithm for 4-bit quantization with a 2x speedup during inference."
 optional = true
 python-versions = ">=3.8.0"
 files = [
-    {file = "autoawq-0.2.3-cp310-cp310-manylinux2014_x86_64.whl", hash = "sha256:47fcbd7e1c7e99daf621f20094ace0d2bdc96b6797cd9dae7c9cb43ba13d932a"},
-    {file = "autoawq-0.2.3-cp310-cp310-win_amd64.whl", hash = "sha256:472b76986f5df13f9d1f28974993e6935e496e3639e835fe255c34bbabccab95"},
-    {file = "autoawq-0.2.3-cp311-cp311-manylinux2014_x86_64.whl", hash = "sha256:c53cf876f8d529e392c1e4f0ab4add604c409e229c867938835ad97fdcc3f6d3"},
-    {file = "autoawq-0.2.3-cp311-cp311-win_amd64.whl", hash = "sha256:8dcbfa71cd056b130770fbd838f30c245fe87caa3c88b1c807af1af2d5c5a769"},
-    {file = "autoawq-0.2.3-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:fc16228b234e25cda97ed934971df7ce2acbbe19d3de8c264b522286c0dbffd1"},
-    {file = "autoawq-0.2.3-cp38-cp38-win_amd64.whl", hash = "sha256:03ed5d87cd96a36af3b0a596bdc00656aa7dc7341d55ef177843ac429458b1af"},
-    {file = "autoawq-0.2.3-cp39-cp39-manylinux2014_x86_64.whl", hash = "sha256:db886661643c14f41603e05de0b63b763d63f86d47f3f9878dbcff8f422234d9"},
-    {file = "autoawq-0.2.3-cp39-cp39-win_amd64.whl", hash = "sha256:8376b475383cbe45b8598ac98d1259a315431d188bad1b9ee2c51c37abbf038d"},
+    {file = "autoawq-0.2.5-cp310-cp310-manylinux2014_x86_64.whl", hash = "sha256:6cddf62e44d3fc0c691a0d12056451ed5fd48c533454b22563c864504b30ce36"},
+    {file = "autoawq-0.2.5-cp310-cp310-win_amd64.whl", hash = "sha256:1bec38e2c18a462566e5207dc6ec7d701ed655bcb1dc68e53f8a8916f7559991"},
+    {file = "autoawq-0.2.5-cp311-cp311-manylinux2014_x86_64.whl", hash = "sha256:2bc7289ede22a638911031e768f7c4549cc89e0165bd828167d553e5f95e1102"},
+    {file = "autoawq-0.2.5-cp311-cp311-win_amd64.whl", hash = "sha256:3aa640cf1c869ed99027086c1c292a1bda8c088608890abfd9bc8dc9b3187381"},
+    {file = "autoawq-0.2.5-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:80cdc6ab6eb3d9e461ae4dda7b5f74a8b3c79f6712162866a5d96e7d582e107d"},
+    {file = "autoawq-0.2.5-cp38-cp38-win_amd64.whl", hash = "sha256:e1a0757e128e8ce63f9fda2d4bb3d43bda06ed4de6b93653e74a87526b35b207"},
+    {file = "autoawq-0.2.5-cp39-cp39-manylinux2014_x86_64.whl", hash = "sha256:c280d4244bc0b48c09c3cd361d30788c2afca38b3ab274fe3b86aecfa1484760"},
+    {file = "autoawq-0.2.5-cp39-cp39-win_amd64.whl", hash = "sha256:ed69a39f76127d40c7249d7a9751b0d211198c2e1f6bd3e80faacc823d01c9d2"},
 ]
 
 [package.dependencies]
@@ -315,7 +315,7 @@ zstandard = "*"
 
 [package.extras]
 dev = ["black", "griffe-typingdoc", "mkdocs-material", "mkdocstrings-python"]
-eval = ["evaluate", "lm-eval (>=0.4.0)", "protobuf", "scipy", "tabulate"]
+eval = ["evaluate", "lm-eval (==0.4.1)", "protobuf", "scipy", "tabulate"]
 
 [[package]]
 name = "autoawq-kernels"
@@ -6005,4 +6005,4 @@ quantization = ["auto-gptq", "autoawq", "optimum"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "d97132a183a161d562e5161423ee2a0f76dfbff0758c196c39f980556a43df11"
+content-hash = "7cfa1a903bae7a93b7b2260c407c465af4ee63f83c81f5f6533993ff7a529824"
