@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Update `autoawq` to `>=0.2.5,<0.3.0`, as it now doesn't have a dependency clash with
+  `transformers`.
+
 ### Fixed
 - When overriding benchmark configuration parameters in `Benchmarker.benchmark` then
   these overridden parameters are now correctly used when building datasets.
