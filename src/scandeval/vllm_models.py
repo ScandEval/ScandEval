@@ -155,7 +155,6 @@ class VLLMModel:
 
     def clear_vllm(self) -> None:
         """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
-        breakpoint()
         destroy_model_parallel()
         ray.shutdown()
         if hasattr(self, "_model"):
