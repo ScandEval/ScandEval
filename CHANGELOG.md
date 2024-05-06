@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update `autoawq` to `>=0.2.5,<0.3.0`, as it now doesn't have a dependency clash with
   `transformers`.
+- Update `vllm` to `>=0.4.2,<0.5.0`, to support new models (such as Phi-3).
+- Update `torch` to `>=2.3.0,<3.0.0`, as this is required by `vllm`.
 
 ### Fixed
 - When overriding benchmark configuration parameters in `Benchmarker.benchmark` then
