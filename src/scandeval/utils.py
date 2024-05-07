@@ -169,6 +169,7 @@ def block_terminal_output():
     logging.getLogger("openai").setLevel(logging.CRITICAL)
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.CRITICAL)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.engine.llm_engine").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.core.scheduler").setLevel(logging.CRITICAL)
