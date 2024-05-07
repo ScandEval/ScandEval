@@ -311,7 +311,6 @@ class HFModelSetup:
                 model = VLLMModel(
                     model_config=model_config,
                     hf_model_config=config,
-                    dataset_config=dataset_config,
                     model_cache_dir=model_config.model_cache_dir,
                     trust_remote_code=self.benchmark_config.trust_remote_code,
                 )
@@ -474,7 +473,7 @@ class HFModelSetup:
 
         if use_vllm:
             model.set_tokenizer(tokenizer=tokenizer)
-            model.build_logits_processors()
+            model.build_logits_processors(dataset_config=dataset_config)
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,
