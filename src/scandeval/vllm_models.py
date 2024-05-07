@@ -15,7 +15,7 @@ from transformers.utils import ModelOutput
 from .exceptions import NeedsExtraInstalled
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
-from .utils import block_terminal_output, clear_memory, get_end_of_chat_token_ids
+from .utils import clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -29,7 +29,6 @@ if importlib.util.find_spec("ray") is not None:
     import ray
 
 if importlib.util.find_spec("vllm") is not None:
-    block_terminal_output()
     from vllm import LLM, SamplingParams
 
     try:
