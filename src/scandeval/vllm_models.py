@@ -124,7 +124,9 @@ class VLLMModel:
             dtype=dtype,
             enforce_eager=True,
             max_logprobs=10,
-            enable_prefix_caching=False,  # TODO: We will support this in the future
+            # TEMP: Prefix caching isn't supported with sliding window in vLLM yet, so
+            # we disable it for now
+            enable_prefix_caching=not hasattr(self.config, "sliding_window"),
         )
 
         self._model = self._initialise(vllm_kwargs=vllm_kwargs)
