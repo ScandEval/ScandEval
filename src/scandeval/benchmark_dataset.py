@@ -18,6 +18,8 @@ from tqdm.auto import tqdm
 from transformers import Trainer
 from transformers.modeling_utils import PreTrainedModel
 
+from scandeval.vllm_models import VLLMModel
+
 from .exceptions import InvalidBenchmark
 from .finetuning import finetune
 from .generation import generate
@@ -146,6 +148,11 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
+
+        # For vLLM models we need to re-build the logits processors to ensure that the
+        # structured generation is only used for NER tasks
+        elif isinstance(model, VLLMModel):
+            model.build_logits_processors(dataset_config=self.dataset_config)
 
         benchmarking_generative_model = model_is_generative(model=model)
 

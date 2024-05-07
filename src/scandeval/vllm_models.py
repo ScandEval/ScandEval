@@ -49,7 +49,6 @@ class VLLMModel:
         self,
         model_config: "ModelConfig",
         hf_model_config: "PretrainedConfig",
-        dataset_config: "DatasetConfig",
         model_cache_dir: "str | Path",
         trust_remote_code: bool,
         tokenizer: "PreTrainedTokenizerBase | None" = None,
@@ -61,8 +60,6 @@ class VLLMModel:
                 A model configuration.
             hf_model_config:
                 A Hugging Face model configuration.
-            dataset_config:
-                A dataset configuration.
             model_cache_dir:
                 The directory to cache the model in.
             trust_remote_code:
@@ -73,7 +70,6 @@ class VLLMModel:
         """
         self.model_config = model_config
         self.config = hf_model_config
-        self.dataset_config = dataset_config
         self.model_cache_dir = model_cache_dir
         self.trust_remote_code = trust_remote_code
         self.device = torch.device("cuda")
@@ -317,10 +313,14 @@ class VLLMModel:
             inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
 
-    def build_logits_processors(self) -> None:
+    def build_logits_processors(self, dataset_config: DatasetConfig) -> None:
         """Return the logits processors to use for structured generation.
 
         This requires the model and tokenizer to be set.
+
+        Args:
+            dataset_config:
+                The dataset configuration to use for building the logits processors.
 
         Raises:
             ValueError:
@@ -331,8 +331,8 @@ class VLLMModel:
 
         logits_processors = list()
 
-        if self.dataset_config.task == NER:
-            ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
+        if dataset_config.task == NER:
+            ner_tag_names = list(dataset_config.prompt_label_mapping.values())
             ner_logits_processors = get_ner_logits_processors(
                 ner_tag_names=ner_tag_names, llm=self._model
             )

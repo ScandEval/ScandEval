@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - When overriding benchmark configuration parameters in `Benchmarker.benchmark` then
   these overridden parameters are now correctly used when building datasets.
+- When a generative model was benchmarked on a NER task followed by another task, the
+  structured generation wasn't set up correctly, as we're not re-initialising the model
+  since v12.8.0. We now ensure that the logits processors are re-built for every
+  dataset.
 
 
 ## [v12.9.1] - 2024-04-30
