@@ -313,7 +313,7 @@ class VLLMModel:
             inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
 
-    def build_logits_processors(self, dataset_config: DatasetConfig) -> None:
+    def build_logits_processors(self, dataset_config: "DatasetConfig") -> None:
         """Return the logits processors to use for structured generation.
 
         This requires the model and tokenizer to be set.
