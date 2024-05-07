@@ -15,7 +15,7 @@ from transformers.utils import ModelOutput
 from .exceptions import NeedsExtraInstalled
 from .structured_generation_utils import get_ner_logits_processors
 from .tasks import NER
-from .utils import clear_memory, get_end_of_chat_token_ids
+from .utils import block_terminal_output, clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -127,6 +127,7 @@ class VLLMModel:
             enable_prefix_caching=False,  # TODO: We will support this in the future
         )
 
+        block_terminal_output()
         self._model = self._initialise(vllm_kwargs=vllm_kwargs)
 
     def _initialise(self, vllm_kwargs: dict) -> "LLM":
