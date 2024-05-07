@@ -179,6 +179,7 @@ def block_terminal_output():
 
     # This suppresses vLLM logging
     os.environ["LOG_LEVEL"] = "CRITICAL"
+    os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
 
     if importlib.util.find_spec("ray") is not None:
         ray._private.worker._worker_logs_enabled = False
