@@ -12,8 +12,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `transformers`.
 - Update `vllm` to `>=0.4.2,<0.5.0`, to support new models (such as Phi-3).
 - Update `torch` to `>=2.3.0,<3.0.0`, as this is required by `vllm`.
-- Enable prefix caching if the `sliding_window` attribute of the Hugging Face model
-  config has not been set (since this combination hasn't been implemented in vLLM yet).
 
 ### Fixed
 - When overriding benchmark configuration parameters in `Benchmarker.benchmark` then
