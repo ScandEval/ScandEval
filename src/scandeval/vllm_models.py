@@ -119,12 +119,12 @@ class VLLMModel:
             revision=self.model_config.revision,
             seed=4242,
             tensor_parallel_size=torch.cuda.device_count(),
-            # disable_custom_all_reduce=True,
+            disable_custom_all_reduce=True,
             quantization=quantization,
             dtype=dtype,
-            # enforce_eager=True,
+            enforce_eager=True,
             max_logprobs=10,
-            enable_prefix_caching=False,  # TODO: We will support this in the future
+            enable_prefix_caching=True,  # TODO: We will support this in the future
         )
 
         self._model = self._initialise(vllm_kwargs=vllm_kwargs)
