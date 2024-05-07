@@ -394,6 +394,9 @@ def _run_engine_with_fixed_progress_bars(
 
 def clear_vllm() -> None:
     """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
-    destroy_model_parallel()
+    try:
+        destroy_model_parallel()
+    except ImportError:
+        pass
     clear_memory()
     ray.shutdown()
