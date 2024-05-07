@@ -29,6 +29,7 @@ if importlib.util.find_spec("ray") is not None:
     import ray
 
 if importlib.util.find_spec("vllm") is not None:
+    block_terminal_output()
     from vllm import LLM, SamplingParams
 
     try:
@@ -127,7 +128,6 @@ class VLLMModel:
             enable_prefix_caching=False,  # TODO: We will support this in the future
         )
 
-        block_terminal_output()
         self._model = self._initialise(vllm_kwargs=vllm_kwargs)
 
     def _initialise(self, vllm_kwargs: dict) -> "LLM":
