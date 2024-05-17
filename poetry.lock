@@ -6054,15 +6054,15 @@ cffi = {version = ">=1.11", markers = "platform_python_implementation == \"PyPy\
 cffi = ["cffi (>=1.11)"]
 
 [extras]
-all = ["auto-gptq", "autoawq", "bert-score", "bert-score", "bitsandbytes", "demjson3", "flax", "gradio", "jax", "jaxlib", "levenshtein", "openai", "optimum", "outlines", "rouge-score", "rouge-score", "vllm"]
-cpu-all = ["bert-score", "bert-score", "demjson3", "flax", "gradio", "jax", "jaxlib", "levenshtein", "openai", "outlines", "rouge-score", "rouge-score"]
+all = ["auto-gptq", "autoawq", "bert-score", "bitsandbytes", "demjson3", "flax", "gradio", "jax", "jaxlib", "levenshtein", "openai", "optimum", "outlines", "rouge-score", "tiktoken", "vllm"]
+cpu-all = ["bert-score", "demjson3", "flax", "gradio", "jax", "jaxlib", "levenshtein", "openai", "outlines", "rouge-score", "tiktoken"]
 generative = ["bert-score", "bitsandbytes", "demjson3", "outlines", "rouge-score", "vllm"]
 human-evaluation = ["gradio", "levenshtein"]
 jax = ["flax", "jax", "jaxlib"]
-openai = ["bert-score", "bitsandbytes", "demjson3", "levenshtein", "openai", "outlines", "rouge-score", "vllm"]
+openai = ["bert-score", "levenshtein", "openai", "rouge-score", "tiktoken"]
 quantization = ["auto-gptq", "autoawq", "optimum"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "8350207d9583d16071bb7d96831a263f2666f7fca5a623bc3f705be57bab01bd"
+content-hash = "ab51bbeb52af557c628f79baddefdb5a52b936147776947f03900013a53743da"

@@ -50,6 +50,7 @@ flax = { version = "^0.8.1", optional = true }
 
 # Needed for evaluating OpenAI models
 openai = { version = "^1.11.1", optional = true }
+tiktoken = {version = "^0.6.0", optional = true}
 levenshtein = { version = "^0.24.0", optional = true }  # This is also used for human evaluation
 
 # Needed for quantised models
@@ -85,10 +86,6 @@ generative = [
     "bert-score",
 ]
 openai = [
-    "demjson3",
-    "outlines",
-    "bitsandbytes",
-    "vllm",
     "rouge-score",
     "bert-score",
     "openai",
@@ -114,8 +111,6 @@ all = [
     "outlines",
     "bitsandbytes",
     "vllm",
-    "rouge-score",
-    "bert-score",
     "openai",
     "tiktoken",
     "levenshtein",
@@ -132,8 +127,6 @@ cpu_all = [
     "bert-score",
     "demjson3",
     "outlines",
-    "rouge-score",
-    "bert-score",
     "openai",
     "tiktoken",
     "levenshtein",
