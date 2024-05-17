@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now recognises the metadata for the new GPT-4o models correctly.
+
+
 ## [v12.10.0] - 2024-05-08
 ### Changed
 - Update `autoawq` to `>=0.2.5,<0.3.0`, as it now doesn't have a dependency clash with
