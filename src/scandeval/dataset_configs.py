@@ -62,7 +62,7 @@ SWEREC_CONFIG = DatasetConfig(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 ANGRY_TWEETS_CONFIG = DatasetConfig(
@@ -79,7 +79,7 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 NOREC_CONFIG = DatasetConfig(
@@ -96,7 +96,7 @@ NOREC_CONFIG = DatasetConfig(
         positive="positiv", neutral="nøytral", negative="negativ"
     ),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 # ISREC_CONFIG = DatasetConfig(
@@ -112,7 +112,7 @@ NOREC_CONFIG = DatasetConfig(
 #         positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
 #     ),
 #     num_few_shot_examples=12,
-#     max_generated_tokens=1,
+#     max_generated_tokens=2,
 # )
 
 # FOREC_CONFIG = DatasetConfig(
@@ -128,7 +128,7 @@ NOREC_CONFIG = DatasetConfig(
 #         positive="positivur", neutral="neutralur", negative="negativur"
 #     ),
 #     num_few_shot_examples=12,
-#     max_generated_tokens=1,
+#     max_generated_tokens=2,
 # )
 
 SB10K_CONFIG = DatasetConfig(
@@ -145,7 +145,7 @@ SB10K_CONFIG = DatasetConfig(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 DUTCH_SOCIAL_CONFIG = DatasetConfig(
@@ -162,7 +162,7 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
         positive="positief", neutral="neutraal", negative="negatief"
     ),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SST5_CONFIG = DatasetConfig(
@@ -179,7 +179,7 @@ SST5_CONFIG = DatasetConfig(
         positive="positive", neutral="neutral", negative="negative"
     ),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 # TODO: Icelandic Sentiment Classification
@@ -467,7 +467,7 @@ SCALA_SV_CONFIG = DatasetConfig(
     prompt_template="Mening: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SCALA_DA_CONFIG = DatasetConfig(
@@ -480,7 +480,7 @@ SCALA_DA_CONFIG = DatasetConfig(
     prompt_template="Sætning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SCALA_NB_CONFIG = DatasetConfig(
@@ -493,7 +493,7 @@ SCALA_NB_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SCALA_NN_CONFIG = DatasetConfig(
@@ -506,7 +506,7 @@ SCALA_NN_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SCALA_IS_CONFIG = DatasetConfig(
@@ -519,7 +519,7 @@ SCALA_IS_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 
@@ -533,7 +533,7 @@ SCALA_FO_CONFIG = DatasetConfig(
     prompt_template="Setningur: {text}\nMállæruliga rættur: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SCALA_DE_CONFIG = DatasetConfig(
@@ -546,7 +546,7 @@ SCALA_DE_CONFIG = DatasetConfig(
     prompt_template="Satz: {text}\nGrammatikalisch richtig: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nein"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SCALA_NL_CONFIG = DatasetConfig(
@@ -559,7 +559,7 @@ SCALA_NL_CONFIG = DatasetConfig(
     prompt_template="Zin: {text}\nGrammaticaal correct: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nee"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 SCALA_EN_CONFIG = DatasetConfig(
@@ -573,7 +573,7 @@ SCALA_EN_CONFIG = DatasetConfig(
     prompt_template="Sentence: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(correct="yes", incorrect="no"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 
@@ -702,7 +702,7 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     languages=[DA],
     prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
     prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
-    num_few_shot_examples=1,
+    num_few_shot_examples=2,
     max_generated_tokens=256,
 )
 
@@ -715,7 +715,7 @@ MLSUM_CONFIG = DatasetConfig(
     prompt_prefix="Im Folgenden finden Sie Nachrichtenartikel mit den dazugehörigen "
     "Zusammenfassungen.",
     prompt_template="Nachrichtenartikel: {text}\nZusammenfassung: {target_text}",
-    num_few_shot_examples=1,
+    num_few_shot_examples=2,
     max_generated_tokens=256,
 )
 
@@ -728,7 +728,7 @@ RRN_CONFIG = DatasetConfig(
     languages=[IS],
     prompt_prefix="Eftirfarandi eru fréttagreinar með tilheyrandi samantektum.",
     prompt_template="Fréttagrein: {text}\nSamantekt: {target_text}",
-    num_few_shot_examples=1,
+    num_few_shot_examples=2,
     max_generated_tokens=256,
 )
 
@@ -741,7 +741,7 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     languages=[NB, NN, NO],
     prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
     prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
-    num_few_shot_examples=1,
+    num_few_shot_examples=2,
     max_generated_tokens=256,
 )
 
@@ -754,7 +754,7 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     languages=[NL],
     prompt_prefix="Hieronder volgen artikelen met bijbehorende samenvattingen.",
     prompt_template="Artikel: {text}\nSamenvatting: {target_text}",
-    num_few_shot_examples=1,
+    num_few_shot_examples=2,
     max_generated_tokens=256,
 )
 
@@ -766,7 +766,7 @@ SWEDN_CONFIG = DatasetConfig(
     languages=[SV],
     prompt_prefix="Nedan följer artiklar med tillhörande sammanfattningar.",
     prompt_template="Artikel: {text}\nSammanfattning: {target_text}",
-    num_few_shot_examples=1,
+    num_few_shot_examples=2,
     max_generated_tokens=256,
 )
 
@@ -779,7 +779,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     languages=[EN],
     prompt_prefix="The following are articles with accompanying summaries.",
     prompt_template="News article: {text}\nSummary: {target_text}",
-    num_few_shot_examples=1,
+    num_few_shot_examples=2,
     max_generated_tokens=256,
 )
 
@@ -799,7 +799,7 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
@@ -812,7 +812,7 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 MMLU_NO_CONFIG = DatasetConfig(
@@ -826,7 +826,7 @@ MMLU_NO_CONFIG = DatasetConfig(
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 MMLU_SV_CONFIG = DatasetConfig(
@@ -840,7 +840,7 @@ MMLU_SV_CONFIG = DatasetConfig(
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 MMLU_IS_CONFIG = DatasetConfig(
@@ -854,7 +854,7 @@ MMLU_IS_CONFIG = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 MMLU_DE_CONFIG = DatasetConfig(
@@ -868,7 +868,7 @@ MMLU_DE_CONFIG = DatasetConfig(
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 MMLU_NL_CONFIG = DatasetConfig(
@@ -882,7 +882,7 @@ MMLU_NL_CONFIG = DatasetConfig(
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 MMLU_CONFIG = DatasetConfig(
@@ -895,7 +895,7 @@ MMLU_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 MMLU_DA_CONFIG = DatasetConfig(
@@ -909,7 +909,7 @@ MMLU_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -924,7 +924,7 @@ ARC_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -939,7 +939,7 @@ ARC_NO_CONFIG = DatasetConfig(
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -954,7 +954,7 @@ ARC_SV_CONFIG = DatasetConfig(
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -969,7 +969,7 @@ ARC_IS_CONFIG = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -984,7 +984,7 @@ ARC_DE_CONFIG = DatasetConfig(
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -999,7 +999,7 @@ ARC_NL_CONFIG = DatasetConfig(
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -1013,7 +1013,7 @@ ARC_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -1033,7 +1033,7 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 HELLASWAG_NO_CONFIG = DatasetConfig(
@@ -1047,7 +1047,7 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 HELLASWAG_SV_CONFIG = DatasetConfig(
@@ -1061,7 +1061,7 @@ HELLASWAG_SV_CONFIG = DatasetConfig(
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 HELLASWAG_IS_CONFIG = DatasetConfig(
@@ -1075,7 +1075,7 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
     unofficial=True,
 )
 
@@ -1090,7 +1090,7 @@ WINOGRANDE_IS = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 HELLASWAG_DE_CONFIG = DatasetConfig(
@@ -1104,7 +1104,7 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 HELLASWAG_NL_CONFIG = DatasetConfig(
@@ -1118,7 +1118,7 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 HELLASWAG_CONFIG = DatasetConfig(
@@ -1132,7 +1132,7 @@ HELLASWAG_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=2,
 )
 
 # TODO: Faroese common sense reasoning
