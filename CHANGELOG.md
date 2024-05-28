@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.10.1] - 2024-05-28
 ### Fixed
 - Now recognises the metadata for the new GPT-4o models correctly. Currently there is a
   version clash between `vllm` and `tiktoken`, meaning that one needs to manually
