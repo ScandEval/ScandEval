@@ -473,7 +473,6 @@ class HFModelSetup:
 
         if use_vllm:
             model.set_tokenizer(tokenizer=tokenizer)
-            model.build_logits_processors(dataset_config=dataset_config)
 
         model, tokenizer = align_model_and_tokenizer(
             model=model,

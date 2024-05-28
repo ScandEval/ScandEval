@@ -13,8 +13,6 @@ from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
 from .exceptions import NeedsExtraInstalled
-from .structured_generation_utils import get_ner_logits_processors
-from .tasks import NER
 from .utils import clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
@@ -23,7 +21,7 @@ if TYPE_CHECKING:
     from transformers import PretrainedConfig, PreTrainedTokenizerBase
     from vllm import LLM, RequestOutput
 
-    from .config import DatasetConfig, ModelConfig
+    from .config import ModelConfig
 
 if importlib.util.find_spec("ray") is not None:
     import ray
@@ -223,7 +221,7 @@ class VLLMModel:
             stop=stop_tokens,
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            logits_processors=self.logits_processors,
+            logits_processors=generation_kwargs.get("logits_processors"),
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which
@@ -314,33 +312,6 @@ class VLLMModel:
         return self.generate(
             inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
-
-    def build_logits_processors(self, dataset_config: "DatasetConfig") -> None:
-        """Return the logits processors to use for structured generation.
-
-        This requires the model and tokenizer to be set.
-
-        Args:
-            dataset_config:
-                The dataset configuration to use for building the logits processors.
-
-        Raises:
-            ValueError:
-                If the model or tokenizer is not set.
-        """
-        if self.tokenizer is None:
-            raise ValueError("Tokenizer must be set to build logits processors.")
-
-        logits_processors = list()
-
-        if dataset_config.task == NER:
-            ner_tag_names = list(dataset_config.prompt_label_mapping.values())
-            ner_logits_processors = get_ner_logits_processors(
-                ner_tag_names=ner_tag_names, llm=self._model
-            )
-            logits_processors.extend(ner_logits_processors)
-
-        self.logits_processors = logits_processors
 
     def set_tokenizer(self, tokenizer: "PreTrainedTokenizerBase") -> None:
         """Set the tokenizer to use for generation.

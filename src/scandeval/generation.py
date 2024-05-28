@@ -26,7 +26,10 @@ from .model_cache import (
     split_dataset_into_cached_and_non_cached,
 )
 from .openai_models import OpenAIModel
-from .structured_generation_utils import get_ner_prefix_allowed_tokens_fn
+from .structured_generation_utils import (
+    get_ner_logits_processors,
+    get_ner_prefix_allowed_tokens_fn,
+)
 from .tasks import NER
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_end_of_chat_token_ids
 from .vllm_models import VLLMModel
@@ -463,26 +466,24 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
-        use_structured_generation = (
-            dataset_config == NER
-            and isinstance(tokenizer, PreTrainedTokenizerBase)
-            and not hasattr(sys, "_called_from_test")
-        )
-
-        if use_structured_generation:
-            assert isinstance(tokenizer, PreTrainedTokenizerBase)
+        prefix_allowed_tokens_fn = None
+        logits_processors = None
+        if dataset_config == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
+            ner_tag_names = list(dataset_config.prompt_label_mapping.values())
             prefix_allowed_tokens_fn = get_ner_prefix_allowed_tokens_fn(
-                ner_tag_names=list(dataset_config.prompt_label_mapping.values()),
-                tokenizer=tokenizer,
+                ner_tag_names=ner_tag_names, tokenizer=tokenizer
             )
-        else:
-            prefix_allowed_tokens_fn = None
+            if isinstance(model, VLLMModel):
+                logits_processors = get_ner_logits_processors(
+                    ner_tag_names=ner_tag_names, llm=model
+                )
 
         model_output = model.generate(
             inputs=inputs,
             generation_config=generation_config,
             stopping_criteria=StoppingCriteriaList([stopping_criteria]),
             prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
+            logits_processors=logits_processors,
         )
         assert isinstance(model_output, ModelOutput)
 

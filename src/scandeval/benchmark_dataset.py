@@ -33,7 +33,6 @@ from .utils import (
     model_is_generative,
     should_prompts_be_stripped,
 )
-from .vllm_models import VLLMModel
 
 if TYPE_CHECKING:
     from datasets.arrow_dataset import Dataset
@@ -147,11 +146,6 @@ class BenchmarkDataset(ABC):
                 dataset_config=self.dataset_config,
                 benchmark_config=self.benchmark_config,
             )
-
-        # For vLLM models we need to re-build the logits processors to ensure that the
-        # structured generation is only used for NER tasks
-        elif isinstance(model, VLLMModel):
-            model.build_logits_processors(dataset_config=self.dataset_config)
 
         benchmarking_generative_model = model_is_generative(model=model)
 
