@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   version clash between `vllm` and `tiktoken`, meaning that one needs to manually
   upgrade `tiktoken` to evaluate GPT-4o - an informative error message notes this to
   the user now in that case.
+- Number of generated tokens for sequence classification tasks has been changed back to
+  1 (from 3). This makes no difference to open source models, as we only use the
+  logprobs from the first token anyway, but this makes a big difference on multiple
+  choice QA tasks for OpenAI models, as some of them might output things like "a is
+  correct" rather than simply "a". Since we're using word edit distance to the labels,
+  this might accidentally cause the final prediction to be different from "a".
 
 
 ## [v12.10.0] - 2024-05-08
