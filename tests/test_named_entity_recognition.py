@@ -12,6 +12,7 @@ from scandeval.languages import DA
 from scandeval.named_entity_recognition import NamedEntityRecognition
 from scandeval.tasks import NER
 from scandeval.utils import GENERATIVE_DATASET_TASKS
+from scandeval.vllm_models import clear_vllm
 
 
 @pytest.fixture(
@@ -52,5 +53,7 @@ def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
     """Test that decoder models can be benchmarked on named entity recognition."""
     with does_not_raise():
         _, _, model, _ = benchmark_dataset.benchmark(generative_model_id)
-        breakpoint()
+        del model._model
         del model
+        breakpoint()
+        clear_vllm()
