@@ -24,18 +24,18 @@ from scandeval.model_setups.hf import HFModelSetup
         ("cpu", "microsoft/phi-2", torch.float32),
     ],
     ids=[
-        "cuda: mdeberta-v3-base",
-        "cuda: electra-small-nordic",
-        "cuda: mistral-7b",
-        "cuda: phi-2",
-        "mps: mdeberta-v3-base",
-        "mps: electra-small-nordic",
-        "mps: mistral-7b",
-        "mps: phi-2",
-        "cpu: mdeberta-v3-base",
-        "cpu: electra-small-nordic",
-        "cpu: mistral-7b",
-        "cpu: phi-2",
+        "cuda:mdeberta-v3-base",
+        "cuda:electra-small-nordic",
+        "cuda:mistral-7b",
+        "cuda:phi-2",
+        "mps:mdeberta-v3-base",
+        "mps:electra-small-nordic",
+        "mps:mistral-7b",
+        "mps:phi-2",
+        "cpu:mdeberta-v3-base",
+        "cpu:electra-small-nordic",
+        "cpu:mistral-7b",
+        "cpu:phi-2",
     ],
 )
 def test_torch_dtype_is_set_correctly(
@@ -53,4 +53,9 @@ def test_torch_dtype_is_set_correctly(
         revision="main",
         model_cache_dir=benchmark_config_copy.cache_dir,
     )
+
+    bf16_available = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    if test_device == "cuda" and expected == torch.float16 and bf16_available:
+        expected = torch.bfloat16
+
     assert model_setup._get_torch_dtype(config=hf_model_config) == expected
