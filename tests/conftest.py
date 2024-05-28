@@ -130,16 +130,20 @@ def generative_model_id() -> Generator[str, None, None]:
 @pytest.fixture(scope="session")
 def generative_model_and_tokenizer(
     benchmark_config, generative_model_id
-) -> Generator[tuple[GenerativeModel, Tokenizer], None, None]:
+) -> Generator[tuple[GenerativeModel | None, Tokenizer | None], None, None]:
     """Yields a generative model ID used in tests."""
-    model_config = get_model_config(
-        model_id=generative_model_id, benchmark_config=benchmark_config
-    )
-    model, tokenizer = load_model(
-        model_config=model_config,
-        dataset_config=ANGRY_TWEETS_CONFIG,
-        benchmark_config=benchmark_config,
-    )
+    if os.getenv("USE_VLLM", "0") == "1":
+        model_config = get_model_config(
+            model_id=generative_model_id, benchmark_config=benchmark_config
+        )
+        model, tokenizer = load_model(
+            model_config=model_config,
+            dataset_config=ANGRY_TWEETS_CONFIG,
+            benchmark_config=benchmark_config,
+        )
+    else:
+        model = None
+        tokenizer = None
     yield model, tokenizer
 
 
