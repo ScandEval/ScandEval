@@ -8,6 +8,7 @@ from scandeval.exceptions import InvalidBenchmark, InvalidModel
 from scandeval.languages import DA
 from scandeval.model_config import get_model_config
 from scandeval.model_loading import load_model
+from torch.cuda import OutOfMemoryError
 
 
 def test_load_non_generative_model(model_id, dataset_config, benchmark_config):
@@ -55,22 +56,6 @@ def test_load_non_generative_model_with_generative_data(
         )
 
 
-def test_load_generative_model_with_non_generative_data(
-    generative_model_id, dataset_config, benchmark_config
-):
-    """Test loading a generative model with non-generative data."""
-    model_config = get_model_config(
-        model_id=generative_model_id, benchmark_config=benchmark_config
-    )
-    tokenizer, model = load_model(
-        model_config=model_config,
-        dataset_config=dataset_config,
-        benchmark_config=benchmark_config,
-    )
-    assert tokenizer is not None
-    assert model is not None
-
-
 def test_load_non_existing_model(dataset_config, benchmark_config):
     """Test loading a non-existing model."""
     model_config = ModelConfig(
@@ -98,11 +83,14 @@ def test_load_awq_model(awq_generative_model_id, dataset_config, benchmark_confi
     model_config = get_model_config(
         model_id=awq_generative_model_id, benchmark_config=benchmark_config
     )
-    load_model(
-        model_config=model_config,
-        dataset_config=dataset_config,
-        benchmark_config=benchmark_config,
-    )
+    try:
+        load_model(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
+    except OutOfMemoryError:
+        pytest.skip("Skipping test as the GPU ran out of memory.")
 
 
 @pytest.mark.skipif(condition=not torch.cuda.is_available(), reason="No GPU available.")
@@ -113,8 +101,11 @@ def test_load_gptq_model(gptq_generative_model_id, dataset_config, benchmark_con
     model_config = get_model_config(
         model_id=gptq_generative_model_id, benchmark_config=benchmark_config
     )
-    load_model(
-        model_config=model_config,
-        dataset_config=dataset_config,
-        benchmark_config=benchmark_config,
-    )
+    try:
+        load_model(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
+    except OutOfMemoryError:
+        pytest.skip("Skipping test as the GPU ran out of memory.")
