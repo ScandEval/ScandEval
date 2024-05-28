@@ -18,8 +18,6 @@ from tqdm.auto import tqdm
 from transformers import Trainer
 from transformers.modeling_utils import PreTrainedModel
 
-from scandeval.vllm_models import VLLMModel
-
 from .exceptions import InvalidBenchmark
 from .finetuning import finetune
 from .generation import generate
@@ -35,6 +33,7 @@ from .utils import (
     model_is_generative,
     should_prompts_be_stripped,
 )
+from .vllm_models import VLLMModel
 
 if TYPE_CHECKING:
     from datasets.arrow_dataset import Dataset

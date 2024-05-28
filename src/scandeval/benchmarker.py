@@ -13,9 +13,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict
 
-from scandeval.config import BenchmarkConfig
-
 from .benchmark_config_factory import build_benchmark_config
+from .config import BenchmarkConfig
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Device, Framework
