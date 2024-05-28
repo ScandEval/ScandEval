@@ -70,9 +70,10 @@ class TestDecoderBenchmarking:
         yield model, tokenizer
 
     def test_decoder_benchmarking(
-        self, benchmark_dataset, generative_model_id, model, tokenizer
+        self, benchmark_dataset, generative_model_id, model_and_tokenizer
     ):
         """Test that decoder models can be benchmarked on named entity recognition."""
+        model, tokenizer = model_and_tokenizer
         with does_not_raise():
             benchmark_dataset.benchmark(
                 model_id=generative_model_id, model=model, tokenizer=tokenizer
