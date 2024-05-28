@@ -25,18 +25,9 @@ def test_load_non_generative_model(model_id, dataset_config, benchmark_config):
     assert model is not None
 
 
-def test_load_generative_model(
-    generative_model_id, generative_dataset_config, benchmark_config
-):
+def test_load_generative_model(generative_model_and_tokenizer):
     """Test loading a generative model."""
-    model_config = get_model_config(
-        model_id=generative_model_id, benchmark_config=benchmark_config
-    )
-    tokenizer, model = load_model(
-        model_config=model_config,
-        dataset_config=generative_dataset_config,
-        benchmark_config=benchmark_config,
-    )
+    model, tokenizer = generative_model_and_tokenizer
     assert tokenizer is not None
     assert model is not None
 
