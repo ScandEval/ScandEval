@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   choice QA tasks for OpenAI models, as some of them might output things like "a is
   correct" rather than simply "a". Since we're using word edit distance to the labels,
   this might accidentally cause the final prediction to be different from "a".
+- An error in `outlines<=0.0.36` meant that NER evaluations were near-random.
+  Unfortunately, due to a strict `outlines` requirement in `vllm`, we cannot enforce
+  `outlines>0.0.37` (see [this vLLM PR for a future
+  fix](https://github.com/vllm-project/vllm/pull/4109)). For now, to prevent faulty
+  evaluations, we raise an error, asking the user to manually upgrade `outlines` if
+  they have an old version.
 
 
 ## [v12.10.0] - 2024-05-08
