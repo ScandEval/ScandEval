@@ -141,7 +141,6 @@ class VLLMModel:
         Returns:
             The initialised vLLM model.
         """
-        breakpoint()
         clear_vllm()
         model = LLM(**vllm_kwargs)
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
@@ -149,6 +148,7 @@ class VLLMModel:
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
+        breakpoint()
         if hasattr(self, "_model"):
             del self._model
         del self
