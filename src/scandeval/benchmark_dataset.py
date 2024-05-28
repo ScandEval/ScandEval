@@ -243,10 +243,10 @@ class BenchmarkDataset(ABC):
             model_id=model_config.model_id,
         )
 
-        # if benchmarking_generative_model:
-        #     return all_scores, metadata_dict, model, tokenizer
-        # else:
-        return all_scores, metadata_dict, None, None
+        if benchmarking_generative_model:
+            return all_scores, metadata_dict, model, tokenizer
+        else:
+            return all_scores, metadata_dict, None, None
 
     def _get_metadata(
         self,

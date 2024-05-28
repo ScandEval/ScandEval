@@ -9,10 +9,12 @@ from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.languages import DA
+from scandeval.model_config import get_model_config
+from scandeval.model_loading import load_model
 from scandeval.named_entity_recognition import NamedEntityRecognition
+from scandeval.protocols import GenerativeModel, Tokenizer
 from scandeval.tasks import NER
 from scandeval.utils import GENERATIVE_DATASET_TASKS
-from scandeval.vllm_models import clear_vllm
 
 
 @pytest.fixture(
@@ -49,9 +51,29 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
 
 
 @pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
-def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
+class TestDecoderBenchmarking:
     """Test that decoder models can be benchmarked on named entity recognition."""
-    with does_not_raise():
-        benchmark_dataset.benchmark(generative_model_id)
-        breakpoint()
-        clear_vllm()
+
+    @pytest.fixture(scope="class")
+    def model_and_tokenizer(
+        self, benchmark_config, generative_model_id, benchmark_dataset
+    ) -> Generator[tuple[GenerativeModel, Tokenizer], None, None]:
+        """Yields a model and tokenizer."""
+        model_config = get_model_config(
+            model_id=generative_model_id, benchmark_config=benchmark_config
+        )
+        model, tokenizer = load_model(
+            model_config=model_config,
+            dataset_config=benchmark_dataset.dataset_config,
+            benchmark_config=benchmark_config,
+        )
+        yield model, tokenizer
+
+    def test_decoder_benchmarking(
+        self, benchmark_dataset, generative_model_id, model, tokenizer
+    ):
+        """Test that decoder models can be benchmarked on named entity recognition."""
+        with does_not_raise():
+            benchmark_dataset.benchmark(
+                model_id=generative_model_id, model=model, tokenizer=tokenizer
+            )
