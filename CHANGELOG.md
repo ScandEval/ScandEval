@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Now recognises the metadata for the new GPT-4o models correctly. Currently there is a
+  version clash between `vllm` and `tiktoken`, meaning that one needs to manually
+  upgrade `tiktoken` to evaluate GPT-4o - an informative error message notes this to
+  the user now in that case.
+
+
 ## [v12.10.0] - 2024-05-08
 ### Changed
 - Update `autoawq` to `>=0.2.5,<0.3.0`, as it now doesn't have a dependency clash with

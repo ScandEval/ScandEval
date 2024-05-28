@@ -49,22 +49,24 @@ VOCAB_SIZE_MAPPING = {
     "gpt-4-turbo(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 100_256,
     "gpt-4-(vision|turbo)(-preview)?": 100_256,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": 100_256,
+    "gpt-4o(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 200_019,
 }
 
 
 MODEL_MAX_LENGTH_MAPPING = {
-    "(text-)?(ada|babbage|curie|davinci)(-001)?": 2_049,
-    "text-davinci-00[2-9]": 4_097,
-    "code-davinci-00[1-9]": 8_001,
-    "gpt-3.5-turbo-0613": 4_095,
-    "gpt-3.5-turbo(-[0-9]{4})?": 16_384,
+    "(text-)?(ada|babbage|curie|davinci)(-001)?": 2_050,
+    "text-davinci-00[2-9]": 4_098,
+    "code-davinci-00[1-9]": 8_002,
+    "gpt-3.5-turbo-0613": 4_096,
+    "gpt-3.5-turbo(-[0-9]{4})?": 16_385,
     "gpt-3.5-turbo-16k(-[0-9]{4})?": 16_384,
     "gpt-4(-[0-9]{4})?": 8_191,
     "gpt-4-32k(-[0-9]{4})?": 32_767,
-    "gpt-4-[0-9]{4}-preview": 127_999,
-    "gpt-4-turbo(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 127_999,
-    "gpt-4-(vision|turbo)(-preview)?": 127_999,
+    "gpt-4-[0-9]{4}-preview": 128_000,
+    "gpt-4-turbo(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 128_000,
+    "gpt-4-(vision|turbo)(-preview)?": 128_000,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": 4_095,
+    "gpt-4o(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 128_000,
 }
 
 
@@ -78,6 +80,7 @@ NUM_PARAMS_MAPPING = {
     "gpt-4-turbo(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
     "gpt-4-(vision|turbo)(-preview)?": -1,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": -1,
+    "gpt-4o(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
 }
 
 

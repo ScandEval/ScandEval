@@ -11,7 +11,7 @@ from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .exceptions import InvalidBenchmark, InvalidModel, NeedsExtraInstalled
 from .tasks import NER
 from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
@@ -78,10 +78,17 @@ class OpenAITokenizer:
         """Return the underlying tiktoken encoding."""
         try:
             return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
-        except KeyError:
+        except KeyError as e:
+            if "gpt-4o" in str(e):
+                raise InvalidModel(
+                    message="This model needs a newer version of `tiktoken` to be "
+                    "used. Please run `pip install --upgrade tiktoken` and try again."
+                )
+
             # For Azure, the model_id is the deployment name. I do not know how to
             # dynamically get the currently deployed model so assuming Azure only
             # supports the latest models.
+            # TODO: This needs to be fixed, as gpt-4o uses a different encoding
             return tiktoken.get_encoding("cl100k_base")
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
