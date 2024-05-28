@@ -140,7 +140,6 @@ class BenchmarkDataset(ABC):
         # weights
         rng = enforce_reproducibility(framework=model_config.framework)
 
-        breakpoint()
         if model is None or tokenizer is None:
             logger.info("Loading model and tokenizer...")
             model, tokenizer = load_model(
