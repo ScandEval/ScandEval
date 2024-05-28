@@ -141,6 +141,7 @@ class VLLMModel:
         Returns:
             The initialised vLLM model.
         """
+        breakpoint()
         clear_vllm()
         model = LLM(**vllm_kwargs)
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
