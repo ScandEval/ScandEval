@@ -52,8 +52,6 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
 def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
     """Test that decoder models can be benchmarked on named entity recognition."""
     with does_not_raise():
-        _, _, model, _ = benchmark_dataset.benchmark(generative_model_id)
-        del model._model
-        del model
+        benchmark_dataset.benchmark(generative_model_id)
         breakpoint()
         clear_vllm()
