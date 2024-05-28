@@ -41,7 +41,6 @@ install: ## Install dependencies
 	@$(MAKE) --quiet install-poetry
 	@$(MAKE) --quiet setup-poetry
 	@$(MAKE) --quiet setup-environment-variables
-	@$(MAKE) --quiet setup-git
 	@echo "Installed the 'ScandEval' project."
 
 install-brew:
@@ -76,19 +75,13 @@ setup-poetry:
 	else \
 	    poetry env use python3.10 && poetry install --extras all; \
 	fi
+	@poetry run pre-commit install
 
 setup-environment-variables:
 	@poetry run python src/scripts/fix_dot_env_file.py
 
 setup-environment-variables-non-interactive:
 	@poetry run python src/scripts/fix_dot_env_file.py --non-interactive
-
-setup-git:
-	@git config --global init.defaultBranch main
-	@git init
-	@git config --local user.name ${GIT_NAME}
-	@git config --local user.email ${GIT_EMAIL}
-	@poetry run pre-commit install
 
 test:  ## Run tests
 	@if [ "$(shell which nvidia-smi)" != "" ]; then \
