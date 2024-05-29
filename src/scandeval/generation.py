@@ -502,6 +502,7 @@ def generate_batch(
     extracted_labels: list = extract_labels_fn(
         input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
     )
+    breakpoint()
 
     return model_output, extracted_labels
 
