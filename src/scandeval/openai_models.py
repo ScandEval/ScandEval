@@ -544,6 +544,7 @@ class OpenAIModel:
                 )
                 generation_output = model_output.choices[0].text.strip()
             else:
+                breakpoint()
                 model_output = self.client.chat.completions.create(
                     messages=[dict(role="user", content=prompt)], **generation_kwargs
                 )
