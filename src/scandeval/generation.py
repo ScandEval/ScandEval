@@ -468,7 +468,9 @@ def generate_batch(
 
         prefix_allowed_tokens_fn = None
         logits_processors = None
-        if dataset_config == NER and isinstance(tokenizer, PreTrainedTokenizerBase):
+        if dataset_config.task == NER and isinstance(
+            tokenizer, PreTrainedTokenizerBase
+        ):
             ner_tag_names = list(dataset_config.prompt_label_mapping.values())
             prefix_allowed_tokens_fn = get_ner_prefix_allowed_tokens_fn(
                 ner_tag_names=ner_tag_names, tokenizer=tokenizer
