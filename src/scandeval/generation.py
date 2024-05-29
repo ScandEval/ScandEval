@@ -489,6 +489,7 @@ def generate_batch(
 
     # Some models include the input in the generated sequence, so we need to remove the
     # input if it is present
+    breakpoint()
     inputs = inputs.detach().cpu()
     model_output.sequences = model_output.sequences.detach().cpu()
     if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
@@ -502,7 +503,6 @@ def generate_batch(
     extracted_labels: list = extract_labels_fn(
         input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
     )
-    breakpoint()
 
     return model_output, extracted_labels
 
