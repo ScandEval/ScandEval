@@ -122,7 +122,6 @@ class OpenAIModelSetup:
             return True
 
         all_models: list[openai.models.Model] = list()
-        breakpoint()
         try:
             all_models = list(openai.models.list())
         except openai.OpenAIError as e:
