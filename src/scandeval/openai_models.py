@@ -581,6 +581,7 @@ class OpenAIModel:
                     logger.info(
                         f"Top tokens: {[lg.token for lg in logprobs.top_logprobs]}"
                     )
+                    breakpoint()
 
                     for logprob_obj in logprobs.top_logprobs:
                         logprob = logprob_obj.logprob
