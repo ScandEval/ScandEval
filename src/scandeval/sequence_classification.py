@@ -380,8 +380,9 @@ def get_closest_logprobs_labels(
             [label_ready_for_tokenization.lower()], add_special_tokens=False
         )["input_ids"]
         candidate_label_id: int = candidate_label_ids[0][0]
-        breakpoint()
         pred_logprobs[:, idx] = generation_logprobs[:, 0, candidate_label_id]
+        breakpoint()
+        pass
 
     # Shape: [batch_size,]
     predicted_label_ids = pred_logprobs.argmax(dim=1)
