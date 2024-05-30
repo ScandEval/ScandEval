@@ -6,6 +6,7 @@ import math
 from typing import TYPE_CHECKING, Literal
 
 import torch
+from openai.types.chat.chat_completion_token_logprob import TopLogprob
 from torch import LongTensor
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
@@ -581,6 +582,13 @@ class OpenAIModel:
                     logger.info(
                         f"Top tokens: {[lg.token for lg in logprobs.top_logprobs]}"
                     )
+
+                    top_logprobs: list[TopLogprob] = list()
+                    for logprob_obj in logprobs.top_logprobs:
+                        token = logprob_obj.token.strip()
+                        if token in {lg.token.strip() for lg in top_logprobs}:
+                            continue
+                        top_logprobs.append(logprob_obj)
 
                     for logprob_obj in logprobs.top_logprobs:
                         logprob = logprob_obj.logprob
