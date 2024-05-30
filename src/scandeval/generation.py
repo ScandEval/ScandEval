@@ -334,7 +334,6 @@ def generate_single_iteration(
         model_output = load_cached_model_outputs(
             cached_dataset=cached_dataset, cache=cache, tokenizer=tokenizer
         )
-        breakpoint()
         extracted_labels = extract_labels_fn(
             input_batch=cached_dataset, model_output=model_output, tokenizer=tokenizer
         )
