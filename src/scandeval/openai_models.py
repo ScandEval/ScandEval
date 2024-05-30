@@ -578,11 +578,6 @@ class OpenAIModel:
                 # OpenAI output only contain the logprobs for the top-k tokens, so we
                 # only fill in these and leave the rest at ~0% probability
                 for gen_token_idx, logprobs in enumerate(logprobs_list):
-                    # TEMP
-                    logger.info(
-                        f"Top tokens: {[lg.token for lg in logprobs.top_logprobs]}"
-                    )
-
                     # Remove duplicate logprobs, since, e.g., "negative" and " negative"
                     # can both be included in the list, and we only want the one with
                     # the highest logprob
