@@ -388,9 +388,6 @@ class BenchmarkDataset(ABC):
         val = dataset_dict["val"]
         test = dataset_dict["test"]
 
-        # TEMP
-        test = test.select(range(5))
-
         if self.benchmark_config.only_validation_split:
             test = val
 
@@ -404,6 +401,9 @@ class BenchmarkDataset(ABC):
         # If we are testing then truncate the test set
         if hasattr(sys, "_called_from_test"):
             test = test.select(range(1))
+
+        # TEMP
+        test = test.select(range(5))
 
         # Bootstrap the test set
         test_bidxs = rng.integers(
