@@ -25,6 +25,8 @@ from requests.exceptions import RequestException
 from transformers import GenerationConfig
 from transformers import logging as tf_logging
 
+from scandeval.openai_models import OpenAITokenizer
+
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
@@ -657,6 +659,9 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
+    if isinstance(tokenizer, OpenAITokenizer):
+        return False
+
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
