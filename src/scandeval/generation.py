@@ -323,6 +323,9 @@ def generate_single_iteration(
                 )
                 all_preds.extend(extracted_labels)
 
+                # TEMP
+                logger.info(f"Generated labels: {extracted_labels}")
+
         if isinstance(itr, tqdm):
             itr.close()
 
