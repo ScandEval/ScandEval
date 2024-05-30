@@ -28,6 +28,7 @@ from transformers import logging as tf_logging
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
+from .openai_models import OpenAITokenizer
 
 if TYPE_CHECKING:
     from huggingface_hub.hf_api import ModelInfo
@@ -661,6 +662,9 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
+    if isinstance(tokenizer, OpenAITokenizer):
+        return False
+
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
