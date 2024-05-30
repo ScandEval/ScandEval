@@ -493,6 +493,7 @@ def generate_batch(
     # input if it is present
     inputs = inputs.detach().cpu()
     model_output.sequences = model_output.sequences.detach().cpu()
+    breakpoint()
     if torch.equal(model_output.sequences[:, : inputs.shape[1]], inputs):
         model_output.sequences = model_output.sequences[:, inputs.shape[1] :]
 
