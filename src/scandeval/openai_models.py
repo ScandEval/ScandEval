@@ -558,7 +558,6 @@ class OpenAIModel:
 
         # TEMP
         logger.info(f"Generated text: {generation_output!r}")
-        breakpoint()
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
