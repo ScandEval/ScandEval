@@ -389,6 +389,7 @@ def get_closest_logprobs_labels(
 
     # TEMP
     logger.info(f"Predicted labels: {predicted_labels}")
+    breakpoint()
 
     return predicted_labels
 
