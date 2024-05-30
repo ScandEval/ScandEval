@@ -382,8 +382,6 @@ def get_closest_logprobs_labels(
         candidate_label_id: int = candidate_label_ids[0][0]
         pred_logprobs[:, idx] = generation_logprobs[:, 0, candidate_label_id]
 
-    breakpoint()
-
     # Shape: [batch_size,]
     predicted_label_ids = pred_logprobs.argmax(dim=1)
 
