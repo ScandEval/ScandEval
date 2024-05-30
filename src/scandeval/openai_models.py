@@ -2,6 +2,7 @@
 
 import importlib.util
 import logging
+import math
 from typing import TYPE_CHECKING, Literal
 
 import torch
@@ -530,6 +531,10 @@ class OpenAIModel:
             stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
         )
 
+        if generation_config.output_scores:
+            generation_kwargs["logprobs"] = True
+            generation_kwargs["top_logprobs"] = 10
+
         if (
             self.dataset_config.task == NER
             and self.supports_json_mode
@@ -544,23 +549,51 @@ class OpenAIModel:
                 )
                 generation_output = model_output.choices[0].text.strip()
             else:
-                breakpoint()
                 model_output = self.client.chat.completions.create(
                     messages=[dict(role="user", content=prompt)], **generation_kwargs
                 )
                 generation_output = model_output.choices[0].message.content.strip()
         except BadRequestError as e:
-            logger.debug(
-                "Encountered error during OpenAI generation - returning blank string "
-                f"instead. The error thrown was {str(e)!r}, and the prompt causing "
-                f"it was {prompt!r}."
+            raise InvalidBenchmark(
+                f"Encountered error during OpenAI generation: {str(e)!r}\n"
+                f"The prompt causing it was {prompt!r}."
             )
-            generation_output = " "
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
 
         if generation_config.return_dict_in_generate:
-            output = ModelOutput(dict(sequences=output))
+            output_dict = dict(sequences=output)
+
+            # Add logprobs scores to the output
+            if generation_config.output_scores:
+                # Create a list with placeholder logprobs for every token generated.
+                # Each tensor in the list will be of shape (batch_size, vocab_size)
+                batch_size = 1
+                vocab_size = self.config.vocab_size
+                breakpoint()
+                max_seq_len = max(
+                    len(raw_output.outputs[0].logprobs) for raw_output in model_output
+                )
+                scores = [
+                    torch.full(size=(batch_size, vocab_size), fill_value=-math.inf)
+                    for _ in range(max_seq_len)
+                ]
+
+                # Fill in the logprobs for each generated token. The logprobs from the
+                # vLLM output only contain the logprobs for the top-k tokens, so we
+                # only fill in these and leave the rest at ~0% probability
+                for sample_idx, raw_output in enumerate(model_output):
+                    assert raw_output.outputs[0].logprobs is not None
+                    seq_len = len(raw_output.outputs[0].logprobs)
+                    for gen_token_idx in range(seq_len):
+                        logprobs_dict = raw_output.outputs[0].logprobs[gen_token_idx]
+                        for token_idx, logprob_obj in logprobs_dict.items():
+                            logprob = logprob_obj.logprob
+                            scores[gen_token_idx][sample_idx, token_idx] = logprob
+
+                output_dict["scores"] = tuple(scores)
+
+            return ModelOutput(output_dict)
 
         return output
