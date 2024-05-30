@@ -76,7 +76,9 @@ class Tokenizer(Protocol):
         """
         ...
 
-    def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
+    def encode(
+        self, text: str | list[str] | list[int], **kwargs
+    ) -> list[int] | list[list[int]]:
         """Encode one or more texts.
 
         Args:

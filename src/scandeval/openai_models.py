@@ -237,6 +237,7 @@ class OpenAITokenizer:
         Returns:
             The token IDs.
         """
+        breakpoint()
         if isinstance(tokens, str):
             tokens = [tokens]
         ids = [self.encode(text=token)[0] for token in tokens]
@@ -571,26 +572,21 @@ class OpenAIModel:
                 # Each tensor in the list will be of shape (batch_size, vocab_size)
                 batch_size = 1
                 vocab_size = self.config.vocab_size
-                breakpoint()
-                max_seq_len = max(
-                    len(raw_output.outputs[0].logprobs) for raw_output in model_output
-                )
+                logprobs_list = model_output.choices[0].logprobs.content
+                seq_len = len(logprobs_list)
                 scores = [
                     torch.full(size=(batch_size, vocab_size), fill_value=-math.inf)
-                    for _ in range(max_seq_len)
+                    for _ in range(seq_len)
                 ]
 
                 # Fill in the logprobs for each generated token. The logprobs from the
-                # vLLM output only contain the logprobs for the top-k tokens, so we
+                # OpenAI output only contain the logprobs for the top-k tokens, so we
                 # only fill in these and leave the rest at ~0% probability
-                for sample_idx, raw_output in enumerate(model_output):
-                    assert raw_output.outputs[0].logprobs is not None
-                    seq_len = len(raw_output.outputs[0].logprobs)
-                    for gen_token_idx in range(seq_len):
-                        logprobs_dict = raw_output.outputs[0].logprobs[gen_token_idx]
-                        for token_idx, logprob_obj in logprobs_dict.items():
-                            logprob = logprob_obj.logprob
-                            scores[gen_token_idx][sample_idx, token_idx] = logprob
+                # for gen_token_idx, logprobs in enumerate(logprobs_list):
+                #     for logprob_obj in logprobs.top_logprobs:
+                #         logprob = logprob_obj.logprob
+                #         token_idx = self.tokenizer.encode(text=logprob_obj.token)[0][0]
+                #         scores[gen_token_idx][0, token_idx] = logprob
 
                 output_dict["scores"] = tuple(scores)
 
