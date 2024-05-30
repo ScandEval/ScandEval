@@ -402,6 +402,9 @@ class BenchmarkDataset(ABC):
         if hasattr(sys, "_called_from_test"):
             test = test.select(range(1))
 
+        # TEMP
+        test = test.select(range(5))
+
         # Bootstrap the test set
         test_bidxs = rng.integers(
             0, len(test), size=(self.benchmark_config.num_iterations, len(test))
