@@ -369,7 +369,6 @@ def get_closest_logprobs_labels(
         len(candidate_labels),
         device=generation_logprobs.device,
     )
-    breakpoint()
 
     for idx, candidate_label in enumerate(candidate_labels):
         # We only use the first token to represent the logprob value of the entire
@@ -386,7 +385,12 @@ def get_closest_logprobs_labels(
     # Shape: [batch_size,]
     predicted_label_ids = pred_logprobs.argmax(dim=1)
 
-    return [candidate_labels[idx] for idx in predicted_label_ids]
+    predicted_labels = [candidate_labels[idx] for idx in predicted_label_ids]
+
+    # TEMP
+    logger.info(f"Predicted labels: {predicted_labels}")
+
+    return predicted_labels
 
 
 def get_closest_word_edit_labels(
