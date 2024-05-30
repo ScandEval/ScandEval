@@ -385,7 +385,9 @@ def get_closest_logprobs_labels(
     # Shape: [batch_size,]
     predicted_label_ids = pred_logprobs.argmax(dim=1)
 
-    return [candidate_labels[idx] for idx in predicted_label_ids]
+    predicted_labels = [candidate_labels[idx] for idx in predicted_label_ids]
+
+    return predicted_labels
 
 
 def get_closest_word_edit_labels(

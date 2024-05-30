@@ -86,9 +86,9 @@ setup-environment-variables-non-interactive:
 test:  ## Run tests
 	@if [ "$(shell which nvidia-smi)" != "" ]; then \
 		$(MAKE) --quiet test-cuda-vllm; \
-		$(MAKE) --quiet test-cuda-no-vllm; \
+	else \
+		$(MAKE) --quiet test-cpu; \
 	fi
-	@$(MAKE) --quiet test-cpu
 	@$(MAKE) --quiet update-coverage-badge
 	@date "+%H:%M:%S ⋅ All done!"
 
@@ -119,8 +119,15 @@ test-fast:  # Run CPU tests without evaluations
 			poetry run pytest | tee tests_with_cpu_fast.log \
 		&& date "+%H:%M:%S ⋅ Finished fast testing with CPU!"
 
-test-slow:  # Run tests with all datasets
-	@TEST_ALL_DATASETS=1 $(MAKE) --quiet test
+test-slow:  # Run all tests
+	@if [ "$(shell which nvidia-smi)" != "" ]; then \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cuda-vllm; \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cuda-no-vllm; \
+	else \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cpu; \
+	fi
+	@$(MAKE) --quiet update-coverage-badge
+	@date "+%H:%M:%S ⋅ All done!"
 
 update-coverage-badge:
 	@poetry run readme-cov

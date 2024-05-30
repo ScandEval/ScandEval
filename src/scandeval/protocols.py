@@ -76,12 +76,12 @@ class Tokenizer(Protocol):
         """
         ...
 
-    def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
+    def encode(self, text: str, **kwargs) -> list[int]:
         """Encode one or more texts.
 
         Args:
             text:
-                The text(s) to encode.
+                The text to encode.
             **kwargs:
                 Keyword arguments to pass to the tokenizer.
 

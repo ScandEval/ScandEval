@@ -28,6 +28,7 @@ from transformers import logging as tf_logging
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
+from .openai_models import OpenAITokenizer
 
 if TYPE_CHECKING:
     from huggingface_hub.hf_api import ModelInfo
@@ -637,6 +638,7 @@ def should_prompts_be_stripped(
         )
         if label_tokens_start_with_colon_tokens:
             strip_prompts = False
+
     return strip_prompts
 
 
@@ -657,6 +659,11 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
+    # We don't add a prefix space to OpenAI models, since they output strings directly,
+    # and we always strip these for token ID consistency
+    if isinstance(tokenizer, OpenAITokenizer):
+        return False
+
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
@@ -666,6 +673,7 @@ def should_prefix_space_be_added_to_labels(
         ids=tokenizer(" ", add_special_tokens=False).input_ids[0]
     )[0]
 
+    add_prefix_space = True
     for label in labels_to_be_generated:
         label_tokens = tokenizer(label, add_special_tokens=False).input_ids
         if isinstance(label_tokens, torch.Tensor):
@@ -674,8 +682,10 @@ def should_prefix_space_be_added_to_labels(
         first_character_of_label = tokenizer.convert_ids_to_tokens(first_label_token)[0]
         has_prefix_space = first_character_of_label == whitespace_token
         if has_prefix_space:
-            return False
-    return True
+            add_prefix_space = False
+            break
+
+    return add_prefix_space
 
 
 def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:

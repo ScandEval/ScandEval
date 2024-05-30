@@ -1,5 +1,7 @@
 """Unit tests for the `model_loading` module."""
 
+import os
+
 import pytest
 from scandeval.config import ModelConfig
 from scandeval.enums import Framework
@@ -23,6 +25,9 @@ def test_load_non_generative_model(model_id, dataset_config, benchmark_config):
     assert model is not None
 
 
+@pytest.mark.skipif(
+    condition=os.getenv("USE_VLLM", "0") != "1", reason="Not using VLLM."
+)
 def test_load_generative_model(generative_model_and_tokenizer):
     """Test loading a generative model."""
     model, tokenizer = generative_model_and_tokenizer
