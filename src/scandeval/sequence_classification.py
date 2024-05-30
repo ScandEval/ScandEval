@@ -369,7 +369,6 @@ def get_closest_logprobs_labels(
         len(candidate_labels),
         device=generation_logprobs.device,
     )
-    breakpoint()
 
     for idx, candidate_label in enumerate(candidate_labels):
         # We only use the first token to represent the logprob value of the entire
@@ -381,6 +380,7 @@ def get_closest_logprobs_labels(
             [label_ready_for_tokenization.lower()], add_special_tokens=False
         )["input_ids"]
         candidate_label_id: int = candidate_label_ids[0][0]
+        breakpoint()
         pred_logprobs[:, idx] = generation_logprobs[:, 0, candidate_label_id]
 
     # Shape: [batch_size,]

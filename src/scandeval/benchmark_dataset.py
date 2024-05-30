@@ -526,7 +526,6 @@ class BenchmarkDataset(ABC):
                             labels_to_be_generated=labels_to_be_generated,
                             tokenizer=tokenizer,
                         )
-                        breakpoint()
                         if strip_prompts:
                             test = test.map(
                                 lambda x: dict(text=x["text"].strip()),
