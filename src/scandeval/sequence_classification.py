@@ -186,6 +186,10 @@ class SequenceClassification(BenchmarkDataset):
             for label in labels
         ]
 
+        # TEMP
+        logger.info(f"Predictions: {predictions}")
+        logger.info(f"Labels: {labels}")
+
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
