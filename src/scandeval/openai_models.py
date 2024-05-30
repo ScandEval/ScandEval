@@ -581,11 +581,12 @@ class OpenAIModel:
                     logger.info(
                         f"Top tokens: {[lg.token for lg in logprobs.top_logprobs]}"
                     )
-                    breakpoint()
 
                     for logprob_obj in logprobs.top_logprobs:
                         logprob = logprob_obj.logprob
                         token = logprob_obj.token.strip()
+                        logger.info(f"Token: {token}")
+                        breakpoint()
                         if token:
                             token_idx = self.tokenizer.encode(text=token)[0]
                             scores[gen_token_idx][0, token_idx] = logprob
