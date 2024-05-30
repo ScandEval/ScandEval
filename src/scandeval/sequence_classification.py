@@ -369,6 +369,7 @@ def get_closest_logprobs_labels(
         len(candidate_labels),
         device=generation_logprobs.device,
     )
+    breakpoint()
 
     for idx, candidate_label in enumerate(candidate_labels):
         # We only use the first token to represent the logprob value of the entire
