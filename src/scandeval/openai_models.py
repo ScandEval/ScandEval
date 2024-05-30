@@ -555,6 +555,9 @@ class OpenAIModel:
                 f"The prompt causing it was {prompt!r}."
             )
 
+        # TEMP
+        logger.info(f"Generated text: {generation_output!r}")
+
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
 
