@@ -311,7 +311,6 @@ class SequenceClassification(BenchmarkDataset):
         Returns:
             The predicted labels.
         """
-        breakpoint()
         if "scores" in model_output:
             if isinstance(model_output["scores"], tuple):
                 all_logprobs = torch.stack(model_output["scores"], dim=1)
@@ -390,6 +389,7 @@ def get_closest_logprobs_labels(
 
     # TEMP
     logger.info(f"Predicted labels: {predicted_labels}")
+    breakpoint()
 
     return predicted_labels
 
