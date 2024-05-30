@@ -626,6 +626,7 @@ def should_prompts_be_stripped(
     for label in labels_to_be_generated:
         colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
         label_tokens = tokenizer(": " + label, add_special_tokens=False).input_ids
+        breakpoint()
 
         if isinstance(colon_tokens, torch.Tensor):
             colon_tokens = list(colon_tokens.squeeze(0))
