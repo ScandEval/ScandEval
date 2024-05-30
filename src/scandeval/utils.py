@@ -641,7 +641,7 @@ def should_prompts_be_stripped(
             strip_prompts = False
 
     # TEMP
-    logger.debug(f"{ strip_prompts = }")
+    logger.info(f"{ strip_prompts = }")
     breakpoint()
 
     return strip_prompts
