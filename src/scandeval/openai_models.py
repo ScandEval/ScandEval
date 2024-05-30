@@ -210,7 +210,6 @@ class OpenAITokenizer:
         Returns:
             The tokens.
         """
-        breakpoint()
         ids_list = [ids] if isinstance(ids, int) else ids
         tokens = [self.decode(token_ids=[i]) for i in ids_list]
         if skip_special_tokens:
