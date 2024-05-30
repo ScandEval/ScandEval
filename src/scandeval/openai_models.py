@@ -560,6 +560,9 @@ class OpenAIModel:
         if generation_config.return_dict_in_generate:
             output_dict = dict(sequences=output)
 
+            # TEMP
+            logger.info(f"Generated: {generation_output}")
+
             # Add logprobs scores to the output
             if generation_config.output_scores:
                 # Create a list with placeholder logprobs for every token generated.

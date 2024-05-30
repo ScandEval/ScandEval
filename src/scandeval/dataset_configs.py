@@ -179,7 +179,7 @@ SST5_CONFIG = DatasetConfig(
         positive="positive", neutral="neutral", negative="negative"
     ),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=3,
 )
 
 # TODO: Icelandic Sentiment Classification
