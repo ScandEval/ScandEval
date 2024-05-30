@@ -14,7 +14,7 @@ from transformers.modeling_utils import ModelOutput
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
 from .exceptions import InvalidBenchmark, InvalidModel, NeedsExtraInstalled
 from .tasks import NER
-from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
+from .types import is_list_of_int, is_list_of_list_of_int
 
 if TYPE_CHECKING:
     from torch import Tensor
@@ -158,7 +158,7 @@ class OpenAITokenizer:
         """
         return [self.decode(token_ids=sequence) for sequence in sequences]
 
-    def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
+    def encode(self, text: str, **kwargs) -> list[int]:
         """Encode text.
 
         Args:
@@ -170,12 +170,7 @@ class OpenAITokenizer:
         Returns:
             The encoded text.
         """
-        if is_list_of_int(text):
-            return text
-        elif is_list_of_str(text) or isinstance(text, str):
-            return self(text, **kwargs).input_ids.tolist()
-        else:
-            raise TypeError(f"Cannot encode {type(text)}.")
+        return self(text, **kwargs).input_ids.tolist()
 
     @property
     def special_tokens_map(self) -> dict[str, str | list[str]]:
