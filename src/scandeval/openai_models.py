@@ -232,7 +232,6 @@ class OpenAITokenizer:
         Returns:
             The token IDs.
         """
-        breakpoint()
         if isinstance(tokens, str):
             tokens = [tokens]
         ids = [self.encode(text=token)[0] for token in tokens]
@@ -558,9 +557,6 @@ class OpenAIModel:
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
 
-        # TEMP
-        self.tokenizer.convert_tokens_to_ids(tokens=["test"])
-
         if generation_config.return_dict_in_generate:
             output_dict = dict(sequences=output)
 
@@ -580,11 +576,12 @@ class OpenAIModel:
                 # Fill in the logprobs for each generated token. The logprobs from the
                 # OpenAI output only contain the logprobs for the top-k tokens, so we
                 # only fill in these and leave the rest at ~0% probability
-                # for gen_token_idx, logprobs in enumerate(logprobs_list):
-                #     for logprob_obj in logprobs.top_logprobs:
-                #         logprob = logprob_obj.logprob
-                #         token_idx = self.tokenizer.encode(text=logprob_obj.token)[0][0]
-                #         scores[gen_token_idx][0, token_idx] = logprob
+                for gen_token_idx, logprobs in enumerate(logprobs_list):
+                    for logprob_obj in logprobs.top_logprobs:
+                        logprob = logprob_obj.logprob
+                        token_idx = self.tokenizer.encode(text=logprob_obj.token)[0]
+                        breakpoint()
+                        scores[gen_token_idx][0, token_idx] = logprob
 
                 output_dict["scores"] = tuple(scores)
 
