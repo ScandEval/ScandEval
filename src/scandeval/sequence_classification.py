@@ -388,7 +388,7 @@ def get_closest_logprobs_labels(
     predicted_labels = [candidate_labels[idx] for idx in predicted_label_ids]
 
     # TEMP
-    logger.info(f"Predicted labels: {predicted_labels}")
+    # logger.info(f"Predicted labels: {predicted_labels}")
 
     return predicted_labels
 

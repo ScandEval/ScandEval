@@ -639,9 +639,6 @@ def should_prompts_be_stripped(
         if label_tokens_start_with_colon_tokens:
             strip_prompts = False
 
-    # TEMP
-    logger.info(f"{ strip_prompts = }")
-
     return strip_prompts
 
 
@@ -685,9 +682,6 @@ def should_prefix_space_be_added_to_labels(
         if has_prefix_space:
             add_prefix_space = False
             break
-
-    # TEMP
-    logger.info(f"{ add_prefix_space = }")
 
     return add_prefix_space
 

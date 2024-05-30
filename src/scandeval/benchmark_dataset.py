@@ -403,7 +403,7 @@ class BenchmarkDataset(ABC):
             test = test.select(range(1))
 
         # TEMP
-        test = test.select(range(25))
+        # test = test.select(range(25))
 
         # Bootstrap the test set
         test_bidxs = rng.integers(
