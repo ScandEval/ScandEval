@@ -561,7 +561,7 @@ class OpenAIModel:
             output_dict = dict(sequences=output)
 
             # TEMP
-            logger.info(f"Generated: {generation_output}")
+            logger.info(f"Generated: {generation_output!r}")
 
             # Add logprobs scores to the output
             if generation_config.output_scores:
