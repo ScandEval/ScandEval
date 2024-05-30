@@ -295,9 +295,8 @@ def load_cached_model_outputs(
             for cached_model_output in cached_model_outputs
         ],
         batch_first=True,
-        padding_value=0.0,
+        padding_value=-math.inf,
     )
-    breakpoint()
     for batch_idx in range(cached_scores.shape[0]):
         for sequence_idx in range(cached_scores.shape[1]):
             top_indices = top_score_indices[batch_idx, sequence_idx]
