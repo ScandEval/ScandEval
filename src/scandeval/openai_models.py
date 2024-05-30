@@ -583,6 +583,9 @@ class OpenAIModel:
                         f"Top tokens: {[lg.token for lg in logprobs.top_logprobs]}"
                     )
 
+                    # Remove duplicate logprobs, since, e.g., "negative" and " negative"
+                    # can both be included in the list, and we only want the one with
+                    # the highest logprob
                     top_logprobs: list[TopLogprob] = list()
                     for logprob_obj in logprobs.top_logprobs:
                         token = logprob_obj.token.strip()
@@ -590,11 +593,9 @@ class OpenAIModel:
                             continue
                         top_logprobs.append(logprob_obj)
 
-                    for logprob_obj in logprobs.top_logprobs:
+                    for logprob_obj in top_logprobs:
                         logprob = logprob_obj.logprob
                         token = logprob_obj.token.strip()
-                        logger.info(f"Token: {token}")
-                        breakpoint()
                         if token:
                             token_idx = self.tokenizer.encode(text=token)[0]
                             scores[gen_token_idx][0, token_idx] = logprob
