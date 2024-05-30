@@ -505,6 +505,16 @@ def generate_batch(
         input_batch=input_batch, model_output=model_output, tokenizer=tokenizer
     )
 
+    # TEMP
+    prompt = (
+        tokenizer.decode(batch["input_ids"][0].tolist())
+        .split("\n\n")[-1]
+        .split("\n")[0]
+    )
+    breakpoint()
+    logger.info(f"Prompt: {prompt}")
+    logger.info(f"Generated labels: {extracted_labels}")
+
     return model_output, extracted_labels
 
 
