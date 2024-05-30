@@ -636,8 +636,8 @@ def should_prompts_be_stripped(
             label_tokens[: len(colon_tokens)] == colon_tokens
         )
         if label_tokens_start_with_colon_tokens:
-            breakpoint()
             strip_prompts = False
+    breakpoint()
     return strip_prompts
 
 
