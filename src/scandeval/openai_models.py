@@ -585,11 +585,9 @@ class OpenAIModel:
                     for logprob_obj in logprobs.top_logprobs:
                         logprob = logprob_obj.logprob
                         token = logprob_obj.token.strip()
-                        try:
+                        if token:
                             token_idx = self.tokenizer.encode(text=token)[0]
-                        except IndexError:
-                            breakpoint()
-                        scores[gen_token_idx][0, token_idx] = logprob
+                            scores[gen_token_idx][0, token_idx] = logprob
 
                 output_dict["scores"] = tuple(scores)
 
