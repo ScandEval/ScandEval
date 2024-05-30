@@ -170,7 +170,7 @@ class OpenAITokenizer:
         Returns:
             The encoded text.
         """
-        return self(text, **kwargs).input_ids.tolist()
+        return self(text, **kwargs).input_ids.tolist()[0]
 
     @property
     def special_tokens_map(self) -> dict[str, str | list[str]]:
