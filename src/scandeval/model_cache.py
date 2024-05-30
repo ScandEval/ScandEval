@@ -183,7 +183,6 @@ class ModelCache:
                     cached_model_output.vocab_size = int(scores.shape[-1])
 
                 # Store the generated sequence in the cache
-                breakpoint()
                 self[decoded_inputs] = cached_model_output
 
 
@@ -294,6 +293,7 @@ def load_cached_model_outputs(
         batch_first=True,
         padding_value=0.0,
     )
+    breakpoint()
     for batch_idx in range(cached_scores.shape[0]):
         for sequence_idx in range(cached_scores.shape[1]):
             top_indices = top_score_indices[batch_idx, sequence_idx]
