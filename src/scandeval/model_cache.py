@@ -142,7 +142,6 @@ class ModelCache:
         # Extract the scores from the model output, to be cached. We only store the
         # indices of the top scores, to save space. Further, we only store the scores
         # if the generated sequence is shorter than the maximum length
-        breakpoint()
         store_scores = "scores" in model_output and self.max_generated_tokens < 8
         if store_scores:
             scores = torch.stack(
@@ -184,6 +183,7 @@ class ModelCache:
                     cached_model_output.vocab_size = int(scores.shape[-1])
 
                 # Store the generated sequence in the cache
+                breakpoint()
                 self[decoded_inputs] = cached_model_output
 
 
