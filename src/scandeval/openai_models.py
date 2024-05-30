@@ -577,11 +577,6 @@ class OpenAIModel:
                 # OpenAI output only contain the logprobs for the top-k tokens, so we
                 # only fill in these and leave the rest at ~0% probability
                 for gen_token_idx, logprobs in enumerate(logprobs_list):
-                    # TEMP
-                    logger.info(
-                        f"Top tokens: {[lg.token for lg in logprobs.top_logprobs]}"
-                    )
-
                     for logprob_obj in logprobs.top_logprobs:
                         logprob = logprob_obj.logprob
                         token = logprob_obj.token.strip()
