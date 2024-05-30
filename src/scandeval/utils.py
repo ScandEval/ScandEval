@@ -624,6 +624,9 @@ def should_prompts_be_stripped(
     Returns:
         Whether we should strip the prompts.
     """
+    if isinstance(tokenizer, OpenAITokenizer):
+        return False
+
     strip_prompts = True
     for label in labels_to_be_generated:
         colon_tokens = tokenizer(": ", add_special_tokens=False).input_ids
@@ -659,9 +662,6 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
-    if isinstance(tokenizer, OpenAITokenizer):
-        return False
-
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
