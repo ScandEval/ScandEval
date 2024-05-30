@@ -510,10 +510,10 @@ def generate_batch(
         tokenizer.decode(batch["input_ids"][0].tolist())
         .split("\n\n")[-1]
         .split("\n")[0]
+        .lstrip("Text: ")
     )
-    breakpoint()
     logger.info(f"Prompt: {prompt}")
-    logger.info(f"Generated labels: {extracted_labels}")
+    logger.info(f"Generated label: {extracted_labels[0]}")
 
     return model_output, extracted_labels
 
