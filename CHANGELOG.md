@@ -7,15 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-### Added
-- We now use logprobs for OpenAI models, as this is supported by the chat models now.
-  This is used for all sequence classification based tasks, which currently comprise of
-  sentiment classification, linguistic acceptability, knowledge and common-sense
-  reasoning.
-
 ### Fixed
 - Correctly update logits processors and prefix allowed functions tokens functions for
   NER datasets when starting generation.
+- We now use logprobs for OpenAI models, as this is supported by the chat models now.
+  This is used for all sequence classification based tasks, which currently comprise of
+  sentiment classification, linguistic acceptability, knowledge and common-sense
+  reasoning. This fixes some incorrect evaluations of the newer GPT-4-turbo and GPT-4o
+  models, as they tend to output things like "Sentiment: positive" rather than simply
+  "positive".
 
 
 ## [v12.10.1] - 2024-05-28
