@@ -2,6 +2,7 @@
 
 import json
 import logging
+import math
 import sys
 from collections import defaultdict
 from dataclasses import asdict, dataclass
@@ -268,14 +269,17 @@ def load_cached_model_outputs(
     # Otherwise, we format the cached scores into a tensor of shape [batch_size,
     # num_sequences, vocab_size], wrap it in a ModelOutput with the padded cached
     # sequences, and return it
-    cached_scores = torch.zeros(
-        len(cached_model_outputs),
-        max(
-            len(cached_model_output.top_score_indices)
-            for cached_model_output in cached_model_outputs
-            if cached_model_output.top_score_indices is not None
+    cached_scores = torch.full(
+        size=(
+            len(cached_model_outputs),
+            max(
+                len(cached_model_output.top_score_indices)
+                for cached_model_output in cached_model_outputs
+                if cached_model_output.top_score_indices is not None
+            ),
+            cached_model_outputs[0].vocab_size,
         ),
-        cached_model_outputs[0].vocab_size,
+        fill_value=-math.inf,
     )
     top_score_indices = torch.nn.utils.rnn.pad_sequence(
         sequences=[
