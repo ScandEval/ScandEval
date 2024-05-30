@@ -560,9 +560,6 @@ class OpenAIModel:
         if generation_config.return_dict_in_generate:
             output_dict = dict(sequences=output)
 
-            # TEMP
-            logger.info(f"Generated: {generation_output!r}")
-
             # Add logprobs scores to the output
             if generation_config.output_scores:
                 # Create a list with placeholder logprobs for every token generated.
@@ -580,6 +577,11 @@ class OpenAIModel:
                 # OpenAI output only contain the logprobs for the top-k tokens, so we
                 # only fill in these and leave the rest at ~0% probability
                 for gen_token_idx, logprobs in enumerate(logprobs_list):
+                    # TEMP
+                    logger.info(
+                        f"Top tokens: {[lg.token for lg in logprobs.top_logprobs]}"
+                    )
+
                     for logprob_obj in logprobs.top_logprobs:
                         logprob = logprob_obj.logprob
                         token = logprob_obj.token.strip()
