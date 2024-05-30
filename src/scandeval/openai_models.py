@@ -547,7 +547,7 @@ class OpenAIModel:
                 generation_output = model_output.choices[0].text.strip()
             else:
                 model_output = self.client.chat.completions.create(
-                    messages=[dict(role="user", content=prompt)], **generation_kwargs
+                    messages=[dict(role="system", content=prompt)], **generation_kwargs
                 )
                 generation_output = model_output.choices[0].message.content.strip()
         except BadRequestError as e:
