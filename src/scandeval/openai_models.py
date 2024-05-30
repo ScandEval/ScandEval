@@ -563,6 +563,7 @@ class OpenAIModel:
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
 
+        breakpoint()
         if generation_config.return_dict_in_generate:
             output_dict = dict(sequences=output)
 
