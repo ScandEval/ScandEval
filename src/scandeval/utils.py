@@ -803,3 +803,36 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     instruction_prompt += label_prefix
 
     return instruction_prompt
+
+
+def scramble(text: str) -> str:
+    """Scramble a string in a bijective manner.
+
+    Args:
+        text:
+            The string to scramble.
+
+    Returns:
+        The scrambled string.
+    """
+    rng = np.random.default_rng(seed=4242)
+    permutation = rng.permutation(x=len(text))
+    scrambled = "".join(text[i] for i in permutation)
+    return scrambled
+
+
+def unscramble(scrambled_text: str) -> str:
+    """Unscramble a string in a bijective manner.
+
+    Args:
+        scrambled_text:
+            The scrambled string to unscramble.
+
+    Returns:
+        The unscrambled string.
+    """
+    rng = np.random.default_rng(seed=4242)
+    permutation = rng.permutation(x=len(scrambled_text))
+    inverse_permutation = np.argsort(permutation)
+    unscrambled = "".join(scrambled_text[i] for i in inverse_permutation)
+    return unscrambled
