@@ -752,12 +752,12 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     )
 
     instruction = "\n\n".join(prompt.split("\n\n")[:-1])
-    # label_prefix = prompt.split("\n\n")[-1]
+    label_prefix = prompt.split("\n\n")[-1]
 
     instruction_prompt = tokenizer.apply_chat_template(
         conversation=[dict(role="user", content=instruction)], **chat_template_kwargs
     )
     assert isinstance(instruction_prompt, str)
-    # instruction_prompt += label_prefix
+    instruction_prompt += label_prefix
 
     return instruction_prompt
