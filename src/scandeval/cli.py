@@ -237,7 +237,7 @@ from .tasks import get_all_tasks
     optimising hyperparameters, to avoid overfitting to the test sets.""",
 )
 @click.option(
-    "--few-shot/--no-few-shot",
+    "--few-shot/--zero-shot",
     default=True,
     show_default=True,
     help="Whether to only evaluate the model using few-shot evaluation. Only relevant "
