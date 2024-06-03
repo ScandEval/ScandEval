@@ -178,6 +178,8 @@ SST5_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positive", neutral="neutral", negative="negative"
     ),
+    instruction_prompt="Text: {text}\n\nClassify the sentiment of the text as "
+    "'positive', 'neutral' or 'negative'.\n\nSentiment:",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -400,6 +402,11 @@ CONLL_EN_CONFIG = DatasetConfig(
         "b-misc": "miscellaneous",
         "i-misc": "miscellaneous",
     },
+    instruction_prompt="Sentence: {text}\n\nIdentify the named entities in the "
+    "sentence. You should output this as a JSON dictionary with the keys being "
+    "'person', 'location', 'organization' and 'miscellaneous'. The values should be "
+    "lists of the named entities of that type, exactly as they appear in the sentence. "
+    "\n\nNamed entities:",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -572,6 +579,9 @@ SCALA_EN_CONFIG = DatasetConfig(
     "correct.",
     prompt_template="Sentence: {text}\nGrammatically correct: {label}",
     prompt_label_mapping=dict(correct="yes", incorrect="no"),
+    instruction_prompt="Sentence: {text}\n\nDetermine whether the sentence is "
+    "grammatically correct or not. Reply with 'yes' if the sentence is correct and "
+    "'no' if it is not.\n\nGrammatically correct:",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -670,6 +680,8 @@ SQUAD_CONFIG = DatasetConfig(
     prompt_prefix="The following are texts with accompanying questions and answers.",
     prompt_template="Text: {text}\nQuestion: {question}\nAnswer in max 3 words: "
     "{label}",
+    instruction_prompt="Text: {text}\n\nAnswer the following question about the "
+    "above text in at most 3 words.\n\nQuestion: {question}\n\nAnswer in max 3 words:",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -779,6 +791,8 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     languages=[EN],
     prompt_prefix="The following are articles with accompanying summaries.",
     prompt_template="News article: {text}\nSummary: {target_text}",
+    instruction_prompt="News article: {text}\n\nWrite a summary of the above "
+    "article.\n\nSummary:",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -894,6 +908,8 @@ MMLU_CONFIG = DatasetConfig(
     prompt_prefix="The following are multiple choice questions (with answers).",
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Question: {text}\n\nAnswer the above question by "
+    "replying with 'a', 'b', 'c' or 'd'.\n\nAnswer:",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1012,6 +1028,8 @@ ARC_CONFIG = DatasetConfig(
     prompt_prefix="The following are multiple choice questions (with answers).",
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Question: {text}\n\nAnswer the above question by "
+    "replying with 'a', 'b', 'c' or 'd'.\n\nAnswer:",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1131,6 +1149,8 @@ HELLASWAG_CONFIG = DatasetConfig(
     prompt_prefix="The following are multiple choice questions (with answers).",
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Question: {text}\n\nAnswer the above question by "
+    "replying with 'a', 'b', 'c' or 'd'.\n\nAnswer:",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )

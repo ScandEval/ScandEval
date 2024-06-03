@@ -230,6 +230,9 @@ class DatasetConfig:
         prompt_label_mapping (optional):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
+        instruction_prompt (optional):
+            The prompt to use when benchmarking the dataset using instruction-based
+            evaluation. Defaults to an empty string.
         unofficial (optional):
             Whether the dataset is unofficial. Defaults to False.
     """
@@ -244,6 +247,7 @@ class DatasetConfig:
     prompt_prefix: str = ""
     num_few_shot_examples: int = 0
     prompt_label_mapping: dict[str, str] = field(default_factory=dict)
+    instruction_prompt: str = ""
     unofficial: bool = False
 
     @property
