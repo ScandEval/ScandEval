@@ -759,5 +759,6 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
 
     label_prefix = prompt.split("\n\n")[-1]
     instruction_prompt += label_prefix
+    breakpoint()
 
     return instruction_prompt
