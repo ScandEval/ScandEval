@@ -402,6 +402,9 @@ class BenchmarkDataset(ABC):
         if hasattr(sys, "_called_from_test"):
             test = test.select(range(1))
 
+        # TEMP
+        test = test.select(range(10))
+
         # Bootstrap the test set
         test_bidxs = rng.integers(
             0, len(test), size=(self.benchmark_config.num_iterations, len(test))
@@ -487,34 +490,32 @@ class BenchmarkDataset(ABC):
                 prepared_tests: list["Dataset"] = list()
                 for itr_idx, test in enumerate(tests):
                     if benchmarking_generative_model:
-                        itr_seed = 4242 + itr_idx
-                        few_shot_examples = self._extract_few_shot_examples(
-                            train_dataset=train, random_seed=itr_seed
-                        )
-                        few_shot_fn = partial(
-                            self._apply_few_shot_prompt,
-                            few_shot_examples=few_shot_examples,
-                            tokenizer=tokenizer,
-                        )
-                        test = test.map(
-                            few_shot_fn,
-                            batched=True,
-                            load_from_cache_file=False,
-                            keep_in_memory=True,
-                        )
-
-                        # NOTE: This applies the model's chat template if one is
-                        # available. However, all experiments have shown this to reduce
-                        # overall performance, so it is left out for now.
-                        # test = test.map(
-                        #     function=lambda x: dict(
-                        #         text=convert_prompt_to_instruction(
-                        #             prompt=x["text"], tokenizer=tokenizer
-                        #         )
-                        #     ),
-                        #     load_from_cache_file=False,
-                        #     keep_in_memory=True,
-                        # )
+                        if self.benchmark_config.few_shot:
+                            itr_seed = 4242 + itr_idx
+                            few_shot_examples = self._extract_few_shot_examples(
+                                train_dataset=train, random_seed=itr_seed
+                            )
+                            few_shot_fn = partial(
+                                self._apply_few_shot_prompt,
+                                few_shot_examples=few_shot_examples,
+                                tokenizer=tokenizer,
+                            )
+                            test = test.map(
+                                few_shot_fn,
+                                batched=True,
+                                load_from_cache_file=False,
+                                keep_in_memory=True,
+                            )
+                        else:
+                            instruction_fn = partial(
+                                self._apply_instruction_prompt, tokenizer=tokenizer
+                            )
+                            test = test.map(
+                                function=instruction_fn,
+                                batched=True,
+                                load_from_cache_file=False,
+                                keep_in_memory=True,
+                            )
 
                         # Determine if we should strip the prompts. This is the case if
                         # the tokenizer needs to include the space as part of the label
@@ -715,6 +716,21 @@ class BenchmarkDataset(ABC):
 
         Returns:
             The examples with the few-shot prompt applied.
+        """
+        pass
+
+    @abstractmethod
+    def _apply_instruction_prompt(self, examples: dict, tokenizer: "Tokenizer") -> dict:
+        """Apply an instruction prompt to the examples.
+
+        Args:
+            examples:
+                The examples to apply the prompt to.
+            tokenizer:
+                The tokenizer to use to encode the instruction prompt.
+
+        Returns:
+            The examples with the instruction prompt applied.
         """
         pass
 

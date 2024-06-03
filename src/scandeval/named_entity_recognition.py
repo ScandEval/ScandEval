@@ -19,6 +19,7 @@ from .exceptions import InvalidBenchmark, NeedsExtraInstalled
 from .generation import extract_raw_predictions
 from .utils import (
     GENERATIVE_MODEL_TASKS,
+    convert_prompt_to_instruction,
     model_is_generative,
     raise_if_model_output_contains_nan_values,
 )
@@ -585,6 +586,31 @@ class NamedEntityRecognition(BenchmarkDataset):
             few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
         ]
 
+        return examples
+
+    def _apply_instruction_prompt(self, examples: dict, tokenizer: "Tokenizer") -> dict:
+        """Apply an instruction prompt to the examples.
+
+        Args:
+            examples:
+                The examples to apply the prompt to.
+            tokenizer:
+                The tokenizer to use to encode the instruction prompt.
+
+        Returns:
+            The examples with the instruction prompt applied.
+        """
+        prompts = [
+            self.dataset_config.instruction_prompt.format(
+                text=re.sub(r"\n+", "\n", text).strip()
+            )
+            for text in examples["text"]
+        ]
+        prompts = [
+            convert_prompt_to_instruction(prompt=prompt, tokenizer=tokenizer)
+            for prompt in prompts
+        ]
+        examples["text"] = prompts
         return examples
 
     def _extract_labels_from_generation(
