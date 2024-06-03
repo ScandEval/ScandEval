@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   released).
 
 
+## [v12.10.4] - 2024-06-03
+### Fixed
+- Access to the evaluation datasets were shut down by Hugging Face again. It has now
+  been restored.
+
+
 ## [v12.10.3] - 2024-06-03
 ### Fixed
 - Access to the evaluation datasets were shut down by Hugging Face. It has now been
