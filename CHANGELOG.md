@@ -10,7 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Updated `vllm` to `>=0.4.3,<0.5.0`, to accomodate new models. This release also
   doesn't have a strict requirement on `tiktoken`, so this has now been set to
-  `>=0.7.0,<0.8.0`, to accomodate GPT-4o.
+  `>=0.7.0,<0.8.0`, to accomodate GPT-4o. However, `outlines` is still pinned and thus
+  still needs manual updating when benchmarking NER tasks (this will be fixed when
+  [this vLLM PR](https://github.com/vllm-project/vllm/pull/4109) has been merged and
+  released).
 
 
 ## [v12.10.3] - 2024-06-03
