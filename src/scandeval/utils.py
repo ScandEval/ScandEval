@@ -759,6 +759,5 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     )
     assert isinstance(instruction_prompt, str)
     instruction_prompt += label_prefix
-    breakpoint()
 
     return instruction_prompt
