@@ -751,14 +751,13 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
         tokenize=False,
     )
 
-    breakpoint()
-    prompt = "\n\n".join(prompt.split("\n\n")[:-1])
+    instruction = "\n\n".join(prompt.split("\n\n")[:-1])
     instruction_prompt = tokenizer.apply_chat_template(
-        conversation=[dict(role="user", content=prompt)], **chat_template_kwargs
+        conversation=[dict(role="user", content=instruction)], **chat_template_kwargs
     )
     assert isinstance(instruction_prompt, str)
 
-    label_prefix = prompt.split("\n\n")[-1]
+    label_prefix = instruction_prompt.split("\n\n")[-1]
     instruction_prompt += label_prefix
     breakpoint()
 
