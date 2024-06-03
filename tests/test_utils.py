@@ -10,8 +10,10 @@ from scandeval.utils import (
     enforce_reproducibility,
     get_end_of_chat_token_ids,
     is_module_installed,
+    scramble,
     should_prefix_space_be_added_to_labels,
     should_prompts_be_stripped,
+    unscramble,
 )
 from transformers import AutoTokenizer
 
@@ -186,3 +188,15 @@ def test_convert_prompt_to_instruction(prompt, model_id, expected, auth):
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
     instruction = convert_prompt_to_instruction(prompt=prompt, tokenizer=tokenizer)
     assert instruction == expected
+
+
+@pytest.mark.parametrize(
+    argnames=["text"],
+    argvalues=[("abc",), ("hasd_asd2w",), ("a",), ("",)],
+    ids=["short_text", "long_text", "single_char_text", "empty_text"],
+)
+def test_scrambling(text):
+    """Test that a text can be scrambled and unscrambled."""
+    scrambled = scramble(text=text)
+    unscrambled = unscramble(scrambled_text=scrambled)
+    assert unscrambled == text
