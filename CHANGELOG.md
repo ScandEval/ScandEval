@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [v12.10.3] - 2024-06-03
+### Fixed
+- Access to the evaluation datasets were shut down by Hugging Face. It has now been
+  restored.
+
+
 ## [v12.10.2] - 2024-05-30
 ### Fixed
 - Correctly update logits processors and prefix allowed functions tokens functions for
