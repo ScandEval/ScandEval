@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.10.3] - 2024-06-03
 ### Fixed
 - Access to the evaluation datasets were shut down by Hugging Face. It has now been
   restored.
