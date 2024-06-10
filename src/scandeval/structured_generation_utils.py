@@ -12,7 +12,12 @@ if importlib.util.find_spec("outlines") is not None:
     # Check outlines version and make sure that it is at least 0.0.37
     from outlines._version import __version__ as outlines_version
 
-    outlines_version = tuple(map(int, outlines_version.split(".")))
+    outlines_version = tuple(
+        [
+            int(version) if version.isdigit() else 0
+            for version in outlines_version.split(".")
+        ]
+    )
     if outlines_version < (0, 0, 37):
         raise InvalidBenchmark(
             "Evaluating models on the named entity recognition task requires "
