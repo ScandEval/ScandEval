@@ -140,11 +140,9 @@ human_evaluate = "scandeval.human_evaluation:main"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
-    '--verbose',
     '--durations=10',
     '--color=no',
-    '-s',
-    '-vv',
+    '--capture=no',
     '--doctest-modules',
     '--cov=src/scandeval',
 ]
