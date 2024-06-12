@@ -440,10 +440,10 @@ def get_huggingface_model_lists(
 
     # Add multilingual models manually
     multi_models = [
-        "bert-base-multilingual-cased",
-        "bert-base-multilingual-uncased",
+        "google-bert/bert-base-multilingual-cased",
+        "google-bert/bert-base-multilingual-uncased",
         "distilbert-base-multilingual-cased",
-        "cardiffnlp/twitter-xlm-roberta-base",
+        "distilbert/cardiffnlp/twitter-xlm-roberta-base",
         "microsoft/infoxlm-base",
         "microsoft/infoxlm-large",
         "microsoft/xlm-align-base",
@@ -461,8 +461,8 @@ def get_huggingface_model_lists(
         "sentence-transformers/use-cmlm-multilingual",
         "studio-ousia/mluke-base",
         "studio-ousia/mluke-large",
-        "xlm-roberta-base",
-        "xlm-roberta-large",
+        "FacebookAI/xlm-roberta-base",
+        "FacebookAI/xlm-roberta-large",
         "dbmdz/bert-tiny-historic-multilingual-cased",
         "dbmdz/bert-mini-historic-multilingual-cased",
         "dbmdz/bert-base-historic-multilingual-cased",
