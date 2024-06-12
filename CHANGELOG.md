@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Remove almost all upper version bounds on dependencies. This makes it easier to be
+  compatible with the `scandeval` package, with the risk of potentially introducing
+  bugs when new dependency versions appear. We will monitor this risk and see if this
+  is the way to go.
+
 ### Fixed
+- Update `vllm` to `>=0.5.0`, `outlines` to `>=0.0.37` and `tiktoken` to `>=0.7.0`,
+  which now resolves the dependency clash between the three of them.
 - When detecting the `outlines` version we expected it to consist of integers, but we
   now accept strings as well (for development versions, say).
 
