@@ -142,7 +142,6 @@ minversion = "6.0"
 addopts = [
     '--durations=10',
     '--color=no',
-    '--capture=no',
     '--doctest-modules',
     '--cov=src/scandeval',
 ]
