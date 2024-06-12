@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Changed
+- Remove almost all upper version bounds on dependencies. This makes it easier to be
+  compatible with the `scandeval` package, with the risk of potentially introducing
+  bugs when new dependency versions appear. We will monitor this risk and see if this
+  is the way to go.
+
+### Fixed
+- Update `vllm` to `>=0.5.0`, `outlines` to `>=0.0.37` and `tiktoken` to `>=0.7.0`,
+  which now resolves the dependency clash between the three of them.
+
+
 ## [v12.10.4] - 2024-06-03
 ### Fixed
 - Access to the evaluation datasets were shut down by Hugging Face again. It has now
