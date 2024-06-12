@@ -152,6 +152,7 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
     "ignore::ImportWarning",
+    "ignore::FutureWarning",
 ]
 log_cli_level = "info"
 testpaths = ["tests", "src/scandeval"]
