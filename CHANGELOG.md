@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Update `vllm` to `>=0.5.0`, `outlines` to `>=0.0.37` and `tiktoken` to `>=0.7.0`,
   which now resolves the dependency clash between the three of them.
+- When detecting the `outlines` version we expected it to consist of integers, but we
+  now accept strings as well (for development versions, say).
 
 
 ## [v12.10.4] - 2024-06-03
