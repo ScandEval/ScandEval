@@ -80,7 +80,7 @@ def test_module_is_installed(module_name, expected):
         ("mistralai/Mistral-7B-v0.1", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
         ("01-ai/Yi-6B", True),
-        ("bert-base-uncased", False),
+        ("google-bert/bert-base-uncased", False),
         ("meta-llama/Meta-Llama-3-8B", True),
     ],
 )
