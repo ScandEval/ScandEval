@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Updated `optimum` to `>=1.20.0` as `1.19.x` is incompatible with newer `transformers`
+  versions.
+
+
 ## [v12.10.5] - 2024-06-12
 ### Changed
 - Remove almost all upper version bounds on dependencies. This makes it easier to be
