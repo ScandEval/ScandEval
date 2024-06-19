@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Updated `optimum` to `>=1.20.0` as `1.19.x` is incompatible with newer `transformers`
   versions.
+- Updated `outlines` to `>=0.44.0` as this fixes an error in evaluating NorwAI models.
 
 
 ## [v12.10.5] - 2024-06-12
