@@ -9,32 +9,8 @@ from pydantic import BaseModel, conlist, create_model
 from .exceptions import InvalidBenchmark
 
 if importlib.util.find_spec("outlines") is not None:
-    # Check outlines version and make sure that it is at least 0.0.37
-    from outlines._version import __version__ as outlines_version
-
-    outlines_version = tuple(
-        [
-            int(version) if version.isdigit() else 0
-            for version in outlines_version.split(".")
-        ]
-    )
-    if outlines_version < (0, 0, 37):
-        raise InvalidBenchmark(
-            "Evaluating models on the named entity recognition task requires "
-            "`outlines>=0.0.37`. Please upgrade this with `pip install -U outlines` "
-            "and try again. This is a temporary measure and will be installed properly "
-            "in the next release."
-        )
-
-    try:
-        from outlines.integrations.transformers import JSONPrefixAllowedTokens
-        from outlines.integrations.vllm import JSONLogitsProcessor
-
-    # TEMP: Remove this once `vllm` has a more lax dependency on `outlines`
-    except ImportError:
-        from outlines.serve.vllm import JSONLogitsProcessor
-
-        JSONPrefixAllowedTokens = None
+    from outlines.integrations.transformers import JSONPrefixAllowedTokens
+    from outlines.integrations.vllm import JSONLogitsProcessor
 
 if TYPE_CHECKING:
     from transformers import PreTrainedTokenizerBase
