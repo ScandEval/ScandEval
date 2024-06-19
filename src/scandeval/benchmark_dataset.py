@@ -324,8 +324,7 @@ class BenchmarkDataset(ABC):
             max_sequence_length=max_seq_length,
             vocabulary_size=vocab_size,
             generative=benchmarking_generative_model,
-            # TODO: This will be changed when we support finetuning of generative models
-            few_shot=True,
+            few_shot=self.benchmark_config.few_shot,
             validation_split=self.benchmark_config.only_validation_split,
         )
 
