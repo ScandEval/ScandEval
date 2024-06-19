@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.10.7] - 2024-06-19
 ### Fixed
 - Require `numpy` to be of version `1.x.x`, as the new `2.0.0` clashes with `outlines`.
 
