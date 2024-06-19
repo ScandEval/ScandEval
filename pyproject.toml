@@ -18,7 +18,7 @@ python = ">=3.10,<3.12"
 # Core packages
 torch = ">=2.3.0"
 pandas = ">=2.2.0"
-numpy = ">=1.23.0"
+numpy = ">=1.23.0,<2.0.0"
 transformers = ">=4.41.0"
 accelerate = ">=0.26.0"
 evaluate = ">=0.4.1"

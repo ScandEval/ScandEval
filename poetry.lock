@@ -6194,4 +6194,4 @@ quantization = ["auto-gptq", "autoawq", "optimum"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "0bb7389d84f9aeb7c7399a266be88a55c005f2d6ca09b2b4ca92622bf2f15f12"
+content-hash = "f9e149144015514689f029776dd18c4fff19af6a135ebe73ec571767cf45dae8"
