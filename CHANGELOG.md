@@ -6,14 +6,25 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.10.6] - 2024-06-19
+### Fixed
+- Updated `optimum` to `>=1.20.0` as `1.19.x` is incompatible with newer `transformers`
+  versions.
+- Updated `outlines` to `>=0.44.0` as this fixes an error in evaluating NorwAI models.
+
+
+## [v12.10.5] - 2024-06-12
 ### Changed
-- Updated `vllm` to `>=0.4.3,<0.5.0`, to accomodate new models. This release also
-  doesn't have a strict requirement on `tiktoken`, so this has now been set to
-  `>=0.7.0,<0.8.0`, to accomodate GPT-4o. However, `outlines` is still pinned and thus
-  still needs manual updating when benchmarking NER tasks (this will be fixed when
-  [this vLLM PR](https://github.com/vllm-project/vllm/pull/4109) has been merged and
-  released).
+- Remove almost all upper version bounds on dependencies. This makes it easier to be
+  compatible with the `scandeval` package, with the risk of potentially introducing
+  bugs when new dependency versions appear. We will monitor this risk and see if this
+  is the way to go.
+
+### Fixed
+- Update `vllm` to `>=0.5.0`, `outlines` to `>=0.0.37` and `tiktoken` to `>=0.7.0`,
+  which now resolves the dependency clash between the three of them.
+- When detecting the `outlines` version we expected it to consist of integers, but we
+  now accept strings as well (for development versions, say).
 
 
 ## [v12.10.4] - 2024-06-03

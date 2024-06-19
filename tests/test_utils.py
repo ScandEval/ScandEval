@@ -80,7 +80,7 @@ def test_module_is_installed(module_name, expected):
         ("mistralai/Mistral-7B-v0.1", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
         ("01-ai/Yi-6B", True),
-        ("bert-base-uncased", False),
+        ("google-bert/bert-base-uncased", False),
         ("meta-llama/Meta-Llama-3-8B", True),
     ],
 )
@@ -121,7 +121,7 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
         ("occiglot/occiglot-7b-de-en", None, None),
         ("occiglot/occiglot-7b-de-en-instruct", [32001, 28705, 13], "<|im_end|>"),
         ("mhenrichsen/danskgpt-tiny", None, None),
-        ("mhenrichsen/danskgpt-tiny-chat", [32000, 29871, 13], "<|im_end|>"),
+        ("mhenrichsen/danskgpt-tiny-chat", [32000, 13], "<|im_end|>"),
         ("mayflowergmbh/Wiedervereinigung-7b-dpo", None, None),
         ("Qwen/Qwen1.5-0.5B-Chat", [151645, 198], "<|im_end|>"),
         ("norallm/normistral-7b-warm", None, None),
