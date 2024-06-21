@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [v12.10.8] - 2024-06-21
 ### Fixed
 - An import error caused `openai` to be installed for any evaluations to be done, which
   has now been fixed.
