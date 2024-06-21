@@ -6,7 +6,6 @@ import math
 from typing import TYPE_CHECKING, Literal
 
 import torch
-from openai.types.chat.chat_completion_token_logprob import TopLogprob
 from torch import LongTensor
 from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
@@ -26,6 +25,7 @@ if importlib.util.find_spec("tiktoken") is not None:
 
 if importlib.util.find_spec("openai") is not None:
     from openai import AzureOpenAI, BadRequestError, NotFoundError, OpenAI
+    from openai.types.chat.chat_completion_token_logprob import TopLogprob
     from openai.types.chat.completion_create_params import ResponseFormat
 
 logger = logging.getLogger(__package__)
