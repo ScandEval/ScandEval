@@ -61,6 +61,8 @@ SWEREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
+    instruction_prompt="Recension: {text}\n\nKlassificera sentimentet i recensionen "
+    "som 'positiv', 'neutral' eller 'negativ'.\n\nSentiment:",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -78,6 +80,8 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
+    instruction_prompt="Tweet: {tekst}\n\nKlassificer sentimentet i tweetet som "
+    "'positiv', 'neutral' eller 'negativ'.\n\nSentiment:",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -95,6 +99,8 @@ NOREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="nøytral", negative="negativ"
     ),
+    instruction_prompt="Anmeldelse: {tekst}\n\nKlassifiser følelsen av anmeldelsen "
+    "som 'positiv', 'nøytral' eller 'negativ'.\n\nSentiment:",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -144,6 +150,8 @@ SB10K_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
+    instruction_prompt="Tweet: {text}\n\nKlassifizieren Sie die Stimmung des Tweets "
+    "als 'positiv', 'neutral' oder 'negativ'.\n\nStimmungslage:",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -161,6 +169,8 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positief", neutral="neutraal", negative="negatief"
     ),
+    instruction_prompt="Tweet: {tekst}\n\nKlasseer het sentiment van de tweet als "
+    "'positief', 'neutraal' of 'negatief'.\n\nSentiment:",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
