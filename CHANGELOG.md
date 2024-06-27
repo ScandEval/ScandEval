@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Updated the `arc-is` dataset to a Claude translated version of ARC-challenge, from the
+  dataset `mideind/icelandic-arc-challenge`. This has substantially higher translation
+  quality than the previous `arc-is` and the current `mmlu-is` datasets. For this
+  reason, the new `arc-is` dataset is now the official Icelandic dataset for the
+  knowledge task.
+
+
 ## [v12.10.8] - 2024-06-21
 ### Fixed
 - An import error caused `openai` to be installed for any evaluations to be done, which
