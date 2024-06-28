@@ -124,6 +124,8 @@ sentiment-classification`.
 
 
 ## Special Thanks :pray:
+- Thanks to [OpenAI](https://openai.com/) for sponsoring OpenAI credits as part of their
+  [Researcher Access Program](https://openai.com/form/researcher-access-program/).
 - Thanks to [UWV](https://www.uwv.nl/) and [KU
   Leuven](https://www.arts.kuleuven.be/ling/ccl) for sponsoring the Azure OpenAI
   credits used to evaluate GPT-4-turbo in Dutch.
