@@ -137,6 +137,12 @@ sentiment-classification`.
 If you want to cite the framework then feel free to use this:
 
 ```
+@article{nielsen2024encoder,
+  title={Encoder vs Decoder: Comparative Analysis of Encoder and Decoder Language Models on Multilingual NLU Tasks},
+  author={Nielsen, Dan Saattrup and Enevoldsen, Kenneth and Schneider-Kamp, Peter},
+  journal={arXiv preprint arXiv:2406.13469},
+  year={2024}
+}
 @inproceedings{nielsen2023scandeval,
   author = {Nielsen, Dan Saattrup},
   booktitle = {Proceedings of the 24th Nordic Conference on Computational Linguistics (NoDaLiDa)},
