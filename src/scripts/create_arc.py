@@ -25,7 +25,6 @@ def main() -> None:
         "da": "Svarmuligheder",
         "no": "Svaralternativer",
         "sv": "Svarsalternativ",
-        "is": "Svarmöguleikar",
         "de": "Antwortmöglichkeiten",
         "nl": "Antwoordopties",
         "en": "Choices",

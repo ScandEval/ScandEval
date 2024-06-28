@@ -855,6 +855,7 @@ MMLU_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
     max_generated_tokens=1,
+    unofficial=True,
 )
 
 MMLU_DE_CONFIG = DatasetConfig(
@@ -970,7 +971,6 @@ ARC_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
     max_generated_tokens=1,
-    unofficial=True,
 )
 
 ARC_DE_CONFIG = DatasetConfig(
