@@ -54,7 +54,7 @@ jobs:
     if: github.event.pull_request.draft == false && contains(github.event.pull_request.labels.*.name, 'macos')
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Poetry
         run: pipx install poetry==1.8.2
