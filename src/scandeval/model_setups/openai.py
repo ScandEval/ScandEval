@@ -121,7 +121,7 @@ class OpenAIModelSetup:
         if self.benchmark_config.azure_openai_api_key is not None:
             return True
 
-        all_models: list[openai.models.Model] = list()
+        all_models: list[openai.types.model.Model] = list()
         try:
             all_models = list(openai.models.list())
         except openai.OpenAIError as e:

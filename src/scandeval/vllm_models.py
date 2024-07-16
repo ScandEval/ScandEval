@@ -99,7 +99,7 @@ class VLLMModel:
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
             raise NeedsExtraInstalled(extra="quantization")
 
-        dtype = "auto"
+        dtype: str | torch.dtype = "auto"
         if quantization is not None and self.config.torch_dtype != torch.float16:
             logger.info(
                 "You are loading a quantized model with dtype "

@@ -99,7 +99,7 @@ def aggregate_scores(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
 
-        results = dict()
+        results: dict[str, tuple[float, float]] = dict()
 
         if "train" in scores.keys():
             train_scores = [
@@ -110,7 +110,7 @@ def aggregate_scores(
                 )
                 for dct in scores["train"]
             ]
-            train_score = np.mean(train_scores)
+            train_score = np.mean(train_scores).item()
 
             if len(train_scores) > 1:
                 sample_std = np.std(train_scores, ddof=1)
@@ -129,7 +129,7 @@ def aggregate_scores(
                 )
                 for dct in scores["test"]
             ]
-            test_score = np.mean(test_scores)
+            test_score = np.mean(test_scores).item()
 
             if len(test_scores) > 1:
                 sample_std = np.std(test_scores, ddof=1)

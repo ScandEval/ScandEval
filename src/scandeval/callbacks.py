@@ -13,6 +13,8 @@ class NeverLeaveProgressCallback(ProgressCallback):
     def __init__(self, *args, **kwargs):
         """Initialise the callback."""
         super().__init__(*args, **kwargs)
+        self.training_bar: tqdm
+        self.prediction_bar: tqdm | None
 
     def on_train_begin(self, args, state, control, **kwargs):
         """Callback actions when training begins."""

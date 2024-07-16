@@ -106,9 +106,7 @@ class NamedEntityRecognition(BenchmarkDataset):
             predictions = [
                 [
                     id2label[pred_id]
-                    for pred_id, lbl_id in zip(  # type: ignore[call-overload]
-                        pred, label
-                    )
+                    for pred_id, lbl_id in zip(pred, label)
                     if lbl_id != -100
                 ]
                 for pred, label in zip(raw_predictions, labels)
@@ -120,7 +118,7 @@ class NamedEntityRecognition(BenchmarkDataset):
                         if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
                         else lbl_id
                     )
-                    for lbl_id in label  # type: ignore[call-overload]
+                    for lbl_id in label
                     if lbl_id != -100
                 ]
                 for label in labels
@@ -155,15 +153,15 @@ class NamedEntityRecognition(BenchmarkDataset):
                     predictions_no_misc[i][j] = "o"
 
         # Remove MISC labels from labels
-        labels_no_misc = deepcopy(labels)
+        labels_no_misc: list[list[str]] = deepcopy(labels)  # type: ignore[arg-type]
         for i, label_list in enumerate(labels_no_misc):
-            for j, ner_tag in enumerate(label_list):  # type: ignore[arg-type]
+            for j, ner_tag in enumerate(label_list):
                 if (
                     isinstance(ner_tag, str)
                     and len(ner_tag) >= 4
-                    and ner_tag[-4:] == "misc"  # type: ignore[index]
+                    and ner_tag[-4:] == "misc"
                 ):
-                    labels_no_misc[i][j] = "o"  # type: ignore[call-overload]
+                    labels_no_misc[i][j] = "o"
 
         # Compute the metrics
         # We manually set the F1 metric to be 100% if both the labels and the models
