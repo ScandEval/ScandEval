@@ -80,7 +80,10 @@ install-pre-commit:  ## Install pre-commit hooks
 	@poetry run pre-commit install
 
 lint:  ## Lint the code
-	@poetry run ruff check . --fix
+	@poetry run ruff check src --fix
+
+format:  ## Format the code
+	@poetry run ruff format src
 
 type-check:  ## Run type checking
 	@poetry run mypy src --install-types --non-interactive --ignore-missing-imports --show-error-codes --check-untyped-defs
