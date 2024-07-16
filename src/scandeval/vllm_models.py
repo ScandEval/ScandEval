@@ -116,6 +116,7 @@ class VLLMModel:
             trust_remote_code=self.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
+            distributed_executor_backed="ray",
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,
