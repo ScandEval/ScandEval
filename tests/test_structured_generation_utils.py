@@ -1,10 +1,9 @@
 """Unit tests for the `structured_generation_utils` module."""
 
 import json
-from typing import Callable, Generator
+from typing import TYPE_CHECKING, Generator
 
 import pytest
-import torch
 from scandeval.generation import StopWordCriteria
 from scandeval.structured_generation_utils import get_ner_prefix_allowed_tokens_fn
 from scandeval.utils import create_model_cache_dir
@@ -16,6 +15,9 @@ from transformers import (
     PreTrainedTokenizerBase,
     StoppingCriteriaList,
 )
+
+if TYPE_CHECKING:
+    from outlines.integrations.transformers import JSONPrefixAllowedTokens
 
 
 @pytest.fixture(scope="module")
@@ -40,7 +42,7 @@ def model(
 @pytest.fixture(scope="module")
 def ner_prefix_allowed_tokens_fn(
     tokenizer,
-) -> Generator[Callable[[int, torch.Tensor], list[int]], None, None]:
+) -> Generator["JSONPrefixAllowedTokens", None, None]:
     """A prefix_allowed_tokens_fn for named entity recognition."""
     yield get_ner_prefix_allowed_tokens_fn(
         ner_tag_names=["person", "location"], tokenizer=tokenizer

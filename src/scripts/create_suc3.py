@@ -83,7 +83,9 @@ def main():
             assert len(tokens) == len(ner_tags)
 
             # Create the record and append it to the list of records
-            record = dict(doc=doc, tokens=tokens, ner_tags=ner_tags)
+            record: dict[str, str | list[str]] = dict(
+                doc=doc, tokens=tokens, ner_tags=ner_tags
+            )
             records.append(record)
 
         # If the current element starts a sentence then reset the list of tokens and

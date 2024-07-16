@@ -11,12 +11,13 @@ on:
       - main
 
 jobs:
-  lint:
+  code-check:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: jpetrucciani/ruff-check@main
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
 
   pytest-linux:
     if: github.event.pull_request.draft == false
@@ -32,7 +33,7 @@ jobs:
         run: pipx install poetry==1.8.2
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
@@ -40,7 +41,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install --extras cpu_all
+          poetry install --extras cpu_all --no-interaction --no-cache
 
       - name: Test with pytest
         run: poetry run pytest
@@ -60,7 +61,7 @@ jobs:
         run: pipx install poetry==1.8.2
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.10
           cache: "poetry"
@@ -68,7 +69,7 @@ jobs:
       - name: Install Dependencies
         run: |
           poetry env use "${{ matrix.python-version }}"
-          poetry install --extras cpu_all
+          poetry install --extras cpu_all --no-interaction --no-cache
 
       - name: Test with pytest
         run: poetry run pytest

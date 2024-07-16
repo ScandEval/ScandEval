@@ -181,7 +181,7 @@ class SequenceClassification(BenchmarkDataset):
             for pred in predictions
         ]
 
-        labels = [
+        label_ids = [
             label2id[label.lower()] if isinstance(label, str) else label
             for label in labels
         ]
@@ -190,7 +190,7 @@ class SequenceClassification(BenchmarkDataset):
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
             score_dict: dict[str, float] | None = metric.compute(
-                predictions=predictions, references=labels, **cfg.compute_kwargs
+                predictions=predictions, references=label_ids, **cfg.compute_kwargs
             )
 
             # The metric returns None if we are running on multi-GPU and the current

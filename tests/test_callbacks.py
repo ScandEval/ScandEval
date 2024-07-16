@@ -48,6 +48,7 @@ class TestNeverLeaveProgressCallback:
         """Test that the `leave` attribute on the training progress bar is False."""
         assert callback.training_bar is None
         callback.on_train_begin(args=None, state=state, control=None)
+        assert callback.training_bar is not None
         assert not callback.training_bar.leave
 
     def test_on_prediction_step_initialises_not_leaving_pbar(
@@ -58,4 +59,5 @@ class TestNeverLeaveProgressCallback:
         callback.on_prediction_step(
             args=None, state=state, control=None, eval_dataloader=eval_dataloader
         )
+        assert callback.prediction_bar is not None
         assert not callback.prediction_bar.leave

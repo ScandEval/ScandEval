@@ -52,7 +52,9 @@ def finetune(
     data_collator: "DataCollator",
     trainer_class: Type["Trainer"],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],
-    preprocess_logits_for_metrics: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
+    preprocess_logits_for_metrics: Callable[
+        [torch.Tensor | tuple, torch.Tensor], torch.Tensor | tuple
+    ],
 ) -> dict[str, list[dict[str, float]]]:
     """Evaluate a model on a dataset through finetuning.
 
@@ -235,7 +237,9 @@ def finetune_single_iteration(
     model: PreTrainedModel | None,
     trainer_class: Type["Trainer"],
     evaluate_inputs_fn: Callable[..., dict[str, Any]],
-    preprocess_logits_for_metrics: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
+    preprocess_logits_for_metrics: Callable[
+        [torch.Tensor | tuple, torch.Tensor], torch.Tensor | tuple
+    ],
 ) -> dict[str, dict[str, float]]:
     """Run a single iteration of a benchmark.
 

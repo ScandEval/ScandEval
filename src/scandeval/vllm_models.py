@@ -99,7 +99,7 @@ class VLLMModel:
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
             raise NeedsExtraInstalled(extra="quantization")
 
-        dtype = "auto"
+        dtype: str | torch.dtype = "auto"
         if quantization is not None and self.config.torch_dtype != torch.float16:
             logger.info(
                 "You are loading a quantized model with dtype "
@@ -116,6 +116,7 @@ class VLLMModel:
             trust_remote_code=self.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
+            distributed_executor_backend="ray",
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,

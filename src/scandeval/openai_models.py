@@ -560,7 +560,7 @@ class OpenAIModel:
         output = LongTensor(completion_ids)
 
         if generation_config.return_dict_in_generate:
-            output_dict = dict(sequences=output)
+            output_dict: dict[str, Tensor | tuple] = dict(sequences=output)
 
             # Add logprobs scores to the output
             if generation_config.output_scores:
