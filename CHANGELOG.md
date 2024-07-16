@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
+  evaluation of Gemma 2 models.
+
+
 ## [v12.11.0] - 2024-07-03
 ### Added
 - Updated the `arc-is` dataset to a Claude translated version of ARC-challenge, from the
