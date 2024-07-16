@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
   evaluation of Gemma 2 models.
+- Remove upper bound on Python versions, to avoid installation issues.
 
 
 ## [v12.11.0] - 2024-07-03
