@@ -80,13 +80,13 @@ install-pre-commit:  ## Install pre-commit hooks
 	@poetry run pre-commit install
 
 lint:  ## Lint the code
-	@poetry run ruff check src --fix
+	@poetry run ruff check . --fix
 
 format:  ## Format the code
-	@poetry run ruff format src
+	@poetry run ruff format .
 
 type-check:  ## Run type checking
-	@poetry run mypy src --install-types --non-interactive --ignore-missing-imports --show-error-codes --check-untyped-defs
+	@poetry run mypy . --install-types --non-interactive --ignore-missing-imports --show-error-codes --check-untyped-defs
 
 setup-environment-variables:
 	@poetry run python src/scripts/fix_dot_env_file.py
