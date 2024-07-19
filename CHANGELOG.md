@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Set upper bound on Python versions to `<4.0` from `<3.12`, to avoid installation
   issues.
 
+### Changed
+- Added `gpt-4o-mini` metadata, to correctly display maximum sequence length and
+  vocabulary size.
+
 
 ## [v12.11.0] - 2024-07-03
 ### Added
