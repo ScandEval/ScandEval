@@ -564,8 +564,22 @@ SCALA_NL_CONFIG = DatasetConfig(
 
 DUTCH_COLA_CONFIG = DatasetConfig(
     name="dutch-cola",
-    pretty_name="a linguistic acceptability dataset for Dutch, Dutch CoLA, inspired by the original CoLA dataset",
+    pretty_name="the truncated version of the Dutch linguistic acceptability dataset Dutch CoLA",
     huggingface_id="ScandEval/dutch-cola",
+    task=LA,
+    languages=[NL],
+    prompt_prefix="Hieronder staan zinnen en of ze grammaticaal correct ('ja') of incorrect ('nee') zijn.",
+    prompt_template="Zin: {text}\nGrammaticaal correct: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nee"),
+    num_few_shot_examples=12,
+    max_generated_tokens=3,
+    unofficial=True,
+)
+
+DUTCH_COLA_FULL_CONFIG = DatasetConfig(
+    name="dutch-cola-full",
+    pretty_name="the Dutch linguistic acceptability dataset Dutch CoLA",
+    huggingface_id="ScandEval/dutch-cola-full",
     task=LA,
     languages=[NL],
     prompt_prefix="Hieronder staan zinnen en of ze grammaticaal correct ('ja') of incorrect ('nee') zijn.",
