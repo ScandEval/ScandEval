@@ -2,7 +2,7 @@
 
 from .config import DatasetConfig
 from .languages import DA, DE, EN, FO, IS, NB, NL, NN, NO, SV, get_all_languages
-from .tasks import COMMON_SENSE, KNOW, LA, NER, QA, SENT, SPEED, SUMM
+from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:
@@ -577,14 +577,14 @@ SCALA_EN_CONFIG = DatasetConfig(
 )
 
 
-### EXTRACTIVE QUESTION ANSWERING DATASETS ###
+### READING COMPREHENSION DATASETS ###
 
 SCANDIQA_DA_CONFIG = DatasetConfig(
     name="scandiqa-da",
     pretty_name="the Danish part of the truncated version of the question answering "
     "dataset ScandiQA",
     huggingface_id="ScandEval/scandiqa-da-mini",
-    task=QA,
+    task=RC,
     languages=[DA],
     prompt_prefix="Følgende er tekster med tilhørende spørgsmål og svar.",
     prompt_template="Tekst: {text}\nSpørgsmål: {question}\nSvar med maks. 3 ord: "
@@ -598,7 +598,7 @@ NORQUAD_CONFIG = DatasetConfig(
     pretty_name="the truncated version of the Norwegian question answering "
     "dataset NorQuAD",
     huggingface_id="ScandEval/norquad-mini",
-    task=QA,
+    task=RC,
     languages=[NB, NN, NO],
     prompt_prefix="Her følger tekster med tilhørende spørsmål og svar.",
     prompt_template="Tekst: {text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
@@ -611,7 +611,7 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     pretty_name="the Swedish part of the truncated version of the question answering "
     "dataset ScandiQA",
     huggingface_id="ScandEval/scandiqa-sv-mini",
-    task=QA,
+    task=RC,
     languages=[SV],
     prompt_prefix="Nedan följer texter med tillhörande frågor och svar.",
     prompt_template="Text: {text}\nFråga: {question}\nSvar på max 3 ord: {label}",
@@ -624,7 +624,7 @@ NQII_CONFIG = DatasetConfig(
     pretty_name="the truncated version of the Icelandic question answering dataset "
     "Natural Questions in Icelandic",
     huggingface_id="ScandEval/nqii-mini",
-    task=QA,
+    task=RC,
     languages=[IS],
     prompt_prefix="Eftirfarandi eru textar með tilheyrandi spurningum og svörum.",
     prompt_template="Texti: {text}\nSpurning: {question}\nSvaraðu með að hámarki 3 "
@@ -637,7 +637,7 @@ NQII_CONFIG = DatasetConfig(
 #     name="foqa",
 #     pretty_name="Faroese Question Answering",
 #     huggingface_id="ScandEval/foqa-mini",  # TODO: Needs to be uploaded
-#     task=QA,
+#     task=RC,
 #     languages=[FO],
 #     prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
 #     "orðum: {label}",
@@ -650,7 +650,7 @@ GERMANQUAD_CONFIG = DatasetConfig(
     pretty_name="the truncated version of the German question answering dataset "
     "GermanQuAD",
     huggingface_id="ScandEval/germanquad-mini",
-    task=QA,
+    task=RC,
     languages=[DE],
     prompt_prefix="Im Folgenden finden Sie Texte mit den dazugehörigen Fragen und "
     "Antworten.",
@@ -665,7 +665,7 @@ SQUAD_CONFIG = DatasetConfig(
     pretty_name="the truncated version of the English question answering "
     "dataset SQuAD",
     huggingface_id="ScandEval/squad-mini",
-    task=QA,
+    task=RC,
     languages=[EN],
     prompt_prefix="The following are texts with accompanying questions and answers.",
     prompt_template="Text: {text}\nQuestion: {question}\nAnswer in max 3 words: "
@@ -679,7 +679,7 @@ SQUAD_NL_CONFIG = DatasetConfig(
     pretty_name="the truncated version of the Dutch question answering dataset "
     "SQuAD-nl, translated from the English SQuAD dataset",
     huggingface_id="ScandEval/squad-nl-mini",
-    task=QA,
+    task=RC,
     languages=[NL],
     prompt_prefix="Hieronder volgen teksten met bijbehorende vragen en antwoorden.",
     prompt_template="Tekst: {text}\nVraag: {question}\nAntwoord in max 3 woorden: "
@@ -1136,6 +1136,117 @@ HELLASWAG_CONFIG = DatasetConfig(
 )
 
 # TODO: Faroese common sense reasoning
+
+
+### MULTIPLE CHOICE READING COMPREHENSION DATASETS ###
+
+BELEBELE_DA_CONFIG = DatasetConfig(
+    name="belebele-da",
+    pretty_name="the Danish multiple choice reading comprehension dataset BeleBele-da, "
+    "translated from the English BeleBele dataset",
+    huggingface_id="ScandEval/belebele-da-mini",
+    task=MCRC,
+    languages=[DA],
+    prompt_prefix="Følgende er tekster med tilhørende multiple choice spørgsmål og svar.",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
+BELEBELE_SV_CONFIG = DatasetConfig(
+    name="belebele-sv",
+    pretty_name="the Swedish multiple choice reading comprehension dataset BeleBele-sv, "
+    "translated from the English BeleBele dataset",
+    huggingface_id="ScandEval/belebele-sv-mini",
+    task=MCRC,
+    languages=[SV],
+    prompt_prefix="Nedan följer texter med tillhörande multiple choice frågor och svar.",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
+BELEBELE_NO_CONFIG = DatasetConfig(
+    name="belebele-no",
+    pretty_name="the Norwegian multiple choice reading comprehension dataset BeleBele-no, "
+    "translated from the English BeleBele dataset",
+    huggingface_id="ScandEval/belebele-no-mini",
+    task=MCRC,
+    languages=[NB, NN, NO],
+    prompt_prefix="Her følger tekster med tilhørende multiple choice spørsmål og svar.",
+    prompt_template="{text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
+BELEBELE_IS_CONFIG = DatasetConfig(
+    name="belebele-is",
+    pretty_name="the Icelandic multiple choice reading comprehension dataset BeleBele-is, "
+    "translated from the English BeleBele dataset",
+    huggingface_id="ScandEval/belebele-is-mini",
+    task=MCRC,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru textar með tilheyrandi fjölvalsspurningum og "
+    "svörum.",
+    prompt_template="{text}\nSvara: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
+BELEBELE_DE_CONFIG = DatasetConfig(
+    name="belebele-de",
+    pretty_name="the German multiple choice reading comprehension dataset BeleBele-de, "
+    "translated from the English BeleBele dataset",
+    huggingface_id="ScandEval/belebele-de-mini",
+    task=MCRC,
+    languages=[DE],
+    prompt_prefix="Die folgenden Texte sind mit dazugehörigen Multiple-Choice-Fragen "
+    "und Antworten.",
+    prompt_template="{text}\nAntwort: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
+BELEBELE_NL_CONFIG = DatasetConfig(
+    name="belebele-nl",
+    pretty_name="the Dutch multiple choice reading comprehension dataset BeleBele-nl, "
+    "translated from the English BeleBele dataset",
+    huggingface_id="ScandEval/belebele-nl-mini",
+    task=MCRC,
+    languages=[NL],
+    prompt_prefix="Hieronder staan teksten met bijbehorende multiple choice vragen en "
+    "antwoorden.",
+    prompt_template="{text}\nAntwoord: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
+BELEBELE_CONFIG = DatasetConfig(
+    name="belebele",
+    pretty_name="the English multiple choice reading comprehension dataset BeleBele",
+    huggingface_id="ScandEval/belebele-mini",
+    task=MCRC,
+    languages=[EN],
+    prompt_prefix="The following are texts with accompanying multiple choice questions "
+    "and answers.",
+    prompt_template="{text}\nAnswer: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+    unofficial=True,
+)
 
 
 ### SPEED ESTIMATION DATASETS ###

@@ -29,12 +29,13 @@ class TestGetAllTasks:
         [
             "linguistic-acceptability",
             "named-entity-recognition",
-            "question-answering",
+            "reading-comprehension",
             "sentiment-classification",
             "summarization",
             "knowledge",
             "common-sense-reasoning",
             "text-modelling",
+            "multiple-choice-reading-comprehension",
             "speed",
         ],
     )
