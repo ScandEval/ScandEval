@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   linguistic acceptability dataset. For now, you can benchmark models on it by
   explicitly setting the dataset using the `--dataset` argument (or `dataset` argument
   if using the `Benchmarker` API).
+- Added the Belebele dataset, being a multilingual multiple-choice reading comprehension
+  dataset. This has been added as a separate `multiple-choice-reading-comprehension`
+  task, and is available in all supported languages except Faroese. The dataset has been
+  marked as unofficial, meaning that it will not be automatically included when
+  benchmarking models, but can be included by specifying the dataset explicitly using
+  the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
 
 ### Fixed
 - Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
@@ -23,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Added `gpt-4o-mini` metadata, to correctly display maximum sequence length and
   vocabulary size.
+- Changed the name of the `question-answering` task to the more descriptive name
+  `reading-comprehension`.
 
 
 ## [v12.11.0] - 2024-07-03
