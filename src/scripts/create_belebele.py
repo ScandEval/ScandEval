@@ -143,7 +143,7 @@ def main() -> None:
         df.reset_index(drop=True, inplace=True)
 
         # Create validation split
-        val_size = 64
+        val_size = 128
         traintest_arr, val_arr = train_test_split(
             df, test_size=val_size, random_state=4242
         )
@@ -151,16 +151,12 @@ def main() -> None:
         val_df = pd.DataFrame(val_arr, columns=df.columns)
 
         # Create test split
-        test_size = 512
+        train_size = 64
         train_arr, test_arr = train_test_split(
-            traintest_df, test_size=test_size, random_state=4242
+            traintest_df, train_size=train_size, random_state=4242
         )
         train_df = pd.DataFrame(train_arr, columns=df.columns)
         test_df = pd.DataFrame(test_arr, columns=df.columns)
-
-        # Create train split
-        train_size = 256
-        train_df = train_df.sample(train_size, random_state=4242)
 
         # Reset the index
         train_df = train_df.reset_index(drop=True)
