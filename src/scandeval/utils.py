@@ -28,6 +28,7 @@ from transformers import logging as tf_logging
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
+from .openai_models import OpenAITokenizer
 
 if TYPE_CHECKING:
     from huggingface_hub.hf_api import ModelInfo
@@ -169,6 +170,7 @@ def block_terminal_output():
     logging.getLogger("openai").setLevel(logging.CRITICAL)
     logging.getLogger("torch.distributed.distributed_c10d").setLevel(logging.CRITICAL)
     logging.getLogger("torch.nn.parallel.distributed").setLevel(logging.CRITICAL)
+    logging.getLogger("vllm").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.engine.llm_engine").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.transformers_utils.tokenizer").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.core.scheduler").setLevel(logging.CRITICAL)
@@ -179,6 +181,7 @@ def block_terminal_output():
 
     # This suppresses vLLM logging
     os.environ["LOG_LEVEL"] = "CRITICAL"
+    os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
 
     if importlib.util.find_spec("ray") is not None:
         ray._private.worker._worker_logs_enabled = False
@@ -437,10 +440,10 @@ def get_huggingface_model_lists(
 
     # Add multilingual models manually
     multi_models = [
-        "bert-base-multilingual-cased",
-        "bert-base-multilingual-uncased",
+        "google-bert/bert-base-multilingual-cased",
+        "google-bert/bert-base-multilingual-uncased",
         "distilbert-base-multilingual-cased",
-        "cardiffnlp/twitter-xlm-roberta-base",
+        "distilbert/cardiffnlp/twitter-xlm-roberta-base",
         "microsoft/infoxlm-base",
         "microsoft/infoxlm-large",
         "microsoft/xlm-align-base",
@@ -458,8 +461,8 @@ def get_huggingface_model_lists(
         "sentence-transformers/use-cmlm-multilingual",
         "studio-ousia/mluke-base",
         "studio-ousia/mluke-large",
-        "xlm-roberta-base",
-        "xlm-roberta-large",
+        "FacebookAI/xlm-roberta-base",
+        "FacebookAI/xlm-roberta-large",
         "dbmdz/bert-tiny-historic-multilingual-cased",
         "dbmdz/bert-mini-historic-multilingual-cased",
         "dbmdz/bert-base-historic-multilingual-cased",
@@ -635,6 +638,7 @@ def should_prompts_be_stripped(
         )
         if label_tokens_start_with_colon_tokens:
             strip_prompts = False
+
     return strip_prompts
 
 
@@ -655,6 +659,11 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
+    # We don't add a prefix space to OpenAI models, since they output strings directly,
+    # and we always strip these for token ID consistency
+    if isinstance(tokenizer, OpenAITokenizer):
+        return False
+
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
@@ -664,6 +673,7 @@ def should_prefix_space_be_added_to_labels(
         ids=tokenizer(" ", add_special_tokens=False).input_ids[0]
     )[0]
 
+    add_prefix_space = True
     for label in labels_to_be_generated:
         label_tokens = tokenizer(label, add_special_tokens=False).input_ids
         if isinstance(label_tokens, torch.Tensor):
@@ -672,8 +682,10 @@ def should_prefix_space_be_added_to_labels(
         first_character_of_label = tokenizer.convert_ids_to_tokens(first_label_token)[0]
         has_prefix_space = first_character_of_label == whitespace_token
         if has_prefix_space:
-            return False
-    return True
+            add_prefix_space = False
+            break
+
+    return add_prefix_space
 
 
 def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
@@ -791,3 +803,36 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     instruction_prompt += label_prefix
 
     return instruction_prompt
+
+
+def scramble(text: str) -> str:
+    """Scramble a string in a bijective manner.
+
+    Args:
+        text:
+            The string to scramble.
+
+    Returns:
+        The scrambled string.
+    """
+    rng = np.random.default_rng(seed=4242)
+    permutation = rng.permutation(x=len(text))
+    scrambled = "".join(text[i] for i in permutation)
+    return scrambled
+
+
+def unscramble(scrambled_text: str) -> str:
+    """Unscramble a string in a bijective manner.
+
+    Args:
+        scrambled_text:
+            The scrambled string to unscramble.
+
+    Returns:
+        The unscrambled string.
+    """
+    rng = np.random.default_rng(seed=4242)
+    permutation = rng.permutation(x=len(scrambled_text))
+    inverse_permutation = np.argsort(permutation)
+    unscrambled = "".join(scrambled_text[i] for i in inverse_permutation)
+    return unscrambled

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ScandEval"
-version = "12.9.0"
+version = "12.11.0"
 description = "Evaluation of pretrained language models on mono- or multilingual language tasks."
 authors = ["Dan Saattrup Nielsen <dan.nielsen@alexandra.dk>"]
 maintainers = [
@@ -13,55 +13,53 @@ homepage = "https://scandeval.github.io"
 repository = "https://github.com/ScandEval/ScandEval"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
+python = ">=3.10,<4.0"
 
 # Core packages
-torch = "~2.1.1"
-pandas = "^2.2.0"
-numpy = "^1.23.0"
-transformers = "~4.40.0"
-accelerate = "^0.26.0"
-evaluate = "^0.4.1"
-datasets = "^2.15.0"
-click = "^8.1.3"
-pydantic = "^2.6.0"
-termcolor = "^2.0.0"
-seqeval = "^1.2.2"
-python-dotenv = "^1.0.1"
-pyinfer = "^0.0.3"  # Used for speed evaluation
+torch = ">=2.3.0"
+pandas = ">=2.2.0"
+numpy = ">=1.23.0,<2.0.0"
+transformers = ">=4.42.4"
+accelerate = ">=0.26.0"
+evaluate = ">=0.4.1"
+datasets = ">=2.15.0"
+click = ">=8.1.3"
+pydantic = ">=2.6.0"
+termcolor = ">=2.0.0"
+seqeval = ">=1.2.2"
+python-dotenv = ">=1.0.1"
+pyinfer = ">=0.0.3"  # Used for speed evaluation
 
 # Needed for some tokenisers
-sentencepiece = "^0.1.96"
+sentencepiece = ">=0.1.96"
 protobuf = "~3.20.0"
-sacremoses = "^0.1.1"
+sacremoses = ">=0.1.1"
 
 # Needed for evaluation of generative models
-rouge-score = { version = "^0.1.2", optional = true }
-bert-score = { version = "^0.3.13", optional = true }
-demjson3 = { version = "^3.0.6", optional = true }
-bitsandbytes = { markers = "sys_platform != 'darwin' or platform_machine != 'arm64'", version = "^0.43.1", optional = true }
-vllm = { markers = "sys_platform != 'darwin'", version = "0.4.0", optional = true }
-outlines = { version = "^0.0.34", optional = true }
+rouge-score = { version = ">=0.1.2", optional = true }
+bert-score = { version = ">=0.3.13", optional = true }
+demjson3 = { version = ">=3.0.6", optional = true }
+bitsandbytes = { markers = "sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.43.1", optional = true }
+vllm = { markers = "sys_platform != 'darwin'", version = ">=0.5.2", optional = true }
+outlines = { version = ">=0.0.44", optional = true }
 
 # Needed for loading JAX based encoder models
-jax = { version = "^0.4.24", optional = true }
-jaxlib = { version = "^0.4.24", optional = true }
-flax = { version = "^0.8.1", optional = true }
+jax = { version = ">=0.4.24", optional = true }
+jaxlib = { version = ">=0.4.24", optional = true }
+flax = { version = ">=0.8.1", optional = true }
 
 # Needed for evaluating OpenAI models
-openai = { version = "^1.11.1", optional = true }
-levenshtein = { version = "^0.24.0", optional = true }  # This is also used for human evaluation
+openai = { version = ">=1.11.1", optional = true }
+tiktoken = {version = ">=0.7.0", optional = true}
+levenshtein = { version = ">=0.24.0", optional = true }  # This is also used for human evaluation
 
 # Needed for quantised models
-auto-gptq = { version = "^0.7.1", optional = true }
-optimum = { version = "^1.19.1", optional = true }
-# We can allow future versions of `autoawq` when the v0.2.5 has been released.
-# Issue tracker: https://github.com/casper-hansen/AutoAWQ/issues/425
-autoawq = { version = "0.2.3", optional = true }
+auto-gptq = { version = ">=0.7.1", optional = true }
+optimum = { version = ">=1.20.0", optional = true }
+autoawq = { version = ">=0.2.5", optional = true }
 
 # Needed for human evaluation
-gradio = { version = "^4.26.0", optional = true }
-
+gradio = { version = ">=4.26.0", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.1.1"
@@ -88,10 +86,6 @@ generative = [
     "bert-score",
 ]
 openai = [
-    "demjson3",
-    "outlines",
-    "bitsandbytes",
-    "vllm",
     "rouge-score",
     "bert-score",
     "openai",
@@ -117,8 +111,6 @@ all = [
     "outlines",
     "bitsandbytes",
     "vllm",
-    "rouge-score",
-    "bert-score",
     "openai",
     "tiktoken",
     "levenshtein",
@@ -135,8 +127,6 @@ cpu_all = [
     "bert-score",
     "demjson3",
     "outlines",
-    "rouge-score",
-    "bert-score",
     "openai",
     "tiktoken",
     "levenshtein",
@@ -150,11 +140,8 @@ human_evaluate = "scandeval.human_evaluation:main"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
-    '--verbose',
     '--durations=10',
     '--color=no',
-    '-s',
-    '-vv',
     '--doctest-modules',
     '--cov=src/scandeval',
 ]
@@ -165,6 +152,7 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
     "ignore::ImportWarning",
+    "ignore::FutureWarning",
 ]
 log_cli_level = "info"
 testpaths = ["tests", "src/scandeval"]

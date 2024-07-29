@@ -48,7 +48,12 @@ def test_encoder_benchmarking(benchmark_dataset, model_id):
 
 
 @pytest.mark.skipif(condition=os.getenv("TEST_EVALUATIONS") == "0", reason="Skipped")
-def test_decoder_benchmarking(benchmark_dataset, generative_model_id):
+def test_decoder_benchmarking(
+    benchmark_dataset, generative_model_id, generative_model_and_tokenizer
+):
     """Test that decoder models can be benchmarked on named entity recognition."""
+    model, tokenizer = generative_model_and_tokenizer
     with does_not_raise():
-        benchmark_dataset.benchmark(generative_model_id)
+        benchmark_dataset.benchmark(
+            model_id=generative_model_id, model=model, tokenizer=tokenizer
+        )

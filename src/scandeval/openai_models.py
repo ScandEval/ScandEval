@@ -2,6 +2,7 @@
 
 import importlib.util
 import logging
+import math
 from typing import TYPE_CHECKING, Literal
 
 import torch
@@ -11,9 +12,9 @@ from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .exceptions import InvalidBenchmark, InvalidModel, NeedsExtraInstalled
 from .tasks import NER
-from .types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
+from .types import is_list_of_int, is_list_of_list_of_int
 
 if TYPE_CHECKING:
     from torch import Tensor
@@ -24,6 +25,7 @@ if importlib.util.find_spec("tiktoken") is not None:
 
 if importlib.util.find_spec("openai") is not None:
     from openai import AzureOpenAI, BadRequestError, NotFoundError, OpenAI
+    from openai.types.chat.chat_completion_token_logprob import TopLogprob
     from openai.types.chat.completion_create_params import ResponseFormat
 
 logger = logging.getLogger(__package__)
@@ -78,10 +80,17 @@ class OpenAITokenizer:
         """Return the underlying tiktoken encoding."""
         try:
             return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
-        except KeyError:
+        except KeyError as e:
+            if "gpt-4o" in str(e):
+                raise InvalidModel(
+                    message="This model needs a newer version of `tiktoken` to be "
+                    "used. Please run `pip install --upgrade tiktoken` and try again."
+                )
+
             # For Azure, the model_id is the deployment name. I do not know how to
             # dynamically get the currently deployed model so assuming Azure only
             # supports the latest models.
+            # TODO: This needs to be fixed, as gpt-4o uses a different encoding
             return tiktoken.get_encoding("cl100k_base")
 
     def __call__(self, text: str | list[str], **kwargs) -> BatchEncoding:
@@ -150,7 +159,7 @@ class OpenAITokenizer:
         """
         return [self.decode(token_ids=sequence) for sequence in sequences]
 
-    def encode(self, text: str | list[str] | list[int], **kwargs) -> list[int]:
+    def encode(self, text: str, **kwargs) -> list[int]:
         """Encode text.
 
         Args:
@@ -162,12 +171,7 @@ class OpenAITokenizer:
         Returns:
             The encoded text.
         """
-        if is_list_of_int(text):
-            return text
-        elif is_list_of_str(text) or isinstance(text, str):
-            return self(text, **kwargs).input_ids.tolist()
-        else:
-            raise TypeError(f"Cannot encode {type(text)}.")
+        return self(text, **kwargs).input_ids.tolist()[0]
 
     @property
     def special_tokens_map(self) -> dict[str, str | list[str]]:
@@ -521,7 +525,12 @@ class OpenAIModel:
             n=generation_config.num_return_sequences,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             stop=["\n\n", self.tokenizer.eos_token, self.tokenizer.pad_token],
+            seed=4242,
         )
+
+        if generation_config.output_scores:
+            generation_kwargs["logprobs"] = True
+            generation_kwargs["top_logprobs"] = 10
 
         if (
             self.dataset_config.task == NER
@@ -538,21 +547,57 @@ class OpenAIModel:
                 generation_output = model_output.choices[0].text.strip()
             else:
                 model_output = self.client.chat.completions.create(
-                    messages=[dict(role="user", content=prompt)], **generation_kwargs
+                    messages=[dict(role="system", content=prompt)], **generation_kwargs
                 )
                 generation_output = model_output.choices[0].message.content.strip()
         except BadRequestError as e:
-            logger.debug(
-                "Encountered error during OpenAI generation - returning blank string "
-                f"instead. The error thrown was {str(e)!r}, and the prompt causing "
-                f"it was {prompt!r}."
+            raise InvalidBenchmark(
+                f"Encountered error during OpenAI generation: {str(e)!r}\n"
+                f"The prompt causing it was {prompt!r}."
             )
-            generation_output = " "
 
         completion_ids = self.tokenizer([generation_output]).input_ids.tolist()
         output = LongTensor(completion_ids)
 
         if generation_config.return_dict_in_generate:
-            output = ModelOutput(dict(sequences=output))
+            output_dict: dict[str, Tensor | tuple] = dict(sequences=output)
+
+            # Add logprobs scores to the output
+            if generation_config.output_scores:
+                # Create a list with placeholder logprobs for every token generated.
+                # Each tensor in the list will be of shape (batch_size, vocab_size)
+                batch_size = 1
+                vocab_size = self.config.vocab_size
+                logprobs_list = model_output.choices[0].logprobs.content
+                seq_len = len(logprobs_list)
+                scores = [
+                    torch.full(size=(batch_size, vocab_size), fill_value=-math.inf)
+                    for _ in range(seq_len)
+                ]
+
+                # Fill in the logprobs for each generated token. The logprobs from the
+                # OpenAI output only contain the logprobs for the top-k tokens, so we
+                # only fill in these and leave the rest at ~0% probability
+                for gen_token_idx, logprobs in enumerate(logprobs_list):
+                    # Remove duplicate logprobs, since, e.g., "negative" and " negative"
+                    # can both be included in the list, and we only want the one with
+                    # the highest logprob
+                    top_logprobs: list[TopLogprob] = list()
+                    for logprob_obj in logprobs.top_logprobs:
+                        token = logprob_obj.token.strip()
+                        if token in {lg.token.strip() for lg in top_logprobs}:
+                            continue
+                        top_logprobs.append(logprob_obj)
+
+                    for logprob_obj in top_logprobs:
+                        logprob = logprob_obj.logprob
+                        token = logprob_obj.token.strip()
+                        if token:
+                            token_idx = self.tokenizer.encode(text=token)[0]
+                            scores[gen_token_idx][0, token_idx] = logprob
+
+                output_dict["scores"] = tuple(scores)
+
+            return ModelOutput(output_dict)
 
         return output

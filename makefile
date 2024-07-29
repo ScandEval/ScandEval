@@ -41,8 +41,7 @@ install: ## Install dependencies
 	@$(MAKE) --quiet install-poetry
 	@$(MAKE) --quiet setup-poetry
 	@$(MAKE) --quiet setup-environment-variables
-	@$(MAKE) --quiet setup-git
-	@echo "Installed the 'ScandEval' project."
+	@echo "Installed the 'ScandEval' project. If you want to use pre-commit hooks, run 'make install-pre-commit'."
 
 install-brew:
 	@if [ $$(uname) = "Darwin" ] && [ "$(shell which brew)" = "" ]; then \
@@ -77,46 +76,51 @@ setup-poetry:
 	    poetry env use python3.10 && poetry install --extras all; \
 	fi
 
+install-pre-commit:  ## Install pre-commit hooks
+	@poetry run pre-commit install
+
+lint:  ## Lint the code
+	@poetry run ruff check . --fix
+
+format:  ## Format the code
+	@poetry run ruff format .
+
+type-check:  ## Run type checking
+	@poetry run mypy . --install-types --non-interactive --ignore-missing-imports --show-error-codes --check-untyped-defs
+
 setup-environment-variables:
 	@poetry run python src/scripts/fix_dot_env_file.py
 
 setup-environment-variables-non-interactive:
 	@poetry run python src/scripts/fix_dot_env_file.py --non-interactive
 
-setup-git:
-	@git config --global init.defaultBranch main
-	@git init
-	@git config --local user.name ${GIT_NAME}
-	@git config --local user.email ${GIT_EMAIL}
-	@poetry run pre-commit install
-
 test:  ## Run tests
 	@if [ "$(shell which nvidia-smi)" != "" ]; then \
 		$(MAKE) --quiet test-cuda-vllm; \
-		$(MAKE) --quiet test-cuda-no-vllm; \
+	else \
+		$(MAKE) --quiet test-cpu; \
 	fi
-	@$(MAKE) --quiet test-cpu
 	@$(MAKE) --quiet update-coverage-badge
 	@date "+%H:%M:%S ⋅ All done!"
 
 test-cuda-vllm:
 	@rm tests_with_cuda_and_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and vLLM..." \
-		&& USE_CUDA=1 USE_VLLM=1 TEST_ALL_DATASETS=1 \
+		&& USE_CUDA=1 USE_VLLM=1 \
 			poetry run pytest | tee tests_with_cuda_and_vllm.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and vLLM!"
 
 test-cuda-no-vllm:
 	@rm tests_with_cuda_and_no_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and no vLLM..." \
-		&& USE_CUDA=1 USE_VLLM=0 TEST_ALL_DATASETS=1 \
+		&& USE_CUDA=1 USE_VLLM=0 \
 			poetry run pytest | tee tests_with_cuda_and_no_vllm.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and no vLLM!"
 
 test-cpu:
 	@rm tests_with_cpu.log; \
 		date "+%H:%M:%S ⋅ Running tests with CPU..." \
-		&& USE_CUDA=0 TEST_ALL_DATASETS=1 poetry run pytest | tee tests_with_cpu.log \
+		&& USE_CUDA=0 poetry run pytest | tee tests_with_cpu.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CPU!"
 
 test-fast:  # Run CPU tests without evaluations
@@ -125,6 +129,16 @@ test-fast:  # Run CPU tests without evaluations
 		&& USE_CUDA=0 TEST_EVALUATIONS=0 \
 			poetry run pytest | tee tests_with_cpu_fast.log \
 		&& date "+%H:%M:%S ⋅ Finished fast testing with CPU!"
+
+test-slow:  # Run all tests
+	@if [ "$(shell which nvidia-smi)" != "" ]; then \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cuda-vllm; \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cuda-no-vllm; \
+	else \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cpu; \
+	fi
+	@$(MAKE) --quiet update-coverage-badge
+	@date "+%H:%M:%S ⋅ All done!"
 
 update-coverage-badge:
 	@poetry run readme-cov

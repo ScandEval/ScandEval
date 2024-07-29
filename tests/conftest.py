@@ -14,8 +14,15 @@ from scandeval.config import (
     ModelConfig,
     Task,
 )
-from scandeval.dataset_configs import MMLU_CONFIG, get_all_dataset_configs
+from scandeval.dataset_configs import (
+    ANGRY_TWEETS_CONFIG,
+    MMLU_CONFIG,
+    get_all_dataset_configs,
+)
 from scandeval.enums import Framework, ModelType
+from scandeval.model_config import get_model_config
+from scandeval.model_loading import load_model
+from scandeval.protocols import GenerativeModel, Tokenizer
 from scandeval.tasks import SPEED
 
 
@@ -45,7 +52,12 @@ def auth() -> Generator[str | bool, None, None]:
 @pytest.fixture(scope="session")
 def device() -> Generator[torch.device, None, None]:
     """Yields the device to use for the tests."""
-    device = torch.device("cuda" if os.getenv("USE_CUDA", "0") == "1" else "cpu")
+    if os.getenv("USE_CUDA", "0") == "1":
+        device = torch.device("cuda")
+    elif os.getenv("USE_MPS", "0") == "1":
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
     yield device
 
 
@@ -118,6 +130,26 @@ def model_id() -> Generator[str, None, None]:
 def generative_model_id() -> Generator[str, None, None]:
     """Yields a generative model ID used in tests."""
     yield "mhenrichsen/danskgpt-tiny"
+
+
+@pytest.fixture(scope="session")
+def generative_model_and_tokenizer(
+    benchmark_config, generative_model_id
+) -> Generator[tuple[GenerativeModel | None, Tokenizer | None], None, None]:
+    """Yields a generative model ID used in tests."""
+    if os.getenv("USE_VLLM", "0") == "1":
+        model_config = get_model_config(
+            model_id=generative_model_id, benchmark_config=benchmark_config
+        )
+        model, tokenizer = load_model(
+            model_config=model_config,
+            dataset_config=ANGRY_TWEETS_CONFIG,
+            benchmark_config=benchmark_config,
+        )
+    else:
+        model = None
+        tokenizer = None
+    yield model, tokenizer
 
 
 @pytest.fixture(scope="session")

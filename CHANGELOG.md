@@ -6,6 +6,127 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
+  evaluation of Gemma 2 models.
+- Set upper bound on Python versions to `<4.0` from `<3.12`, to avoid installation
+  issues.
+
+### Changed
+- Added `gpt-4o-mini` metadata, to correctly display maximum sequence length and
+  vocabulary size.
+
+
+## [v12.11.0] - 2024-07-03
+### Added
+- Updated the `arc-is` dataset to a Claude translated version of ARC-challenge, from the
+  dataset `mideind/icelandic-arc-challenge`. This has substantially higher translation
+  quality than the previous `arc-is` and the current `mmlu-is` datasets. For this
+  reason, the new `arc-is` dataset is now the official Icelandic dataset for the
+  knowledge task.
+
+
+## [v12.10.8] - 2024-06-21
+### Fixed
+- An import error caused `openai` to be installed for any evaluations to be done, which
+  has now been fixed.
+
+
+## [v12.10.7] - 2024-06-19
+### Fixed
+- Require `numpy` to be of version `1.x.x`, as the new `2.0.0` clashes with `outlines`.
+
+
+## [v12.10.6] - 2024-06-19
+### Fixed
+- Updated `optimum` to `>=1.20.0` as `1.19.x` is incompatible with newer `transformers`
+  versions.
+- Updated `outlines` to `>=0.44.0` as this fixes an error in evaluating NorwAI models.
+
+
+## [v12.10.5] - 2024-06-12
+### Changed
+- Remove almost all upper version bounds on dependencies. This makes it easier to be
+  compatible with the `scandeval` package, with the risk of potentially introducing
+  bugs when new dependency versions appear. We will monitor this risk and see if this
+  is the way to go.
+
+### Fixed
+- Update `vllm` to `>=0.5.0`, `outlines` to `>=0.0.37` and `tiktoken` to `>=0.7.0`,
+  which now resolves the dependency clash between the three of them.
+- When detecting the `outlines` version we expected it to consist of integers, but we
+  now accept strings as well (for development versions, say).
+
+
+## [v12.10.4] - 2024-06-03
+### Fixed
+- Access to the evaluation datasets were shut down by Hugging Face again. It has now
+  been restored.
+
+
+## [v12.10.3] - 2024-06-03
+### Fixed
+- Access to the evaluation datasets were shut down by Hugging Face. It has now been
+  restored.
+
+
+## [v12.10.2] - 2024-05-30
+### Fixed
+- Correctly update logits processors and prefix allowed functions tokens functions for
+  NER datasets when starting generation.
+- We now use logprobs for OpenAI models, as this is supported by the chat models now.
+  This is used for all sequence classification based tasks, which currently comprise of
+  sentiment classification, linguistic acceptability, knowledge and common-sense
+  reasoning. This fixes some incorrect evaluations of the newer GPT-4-turbo and GPT-4o
+  models, as they tend to output things like "Sentiment: positive" rather than simply
+  "positive".
+
+
+## [v12.10.1] - 2024-05-28
+### Fixed
+- Now recognises the metadata for the new GPT-4o models correctly. Currently there is a
+  version clash between `vllm` and `tiktoken`, meaning that one needs to manually
+  upgrade `tiktoken` to evaluate GPT-4o - an informative error message notes this to
+  the user now in that case.
+- Number of generated tokens for sequence classification tasks has been changed back to
+  1 (from 3). This makes no difference to open source models, as we only use the
+  logprobs from the first token anyway, but this makes a big difference on multiple
+  choice QA tasks for OpenAI models, as some of them might output things like "a is
+  correct" rather than simply "a". Since we're using word edit distance to the labels,
+  this might accidentally cause the final prediction to be different from "a".
+- An error in `outlines<=0.0.36` meant that NER evaluations were near-random.
+  Unfortunately, due to a strict `outlines` requirement in `vllm`, we cannot enforce
+  `outlines>0.0.37` (see [this vLLM PR for a future
+  fix](https://github.com/vllm-project/vllm/pull/4109)). For now, to prevent faulty
+  evaluations, we raise an error, asking the user to manually upgrade `outlines` if
+  they have an old version.
+
+
+## [v12.10.0] - 2024-05-08
+### Changed
+- Update `autoawq` to `>=0.2.5,<0.3.0`, as it now doesn't have a dependency clash with
+  `transformers`.
+- Update `vllm` to `>=0.4.2,<0.5.0`, to support new models (such as Phi-3).
+- Update `torch` to `>=2.3.0,<3.0.0`, as this is required by `vllm`.
+
+### Fixed
+- When overriding benchmark configuration parameters in `Benchmarker.benchmark` then
+  these overridden parameters are now correctly used when building datasets.
+- When a generative model was benchmarked on a NER task followed by another task, the
+  structured generation wasn't set up correctly, as we're not re-initialising the model
+  since v12.8.0. We now ensure that the logits processors are re-built for every
+  dataset.
+
+
+## [v12.9.1] - 2024-04-30
+### Fixed
+- Disables the prefix caching of vLLMs, as it has not been implemented with sliding
+  window attention yet, causing re-initialisation errors.
+- Updates `vllm` to `>=0.4.1,<0.5.0`, as this fixes an issue with benchmarking
+  freezing.
+
+
 ## [v12.9.0] - 2024-04-26
 ### Changed
 - Update `optimum` dependency to `>=1.19.1,<2.0.0`, as it is now compatible with

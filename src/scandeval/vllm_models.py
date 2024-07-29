@@ -13,8 +13,6 @@ from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
 from .exceptions import NeedsExtraInstalled
-from .structured_generation_utils import get_ner_logits_processors
-from .tasks import NER
 from .utils import clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
@@ -23,7 +21,7 @@ if TYPE_CHECKING:
     from transformers import PretrainedConfig, PreTrainedTokenizerBase
     from vllm import LLM, RequestOutput
 
-    from .config import DatasetConfig, ModelConfig
+    from .config import ModelConfig
 
 if importlib.util.find_spec("ray") is not None:
     import ray
@@ -49,7 +47,6 @@ class VLLMModel:
         self,
         model_config: "ModelConfig",
         hf_model_config: "PretrainedConfig",
-        dataset_config: "DatasetConfig",
         model_cache_dir: "str | Path",
         trust_remote_code: bool,
         tokenizer: "PreTrainedTokenizerBase | None" = None,
@@ -61,8 +58,6 @@ class VLLMModel:
                 A model configuration.
             hf_model_config:
                 A Hugging Face model configuration.
-            dataset_config:
-                A dataset configuration.
             model_cache_dir:
                 The directory to cache the model in.
             trust_remote_code:
@@ -73,17 +68,10 @@ class VLLMModel:
         """
         self.model_config = model_config
         self.config = hf_model_config
-        self.dataset_config = dataset_config
         self.model_cache_dir = model_cache_dir
         self.trust_remote_code = trust_remote_code
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
-
-        # This is required to be able to re-initialize the model, in case we have
-        # already initialized it once
-        destroy_model_parallel()
-        clear_memory()
-        ray.shutdown()
 
         self.max_model_len = 5_000
         potential_max_model_length_config_names = [
@@ -111,7 +99,7 @@ class VLLMModel:
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
             raise NeedsExtraInstalled(extra="quantization")
 
-        dtype = "auto"
+        dtype: str | torch.dtype = "auto"
         if quantization is not None and self.config.torch_dtype != torch.float16:
             logger.info(
                 "You are loading a quantized model with dtype "
@@ -128,38 +116,41 @@ class VLLMModel:
             trust_remote_code=self.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
+            distributed_executor_backend="ray",
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,
             dtype=dtype,
             enforce_eager=True,
             max_logprobs=10,
-            enable_prefix_caching=True,
+            # TEMP: Prefix caching isn't supported with sliding window in vLLM yet, so
+            # we disable it for now
+            enable_prefix_caching=False,
         )
 
-        while True:
-            try:
-                self._model = LLM(**vllm_kwargs)
-                break
-            except NotImplementedError as e:
-                if "prefix caching" in str(e):
-                    vllm_kwargs.pop("enable_prefix_caching")
-                    self._model = LLM(**vllm_kwargs)
-                    continue
-                raise e
+        self._model = self._initialise(vllm_kwargs=vllm_kwargs)
 
-        self._model._run_engine = MethodType(
-            _run_engine_with_fixed_progress_bars, self._model
-        )
+    def _initialise(self, vllm_kwargs: dict) -> "LLM":
+        """Initialise the vLLM model.
+
+        Args:
+            vllm_kwargs:
+                The keyword arguments to pass to the vLLM
+
+        Returns:
+            The initialised vLLM model.
+        """
+        clear_vllm()
+        model = LLM(**vllm_kwargs)
+        model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
+        return model
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
-        destroy_model_parallel()
         if hasattr(self, "_model"):
             del self._model
         del self
-        clear_memory()
-        ray.shutdown()
+        clear_vllm()
 
     def generate(
         self,
@@ -231,7 +222,7 @@ class VLLMModel:
             stop=stop_tokens,
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
-            logits_processors=self.logits_processors,
+            logits_processors=generation_kwargs.get("logits_processors"),
         )
 
         # The inputs are tokenised, so we decode them to get the original text, which
@@ -323,29 +314,6 @@ class VLLMModel:
             inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
 
-    def build_logits_processors(self) -> None:
-        """Return the logits processors to use for structured generation.
-
-        This requires the model and tokenizer to be set.
-
-        Raises:
-            ValueError:
-                If the model or tokenizer is not set.
-        """
-        if self.tokenizer is None:
-            raise ValueError("Tokenizer must be set to build logits processors.")
-
-        logits_processors = list()
-
-        if self.dataset_config.task == NER:
-            ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
-            ner_logits_processors = get_ner_logits_processors(
-                ner_tag_names=ner_tag_names, llm=self._model
-            )
-            logits_processors.extend(ner_logits_processors)
-
-        self.logits_processors = logits_processors
-
     def set_tokenizer(self, tokenizer: "PreTrainedTokenizerBase") -> None:
         """Set the tokenizer to use for generation.
 
@@ -396,3 +364,13 @@ def _run_engine_with_fixed_progress_bars(
     outputs = sorted(outputs, key=lambda x: int(x.request_id))
 
     return outputs
+
+
+def clear_vllm() -> None:
+    """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
+    try:
+        destroy_model_parallel()
+    except ImportError:
+        pass
+    clear_memory()
+    ray.shutdown()

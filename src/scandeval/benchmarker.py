@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict
 
 from .benchmark_config_factory import build_benchmark_config
+from .config import BenchmarkConfig
 from .dataset_configs import get_all_dataset_configs
 from .dataset_factory import DatasetFactory
 from .enums import Device, Framework
@@ -323,7 +324,6 @@ class Benchmarker:
         self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
 
         adjust_logging_level(verbose=self.benchmark_config.verbose)
-        self.dataset_factory = DatasetFactory(benchmark_config=self.benchmark_config)
 
     @property
     def benchmark_results(self) -> list[BenchmarkResult]:
@@ -595,6 +595,7 @@ class Benchmarker:
                         raise_errors=benchmark_config.raise_errors,
                         model=loaded_model,
                         tokenizer=loaded_tokenizer,
+                        benchmark_config=benchmark_config,
                     )
                 except InvalidModel as e:
                     if benchmark_config.raise_errors:
@@ -680,6 +681,7 @@ class Benchmarker:
         raise_errors: bool,
         model: "GenerativeModel | None",
         tokenizer: "Tokenizer | None",
+        benchmark_config: BenchmarkConfig,
     ) -> (
         tuple[BenchmarkResult, "GenerativeModel | None", "Tokenizer | None"]
         | dict[str, str]
@@ -697,6 +699,8 @@ class Benchmarker:
                 The pre-loaded model, if available.
             tokenizer:
                 The pre-loaded tokenizer, if available.
+            benchmark_config:
+                The benchmark configuration.
 
         Returns:
             The benchmark result, or a dictionary containing an error message.
@@ -710,7 +714,8 @@ class Benchmarker:
             )
         while True:
             try:
-                dataset = self.dataset_factory.build_dataset(dataset_config)
+                dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
+                dataset = dataset_factory.build_dataset(dataset_config)
                 results, metadata_dict, model, tokenizer = dataset(
                     model_id=model_id, model=model, tokenizer=tokenizer
                 )
