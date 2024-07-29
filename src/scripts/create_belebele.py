@@ -82,7 +82,7 @@ def main() -> None:
         )
 
         # Convert the label to letters
-        label_mapping = {1: "a", 2: "b", 3: "c", 4: "d"}
+        label_mapping = {"1": "a", "2": "b", "3": "c", "4": "d"}
         df.label = df.label.map(label_mapping)
 
         # Create the instruction from the passage and question
