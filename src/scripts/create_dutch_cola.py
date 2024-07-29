@@ -40,7 +40,7 @@ def main() -> None:
 
     # Convert the dataset to a dataframe
     train_df = dataset["train"].to_pandas()
-    val_df = dataset["validation"].to_pandas()
+    val_df = dataset["val"].to_pandas()
     test_df = dataset["test"].to_pandas()
     assert isinstance(train_df, pd.DataFrame)
     assert isinstance(val_df, pd.DataFrame)
@@ -48,15 +48,45 @@ def main() -> None:
 
     # Create validation split
     val_size = 256
-    val_df = val_df.sample(n=val_size, random_state=4242)
+    incorrect_val_df = val_df.query("label == 'incorrect'").sample(
+        val_size // 2, random_state=4242
+    )
+    correct_val_df = val_df.query("label == 'correct'").sample(
+        val_size // 2, random_state=4242
+    )
+    val_df = (
+        pd.concat([incorrect_val_df, correct_val_df])
+        .sample(frac=1.0, random_state=4242)
+        .reset_index(drop=True)
+    )
 
     # Create test split
     test_size = 2048
-    test_df = test_df.sample(n=test_size, random_state=4242)
+    incorrect_test_df = test_df.query("label == 'incorrect'").sample(
+        test_size // 2, random_state=4242
+    )
+    correct_test_df = test_df.query("label == 'correct'").sample(
+        test_size // 2, random_state=4242
+    )
+    test_df = (
+        pd.concat([incorrect_test_df, correct_test_df])
+        .sample(frac=1.0, random_state=4242)
+        .reset_index(drop=True)
+    )
 
     # Create train split
     train_size = 1024
-    train_df = train_df.sample(n=train_size, random_state=4242)
+    incorrect_train_df = train_df.query("label == 'incorrect'").sample(
+        train_size // 2, random_state=4242
+    )
+    correct_train_df = train_df.query("label == 'correct'").sample(
+        train_size // 2, random_state=4242
+    )
+    train_df = (
+        pd.concat([incorrect_train_df, correct_train_df])
+        .sample(frac=1.0, random_state=4242)
+        .reset_index(drop=True)
+    )
 
     # Reset the index
     train_df = train_df.reset_index(drop=True)
