@@ -8,7 +8,7 @@ from scandeval.dataset_factory import DatasetFactory
 from scandeval.named_entity_recognition import NamedEntityRecognition
 from scandeval.question_answering import QuestionAnswering
 from scandeval.sequence_classification import SequenceClassification
-from scandeval.tasks import COMMON_SENSE, KNOW, LA, NER, QA, SENT, SUMM
+from scandeval.tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SUMM
 from scandeval.text_to_text import TextToText
 
 
@@ -55,9 +55,9 @@ def test_build_ner_dataset(dataset_factory, dataset_config):
 
 
 def test_build_qa_dataset(dataset_factory, dataset_config):
-    """Test that QA datasets are built correctly."""
+    """Test that RC datasets are built correctly."""
     cfg = deepcopy(dataset_config)
-    cfg.task = QA
+    cfg.task = RC
     dataset = dataset_factory.build_dataset(dataset=cfg)
     assert isinstance(dataset, QuestionAnswering)
 
@@ -82,6 +82,14 @@ def test_build_common_sense_dataset(dataset_factory, dataset_config):
     """Test that COMMON_SENSE datasets are built correctly."""
     cfg = deepcopy(dataset_config)
     cfg.task = COMMON_SENSE
+    dataset = dataset_factory.build_dataset(dataset=cfg)
+    assert isinstance(dataset, SequenceClassification)
+
+
+def test_build_mcrc_dataset(dataset_factory, dataset_config):
+    """Test that MCRC datasets are built correctly."""
+    cfg = deepcopy(dataset_config)
+    cfg.task = MCRC
     dataset = dataset_factory.build_dataset(dataset=cfg)
     assert isinstance(dataset, SequenceClassification)
 

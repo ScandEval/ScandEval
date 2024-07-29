@@ -10,7 +10,7 @@ from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.languages import DA
 from scandeval.question_answering import QuestionAnswering, prepare_train_examples
-from scandeval.tasks import QA
+from scandeval.tasks import RC
 from scandeval.utils import GENERATIVE_DATASET_TASKS
 from transformers import AutoTokenizer
 
@@ -20,7 +20,7 @@ from transformers import AutoTokenizer
     params=[
         dataset_config
         for dataset_config in get_all_dataset_configs().values()
-        if dataset_config.task == QA
+        if dataset_config.task == RC
         and (
             os.getenv("TEST_ALL_DATASETS", "0") == "1"
             or (not dataset_config.unofficial and dataset_config.languages == [DA])
