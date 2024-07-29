@@ -56,7 +56,7 @@ def main() -> None:
     test_df = pd.DataFrame(test_arr, columns=df.columns)
 
     # Create train split
-    train_size = 256
+    train_size = 1024
     train_df = train_df.sample(train_size, random_state=4242)
 
     # Reset the index
