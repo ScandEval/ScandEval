@@ -91,7 +91,7 @@ def test_build_mcrc_dataset(dataset_factory, dataset_config):
     cfg = deepcopy(dataset_config)
     cfg.task = MCRC
     dataset = dataset_factory.build_dataset(dataset=cfg)
-    assert isinstance(dataset, QuestionAnswering)
+    assert isinstance(dataset, SequenceClassification)
 
 
 @pytest.mark.skip(reason="Text modelling datasets are not yet implemented.")
