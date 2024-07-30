@@ -19,7 +19,7 @@ import pkg_resources
 import requests
 import torch
 from datasets.utils import disable_progress_bar
-from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub import HfApi
 from requests.exceptions import RequestException
 from transformers import GenerationConfig
 from transformers import logging as tf_logging
@@ -408,7 +408,7 @@ def get_huggingface_model_lists(
 
         # Fetch the model list
         models: list["ModelInfo"] = list(
-            api.list_models(filter=ModelFilter(language=language_str), token=token)
+            api.list_models(language=language_str, token=token)
         )
 
         # Filter the models to only keep the ones with the specified language
