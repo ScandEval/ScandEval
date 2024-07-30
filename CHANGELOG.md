@@ -23,7 +23,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `unofficial` for now, but it might eventually replace ScaLA-nl as the official Dutch
   linguistic acceptability dataset. For now, you can benchmark models on it by
   explicitly setting the dataset using the `--dataset` argument (or `dataset` argument
-  if using the `Benchmarker` API).
+  if using the `Benchmarker` API). If you would prefer to run the full dataset, then you
+  can benchmark models on `dutch-cola-full` as well - note that this evaluation will be
+  significantly slower than the `dutch-cola` evaluation.
 - Added the Belebele dataset, being a multilingual multiple-choice reading comprehension
   dataset. This has been added as a separate `multiple-choice-reading-comprehension`
   task, and is available in all supported languages except Faroese. The dataset has been
