@@ -348,6 +348,7 @@ class HFModelSetup:
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
                 attn_implementation="flash_attention_2" if flash_attention else None,
+                low_cpu_mem_usage=True,
                 device_map=(
                     "cuda:0"
                     if (
