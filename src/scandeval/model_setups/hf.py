@@ -8,7 +8,7 @@ from time import sleep
 from typing import TYPE_CHECKING, Type
 
 import torch
-from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub import HfApi
 from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from huggingface_hub.utils import (
@@ -158,8 +158,7 @@ class HFModelSetup:
 
             # Fetch the model metadata
             models = api.list_models(
-                filter=ModelFilter(author=author, model_name=model_name),
-                token=self.benchmark_config.token,
+                author=author, model_name=model_name, token=self.benchmark_config.token
             )
 
             # Filter the models to only keep the one with the specified model ID
