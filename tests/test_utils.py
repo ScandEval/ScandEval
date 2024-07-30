@@ -142,36 +142,38 @@ def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string
     argnames=["prompt", "model_id", "expected"],
     argvalues=[
         (
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
             "mistralai/Mistral-7B-Instruct-v0.1",
-            "<s> [INST] Do what you're told\n\nExample: This is a test [/INST]Label: ",
+            "<s> [INST] Do what you're told\n\nExample: This is a test [/INST]",
         ),
         (
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
             "occiglot/occiglot-7b-de-en-instruct",
-            "<s><|im_start|>system\nDo what you're told<|im_end|>\n<|im_start|>user\n"
-            "Example: This is a test<|im_end|>\n<|im_start|>assistant\nLabel: ",
+            "<s><|im_start|>system\nYou are a helpful assistant. Please give a long "
+            "and detailed answer.<|im_end|>\n<|im_start|>user\nDo what you're told\n\n"
+            "Example: This is a test<|im_end|>\n<|im_start|>assistant\n",
         ),
         (
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
             "mhenrichsen/danskgpt-tiny-chat",
-            "<|im_start|>system\nDo what you're told<|im_end|>\n<|im_start|>user\n"
-            "Example: This is a test<|im_end|>\n<|im_start|>assistant\nLabel: ",
+            "<|im_start|>system\nDu er en hjælpsom assistent.<|im_end|>\n"
+            "<|im_start|>user\nDo what you're told\n\nExample: This is a test"
+            "<|im_end|>\n<|im_start|>assistant\n",
         ),
         (
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
             "mistralai/Mistral-7B-v0.1",
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
         ),
         (
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
             "occiglot/occiglot-7b-de-en",
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
         ),
         (
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
             "mhenrichsen/danskgpt-tiny",
-            "Do what you're told\n\nExample: This is a test\nLabel: ",
+            "Do what you're told\n\nExample: This is a test",
         ),
     ],
     ids=[

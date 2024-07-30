@@ -48,6 +48,7 @@ def test_cli_param_names(params):
         "only_validation_split",
         "few_shot",
         "num_iterations",
+        "debug",
         "help",
     }
 
@@ -84,4 +85,5 @@ def test_cli_param_types(params):
     assert params["only_validation_split"] == BOOL
     assert params["few_shot"] == BOOL
     assert params["num_iterations"] == INT
+    assert params["debug"] == BOOL
     assert params["help"] == BOOL
