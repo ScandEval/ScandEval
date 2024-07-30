@@ -575,7 +575,11 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
             pad_token_id=model.config.pad_token_id,
             eos_token_id=model.config.eos_token_id,
         )
-        model.generate(inputs=dummy_inputs, generation_config=generation_config)
+        model.generate(
+            inputs=dummy_inputs,
+            attention_mask=torch.ones_like(dummy_inputs),
+            generation_config=generation_config,
+        )
         return True
     except (NotImplementedError, TypeError) as e:
         if "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
