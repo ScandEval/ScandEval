@@ -199,7 +199,10 @@ def build_benchmark_config(
     if use_flash_attention is None:
         if torch_device.type != "cuda":
             use_flash_attention = False
-        elif importlib.util.find_spec("flash_attn") is None:
+        elif (
+            importlib.util.find_spec("flash_attn") is None
+            and importlib.util.find_spec("vllm_flash_attn") is None
+        ):
             use_flash_attention = False
             if first_time and torch_device.type == "cuda":
                 message = (

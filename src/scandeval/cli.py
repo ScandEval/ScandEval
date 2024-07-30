@@ -217,8 +217,8 @@ from .tasks import get_all_tasks
     default=None,
     show_default=True,
     help="""Whether to use Flash Attention. If not specified then the model will use
-    Flash Attention for generative models, if a CUDA GPU is availabel and `flash-attn`
-    is installed.""",
+    Flash Attention for generative models if a CUDA GPU is available and `flash-attn`
+    or `vllm-flash-attn` are installed.""",
 )
 @click.option(
     "--clear-model-cache/--no-clear-model-cache",
