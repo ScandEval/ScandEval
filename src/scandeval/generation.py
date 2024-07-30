@@ -30,7 +30,7 @@ from .structured_generation_utils import (
     get_ner_logits_processors,
     get_ner_prefix_allowed_tokens_fn,
 )
-from .tasks import NER, RC, SENT, SUMM
+from .tasks import LA, NER, RC, SENT, SUMM
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_end_of_chat_token_ids
 from .vllm_models import VLLMModel
 
@@ -678,6 +678,7 @@ def debug_log(
         logger.info("\n\n".join(log_msgs))
 
     else:
+        # Define predictions
         if dataset_config.task == RC:
             extracted_labels = [
                 prediction["prediction_text"]
@@ -685,7 +686,8 @@ def debug_log(
                 if isinstance(prediction, dict)
             ]
 
-        if dataset_config.task == SENT:
+        # Define labels
+        if dataset_config.task in {SENT, LA}:
             labels = [
                 dataset_config.prompt_label_mapping.get(label, label).lower()
                 for label in samples["label"]
@@ -697,6 +699,7 @@ def debug_log(
         else:
             labels = samples["label"]
 
+        # Log inputs and outputs
         for input_text, prediction, label in zip(
             samples["text"], extracted_labels, labels
         ):

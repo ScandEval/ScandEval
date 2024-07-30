@@ -61,8 +61,8 @@ SWEREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    instruction_prompt="Recension: {text}\n\nKlassificera sentimentet i recensionen "
-    "som 'positiv', 'neutral' eller 'negativ'.\n\nSentiment:",
+    instruction_prompt="Recension: {text}\n\nKlassificera sentimentet i recensionen. "
+    "Svara med 'positiv', 'neutral' eller 'negativ'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -80,8 +80,8 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    instruction_prompt="Tweet: {text}\n\nKlassificer sentimentet i tweetet som "
-    "'positiv', 'neutral' eller 'negativ'.\n\nSentiment:",
+    instruction_prompt="Tweet: {text}\n\nKlassificer sentimentet i tweetet. Svar kun "
+    "med 'positiv', 'neutral' eller 'negativ'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -99,8 +99,8 @@ NOREC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="nøytral", negative="negativ"
     ),
-    instruction_prompt="Anmeldelse: {text}\n\nKlassifiser følelsen av anmeldelsen "
-    "som 'positiv', 'nøytral' eller 'negativ'.\n\nSentiment:",
+    instruction_prompt="Anmeldelse: {text}\n\nKlassifiser sentimentet i anmeldelsen. "
+    "Svar med 'positiv', 'nøytral' eller 'negativ'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -150,8 +150,8 @@ SB10K_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
-    instruction_prompt="Tweet: {text}\n\nKlassifizieren Sie die Stimmung des Tweets "
-    "als 'positiv', 'neutral' oder 'negativ'.\n\nStimmungslage:",
+    instruction_prompt="Tweet: {text}\n\nKlassifizieren Sie die Stimmung im Tweet. "
+    "Antworten Sie mit 'positiv', 'neutral' oder 'negativ'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -169,8 +169,8 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positief", neutral="neutraal", negative="negatief"
     ),
-    instruction_prompt="Tweet: {text}\n\nKlasseer het sentiment van de tweet als "
-    "'positief', 'neutraal' of 'negatief'.\n\nSentiment:",
+    instruction_prompt="Tweet: {text}\n\nClassificeer het sentiment in de tweet. "
+    "Antwoord met 'positief', 'neutraal' of 'negatief'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -188,8 +188,8 @@ SST5_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="positive", neutral="neutral", negative="negative"
     ),
-    instruction_prompt="Text: {text}\n\nClassify the sentiment of the text as "
-    "'positive', 'neutral' or 'negative'.\n\nSentiment:",
+    instruction_prompt="Text: {text}\n\nClassify the sentiment in the text. Answer "
+    "with 'positive', 'neutral' or 'negative'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -224,7 +224,7 @@ SUC3_CONFIG = DatasetConfig(
     instruction_prompt="Mening: {text}\n\nIdentifiera de namngivna enheterna i "
     "meningen. Du ska outputta detta som en JSON-ordbok med nycklarna 'person', "
     "'plats', 'organisation' och 'diverse'. Värdena ska vara listor över de namngivna "
-    "enheter av den typen, precis som de förekommer i meningen.\n\nNamngivna entiteter:",
+    "enheter av den typen, precis som de förekommer i meningen.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -252,7 +252,7 @@ DANSK_CONFIG = DatasetConfig(
     instruction_prompt="Sætning: {text}\n\nIdentificér de navngivne enheder i "
     "sætningen. Du skal outputte dette som en JSON-ordbog med nøglerne 'person', "
     "'sted', 'organisation' og 'diverse'. Værdierne skal være lister over de navngivne "
-    "enheder af den type, præcis som de forekommer i sætningen.\n\nNavngivne enheder:",
+    "enheder af den type, præcis som de forekommer i sætningen.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -281,7 +281,7 @@ NORNE_NB_CONFIG = DatasetConfig(
     instruction_prompt="Frase: {text}\n\nIdentifiser de navngitte enhetene i frasen. "
     "Du bør outputte dette som en JSON-ordbok med nøklene 'person', 'sted', "
     "'organisasjon' og 'diverse'. Verdiene skal være lister over de navngitte enhetene "
-    "av den typen, akkurat som de vises i frasen.\n\nNavngitte enheter:",
+    "av den typen, akkurat som de vises i frasen.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -310,7 +310,7 @@ NORNE_NN_CONFIG = DatasetConfig(
     instruction_prompt="Frase: {text}\n\nIdentifiser de navngitte enhetene i frasen. "
     "Du bør outputte dette som en JSON-ordbok med nøklene 'person', 'sted', "
     "'organisasjon' og 'diverse'. Verdiene skal være lister over de navngitte enhetene "
-    "av den typen, akkurat som de vises i frasen.\n\nNavngitte enheter:",
+    "av den typen, akkurat som de vises i frasen.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -339,8 +339,7 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     instruction_prompt="Setning: {text}\n\nGreinið nefndu einingarnar í setningunni. "
     "Þú ættir að skila þessu sem JSON orðabók með lyklunum 'einstaklingur', "
     "'staðsetning', 'stofnun' og 'ýmislegt'. Gildin ættu að vera listi yfir nefndu "
-    "einingarnar af þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.\n\n"
-    "Nefndar einingar:",
+    "einingarnar af þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -369,7 +368,7 @@ FONE_CONFIG = DatasetConfig(
     instruction_prompt="Setningur: {text}\n\nGreinið nevndu einingarnar í setningunni. "
     "Þú ættir að skila þessu sem JSON orðabók með lyklunum 'persónur', 'staður', "
     "'felagsskapur' og 'ymiskt'. Gildin ættu að vera listi yfir nevndu einingarnar af "
-    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.\n\nNevndar eindir:",
+    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -398,8 +397,7 @@ GERMEVAL_CONFIG = DatasetConfig(
     instruction_prompt="Satz: {text}\n\nIdentifizieren Sie die benannten Entitäten im "
     "Satz. Sie sollten dies als JSON-Wörterbuch mit den Schlüsseln 'person', 'ort', "
     "'organisation' und 'verschiedenes' ausgeben. Die Werte sollten Listen der "
-    "benannten Entitäten dieses Typs sein, genau wie sie im Satz erscheinen.\n\n"
-    "Benannte Entitäten:",
+    "benannten Entitäten dieses Typs sein, genau wie sie im Satz erscheinen.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -428,8 +426,7 @@ CONLL_NL_CONFIG = DatasetConfig(
     instruction_prompt="Zin: {text}\n\nIdentificeer de genoemde entiteiten in de zin. "
     "Je moet dit uitvoeren als een JSON-woordenboek met de sleutels 'persoon', "
     "'locatie', 'organisatie' en 'diversen'. De waarden moeten lijsten zijn van de "
-    "genoemde entiteiten van dat type, precies zoals ze voorkomen in de zin.\n\n"
-    "Genoemde entiteiten:",
+    "genoemde entiteiten van dat type, precies zoals ze voorkomen in de zin.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -457,8 +454,7 @@ CONLL_EN_CONFIG = DatasetConfig(
     instruction_prompt="Sentence: {text}\n\nIdentify the named entities in the "
     "sentence. You should output this as a JSON dictionary with the keys being "
     "'person', 'location', 'organization' and 'miscellaneous'. The values should be "
-    "lists of the named entities of that type, exactly as they appear in the sentence. "
-    "\n\nNamed entities:",
+    "lists of the named entities of that type, exactly as they appear in the sentence.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -486,7 +482,7 @@ DANE_CONFIG = DatasetConfig(
     instruction_prompt="Sætning: {text}\n\nIdentificér de navngivne enheder i "
     "sætningen. Du skal outputte dette som en JSON-ordbog med nøglerne 'person', "
     "'sted', 'organisation' og 'diverse'. Værdierne skal være lister over de navngivne "
-    "enheder af den type, præcis som de forekommer i sætningen.\n\nNavngivne enheder:",
+    "enheder af den type, præcis som de forekommer i sætningen.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
     unofficial=True,
@@ -516,7 +512,7 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     instruction_prompt="Setningur: {text}\n\nGreinið nevndu einingarnar í setningunni. "
     "Þú ættir að skila þessu sem JSON orðabók með lyklunum 'persónur', 'staður', "
     "'felagsskapur' og 'ymiskt'. Gildin ættu að vera listi yfir nevndu einingarnar af "
-    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.\n\nNevndar eindir:",
+    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
     unofficial=True,
@@ -536,8 +532,7 @@ SCALA_SV_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Mening: {text}\n\nBestäm om meningen är grammatiskt korrekt "
-    "eller inte. Svara med 'ja' om meningen är korrekt och 'nej' om den inte är."
-    "\n\nGrammatisk korrekt:",
+    "eller inte. Svara med 'ja' om meningen är korrekt och 'nej' om den inte är.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -552,8 +547,7 @@ SCALA_DA_CONFIG = DatasetConfig(
     prompt_template="Sætning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
     instruction_prompt="Sætning: {text}\n\nBestem om sætningen er grammatisk korrekt "
-    "eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er."
-    "\n\nGrammatisk korrekt:",
+    "eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -568,8 +562,7 @@ SCALA_NB_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
-    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er."
-    "\n\nGrammatisk korrekt:",
+    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
     max_generated_tokens=1,
@@ -586,8 +579,7 @@ SCALA_NN_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
-    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er."
-    "\n\nGrammatisk korrekt:",
+    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -603,8 +595,7 @@ SCALA_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
-    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki."
-    "\n\nMálfræðilega rétt:",
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -622,7 +613,7 @@ SCALA_FO_CONFIG = DatasetConfig(
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Setningur: {text}\n\nGreinið hvort setningurin er mállæruliga "
     "rættur ella ikki. Svarið skal vera 'ja' um setningurin er rættur og 'nei' um "
-    "hann ikki er.\n\nMállæruliga rættur:",
+    "hann ikki er.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -639,7 +630,7 @@ SCALA_DE_CONFIG = DatasetConfig(
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Satz: {text}\n\nBestimmen Sie, ob der Satz grammatikalisch "
     "korrekt ist oder nicht. Antworten Sie mit 'ja', wenn der Satz korrekt ist und "
-    "'nein', wenn er es nicht ist.\n\nGrammatikalisch richtig:",
+    "'nein', wenn er es nicht ist.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -655,8 +646,7 @@ SCALA_NL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nee"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Zin: {text}\n\nBepaal of de zin grammaticaal correct is of "
-    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is."
-    "\n\nGrammaticaal correct:",
+    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -673,7 +663,7 @@ SCALA_EN_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="yes", incorrect="no"),
     instruction_prompt="Sentence: {text}\n\nDetermine whether the sentence is "
     "grammatically correct or not. Reply with 'yes' if the sentence is correct and "
-    "'no' if it is not.\n\nGrammatically correct:",
+    "'no' if it is not.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -691,8 +681,7 @@ DUTCH_COLA_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nee"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Zin: {text}\n\nBepaal of de zin grammaticaal correct is of "
-    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is."
-    "\n\nGrammaticaal correct:",
+    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is.",
     num_few_shot_examples=12,
     max_generated_tokens=3,
     unofficial=True,
@@ -710,8 +699,7 @@ DUTCH_COLA_FULL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nee"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Zin: {text}\n\nBepaal of de zin grammaticaal correct is of "
-    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is."
-    "\n\nGrammaticaal correct:",
+    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is.",
     num_few_shot_examples=12,
     max_generated_tokens=3,
     unofficial=True,
@@ -731,7 +719,7 @@ SCANDIQA_DA_CONFIG = DatasetConfig(
     prompt_template="Tekst: {text}\nSpørgsmål: {question}\nSvar med maks. 3 ord: "
     "{label}",
     instruction_prompt="Tekst: {text}\n\nBesvar følgende spørgsmål om teksten ovenfor "
-    "med maks. 3 ord.\n\nSpørgsmål: {question}\n\nSvar med maks. 3 ord:",
+    "med maks. 3 ord.\n\nSpørgsmål: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -747,7 +735,7 @@ NORQUAD_CONFIG = DatasetConfig(
     prompt_template="Tekst: {text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Tekst: {text}\n\nBesvar følgende spørsmål om teksten ovenfor "
-    "med maks 3 ord.\n\nSpørsmål: {question}\n\nSvar på maks 3 ord:",
+    "med maks 3 ord.\n\nSpørsmål: {question}",
     num_few_shot_examples=2,
     max_generated_tokens=32,
 )
@@ -763,7 +751,7 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
     prompt_template="Text: {text}\nFråga: {question}\nSvar på max 3 ord: {label}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Text: {text}\n\nBesvara följande fråga om texten ovan med "
-    "högst 3 ord.\n\nFråga: {question}\n\nSvar på max 3 ord:",
+    "högst 3 ord.\n\nFråga: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -780,7 +768,7 @@ NQII_CONFIG = DatasetConfig(
     "orðum: {label}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Texti: {text}\n\nSvaraðu eftirfarandi spurningu um textann að "
-    "hámarki í 3 orðum.\n\nSpurning: {question}\n\nSvaraðu með að hámarki 3 orðum:",
+    "hámarki í 3 orðum.\n\nSpurning: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -810,7 +798,7 @@ GERMANQUAD_CONFIG = DatasetConfig(
     "Wörtern: {label}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Text: {text}\n\nBeantworten Sie die folgende Frage zum obigen "
-    "Text in höchstens 3 Wörtern.\n\nFrage: {question}\n\nAntwort in max 3 Wörtern:",
+    "Text in höchstens 3 Wörtern.\n\nFrage: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -826,7 +814,7 @@ SQUAD_CONFIG = DatasetConfig(
     prompt_template="Text: {text}\nQuestion: {question}\nAnswer in max 3 words: "
     "{label}",
     instruction_prompt="Text: {text}\n\nAnswer the following question about the "
-    "above text in at most 3 words.\n\nQuestion: {question}\n\nAnswer in max 3 words:",
+    "above text in at most 3 words.\n\nQuestion: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -843,8 +831,7 @@ SQUAD_NL_CONFIG = DatasetConfig(
     "{label}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Tekst: {text}\n\nBeantwoord de volgende vraag over de "
-    "bovenstaande tekst in maximaal 3 woorden.\n\nVraag: {question}\n\nAntwoord in "
-    "max 3 woorden:",
+    "bovenstaande tekst in maximaal 3 woorden.\n\nVraag: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
@@ -864,7 +851,7 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
     prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
     instruction_prompt="Nyhedsartikel: {text}\n\nSkriv et resumé af ovenstående "
-    "artikel.\n\nResumé:",
+    "artikel.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -880,7 +867,7 @@ MLSUM_CONFIG = DatasetConfig(
     prompt_template="Nachrichtenartikel: {text}\nZusammenfassung: {target_text}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Nachrichtenartikel: {text}\n\nSchreiben Sie eine "
-    "Zusammenfassung des obigen Artikels.\n\nZusammenfassung:",
+    "Zusammenfassung des obigen Artikels.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -896,7 +883,7 @@ RRN_CONFIG = DatasetConfig(
     prompt_template="Fréttagrein: {text}\nSamantekt: {target_text}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Fréttagrein: {text}\n\nSkrifaðu samantekt um ofangreindu "
-    "grein.\n\nSamantekt:",
+    "grein.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -912,7 +899,7 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Nyhetsartikkel: {text}\n\nSkriv et sammendrag av den "
-    "ovennevnte artikkelen.\n\nSammendrag:",
+    "ovennevnte artikkelen.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -928,7 +915,7 @@ WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     prompt_template="Artikel: {text}\nSamenvatting: {target_text}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Artikel: {text}\n\nSchrijf een samenvatting van het "
-    "bovenstaande artikel.\n\nSamenvatting:",
+    "bovenstaande artikel.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -942,8 +929,7 @@ SWEDN_CONFIG = DatasetConfig(
     prompt_prefix="Nedan följer artiklar med tillhörande sammanfattningar.",
     prompt_template="Artikel: {text}\nSammanfattning: {target_text}",
     # TODO: Haven't checked spelling in the instruction prompt
-    instruction_prompt="Artikel: {text}\n\nSkriv en sammanfattning av artikeln ovan."
-    "\n\nSammanfattning:",
+    instruction_prompt="Artikel: {text}\n\nSkriv en sammanfattning av artikeln ovan.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -958,7 +944,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     prompt_prefix="The following are articles with accompanying summaries.",
     prompt_template="News article: {text}\nSummary: {target_text}",
     instruction_prompt="News article: {text}\n\nWrite a summary of the above "
-    "article.\n\nSummary:",
+    "article.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -979,7 +965,7 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.\n\nSvar:",
+    "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -994,7 +980,7 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.\n\nSvar:",
+    "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1011,7 +997,7 @@ MMLU_NO_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.\n\nSvar:",
+    "'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1028,7 +1014,7 @@ MMLU_SV_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.\n\nSvar:",
+    "eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1045,7 +1031,7 @@ MMLU_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.\n\nSvara:",
+    "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1063,7 +1049,7 @@ MMLU_DE_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.\n\nAntwort:",
+    "'c' oder 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1080,7 +1066,7 @@ MMLU_NL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.\n\nAntwoord:",
+    "'c' of 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1095,7 +1081,7 @@ MMLU_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.\n\nAnswer:",
+    "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1111,7 +1097,7 @@ MMLU_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.\n\nSvar:",
+    "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1128,7 +1114,7 @@ ARC_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.\n\nSvar:",
+    "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1146,7 +1132,7 @@ ARC_NO_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.\n\nSvar:",
+    "'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1164,7 +1150,7 @@ ARC_SV_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.\n\nSvar:",
+    "eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1182,7 +1168,7 @@ ARC_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.\n\nSvara:",
+    "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1199,7 +1185,7 @@ ARC_DE_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.\n\nAntwort:",
+    "'c' oder 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1217,7 +1203,7 @@ ARC_NL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.\n\nAntwoord:",
+    "'c' of 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1233,7 +1219,7 @@ ARC_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.\n\nAnswer:",
+    "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1255,7 +1241,7 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.\n\nSvar:",
+    "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1272,7 +1258,7 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.\n\nSvar:",
+    "'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1289,7 +1275,7 @@ HELLASWAG_SV_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.\n\nSvar:",
+    "eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1306,7 +1292,7 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.\n\nSvara:",
+    "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1324,7 +1310,7 @@ WINOGRANDE_IS = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.\n\nSvara:",
+    "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1341,7 +1327,7 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.\n\nAntwort:",
+    "'c' oder 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1358,7 +1344,7 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.\n\nAntwoord:",
+    "'c' of 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1374,7 +1360,7 @@ HELLASWAG_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.\n\nAnswer:",
+    "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
@@ -1395,7 +1381,7 @@ BELEBELE_DA_CONFIG = DatasetConfig(
     prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.\n\nSvar:",
+    "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1413,7 +1399,7 @@ BELEBELE_SV_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.\n\nSvar:",
+    "eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1431,7 +1417,7 @@ BELEBELE_NO_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.\n\nSvar:",
+    "'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1449,7 +1435,7 @@ BELEBELE_IS_CONFIG = DatasetConfig(
     prompt_template="{text}\nSvara: {label}",
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.\n\nSvara:",
+    "'b', 'c' eða 'd'.",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
     max_generated_tokens=1,
@@ -1469,7 +1455,7 @@ BELEBELE_DE_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.\n\nAntwort:",
+    "'c' oder 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1488,7 +1474,7 @@ BELEBELE_NL_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     # TODO: Haven't checked spelling in the instruction prompt
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.\n\nAntwoord:",
+    "'c' of 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1505,7 +1491,7 @@ BELEBELE_CONFIG = DatasetConfig(
     prompt_template="{text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.\n\nAnswer:",
+    "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
