@@ -34,8 +34,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
 
 ### Fixed
-- Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
-  evaluation of Gemma 2 models.
 - Set upper bound on Python versions to `<4.0` from `<3.12`, to avoid installation
   issues.
 - Removed the use of `ModelFilter` from the `huggingface_hub`, as it was removed from
@@ -50,6 +48,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   vocabulary size.
 - Changed the name of the `question-answering` task to the more descriptive name
   `reading-comprehension`.
+- Update `vllm` to `>=0.5.3` and `transformers` to `>=4.43.0`, which now allows
+  evaluation of Gemma 2 and Llama-3.1 models.
 
 
 ## [v12.11.0] - 2024-07-03
