@@ -505,7 +505,9 @@ def generate_batch(
 
         model_output = model.generate(
             inputs=inputs,
-            attention_mask=batch["attention_mask"].to(model.device),
+            attention_mask=batch["attention_mask"].to(model.device)
+            if "attention_mask" in batch
+            else None,
             generation_config=generation_config,
             stopping_criteria=StoppingCriteriaList([stopping_criteria]),
             prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
