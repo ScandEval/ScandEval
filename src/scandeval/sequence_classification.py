@@ -403,7 +403,7 @@ def get_closest_logprobs_labels(
         if add_prefix_space_to_labels:
             label_ready_for_tokenization = " " + label_ready_for_tokenization
         candidate_label_ids: list[list[int]] = tokenizer(
-            [label_ready_for_tokenization.lower()], add_special_tokens=False
+            [label_ready_for_tokenization], add_special_tokens=False
         )["input_ids"]
         candidate_label_id: int = candidate_label_ids[0][0]
         pred_logprobs[:, idx] = generation_logprobs[:, 0, candidate_label_id]
