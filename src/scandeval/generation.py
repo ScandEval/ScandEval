@@ -301,12 +301,8 @@ def generate_single_iteration(
 
             itr = (
                 dataloader
-                if batch_size == len(torch_dataset)
-                else tqdm(
-                    iterable=dataloader,
-                    leave=False,
-                    disable=hasattr(sys, "_called_from_test"),
-                )
+                if batch_size == len(torch_dataset) or hasattr(sys, "_called_from_test")
+                else tqdm(iterable=dataloader, leave=False)
             )
 
             # Generate the completions for the non-cached examples
