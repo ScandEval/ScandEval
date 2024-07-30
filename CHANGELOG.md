@@ -50,6 +50,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `reading-comprehension`.
 - Update `vllm` to `>=0.5.3` and `transformers` to `>=4.43.0`, which now allows
   evaluation of Gemma 2 and Llama-3.1 models.
+- Removed the `quantization` extra and instead prompt the user to manually install any
+  missing quantisation packages when evaluating quantised models. This is due to several
+  dependency clashes with `optimum` and `transformers`.
 
 
 ## [v12.11.0] - 2024-07-03
