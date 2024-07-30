@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   marked as unofficial, meaning that it will not be automatically included when
   benchmarking models, but can be included by specifying the dataset explicitly using
   the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
+- Debug mode for generative models is now possible now, which can be used to validate a
+  model's output manually. This will log the predictions, and store all the inputs and
+  predictions to a JSON file in the current working directory. This can be enabled by
+  setting the `--debug` flag when benchmarking a model (or `debug=True` if using the
+  `Benchmarker` API).
 
 ### Fixed
 - Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
