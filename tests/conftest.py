@@ -93,6 +93,7 @@ def benchmark_config(
         only_validation_split=False,
         few_shot=True,
         num_iterations=10,
+        debug=False,
         run_with_cli=True,
     )
 
@@ -173,7 +174,10 @@ def dataset_config(language, task) -> Generator[DatasetConfig, None, None]:
         huggingface_id="dataset_id",
         task=task,
         languages=[language],
+        prompt_prefix="",
         prompt_template="{text}\n{label}",
+        instruction_prompt="",
+        num_few_shot_examples=0,
         max_generated_tokens=1,
     )
 
