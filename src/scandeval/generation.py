@@ -646,7 +646,10 @@ def debug_log(
         dataset_config:
             The configuration of the dataset.
     """
-    sample_idxs = range(batch_idx * batch_size, (batch_idx + 1) * batch_size)
+    sample_idxs = range(
+        batch_idx * batch_size,
+        min((batch_idx + 1) * batch_size, len(non_cached_dataset)),
+    )
     samples = non_cached_dataset.select(sample_idxs)
 
     if dataset_config.task == NER:
