@@ -55,6 +55,8 @@ tiktoken = {version = ">=0.7.0", optional = true}
 levenshtein = { version = ">=0.24.0", optional = true }  # This is also used for human evaluation
 
 # Needed for quantised models
+# TODO: Make these completely separate, and instead ask the user to pip install them as
+# necessary
 auto-gptq = { version = ">=0.7.1", optional = true }
 # optimum = { version = ">=1.20.0", optional = true }
 autoawq = { version = ">=0.2.5", optional = true }
