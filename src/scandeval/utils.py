@@ -25,7 +25,7 @@ from transformers import GenerationConfig
 from transformers import logging as tf_logging
 
 from .enums import Framework
-from .exceptions import NaNValueInModelOutput
+from .exceptions import InvalidModel, NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .openai_models import OpenAITokenizer
 
@@ -578,6 +578,12 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
         model.generate(inputs=dummy_inputs, generation_config=generation_config)
         return True
     except (NotImplementedError, TypeError) as e:
+        if "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
+            raise InvalidModel(
+                "The benchmark failed because the environment variable "
+                "`PYTORCH_ENABLE_MPS_FALLBACK` is not set. Please set this "
+                "environment variable to `1` and try again."
+            )
         logger.debug(
             f"The model was found not to be generative, as an error occurred: {e}"
         )
