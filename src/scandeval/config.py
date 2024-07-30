@@ -160,6 +160,8 @@ class BenchmarkConfig:
             if the model is generative.
         num_iterations:
             The number of iterations each model should be evaluated for.
+        debug:
+            Whether to run the benchmark in debug mode.
         run_with_cli:
             Whether the benchmark is being run with the CLI.
     """
@@ -190,6 +192,7 @@ class BenchmarkConfig:
     only_validation_split: bool
     few_shot: bool
     num_iterations: int
+    debug: bool
     run_with_cli: bool
 
 

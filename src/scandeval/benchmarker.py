@@ -63,6 +63,7 @@ class BenchmarkConfigParams(BaseModel):
     only_validation_split: bool
     few_shot: bool
     num_iterations: int
+    debug: bool
     run_with_cli: bool
 
 
@@ -174,6 +175,7 @@ class Benchmarker:
         only_validation_split: bool = False,
         few_shot: bool = True,
         num_iterations: int = 10,
+        debug: bool = False,
         run_with_cli: bool = False,
     ) -> None:
         """Initialise the benchmarker.
@@ -270,6 +272,8 @@ class Benchmarker:
                 The number of times each model should be evaluated. This is only meant
                 to be used for power users, and scores will not be allowed on the
                 leaderboards if this is changed. Defaults to 10.
+            debug:
+                Whether to output debug information. Defaults to False.
             run_with_cli:
                 Whether the benchmarker is being run from the command-line interface.
                 Defaults to False.
@@ -310,6 +314,7 @@ class Benchmarker:
             only_validation_split=only_validation_split,
             few_shot=few_shot,
             num_iterations=num_iterations,
+            debug=debug,
             run_with_cli=run_with_cli,
         )
 
@@ -712,6 +717,13 @@ class Benchmarker:
                 "meaning that the resulting evaluation will not be included in the "
                 "official leaderboard."
             )
+        if benchmark_config.debug:
+            logger.info(
+                "Running in debug mode. This will output additional information, as "
+                "well as store the model outputs in the current directory after each "
+                "batch. For this reason, evaluation will be slower."
+            )
+
         while True:
             try:
                 dataset_factory = DatasetFactory(benchmark_config=benchmark_config)

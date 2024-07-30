@@ -251,6 +251,14 @@ from .tasks import get_all_tasks
     be used for power users, and scores will not be allowed on the leaderboards if this
     is changed.""",
 )
+@click.option(
+    "--debug/--no-debug",
+    default=False,
+    show_default=True,
+    help="Whether to run the benchmark in debug mode. This prints out extra information "
+    "and stores all outputs to the current working directory. Only relevant if the "
+    "model is generative.",
+)
 def benchmark(
     model: tuple[str],
     dataset: tuple[str],
@@ -282,6 +290,7 @@ def benchmark(
     only_validation_split: bool,
     few_shot: bool,
     num_iterations: int,
+    debug: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
     # Set up language variables
@@ -325,6 +334,7 @@ def benchmark(
         only_validation_split=only_validation_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        debug=debug,
         run_with_cli=True,
     )
 

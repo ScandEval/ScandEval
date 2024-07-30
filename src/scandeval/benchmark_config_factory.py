@@ -51,6 +51,7 @@ def build_benchmark_config(
     only_validation_split: bool,
     few_shot: bool,
     num_iterations: int,
+    debug: bool,
     run_with_cli: bool,
     first_time: bool = False,
 ) -> BenchmarkConfig:
@@ -124,6 +125,8 @@ def build_benchmark_config(
             Whether to use few-shot learning for the models.
         num_iterations:
             The number of iterations each model should be evaluated for.
+        debug:
+            Whether to run the benchmark in debug mode.
         run_with_cli:
             Whether the benchmark is being run with the CLI.
         first_time:
@@ -245,6 +248,7 @@ def build_benchmark_config(
         only_validation_split=only_validation_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        debug=debug,
         run_with_cli=run_with_cli,
     )
 
