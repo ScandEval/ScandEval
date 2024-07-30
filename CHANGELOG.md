@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Evaluation of instruction tuned models is now possible! This is done by setting the
+  `--zero-shot` flag when benchmarking a model (or `zero_shot=True` if using the
+  `Benchmarker` API). This will evaluate the model using an instruction prompt and
+  without any in-context examples. Furthermore, the chat template of the model will be
+  used. This is to mimic the behaviour of the model when it is used in a user-facing
+  setting.
+- Debug mode for generative models is now possible now, which can be used to validate a
+  model's output manually. This will log the predictions, and store all the inputs and
+  predictions to a JSON file in the current working directory. This can be enabled by
+  setting the `--debug` flag when benchmarking a model (or `debug=True` if using the
+  `Benchmarker` API).
 - Added the Dutch linguistic acceptability dataset `dutch-cola`. It has been set to
   `unofficial` for now, but it might eventually replace ScaLA-nl as the official Dutch
   linguistic acceptability dataset. For now, you can benchmark models on it by
@@ -19,11 +30,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   marked as unofficial, meaning that it will not be automatically included when
   benchmarking models, but can be included by specifying the dataset explicitly using
   the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
-- Debug mode for generative models is now possible now, which can be used to validate a
-  model's output manually. This will log the predictions, and store all the inputs and
-  predictions to a JSON file in the current working directory. This can be enabled by
-  setting the `--debug` flag when benchmarking a model (or `debug=True` if using the
-  `Benchmarker` API).
 
 ### Fixed
 - Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
