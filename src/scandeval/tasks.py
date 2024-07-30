@@ -65,8 +65,8 @@ NER = Task(
 )
 
 
-QA = Task(
-    name="question-answering",
+RC = Task(
+    name="reading-comprehension",
     supertask="question-answering",
     metrics=[
         MetricConfig(
@@ -136,6 +136,27 @@ SUMM = Task(
 
 KNOW = Task(
     name="knowledge",
+    supertask="sequence-classification",
+    metrics=[
+        MetricConfig(
+            name="mcc",
+            pretty_name="Matthew's Correlation Coefficient",
+            huggingface_id="matthews_correlation",
+            results_key="matthews_correlation",
+        ),
+        MetricConfig(
+            name="accuracy",
+            pretty_name="Accuracy",
+            huggingface_id="accuracy",
+            results_key="accuracy",
+        ),
+    ],
+    labels=["a", "b", "c", "d"],
+)
+
+
+MCRC = Task(
+    name="multiple-choice-reading-comprehension",
     supertask="sequence-classification",
     metrics=[
         MetricConfig(

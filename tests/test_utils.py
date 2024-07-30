@@ -144,7 +144,7 @@ def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string
         (
             "Do what you're told\n\nExample: This is a test\nLabel: ",
             "mistralai/Mistral-7B-Instruct-v0.1",
-            "<s>[INST] Do what you're told\n\nExample: This is a test [/INST]Label: ",
+            "<s> [INST] Do what you're told\n\nExample: This is a test [/INST]Label: ",
         ),
         (
             "Do what you're told\n\nExample: This is a test\nLabel: ",

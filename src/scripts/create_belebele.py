@@ -1,5 +1,6 @@
-"""Create the MMLU-mini datasets and upload them to the HF Hub."""
+"""Create the Belebele-mini datasets and upload them to the HF Hub."""
 
+import re
 from collections import Counter
 
 import pandas as pd
@@ -17,11 +18,36 @@ from sklearn.model_selection import train_test_split
 
 
 def main() -> None:
-    """Create the MMLU-mini datasets and upload them to the HF Hub."""
-    # Define the base download URL
-    repo_id = "alexandrainst/m_mmlu"
+    """Create the Belebele-mini datasets and upload them to the HF Hub."""
+    repo_id = "facebook/belebele"
 
-    # Create a mapping with the word "Choices" in different languages
+    language_mapping = {
+        "da": "dan_Latn",
+        "no": "nob_Latn",
+        "sv": "swe_Latn",
+        "is": "isl_Latn",
+        "de": "deu_Latn",
+        "nl": "nld_Latn",
+        "en": "eng_Latn",
+    }
+    text_mapping = {
+        "da": "Tekst",
+        "no": "Tekst",
+        "sv": "Text",
+        "is": "Texti",
+        "de": "Text",
+        "nl": "Tekst",
+        "en": "Text",
+    }
+    question_mapping = {
+        "da": "Spørgsmål",
+        "no": "Spørsmål",
+        "sv": "Fråga",
+        "is": "Spurning",
+        "de": "Fragen",
+        "nl": "Vraag",
+        "en": "Question",
+    }
     choices_mapping = {
         "da": "Svarmuligheder",
         "no": "Svaralternativer",
@@ -34,28 +60,41 @@ def main() -> None:
 
     for language in choices_mapping.keys():
         # Download the dataset
-        try:
-            dataset = load_dataset(path=repo_id, name=language, token=True)
-        except ValueError as e:
-            if language == "no":
-                dataset = load_dataset(path=repo_id, name="nb", token=True)
-            else:
-                raise e
-        assert isinstance(dataset, DatasetDict)
+        dataset = load_dataset(
+            path=repo_id, split=language_mapping[language], token=True
+        )
+        assert isinstance(dataset, Dataset)
 
         # Convert the dataset to a dataframe
-        train_df = dataset["train"].to_pandas()
-        val_df = dataset["val"].to_pandas()
-        test_df = dataset["test"].to_pandas()
-        assert isinstance(train_df, pd.DataFrame)
-        assert isinstance(val_df, pd.DataFrame)
-        assert isinstance(test_df, pd.DataFrame)
-
-        # Concatenate the splits
-        df = pd.concat([train_df, val_df, test_df], ignore_index=True)
+        df = dataset.to_pandas()
+        assert isinstance(df, pd.DataFrame)
 
         # Rename the columns
-        df.rename(columns=dict(answer="label"), inplace=True)
+        df.rename(
+            columns=dict(
+                correct_answer_num="label",
+                mc_answer1="option_a",
+                mc_answer2="option_b",
+                mc_answer3="option_c",
+                mc_answer4="option_d",
+            ),
+            inplace=True,
+        )
+
+        # Convert the label to letters
+        label_mapping = {"1": "a", "2": "b", "3": "c", "4": "d"}
+        df.label = df.label.map(label_mapping)
+
+        # Create the instruction from the passage and question
+        df["instruction"] = (
+            text_mapping[language]
+            + ": "
+            + df.flores_passage
+            + "\n"
+            + question_mapping[language]
+            + ": "
+            + df.question
+        )
 
         # Remove the samples with overly short or long texts
         df = df[
@@ -85,52 +124,39 @@ def main() -> None:
             & ~df.option_d.apply(is_repetitive)
         ]
 
-        # Extract the category as a column
-        df["category"] = df["id"].str.split("/").str[0]
-
         # Make a `text` column with all the options in it
         df["text"] = [
-            row.instruction.replace("\n", " ").strip() + "\n"
+            re.sub(r"\n+", "\n", row.instruction).strip() + "\n"
             f"{choices_mapping[language]}:\n"
-            "a. " + row.option_a.replace("\n", " ").strip() + "\n"
-            "b. " + row.option_b.replace("\n", " ").strip() + "\n"
-            "c. " + row.option_c.replace("\n", " ").strip() + "\n"
-            "d. " + row.option_d.replace("\n", " ").strip()
+            "a. " + re.sub(r"\n+", "\n", row.option_a).strip() + "\n"
+            "b. " + re.sub(r"\n+", "\n", row.option_b).strip() + "\n"
+            "c. " + re.sub(r"\n+", "\n", row.option_c).strip() + "\n"
+            "d. " + re.sub(r"\n+", "\n", row.option_d).strip()
             for _, row in df.iterrows()
         ]
 
-        # Make the `label` column case-consistent with the `text` column
-        df.label = df.label.str.lower()
-
-        # Only keep the `text`, `label` and `category` columns
-        df = df[["text", "label", "category"]]
+        # Only keep the `text` and `label` columns
+        df = df[["text", "label"]]
 
         # Remove duplicates
         df.drop_duplicates(inplace=True)
         df.reset_index(drop=True, inplace=True)
 
         # Create validation split
-        val_size = 256
+        val_size = 128
         traintest_arr, val_arr = train_test_split(
-            df, test_size=val_size, random_state=4242, stratify=df.category
+            df, test_size=val_size, random_state=4242
         )
         traintest_df = pd.DataFrame(traintest_arr, columns=df.columns)
         val_df = pd.DataFrame(val_arr, columns=df.columns)
 
         # Create test split
-        test_size = 2048
+        train_size = 64
         train_arr, test_arr = train_test_split(
-            traintest_df,
-            test_size=test_size,
-            random_state=4242,
-            stratify=traintest_df.category,
+            traintest_df, train_size=train_size, random_state=4242
         )
         train_df = pd.DataFrame(train_arr, columns=df.columns)
         test_df = pd.DataFrame(test_arr, columns=df.columns)
-
-        # Create train split
-        train_size = 1024
-        train_df = train_df.sample(train_size, random_state=4242)
 
         # Reset the index
         train_df = train_df.reset_index(drop=True)
@@ -146,9 +172,9 @@ def main() -> None:
 
         # Create dataset ID
         if language == "en":
-            dataset_id = "ScandEval/mmlu-mini"
+            dataset_id = "ScandEval/belebele-mini"
         else:
-            dataset_id = f"ScandEval/mmlu-{language}-mini"
+            dataset_id = f"ScandEval/belebele-{language}-mini"
 
         # Remove the dataset from Hugging Face Hub if it already exists
         try:

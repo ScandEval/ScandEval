@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Added
+- Added the Dutch linguistic acceptability dataset `dutch-cola`. It has been set to
+  `unofficial` for now, but it might eventually replace ScaLA-nl as the official Dutch
+  linguistic acceptability dataset. For now, you can benchmark models on it by
+  explicitly setting the dataset using the `--dataset` argument (or `dataset` argument
+  if using the `Benchmarker` API).
+- Added the Belebele dataset, being a multilingual multiple-choice reading comprehension
+  dataset. This has been added as a separate `multiple-choice-reading-comprehension`
+  task, and is available in all supported languages except Faroese. The dataset has been
+  marked as unofficial, meaning that it will not be automatically included when
+  benchmarking models, but can be included by specifying the dataset explicitly using
+  the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
+
+### Fixed
+- Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
+  evaluation of Gemma 2 models.
+- Set upper bound on Python versions to `<4.0` from `<3.12`, to avoid installation
+  issues.
+
+### Changed
+- Added `gpt-4o-mini` metadata, to correctly display maximum sequence length and
+  vocabulary size.
+- Changed the name of the `question-answering` task to the more descriptive name
+  `reading-comprehension`.
+
+
+## [v12.11.0] - 2024-07-03
+### Added
+- Updated the `arc-is` dataset to a Claude translated version of ARC-challenge, from the
+  dataset `mideind/icelandic-arc-challenge`. This has substantially higher translation
+  quality than the previous `arc-is` and the current `mmlu-is` datasets. For this
+  reason, the new `arc-is` dataset is now the official Icelandic dataset for the
+  knowledge task.
+
+
 ## [v12.10.8] - 2024-06-21
 ### Fixed
 - An import error caused `openai` to be installed for any evaluations to be done, which

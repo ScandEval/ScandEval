@@ -41,7 +41,7 @@ install: ## Install dependencies
 	@$(MAKE) --quiet install-poetry
 	@$(MAKE) --quiet setup-poetry
 	@$(MAKE) --quiet setup-environment-variables
-	@echo "Installed the 'ScandEval' project."
+	@echo "Installed the 'ScandEval' project. If you want to use pre-commit hooks, run 'make install-pre-commit'."
 
 install-brew:
 	@if [ $$(uname) = "Darwin" ] && [ "$(shell which brew)" = "" ]; then \
@@ -75,7 +75,18 @@ setup-poetry:
 	else \
 	    poetry env use python3.10 && poetry install --extras all; \
 	fi
+
+install-pre-commit:  ## Install pre-commit hooks
 	@poetry run pre-commit install
+
+lint:  ## Lint the code
+	@poetry run ruff check . --fix
+
+format:  ## Format the code
+	@poetry run ruff format .
+
+type-check:  ## Run type checking
+	@poetry run mypy . --install-types --non-interactive --ignore-missing-imports --show-error-codes --check-untyped-defs
 
 setup-environment-variables:
 	@poetry run python src/scripts/fix_dot_env_file.py
