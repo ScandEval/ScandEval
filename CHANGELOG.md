@@ -41,6 +41,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed the use of `ModelFilter` from the `huggingface_hub`, as it was removed from
   version `0.24.0` onwards. For the same reason, we now require `>=0.24.0` for the
   `huggingface_hub` dependency.
+- Now checks the `sliding_window` and `sliding_window_size` config attributes when
+  determining the vLLM context length. This would result in errors when the sliding
+  window is less than 5,000, which for instance is the case with the Gemma 2 models.
 
 ### Changed
 - Added `gpt-4o-mini` metadata, to correctly display maximum sequence length and

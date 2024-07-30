@@ -78,6 +78,8 @@ class VLLMModel:
             "max_position_embeddings",
             "max_sequence_length",
             "model_max_length",
+            "sliding_window",
+            "sliding_window_size",
             "n_positions",
         ]
         for config_name in potential_max_model_length_config_names:

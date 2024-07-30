@@ -291,6 +291,12 @@ class BenchmarkDataset(ABC):
             max_seq_length = getattr(model.config, "model_max_length")
         elif hasattr(model.config, "max_sequence_length"):
             max_seq_length = getattr(model.config, "max_sequence_length")
+        elif hasattr(model.config, "max_position_embeddings"):
+            max_seq_length = getattr(model.config, "max_position_embeddings")
+        elif hasattr(model.config, "sliding_window"):
+            max_seq_length = getattr(model.config, "sliding_window")
+        elif hasattr(model.config, "sliding_window_size"):
+            max_seq_length = getattr(model.config, "sliding_window_size")
         elif hasattr(
             tokenizer, "model_max_length"
         ) and tokenizer.model_max_length < int(1e30):
