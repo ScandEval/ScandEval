@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   evaluation of Gemma 2 models.
 - Set upper bound on Python versions to `<4.0` from `<3.12`, to avoid installation
   issues.
+- Removed the use of `ModelFilter` from the `huggingface_hub`, as it was removed from
+  version `0.24.0` onwards. For the same reason, we now require `>=0.24.0` for the
+  `huggingface_hub` dependency.
 
 ### Changed
 - Added `gpt-4o-mini` metadata, to correctly display maximum sequence length and
