@@ -460,7 +460,10 @@ class HFModelSetup:
 
         model.eval()
         if not load_in_4bit:
-            model.to(self.benchmark_config.device)
+            if hasattr(model, "to_empty"):
+                model.to_empty(device=self.benchmark_config.device)
+            else:
+                model.to(self.benchmark_config.device)
 
         generative_model = model_is_generative(model=model)
 
