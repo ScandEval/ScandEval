@@ -115,6 +115,23 @@ class NeedsExtraInstalled(InvalidModel):
         super().__init__(self.message)
 
 
+class NeedsManualDependency(InvalidModel):
+    """The evaluation requires a dependency to be manually installed."""
+
+    def __init__(self, package: str):
+        """Initialize the exception.
+
+        Args:
+            package:
+                The package that needs to be manually installed.
+        """
+        self.message = (
+            f"The model you are trying to load requires the `{package}` package to be "
+            f"installed - please run `pip install {package}` and try again."
+        )
+        super().__init__(self.message)
+
+
 class NeedsAdditionalArgument(InvalidModel):
     """The evaluation requires additional arguments to the `scandeval` command."""
 

@@ -30,6 +30,7 @@ from ..exceptions import (
     MissingHuggingFaceToken,
     NeedsAdditionalArgument,
     NeedsExtraInstalled,
+    NeedsManualDependency,
     NoInternetConnection,
 )
 from ..languages import get_all_languages
@@ -258,13 +259,12 @@ class HFModelSetup:
         quantization = None
         if hasattr(config, "quantization_config"):
             quantization = config.quantization_config.get("quant_method", None)
-        if quantization == "gptq" and (
-            importlib.util.find_spec("auto_gptq") is None
-            or importlib.util.find_spec("optimum") is None
-        ):
-            raise NeedsExtraInstalled(extra="quantization")
+        if quantization == "gptq" and importlib.util.find_spec("auto_gptq") is None:
+            raise NeedsManualDependency(package="auto-gptq")
+        if quantization == "gptq" and importlib.util.find_spec("optimum") is None:
+            raise NeedsManualDependency(package="optimum")
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
-            raise NeedsExtraInstalled(extra="quantization")
+            raise NeedsManualDependency(package="autoawq")
 
         if self.benchmark_config.load_in_4bit is not None:
             load_in_4bit = self.benchmark_config.load_in_4bit
