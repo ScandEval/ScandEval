@@ -28,6 +28,7 @@ pydantic = ">=2.6.0"
 termcolor = ">=2.0.0"
 seqeval = ">=1.2.2"
 python-dotenv = ">=1.0.1"
+huggingface-hub = ">=0.24.0"
 pyinfer = ">=0.0.3"  # Used for speed evaluation
 
 # Needed for some tokenisers
