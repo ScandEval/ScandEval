@@ -8,11 +8,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Evaluation of instruction tuned models is now possible! This is done by setting the
+  `--zero-shot` flag when benchmarking a model (or `zero_shot=True` if using the
+  `Benchmarker` API). This will evaluate the model using an instruction prompt and
+  without any in-context examples. Furthermore, the chat template of the model will be
+  used. This is to mimic the behaviour of the model when it is used in a user-facing
+  setting.
+- Debug mode for generative models is now possible now, which can be used to validate a
+  model's output manually. This will log the predictions, and store all the inputs and
+  predictions to a JSON file in the current working directory. This can be enabled by
+  setting the `--debug` flag when benchmarking a model (or `debug=True` if using the
+  `Benchmarker` API).
 - Added the Dutch linguistic acceptability dataset `dutch-cola`. It has been set to
   `unofficial` for now, but it might eventually replace ScaLA-nl as the official Dutch
   linguistic acceptability dataset. For now, you can benchmark models on it by
   explicitly setting the dataset using the `--dataset` argument (or `dataset` argument
-  if using the `Benchmarker` API).
+  if using the `Benchmarker` API). If you would prefer to run the full dataset, then you
+  can benchmark models on `dutch-cola-full` as well - note that this evaluation will be
+  significantly slower than the `dutch-cola` evaluation.
 - Added the Belebele dataset, being a multilingual multiple-choice reading comprehension
   dataset. This has been added as a separate `multiple-choice-reading-comprehension`
   task, and is available in all supported languages except Faroese. The dataset has been
@@ -21,16 +34,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
 
 ### Fixed
-- Update `vllm` to `>=0.5.2` and `transformers` to `>=4.42.4`, which now allows
-  evaluation of Gemma 2 models.
 - Set upper bound on Python versions to `<4.0` from `<3.12`, to avoid installation
   issues.
+- Removed the use of `ModelFilter` from the `huggingface_hub`, as it was removed from
+  version `0.24.0` onwards. For the same reason, we now require `>=0.24.0` for the
+  `huggingface_hub` dependency.
+- Now checks the `sliding_window` and `sliding_window_size` config attributes when
+  determining the vLLM context length. This would result in errors when the sliding
+  window is less than 5,000, which for instance is the case with the Gemma 2 models.
 
 ### Changed
 - Added `gpt-4o-mini` metadata, to correctly display maximum sequence length and
   vocabulary size.
 - Changed the name of the `question-answering` task to the more descriptive name
   `reading-comprehension`.
+- Update `vllm` to `>=0.5.3` and `transformers` to `>=4.43.0`, which now allows
+  evaluation of Gemma 2 and Llama-3.1 models.
+- Removed the `quantization` extra and instead prompt the user to manually install any
+  missing quantisation packages when evaluating quantised models. This is due to several
+  dependency clashes with `optimum` and `transformers`.
 
 
 ## [v12.11.0] - 2024-07-03

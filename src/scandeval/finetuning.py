@@ -440,6 +440,7 @@ def get_training_args(
         bf16=dtype == DataType.BF16,
         disable_tqdm=not benchmark_config.progress_bar,
         ddp_find_unused_parameters=False,
+        save_safetensors=False,
     )
 
     # TEMP: Use only 1 GPU for now for finetuning

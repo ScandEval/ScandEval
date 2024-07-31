@@ -10,7 +10,7 @@ ______________________________________________________________________
 [![Second paper](https://img.shields.io/badge/arXiv-2406.13469-b31b1b.svg)](https://arxiv.org/abs/2406.13469)
 [![License](https://img.shields.io/github/license/ScandEval/ScandEval)](https://github.com/ScandEval/ScandEval/blob/main/LICENSE)
 [![LastCommit](https://img.shields.io/github/last-commit/ScandEval/ScandEval)](https://github.com/ScandEval/ScandEval/commits/main)
-[![Code Coverage](https://img.shields.io/badge/Coverage-69%25-yellow.svg)](https://github.com/ScandEval/ScandEval/tree/main/tests)
+[![Code Coverage](https://img.shields.io/badge/Coverage-68%25-yellow.svg)](https://github.com/ScandEval/ScandEval/tree/main/tests)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg)](https://github.com/ScandEval/ScandEval/blob/main/CODE_OF_CONDUCT.md)
 
 

@@ -8,7 +8,7 @@ from time import sleep
 from typing import TYPE_CHECKING, Type
 
 import torch
-from huggingface_hub import HfApi, ModelFilter
+from huggingface_hub import HfApi
 from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import RepositoryNotFoundError
 from huggingface_hub.utils import (
@@ -30,6 +30,7 @@ from ..exceptions import (
     MissingHuggingFaceToken,
     NeedsAdditionalArgument,
     NeedsExtraInstalled,
+    NeedsManualDependency,
     NoInternetConnection,
 )
 from ..languages import get_all_languages
@@ -158,8 +159,7 @@ class HFModelSetup:
 
             # Fetch the model metadata
             models = api.list_models(
-                filter=ModelFilter(author=author, model_name=model_name),
-                token=self.benchmark_config.token,
+                author=author, model_name=model_name, token=self.benchmark_config.token
             )
 
             # Filter the models to only keep the one with the specified model ID
@@ -259,13 +259,12 @@ class HFModelSetup:
         quantization = None
         if hasattr(config, "quantization_config"):
             quantization = config.quantization_config.get("quant_method", None)
-        if quantization == "gptq" and (
-            importlib.util.find_spec("auto_gptq") is None
-            or importlib.util.find_spec("optimum") is None
-        ):
-            raise NeedsExtraInstalled(extra="quantization")
+        if quantization == "gptq" and importlib.util.find_spec("auto_gptq") is None:
+            raise NeedsManualDependency(package="auto-gptq")
+        if quantization == "gptq" and importlib.util.find_spec("optimum") is None:
+            raise NeedsManualDependency(package="optimum")
         if quantization == "awq" and importlib.util.find_spec("awq") is None:
-            raise NeedsExtraInstalled(extra="quantization")
+            raise NeedsManualDependency(package="autoawq")
 
         if self.benchmark_config.load_in_4bit is not None:
             load_in_4bit = self.benchmark_config.load_in_4bit

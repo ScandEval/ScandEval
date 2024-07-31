@@ -217,8 +217,8 @@ from .tasks import get_all_tasks
     default=None,
     show_default=True,
     help="""Whether to use Flash Attention. If not specified then the model will use
-    Flash Attention for generative models, if a CUDA GPU is availabel and `flash-attn`
-    is installed.""",
+    Flash Attention for generative models if a CUDA GPU is available and `flash-attn`
+    or `vllm-flash-attn` are installed.""",
 )
 @click.option(
     "--clear-model-cache/--no-clear-model-cache",
@@ -237,7 +237,7 @@ from .tasks import get_all_tasks
     optimising hyperparameters, to avoid overfitting to the test sets.""",
 )
 @click.option(
-    "--few-shot/--no-few-shot",
+    "--few-shot/--zero-shot",
     default=True,
     show_default=True,
     help="Whether to only evaluate the model using few-shot evaluation. Only relevant "
@@ -250,6 +250,14 @@ from .tasks import get_all_tasks
     help="""The number of times each model should be evaluated. This is only meant to
     be used for power users, and scores will not be allowed on the leaderboards if this
     is changed.""",
+)
+@click.option(
+    "--debug/--no-debug",
+    default=False,
+    show_default=True,
+    help="Whether to run the benchmark in debug mode. This prints out extra information "
+    "and stores all outputs to the current working directory. Only relevant if the "
+    "model is generative.",
 )
 def benchmark(
     model: tuple[str],
@@ -282,6 +290,7 @@ def benchmark(
     only_validation_split: bool,
     few_shot: bool,
     num_iterations: int,
+    debug: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
     # Set up language variables
@@ -325,6 +334,7 @@ def benchmark(
         only_validation_split=only_validation_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        debug=debug,
         run_with_cli=True,
     )
 

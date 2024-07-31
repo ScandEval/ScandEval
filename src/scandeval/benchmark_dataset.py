@@ -280,21 +280,46 @@ class BenchmarkDataset(ABC):
             and "total" in repo_info.safetensors
         ):
             num_params = repo_info.safetensors["total"]
-        elif hasattr(model.config, "num_params"):
+        elif (
+            hasattr(model.config, "num_params") and model.config.num_params is not None
+        ):
             num_params = model.config.num_params
         elif isinstance(model, PreTrainedModel):
             num_params = sum(p.numel() for p in model.parameters())
         else:
             num_params = -1
 
-        if hasattr(model.config, "model_max_length"):
-            max_seq_length = getattr(model.config, "model_max_length")
-        elif hasattr(model.config, "max_sequence_length"):
-            max_seq_length = getattr(model.config, "max_sequence_length")
-        elif hasattr(
-            tokenizer, "model_max_length"
-        ) and tokenizer.model_max_length < int(1e30):
-            max_seq_length = getattr(tokenizer, "model_max_length")
+        if (
+            hasattr(model.config, "model_max_length")
+            and model.config.model_max_length is not None
+        ):
+            max_seq_length = model.config.model_max_length
+        elif (
+            hasattr(model.config, "max_sequence_length")
+            and model.config.max_sequence_length is not None
+        ):
+            max_seq_length = model.config.max_sequence_length
+        elif (
+            hasattr(model.config, "max_position_embeddings")
+            and model.config.max_position_embeddings is not None
+        ):
+            max_seq_length = model.config.max_position_embeddings
+        elif (
+            hasattr(tokenizer, "model_max_length")
+            and tokenizer.model_max_length is not None
+            and tokenizer.model_max_length < int(1e30)
+        ):
+            max_seq_length = tokenizer.model_max_length
+        elif (
+            hasattr(model.config, "sliding_window")
+            and model.config.sliding_window is not None
+        ):
+            max_seq_length = model.config.sliding_window
+        elif (
+            hasattr(model.config, "sliding_window_size")
+            and model.config.sliding_window_size is not None
+        ):
+            max_seq_length = model.config.sliding_window_size
         else:
             max_seq_length = -1
 
@@ -311,10 +336,10 @@ class BenchmarkDataset(ABC):
             if isinstance(model, OpenAIModel) and model.is_chat_model:
                 max_seq_length += 7
 
-        if hasattr(model.config, "vocab_size"):
-            vocab_size = getattr(model.config, "vocab_size")
-        elif hasattr(tokenizer, "vocab_size"):
-            vocab_size = getattr(tokenizer, "vocab_size")
+        if hasattr(model.config, "vocab_size") and model.config.vocab_size is not None:
+            vocab_size = model.config.vocab_size
+        elif hasattr(tokenizer, "vocab_size") and tokenizer.vocab_size is not None:
+            vocab_size = tokenizer.vocab_size
         else:
             vocab_size = -1
 
@@ -324,8 +349,7 @@ class BenchmarkDataset(ABC):
             max_sequence_length=max_seq_length,
             vocabulary_size=vocab_size,
             generative=benchmarking_generative_model,
-            # TODO: This will be changed when we support finetuning of generative models
-            few_shot=True,
+            few_shot=self.benchmark_config.few_shot,
             validation_split=self.benchmark_config.only_validation_split,
         )
 
@@ -488,34 +512,32 @@ class BenchmarkDataset(ABC):
                 prepared_tests: list["Dataset"] = list()
                 for itr_idx, test in enumerate(tests):
                     if benchmarking_generative_model:
-                        itr_seed = 4242 + itr_idx
-                        few_shot_examples = self._extract_few_shot_examples(
-                            train_dataset=train, random_seed=itr_seed
-                        )
-                        few_shot_fn = partial(
-                            self._apply_few_shot_prompt,
-                            few_shot_examples=few_shot_examples,
-                            tokenizer=tokenizer,
-                        )
-                        test = test.map(
-                            few_shot_fn,
-                            batched=True,
-                            load_from_cache_file=False,
-                            keep_in_memory=True,
-                        )
-
-                        # NOTE: This applies the model's chat template if one is
-                        # available. However, all experiments have shown this to reduce
-                        # overall performance, so it is left out for now.
-                        # test = test.map(
-                        #     function=lambda x: dict(
-                        #         text=convert_prompt_to_instruction(
-                        #             prompt=x["text"], tokenizer=tokenizer
-                        #         )
-                        #     ),
-                        #     load_from_cache_file=False,
-                        #     keep_in_memory=True,
-                        # )
+                        if self.benchmark_config.few_shot:
+                            itr_seed = 4242 + itr_idx
+                            few_shot_examples = self._extract_few_shot_examples(
+                                train_dataset=train, random_seed=itr_seed
+                            )
+                            few_shot_fn = partial(
+                                self._apply_few_shot_prompt,
+                                few_shot_examples=few_shot_examples,
+                                tokenizer=tokenizer,
+                            )
+                            test = test.map(
+                                few_shot_fn,
+                                batched=True,
+                                load_from_cache_file=False,
+                                keep_in_memory=True,
+                            )
+                        else:
+                            instruction_fn = partial(
+                                self._apply_instruction_prompt, tokenizer=tokenizer
+                            )
+                            test = test.map(
+                                function=instruction_fn,
+                                batched=True,
+                                load_from_cache_file=False,
+                                keep_in_memory=True,
+                            )
 
                         # Determine if we should strip the prompts. This is the case if
                         # the tokenizer needs to include the space as part of the label
@@ -716,6 +738,21 @@ class BenchmarkDataset(ABC):
 
         Returns:
             The examples with the few-shot prompt applied.
+        """
+        pass
+
+    @abstractmethod
+    def _apply_instruction_prompt(self, examples: dict, tokenizer: "Tokenizer") -> dict:
+        """Apply an instruction prompt to the examples.
+
+        Args:
+            examples:
+                The examples to apply the prompt to.
+            tokenizer:
+                The tokenizer to use to encode the instruction prompt.
+
+        Returns:
+            The examples with the instruction prompt applied.
         """
         pass
 

@@ -160,6 +160,8 @@ class BenchmarkConfig:
             if the model is generative.
         num_iterations:
             The number of iterations each model should be evaluated for.
+        debug:
+            Whether to run the benchmark in debug mode.
         run_with_cli:
             Whether the benchmark is being run with the CLI.
     """
@@ -190,6 +192,7 @@ class BenchmarkConfig:
     only_validation_split: bool
     few_shot: bool
     num_iterations: int
+    debug: bool
     run_with_cli: bool
 
 
@@ -221,12 +224,15 @@ class DatasetConfig:
         max_generated_tokens:
             The maximum number of tokens to generate when benchmarking the dataset
             using few-shot evaluation.
-        prompt_prefix (optional):
-            The prefix to use in the few-shot prompt. Defaults to an empty string.
-        num_few_shot_examples (optional):
+        prompt_prefix:
+            The prefix to use in the few-shot prompt.
+        num_few_shot_examples:
             The number of examples to use when benchmarking the dataset using few-shot
             evaluation. For a classification task, these will be drawn evenly from
-            each label. Defaults to 0.
+            each label.
+        instruction_prompt:
+            The prompt to use when benchmarking the dataset using instruction-based
+            evaluation.
         prompt_label_mapping (optional):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
@@ -241,8 +247,9 @@ class DatasetConfig:
     languages: list[Language]
     prompt_template: str
     max_generated_tokens: int
-    prompt_prefix: str = ""
-    num_few_shot_examples: int = 0
+    prompt_prefix: str
+    num_few_shot_examples: int
+    instruction_prompt: str
     prompt_label_mapping: dict[str, str] = field(default_factory=dict)
     unofficial: bool = False
 

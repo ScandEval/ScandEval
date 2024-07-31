@@ -78,13 +78,15 @@ class VLLMModel:
             "max_position_embeddings",
             "max_sequence_length",
             "model_max_length",
+            "sliding_window",
+            "sliding_window_size",
             "n_positions",
         ]
         for config_name in potential_max_model_length_config_names:
             if hasattr(hf_model_config, config_name):
-                self.max_model_len = min(
-                    self.max_model_len, getattr(hf_model_config, config_name)
-                )
+                model_len = getattr(hf_model_config, config_name)
+                if model_len is not None:
+                    self.max_model_len = min(self.max_model_len, model_len)
 
         quantization = None
         if hasattr(self.config, "quantization_config"):

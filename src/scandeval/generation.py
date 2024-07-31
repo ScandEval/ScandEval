@@ -30,7 +30,7 @@ from .structured_generation_utils import (
     get_ner_logits_processors,
     get_ner_prefix_allowed_tokens_fn,
 )
-from .tasks import NER
+from .tasks import LA, NER, RC, SENT, SUMM
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_end_of_chat_token_ids
 from .vllm_models import VLLMModel
 
@@ -97,12 +97,17 @@ def generate(
     # Set up the name of the model output cache. If we are testing then we save the
     # model outputs to a different cache and ensure that that cache is deleted before
     # the next test, to ensure that the tests are independent of each other
-    model_cache_dir = Path(model_config.model_cache_dir)
-    if not hasattr(sys, "_called_from_test"):
-        cache_name = f"{dataset_config.name}-model-outputs.json"
+    if benchmark_config.debug:
+        model_cache_dir = Path.cwd()
     else:
+        model_cache_dir = Path(model_config.model_cache_dir)
+    if hasattr(sys, "_called_from_test"):
         cache_name = f"{dataset_config.name}-model-outputs-test.json"
         (model_cache_dir / cache_name).unlink(missing_ok=True)
+    elif benchmark_config.debug:
+        cache_name = f"{model_config.model_id}-{dataset_config.name}-model-outputs.json"
+    else:
+        cache_name = f"{dataset_config.name}-model-outputs.json"
 
     cache = ModelCache(
         model_cache_dir=model_cache_dir,
@@ -186,7 +191,9 @@ def generate(
                             "GPU out of memory, even with a batch size of 1!"
                         )
 
-    cache.remove()
+    if not benchmark_config.debug:
+        cache.remove()
+
     return scores
 
 
@@ -233,7 +240,7 @@ def generate_single_iteration(
         dataset=prepared_dataset, cache=cache
     )
 
-    all_preds: list[str | list[str]] = list()
+    all_preds: list[dict | str | list[str]] = list()
 
     if len(non_cached_dataset) > 0:
         # Tokens used in generation to know when generation is finished
@@ -294,12 +301,8 @@ def generate_single_iteration(
 
             itr = (
                 dataloader
-                if batch_size == len(torch_dataset)
-                else tqdm(
-                    iterable=dataloader,
-                    leave=False,
-                    disable=hasattr(sys, "_called_from_test"),
-                )
+                if batch_size == len(torch_dataset) or hasattr(sys, "_called_from_test")
+                else tqdm(iterable=dataloader, leave=False)
             )
 
             # Generate the completions for the non-cached examples
@@ -317,12 +320,27 @@ def generate_single_iteration(
                     dataset_config=dataset_config,
                 )
 
+                # Extended logging if we are running in debug mode
+                if benchmark_config.debug:
+                    debug_log(
+                        batch_idx=batch_idx,
+                        batch_size=batch_size,
+                        non_cached_dataset=non_cached_dataset,
+                        extracted_labels=extracted_labels,
+                        dataset_config=dataset_config,
+                    )
+
                 cache.add_to_cache(
                     model_input=batch["input_ids"],
                     model_output=model_output,
                     tokenizer=tokenizer,
                 )
                 all_preds.extend(extracted_labels)
+
+                # If we are debugging then we save the cache often, but since this makes
+                # evaluation slower, we do not do this by default
+                if benchmark_config.debug:
+                    cache.save()
 
         if isinstance(itr, tqdm):
             itr.close()
@@ -433,7 +451,7 @@ def generate_batch(
     generation_config: GenerationConfig,
     extract_labels_fn: Callable[..., list[str]],
     dataset_config: "DatasetConfig",
-) -> tuple[ModelOutput, list[str | list[str]]]:
+) -> tuple[ModelOutput, list[dict | str | list[str]]]:
     """Evaluate a model on a single batch of examples through generation.
 
     Args:
@@ -483,6 +501,9 @@ def generate_batch(
 
         model_output = model.generate(
             inputs=inputs,
+            attention_mask=batch["attention_mask"].to(model.device)
+            if "attention_mask" in batch
+            else None,
             generation_config=generation_config,
             stopping_criteria=StoppingCriteriaList([stopping_criteria]),
             prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
@@ -600,3 +621,92 @@ def get_generation_stopping_criteria(
     ]
 
     return StopWordCriteria(stop_word_id_lists=stop_word_id_lists)
+
+
+def debug_log(
+    batch_idx: int,
+    batch_size: int,
+    non_cached_dataset: Dataset,
+    extracted_labels: list[dict | str | list[str]],
+    dataset_config: "DatasetConfig",
+) -> None:
+    """Log inputs and outputs for debugging purposes.
+
+    Args:
+        batch_idx:
+            The index of the batch.
+        batch_size:
+            The size of the batch.
+        non_cached_dataset:
+            The dataset to evaluate on.
+        extracted_labels:
+            The extracted labels from the model output.
+        dataset_config:
+            The configuration of the dataset.
+    """
+    sample_idxs = range(
+        batch_idx * batch_size,
+        min((batch_idx + 1) * batch_size, len(non_cached_dataset)),
+    )
+    samples = non_cached_dataset.select(sample_idxs)
+
+    if dataset_config.task == NER:
+        log_msgs = [""]
+        for tokens, predictions, labels in zip(
+            samples["tokens"], extracted_labels, samples["labels"]
+        ):
+            predictions = [tag.upper() for tag in predictions]
+            sample = list(zip(tokens, predictions, labels))
+            log_batches = [
+                [("Tokens: ", "Predictions: ", "Labels: ")] + sample[i : i + 10]
+                for i in range(0, len(sample), 10)
+            ]
+            for log_batch in log_batches:
+                lengths = [len(max(triple, key=len)) for triple in log_batch]
+                log_batch = [
+                    [f"{x:<{length}}" for x in triple]
+                    for triple, length in zip(log_batch, lengths)
+                ]
+                tokens = [triple[0] for triple in log_batch]
+                predictions = [triple[1] for triple in log_batch]
+                labels = [triple[2] for triple in log_batch]
+                log_msgs.append(
+                    "\t".join(tokens)
+                    + "\n"
+                    + "\t".join(predictions)
+                    + "\n"
+                    + "\t".join(labels)
+                )
+        logger.info("\n\n".join(log_msgs))
+
+    else:
+        # Define predictions
+        if dataset_config.task == RC:
+            extracted_labels = [
+                prediction["prediction_text"]
+                for prediction in extracted_labels
+                if isinstance(prediction, dict)
+            ]
+
+        # Define labels
+        if dataset_config.task in {SENT, LA}:
+            labels = [
+                dataset_config.prompt_label_mapping.get(label, label).lower()
+                for label in samples["label"]
+            ]
+        elif dataset_config.task == RC:
+            labels = [label["answers"]["text"][0] for label in samples["label"]]
+        elif dataset_config.task == SUMM:
+            labels = samples["target_text"]
+        else:
+            labels = samples["label"]
+
+        # Log inputs and outputs
+        for input_text, prediction, label in zip(
+            samples["text"], extracted_labels, labels
+        ):
+            logger.info(
+                f"Input: '{input_text}'\n"
+                f"Prediction: '{prediction}'\n"
+                f"Label: '{label}'"
+            )

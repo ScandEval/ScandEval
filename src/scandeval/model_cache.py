@@ -63,7 +63,7 @@ class ModelCache:
         """
         self.model_cache_dir = model_cache_dir
         self.model_cache_dir.mkdir(parents=True, exist_ok=True)
-        self.cache_path = self.model_cache_dir / cache_name
+        self.cache_path = self.model_cache_dir / cache_name.replace("/", "--")
         self.max_generated_tokens = max_generated_tokens
 
     def load(self) -> None:

@@ -137,9 +137,9 @@ def align_model_and_tokenizer(
         )
 
     # To avoid models having artificially low max lengths, we remove any max lengths
-    # that are less than 512
+    # that are less than 128
     all_max_lengths = [
-        max_length for max_length in all_max_lengths if max_length >= 512
+        max_length for max_length in all_max_lengths if max_length >= 128
     ]
 
     # If the model is a generative model then we need to subtract the generation length

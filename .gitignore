@@ -104,3 +104,6 @@ gai-experiments.xlsx
 
 # Upload of leaderboard
 src/upload/
+
+# Model outputs in debugging mode
+*.json

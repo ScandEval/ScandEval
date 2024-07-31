@@ -19,7 +19,7 @@ python = ">=3.10,<4.0"
 torch = ">=2.3.0"
 pandas = ">=2.2.0"
 numpy = ">=1.23.0,<2.0.0"
-transformers = ">=4.42.4"
+transformers = ">=4.43.3"
 accelerate = ">=0.26.0"
 evaluate = ">=0.4.1"
 datasets = ">=2.15.0"
@@ -28,6 +28,7 @@ pydantic = ">=2.6.0"
 termcolor = ">=2.0.0"
 seqeval = ">=1.2.2"
 python-dotenv = ">=1.0.1"
+huggingface-hub = ">=0.24.0"
 pyinfer = ">=0.0.3"  # Used for speed evaluation
 
 # Needed for some tokenisers
@@ -40,7 +41,7 @@ rouge-score = { version = ">=0.1.2", optional = true }
 bert-score = { version = ">=0.3.13", optional = true }
 demjson3 = { version = ">=3.0.6", optional = true }
 bitsandbytes = { markers = "sys_platform != 'darwin' or platform_machine != 'arm64'", version = ">=0.43.1", optional = true }
-vllm = { markers = "sys_platform != 'darwin'", version = ">=0.5.2", optional = true }
+vllm = { markers = "sys_platform != 'darwin'", version = ">=0.5.3", optional = true }
 outlines = { version = ">=0.0.44", optional = true }
 
 # Needed for loading JAX based encoder models
@@ -52,11 +53,6 @@ flax = { version = ">=0.8.1", optional = true }
 openai = { version = ">=1.11.1", optional = true }
 tiktoken = {version = ">=0.7.0", optional = true}
 levenshtein = { version = ">=0.24.0", optional = true }  # This is also used for human evaluation
-
-# Needed for quantised models
-auto-gptq = { version = ">=0.7.1", optional = true }
-optimum = { version = ">=1.20.0", optional = true }
-autoawq = { version = ">=0.2.5", optional = true }
 
 # Needed for human evaluation
 gradio = { version = ">=4.26.0", optional = true }
@@ -92,11 +88,6 @@ openai = [
     "tiktoken",
     "levenshtein",
 ]
-quantization = [
-    "optimum",
-    "auto-gptq",
-    "autoawq",
-]
 human_evaluation = [
     "gradio",
     "levenshtein",
@@ -114,9 +105,6 @@ all = [
     "openai",
     "tiktoken",
     "levenshtein",
-    "optimum",
-    "auto-gptq",
-    "autoawq",
     "gradio",
 ]
 cpu_all = [

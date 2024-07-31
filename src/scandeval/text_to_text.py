@@ -2,6 +2,7 @@
 
 import logging
 import random
+import re
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -14,6 +15,7 @@ from .utils import (
     METRIC_ATTRIBUTES_TAKING_UP_MEMORY,
     HiddenPrints,
     clear_memory,
+    convert_prompt_to_instruction,
     raise_if_model_output_contains_nan_values,
 )
 
@@ -264,6 +266,31 @@ class TextToText(BenchmarkDataset):
 
         examples["text"] = final_prompts
 
+        return examples
+
+    def _apply_instruction_prompt(self, examples: dict, tokenizer: "Tokenizer") -> dict:
+        """Apply an instruction prompt to the examples.
+
+        Args:
+            examples:
+                The examples to apply the prompt to.
+            tokenizer:
+                The tokenizer to use to encode the instruction prompt.
+
+        Returns:
+            The examples with the instruction prompt applied.
+        """
+        prompts = [
+            self.dataset_config.instruction_prompt.format(
+                text=re.sub(r"\n+", "\n", text).strip()
+            )
+            for text in examples["text"]
+        ]
+        prompts = [
+            convert_prompt_to_instruction(prompt=prompt, tokenizer=tokenizer)
+            for prompt in prompts
+        ]
+        examples["text"] = prompts
         return examples
 
     def _extract_labels_from_generation(

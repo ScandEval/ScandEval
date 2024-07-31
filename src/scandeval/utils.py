@@ -19,14 +19,13 @@ import pkg_resources
 import requests
 import torch
 from datasets.utils import disable_progress_bar
-from huggingface_hub import HfApi, ModelFilter
-from jinja2 import TemplateError
+from huggingface_hub import HfApi
 from requests.exceptions import RequestException
 from transformers import GenerationConfig
 from transformers import logging as tf_logging
 
 from .enums import Framework
-from .exceptions import NaNValueInModelOutput
+from .exceptions import InvalidModel, NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
 from .openai_models import OpenAITokenizer
 
@@ -409,7 +408,7 @@ def get_huggingface_model_lists(
 
         # Fetch the model list
         models: list["ModelInfo"] = list(
-            api.list_models(filter=ModelFilter(language=language_str), token=token)
+            api.list_models(language=language_str, token=token)
         )
 
         # Filter the models to only keep the ones with the specified language
@@ -576,9 +575,19 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
             pad_token_id=model.config.pad_token_id,
             eos_token_id=model.config.eos_token_id,
         )
-        model.generate(inputs=dummy_inputs, generation_config=generation_config)
+        model.generate(
+            inputs=dummy_inputs,
+            attention_mask=torch.ones_like(dummy_inputs),
+            generation_config=generation_config,
+        )
         return True
     except (NotImplementedError, TypeError) as e:
+        if "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
+            raise InvalidModel(
+                "The benchmark failed because the environment variable "
+                "`PYTORCH_ENABLE_MPS_FALLBACK` is not set. Please set this "
+                "environment variable to `1` and try again."
+            )
         logger.debug(
             f"The model was found not to be generative, as an error occurred: {e}"
         )
@@ -734,29 +743,9 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
 
 
 def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
-    """Convert a prompt to an instruction.
+    """Make an instruction prompt conform to a chat template.
 
     Note that it is expected that the prompt has the following format:
-
-    ```
-    <prefix prompt>
-
-    [<example prefix>: <example>
-    <label prefix>: <label>
-
-    <example prefix>: <example>
-    <label prefix>: <label>
-
-    (...)
-
-    <example prefix>: <example>
-    <label prefix>: <label>]
-
-    <example prefix>: <example>
-    <label prefix>:
-    ```
-
-    Here the part in square brackets is optional, containing few-shot examples.
 
     Args:
         prompt:
@@ -765,7 +754,7 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
             The tokenizer.
 
     Returns:
-        The instruction.
+        The chat template formatted prompt.
     """
     if tokenizer.chat_template is None:
         return prompt
@@ -776,35 +765,10 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
         tokenize=False,
     )
 
-    prompt_has_prefix = (
-        len(prompt.split("\n\n")) > 1 and len(prompt.split("\n\n")[0].split("\n")) == 1
+    instruction_prompt = tokenizer.apply_chat_template(
+        conversation=[dict(role="user", content=prompt)], **chat_template_kwargs
     )
-    if not prompt_has_prefix:
-        raise ValueError(f"The prompt doesn't have a prefix: {prompt!r}")
-
-    # Split up the prompt into its main components
-    prompt_prefix = prompt.split("\n\n")[0]
-    main_prompt = "\n".join(prompt.split("\n")[2:-1])
-    label_prefix = prompt.split("\n")[-1]
-
-    try:
-        instruction_prompt = tokenizer.apply_chat_template(
-            conversation=[
-                dict(role="system", content=prompt_prefix),
-                dict(role="user", content=main_prompt),
-            ],
-            **chat_template_kwargs,
-        )
-    except TemplateError:
-        instruction_prompt = tokenizer.apply_chat_template(
-            conversation=[
-                dict(role="user", content=prompt_prefix + "\n\n" + main_prompt)
-            ],
-            **chat_template_kwargs,
-        )
     assert isinstance(instruction_prompt, str)
-
-    instruction_prompt += label_prefix
 
     return instruction_prompt
 

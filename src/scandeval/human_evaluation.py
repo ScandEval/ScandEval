@@ -269,6 +269,7 @@ class HumanEvaluator:
             only_validation_split=True,
             few_shot=True,
             num_iterations=iteration + 1,
+            debug=False,
             run_with_cli=True,
         )
         dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
