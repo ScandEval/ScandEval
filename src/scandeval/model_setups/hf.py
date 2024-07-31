@@ -348,7 +348,6 @@ class HFModelSetup:
                 quantization_config=bnb_config,
                 torch_dtype=self._get_torch_dtype(config=config),
                 attn_implementation="flash_attention_2" if flash_attention else None,
-                # low_cpu_mem_usage=True,  # TEMP
                 device_map=(
                     "cuda:0"
                     if (
@@ -460,15 +459,7 @@ class HFModelSetup:
 
         model.eval()
         if not load_in_4bit:
-            try:
-                model.to(self.benchmark_config.device)
-            # TEMP
-            except NotImplementedError as e:
-                if "Please use torch.nn.Module.to_empty()" not in str(e) or not hasattr(
-                    model, "to_empty"
-                ):
-                    raise e
-                model.to_empty(device=self.benchmark_config.device)
+            model.to(self.benchmark_config.device)
 
         generative_model = model_is_generative(model=model)
 
