@@ -460,12 +460,7 @@ class HFModelSetup:
 
         model.eval()
         if not load_in_4bit:
-            # Using `to_empty` is required when we're dealing with HF models loaded with
-            # `low_cpu_mem_usage` set to True.
-            if hasattr(model, "to_empty"):
-                model.to_empty(device=self.benchmark_config.device)
-            else:
-                model.to(self.benchmark_config.device)
+            model.to(self.benchmark_config.device)
 
         generative_model = model_is_generative(model=model)
 
