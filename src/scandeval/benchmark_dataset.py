@@ -280,27 +280,46 @@ class BenchmarkDataset(ABC):
             and "total" in repo_info.safetensors
         ):
             num_params = repo_info.safetensors["total"]
-        elif hasattr(model.config, "num_params"):
+        elif (
+            hasattr(model.config, "num_params") and model.config.num_params is not None
+        ):
             num_params = model.config.num_params
         elif isinstance(model, PreTrainedModel):
             num_params = sum(p.numel() for p in model.parameters())
         else:
             num_params = -1
 
-        if hasattr(model.config, "model_max_length"):
-            max_seq_length = getattr(model.config, "model_max_length")
-        elif hasattr(model.config, "max_sequence_length"):
-            max_seq_length = getattr(model.config, "max_sequence_length")
-        elif hasattr(model.config, "max_position_embeddings"):
-            max_seq_length = getattr(model.config, "max_position_embeddings")
-        elif hasattr(
-            tokenizer, "model_max_length"
-        ) and tokenizer.model_max_length < int(1e30):
-            max_seq_length = getattr(tokenizer, "model_max_length")
-        elif hasattr(model.config, "sliding_window"):
-            max_seq_length = getattr(model.config, "sliding_window")
-        elif hasattr(model.config, "sliding_window_size"):
-            max_seq_length = getattr(model.config, "sliding_window_size")
+        if (
+            hasattr(model.config, "model_max_length")
+            and model.config.model_max_length is not None
+        ):
+            max_seq_length = model.config.model_max_length
+        elif (
+            hasattr(model.config, "max_sequence_length")
+            and model.config.max_sequence_length is not None
+        ):
+            max_seq_length = model.config.max_sequence_length
+        elif (
+            hasattr(model.config, "max_position_embeddings")
+            and model.config.max_position_embeddings is not None
+        ):
+            max_seq_length = model.config.max_position_embeddings
+        elif (
+            hasattr(tokenizer, "model_max_length")
+            and tokenizer.model_max_length is not None
+            and tokenizer.model_max_length < int(1e30)
+        ):
+            max_seq_length = tokenizer.model_max_length
+        elif (
+            hasattr(model.config, "sliding_window")
+            and model.config.sliding_window is not None
+        ):
+            max_seq_length = model.config.sliding_window
+        elif (
+            hasattr(model.config, "sliding_window_size")
+            and model.config.sliding_window_size is not None
+        ):
+            max_seq_length = model.config.sliding_window_size
         else:
             max_seq_length = -1
 
@@ -317,10 +336,10 @@ class BenchmarkDataset(ABC):
             if isinstance(model, OpenAIModel) and model.is_chat_model:
                 max_seq_length += 7
 
-        if hasattr(model.config, "vocab_size"):
-            vocab_size = getattr(model.config, "vocab_size")
-        elif hasattr(tokenizer, "vocab_size"):
-            vocab_size = getattr(tokenizer, "vocab_size")
+        if hasattr(model.config, "vocab_size") and model.config.vocab_size is not None:
+            vocab_size = model.config.vocab_size
+        elif hasattr(tokenizer, "vocab_size") and tokenizer.vocab_size is not None:
+            vocab_size = tokenizer.vocab_size
         else:
             vocab_size = -1
 
