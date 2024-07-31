@@ -460,7 +460,14 @@ class HFModelSetup:
 
         model.eval()
         if not load_in_4bit:
-            model.to(self.benchmark_config.device)
+            try:
+                model.to(self.benchmark_config.device)
+            except NotImplementedError as e:
+                if "Please use torch.nn.Module.to_empty()" not in str(e) or not hasattr(
+                    model, "to_empty"
+                ):
+                    raise e
+                model.to_empty(device=self.benchmark_config.device)
 
         generative_model = model_is_generative(model=model)
 
