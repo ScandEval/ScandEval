@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+### Fixed
+- If a model does not use attention mask then we now do not supply it. This caused
+  errors when evaluating state space models.
+
+
 ## [v13.0.0] - 2024-07-31
 ### Added
 - Evaluation of instruction tuned models is now possible! This is done by setting the
