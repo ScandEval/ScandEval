@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 from ..exceptions import InvalidModel
-from ..utils import DUMMY_FILL_VALUE
+from ..utils import DUMMY_FILL_VALUE, get_model_max_length
 
 if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizerBase
@@ -115,55 +115,26 @@ def align_model_and_tokenizer(
     Returns:
         The fixed model and tokenizer.
     """
-    # Get all possible maximal lengths
-    all_max_lengths: list[int] = []
-
-    # Add the registered max length of the tokenizer
-    if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < 100_000:
-        all_max_lengths.append(tokenizer.model_max_length)
-
-    # Add the max length derived from the position embeddings
-    if hasattr(model.config, "max_position_embeddings"):
-        all_max_lengths.append(model.config.max_position_embeddings)
-
-    # Add the max length derived from the model's input sizes
-    if hasattr(tokenizer, "max_model_input_sizes"):
-        all_max_lengths.extend(
-            [
-                size
-                for size in tokenizer.max_model_input_sizes.values()
-                if size is not None
-            ]
-        )
-
-    # To avoid models having artificially low max lengths, we remove any max lengths
-    # that are less than 128
-    all_max_lengths = [
-        max_length for max_length in all_max_lengths if max_length >= 128
-    ]
+    model_max_length = get_model_max_length(model=model, tokenizer=tokenizer)
 
     # If the model is a generative model then we need to subtract the generation length
     # from the maximum length, to allow it to keep generating
     if generative_model:
-        all_max_lengths = [
-            max_length - generation_length for max_length in all_max_lengths
-        ]
+        model_max_length -= generation_length
 
-    # If any maximal lengths were found then use the shortest one
-    if len(list(all_max_lengths)) > 0:
-        min_max_length = min(list(all_max_lengths))
-        tokenizer.model_max_length = min_max_length
+    # Ensure that the model max length is at least 5,000, to avoid OOM errors
+    model_max_length = min(model_max_length, 5_000)
 
-    # Otherwise, use the default maximal length
+    if model_max_length > 0:
+        tokenizer.model_max_length = model_max_length
     elif generative_model:
-        tokenizer.model_max_length = 32_768
+        tokenizer.model_max_length = 5_000
     else:
         tokenizer.model_max_length = 512
 
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
-    breakpoint()
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
         dummy_inputs = torch.full(

@@ -23,13 +23,13 @@ from .finetuning import finetune
 from .generation import generate
 from .model_config import get_model_config
 from .model_loading import load_model
-from .openai_models import OpenAIModel
 from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .tasks import SPEED
 from .utils import (
     GENERATIVE_MODEL_TASKS,
     enforce_reproducibility,
+    get_model_max_length,
     model_is_generative,
     should_prompts_be_stripped,
     unscramble,
@@ -289,52 +289,7 @@ class BenchmarkDataset(ABC):
         else:
             num_params = -1
 
-        if (
-            hasattr(model.config, "model_max_length")
-            and model.config.model_max_length is not None
-        ):
-            max_seq_length = model.config.model_max_length
-        elif (
-            hasattr(model.config, "max_sequence_length")
-            and model.config.max_sequence_length is not None
-        ):
-            max_seq_length = model.config.max_sequence_length
-        elif (
-            hasattr(model.config, "max_position_embeddings")
-            and model.config.max_position_embeddings is not None
-        ):
-            max_seq_length = model.config.max_position_embeddings
-        elif (
-            hasattr(tokenizer, "model_max_length")
-            and tokenizer.model_max_length is not None
-            and tokenizer.model_max_length < int(1e30)
-        ):
-            max_seq_length = tokenizer.model_max_length
-        elif (
-            hasattr(model.config, "sliding_window")
-            and model.config.sliding_window is not None
-        ):
-            max_seq_length = model.config.sliding_window
-        elif (
-            hasattr(model.config, "sliding_window_size")
-            and model.config.sliding_window_size is not None
-        ):
-            max_seq_length = model.config.sliding_window_size
-        else:
-            max_seq_length = -1
-
-        # If the model is a generative model then we have subtracted the generation
-        # length from the maximum length to allow it to keep generating. But for the
-        # model metadata we want to know the maximum length, so we add the generation
-        # length back on here
-        if max_seq_length >= 0 and benchmarking_generative_model:
-            max_seq_length += self.dataset_config.max_generated_tokens
-
-            # If the model is an OpenAI chat model then we add on 7 extra tokens, as
-            # these are part of the chat prompt and was removed from the sequence
-            # length
-            if isinstance(model, OpenAIModel) and model.is_chat_model:
-                max_seq_length += 7
+        max_seq_length = get_model_max_length(model=model, tokenizer=tokenizer)
 
         if hasattr(model.config, "vocab_size") and model.config.vocab_size is not None:
             vocab_size = model.config.vocab_size
