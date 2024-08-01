@@ -812,7 +812,7 @@ def unscramble(scrambled_text: str) -> str:
 
 
 def get_model_max_length(
-    model: "PreTrainedModel | GenerativeModel", tokenizer: "Tokenizer"
+    model: "PreTrainedModel | GenerativeModel", tokenizer: "Tokenizer | None" = None
 ) -> int:
     """Get the maximum context length of a model.
 
@@ -820,28 +820,29 @@ def get_model_max_length(
         model:
             The model.
         tokenizer:
-            The tokenizer.
+            The tokenizer, or None if the tokenizer is not available.
 
     Returns:
         The maximum context length.
     """
-    all_max_lengths: list[int] = []
+    all_max_lengths: list[int] = list()
 
-    # Add the registered max length of the tokenizer
-    if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < int(
-        1e30
-    ):
-        all_max_lengths.append(tokenizer.model_max_length)
+    if tokenizer is not None:
+        # Add the registered max length of the tokenizer
+        if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < int(
+            1e30
+        ):
+            all_max_lengths.append(tokenizer.model_max_length)
 
-    # Add the max length derived from the model's input sizes
-    if hasattr(tokenizer, "max_model_input_sizes"):
-        all_max_lengths.extend(
-            [
-                size
-                for size in tokenizer.max_model_input_sizes.values()
-                if size is not None
-            ]
-        )
+        # Add the max length derived from the model's input sizes
+        if hasattr(tokenizer, "max_model_input_sizes"):
+            all_max_lengths.extend(
+                [
+                    size
+                    for size in tokenizer.max_model_input_sizes.values()
+                    if size is not None
+                ]
+            )
 
     # Add max length candidates from the model's configuration
     candidate_config_max_lengths = [

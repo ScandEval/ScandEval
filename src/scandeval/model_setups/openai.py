@@ -188,11 +188,8 @@ class OpenAIModelSetup:
         ]
         hf_model_config.vocab_size = vocab_sizes[0] if vocab_sizes else 100_256
 
-        # We subtract the maximum generation length, as that counts towards the total
-        # amount of tokens that the model needs to process.
-        # We subtract 1 as errors occur if the model is exactly at the maximum length.
         model_lengths = [
-            model_length - dataset_config.max_generated_tokens - 1
+            model_length
             for pattern, model_length in MODEL_MAX_LENGTH_MAPPING.items()
             if re.match(pattern=f"^{pattern}$", string=model_config.model_id)
         ]

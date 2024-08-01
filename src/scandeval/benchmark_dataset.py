@@ -289,7 +289,7 @@ class BenchmarkDataset(ABC):
         else:
             num_params = -1
 
-        max_seq_length = get_model_max_length(model=model, tokenizer=tokenizer)
+        max_seq_length = get_model_max_length(model=model)
 
         if hasattr(model.config, "vocab_size") and model.config.vocab_size is not None:
             vocab_size = model.config.vocab_size
