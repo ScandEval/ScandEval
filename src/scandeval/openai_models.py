@@ -12,7 +12,7 @@ from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
 from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .exceptions import InvalidBenchmark, NeedsExtraInstalled
+from .exceptions import InvalidBenchmark, InvalidModel, NeedsExtraInstalled
 from .tasks import NER
 from .types import is_list_of_int, is_list_of_list_of_int
 
@@ -397,7 +397,7 @@ class OpenAIModel:
                         "`azure_openai_endpoint` and `azure_openai_api_version` "
                         "arguments in the `Benchmarker` class"
                     )
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     "Azure OpenAI models require an endpoint and API version to be "
                     "specified. Please specify the endpoint with the "
                     f"{argument_message}, or specify the environment variables "
@@ -410,7 +410,7 @@ class OpenAIModel:
                 max_retries=60,
             )
         elif self.benchmark_config.run_with_cli:
-            raise InvalidBenchmark(
+            raise InvalidModel(
                 "OpenAI models require an API key to be specified. Please specify the "
                 "`--openai-api-key` argument (or `--azure-openai-api-key` and "
                 "`--azure-openai-endpoint` arguments) or specify the environment "
@@ -418,7 +418,7 @@ class OpenAIModel:
                 "`AZURE_OPENAI_ENDPOINT`)."
             )
         else:
-            raise InvalidBenchmark(
+            raise InvalidModel(
                 "OpenAI models require an API key to be specified. Please specify the "
                 "`openai_api_key` argument to the `Benchmarker` class (or "
                 "`azure_openai_api_key` and `azure_openai_endpoint` arguments) or "
