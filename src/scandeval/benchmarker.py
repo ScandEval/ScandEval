@@ -774,6 +774,7 @@ class Benchmarker:
                 else:
                     if raise_errors:
                         raise e
+                    breakpoint()
                     return dict(error=str(e))
 
     def __call__(self, *args, **kwargs) -> list[BenchmarkResult]:
