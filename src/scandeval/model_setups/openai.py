@@ -37,6 +37,7 @@ CACHED_OPENAI_MODEL_IDS: list[str] = [
     "gpt-4(-[0-9]{4})?(-preview)?",
     "gpt-4-turbo(-[0-9]{4}-[0-9]{2}-[0-9]{2})?",
     "gpt-4-32k(-[0-9]{4})?(-preview)?",
+    "gpt-4o(-mini)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?",
 ]
 
 
