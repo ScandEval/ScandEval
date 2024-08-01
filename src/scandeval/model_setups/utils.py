@@ -163,6 +163,7 @@ def align_model_and_tokenizer(
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
+    breakpoint()
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
         dummy_inputs = torch.full(
