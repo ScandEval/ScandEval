@@ -126,6 +126,7 @@ class OpenAIModelSetup:
         all_models: list[openai.types.model.Model] = list()
         try:
             all_models = list(openai.models.list())
+            return model_id in [model.id for model in all_models]
         except openai.OpenAIError as e:
             model_exists = any(
                 [
@@ -140,8 +141,7 @@ class OpenAIModelSetup:
                     return dict(missing_env_var="AZURE_OPENAI_API_KEY")
                 elif "AZURE_OPENAI_ENDPOINT" in str(e):
                     return dict(missing_env_var="AZURE_OPENAI_ENDPOINT")
-
-        return model_id in [model.id for model in all_models]
+            return model_exists
 
     def get_model_config(self, model_id: str) -> ModelConfig:
         """Fetches configuration for an OpenAI model.

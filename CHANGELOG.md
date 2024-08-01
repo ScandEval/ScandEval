@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now limits the maximum sequence length when loading HF models (as opposed to vLLM
   models) to 5,000 tokens, just like we do with vLLM (no prompts are larger than that).
   This avoids OOM issues.
+- Adds GPT-4o and GPT-4o-mini to the list of cached OpenAI model IDs, to correctly
+  determine if the model exists, without needing an OpenAI API key.
 
 
 ## [v13.0.0] - 2024-07-31
