@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - If a model does not use attention mask then we now do not supply it. This caused
   errors when evaluating state space models.
+- Now limits the maximum sequence length when loading HF models (as opposed to vLLM
+  models) to 5,000 tokens, just like we do with vLLM (no prompts are larger than that).
+  This avoids OOM issues.
 
 
 ## [v13.0.0] - 2024-07-31
