@@ -80,13 +80,7 @@ class OpenAITokenizer:
         """Return the underlying tiktoken encoding."""
         try:
             return tiktoken.encoding_for_model(model_name=self.model_config.model_id)
-        except KeyError as e:
-            if "gpt-4o" in str(e):
-                raise InvalidModel(
-                    message="This model needs a newer version of `tiktoken` to be "
-                    "used. Please run `pip install --upgrade tiktoken` and try again."
-                )
-
+        except KeyError:
             # For Azure, the model_id is the deployment name. I do not know how to
             # dynamically get the currently deployed model so assuming Azure only
             # supports the latest models.
@@ -403,7 +397,7 @@ class OpenAIModel:
                         "`azure_openai_endpoint` and `azure_openai_api_version` "
                         "arguments in the `Benchmarker` class"
                     )
-                raise InvalidBenchmark(
+                raise InvalidModel(
                     "Azure OpenAI models require an endpoint and API version to be "
                     "specified. Please specify the endpoint with the "
                     f"{argument_message}, or specify the environment variables "
@@ -416,7 +410,7 @@ class OpenAIModel:
                 max_retries=60,
             )
         elif self.benchmark_config.run_with_cli:
-            raise InvalidBenchmark(
+            raise InvalidModel(
                 "OpenAI models require an API key to be specified. Please specify the "
                 "`--openai-api-key` argument (or `--azure-openai-api-key` and "
                 "`--azure-openai-endpoint` arguments) or specify the environment "
@@ -424,7 +418,7 @@ class OpenAIModel:
                 "`AZURE_OPENAI_ENDPOINT`)."
             )
         else:
-            raise InvalidBenchmark(
+            raise InvalidModel(
                 "OpenAI models require an API key to be specified. Please specify the "
                 "`openai_api_key` argument to the `Benchmarker` class (or "
                 "`azure_openai_api_key` and `azure_openai_endpoint` arguments) or "

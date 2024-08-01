@@ -37,6 +37,7 @@ CACHED_OPENAI_MODEL_IDS: list[str] = [
     "gpt-4(-[0-9]{4})?(-preview)?",
     "gpt-4-turbo(-[0-9]{4}-[0-9]{2}-[0-9]{2})?",
     "gpt-4-32k(-[0-9]{4})?(-preview)?",
+    "gpt-4o(-mini)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?",
 ]
 
 
@@ -125,6 +126,7 @@ class OpenAIModelSetup:
         all_models: list[openai.types.model.Model] = list()
         try:
             all_models = list(openai.models.list())
+            return model_id in [model.id for model in all_models]
         except openai.OpenAIError as e:
             model_exists = any(
                 [
@@ -139,8 +141,7 @@ class OpenAIModelSetup:
                     return dict(missing_env_var="AZURE_OPENAI_API_KEY")
                 elif "AZURE_OPENAI_ENDPOINT" in str(e):
                     return dict(missing_env_var="AZURE_OPENAI_ENDPOINT")
-
-        return model_id in [model.id for model in all_models]
+            return model_exists
 
     def get_model_config(self, model_id: str) -> ModelConfig:
         """Fetches configuration for an OpenAI model.
@@ -187,11 +188,8 @@ class OpenAIModelSetup:
         ]
         hf_model_config.vocab_size = vocab_sizes[0] if vocab_sizes else 100_256
 
-        # We subtract the maximum generation length, as that counts towards the total
-        # amount of tokens that the model needs to process.
-        # We subtract 1 as errors occur if the model is exactly at the maximum length.
         model_lengths = [
-            model_length - dataset_config.max_generated_tokens - 1
+            model_length
             for pattern, model_length in MODEL_MAX_LENGTH_MAPPING.items()
             if re.match(pattern=f"^{pattern}$", string=model_config.model_id)
         ]

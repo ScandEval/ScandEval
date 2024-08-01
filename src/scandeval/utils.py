@@ -27,7 +27,7 @@ from transformers import logging as tf_logging
 from .enums import Framework
 from .exceptions import InvalidModel, NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
-from .openai_models import OpenAITokenizer
+from .openai_models import OpenAIModel, OpenAITokenizer
 
 if TYPE_CHECKING:
     from huggingface_hub.hf_api import ModelInfo
@@ -809,3 +809,76 @@ def unscramble(scrambled_text: str) -> str:
     inverse_permutation = np.argsort(permutation)
     unscrambled = "".join(scrambled_text[i] for i in inverse_permutation)
     return unscrambled
+
+
+def get_model_max_length(
+    model: "PreTrainedModel | GenerativeModel", tokenizer: "Tokenizer | None" = None
+) -> int:
+    """Get the maximum context length of a model.
+
+    Args:
+        model:
+            The model.
+        tokenizer:
+            The tokenizer, or None if the tokenizer is not available.
+
+    Returns:
+        The maximum context length.
+    """
+    all_max_lengths: list[int] = list()
+
+    if tokenizer is not None:
+        # Add the registered max length of the tokenizer
+        if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < int(
+            1e30
+        ):
+            all_max_lengths.append(tokenizer.model_max_length)
+
+        # Add the max length derived from the model's input sizes
+        if hasattr(tokenizer, "max_model_input_sizes"):
+            all_max_lengths.extend(
+                [
+                    size
+                    for size in tokenizer.max_model_input_sizes.values()
+                    if size is not None
+                ]
+            )
+
+    # Add max length candidates from the model's configuration
+    candidate_config_max_lengths = [
+        "max_position_embeddings",
+        "model_max_length",
+        "max_sequence_length",
+        "sliding_window",
+        "sliding_window_size",
+    ]
+    for candidate_config_max_length in candidate_config_max_lengths:
+        if (
+            hasattr(model.config, candidate_config_max_length)
+            and (value := getattr(model.config, candidate_config_max_length))
+            is not None
+        ):
+            all_max_lengths.append(value)
+
+    # To avoid models having artificially low max lengths, we remove any max lengths
+    # that are less than 128
+    all_max_lengths = [
+        max_length for max_length in all_max_lengths if max_length >= 128
+    ]
+
+    if len(list(all_max_lengths)) > 0:
+        model_max_length = min(list(all_max_lengths))
+
+        # If the model is an OpenAI chat model then we add on 7 extra tokens, as
+        # these are part of the chat prompt and was removed from the sequence
+        # length
+        if (
+            model_max_length >= 0
+            and isinstance(model, OpenAIModel)
+            and model.is_chat_model
+        ):
+            model_max_length += 7
+    else:
+        model_max_length = -1
+
+    return model_max_length
