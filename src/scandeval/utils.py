@@ -12,7 +12,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Literal, Type
 
 import numpy as np
 import pkg_resources
@@ -764,14 +764,15 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     if tokenizer.chat_template is None:
         return prompt
 
-    chat_template_kwargs = dict(
+    user_message: dict[Literal["role"] | Literal["content"], str] = dict()
+    user_message["role"] = "user"
+    user_message["content"] = prompt
+
+    instruction_prompt = tokenizer.apply_chat_template(
+        conversation=[user_message],
         chat_template=tokenizer.chat_template,
         add_generation_prompt=True,
         tokenize=False,
-    )
-
-    instruction_prompt = tokenizer.apply_chat_template(
-        conversation=[dict(role="user", content=prompt)], **chat_template_kwargs
     )
     assert isinstance(instruction_prompt, str)
 
