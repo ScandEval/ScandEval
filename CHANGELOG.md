@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   This avoids OOM issues.
 - Adds GPT-4o and GPT-4o-mini to the list of cached OpenAI model IDs, to correctly
   determine if the model exists, without needing an OpenAI API key.
+- If a model has set its EOS token ID to multiple tokens and hasn't set the padding
+  token ID, we use the first EOS token ID as the padding token ID.
 
 
 ## [v13.0.0] - 2024-07-31
