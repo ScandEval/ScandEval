@@ -545,7 +545,10 @@ class HFModelSetup:
                     cache_dir=model_cache_dir,
                 )
                 if config.eos_token_id is not None and config.pad_token_id is None:
-                    config.pad_token_id = config.eos_token_id
+                    if isinstance(config.eos_token_id, list):
+                        config.pad_token_id = config.eos_token_id[0]
+                    else:
+                        config.pad_token_id = config.eos_token_id
                 return config
             except KeyError as e:
                 key = e.args[0]
