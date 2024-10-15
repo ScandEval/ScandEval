@@ -449,7 +449,7 @@ class OpenAIModel:
             return False
 
         try:
-            self.client.chat.completions.create(
+            self.client.chat.completions.create(  # type: ignore[call-overload]
                 model=self.model_config.model_id,
                 messages=[
                     ChatCompletionUserMessageParam(role="user", content="Test json")
