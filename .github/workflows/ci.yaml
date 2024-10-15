@@ -17,7 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - uses: pre-commit/action@v3.0.1
+      - name: Install pre-commit
+        run: pipx install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run --all-files
 
   pytest-linux:
     if: github.event.pull_request.draft == false
