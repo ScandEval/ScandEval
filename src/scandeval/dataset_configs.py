@@ -753,17 +753,20 @@ NQII_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-# FOQA_CONFIG = DatasetConfig(
-#     name="foqa",
-#     pretty_name="Faroese Question Answering",
-#     huggingface_id="ScandEval/foqa-mini",  # TODO: Needs to be uploaded
-#     task=RC,
-#     languages=[FO],
-#     prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
-#     "orðum: {label}",
-#     num_few_shot_examples=4,
-#     max_generated_tokens=32,
-# )
+FOQA_CONFIG = DatasetConfig(
+    name="foqa",
+    pretty_name="Faroese Question Answering",
+    huggingface_id="ScandEval/foqa",
+    task=RC,
+    languages=[FO],
+    prompt_prefix="Hetta eru tekstir saman við spurningum og svar.",
+    prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
+    "orðum: {label}",
+    instruction_prompt="Tekstur: {text}\n\nSvara hesum spurninginum um tekstin "
+    "uppiyvir við í mesta lagi trimum orðum.\n\nSpurningur: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
 
 GERMANQUAD_CONFIG = DatasetConfig(
     name="germanquad",
@@ -813,8 +816,6 @@ SQUAD_NL_CONFIG = DatasetConfig(
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
-
-# TODO: Faroese Question Answering
 
 
 ### SUMMARIZATION DATASETS ###
