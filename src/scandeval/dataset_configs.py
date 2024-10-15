@@ -755,7 +755,7 @@ NQII_CONFIG = DatasetConfig(
 
 FOQA_CONFIG = DatasetConfig(
     name="foqa",
-    pretty_name="Faroese Question Answering",
+    pretty_name="the Faroese question answering dataset FoQA",
     huggingface_id="ScandEval/foqa",
     task=RC,
     languages=[FO],
