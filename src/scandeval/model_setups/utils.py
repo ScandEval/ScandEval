@@ -132,11 +132,6 @@ def align_model_and_tokenizer(
     else:
         tokenizer.model_max_length = 512
 
-    # Move model temporarily to CPU to avoid OOM errors
-    model_device = model.device
-    breakpoint()
-    model.to("cpu")
-
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
@@ -162,9 +157,6 @@ def align_model_and_tokenizer(
             # This happens if `max_length` is too large
             except IndexError:
                 continue
-
-    # Move model back to original device
-    model.to(model_device)
 
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
