@@ -134,7 +134,8 @@ def align_model_and_tokenizer(
 
     # Move model temporarily to CPU to avoid OOM errors
     model_device = model.device
-    model.cpu()
+    breakpoint()
+    model.to("cpu")
 
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
