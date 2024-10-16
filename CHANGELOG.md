@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added the new Faroese reading comprehension dataset FoQA. This is now the default
+  Faroese reading comprehension benchmark, as there was none previously.
+
 ### Fixed
 - If a model does not use attention mask then we now do not supply it. This caused
   errors when evaluating state space models.

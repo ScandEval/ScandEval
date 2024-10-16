@@ -25,8 +25,9 @@ if importlib.util.find_spec("tiktoken") is not None:
 
 if importlib.util.find_spec("openai") is not None:
     from openai import AzureOpenAI, BadRequestError, NotFoundError, OpenAI
+    from openai.types.chat import ChatCompletionUserMessageParam
     from openai.types.chat.chat_completion_token_logprob import TopLogprob
-    from openai.types.chat.completion_create_params import ResponseFormat
+    from openai.types.shared.response_format_json_object import ResponseFormatJSONObject
 
 logger = logging.getLogger(__package__)
 
@@ -446,12 +447,15 @@ class OpenAIModel:
         """Returns whether the model supports JSON mode."""
         if not self.is_chat_model:
             return False
+
         try:
-            self.client.chat.completions.create(
+            self.client.chat.completions.create(  # type: ignore[call-overload]
                 model=self.model_config.model_id,
-                messages=[dict(role="user", content="Test json")],
+                messages=[
+                    ChatCompletionUserMessageParam(role="user", content="Test json")
+                ],
                 max_tokens=1,
-                response_format=ResponseFormat(type="json_object"),
+                response_format=ResponseFormatJSONObject(type="json_object"),
             )
             return True
         except BadRequestError as e:

@@ -132,16 +132,17 @@ def align_model_and_tokenizer(
     else:
         tokenizer.model_max_length = 512
 
+    # Move model temporarily to CPU to avoid OOM errors
+    model_device = model.device
+    model.cpu()
+
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
         dummy_inputs = torch.full(
-            size=(1, max_length),
-            fill_value=DUMMY_FILL_VALUE,
-            dtype=torch.long,
-            device=model.device,
+            size=(1, max_length), fill_value=DUMMY_FILL_VALUE, dtype=torch.long
         )
 
         with torch.inference_mode():
@@ -154,15 +155,15 @@ def align_model_and_tokenizer(
             except ValueError as e:
                 if "decoder_input_ids" not in str(e):
                     raise e
-                model(
-                    input_ids=dummy_inputs,
-                    labels=torch.zeros(1, 1).long().to(dummy_inputs.device),
-                )
+                model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long())
                 break
 
             # This happens if `max_length` is too large
             except IndexError:
                 continue
+
+    # Move model back to original device
+    model.to(model_device)
 
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
