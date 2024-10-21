@@ -5,10 +5,9 @@ from typing import TYPE_CHECKING, Any
 import torch
 import torch.nn as nn
 
-from scandeval.vllm_models import VLLMModel
-
 from ..exceptions import InvalidModel
 from ..utils import DUMMY_FILL_VALUE, get_model_max_length
+from ..vllm_models import VLLMModel
 
 if TYPE_CHECKING:
     from transformers import PreTrainedModel, PreTrainedTokenizerBase
