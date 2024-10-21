@@ -138,7 +138,10 @@ def align_model_and_tokenizer(
     for max_length in range(initial_max_length, 0, -1):
         tokenizer.model_max_length = max_length
         dummy_inputs = torch.full(
-            size=(1, max_length), fill_value=DUMMY_FILL_VALUE, dtype=torch.long
+            size=(1, max_length),
+            fill_value=DUMMY_FILL_VALUE,
+            dtype=torch.long,
+            device=model.device,
         )
 
         with torch.inference_mode():
