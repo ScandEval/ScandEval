@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Any
 import torch
 import torch.nn as nn
 
+from scandeval.vllm_models import VLLMModel
+
 from ..exceptions import InvalidModel
 from ..utils import DUMMY_FILL_VALUE, get_model_max_length
 
@@ -91,12 +93,12 @@ def setup_model_for_question_answering(model: "PreTrainedModel") -> "PreTrainedM
 
 
 def align_model_and_tokenizer(
-    model: "PreTrainedModel",
+    model: "PreTrainedModel | VLLMModel",
     tokenizer: "PreTrainedTokenizerBase",
     generative_model: bool,
     generation_length: int,
     raise_errors: bool = False,
-) -> tuple["PreTrainedModel", "PreTrainedTokenizerBase"]:
+) -> tuple["PreTrainedModel | VLLMModel", "PreTrainedTokenizerBase"]:
     """Aligns the model and the tokenizer.
 
     Args:
@@ -132,9 +134,13 @@ def align_model_and_tokenizer(
     else:
         tokenizer.model_max_length = 512
 
-    # If we're dealing with a transformers model then we move it to CPU to avoid OOM
+    # If we're not dealing with a generative model then we move it to CPU to avoid OOM
     # errors
-    breakpoint()
+    if not generative_model:
+        model.to("cpu")
+        device = "cpu"
+    else:
+        device = model.device
 
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
@@ -145,7 +151,7 @@ def align_model_and_tokenizer(
             size=(1, max_length),
             fill_value=DUMMY_FILL_VALUE,
             dtype=torch.long,
-            device=model.device,
+            device=device,
         )
 
         with torch.inference_mode():
@@ -156,7 +162,7 @@ def align_model_and_tokenizer(
             # This handles the case where the model is a sequence-to-sequence model, as
             # they require text labels to be passed in
             except ValueError as e:
-                if "decoder_input_ids" not in str(e):
+                if "decoder_input_ids" not in str(e) or isinstance(model, VLLMModel):
                     raise e
                 model(input_ids=dummy_inputs, labels=torch.zeros(1, 1).long())
                 break
@@ -174,6 +180,11 @@ def align_model_and_tokenizer(
                     "The vocab size of the tokenizer is larger than the vocab size of "
                     "the model. As the --raise-errors option was specified, the "
                     "embeddings of the model will not be automatically adjusted."
+                )
+            if isinstance(model, VLLMModel):
+                raise InvalidModel(
+                    "The vocab size of the tokenizer is larger than the vocab size of "
+                    "the model."
                 )
             model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size + 1)
 
