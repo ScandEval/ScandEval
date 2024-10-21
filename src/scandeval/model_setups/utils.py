@@ -132,6 +132,10 @@ def align_model_and_tokenizer(
     else:
         tokenizer.model_max_length = 512
 
+    # If we're dealing with a transformers model then we move it to CPU to avoid OOM
+    # errors
+    breakpoint()
+
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
