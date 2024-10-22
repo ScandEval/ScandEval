@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
     from transformers import PretrainedConfig, PreTrainedTokenizerBase
     from vllm import LLM, RequestOutput
-    from vllm.lora import LoRARequest
+    from vllm.lora.request import LoRARequest
 
     from .config import ModelConfig
 
@@ -30,7 +30,7 @@ if importlib.util.find_spec("ray") is not None:
 
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
-    from vllm.lora import LoRARequest
+    from vllm.lora.request import LoRARequest
 
     try:
         from vllm.model_executor.parallel_utils.parallel_state import (
