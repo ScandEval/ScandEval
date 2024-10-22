@@ -120,7 +120,7 @@ class VLLMModel:
             dtype = torch.float16
 
         vllm_kwargs = dict(
-            model=self.model_config.model_id,
+            model=self.adapter_base_model_id or self.model_config.model_id,
             gpu_memory_utilization=0.95,
             max_model_len=self.max_model_len,
             download_dir=str(self.model_cache_dir),
@@ -158,7 +158,7 @@ class VLLMModel:
 
         if self.adapter_base_model_id is not None:
             self.adapter_path = snapshot_download(
-                repo_id=self.adapter_base_model_id, cache_dir=self.model_cache_dir
+                repo_id=self.model_config.model_id, cache_dir=self.model_cache_dir
             )
 
         return model
