@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Type
 import torch
 from huggingface_hub import HfApi
 from huggingface_hub import whoami as hf_whoami
-from huggingface_hub.hf_api import RepositoryNotFoundError
+from huggingface_hub.hf_api import ModelInfo, RepositoryNotFoundError
 from huggingface_hub.utils import (
     GatedRepoError,
     HFValidationError,
@@ -173,7 +173,8 @@ class HFModelSetup:
                     f"The model {model_id} does not exist on the Hugging Face Hub."
                 )
 
-            tags: list[str] = models[0].tags
+            model: ModelInfo = models[0]
+            tags: list[str] = model.tags or list()
 
             framework = Framework.PYTORCH
             if "pytorch" in tags:
@@ -185,7 +186,7 @@ class HFModelSetup:
             elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
                 raise InvalidModel("TensorFlow/Keras models are not supported.")
 
-            model_task: str | None = models[0].pipeline_tag
+            model_task: str | None = model.pipeline_tag
             if model_task is None:
                 generative_tags = [
                     "trl",
@@ -193,7 +194,7 @@ class HFModelSetup:
                     "text-generation-inference",
                     "unsloth",
                 ]
-                if any(tag in models[0].tags for tag in generative_tags):
+                if any(tag in tags for tag in generative_tags):
                     model_task = "text-generation"
                 else:
                     model_task = "fill-mask"
@@ -202,7 +203,7 @@ class HFModelSetup:
             language_codes = list(language_mapping.keys())
 
             model_config = ModelConfig(
-                model_id=models[0].modelId,
+                model_id=model.modelId,
                 framework=framework,
                 task=model_task,
                 languages=[
@@ -214,6 +215,7 @@ class HFModelSetup:
                     cache_dir=self.benchmark_config.cache_dir, model_id=model_id
                 ),
             )
+            breakpoint()
 
         # If fetching from the Hugging Face Hub failed then throw a reasonable
         # exception
