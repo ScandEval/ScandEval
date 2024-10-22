@@ -232,8 +232,9 @@ class HFModelSetup:
                     "mistral",
                     "text-generation-inference",
                     "unsloth",
+                    "text-generation",
+                    "llama",
                 ]
-                breakpoint()
                 if any(tag in tags for tag in generative_tags):
                     model_task = "text-generation"
                 else:
