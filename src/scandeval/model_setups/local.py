@@ -5,7 +5,6 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from peft.config import PeftConfig
 from transformers import AutoConfig
 from transformers.models.auto.modeling_auto import (
     MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
@@ -20,6 +19,7 @@ from ..utils import create_model_cache_dir
 from .hf import HFModelSetup
 
 if TYPE_CHECKING:
+    from peft.config import PeftConfig
     from transformers import PreTrainedModel
 
     from ..config import BenchmarkConfig, DatasetConfig
