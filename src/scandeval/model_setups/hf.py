@@ -554,6 +554,7 @@ class HFModelSetup:
         """
         while True:
             try:
+                breakpoint()
                 config = AutoConfig.from_pretrained(
                     model_id,
                     num_labels=num_labels,
