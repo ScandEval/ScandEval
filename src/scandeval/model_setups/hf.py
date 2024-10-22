@@ -266,9 +266,8 @@ class HFModelSetup:
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
 
-        breakpoint()
         config = self._load_hf_model_config(
-            model_id=model_id,
+            model_id=model_config.adapter_base_model_id or model_id,
             num_labels=dataset_config.num_labels,
             id2label=dataset_config.id2label,
             label2id=dataset_config.label2id,
@@ -555,7 +554,6 @@ class HFModelSetup:
         """
         while True:
             try:
-                breakpoint()
                 config = AutoConfig.from_pretrained(
                     model_id,
                     num_labels=num_labels,
