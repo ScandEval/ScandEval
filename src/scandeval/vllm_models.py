@@ -144,7 +144,7 @@ class VLLMModel:
             # we disable it for now
             enable_prefix_caching=False,
             enable_lora=self.adapter_base_model_id is not None,
-            max_lora_rank=1e6,
+            max_lora_rank=256,
         )
 
         self._model = self._initialise(vllm_kwargs=vllm_kwargs)
