@@ -158,8 +158,8 @@ class VLLMModel:
 
         if self.adapter_base_model_id is not None:
             self.adapter_path = snapshot_download(
-                repo_id=self.model_config.model_id,
-                cache_dir=Path(self.model_cache_dir).parent,
+                repo_id=self.model_config.model_id
+                # cache_dir=Path(self.model_cache_dir).parent,
             )
             self.lora_request = LoRARequest(
                 lora_name="adapter", lora_int_id=1, lora_path=self.adapter_path
