@@ -375,7 +375,7 @@ class HFModelSetup:
                     f"implementation instead. The error raised was {e!r}"
                 )
 
-        if not use_vllm:
+        else:
             if self.benchmark_config.use_flash_attention is None:
                 flash_attention = model_config.task in GENERATIVE_MODEL_TASKS
             else:
@@ -693,5 +693,5 @@ class HFModelSetup:
             "please ensure that it has a framework registered. If it is a "
             "private model then enable the `--use-token` flag and make "
             "sure that you are logged in to the Hub via the "
-            "`huggingface-cli login` command."
+            f"`huggingface-cli login` command. The error raised was {exception!r}"
         )
