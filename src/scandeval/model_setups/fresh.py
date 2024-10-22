@@ -85,8 +85,6 @@ class FreshModelSetup:
             model_cache_dir=create_model_cache_dir(
                 cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
-            adapter_model_id=None,
-            adapter_revision="main",
         )
 
     def load_model(
