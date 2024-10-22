@@ -166,7 +166,6 @@ class HFModelSetup:
             models = [
                 model for model in models if model.modelId == model_id_without_revision
             ]
-            breakpoint()
 
             # Check that the model exists. If it does not then raise an error
             if len(models) == 0:
@@ -256,6 +255,7 @@ class HFModelSetup:
             revision=model_config.revision,
             model_cache_dir=model_config.model_cache_dir,
         )
+        breakpoint()
 
         quantization = None
         if hasattr(config, "quantization_config"):
