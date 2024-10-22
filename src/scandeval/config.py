@@ -292,8 +292,9 @@ class ModelConfig:
             The type of the model.
         model_cache_dir:
             The directory to cache the model in.
-        is_adapter:
-            Whether the model is an adapter model.
+        adapter_base_model_id:
+            The model ID of the base model if the model is an adapter model. Can be None
+            if the model is not an adapter model.
     """
 
     model_id: str
@@ -303,7 +304,7 @@ class ModelConfig:
     languages: list[Language]
     model_type: "ModelType | str"
     model_cache_dir: str
-    is_adapter: bool
+    adapter_base_model_id: str | None
 
     def __hash__(self) -> int:
         """Return a hash of the model configuration."""

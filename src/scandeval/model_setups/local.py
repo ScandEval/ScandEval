@@ -1,9 +1,11 @@
 """Model setup for local Hugging Face Hub models."""
 
+import importlib.util
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from peft.config import PeftConfig
 from transformers import AutoConfig
 from transformers.models.auto.modeling_auto import (
     MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
@@ -13,7 +15,7 @@ from transformers.models.auto.modeling_auto import (
 
 from ..config import ModelConfig
 from ..enums import Framework, ModelType
-from ..exceptions import InvalidModel
+from ..exceptions import InvalidModel, NeedsManualDependency
 from ..utils import create_model_cache_dir
 from .hf import HFModelSetup
 
@@ -128,6 +130,12 @@ class LocalModelSetup:
         is_adapter = "adapter_config.json" in [
             path.name for path in Path(model_id).glob("*.json")
         ]
+        adapter_base_model_id: str | None = None
+        if is_adapter:
+            if importlib.util.find_spec("peft") is None:
+                raise NeedsManualDependency(package="peft")
+            peft_config = PeftConfig.from_pretrained(model_id)
+            adapter_base_model_id = peft_config.base_model_name_or_path
 
         model_config = ModelConfig(
             model_id=model_id,
@@ -139,7 +147,7 @@ class LocalModelSetup:
             model_cache_dir=create_model_cache_dir(
                 cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
-            is_adapter=is_adapter,
+            adapter_base_model_id=adapter_base_model_id,
         )
         return model_config
 

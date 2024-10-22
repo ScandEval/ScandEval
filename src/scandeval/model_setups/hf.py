@@ -48,6 +48,7 @@ from ..vllm_models import VLLMModel
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 if TYPE_CHECKING:
+    from peft.config import PeftConfig
     from transformers import PretrainedConfig, PreTrainedModel
 
     from ..config import BenchmarkConfig, DatasetConfig
@@ -205,6 +206,12 @@ class HFModelSetup:
                 for path in fs.ls(path=model_id, detail=False)
                 if isinstance(path, str)
             ]
+            adapter_base_model_id: str | None = None
+            if is_adapter:
+                if importlib.util.find_spec("peft") is None:
+                    raise NeedsManualDependency(package="peft")
+                peft_config = PeftConfig.from_pretrained(model_id)
+                adapter_base_model_id = peft_config.base_model_name_or_path
 
             language_mapping = get_all_languages()
             language_codes = list(language_mapping.keys())
@@ -221,7 +228,7 @@ class HFModelSetup:
                 model_cache_dir=create_model_cache_dir(
                     cache_dir=self.benchmark_config.cache_dir, model_id=model_id
                 ),
-                is_adapter=is_adapter,
+                adapter_base_model_id=adapter_base_model_id,
             )
 
         # If fetching from the Hugging Face Hub failed then throw a reasonable
@@ -264,7 +271,6 @@ class HFModelSetup:
             revision=model_config.revision,
             model_cache_dir=model_config.model_cache_dir,
         )
-        breakpoint()
 
         quantization = None
         if hasattr(config, "quantization_config"):

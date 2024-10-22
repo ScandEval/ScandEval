@@ -163,7 +163,7 @@ class OpenAIModelSetup:
             model_cache_dir=create_model_cache_dir(
                 cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
-            is_adapter=False,
+            adapter_base_model_id=None,
         )
 
     def load_model(
