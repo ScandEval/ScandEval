@@ -282,6 +282,23 @@ class BenchmarkDataset(ABC):
         ):
             num_params = repo_info.safetensors["total"]
         elif (
+            repo_info is not None
+            and hasattr(repo_info, "card_data")
+            and repo_info.card_data is not None
+            and "base_model" in repo_info.card_data
+            and len(repo_info.card_data["base_model"]) > 0
+            and (
+                base_repo_info := api.repo_info(
+                    repo_info.card_data["base_model"], repo_type="model"
+                )
+            )
+            is not None
+            and hasattr(base_repo_info, "safetensors")
+            and base_repo_info.safetensors is not None
+            and "total" in base_repo_info.safetensors
+        ):
+            num_params = base_repo_info.safetensors["total"]
+        elif (
             hasattr(model.config, "num_params") and model.config.num_params is not None
         ):
             num_params = model.config.num_params
