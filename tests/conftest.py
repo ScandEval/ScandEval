@@ -193,6 +193,7 @@ def model_config(language) -> Generator[ModelConfig, None, None]:
         languages=[language],
         model_type=ModelType.FRESH,
         model_cache_dir="cache_dir",
+        adapter_base_model_id=None,
     )
 
 
