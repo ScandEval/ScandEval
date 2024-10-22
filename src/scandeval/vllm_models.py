@@ -119,12 +119,17 @@ class VLLMModel:
             )
             dtype = torch.float16
 
+        if self.adapter_base_model_id is not None:
+            download_dir = str(Path(self.model_cache_dir) / "base_model")
+        else:
+            download_dir = str(self.model_cache_dir)
+
         vllm_kwargs = dict(
             model=self.adapter_base_model_id or self.model_config.model_id,
             tokenizer=self.adapter_base_model_id or self.model_config.model_id,
             gpu_memory_utilization=0.95,
             max_model_len=self.max_model_len,
-            download_dir=str(Path(self.model_cache_dir) / "base_model"),
+            download_dir=download_dir,
             trust_remote_code=self.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
