@@ -266,6 +266,7 @@ class HFModelSetup:
         from_flax = model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
 
+        breakpoint()
         config = self._load_hf_model_config(
             model_id=model_id,
             num_labels=dataset_config.num_labels,
