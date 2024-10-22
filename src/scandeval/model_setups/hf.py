@@ -332,6 +332,7 @@ class HFModelSetup:
                     hf_model_config=config,
                     model_cache_dir=model_config.model_cache_dir,
                     trust_remote_code=self.benchmark_config.trust_remote_code,
+                    adapter_base_model_id=model_config.adapter_base_model_id,
                 )
             except ValueError as e:
                 # If the model is too large to fit on the GPU then we simply throw an

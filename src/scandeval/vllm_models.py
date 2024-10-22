@@ -8,6 +8,7 @@ from types import MethodType
 from typing import TYPE_CHECKING
 
 import torch
+from huggingface_hub import snapshot_download
 from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.utils import ModelOutput
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
 
     from transformers import PretrainedConfig, PreTrainedTokenizerBase
     from vllm import LLM, RequestOutput
+    from vllm.lora import LoRARequest
 
     from .config import ModelConfig
 
@@ -28,6 +30,7 @@ if importlib.util.find_spec("ray") is not None:
 
 if importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, SamplingParams
+    from vllm.lora import LoRARequest
 
     try:
         from vllm.model_executor.parallel_utils.parallel_state import (
@@ -50,6 +53,7 @@ class VLLMModel:
         model_cache_dir: "str | Path",
         trust_remote_code: bool,
         tokenizer: "PreTrainedTokenizerBase | None" = None,
+        adapter_base_model_id: str | None = None,
     ) -> None:
         """Initialize a vLLM model.
 
@@ -65,6 +69,9 @@ class VLLMModel:
             tokenizer:
                 A Hugging Face tokenizer. If None, the tokenizer will need to be
                 loaded separately.
+            adapter_base_model_id:
+                The base model ID of the adapter model, if the model is an adapter.
+                None otherwise.
         """
         self.model_config = model_config
         self.config = hf_model_config
@@ -72,6 +79,8 @@ class VLLMModel:
         self.trust_remote_code = trust_remote_code
         self.device = torch.device("cuda")
         self.tokenizer = tokenizer
+        self.adapter_base_model_id = adapter_base_model_id
+        self.adapter_path: str | None = None
 
         self.max_model_len = 5_000
         potential_max_model_length_config_names = [
@@ -128,6 +137,7 @@ class VLLMModel:
             # TEMP: Prefix caching isn't supported with sliding window in vLLM yet, so
             # we disable it for now
             enable_prefix_caching=False,
+            enable_lora=self.adapter_base_model_id is not None,
         )
 
         self._model = self._initialise(vllm_kwargs=vllm_kwargs)
@@ -145,6 +155,12 @@ class VLLMModel:
         clear_vllm()
         model = LLM(**vllm_kwargs)
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
+
+        if self.adapter_base_model_id is not None:
+            self.adapter_path = snapshot_download(
+                repo_id=self.adapter_base_model_id, cache_dir=self.model_cache_dir
+            )
+
         return model
 
     def __del__(self) -> None:
@@ -246,8 +262,11 @@ class VLLMModel:
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
         raw_outputs = self._model.generate(
             prompts=prompts,
-            use_tqdm=(not input_is_a_test),
             sampling_params=sampling_params,
+            use_tqdm=(not input_is_a_test),
+            lora_request=LoRARequest(
+                lora_name="adapter", lora_int_id=1, lora_path=self.adapter_path
+            ),
         )
 
         # Collect the generated sequences into a single tensor of shape
