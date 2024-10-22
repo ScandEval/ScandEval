@@ -119,13 +119,12 @@ class VLLMModel:
             )
             dtype = torch.float16
 
-        breakpoint()
         vllm_kwargs = dict(
             model=self.adapter_base_model_id or self.model_config.model_id,
             tokenizer=self.adapter_base_model_id or self.model_config.model_id,
             gpu_memory_utilization=0.95,
             max_model_len=self.max_model_len,
-            download_dir=str(self.model_cache_dir),
+            download_dir=str(Path(self.model_cache_dir) / "base_model"),
             trust_remote_code=self.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
@@ -160,8 +159,7 @@ class VLLMModel:
 
         if self.adapter_base_model_id is not None:
             self.adapter_path = snapshot_download(
-                repo_id=self.model_config.model_id,
-                cache_dir=Path(self.model_cache_dir).parent,
+                repo_id=self.model_config.model_id, cache_dir=Path(self.model_cache_dir)
             )
             self.lora_request = LoRARequest(
                 lora_name="adapter", lora_int_id=1, lora_path=self.adapter_path
