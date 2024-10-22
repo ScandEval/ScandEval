@@ -191,6 +191,40 @@ class HFModelSetup:
             elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
                 raise InvalidModel("TensorFlow/Keras models are not supported.")
 
+            is_adapter = "adapter_config.json" in [
+                path.split("/")[-1]
+                for path in fs.ls(path=model_id, detail=False)
+                if isinstance(path, str)
+            ]
+            adapter_base_model_id: str | None = None
+            if is_adapter:
+                if importlib.util.find_spec("peft") is None:
+                    raise NeedsManualDependency(package="peft")
+                peft_config = PeftConfig.from_pretrained(model_id)
+                adapter_base_model_id = peft_config.base_model_name_or_path
+
+                # Add tags from the adapter base model
+                if adapter_base_model_id is not None:
+                    adapter_author, adapter_model_name = adapter_base_model_id.split(
+                        "/"
+                    )
+                    adapter_models = api.list_models(
+                        author=adapter_author,
+                        model_name=adapter_model_name,
+                        token=self.benchmark_config.token,
+                    )
+                    adapter_models = [
+                        model
+                        for model in adapter_models
+                        if model.id == adapter_base_model_id
+                    ]
+                    if len(adapter_models) == 0:
+                        raise InvalidModel(
+                            f"The adapter base model {adapter_base_model_id} does not "
+                            "exist on the Hugging Face Hub."
+                        )
+                    tags += adapter_models[0].tags or list()
+
             model_task: str | None = model.pipeline_tag
             if model_task is None:
                 generative_tags = [
@@ -204,18 +238,6 @@ class HFModelSetup:
                     model_task = "text-generation"
                 else:
                     model_task = "fill-mask"
-
-            is_adapter = "adapter_config.json" in [
-                path.split("/")[-1]
-                for path in fs.ls(path=model_id, detail=False)
-                if isinstance(path, str)
-            ]
-            adapter_base_model_id: str | None = None
-            if is_adapter:
-                if importlib.util.find_spec("peft") is None:
-                    raise NeedsManualDependency(package="peft")
-                peft_config = PeftConfig.from_pretrained(model_id)
-                adapter_base_model_id = peft_config.base_model_name_or_path
 
             language_mapping = get_all_languages()
             language_codes = list(language_mapping.keys())
