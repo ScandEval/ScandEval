@@ -191,6 +191,7 @@ def align_model_and_tokenizer(
     # identical to the eos token, if the latter exists. Otherwise, if both the pad and
     # eos token are not defined, then we attempt to set the padding token to the sep
     # token. If a sep token doesn't exist either, we raise an error.
+    breakpoint()
     if generative_model:
         tokenizer.padding_side = "left"
         if tokenizer.eos_token is not None:
