@@ -487,7 +487,9 @@ class HFModelSetup:
             model = setup_model_for_question_answering(model=model)
 
         tokenizer = self._load_tokenizer(
-            model=model, model_id=model_id, generative_model=generative_model
+            model=model,
+            model_id=model_config.adapter_base_model_id or model_id,
+            generative_model=generative_model,
         )
 
         if use_vllm:
