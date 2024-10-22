@@ -288,7 +288,7 @@ class BenchmarkDataset(ABC):
             and len(repo_info.card_data["base_model"]) > 0
             and (
                 base_repo_info := api.repo_info(
-                    repo_info.card_data["base_model"], repo_type="model"
+                    repo_info.card_data["base_model"][-1], repo_type="model"
                 )
             )
             is not None
