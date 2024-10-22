@@ -81,6 +81,7 @@ class VLLMModel:
         self.tokenizer = tokenizer
         self.adapter_base_model_id = adapter_base_model_id
         self.adapter_path: str | None = None
+        self.lora_request: "LoRARequest | None" = None
 
         self.max_model_len = 5_000
         potential_max_model_length_config_names = [
@@ -159,6 +160,9 @@ class VLLMModel:
         if self.adapter_base_model_id is not None:
             self.adapter_path = snapshot_download(
                 repo_id=self.model_config.model_id, cache_dir=self.model_cache_dir
+            )
+            self.lora_request = LoRARequest(
+                lora_name="adapter", lora_int_id=1, lora_path=self.adapter_path
             )
 
         return model
@@ -264,9 +268,7 @@ class VLLMModel:
             prompts=prompts,
             sampling_params=sampling_params,
             use_tqdm=(not input_is_a_test),
-            lora_request=LoRARequest(
-                lora_name="adapter", lora_int_id=1, lora_path=self.adapter_path
-            ),
+            lora_request=self.lora_request,
         )
 
         # Collect the generated sequences into a single tensor of shape
