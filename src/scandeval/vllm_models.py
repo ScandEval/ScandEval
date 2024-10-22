@@ -121,6 +121,7 @@ class VLLMModel:
 
         vllm_kwargs = dict(
             model=self.adapter_base_model_id or self.model_config.model_id,
+            tokenizer=self.adapter_base_model_id or self.model_config.model_id,
             gpu_memory_utilization=0.95,
             max_model_len=self.max_model_len,
             download_dir=str(self.model_cache_dir),
