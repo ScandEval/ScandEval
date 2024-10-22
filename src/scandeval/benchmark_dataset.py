@@ -285,6 +285,7 @@ class BenchmarkDataset(ABC):
             and hasattr(repo_info, "card_data")
             and repo_info.card_data is not None
             and "base_model" in repo_info.card_data
+            and repo_info.card_data["base_model"] is not None
             and len(repo_info.card_data["base_model"]) > 0
             and (
                 base_repo_info := api.repo_info(
