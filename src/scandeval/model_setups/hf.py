@@ -199,6 +199,7 @@ class HFModelSetup:
                     "text-generation-inference",
                     "unsloth",
                 ]
+                breakpoint()
                 if any(tag in tags for tag in generative_tags):
                     model_task = "text-generation"
                 else:
@@ -320,7 +321,6 @@ class HFModelSetup:
             and self.benchmark_config.device == torch.device("cuda")
             and os.getenv("USE_VLLM", "1") == "1"
         )
-        breakpoint()
 
         if use_vllm and importlib.util.find_spec("vllm") is None:
             raise NeedsExtraInstalled(extra="generative")
