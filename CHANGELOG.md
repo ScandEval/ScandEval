@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added the new Faroese reading comprehension dataset FoQA. This is now the default
   Faroese reading comprehension benchmark, as there was none previously.
+- Now supports evaluation of models with adapters. This requires that the model
+  repository has an `adapter_config.json` file, but no additional setup is needed.
 
 ### Fixed
 - If a model does not use attention mask then we now do not supply it. This caused
