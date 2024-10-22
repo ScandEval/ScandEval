@@ -25,6 +25,9 @@ if TYPE_CHECKING:
     from ..config import BenchmarkConfig, DatasetConfig
     from ..protocols import GenerativeModel, Tokenizer
 
+if importlib.util.find_spec("peft") is not None:
+    from peft.config import PeftConfig
+
 
 logger = logging.getLogger(__package__)
 
