@@ -323,6 +323,7 @@ class HFModelSetup:
 
         if use_vllm:
             try:
+                breakpoint()
                 model = VLLMModel(
                     model_config=model_config,
                     hf_model_config=config,
