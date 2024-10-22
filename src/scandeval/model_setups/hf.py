@@ -138,12 +138,26 @@ class HFModelSetup:
         Returns:
             The model configuration.
         """
-        # Extract the revision from the model ID, if it is specified
+        # Split the model from its adapter
+        if "+" in model_id:
+            model_id, adapter_model_id = model_id.split("+", 1)
+        else:
+            adapter_model_id = None
+
+        # Extract the revision from the model IDs, if they are specified
+        adapter_model_id_without_revision: str | None
         if "@" in model_id:
             model_id_without_revision, revision = model_id.split("@", 1)
         else:
             model_id_without_revision = model_id
             revision = "main"
+        if adapter_model_id is not None and "@" in adapter_model_id:
+            adapter_model_id_without_revision, adapter_revision = (
+                adapter_model_id.split("@", 1)
+            )
+        else:
+            adapter_model_id_without_revision = adapter_model_id
+            adapter_revision = "main"
 
         # Extract the author and model name from the model ID
         author: str | None
@@ -213,6 +227,8 @@ class HFModelSetup:
                 model_cache_dir=create_model_cache_dir(
                     cache_dir=self.benchmark_config.cache_dir, model_id=model_id
                 ),
+                adapter_model_id=adapter_model_id_without_revision,
+                adapter_revision=adapter_revision,
             )
 
         # If fetching from the Hugging Face Hub failed then throw a reasonable
