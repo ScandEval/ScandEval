@@ -166,6 +166,7 @@ class HFModelSetup:
             models = [
                 model for model in models if model.modelId == model_id_without_revision
             ]
+            breakpoint()
 
             # Check that the model exists. If it does not then raise an error
             if len(models) == 0:
