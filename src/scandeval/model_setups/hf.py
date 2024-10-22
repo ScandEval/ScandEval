@@ -8,7 +8,7 @@ from time import sleep
 from typing import TYPE_CHECKING, Type
 
 import torch
-from huggingface_hub import HfApi
+from huggingface_hub import HfApi, HfFileSystem
 from huggingface_hub import whoami as hf_whoami
 from huggingface_hub.hf_api import ModelInfo, RepositoryNotFoundError
 from huggingface_hub.utils import (
@@ -156,6 +156,7 @@ class HFModelSetup:
         # Attempt to fetch model data from the Hugging Face Hub
         try:
             api: HfApi = HfApi()
+            fs = HfFileSystem()
 
             # Fetch the model metadata
             models = api.list_models(
@@ -164,7 +165,7 @@ class HFModelSetup:
 
             # Filter the models to only keep the one with the specified model ID
             models = [
-                model for model in models if model.modelId == model_id_without_revision
+                model for model in models if model.id == model_id_without_revision
             ]
 
             # Check that the model exists. If it does not then raise an error
@@ -199,11 +200,17 @@ class HFModelSetup:
                 else:
                     model_task = "fill-mask"
 
+            is_adapter = "adapter_config.json" in [
+                path.split("/")[-1]
+                for path in fs.ls(path=model_id, detail=False)
+                if isinstance(path, str)
+            ]
+
             language_mapping = get_all_languages()
             language_codes = list(language_mapping.keys())
 
             model_config = ModelConfig(
-                model_id=model.modelId,
+                model_id=model_id,
                 framework=framework,
                 task=model_task,
                 languages=[
@@ -214,8 +221,8 @@ class HFModelSetup:
                 model_cache_dir=create_model_cache_dir(
                     cache_dir=self.benchmark_config.cache_dir, model_id=model_id
                 ),
+                is_adapter=is_adapter,
             )
-            breakpoint()
 
         # If fetching from the Hugging Face Hub failed then throw a reasonable
         # exception

@@ -125,6 +125,10 @@ class LocalModelSetup:
         else:
             task = "unknown"
 
+        is_adapter = "adapter_config.json" in [
+            path.name for path in Path(model_id).glob("*.json")
+        ]
+
         model_config = ModelConfig(
             model_id=model_id,
             revision="main",
@@ -135,6 +139,7 @@ class LocalModelSetup:
             model_cache_dir=create_model_cache_dir(
                 cache_dir=self.benchmark_config.cache_dir, model_id=model_id
             ),
+            is_adapter=is_adapter,
         )
         return model_config
 
