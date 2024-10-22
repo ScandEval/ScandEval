@@ -181,6 +181,7 @@ def block_terminal_output():
     logging.getLogger("httpx").setLevel(logging.CRITICAL)
     logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.CRITICAL)
+    logging.getLogger("accelerate").setLevel(logging.CRITICAL)
 
     # This suppresses vLLM logging
     os.environ["LOG_LEVEL"] = "CRITICAL"
