@@ -562,6 +562,7 @@ def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
     Returns:
         Whether the model is generative or not.
     """
+    breakpoint()
     known_generative_models = ["VLLMModel", "OpenAIModel"]
     if any(model.__class__.__name__ == name for name in known_generative_models):
         return True
