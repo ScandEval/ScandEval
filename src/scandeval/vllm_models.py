@@ -4,6 +4,7 @@ import importlib.util
 import logging
 import math
 import sys
+from pathlib import Path
 from types import MethodType
 from typing import TYPE_CHECKING
 
@@ -17,8 +18,6 @@ from .exceptions import NeedsExtraInstalled
 from .utils import clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from transformers import PretrainedConfig, PreTrainedTokenizerBase
     from vllm import LLM, RequestOutput
     from vllm.lora.request import LoRARequest
