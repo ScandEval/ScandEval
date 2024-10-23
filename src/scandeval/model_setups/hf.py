@@ -8,9 +8,9 @@ from time import sleep
 from typing import TYPE_CHECKING, Type
 
 import torch
-from huggingface_hub import HfApi
+from huggingface_hub import HfApi, HfFileSystem
 from huggingface_hub import whoami as hf_whoami
-from huggingface_hub.hf_api import RepositoryNotFoundError
+from huggingface_hub.hf_api import ModelInfo, RepositoryNotFoundError
 from huggingface_hub.utils import (
     GatedRepoError,
     HFValidationError,
@@ -48,10 +48,14 @@ from ..vllm_models import VLLMModel
 from .utils import align_model_and_tokenizer, setup_model_for_question_answering
 
 if TYPE_CHECKING:
+    from peft.config import PeftConfig
     from transformers import PretrainedConfig, PreTrainedModel
 
     from ..config import BenchmarkConfig, DatasetConfig
     from ..protocols import GenerativeModel, Tokenizer
+
+if importlib.util.find_spec("peft") is not None:
+    from peft.config import PeftConfig
 
 
 logger = logging.getLogger(__package__)
@@ -138,7 +142,7 @@ class HFModelSetup:
         Returns:
             The model configuration.
         """
-        # Extract the revision from the model ID, if it is specified
+        # Extract the revision from the model IDs, if they are specified
         if "@" in model_id:
             model_id_without_revision, revision = model_id.split("@", 1)
         else:
@@ -156,6 +160,7 @@ class HFModelSetup:
         # Attempt to fetch model data from the Hugging Face Hub
         try:
             api: HfApi = HfApi()
+            fs = HfFileSystem()
 
             # Fetch the model metadata
             models = api.list_models(
@@ -164,7 +169,7 @@ class HFModelSetup:
 
             # Filter the models to only keep the one with the specified model ID
             models = [
-                model for model in models if model.modelId == model_id_without_revision
+                model for model in models if model.id == model_id_without_revision
             ]
 
             # Check that the model exists. If it does not then raise an error
@@ -173,7 +178,8 @@ class HFModelSetup:
                     f"The model {model_id} does not exist on the Hugging Face Hub."
                 )
 
-            tags: list[str] = models[0].tags
+            model: ModelInfo = models[0]
+            tags: list[str] = model.tags or list()
 
             framework = Framework.PYTORCH
             if "pytorch" in tags:
@@ -185,15 +191,51 @@ class HFModelSetup:
             elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
                 raise InvalidModel("TensorFlow/Keras models are not supported.")
 
-            model_task: str | None = models[0].pipeline_tag
+            is_adapter = "adapter_config.json" in [
+                path.split("/")[-1]
+                for path in fs.ls(path=model_id, detail=False)
+                if isinstance(path, str)
+            ]
+            adapter_base_model_id: str | None = None
+            if is_adapter:
+                if importlib.util.find_spec("peft") is None:
+                    raise NeedsManualDependency(package="peft")
+                peft_config = PeftConfig.from_pretrained(model_id)
+                adapter_base_model_id = peft_config.base_model_name_or_path
+
+                # Add tags from the adapter base model
+                if adapter_base_model_id is not None:
+                    adapter_author, adapter_model_name = adapter_base_model_id.split(
+                        "/"
+                    )
+                    adapter_models = api.list_models(
+                        author=adapter_author,
+                        model_name=adapter_model_name,
+                        token=self.benchmark_config.token,
+                    )
+                    adapter_models = [
+                        model
+                        for model in adapter_models
+                        if model.id == adapter_base_model_id
+                    ]
+                    if len(adapter_models) == 0:
+                        raise InvalidModel(
+                            f"The adapter base model {adapter_base_model_id} does not "
+                            "exist on the Hugging Face Hub."
+                        )
+                    tags += adapter_models[0].tags or list()
+
+            model_task: str | None = model.pipeline_tag
             if model_task is None:
                 generative_tags = [
                     "trl",
                     "mistral",
                     "text-generation-inference",
                     "unsloth",
+                    "text-generation",
+                    "llama",
                 ]
-                if any(tag in models[0].tags for tag in generative_tags):
+                if any(tag in tags for tag in generative_tags):
                     model_task = "text-generation"
                 else:
                     model_task = "fill-mask"
@@ -202,7 +244,7 @@ class HFModelSetup:
             language_codes = list(language_mapping.keys())
 
             model_config = ModelConfig(
-                model_id=models[0].modelId,
+                model_id=model_id,
                 framework=framework,
                 task=model_task,
                 languages=[
@@ -213,6 +255,7 @@ class HFModelSetup:
                 model_cache_dir=create_model_cache_dir(
                     cache_dir=self.benchmark_config.cache_dir, model_id=model_id
                 ),
+                adapter_base_model_id=adapter_base_model_id,
             )
 
         # If fetching from the Hugging Face Hub failed then throw a reasonable
@@ -248,7 +291,7 @@ class HFModelSetup:
         ignore_mismatched_sizes = False
 
         config = self._load_hf_model_config(
-            model_id=model_id,
+            model_id=model_config.adapter_base_model_id or model_id,
             num_labels=dataset_config.num_labels,
             id2label=dataset_config.id2label,
             label2id=dataset_config.label2id,
@@ -312,6 +355,7 @@ class HFModelSetup:
                     hf_model_config=config,
                     model_cache_dir=model_config.model_cache_dir,
                     trust_remote_code=self.benchmark_config.trust_remote_code,
+                    adapter_base_model_id=model_config.adapter_base_model_id,
                 )
             except ValueError as e:
                 # If the model is too large to fit on the GPU then we simply throw an
@@ -331,7 +375,7 @@ class HFModelSetup:
                     f"implementation instead. The error raised was {e!r}"
                 )
 
-        if not use_vllm:
+        else:
             if self.benchmark_config.use_flash_attention is None:
                 flash_attention = model_config.task in GENERATIVE_MODEL_TASKS
             else:
@@ -467,7 +511,9 @@ class HFModelSetup:
             model = setup_model_for_question_answering(model=model)
 
         tokenizer = self._load_tokenizer(
-            model=model, model_id=model_id, generative_model=generative_model
+            model=model,
+            model_id=model_config.adapter_base_model_id or model_id,
+            generative_model=generative_model,
         )
 
         if use_vllm:
@@ -647,5 +693,5 @@ class HFModelSetup:
             "please ensure that it has a framework registered. If it is a "
             "private model then enable the `--use-token` flag and make "
             "sure that you are logged in to the Hub via the "
-            "`huggingface-cli login` command."
+            f"`huggingface-cli login` command. The error raised was {exception!r}"
         )

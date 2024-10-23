@@ -135,11 +135,9 @@ def align_model_and_tokenizer(
 
     # If we're not dealing with a generative model then we move it to CPU to avoid OOM
     # errors
-    if not generative_model:
-        model.to("cpu")
-        device = "cpu"
-    else:
-        device = model.device
+    device = model.device if generative_model else torch.device("cpu")
+    model_device = model.device
+    model.to(device)
 
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
@@ -208,5 +206,7 @@ def align_model_and_tokenizer(
     if tokenizer.bos_token is None and tokenizer.eos_token is not None:
         tokenizer.bos_token = tokenizer.eos_token
         tokenizer.bos_token_id = tokenizer.eos_token_id
+
+    model.to(model_device)
 
     return model, tokenizer

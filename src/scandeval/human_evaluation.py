@@ -286,6 +286,7 @@ class HumanEvaluator:
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),
+            adapter_base_model_id=None,
         )
 
         self.benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)

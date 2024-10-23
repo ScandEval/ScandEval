@@ -88,6 +88,8 @@ format:  ## Format the code
 type-check:  ## Run type checking
 	@poetry run mypy . --install-types --non-interactive --ignore-missing-imports --show-error-codes --check-untyped-defs
 
+check: lint format type-check  ## Run all checks
+
 setup-environment-variables:
 	@poetry run python src/scripts/fix_dot_env_file.py
 

@@ -60,6 +60,7 @@ def test_load_non_existing_model(dataset_config, benchmark_config):
         languages=[DA],
         model_type="fresh",
         model_cache_dir="cache_dir",
+        adapter_base_model_id=None,
     )
     with pytest.raises(InvalidModel):
         load_model(
