@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   determine if the model exists, without needing an OpenAI API key.
 - If a model has set its EOS token ID to multiple tokens and hasn't set the padding
   token ID, we use the first EOS token ID as the padding token ID.
+- Fixed a bug related to the loading of some encoder models by updating `accelerate` to
+  `>=0.34.2` and `transformers` to `>=4.45.0`.
 
 
 ## [v13.0.0] - 2024-07-31
