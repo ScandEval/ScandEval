@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Faroese reading comprehension benchmark, as there was none previously.
 - Now supports evaluation of models with adapters. This requires that the model
   repository has an `adapter_config.json` file, but no additional setup is needed.
+- Added the Icelandic summarisation dataset IceSum. IceSum is a collection of 1,000
+  Icelandic news articles from mbl.is, which have been manually annotated with summaries.
+  The dataset has been marked as unofficial, meaning that it will not be automatically
+  included when benchmarking models, but can be included by specifying the dataset
+  explicitly using the --dataset argument (or dataset argument if using the
+  Benchmarker API).
 
 ### Fixed
 - If a model does not use attention mask then we now do not supply it. This caused
