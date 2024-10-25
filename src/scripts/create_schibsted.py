@@ -64,12 +64,11 @@ def main():
         """Detect if the text is in Swedish or Norwegian.
 
         Args:
-            text (str):
+            text:
                 The text to detect the language of.
 
         Returns:
-            str:
-                The language of the text ("sv" or "no").
+            The language of the text ("sv" or "no").
         """
         label, _ = model.predict(text=text)
         label = label[0]
