@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added the [Schibsted dataset](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries), which contains summaries of published articles from Schibsted Media's Norwegian and Swedish newsrooms. The dataset has been split into two separate small datasets, one for Swedish and one for Norwegian:
   - `schibsted-sv` for Swedish (train: 528 samples, val: 96 samples, test: 89 samples)
-  - `schibsted-no` for Norwegian (train: 528 samples, val: 96 samples, test: 89 samples)
+  - `schibsted-no` for Norwegian (train: 1240 samples, val: 347 samples, test: 374 samples)
 
   Both the datasets are currently listed as unofficial, meaning that they will not be
   automatically included when benchmarking models, but can be included by specifying
