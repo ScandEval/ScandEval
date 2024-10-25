@@ -77,7 +77,6 @@ def main():
         elif label == "__label__nob_Latn" or label == "__label__nno_Latn":
             return "no"
         return "other"
-        # print(f"Not Swedish or Norwegian ({label}): {text}")
 
     dataset_sv = dataset.filter(
         lambda x: detect_language(text=x["article_title"]) == "sv"
