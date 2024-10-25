@@ -247,7 +247,7 @@ class VLLMModel:
             temperature=temperature,
             top_p=generation_config.top_p,
             top_k=generation_config.top_k,
-            stop=stop_tokens,
+            stop=[stop_token for stop_token in stop_tokens if stop_token],
             repetition_penalty=generation_config.repetition_penalty,
             frequency_penalty=generation_config.repetition_penalty - 1.0,
             logits_processors=generation_kwargs.get("logits_processors"),
