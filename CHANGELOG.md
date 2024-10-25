@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   token ID, we use the first EOS token ID as the padding token ID.
 - Fixed a bug related to the loading of some encoder models by updating `accelerate` to
   `>=0.34.2` and `transformers` to `>=4.45.0`.
+- We now ensure that stop tokens in vLLM can't be empty, as this caused errors when
+  evaluating some models.
 
 
 ## [v13.0.0] - 2024-07-31
