@@ -975,6 +975,22 @@ files = [
 devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benchmark", "pytest-cache", "validictory"]
 
 [[package]]
+name = "fasttext"
+version = "0.9.3"
+description = "fasttext Python bindings"
+optional = false
+python-versions = "*"
+files = [
+    {file = "fasttext-0.9.3-cp39-cp39-macosx_14_0_arm64.whl", hash = "sha256:8b39f3ac5df43873648ea400cb75d4f7f9455730ac5105490b23b70f14e03ea7"},
+    {file = "fasttext-0.9.3.tar.gz", hash = "sha256:eb03f2ef6340c6ac9e4398a30026f05471da99381b307aafe2f56e4cd26baaef"},
+]
+
+[package.dependencies]
+numpy = "*"
+pybind11 = ">=2.2"
+setuptools = ">=0.7.0"
+
+[[package]]
 name = "ffmpy"
 version = "0.4.0"
 description = "A simple Python wrapper for FFmpeg"
@@ -3048,7 +3064,6 @@ description = "Nvidia JIT LTO Library"
 optional = false
 python-versions = ">=3"
 files = [
-    {file = "nvidia_nvjitlink_cu12-12.5.82-py3-none-manylinux2014_aarch64.whl", hash = "sha256:98103729cc5226e13ca319a10bbf9433bbbd44ef64fe72f45f067cacc14b8d27"},
     {file = "nvidia_nvjitlink_cu12-12.5.82-py3-none-manylinux2014_x86_64.whl", hash = "sha256:f9b37bc5c8cf7509665cb6ada5aaa0ce65618f2332b7d3e78e9790511f111212"},
     {file = "nvidia_nvjitlink_cu12-12.5.82-py3-none-win_amd64.whl", hash = "sha256:e782564d705ff0bf61ac3e1bf730166da66dd2fe9012f111ede5fc49b64ae697"},
 ]
@@ -3725,6 +3740,20 @@ files = [
 ]
 
 [[package]]
+name = "pybind11"
+version = "2.13.6"
+description = "Seamless operability between C++11 and Python"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pybind11-2.13.6-py3-none-any.whl", hash = "sha256:237c41e29157b962835d356b370ededd57594a26d5894a795960f0047cb5caf5"},
+    {file = "pybind11-2.13.6.tar.gz", hash = "sha256:ba6af10348c12b24e92fa086b39cfba0eff619b61ac77c406167d813b096d39a"},
+]
+
+[package.extras]
+global = ["pybind11-global (==2.13.6)"]
+
+[[package]]
 name = "pycountry"
 version = "24.6.1"
 description = "ISO country, subdivision, language, currency and script definitions and their translations"
@@ -4068,7 +4097,6 @@ files = [
     {file = "PyYAML-6.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:bf07ee2fef7014951eeb99f56f39c9bb4af143d8aa3c21b1677805985307da34"},
     {file = "PyYAML-6.0.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:855fb52b0dc35af121542a76b9a84f8d1cd886ea97c84703eaa6d88e37a2ad28"},
     {file = "PyYAML-6.0.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:40df9b996c2b73138957fe23a16a4f0ba614f4c0efce1e9406a184b6d07fa3a9"},
-    {file = "PyYAML-6.0.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a08c6f0fe150303c1c6b71ebcd7213c2858041a7e01975da3a99aed1e7a378ef"},
     {file = "PyYAML-6.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c22bec3fbe2524cde73d7ada88f6566758a8f7227bfbf93a408a9d86bcc12a0"},
     {file = "PyYAML-6.0.1-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:8d4e9c88387b0f5c7d5f281e55304de64cf7f9c0021a3525bd3b1c542da3b0e4"},
     {file = "PyYAML-6.0.1-cp312-cp312-win32.whl", hash = "sha256:d483d2cdf104e7c9fa60c544d92981f12ad66a457afae824d146093b8c294c54"},
@@ -4996,7 +5024,7 @@ scikit-learn = ">=0.21.3"
 name = "setuptools"
 version = "75.2.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "setuptools-75.2.0-py3-none-any.whl", hash = "sha256:a7fcb66f68b4d9e8e66b42f9876150a3371558f98fa32222ffaa5bced76406f8"},
@@ -6218,4 +6246,4 @@ openai = ["bert-score", "levenshtein", "openai", "rouge-score", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "2241668e6e5a863202c677fae7147d5a0bbe80950fd6766557c78a15cbf88a06"
+content-hash = "f7c454b68c25643a0c39083a927e52a61d2cbc772679825bf369b1c48e0cfb29"

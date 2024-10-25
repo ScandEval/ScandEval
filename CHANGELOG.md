@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+### Added
+- Added the [Schibsted dataset](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries),
+  which contains summaries of published articles from Schibsted Media's Norwegian and Swedish newsrooms.
+  The dataset has been split into two separate datasets, one for Swedish and one for Norwegian:
+  - `schibsted-sv` for Swedish
+  - `schibsted-no` for Norwegian
+  Both the dataset are currently listed as unofficial, meaning that they will not be automatically included when benchmarking models, but can be included by specifying the dataset explicitly using the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
 
 ## [Unreleased]
 ### Added

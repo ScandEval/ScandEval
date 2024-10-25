@@ -923,6 +923,36 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
+SCHIBSTED_SV = DatasetConfig(
+    name="schibsted-sv",
+    pretty_name="article summaries from Schibsted Media Swedish newsrooms.",
+    huggingface_id="ScandEval/schibsted-article-summaries-sv",
+    task=SUMM,
+    languages=[SV],
+    prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
+    prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
+    instruction_prompt="Nyhedsartikel: {text}\n\nSkriv et resumé af ovenstående "
+    "artikel.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+    unofficial=True,
+)
+
+SCHIBSTED_NO = DatasetConfig(
+    name="schibsted-no",
+    pretty_name="article summaries from Schibsted Medias Norwegian newsrooms.",
+    huggingface_id="ScandEval/schibsted-article-summaries-no",
+    task=SUMM,
+    languages=[NB, NN, NO],
+    prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
+    prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
+    instruction_prompt="Nyhedsartikel: {text}\n\nSkriv et resumé af ovenstående "
+    "artikel.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+    unofficial=True,
+)
+
 # TODO: Faroese summarization
 
 
