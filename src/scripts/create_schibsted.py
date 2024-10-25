@@ -19,7 +19,9 @@ def main():
     dataset["val"] = dataset.pop("validation")
 
     # Rename article_text_all to text
-    dataset = dataset.rename_columns(column_mapping=dict(article_text_all="text", summary="target_text"))
+    dataset = dataset.rename_columns(
+        column_mapping=dict(article_text_all="text", summary="target_text")
+    )
 
     # Add article title to text, separated by a colon
     dataset = dataset.map(lambda x: {"text": f"{x['article_title']}: {x['text']}"})
