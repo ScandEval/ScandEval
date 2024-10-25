@@ -863,7 +863,6 @@ RRN_CONFIG = DatasetConfig(
     "grein.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
-    unofficial=True,
 )
 
 ICESUM_CONFIG = DatasetConfig(
@@ -878,6 +877,7 @@ ICESUM_CONFIG = DatasetConfig(
     "grein.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
+    unofficial=True,
 )
 
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
