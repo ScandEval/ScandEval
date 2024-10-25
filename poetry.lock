@@ -6246,4 +6246,4 @@ openai = ["bert-score", "levenshtein", "openai", "rouge-score", "tiktoken"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "f7c454b68c25643a0c39083a927e52a61d2cbc772679825bf369b1c48e0cfb29"
+content-hash = "61ed9a2f8c36f375b87a5b89e2804a582dd1666f3124548533bc5ac59715aa9b"
