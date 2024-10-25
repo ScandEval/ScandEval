@@ -11,13 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Added the [Schibsted dataset](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries),
-  which contains summaries of published articles from Schibsted Media's Norwegian and Swedish newsrooms.
-  The dataset has been split into two separate datasets, one for Swedish and one for Norwegian:
+  which contains summaries of published articles from Schibsted Media's Norwegian
+  and Swedish newsrooms. The dataset has been split into two separate datasets,
+  one for Swedish and one for Norwegian:
   - `schibsted-sv` for Swedish
   - `schibsted-no` for Norwegian
-  Both the dataset are currently listed as unofficial, meaning that they will not be automatically included when benchmarking models, but can be included by specifying the dataset explicitly using the `--dataset` argument (or `dataset` argument if using the `Benchmarker` API).
-
-### Added
+  Both the dataset are currently listed as unofficial, meaning that they will not be
+  automatically included when benchmarking models, but can be included by specifying
+  the dataset explicitly using the `--dataset` argument (or `dataset` argument if using
+  the `Benchmarker` API).
 - Added the new Faroese reading comprehension dataset FoQA. This is now the default
   Faroese reading comprehension benchmark, as there was none previously.
 - Now supports evaluation of models with adapters. This requires that the model
