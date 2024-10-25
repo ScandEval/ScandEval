@@ -929,10 +929,9 @@ SCHIBSTED_SV = DatasetConfig(
     huggingface_id="ScandEval/schibsted-article-summaries-sv",
     task=SUMM,
     languages=[SV],
-    prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
-    prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
-    instruction_prompt="Nyhedsartikel: {text}\n\nSkriv et resumé af ovenstående "
-    "artikel.",
+    prompt_prefix="Nedan följer artiklar med tillhörande sammanfattningar.",
+    prompt_template="Artikel: {text}\nSammanfattning: {target_text}",
+    instruction_prompt="Artikel: {text}\n\nSkriv en sammanfattning av artikeln ovan.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
     unofficial=True,
@@ -944,10 +943,10 @@ SCHIBSTED_NO = DatasetConfig(
     huggingface_id="ScandEval/schibsted-article-summaries-no",
     task=SUMM,
     languages=[NB, NN, NO],
-    prompt_prefix="Følgende er nyhedsartikler med tilhørende resuméer.",
-    prompt_template="Nyhedsartikel: {text}\nResumé: {target_text}",
-    instruction_prompt="Nyhedsartikel: {text}\n\nSkriv et resumé af ovenstående "
-    "artikel.",
+    prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
+    prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
+    instruction_prompt="Nyhetsartikkel: {text}\n\nSkriv et sammendrag av den "
+    "ovennevnte artikkelen.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
     unofficial=True,
