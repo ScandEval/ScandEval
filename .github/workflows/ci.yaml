@@ -47,7 +47,7 @@ jobs:
           poetry install --extras cpu_all --no-interaction --no-cache
 
       - name: Test with pytest
-        run: poetry run pytest
+        run: TEST_ALL_DATASETS=1 poetry run pytest
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
 
@@ -75,7 +75,7 @@ jobs:
           poetry install --extras cpu_all --no-interaction --no-cache
 
       - name: Test with pytest
-        run: poetry run pytest
+        run: TEST_ALL_DATASETS=1 poetry run pytest
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
 
