@@ -1,4 +1,4 @@
-"""Create the ScandiQA-mini datasets and upload them to the HF Hub."""
+"""Create the Icelandic QA dataset about Icelandic history and culture and upload it to the HF Hub."""
 
 import pandas as pd
 from constants import (
@@ -16,7 +16,7 @@ from requests.exceptions import HTTPError
 
 
 def main() -> None:
-    """Create the ScandiQA-mini datasets and upload them to the HF Hub."""
+    """Create the Icelandic QA dataset about Icelandic history and culture and upload it to the HF Hub."""
     repo_id = "mideind/icelandic_qa_scandeval"
 
     dataset = load_dataset(path=repo_id, token=True, split="train")
