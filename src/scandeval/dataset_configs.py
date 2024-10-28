@@ -832,6 +832,21 @@ SQUAD_NL_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+NQII_CONFIG = DatasetConfig(
+    name="icelandic-qa",
+    pretty_name="Icelandic question answering dataset about Icelandic culture and history",
+    huggingface_id="ScandEval/icelandic-qa",
+    task=RC,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru textar með tilheyrandi spurningum og svörum.",
+    prompt_template="Texti: {text}\nSpurning: {question}\nSvaraðu með að hámarki 3 "
+    "orðum: {label}",
+    instruction_prompt="Texti: {text}\n\nSvaraðu eftirfarandi spurningu um textann að "
+    "hámarki í 3 orðum.\n\nSpurning: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+    unofficial=True,
+)
 
 ### SUMMARIZATION DATASETS ###
 

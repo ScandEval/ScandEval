@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added `icelandic-qa`, an Icelandic question answering dataset about Icelandic culture and history ([source](https://huggingface.co/datasets/mideind/icelandic_qa_scandeval)). It has been set to `unofficial` for now.
 - Added `ice-ce`, an Icelandic linguistic acceptability dataset ([IceEC](https://huggingface.co/datasets/mideind/icelandic-error-corpus-IceEC)).  It has been set to
   `unofficial` for now.
 - Added the [Schibsted
