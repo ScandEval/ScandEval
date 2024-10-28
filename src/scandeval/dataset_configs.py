@@ -832,7 +832,7 @@ SQUAD_NL_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
-NQII_CONFIG = DatasetConfig(
+ICELANDIC_QA_CONFIG = DatasetConfig(
     name="icelandic-qa",
     pretty_name="Icelandic question answering dataset about Icelandic culture and history",
     huggingface_id="ScandEval/icelandic-qa",
