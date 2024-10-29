@@ -271,13 +271,13 @@ class VLLMModel:
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
+        breakpoint()
         raw_outputs = self._model.generate(
             prompts=prompts,
             sampling_params=sampling_params,
             use_tqdm=(not input_is_a_test),
             lora_request=self.lora_request,
         )
-        breakpoint()
 
         # Collect the generated sequences into a single tensor of shape
         # (batch_size, generated_sequence_length)
