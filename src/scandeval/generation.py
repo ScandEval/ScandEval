@@ -556,10 +556,11 @@ def extract_raw_predictions(
     end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
     if end_of_chat_token_ids is not None:
         end_of_chat_token = tokenizer.decode(end_of_chat_token_ids).strip()
-        raw_predictions = [
-            raw_prediction.split(end_of_chat_token)[0]
-            for raw_prediction in raw_predictions
-        ]
+        if end_of_chat_token:
+            raw_predictions = [
+                raw_prediction.split(end_of_chat_token)[0]
+                for raw_prediction in raw_predictions
+            ]
 
     raw_predictions = [raw_prediction.strip() for raw_prediction in raw_predictions]
 
