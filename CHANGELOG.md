@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an Icelandic linguistic acceptability dataset ([IceEC](https://huggingface.co/datasets/mideind/icelandic-error-corpus-IceEC)).  It has been set to
+  `unofficial` for now.
 - Added the [Schibsted
   dataset](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries), which
   contains summaries of published articles from Schibsted Media's Norwegian and Swedish
