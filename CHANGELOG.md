@@ -49,6 +49,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `>=0.34.2` and `transformers` to `>=4.45.0`.
 - We now ensure that stop tokens in vLLM can't be empty, as this caused errors when
   evaluating some models.
+- If the end-of-chat-token for a model only consists of whitespace and/or newlines then
+  we ignore it, as this caused errors when evaluating some models and makes no
+  difference to the evaluation of the model, since we are stripping the output anyway.
 
 
 ## [v13.0.0] - 2024-07-31
