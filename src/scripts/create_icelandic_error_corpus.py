@@ -27,7 +27,8 @@ def main():
         test=Dataset.from_pandas(test_df, split=Split.TEST),
     )
 
-    # Make subset of the dataset with 1024 train samples, 256 validation samples, and 2048 test samples
+    # Make subset of the dataset
+    # We use `head` instead of `sample` here as the dataframes have already been shuffled.
     dataset_subset = DatasetDict(
         train=Dataset.from_pandas(
             train_df.head(1024), split=Split.TRAIN, preserve_index=False

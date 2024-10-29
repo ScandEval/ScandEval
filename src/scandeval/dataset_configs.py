@@ -690,7 +690,7 @@ DUTCH_COLA_FULL_CONFIG = DatasetConfig(
 
 ICE_EC_CONFIG = DatasetConfig(
     name="ice-ec",
-    pretty_name="the Icelandic Error Corpus (a subset of the dataset)",
+    pretty_name="the truncated version of the Icelandic Error Corpus",
     huggingface_id="ScandEval/ice-ec",
     task=LA,
     languages=[IS],
@@ -706,7 +706,7 @@ ICE_EC_CONFIG = DatasetConfig(
 
 ICE_EC_FULL_CONFIG = DatasetConfig(
     name="ice-ec-full",
-    pretty_name="the full Icelandic Error Corpus",
+    pretty_name="the Icelandic Error Corpus",
     huggingface_id="ScandEval/ice-ec-full",
     task=LA,
     languages=[IS],
