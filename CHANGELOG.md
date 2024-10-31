@@ -8,21 +8,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an Icelandic linguistic acceptability dataset ([IceEC](https://huggingface.co/datasets/mideind/icelandic-error-corpus-IceEC)).  It has been set to
+- Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an
+  Icelandic linguistic acceptability dataset. It has been set to `unofficial` for now.
+- Added the Schibsted summarisation dataset, which contains summaries of published
+  articles from Schibsted Media's Norwegian and Swedish newsrooms. The dataset has been
+  split into two separate small datasets, `schibsted-sv` for Swedish and `schibsted-no`
+  for Norwegian. Note that both of these datasets are really small (89 and 374 test
+  samples in `schibsted-sv` and `schibsted-no`, respectively), and have been set to
   `unofficial` for now.
-- Added the [Schibsted
-  dataset](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries), which
-  contains summaries of published articles from Schibsted Media's Norwegian and Swedish
-  newsrooms. The dataset has been split into two separate small datasets, one for
-  Swedish and one for Norwegian:
-  - `schibsted-sv` for Swedish (train: 528 samples, val: 96 samples, test: 89 samples)
-  - `schibsted-no` for Norwegian (train: 1240 samples, val: 347 samples, test: 374
-    samples)
-
-  Both the datasets are currently listed as unofficial, meaning that they will not be
-  automatically included when benchmarking models, but can be included by specifying the
-  dataset explicitly using the `--dataset` argument (or `dataset` argument if using the
-  `Benchmarker` API).
 - Added the new Faroese reading comprehension dataset FoQA. This is now the default
   Faroese reading comprehension benchmark, as there was none previously.
 - Now supports evaluation of models with adapters. This requires that the model
@@ -51,6 +44,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - If the end-of-chat-token for a model only consists of whitespace and/or newlines then
   we ignore it, as this caused errors when evaluating some models and makes no
   difference to the evaluation of the model, since we are stripping the output anyway.
+- Now identifies more models correctly as generative models.
 
 
 ## [v13.0.0] - 2024-07-31
