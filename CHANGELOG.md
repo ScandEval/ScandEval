@@ -9,16 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an
-  Icelandic linguistic acceptability dataset
-  ([IceEC](https://huggingface.co/datasets/mideind/icelandic-error-corpus-IceEC)).  It
-  has been set to `unofficial` for now.
-- Added the [Schibsted
-  dataset](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries), which
-  contains summaries of published articles from Schibsted Media's Norwegian and Swedish
-  newsrooms. The dataset has been split into two separate small datasets, `schibsted-sv`
-  for Swedish and `schibsted-no` for Norwegian. Note that both of these datasets are
-  really small (89 and 374 test samples in `schibsted-sv` and `schibsted-no`,
-  respectively), and have been set to `unofficial` for now.
+  Icelandic linguistic acceptability dataset. It has been set to `unofficial` for now.
+- Added the Schibsted summarisation dataset, which contains summaries of published
+  articles from Schibsted Media's Norwegian and Swedish newsrooms. The dataset has been
+  split into two separate small datasets, `schibsted-sv` for Swedish and `schibsted-no`
+  for Norwegian. Note that both of these datasets are really small (89 and 374 test
+  samples in `schibsted-sv` and `schibsted-no`, respectively), and have been set to
+  `unofficial` for now.
 - Added the new Faroese reading comprehension dataset FoQA. This is now the default
   Faroese reading comprehension benchmark, as there was none previously.
 - Now supports evaluation of models with adapters. This requires that the model
