@@ -1,11 +1,26 @@
 """Create the Schibsted summarisation dataset."""
 
-import fasttext
 import pandas as pd
 from constants import MAX_NUM_CHARS_IN_ARTICLE, MIN_NUM_CHARS_IN_ARTICLE
 from datasets import Dataset, DatasetDict, Split, load_dataset
-from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub import HfApi
 from requests import HTTPError
+
+NEWSROOM_TO_LANGUAGE = {
+    "sno-commercial": "no",
+    "vektklubb": "no",
+    "e24": "no",
+    "e24partnerstudio": "no",
+    "dinepenger": "no",
+    "vgpartnerstudio": "no",
+    "bt": "no",
+    "tekno": "no",
+    "vg": "no",
+    "ap": "no",
+    "randaberg24": "no",
+    "ab": "se",
+    "sa": "no",
+}
 
 
 def main():
@@ -47,6 +62,10 @@ def main():
     val_df = val_df[val_lengths.between(lower_bound, upper_bound)]
     test_df = test_df[test_lengths.between(lower_bound, upper_bound)]
 
+    for df in [train_df, val_df, test_df]:
+        # make column language based on newsroom
+        df["language"] = df["newsroom"].map(NEWSROOM_TO_LANGUAGE)
+
     dataset = DatasetDict(
         train=Dataset.from_pandas(train_df, split=Split.TRAIN),
         val=Dataset.from_pandas(val_df, split=Split.VALIDATION),
@@ -55,35 +74,9 @@ def main():
 
     # Dataset is a mix of Swedish and Norwegian articles.
     # Make two separate datasets, one for each language.
-    model_path = hf_hub_download(
-        repo_id="facebook/fasttext-language-identification", filename="model.bin"
-    )
-    model = fasttext.load_model(model_path)
+    dataset_sv = dataset.filter(lambda x: x["language"] == "se")
 
-    def detect_language(text: str) -> str:
-        """Detect if the text is in Swedish or Norwegian.
-
-        Args:
-            text:
-                The text to detect the language of.
-
-        Returns:
-            The language of the text ("sv" or "no").
-        """
-        label, _ = model.predict(text=text)
-        label = label[0]
-        if label == "__label__swe_Latn":
-            return "sv"
-        elif label == "__label__nob_Latn" or label == "__label__nno_Latn":
-            return "no"
-        return "other"
-
-    dataset_sv = dataset.filter(
-        lambda x: detect_language(text=x["article_title"]) == "sv"
-    )
-    dataset_no = dataset.filter(
-        lambda x: detect_language(text=x["article_title"]) == "no"
-    )
+    dataset_no = dataset.filter(lambda x: x["language"] == "no")
 
     # Dataset IDs.
     dataset_id_sv = "ScandEval/schibsted-article-summaries-sv"
