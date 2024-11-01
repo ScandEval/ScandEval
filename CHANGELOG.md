@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [v13.1.0] - 2024-10-31
 ### Added
+- Added the summarisation part of the Norwegian NorGLM multi-task human annotated
+  dataset NO-Multi-QA-Sum. This dataset is part of the It is a part of NLEBench
+  Norwegian benchmarks. It has been marked as `unofficial` for now.
 - Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an
   Icelandic linguistic acceptability dataset. It has been set to `unofficial` for now.
 - Added the Schibsted summarisation dataset, which contains summaries of published
