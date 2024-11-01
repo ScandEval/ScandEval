@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Added a linguistic acceptability dataset which is a subset of the [Icelandic Linguistic Benchmarks dataset](https://raw.githubusercontent.com/stofnun-arna-magnussonar/ice_linguistic_benchmarks/refs/heads/main/ice_benchmark_set.jsonl). It is a small dataset with 250 train samples, 50 val samples, and 82 test samples. The dataset has been marked as unofficial.
+- Added `ice-linguistic` a linguistic acceptability dataset which is a subset of the [Icelandic Linguistic Benchmarks dataset](https://raw.githubusercontent.com/stofnun-arna-magnussonar/ice_linguistic_benchmarks/refs/heads/main/ice_benchmark_set.jsonl). It is a small dataset with 94 train samples, 32 val samples, and 256 test samples. The dataset has been marked as unofficial.
 - Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an Icelandic linguistic acceptability dataset ([IceEC](https://huggingface.co/datasets/mideind/icelandic-error-corpus-IceEC)).  It has been set to
   `unofficial` for now.
 - Added the [Schibsted

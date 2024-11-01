@@ -20,14 +20,13 @@ def main():
 
     train_df = prepare_dataframe(df=df)
 
-    # Make split from 382 samples. Train: 250, val: 50, test: 82
     # Validation split
-    val_size = 50
+    val_size = 32
     val_df = train_df.sample(n=val_size, random_state=4242)
     train_df = train_df.drop(val_df.index)
 
     # Test split
-    test_size = 82
+    test_size = 256
     test_df = train_df.sample(n=test_size, random_state=4242)
     train_df = train_df.drop(test_df.index)
 
@@ -73,7 +72,7 @@ def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df["text"] = df["input"].str.extract(r"\n\n(.*)\n\n")
     df["text"] = df["text"].str.strip()
 
-    # Remove samples with five or fewer tokens
+    # Remove samples with too few tokens
     df = df[df["text"].str.split().map(len) > 5]
 
     def make_label(row: pd.Series) -> str:
