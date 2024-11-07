@@ -1,4 +1,4 @@
-"""Create the Icelandic Error Corpus dataset and upload it to the HF Hub."""
+"""Create the Icelandic Error Corpus dataset (a subset and the full dataset) and upload it to the HF Hub."""
 
 import re
 from typing import List
@@ -9,7 +9,7 @@ from requests.exceptions import HTTPError
 
 
 def main():
-    """Create the Icelandic Error Corpus dataset and upload it to the HF Hub."""
+    """Create the Icelandic Error Corpus dataset (a subset and the full dataset) and upload it to the HF Hub."""
     repo_id = "mideind/icelandic-error-corpus-IceEC"
     dataset = load_dataset(path=repo_id, name="category")
 
@@ -27,18 +27,37 @@ def main():
         test=Dataset.from_pandas(test_df, split=Split.TEST),
     )
 
-    # Create dataset ID
-    dataset_id = "ScandEval/ice-ec"
+    # Make subset of the dataset
+    # We use `head` instead of `sample` here as the dataframes have already been shuffled.
+    dataset_subset = DatasetDict(
+        train=Dataset.from_pandas(
+            train_df.head(1024), split=Split.TRAIN, preserve_index=False
+        ),
+        val=Dataset.from_pandas(
+            val_df.head(256), split=Split.VALIDATION, preserve_index=False
+        ),
+        test=Dataset.from_pandas(
+            test_df.head(2048), split=Split.TEST, preserve_index=False
+        ),
+    )
 
-    # Remove the dataset from Hugging Face Hub if it already exists
-    try:
-        api = HfApi()
-        api.delete_repo(dataset_id, repo_type="dataset")
-    except HTTPError:
-        pass
+    # Create dataset IDs
+    dataset_id = "ScandEval/ice-ec-full"
+    dataset_subset_id = "ScandEval/ice-ec"
 
-    # Push the dataset to the Hugging Face Hub
-    dataset.push_to_hub(dataset_id, private=True)
+    for dataset_, dataset_id_ in [
+        (dataset, dataset_id),
+        (dataset_subset, dataset_subset_id),
+    ]:
+        # Remove the dataset from Hugging Face Hub if it already exists
+        try:
+            api = HfApi()
+            api.delete_repo(dataset_id_, repo_type="dataset")
+        except HTTPError:
+            pass
+
+        # Push the dataset to the Hugging Face Hub
+        dataset_.push_to_hub(dataset_id_, private=True)
 
 
 def prepare_dataframe(dataset: Dataset) -> Dataset:

@@ -191,6 +191,21 @@ class HFModelSetup:
             elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
                 raise InvalidModel("TensorFlow/Keras models are not supported.")
 
+            base_model_ids: list[str] = list()
+
+            # If the model is a finetuned model then we fetch the base model ID
+            has_base_model_tag = any(
+                tag.startswith("base_model:") and tag.count(":") == 1 for tag in tags
+            )
+            if has_base_model_tag:
+                base_model_id = [
+                    tag.split(":")[1]
+                    for tag in tags
+                    if tag.startswith("base_model:") and tag.count(":") == 1
+                ][0]
+                base_model_ids.append(base_model_id)
+
+            # If the model is an adapter model then we fetch the base model ID
             is_adapter = "adapter_config.json" in [
                 path.split("/")[-1]
                 for path in fs.ls(path=model_id, detail=False)
@@ -202,28 +217,24 @@ class HFModelSetup:
                     raise NeedsManualDependency(package="peft")
                 peft_config = PeftConfig.from_pretrained(model_id)
                 adapter_base_model_id = peft_config.base_model_name_or_path
-
-                # Add tags from the adapter base model
                 if adapter_base_model_id is not None:
-                    adapter_author, adapter_model_name = adapter_base_model_id.split(
-                        "/"
-                    )
-                    adapter_models = api.list_models(
-                        author=adapter_author,
-                        model_name=adapter_model_name,
+                    base_model_ids.append(adapter_base_model_id)
+
+            # Add tags from the base models
+            for base_model_id in base_model_ids:
+                base_model_author, base_model_name = base_model_id.split("/")
+                base_models = [
+                    model
+                    for model in api.list_models(
+                        author=base_model_author,
+                        model_name=base_model_name,
                         token=self.benchmark_config.token,
                     )
-                    adapter_models = [
-                        model
-                        for model in adapter_models
-                        if model.id == adapter_base_model_id
-                    ]
-                    if len(adapter_models) == 0:
-                        raise InvalidModel(
-                            f"The adapter base model {adapter_base_model_id} does not "
-                            "exist on the Hugging Face Hub."
-                        )
-                    tags += adapter_models[0].tags or list()
+                    if model.id == base_model_id
+                ]
+                if len(base_models) > 0:
+                    tags += base_models[0].tags or list()
+                    tags = list(set(tags))
 
             model_task: str | None = model.pipeline_tag
             if model_task is None:
