@@ -6,12 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [v13.1.0] - 2024-10-31
+## [Unreleased]
 ### Added
 - Added `ice-linguistic` a linguistic acceptability dataset which is a subset of the 
   Icelandic Linguistic Benchmarks dataset. It is a small dataset with 94 train 
   samples, 32 val samples, and 256 test samples. The dataset has been marked as 
   unofficial.
+  
+  
+## [v13.1.0] - 2024-10-31
 - Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an
   Icelandic linguistic acceptability dataset. It has been set to `unofficial` for now.
 - Added the Schibsted summarisation dataset, which contains summaries of published
