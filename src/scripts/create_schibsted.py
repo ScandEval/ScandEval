@@ -18,7 +18,7 @@ NEWSROOM_TO_LANGUAGE = {
     "vg": "no",
     "ap": "no",
     "randaberg24": "no",
-    "ab": "se",
+    "ab": "sv",
     "sa": "no",
 }
 
@@ -74,7 +74,7 @@ def main():
 
     # Dataset is a mix of Swedish and Norwegian articles.
     # Make two separate datasets, one for each language.
-    dataset_sv = dataset.filter(lambda x: x["language"] == "se")
+    dataset_sv = dataset.filter(lambda x: x["language"] == "sv")
 
     dataset_no = dataset.filter(lambda x: x["language"] == "no")
 
