@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Added the summarisation part of the Norwegian NorGLM multi-task human annotated
-  dataset NO-Multi-QA-Sum. This dataset is part of the It is a part of NLEBench
+  dataset NO-Multi-QA-Sum (`norglm-multi-sum`). This dataset is part of the NLEBench
   Norwegian benchmarks. It has been marked as `unofficial` for now.
 
 ## [v13.1.0] - 2024-10-31
