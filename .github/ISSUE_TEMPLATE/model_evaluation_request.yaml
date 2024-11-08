@@ -22,8 +22,10 @@ body:
     required: true
 - type: checkboxes
   attributes:
-    label: Model languages
-    description: What languages have the model been trained on?
+    label: Evaluation languages
+    description: >
+      What languages should this model be evaluated on? Tick all that apply. If the
+      model is multilingual (e.g., Mistral, Llama), then tick all the languages.
     options:
       - label: Danish
       - label: Swedish
