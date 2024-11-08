@@ -24,7 +24,7 @@ load_dotenv()
 
 def main() -> None:
     """Create the Icelandic QA dataset about Icelandic history and culture and upload it to the HF Hub."""
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     repo_id = "mideind/icelandic_qa_scandeval"
 
