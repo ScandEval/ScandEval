@@ -120,12 +120,18 @@ def main() -> None:
     ]
     test_df = df_with_answer_filtered.sample(n=test_size, random_state=4242)
 
-    # Create train split
-    train_size = 531
+    # Create train split, which is the rest of the data
+    train_size = len(df_with_answer) - val_size - test_size
     full_train_df_with_answer = df_with_answer_filtered.loc[
         ~df_with_answer_filtered.index.isin(test_df.index)
     ]
     train_df = full_train_df_with_answer.sample(n=train_size, random_state=4242)
+
+    train_num_samples_lower_bound = 500
+    assert len(train_df) > train_num_samples_lower_bound, (
+        f"There are only {len(train_df):,} samples in the training set - there should be at "
+        f"least {train_num_samples_lower_bound:,}."
+    )
 
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
