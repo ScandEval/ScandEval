@@ -28,7 +28,7 @@ def main():
     df.drop(index=359, inplace=True)
 
     # Shuffle and drop first duplicate
-    df = df.sample(frac=1).drop_duplicates(subset="text")
+    df = df.sample(frac=1, random_state=4242).drop_duplicates(subset="text")
 
     # Reset the index
     df = df.reset_index(drop=True)
