@@ -21,8 +21,19 @@ def main():
     df = dataset.to_pandas()
     assert isinstance(df, pd.DataFrame)
 
-    # Only work with samples where the text is not very large or small
+    # Drop unneeded index column
+    df.drop("Unnamed: 0", inplace=True, axis=1)
 
+    # Drop non-article by index
+    df.drop(index=359, inplace=True)
+
+    # Shuffle and drop first duplicate
+    df = df.sample(frac=1).drop_duplicates(subset="article")
+
+    # Reset the index
+    df = df.reset_index(drop=True)
+
+    # Only work with samples where the text is not very large or small
     lengths = df.text.str.len()
     lower_bound = MIN_NUM_CHARS_IN_ARTICLE
     upper_bound = MAX_NUM_CHARS_IN_ARTICLE
@@ -38,9 +49,7 @@ def main():
     test_df = filtered_df.sample(n=test_size, random_state=4242)
 
     # Create train split
-    train_size = 147
-    filtered_df = filtered_df[~filtered_df.index.isin(test_df.index)]
-    train_df = filtered_df.sample(n=train_size, random_state=4242)
+    train_df = filtered_df[~filtered_df.index.isin(test_df.index)]
 
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
