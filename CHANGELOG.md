@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   dataset NO-Multi-QA-Sum (`norglm-multi-sum`). This dataset is part of the NLEBench
   Norwegian benchmarks. It has been marked as `unofficial` for now.
 
+## [Changelog]
+### Fixed
+- Small typo in prefix prompt used for few-shot evaluation of the English sentiment
+  classification dataset SST5.
+
+
 ## [v13.1.0] - 2024-10-31
 ### Added
 - Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an
