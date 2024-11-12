@@ -182,7 +182,7 @@ SST5_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/sst5-mini",
     task=SENT,
     languages=[EN],
-    prompt_prefix="The following are texts are their sentiment, which can be "
+    prompt_prefix="The following are texts and their sentiment, which can be "
     "'positive', 'neutral' or 'negative'.",
     prompt_template="Text: {text}\nSentiment: {label}",
     prompt_label_mapping=dict(
