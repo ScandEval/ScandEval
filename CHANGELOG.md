@@ -14,7 +14,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   are found in the context (exact match). An LLM has therefore been used to rephrase 
   the answers and we now have 1683 samples where the answers are found in the context 
   (531 train, 128 val, 1024 test). It has been set to `unofficial` for now.
-  
+
+### Fixed
+- Small typo in prefix prompt used for few-shot evaluation of the English sentiment
+  classification dataset SST5.
+
 
 ## [v13.1.0] - 2024-10-31
 ### Added
