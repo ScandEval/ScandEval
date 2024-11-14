@@ -588,7 +588,6 @@ SCALA_IS_CONFIG = DatasetConfig(
     max_generated_tokens=1,
 )
 
-
 SCALA_FO_CONFIG = DatasetConfig(
     name="scala-fo",
     pretty_name="the Faroese part of the linguistic acceptability dataset ScaLA",
@@ -720,6 +719,23 @@ ICE_EC_FULL_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+ICE_LINGUISTIC_CONFIG = DatasetConfig(
+    name="ice-linguistic",
+    pretty_name="the Icelandic dataset to evaluate LLMs grammatical knowledge and linguistic ability for Icelandic",
+    huggingface_id="ScandEval/ice-linguistic",
+    task=LA,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru setningar og hvort þær eru málfræðilega réttar.",
+    prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
+    prompt_label_mapping=dict(correct="já", incorrect="nei"),
+    instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
+    num_few_shot_examples=12,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
+
 ### READING COMPREHENSION DATASETS ###
 
 SCANDIQA_DA_CONFIG = DatasetConfig(
@@ -848,6 +864,21 @@ SQUAD_NL_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+ICELANDIC_QA_CONFIG = DatasetConfig(
+    name="icelandic-qa",
+    pretty_name="the Icelandic question answering dataset about Icelandic culture and history",
+    huggingface_id="ScandEval/icelandic-qa",
+    task=RC,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru textar með tilheyrandi spurningum og svörum.",
+    prompt_template="Texti: {text}\nSpurning: {question}\nSvaraðu með að hámarki 3 "
+    "orðum: {label}",
+    instruction_prompt="Texti: {text}\n\nSvaraðu eftirfarandi spurningu um textann að "
+    "hámarki í 3 orðum.\n\nSpurning: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+    unofficial=True,
+)
 
 ### SUMMARIZATION DATASETS ###
 
@@ -924,6 +955,22 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     "ovennevnte artikkelen.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
+)
+
+NORGLM_MULTI_SUM = DatasetConfig(
+    name="norglm-multi-sum",
+    pretty_name="the summarisation part of the Norwegian NorGLM multi-task human annotated dataset "
+    "NO-Multi-QA-Sum",
+    huggingface_id="ScandEval/norglm-multi-sum",
+    task=SUMM,
+    languages=[NB, NN, NO],
+    prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
+    prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
+    instruction_prompt="Nyhetsartikkel: {text}\n\nSkriv et sammendrag av den "
+    "ovennevnte artikkelen.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+    unofficial=True,
 )
 
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
