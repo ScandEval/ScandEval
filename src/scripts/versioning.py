@@ -48,7 +48,9 @@ def set_new_version(major: int, minor: int, patch: int):
 
     # Add version to CHANGELOG
     today = dt.date.today().strftime("%Y-%m-%d")
-    new_changelog = re.sub(r"\[Unreleased\].*", f"[v{version}] - {today}", changelog)
+    new_changelog = re.sub(
+        r"\[Unreleased\].*", f"[Unreleased]\n\n\n\n## [v{version}] - {today}", changelog
+    )
     changelog_path.write_text(new_changelog)
 
     # Update the version in the `pyproject.toml` file
