@@ -17,6 +17,7 @@ from .tasks import NER
 from .types import is_list_of_int, is_list_of_list_of_int
 
 if TYPE_CHECKING:
+    import tiktoken
     from torch import Tensor
     from transformers import PretrainedConfig
 
@@ -44,10 +45,10 @@ class OpenAITokenizer:
             The encoding.
     """
 
-    unk_token = "<unk>"
+    unk_token: str | None = "<unk>"
     unk_token_id = -1
-    pad_token = "<pad>"
-    padding_side = "left"
+    pad_token: str | None = "<pad>"
+    padding_side: Literal["right", "left"] = "left"
     is_fast = False
     chat_template: str | None = None
 
@@ -64,6 +65,7 @@ class OpenAITokenizer:
         """
         self.model_config = model_config
         self.hf_model_config = hf_model_config
+        self.model_max_length = self.hf_model_config.model_max_length
 
         self.bos_token_id: int = self.hf_model_config.bos_token_id or -1
         self.cls_token_id: int = self.bos_token_id
@@ -75,6 +77,15 @@ class OpenAITokenizer:
         self.cls_token = self.bos_token
         self.eos_token = self.encoding.decode([self.eos_token_id])
         self.sep_token = self.eos_token
+
+        self.vocab_size = self.encoding.max_token_value + 1
+        self.special_tokens_map = dict(
+            bos_token=self.bos_token,
+            cls_token=self.cls_token,
+            eos_token=self.eos_token,
+            sep_token=self.sep_token,
+            pad_token=self.pad_token,
+        )
 
     @property
     def encoding(self) -> "tiktoken.Encoding":
@@ -167,30 +178,6 @@ class OpenAITokenizer:
             The encoded text.
         """
         return self(text, **kwargs).input_ids.tolist()[0]
-
-    @property
-    def special_tokens_map(self) -> dict[str, str | list[str]]:
-        """A mapping of special tokens to their values.
-
-        Returns:
-            The mapping of special tokens to their values.
-        """
-        return dict(
-            bos_token=self.bos_token,
-            cls_token=self.cls_token,
-            eos_token=self.eos_token,
-            sep_token=self.sep_token,
-            pad_token=self.pad_token,
-        )
-
-    @property
-    def model_max_length(self) -> int:
-        """The maximum length of a sequence for this model.
-
-        Returns:
-            The maximum length of a sequence for this model.
-        """
-        return self.hf_model_config.model_max_length
 
     def convert_ids_to_tokens(
         self, ids: int | list[int], skip_special_tokens: bool = False
@@ -293,11 +280,6 @@ class OpenAITokenizer:
         )
 
         return BatchEncoding(dict(input_ids=padded_input_ids))
-
-    @property
-    def vocab_size(self) -> int:
-        """Return the size of the vocabulary."""
-        return self.encoding.max_token_value + 1
 
     def apply_chat_template(
         self, conversation: list[dict[Literal["role", "content"], str]], **kwargs
@@ -599,3 +581,23 @@ class OpenAIModel:
             return ModelOutput(output_dict)
 
         return output
+
+    def to(self, device: torch.device) -> "OpenAIModel":
+        """Move the model to a device.
+
+        Args:
+            device:
+                The device to move the model to.
+
+        Returns:
+            The model.
+        """
+        return self
+
+    def eval(self) -> "OpenAIModel":
+        """Put the model in evaluation mode.
+
+        Returns:
+            The model.
+        """
+        return self

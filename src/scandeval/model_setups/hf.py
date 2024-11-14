@@ -359,6 +359,7 @@ class HFModelSetup:
         if use_vllm and importlib.util.find_spec("vllm") is None:
             raise NeedsExtraInstalled(extra="generative")
 
+        model: "PreTrainedModel | GenerativeModel | None" = None
         if use_vllm:
             try:
                 model = VLLMModel(
@@ -512,13 +513,14 @@ class HFModelSetup:
 
                     self._handle_loading_exception(exception=e, model_id=model_id)
 
+        assert isinstance(model, (PreTrainedModel, GenerativeModel))
         model.eval()
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
 
         generative_model = model_is_generative(model=model)
 
-        if supertask == "question-answering":
+        if isinstance(model, PreTrainedModel) and supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
         tokenizer = self._load_tokenizer(
@@ -527,7 +529,7 @@ class HFModelSetup:
             generative_model=generative_model,
         )
 
-        if use_vllm:
+        if use_vllm and isinstance(model, VLLMModel):
             model.set_tokenizer(tokenizer=tokenizer)
 
         model, tokenizer = align_model_and_tokenizer(
