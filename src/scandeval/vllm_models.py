@@ -15,6 +15,7 @@ from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
 from .exceptions import NeedsExtraInstalled
+from .protocols import Tokenizer
 from .utils import clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
@@ -344,7 +345,7 @@ class VLLMModel:
             inputs=inputs, generation_config=generation_config, **generation_kwargs
         )
 
-    def set_tokenizer(self, tokenizer: "PreTrainedTokenizerBase") -> None:
+    def set_tokenizer(self, tokenizer: "Tokenizer") -> None:
         """Set the tokenizer to use for generation.
 
         Args:

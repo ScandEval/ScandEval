@@ -592,33 +592,32 @@ def get_generation_stopping_criteria(
     single_newline_ids: list[int] = tokenizer(
         text=["\n"], add_special_tokens=False
     ).input_ids[0]
-    bos_token_ids: list[int] = tokenizer(
-        text=[tokenizer.bos_token], add_special_tokens=False
-    ).input_ids[0]
-    eos_token_ids: list[int] = tokenizer(
-        text=[tokenizer.eos_token], add_special_tokens=False
-    ).input_ids[0]
+
+    stop_word_id_lists = [double_newline_ids, single_newline_ids + single_newline_ids]
 
     end_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
-    if end_chat_token_ids is None:
-        end_chat_token_ids = []
+    if end_chat_token_ids is not None:
+        stop_word_id_lists.append(end_chat_token_ids)
+
+    if tokenizer.bos_token is not None:
+        bos_token_ids: list[int] = tokenizer(
+            text=[tokenizer.bos_token], add_special_tokens=False
+        ).input_ids[0]
+        stop_word_id_lists.append(bos_token_ids)
+
+    if tokenizer.eos_token is not None:
+        eos_token_ids: list[int] = tokenizer(
+            text=[tokenizer.eos_token], add_special_tokens=False
+        ).input_ids[0]
+        stop_word_id_lists.append(eos_token_ids)
 
     def remove_empty_tokens(token_id_list: list[int]) -> list[int]:
         return [
             token_id for token_id in token_id_list if tokenizer.decode([token_id]) != ""
         ]
 
-    double_newline_ids = remove_empty_tokens(double_newline_ids)
-    single_newline_ids = remove_empty_tokens(single_newline_ids)
-    bos_token_ids = remove_empty_tokens(bos_token_ids)
-    eos_token_ids = remove_empty_tokens(eos_token_ids)
-
     stop_word_id_lists = [
-        double_newline_ids,
-        single_newline_ids + single_newline_ids,
-        bos_token_ids,
-        eos_token_ids,
-        end_chat_token_ids,
+        remove_empty_tokens(token_id_list) for token_id_list in stop_word_id_lists
     ]
 
     return StopWordCriteria(stop_word_id_lists=stop_word_id_lists)

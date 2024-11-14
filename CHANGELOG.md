@@ -9,49 +9,49 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added the summarisation part of the Norwegian NorGLM multi-task human annotated
   dataset NO-Multi-QA-Sum (`norglm-multi-sum`). This dataset is part of the NLEBench
-  Norwegian benchmarks. It has been marked as `unofficial` for now.
-
-## [Unreleased]
-### Added
-- Added `icelandic-qa`, an Icelandic question answering dataset about Icelandic culture 
-  and history ([source](https://huggingface.co/datasets/mideind/icelandic_qa_scandeval)). 
-  The original dataset has 2000 samples, but only 375 of the samples have answers that 
-  are found in the context (exact match). An LLM has therefore been used to rephrase 
-  the answers and we now have 1683 samples where the answers are found in the context 
-  (531 train, 128 val, 1024 test). It has been set to `unofficial` for now.
+  Norwegian benchmarks. It has been marked as `unofficial` for now. This was contributed
+  by [@viggo-gascou](https://github.com/viggo-gascou) ✨
+- Added `ice-linguistic` a linguistic acceptability dataset which is a subset of the
+  Icelandic Linguistic Benchmarks dataset. It is a small dataset with 94 train
+  samples, 32 validation samples, and 256 test samples, and has been marked as
+  `unofficial` for now. This was contributed by
+  [@oliverkinch](https://github.com/oliverkinch) ✨
+- Added `icelandic-qa`, an Icelandic question answering dataset about Icelandic culture
+  and history. The original dataset has 2000 samples, but only 375 of the samples have
+  answers that are found in the context (exact match). An LLM has therefore been used to
+  rephrase the answers and we now have 1683 samples where the answers are found in the
+  context (531 train, 128 val, 1024 test). It has been set to `unofficial` for now. This
+  was contributed by [@oliverkinch](http://github.com/oliverkinch) ✨
 
 ### Fixed
 - Small typo in prefix prompt used for few-shot evaluation of the English sentiment
   classification dataset SST5.
+- If a model cannot be benchmarked with vLLM then we now properly load the model with
+  the `transformers` backend.
 
 
-## [Unreleased]
-### Added
-- Added `ice-linguistic` a linguistic acceptability dataset which is a subset of the 
-  Icelandic Linguistic Benchmarks dataset. It is a small dataset with 94 train 
-  samples, 32 val samples, and 256 test samples. The dataset has been marked as 
-  unofficial.
-  
-  
 ## [v13.1.0] - 2024-10-31
 - Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an
   Icelandic linguistic acceptability dataset. It has been set to `unofficial` for now.
+  This was contributed by [@oliverkinch](https://github.com/oliverkinch) ✨
 - Added the Schibsted summarisation dataset, which contains summaries of published
   articles from Schibsted Media's Norwegian and Swedish newsrooms. The dataset has been
   split into two separate small datasets, `schibsted-sv` for Swedish and `schibsted-no`
   for Norwegian. Note that both of these datasets are really small (89 and 374 test
   samples in `schibsted-sv` and `schibsted-no`, respectively), and have been set to
-  `unofficial` for now.
-- Added the new Faroese reading comprehension dataset FoQA. This is now the default
-  Faroese reading comprehension benchmark, as there was none previously.
-- Now supports evaluation of models with adapters. This requires that the model
-  repository has an `adapter_config.json` file, but no additional setup is needed.
+  `unofficial` for now. This was contributed by
+  [@oliverkinch](https://github.com/oliverkinch) ✨
 - Added the Icelandic summarisation dataset IceSum. IceSum is a collection of 1,000
   Icelandic news articles from mbl.is, which have been manually annotated with
   summaries. The dataset has been marked as unofficial, meaning that it will not be
   automatically included when benchmarking models, but can be included by specifying the
   dataset explicitly using the --dataset argument (or dataset argument if using the
-  Benchmarker API).
+  Benchmarker API). This was contributed by
+  [@viggo-gascou](https://github.com/viggo-gascou) ✨
+- Added the new Faroese reading comprehension dataset FoQA. This is now the default
+  Faroese reading comprehension benchmark, as there was none previously.
+- Now supports evaluation of models with adapters. This requires that the model
+  repository has an `adapter_config.json` file, but no additional setup is needed.
 
 ### Fixed
 - If a model does not use attention mask then we now do not supply it. This caused

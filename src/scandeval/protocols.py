@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING, Literal, Protocol, Union, runtime_checkable
 
 if TYPE_CHECKING:
-    from torch import Tensor, device
+    import torch
     from transformers import (
         BatchEncoding,
         GenerationConfig,
@@ -19,12 +19,12 @@ if TYPE_CHECKING:
 class Tokenizer(Protocol):
     """A protocol for a tokenizer."""
 
-    cls_token: str
-    sep_token: str
-    bos_token: str
-    eos_token: str
-    pad_token: str
-    unk_token: str
+    cls_token: str | None
+    sep_token: str | None
+    bos_token: str | None
+    eos_token: str | None
+    pad_token: str | None
+    unk_token: str | None
     cls_token_id: int
     sep_token_id: int
     bos_token_id: int
@@ -33,6 +33,10 @@ class Tokenizer(Protocol):
     unk_token_id: int
     is_fast: bool
     chat_template: str | None
+    special_tokens_map: dict[str, str]
+    model_max_length: int
+    vocab_size: int
+    padding_side: Literal["right", "left"]
 
     def __call__(self, text: str | list[str], **kwargs) -> "BatchEncoding":
         """Call the tokenizer.
@@ -118,29 +122,14 @@ class Tokenizer(Protocol):
         """
         ...
 
-    @property
-    def special_tokens_map(self) -> dict[str, str | list[str]]:
-        """The mapping from special tokens to their token strings."""
-        ...
-
-    @property
-    def model_max_length(self) -> int:
-        """The maximum length of a sequence that can be processed by the model."""
-        ...
-
-    @property
-    def vocab_size(self) -> int:
-        """Return the size of the vocabulary."""
-        ...
-
     def pad(
         self,
         encoded_inputs: Union[
             "BatchEncoding",
             list["BatchEncoding"],
-            dict[str, list[str]],
-            dict[str, list[list[str]]],
-            list[dict[str, list[str]]],
+            dict[str, list[int]],
+            dict[str, list[list[int]]],
+            list[dict[str, list[int]]],
         ],
         **kwargs,
     ) -> "BatchEncoding":
@@ -178,22 +167,35 @@ class Tokenizer(Protocol):
 class GenerativeModel(Protocol):
     """A protocol for a generative model."""
 
-    @property
-    def config(self) -> "PretrainedConfig":
-        """The Hugging Face model configuration."""
+    config: "PretrainedConfig"
+    device: "torch.device"
+
+    def to(self, device: "torch.device") -> "GenerativeModel":
+        """Move the model to a device.
+
+        Args:
+            device:
+                The device to move the model to.
+
+        Returns:
+            The model.
+        """
         ...
 
-    @property
-    def device(self) -> "device":
-        """The device on which the model is running."""
+    def eval(self) -> "GenerativeModel":
+        """Put the model in evaluation mode.
+
+        Returns:
+            The model.
+        """
         ...
 
     def generate(
         self,
-        inputs: "Tensor",
+        inputs: "torch.Tensor",
         generation_config: "GenerationConfig | None" = None,
         **generation_kwargs,
-    ) -> "ModelOutput | Tensor":
+    ) -> "ModelOutput | torch.Tensor":
         """Generate text.
 
         Args:
@@ -206,6 +208,22 @@ class GenerativeModel(Protocol):
 
         Returns:
             The generated text.
+        """
+        ...
+
+    def __call__(
+        self, input_ids: "torch.Tensor", labels: "torch.Tensor | None" = None
+    ) -> "ModelOutput":
+        """Call the model.
+
+        Args:
+            input_ids:
+                The input IDs.
+            labels:
+                The labels.
+
+        Returns:
+            The model output.
         """
         ...
 

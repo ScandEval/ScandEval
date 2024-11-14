@@ -1,4 +1,4 @@
-"""Create the Icelandic QA dataset about Icelandic history and culture and upload it to the HF Hub."""
+"""Create the Icelandic QA dataset and upload it to the HF Hub."""
 
 import os
 import re
@@ -23,7 +23,7 @@ load_dotenv()
 
 
 def main() -> None:
-    """Create the Icelandic QA dataset about Icelandic history and culture and upload it to the HF Hub."""
+    """Create the Icelandic QA dataset and upload it to the HF Hub."""
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     repo_id = "mideind/icelandic_qa_scandeval"
@@ -57,7 +57,8 @@ def main() -> None:
                 The context.
 
         Returns:
-            The rephrased answer (if the answer is already in the context, it is returned as is).
+            The rephrased answer (if the answer is already in the context, it is
+            returned as is).
         """
         answer = answer[:-1] if answer.endswith(".") else answer
 
@@ -70,11 +71,14 @@ def main() -> None:
                 {
                     "role": "user",
                     "content": (
-                        f"Given the following context: '{context}', please rephrase the answer '{answer}' so that it matches exactly "
-                        f"with a phrase from the context in a case-insensitive way. E.g. it must be possible to find the rephrased answer "
-                        f"in the context without any modifications. "
-                        f"The rephrased answer should be as concise as possible, preferable not more than 7 words, and ideally 3 or less words."
-                        f"Here is the related question: '{question}'"
+                        f"Given the following context: {context!r}, please rephrase "
+                        f"the answer {answer!r} so that it matches exactly with a "
+                        "phrase from the context in a case-insensitive way. I.e., it "
+                        "must be possible to find the rephrased answer in the context "
+                        "without any modifications. The rephrased answer should be "
+                        "as concise as possible, preferable not more than 7 words, "
+                        "and ideally 3 or less words. Here is the related question: "
+                        f"{question!r}"
                     ),
                 }
             ],
@@ -82,6 +86,11 @@ def main() -> None:
         )
 
         rephrased_answer = chat_completion.choices[0].message.content
+        if rephrased_answer is None:
+            raise ValueError(
+                f"OpenAI could not rephrase the answer {answer!r} for the question "
+                f"{question!r} and context {context!r}."
+            )
         return rephrased_answer
 
     # Rephrase the answers
@@ -129,8 +138,8 @@ def main() -> None:
 
     train_num_samples_lower_bound = 500
     assert len(train_df) > train_num_samples_lower_bound, (
-        f"There are only {len(train_df):,} samples in the training set - there should be at "
-        f"least {train_num_samples_lower_bound:,}."
+        f"There are only {len(train_df):,} samples in the training set - there should "
+        f"be at least {train_num_samples_lower_bound:,}."
     )
 
     val_df = val_df.reset_index(drop=True)

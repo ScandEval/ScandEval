@@ -6,11 +6,12 @@ import torch
 import torch.nn as nn
 
 from ..exceptions import InvalidModel
+from ..protocols import GenerativeModel, Tokenizer
 from ..utils import DUMMY_FILL_VALUE, get_model_max_length
 from ..vllm_models import VLLMModel
 
 if TYPE_CHECKING:
-    from transformers import PreTrainedModel, PreTrainedTokenizerBase
+    from transformers import PreTrainedModel
 
 
 def get_children_of_module(
@@ -92,12 +93,12 @@ def setup_model_for_question_answering(model: "PreTrainedModel") -> "PreTrainedM
 
 
 def align_model_and_tokenizer(
-    model: "PreTrainedModel | VLLMModel",
-    tokenizer: "PreTrainedTokenizerBase",
+    model: "PreTrainedModel | GenerativeModel",
+    tokenizer: "Tokenizer",
     generative_model: bool,
     generation_length: int,
     raise_errors: bool = False,
-) -> tuple["PreTrainedModel | VLLMModel", "PreTrainedTokenizerBase"]:
+) -> tuple["PreTrainedModel | GenerativeModel", "Tokenizer"]:
     """Aligns the model and the tokenizer.
 
     Args:
@@ -135,7 +136,7 @@ def align_model_and_tokenizer(
 
     # If we're not dealing with a generative model then we move it to CPU to avoid OOM
     # errors
-    device = model.device if generative_model else torch.device("cpu")
+    device: torch.device = model.device if generative_model else torch.device("cpu")
     model_device = model.device
     model.to(device)
 
@@ -183,7 +184,8 @@ def align_model_and_tokenizer(
                     "The vocab size of the tokenizer is larger than the vocab size of "
                     "the model."
                 )
-            model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size + 1)
+            if hasattr(model, "resize_token_embeddings"):
+                model.resize_token_embeddings(new_num_tokens=tokenizer.vocab_size + 1)
 
     # For generative models, the `transformers` package requires the pad token to be
     # identical to the eos token, if the latter exists. Otherwise, if both the pad and

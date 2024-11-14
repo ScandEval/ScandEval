@@ -34,6 +34,7 @@ from ..exceptions import (
     NoInternetConnection,
 )
 from ..languages import get_all_languages
+from ..protocols import GenerativeModel
 from ..utils import (
     GENERATIVE_DATASET_SUPERTASKS,
     GENERATIVE_DATASET_TASKS,
@@ -52,7 +53,7 @@ if TYPE_CHECKING:
     from transformers import PretrainedConfig, PreTrainedModel
 
     from ..config import BenchmarkConfig, DatasetConfig
-    from ..protocols import GenerativeModel, Tokenizer
+    from ..protocols import Tokenizer
 
 if importlib.util.find_spec("peft") is not None:
     from peft.config import PeftConfig
@@ -359,6 +360,7 @@ class HFModelSetup:
         if use_vllm and importlib.util.find_spec("vllm") is None:
             raise NeedsExtraInstalled(extra="generative")
 
+        model: "PreTrainedModel | GenerativeModel | None" = None
         if use_vllm:
             try:
                 model = VLLMModel(
@@ -386,7 +388,7 @@ class HFModelSetup:
                     f"implementation instead. The error raised was {e!r}"
                 )
 
-        else:
+        if not use_vllm:
             if self.benchmark_config.use_flash_attention is None:
                 flash_attention = model_config.task in GENERATIVE_MODEL_TASKS
             else:
@@ -512,13 +514,14 @@ class HFModelSetup:
 
                     self._handle_loading_exception(exception=e, model_id=model_id)
 
+        assert isinstance(model, (PreTrainedModel, GenerativeModel))
         model.eval()
         if not load_in_4bit:
             model.to(self.benchmark_config.device)
 
         generative_model = model_is_generative(model=model)
 
-        if supertask == "question-answering":
+        if isinstance(model, PreTrainedModel) and supertask == "question-answering":
             model = setup_model_for_question_answering(model=model)
 
         tokenizer = self._load_tokenizer(
@@ -527,7 +530,7 @@ class HFModelSetup:
             generative_model=generative_model,
         )
 
-        if use_vllm:
+        if use_vllm and isinstance(model, VLLMModel):
             model.set_tokenizer(tokenizer=tokenizer)
 
         model, tokenizer = align_model_and_tokenizer(
