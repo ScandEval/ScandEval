@@ -941,6 +941,22 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
+NORGLM_MULTI_SUM = DatasetConfig(
+    name="norglm-multi-sum",
+    pretty_name="the summarisation part of the Norwegian NorGLM multi-task human annotated dataset "
+    "NO-Multi-QA-Sum",
+    huggingface_id="ScandEval/norglm-multi-sum",
+    task=SUMM,
+    languages=[NB, NN, NO],
+    prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
+    prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
+    instruction_prompt="Nyhetsartikkel: {text}\n\nSkriv et sammendrag av den "
+    "ovennevnte artikkelen.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+    unofficial=True,
+)
+
 WIKI_LINGUA_NL_CONFIG = DatasetConfig(
     name="wiki-lingua-nl",
     pretty_name="the Dutch part of the truncated version of the summarisation dataset "
