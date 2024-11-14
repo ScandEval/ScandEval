@@ -387,7 +387,7 @@ class HFModelSetup:
                     f"implementation instead. The error raised was {e!r}"
                 )
 
-        else:
+        if not use_vllm:
             if self.benchmark_config.use_flash_attention is None:
                 flash_attention = model_config.task in GENERATIVE_MODEL_TASKS
             else:

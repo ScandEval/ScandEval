@@ -10,29 +10,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the summarisation part of the Norwegian NorGLM multi-task human annotated
   dataset NO-Multi-QA-Sum (`norglm-multi-sum`). This dataset is part of the NLEBench
   Norwegian benchmarks. It has been marked as `unofficial` for now.
-
-## [Unreleased]
-### Added
-- Added `icelandic-qa`, an Icelandic question answering dataset about Icelandic culture 
-  and history ([source](https://huggingface.co/datasets/mideind/icelandic_qa_scandeval)). 
-  The original dataset has 2000 samples, but only 375 of the samples have answers that 
-  are found in the context (exact match). An LLM has therefore been used to rephrase 
-  the answers and we now have 1683 samples where the answers are found in the context 
+- Added `ice-linguistic` a linguistic acceptability dataset which is a subset of the
+  Icelandic Linguistic Benchmarks dataset. It is a small dataset with 94 train
+  samples, 32 val samples, and 256 test samples. The dataset has been marked as
+  unofficial.
+- Added `icelandic-qa`, an Icelandic question answering dataset about Icelandic culture
+  and history ([source](https://huggingface.co/datasets/mideind/icelandic_qa_scandeval)).
+  The original dataset has 2000 samples, but only 375 of the samples have answers that
+  are found in the context (exact match). An LLM has therefore been used to rephrase
+  the answers and we now have 1683 samples where the answers are found in the context
   (531 train, 128 val, 1024 test). It has been set to `unofficial` for now.
 
 ### Fixed
 - Small typo in prefix prompt used for few-shot evaluation of the English sentiment
   classification dataset SST5.
+- If a model cannot be benchmarked with vLLM then we now properly load the model with
+  the `transformers` backend.
 
 
-## [Unreleased]
-### Added
-- Added `ice-linguistic` a linguistic acceptability dataset which is a subset of the 
-  Icelandic Linguistic Benchmarks dataset. It is a small dataset with 94 train 
-  samples, 32 val samples, and 256 test samples. The dataset has been marked as 
-  unofficial.
-  
-  
 ## [v13.1.0] - 2024-10-31
 - Added `ice-ec` (a subset of the dataset) and `ice-ec-full` (the full dataset), an
   Icelandic linguistic acceptability dataset. It has been set to `unofficial` for now.
