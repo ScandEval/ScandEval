@@ -1,19 +1,18 @@
 """Utility functions related to structured generation."""
 
 import importlib.util
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
-import torch
 from pydantic import BaseModel, conlist, create_model
 
 if importlib.util.find_spec("outlines") is not None:
-    from outlines.integrations.transformers import JSONPrefixAllowedTokens
-    from outlines.integrations.vllm import JSONLogitsProcessor
+    from outlines.models.transformers import TransformerTokenizer
+    from outlines.processors.structured import JSONLogitsProcessor
 
 if TYPE_CHECKING:
-    from outlines.integrations.transformers import JSONPrefixAllowedTokens
-    from transformers import PreTrainedTokenizerBase
-    from vllm import LLM
+    from outlines.models.transformers import TransformerTokenizer
+    from outlines.processors.structured import JSONLogitsProcessor
+    from transformers import PreTrainedTokenizer
 
 
 def get_ner_schema(ner_tag_names: list[str]) -> type[BaseModel]:
@@ -33,10 +32,10 @@ def get_ner_schema(ner_tag_names: list[str]) -> type[BaseModel]:
     return schema
 
 
-def get_ner_prefix_allowed_tokens_fn(
-    ner_tag_names: list[str], tokenizer: "PreTrainedTokenizerBase"
-) -> "JSONPrefixAllowedTokens":
-    """Get the prefix allowed tokens function for the NER task, used in `transformers`.
+def get_ner_logits_processors(
+    ner_tag_names: list[str], tokenizer: "PreTrainedTokenizer"
+) -> list[JSONLogitsProcessor]:
+    """Get the logits processors for the NER task, used in vLLM.
 
     Args:
         ner_tag_names:
@@ -45,32 +44,11 @@ def get_ner_prefix_allowed_tokens_fn(
             The tokenizer to use for tokenizing the JSON Schema.
 
     Returns:
-        The prefix allowed tokens function for the NER task.
-    """
-    return JSONPrefixAllowedTokens(
-        schema=get_ner_schema(ner_tag_names=ner_tag_names),
-        tokenizer_or_pipe=tokenizer,
-        whitespace_pattern=r" ?",
-    )
-
-
-def get_ner_logits_processors(
-    ner_tag_names: list[str], llm: "LLM"
-) -> list[Callable[[list[int], torch.Tensor], torch.Tensor]]:
-    """Get the logits processors for the NER task, used in vLLM.
-
-    Args:
-        ner_tag_names:
-            The NER tag names.
-        llm:
-            The vLLM model.
-
-    Returns:
         The logit processors for the NER task.
     """
     logits_processor = JSONLogitsProcessor(
         schema=get_ner_schema(ner_tag_names=ner_tag_names),
-        llm=llm,
+        tokenizer=TransformerTokenizer(tokenizer=tokenizer),
         whitespace_pattern=r" ?",
     )
     return [logits_processor]

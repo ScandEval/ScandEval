@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import (
     GenerationConfig,
+    PreTrainedTokenizer,
     PreTrainedTokenizerBase,
     StoppingCriteria,
     StoppingCriteriaList,
@@ -26,10 +27,7 @@ from .model_cache import (
     split_dataset_into_cached_and_non_cached,
 )
 from .openai_models import OpenAIModel
-from .structured_generation_utils import (
-    get_ner_logits_processors,
-    get_ner_prefix_allowed_tokens_fn,
-)
+from .structured_generation_utils import get_ner_logits_processors
 from .tasks import LA, NER, RC, SENT, SUMM
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_end_of_chat_token_ids
 from .vllm_models import VLLMModel
@@ -485,19 +483,13 @@ def generate_batch(
         inputs = batch["input_ids"].to(model.device)
         stopping_criteria.clear()
 
-        prefix_allowed_tokens_fn = None
         logits_processors = None
-        if dataset_config.task == NER and isinstance(
-            tokenizer, PreTrainedTokenizerBase
-        ):
+        if dataset_config.task == NER and isinstance(tokenizer, PreTrainedTokenizer):
+            assert isinstance(tokenizer, PreTrainedTokenizerBase)
             ner_tag_names = list(dataset_config.prompt_label_mapping.values())
-            prefix_allowed_tokens_fn = get_ner_prefix_allowed_tokens_fn(
+            logits_processors = get_ner_logits_processors(
                 ner_tag_names=ner_tag_names, tokenizer=tokenizer
             )
-            if isinstance(model, VLLMModel):
-                logits_processors = get_ner_logits_processors(
-                    ner_tag_names=ner_tag_names, llm=model
-                )
 
         model_output = model.generate(
             inputs=inputs,
@@ -506,7 +498,6 @@ def generate_batch(
             else None,
             generation_config=generation_config,
             stopping_criteria=StoppingCriteriaList([stopping_criteria]),
-            prefix_allowed_tokens_fn=prefix_allowed_tokens_fn,
             logits_processors=logits_processors,
         )
         assert isinstance(model_output, ModelOutput)
