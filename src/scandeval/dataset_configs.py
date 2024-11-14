@@ -588,7 +588,6 @@ SCALA_IS_CONFIG = DatasetConfig(
     max_generated_tokens=1,
 )
 
-
 SCALA_FO_CONFIG = DatasetConfig(
     name="scala-fo",
     pretty_name="the Faroese part of the linguistic acceptability dataset ScaLA",
@@ -720,7 +719,7 @@ ICE_EC_FULL_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
-SCALA_IS_CONFIG = DatasetConfig(
+ICE_LINGUISTIC_CONFIG = DatasetConfig(
     name="ice-linguistic",
     pretty_name="the Icelandic dataset to evaluate LLMs grammatical knowledge and linguistic ability for Icelandic",
     huggingface_id="ScandEval/ice-linguistic",
@@ -735,6 +734,7 @@ SCALA_IS_CONFIG = DatasetConfig(
     max_generated_tokens=1,
     unofficial=True,
 )
+
 
 ### READING COMPREHENSION DATASETS ###
 
@@ -864,6 +864,21 @@ SQUAD_NL_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+ICELANDIC_QA_CONFIG = DatasetConfig(
+    name="icelandic-qa",
+    pretty_name="the Icelandic question answering dataset about Icelandic culture and history",
+    huggingface_id="ScandEval/icelandic-qa",
+    task=RC,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru textar með tilheyrandi spurningum og svörum.",
+    prompt_template="Texti: {text}\nSpurning: {question}\nSvaraðu með að hámarki 3 "
+    "orðum: {label}",
+    instruction_prompt="Texti: {text}\n\nSvaraðu eftirfarandi spurningu um textann að "
+    "hámarki í 3 orðum.\n\nSpurning: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+    unofficial=True,
+)
 
 ### SUMMARIZATION DATASETS ###
 

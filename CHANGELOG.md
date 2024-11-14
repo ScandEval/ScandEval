@@ -11,7 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   dataset NO-Multi-QA-Sum (`norglm-multi-sum`). This dataset is part of the NLEBench
   Norwegian benchmarks. It has been marked as `unofficial` for now.
 
-## [Changelog]
+## [Unreleased]
+### Added
+- Added `icelandic-qa`, an Icelandic question answering dataset about Icelandic culture 
+  and history ([source](https://huggingface.co/datasets/mideind/icelandic_qa_scandeval)). 
+  The original dataset has 2000 samples, but only 375 of the samples have answers that 
+  are found in the context (exact match). An LLM has therefore been used to rephrase 
+  the answers and we now have 1683 samples where the answers are found in the context 
+  (531 train, 128 val, 1024 test). It has been set to `unofficial` for now.
+
 ### Fixed
 - Small typo in prefix prompt used for few-shot evaluation of the English sentiment
   classification dataset SST5.
