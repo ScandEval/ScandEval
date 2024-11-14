@@ -583,7 +583,8 @@ SCALA_IS_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
-    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
+    "ekki.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -697,7 +698,8 @@ ICE_EC_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
-    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
+    "ekki.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
     unofficial=True,
@@ -721,7 +723,7 @@ ICE_EC_FULL_CONFIG = DatasetConfig(
 
 ICE_LINGUISTIC_CONFIG = DatasetConfig(
     name="ice-linguistic",
-    pretty_name="the Icelandic dataset to evaluate LLMs grammatical knowledge and linguistic ability for Icelandic",
+    pretty_name="the Icelandic linguistic acceptability dataset IceLinguistic",
     huggingface_id="ScandEval/ice-linguistic",
     task=LA,
     languages=[IS],
@@ -866,7 +868,8 @@ SQUAD_NL_CONFIG = DatasetConfig(
 
 ICELANDIC_QA_CONFIG = DatasetConfig(
     name="icelandic-qa",
-    pretty_name="the Icelandic question answering dataset about Icelandic culture and history",
+    pretty_name="the Icelandic question answering dataset about Icelandic culture and "
+    "history",
     huggingface_id="ScandEval/icelandic-qa",
     task=RC,
     languages=[IS],
@@ -959,8 +962,8 @@ NO_SAMMENDRAG_CONFIG = DatasetConfig(
 
 NORGLM_MULTI_SUM = DatasetConfig(
     name="norglm-multi-sum",
-    pretty_name="the summarisation part of the Norwegian NorGLM multi-task human annotated dataset "
-    "NO-Multi-QA-Sum",
+    pretty_name="the summarisation part of the Norwegian NorGLM multi-task human "
+    "annotated dataset NO-Multi-QA-Sum",
     huggingface_id="ScandEval/norglm-multi-sum",
     task=SUMM,
     languages=[NB, NN, NO],
@@ -1288,8 +1291,8 @@ ARC_NL_CONFIG = DatasetConfig(
     prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.",
+    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
+    "'b', 'c' of 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
@@ -1457,7 +1460,8 @@ BELEBELE_DA_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/belebele-da-mini",
     task=MCRC,
     languages=[DA],
-    prompt_prefix="Følgende er tekster med tilhørende multiple choice spørgsmål og svar.",
+    prompt_prefix="Følgende er tekster med tilhørende multiple choice spørgsmål og "
+    "svar.",
     prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
@@ -1469,12 +1473,13 @@ BELEBELE_DA_CONFIG = DatasetConfig(
 
 BELEBELE_SV_CONFIG = DatasetConfig(
     name="belebele-sv",
-    pretty_name="the Swedish multiple choice reading comprehension dataset BeleBele-sv, "
-    "translated from the English BeleBele dataset",
+    pretty_name="the Swedish multiple choice reading comprehension dataset "
+    "BeleBele-sv, translated from the English BeleBele dataset",
     huggingface_id="ScandEval/belebele-sv-mini",
     task=MCRC,
     languages=[SV],
-    prompt_prefix="Nedan följer texter med tillhörande multiple choice frågor och svar.",
+    prompt_prefix="Nedan följer texter med tillhörande multiple choice frågor och "
+    "svar.",
     prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
@@ -1486,8 +1491,8 @@ BELEBELE_SV_CONFIG = DatasetConfig(
 
 BELEBELE_NO_CONFIG = DatasetConfig(
     name="belebele-no",
-    pretty_name="the Norwegian multiple choice reading comprehension dataset BeleBele-no, "
-    "translated from the English BeleBele dataset",
+    pretty_name="the Norwegian multiple choice reading comprehension dataset "
+    "BeleBele-no, translated from the English BeleBele dataset",
     huggingface_id="ScandEval/belebele-no-mini",
     task=MCRC,
     languages=[NB, NN, NO],
@@ -1503,8 +1508,8 @@ BELEBELE_NO_CONFIG = DatasetConfig(
 
 BELEBELE_IS_CONFIG = DatasetConfig(
     name="belebele-is",
-    pretty_name="the Icelandic multiple choice reading comprehension dataset BeleBele-is, "
-    "translated from the English BeleBele dataset",
+    pretty_name="the Icelandic multiple choice reading comprehension dataset "
+    "BeleBele-is, translated from the English BeleBele dataset",
     huggingface_id="ScandEval/belebele-is-mini",
     task=MCRC,
     languages=[IS],
@@ -1548,8 +1553,8 @@ BELEBELE_NL_CONFIG = DatasetConfig(
     "antwoorden.",
     prompt_template="{text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.",
+    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
+    "'b', 'c' of 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
     unofficial=True,
