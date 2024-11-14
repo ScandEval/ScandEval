@@ -719,6 +719,22 @@ ICE_EC_FULL_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+ICE_LINGUISTIC_CONFIG = DatasetConfig(
+    name="ice-linguistic",
+    pretty_name="the Icelandic dataset to evaluate LLMs grammatical knowledge and linguistic ability for Icelandic",
+    huggingface_id="ScandEval/ice-linguistic",
+    task=LA,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru setningar og hvort þær eru málfræðilega réttar.",
+    prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
+    prompt_label_mapping=dict(correct="já", incorrect="nei"),
+    instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
+    num_few_shot_examples=12,
+    max_generated_tokens=1,
+    unofficial=True,
+)
+
 
 ### READING COMPREHENSION DATASETS ###
 
