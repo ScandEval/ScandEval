@@ -73,13 +73,19 @@ class OpenAITokenizer:
         self.sep_token_id: int = self.eos_token_id
         self.pad_token_id: int = self.hf_model_config.pad_token_id or -1
 
-        self.bos_token = self.encoding.decode([self.bos_token_id])
-        self.cls_token = self.bos_token
-        self.eos_token = self.encoding.decode([self.eos_token_id])
-        self.sep_token = self.eos_token
+        self.bos_token: str | None = self.encoding.decode([self.bos_token_id])
+        self.cls_token: str | None = self.bos_token
+        self.eos_token: str | None = self.encoding.decode([self.eos_token_id])
+        self.sep_token: str | None = self.eos_token
+
+        assert self.bos_token is not None
+        assert self.cls_token is not None
+        assert self.eos_token is not None
+        assert self.sep_token is not None
+        assert self.pad_token is not None
 
         self.vocab_size = self.encoding.max_token_value + 1
-        self.special_tokens_map = dict(
+        self.special_tokens_map: dict[str, str] = dict(
             bos_token=self.bos_token,
             cls_token=self.cls_token,
             eos_token=self.eos_token,
@@ -601,3 +607,7 @@ class OpenAIModel:
             The model.
         """
         return self
+
+    def __call__(self, *args, **kwargs):
+        """Call the model."""
+        raise NotImplementedError("OpenAI models do not support the `__call__` method.")
