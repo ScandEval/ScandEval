@@ -34,6 +34,7 @@ from ..exceptions import (
     NoInternetConnection,
 )
 from ..languages import get_all_languages
+from ..protocols import GenerativeModel
 from ..utils import (
     GENERATIVE_DATASET_SUPERTASKS,
     GENERATIVE_DATASET_TASKS,
@@ -52,7 +53,7 @@ if TYPE_CHECKING:
     from transformers import PretrainedConfig, PreTrainedModel
 
     from ..config import BenchmarkConfig, DatasetConfig
-    from ..protocols import GenerativeModel, Tokenizer
+    from ..protocols import Tokenizer
 
 if importlib.util.find_spec("peft") is not None:
     from peft.config import PeftConfig
