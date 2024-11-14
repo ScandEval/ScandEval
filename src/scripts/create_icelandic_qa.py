@@ -138,8 +138,8 @@ def main() -> None:
 
     train_num_samples_lower_bound = 500
     assert len(train_df) > train_num_samples_lower_bound, (
-        f"There are only {len(train_df):,} samples in the training set - there should be at "
-        f"least {train_num_samples_lower_bound:,}."
+        f"There are only {len(train_df):,} samples in the training set - there should "
+        f"be at least {train_num_samples_lower_bound:,}."
     )
 
     val_df = val_df.reset_index(drop=True)
