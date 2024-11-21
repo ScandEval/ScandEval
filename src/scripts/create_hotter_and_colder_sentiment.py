@@ -49,11 +49,11 @@ def main() -> None:
     # Set up the dataframe for the dataset, resulting in 'text' and 'label' columns,
     # with 'text' being the hydrated comment content and 'label' being the sentiment
     # label ('negative', 'neutral', 'positive')
-    df = df.query("annotation_task_name == 'sentiment'")
-    df = hydrate_data(df=df)
+    df = hydrate_data(df=df.query("annotation_task_name == 'sentiment'"))
     df = df.rename(columns=dict(comment_content="text", label_given_by_user="label"))
-    df = df.drop(columns=[col for col in df.columns if col not in ["text", "label"]])
     df.label = df.label.map({"0": "negative", "1": "neutral", "2": "positive"})
+    df = df.dropna(subset="label")
+    df = df.drop(columns=[col for col in df.columns if col not in ["text", "label"]])
 
     # Create validation split
     val_size = 256
@@ -122,8 +122,7 @@ def hydrate_data(df: pd.DataFrame) -> pd.DataFrame:
         )
         df["comment_content"] = comment_texts
 
-    df = df.dropna(subset=["comment_content"])
-    return df
+    return df.dropna(subset=["comment_content"])
 
 
 def scrape_comment_content(url: str, target_datetime: dt.datetime) -> str | None:
