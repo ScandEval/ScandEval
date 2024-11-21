@@ -63,10 +63,9 @@ def main() -> None:
     # Create train split
     train_size = 1024
     train_df = df.sample(n=train_size, random_state=4242)
-    df = df.drop(index=train_df.index.tolist())
 
     # Create test split, just being the rest of the samples
-    test_df = df
+    test_df = df.drop(index=train_df.index.tolist())
 
     # Sampling maintains the original index, so we need to reset it, as otherwise the
     # conversion to Dataset objects will create extra index columns
