@@ -105,37 +105,23 @@ NOREC_CONFIG = DatasetConfig(
     max_generated_tokens=1,
 )
 
-# ISREC_CONFIG = DatasetConfig(
-#     name="isrec",
-#     pretty_name="the truncated version of IsReC",
-#     huggingface_id="ScandEval/isrec-mini",  # TODO: Needs to be uploaded
-#     task=SENT,
-#     languages=[IS],
-#     prompt_prefix="Eftirfarandi eru yfirferðir ásamt lyndisgildi þeirra, sem getur "
-#     "verið 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
-#     prompt_template="Yfirferð: {text}\nLyndi: {label}",
-#     prompt_label_mapping=dict(
-#         positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
-#     ),
-#     num_few_shot_examples=12,
-#     max_generated_tokens=1,
-# )
-
-# FOREC_CONFIG = DatasetConfig(
-#     name="forec",
-#     pretty_name="the truncated version of FoReC",
-#     huggingface_id="ScandEval/forec-mini",  # TODO: Needs to be uploaded
-#     task=SENT,
-#     languages=[FO],
-#     prompt_prefix="Her koma nøkur ummæli og teirra kensluliga sjónarmið, sum kunnu "
-#     "vera 'positivur', 'neutralur' ella 'negativur'.",
-#     prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
-#     prompt_label_mapping=dict(
-#         positive="positivur", neutral="neutralur", negative="negativur"
-#     ),
-#     num_few_shot_examples=12,
-#     max_generated_tokens=1,
-# )
+HOTTER_AND_COLDER_SENTIMENT_CONFIG = DatasetConfig(
+    name="hotter-and-colder-sentiment",
+    pretty_name="the sentiment classification part of the Icelandic dataset Hotter "
+    "and Colder",
+    huggingface_id="ScandEval/hotter-and-colder-sentiment",
+    task=SENT,
+    languages=[IS],
+    prompt_prefix="Eftirfarandi eru yfirferðir ásamt lyndisgildi þeirra, sem getur "
+    "verið 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
+    prompt_template="Yfirferð: {text}\nLyndi: {label}",
+    prompt_label_mapping=dict(
+        positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
+    ),
+    instruction_prompt="",  # TODO: Add instruction prompt
+    num_few_shot_examples=12,
+    max_generated_tokens=1,
+)
 
 SB10K_CONFIG = DatasetConfig(
     name="sb10k",
@@ -194,8 +180,22 @@ SST5_CONFIG = DatasetConfig(
     max_generated_tokens=1,
 )
 
-# TODO: Icelandic Sentiment Classification
 # TODO: Faroese Sentiment Classification
+# FOREC_CONFIG = DatasetConfig(
+#     name="forec",
+#     pretty_name="the truncated version of FoReC",
+#     huggingface_id="ScandEval/forec-mini",
+#     task=SENT,
+#     languages=[FO],
+#     prompt_prefix="Her koma nøkur ummæli og teirra kensluliga sjónarmið, sum kunnu "
+#     "vera 'positivur', 'neutralur' ella 'negativur'.",
+#     prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
+#     prompt_label_mapping=dict(
+#         positive="positivur", neutral="neutralur", negative="negativur"
+#     ),
+#     num_few_shot_examples=12,
+#     max_generated_tokens=1,
+# )
 
 
 ### NAMED ENTITY RECOGNITION DATASETS ###
