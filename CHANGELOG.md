@@ -6,7 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
+### Added
+- Added the sentiment classification part of the Icelandic dataset Hotter and Colder,
+  being a gold standard dataset. As no Icelandic sentiment classification dataset was
+  included in the benchmark previously, this is now the official Icelandic sentiment
+  classification dataset.
 
 
 ## [v13.2.0] - 2024-11-14
