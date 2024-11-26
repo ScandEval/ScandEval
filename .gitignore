@@ -107,3 +107,6 @@ src/upload/
 
 # Model outputs in debugging mode
 *.json
+
+# Mkdocs
+site/
