@@ -98,15 +98,22 @@ human_evaluate = "scandeval.human_evaluation:main"
 
 [tool.uv]
 dev-dependencies = [
-    "pytest>=8.1.1",
-    "pre-commit>=3.6.2",
-    "lxml>=5.1.0",
-    "pytest-cov>=4.1.0",
+    "pytest>=8.3.3",
+    "pytest-cov>=5.0.0",
+    "pre-commit>=3.8.0",
     "readme-coverage-badger>=0.1.2",
-    "ruff>=0.3.2",
-    "mypy>=1.9.0",
+    "click>=8.1.7",
+    "ruff>=0.7.1",
+    "mypy>=1.13.0",
     "nbstripout>=0.7.1",
+    "coverage>=5.5",
+    "lxml>=5.1.0",
     "peft>=0.13.2",
+    "mkdocs-material>=9.5.45",
+    "mkdocs-include-markdown-plugin>=7.0.1",
+    "mkdocs-include-dir-to-nav>=1.2.0",
+    "mkapi>=3.0.22",
+    "pip>=24.3.1",
 ]
 
 [tool.ruff]

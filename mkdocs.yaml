@@ -1,0 +1,11 @@
+site_name: ScandEval
+theme: material
+plugins:
+  - include-markdown
+  - search
+  - include_dir_to_nav
+  - mkapi
+nav:
+  - .
+  - API Reference:
+    - $api:src/scandeval.***
