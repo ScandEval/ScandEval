@@ -3,6 +3,7 @@
 from typing import Generator
 
 import pytest
+
 from scandeval.config import Language
 from scandeval.languages import get_all_languages
 

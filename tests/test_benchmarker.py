@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Generator, TypedDict
 
 import pytest
+
 from scandeval import __version__
 from scandeval.benchmarker import (
     Benchmarker,

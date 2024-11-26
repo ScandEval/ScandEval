@@ -6,6 +6,7 @@ from typing import Generator
 
 import pytest
 import torch
+
 from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,

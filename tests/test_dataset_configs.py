@@ -3,6 +3,7 @@
 from typing import Generator
 
 import pytest
+
 from scandeval.config import DatasetConfig
 from scandeval.dataset_configs import get_all_dataset_configs, get_dataset_config
 

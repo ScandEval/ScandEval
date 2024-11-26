@@ -3,6 +3,7 @@
 from typing import Generator
 
 import pytest
+
 from scandeval.config import Task
 from scandeval.tasks import get_all_tasks
 

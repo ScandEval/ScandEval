@@ -22,8 +22,9 @@ from load_ud_pos import (
 )
 from pandas.errors import SettingWithCopyWarning
 from requests.exceptions import HTTPError
-from scandeval.utils import block_terminal_output
 from tqdm.auto import tqdm
+
+from scandeval.utils import block_terminal_output
 
 
 def main():

@@ -5,6 +5,7 @@ from contextlib import nullcontext as does_not_raise
 from typing import Generator
 
 import pytest
+
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.languages import DA
