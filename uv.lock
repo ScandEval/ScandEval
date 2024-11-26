@@ -3816,6 +3816,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "readme-coverage-badger" },
     { name = "ruff" },
+    { name = "setuptools" },
 ]
 
 [package.metadata]
@@ -3897,6 +3898,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=5.0.0" },
     { name = "readme-coverage-badger", specifier = ">=0.1.2" },
     { name = "ruff", specifier = ">=0.7.1" },
+    { name = "setuptools", specifier = ">=75.6.0" },
 ]
 
 [[package]]

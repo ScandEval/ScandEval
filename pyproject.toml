@@ -114,6 +114,7 @@ dev-dependencies = [
     "mkdocs-include-dir-to-nav>=1.2.0",
     "mkapi>=3.0.22",
     "pip>=24.3.1",
+    "setuptools>=75.6.0",
 ]
 
 [tool.ruff]
