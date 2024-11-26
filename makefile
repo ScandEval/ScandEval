@@ -1,6 +1,6 @@
 # This ensures that we can call `make <target>` even if `<target>` exists as a file or
 # directory.
-.PHONY: help
+.PHONY: help docs
 
 # Exports all variables defined in the makefile available to scripts
 .EXPORT_ALL_VARIABLES:
@@ -10,12 +10,6 @@ ifeq (,$(wildcard .env))
   $(shell touch .env)
 endif
 
-# Create poetry env file if it does not already exist
-ifeq (,$(wildcard ${HOME}/.poetry/env))
-  $(shell mkdir ${HOME}/.poetry)
-  $(shell touch ${HOME}/.poetry/env)
-endif
-
 # Includes environment variables from the .env file
 include .env
 
@@ -23,78 +17,57 @@ include .env
 export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
 export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1
 
-# Ensure that `pipx` and `poetry` will be able to run, since `pip` and `brew` put these
-# in the following folders on Unix systems
-export PATH := ${HOME}/.local/bin:/opt/homebrew/bin:$(PATH)
-
-# Prevent DBusErrorResponse during `poetry install`
-# (see https://stackoverflow.com/a/75098703 for more information)
-export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
-
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install dependencies
 	@echo "Installing the 'ScandEval' project..."
-	@$(MAKE) --quiet install-brew
-	@$(MAKE) --quiet install-pipx
-	@$(MAKE) --quiet install-poetry
-	@$(MAKE) --quiet setup-poetry
+	@$(MAKE) --quiet install-rust
+	@$(MAKE) --quiet install-uv
+	@$(MAKE) --quiet install-dependencies
 	@$(MAKE) --quiet setup-environment-variables
 	@echo "Installed the 'ScandEval' project. If you want to use pre-commit hooks, run 'make install-pre-commit'."
 
-install-brew:
-	@if [ $$(uname) = "Darwin" ] && [ "$(shell which brew)" = "" ]; then \
-		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
-		echo "Installed Homebrew."; \
+install-rust:
+	@if [ "$(shell which rustup)" = "" ]; then \
+		curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; \
+		source "${HOME}/.cargo/env"; \
+		echo "Installed Rust."; \
 	fi
 
-install-pipx:
-	@if [ "$(shell which pipx)" = "" ]; then \
-		uname=$$(uname); \
-			case $${uname} in \
-				(*Darwin*) installCmd='brew install pipx'; ;; \
-				(*CYGWIN*) installCmd='py -3 -m pip install --upgrade --user pipx'; ;; \
-				(*) installCmd='python3 -m pip install --upgrade --user pipx'; ;; \
-			esac; \
-			$${installCmd}; \
-		pipx ensurepath --force; \
-		echo "Installed pipx."; \
+install-uv:
+	@if [ "$(shell which uv)" = "" ]; then \
+		curl -LsSf https://astral.sh/uv/install.sh | sh; \
+		source "${HOME}/.local/bin/env"; \
+        echo "Installed uv."; \
+    else \
+		echo "Updating uv..."; \
+		uv self update; \
 	fi
 
-install-poetry:
-	@if [ ! "$(shell poetry --version)" = "Poetry (version 1.8.2)" ]; then \
-		python3 -m pip uninstall -y poetry poetry-core poetry-plugin-export; \
-		pipx install --force poetry==1.8.2; \
-		echo "Installed Poetry."; \
+install-dependencies:
+	@uv python install 3.11
+	@uv sync --all-extras --python 3.11
+	@if [ "${NO_FLASH_ATTN}" != "1" ] && [ $$(uname) != "Darwin" ]; then \
+		uv pip install --no-build-isolation flash-attn>=2.7.0.post2; \
 	fi
-
-setup-poetry:
-	@if [ "$(shell which nvidia-smi)" = "" ]; then \
-	    poetry env use python3.10 && poetry install --extras cpu_all; \
-	else \
-	    poetry env use python3.10 && poetry install --extras all; \
-	fi
-
-install-pre-commit:  ## Install pre-commit hooks
-	@poetry run pre-commit install
-
-lint:  ## Lint the code
-	@poetry run ruff check . --fix
-
-format:  ## Format the code
-	@poetry run ruff format .
-
-type-check:  ## Run type checking
-	@poetry run mypy . --install-types --non-interactive --ignore-missing-imports --show-error-codes --check-untyped-defs
-
-check: lint format type-check  ## Run all checks
 
 setup-environment-variables:
-	@poetry run python src/scripts/fix_dot_env_file.py
+	@uv run python src/scripts/fix_dot_env_file.py
 
 setup-environment-variables-non-interactive:
-	@poetry run python src/scripts/fix_dot_env_file.py --non-interactive
+	@uv run python src/scripts/fix_dot_env_file.py --non-interactive
+
+install-pre-commit:  ## Install pre-commit hooks
+	@uv run pre-commit install
+
+docs:  ## View documentation locally
+	@echo "Viewing documentation - run 'make publish-docs' to publish the documentation website."
+	@uv run mkdocs serve
+
+publish-docs:  ## Publish documentation to GitHub Pages
+	@uv run mkdocs gh-deploy
+	@echo "Updated documentation website: https://scandeval.com/ScandEval/"
 
 test:  ## Run tests
 	@if [ "$(shell which nvidia-smi)" != "" ]; then \
@@ -109,27 +82,27 @@ test-cuda-vllm:
 	@rm tests_with_cuda_and_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and vLLM..." \
 		&& USE_CUDA=1 USE_VLLM=1 \
-			poetry run pytest | tee tests_with_cuda_and_vllm.log \
+			uv run pytest | tee tests_with_cuda_and_vllm.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and vLLM!"
 
 test-cuda-no-vllm:
 	@rm tests_with_cuda_and_no_vllm.log; \
 		date "+%H:%M:%S ⋅ Running tests with CUDA and no vLLM..." \
 		&& USE_CUDA=1 USE_VLLM=0 \
-			poetry run pytest | tee tests_with_cuda_and_no_vllm.log \
+			uv run pytest | tee tests_with_cuda_and_no_vllm.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and no vLLM!"
 
 test-cpu:
 	@rm tests_with_cpu.log; \
 		date "+%H:%M:%S ⋅ Running tests with CPU..." \
-		&& USE_CUDA=0 poetry run pytest | tee tests_with_cpu.log \
+		&& USE_CUDA=0 uv run pytest | tee tests_with_cpu.log \
 		&& date "+%H:%M:%S ⋅ Finished testing with CPU!"
 
 test-fast:  # Run CPU tests without evaluations
 	@rm tests_with_cpu_fast.log; \
 		date "+%H:%M:%S ⋅ Running fast tests with CPU..." \
 		&& USE_CUDA=0 TEST_EVALUATIONS=0 \
-			poetry run pytest | tee tests_with_cpu_fast.log \
+			uv run pytest | tee tests_with_cpu_fast.log \
 		&& date "+%H:%M:%S ⋅ Finished fast testing with CPU!"
 
 test-slow:  # Run all tests
@@ -142,24 +115,35 @@ test-slow:  # Run all tests
 	@$(MAKE) --quiet update-coverage-badge
 	@date "+%H:%M:%S ⋅ All done!"
 
-update-coverage-badge:
-	@poetry run readme-cov
-	@rm .coverage*
-	@date "+%H:%M:%S ⋅ Updated coverage badge!"
-
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .
 
+lint:  ## Lint the project
+	uv run ruff check . --fix
+
+format:  ## Format the project
+	uv run ruff format .
+
+type-check:  ## Type-check the project
+	@uv run mypy . \
+		--install-types \
+		--non-interactive \
+		--ignore-missing-imports \
+		--show-error-codes \
+		--check-untyped-defs
+
+check: lint format type-check  ## Lint, format, and type-check the code
+
 bump-major:
-	@poetry run python -m src.scripts.versioning --major
+	@uv run python -m src.scripts.versioning --major
 	@echo "Bumped major version!"
 
 bump-minor:
-	@poetry run python -m src.scripts.versioning --minor
+	@uv run python -m src.scripts.versioning --minor
 	@echo "Bumped minor version!"
 
 bump-patch:
-	@poetry run python -m src.scripts.versioning --patch
+	@uv run python -m src.scripts.versioning --patch
 	@echo "Bumped patch version!"
 
 publish:
@@ -167,7 +151,7 @@ publish:
 		echo "No PyPI API token specified in the '.env' file, so cannot publish."; \
 	else \
 		echo "Publishing to PyPI..."; \
-		poetry publish --build --username "__token__" --password ${PYPI_API_TOKEN}; \
+		uv publish --build --username "__token__" --password ${PYPI_API_TOKEN}; \
 	fi
 	@echo "Published!"
 

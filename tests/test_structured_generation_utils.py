@@ -4,9 +4,6 @@ import json
 from typing import TYPE_CHECKING, Generator
 
 import pytest
-from scandeval.generation import StopWordCriteria
-from scandeval.structured_generation_utils import get_ner_prefix_allowed_tokens_fn
-from scandeval.utils import create_model_cache_dir
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -15,6 +12,10 @@ from transformers import (
     PreTrainedTokenizerBase,
     StoppingCriteriaList,
 )
+
+from scandeval.generation import StopWordCriteria
+from scandeval.structured_generation_utils import get_ner_prefix_allowed_tokens_fn
+from scandeval.utils import create_model_cache_dir
 
 if TYPE_CHECKING:
     from outlines.integrations.transformers import JSONPrefixAllowedTokens

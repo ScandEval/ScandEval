@@ -4,6 +4,7 @@ from typing import Generator
 
 import pytest
 import torch
+
 from scandeval.benchmark_config_factory import (
     get_correct_language_codes,
     prepare_device,

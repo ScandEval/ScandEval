@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Generator
 
 import pytest
+
 from scandeval.dataset_factory import DatasetFactory
 from scandeval.named_entity_recognition import NamedEntityRecognition
 from scandeval.question_answering import QuestionAnswering

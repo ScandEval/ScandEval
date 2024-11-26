@@ -6,6 +6,7 @@ import re
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from evaluate import EvaluationModule
 from transformers.data.data_collator import DataCollatorWithPadding
 
 from .benchmark_dataset import BenchmarkDataset
@@ -123,6 +124,7 @@ class TextToText(BenchmarkDataset):
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
+            assert isinstance(metric, EvaluationModule)
 
             # Some metrics can be computed on hardware accelerators. In this case we
             # start by setting the device to the same device as the model

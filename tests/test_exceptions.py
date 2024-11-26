@@ -1,6 +1,7 @@
 """Unit tests for the `exceptions` module."""
 
 import pytest
+
 from scandeval.exceptions import (
     FlashAttentionNotInstalled,
     HuggingFaceHubDown,

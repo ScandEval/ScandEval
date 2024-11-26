@@ -17,37 +17,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - name: Install pre-commit
-        run: pipx install pre-commit
-      - name: Run pre-commit
-        run: pre-commit run --all-files
+        with:
+          python-version: "3.11"
+      - uses: pre-commit/action@v3.0.1
 
   pytest-linux:
     if: github.event.pull_request.draft == false
     strategy:
         matrix:
             python-version: ["3.10", "3.11"]
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Poetry
-        run: pipx install poetry==1.8.2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install Dependencies
-        run: |
-          poetry env use "${{ matrix.python-version }}"
-          poetry install --extras cpu_all --no-interaction --no-cache
+        run: uv sync --no-dev --extra cpu_all
 
       - name: Test with pytest
-        run: poetry run pytest
+        run: uv run pytest
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
 
@@ -60,22 +55,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Poetry
-        run: pipx install poetry==1.8.2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.10
-          cache: "poetry"
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install Dependencies
-        run: |
-          poetry env use "${{ matrix.python-version }}"
-          poetry install --extras cpu_all --no-interaction --no-cache
+        run: uv sync --no-dev --extra cpu_all
 
       - name: Test with pytest
-        run: poetry run pytest
+        run: uv run pytest
         env:
           HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_HUB_TOKEN }}
 

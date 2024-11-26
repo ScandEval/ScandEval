@@ -5,6 +5,8 @@ from contextlib import nullcontext as does_not_raise
 from typing import Generator
 
 import pytest
+from transformers import AutoTokenizer
+
 from scandeval.benchmark_dataset import BenchmarkDataset
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.exceptions import InvalidBenchmark
@@ -12,7 +14,6 @@ from scandeval.languages import DA
 from scandeval.question_answering import QuestionAnswering, prepare_train_examples
 from scandeval.tasks import RC
 from scandeval.utils import GENERATIVE_DATASET_TASKS
-from transformers import AutoTokenizer
 
 
 @pytest.fixture(

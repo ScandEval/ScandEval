@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Generator
 
 import pytest
+
 from scandeval.callbacks import NeverLeaveProgressCallback
 
 

@@ -5,6 +5,7 @@ import typing
 from typing import Generator
 
 import pytest
+
 import scandeval.types as types
 
 

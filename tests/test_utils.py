@@ -5,6 +5,8 @@ import random
 import numpy as np
 import pytest
 import torch
+from transformers import AutoTokenizer
+
 from scandeval.utils import (
     convert_prompt_to_instruction,
     enforce_reproducibility,
@@ -15,7 +17,6 @@ from scandeval.utils import (
     should_prompts_be_stripped,
     unscramble,
 )
-from transformers import AutoTokenizer
 
 
 class TestEnforceReproducibility:
