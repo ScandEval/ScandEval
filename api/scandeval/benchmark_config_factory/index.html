@@ -1,0 +1,1708 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../benchmarker/">
+      
+      
+        <link rel="next" href="../benchmark_dataset/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.46">
+    
+    
+      
+        <title>scandeval.benchmark_config_factory - ScandEval</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/mkapi-common.css">
+    
+      <link rel="stylesheet" href="../../../css/mkapi-material.css">
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#scandeval.benchmark_config_factory" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="ScandEval" class="md-header__button md-logo" aria-label="ScandEval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ScandEval
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              scandeval.benchmark_config_factory
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="ScandEval" class="md-nav__button md-logo" aria-label="ScandEval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    ScandEval
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    scandeval
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            scandeval
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Benchmarker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_config_factory
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_config_factory
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.build_benchmark_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_benchmark_config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.get_correct_language_codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_correct_language_codes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.prepare_languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_languages
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.prepare_tasks_and_datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_tasks_and_datasets
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.prepare_device" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_device
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark_dataset/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Benchmark dataset
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../callbacks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Callbacks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cli
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dataset_configs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.dataset_configs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dataset_factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dataset factory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../enums/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.enums
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exceptions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.exceptions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../finetuning/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Finetuning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../human_evaluation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Human evaluation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.languages
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model_cache/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model cache
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model_loading/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model loading
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model_setups/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model setups
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../named_entity_recognition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Named entity recognition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openai_models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Openai models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../protocols/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Protocols
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../question_answering/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Question answering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../question_answering_trainer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Question answering trainer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scores/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scores
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sequence_classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sequence classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../speed_benchmark/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Speed benchmark
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../structured_generation_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structured generation utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.tasks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../text_to_text/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Text to text
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vllm_models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Vllm models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.build_benchmark_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      build_benchmark_config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.get_correct_language_codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_correct_language_codes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.prepare_languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_languages
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.prepare_tasks_and_datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_tasks_and_datasets
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_config_factory.prepare_device" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_device
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 style="display: none;">scandeval.benchmark_config_factory</h1><p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_config_factory">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/benchmark_config_factory/#scandeval.benchmark_config_factory" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">module</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_config_factory" title="scandeval.benchmark_config_factory">scandeval.benchmark_config_factory</a></span>
+</p>
+<div class="mkapi-document">
+<p>Factory class for creating dataset configurations.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle functions">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Functions</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_config_factory.build_benchmark_config" title="scandeval.benchmark_config_factory.build_benchmark_config">build_benchmark_config</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Create a benchmark configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_config_factory.get_correct_language_codes" title="scandeval.benchmark_config_factory.get_correct_language_codes">get_correct_language_codes</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Get correct language code(s).</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_config_factory.prepare_languages" title="scandeval.benchmark_config_factory.prepare_languages">prepare_languages</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Prepare language(s) for benchmarking.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_config_factory.prepare_tasks_and_datasets" title="scandeval.benchmark_config_factory.prepare_tasks_and_datasets">prepare_tasks_and_datasets</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Prepare task(s) and dataset(s) for benchmarking.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_config_factory.prepare_device" title="scandeval.benchmark_config_factory.prepare_device">prepare_device</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Prepare device for benchmarking.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_config_factory.build_benchmark_config">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/benchmark_config_factory/#scandeval.benchmark_config_factory.build_benchmark_config" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_config_factory.build_benchmark_config" title="scandeval.benchmark_config_factory.build_benchmark_config">build_benchmark_config</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">progress_bar</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">save_results</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">task</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str] | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dataset</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str] | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">language</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_language</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str] | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dataset_language</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str] | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">framework</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.Framework" title="scandeval.enums.Framework">Framework</a> | str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">device</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.Device" title="scandeval.enums.Device">Device</a> | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">batch_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-comma">, </span><span class="mkapi-arg">evaluate_train</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">raise_errors</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">cache_dir</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">token</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool | str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">openai_api_key</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">prefer_azure</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">azure_openai_api_key</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">azure_openai_endpoint</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">azure_openai_api_version</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">force</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">verbose</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">trust_remote_code</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">load_in_4bit</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">use_flash_attention</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">clear_model_cache</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">only_validation_split</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">few_shot</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">num_iterations</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-comma">, </span><span class="mkapi-arg">debug</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">run_with_cli</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">first_time</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><a href="../config/#scandeval.config.BenchmarkConfig" title="scandeval.config.BenchmarkConfig">BenchmarkConfig</a></span></span>
+</p>
+<div class="mkapi-document">
+<p>Create a benchmark configuration.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">progress_bar</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to show a progress bar when running the benchmark.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">save_results</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to save the benchmark results to a file.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">task</span> : 
+<span class="mkapi-item-type">str | list[str] | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The tasks to include for dataset. If None then datasets will not be
+filtered based on their task.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dataset</span> : 
+<span class="mkapi-item-type">str | list[str] | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The datasets to include for task. If None then all datasets will be
+included, limited by the <code>task</code> parameter.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">language</span> : 
+<span class="mkapi-item-type">str | list[str]</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The language codes of the languages to include, both for models and
+datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
+to 'all' if all languages (also non-Scandinavian) should be considered.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_language</span> : 
+<span class="mkapi-item-type">str | list[str] | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The language codes of the languages to include for models. If None then
+the <code>language</code> parameter will be used.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dataset_language</span> : 
+<span class="mkapi-item-type">str | list[str] | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The language codes of the languages to include for datasets. If None then
+the <code>language</code> parameter will be used.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">framework</span> : 
+<span class="mkapi-item-type"><a href="../enums/#scandeval.enums.Framework" title="scandeval.enums.Framework">Framework</a> | str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The framework to use for running the models. If None then the framework
+will be set automatically.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">device</span> : 
+<span class="mkapi-item-type"><a href="../enums/#scandeval.enums.Device" title="scandeval.enums.Device">Device</a> | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The device to use for running the models. If None then the device will be
+set automatically.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">batch_size</span> : 
+<span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The batch size to use for running the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">evaluate_train</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to evaluate the models on the training set.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">raise_errors</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to raise errors when running the benchmark.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">cache_dir</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The directory to use for caching the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">token</span> : 
+<span class="mkapi-item-type">bool | str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The token to use for running the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">openai_api_key</span> : 
+<span class="mkapi-item-type">str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The OpenAI API key to use for running the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">prefer_azure</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to prefer the Azure OpenAI API for running the models, over the
+OpenAI API.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">azure_openai_api_key</span> : 
+<span class="mkapi-item-type">str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The Azure OpenAI API key to use for running the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">azure_openai_endpoint</span> : 
+<span class="mkapi-item-type">str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The Azure OpenAI endpoint to use for running the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">azure_openai_api_version</span> : 
+<span class="mkapi-item-type">str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The Azure OpenAI api version to use for running the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">force</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to force the benchmark to run even if the results are already
+cached.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">verbose</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to print verbose output when running the benchmark.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">trust_remote_code</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to trust remote code when running the benchmark.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">load_in_4bit</span> : 
+<span class="mkapi-item-type">bool | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to load the models in 4-bit precision.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">use_flash_attention</span> : 
+<span class="mkapi-item-type">bool | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to use Flash Attention for the models. If None then it will be used
+if it is available.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clear_model_cache</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to clear the model cache before running the benchmark.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">only_validation_split</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to only use the validation split for the datasets.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">few_shot</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to use few-shot learning for the models.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">num_iterations</span> : 
+<span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The number of iterations each model should be evaluated for.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">debug</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to run the benchmark in debug mode.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">run_with_cli</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether the benchmark is being run with the CLI.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">first_time</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether this is the first time the benchmark configuration is being created.
+Defaults to False.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../config/#scandeval.config.BenchmarkConfig" title="scandeval.config.BenchmarkConfig">BenchmarkConfig</a></span> <span class="mkapi-dash">&mdash;</span>
+The benchmark configuration.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_config_factory.get_correct_language_codes">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/benchmark_config_factory/#scandeval.benchmark_config_factory.get_correct_language_codes" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_config_factory.get_correct_language_codes" title="scandeval.benchmark_config_factory.get_correct_language_codes">get_correct_language_codes</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">language_codes</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str]</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">list[str]</span></span>
+</p>
+<div class="mkapi-document">
+<p>Get correct language code(s).</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">language_codes</span> : 
+<span class="mkapi-item-type">str | list[str]</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The language codes of the languages to include, both for models and
+datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
+to 'all' if all languages (also non-Scandinavian) should be considered.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">list[str]</span> <span class="mkapi-dash">&mdash;</span>
+The correct language codes.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_config_factory.prepare_languages">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/benchmark_config_factory/#scandeval.benchmark_config_factory.prepare_languages" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_config_factory.prepare_languages" title="scandeval.benchmark_config_factory.prepare_languages">prepare_languages</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">language_codes</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str] | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">default_language_codes</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[str]</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">list[<a href="../config/#scandeval.config.Language" title="scandeval.config.Language">Language</a>]</span></span>
+</p>
+<div class="mkapi-document">
+<p>Prepare language(s) for benchmarking.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">language_codes</span> : 
+<span class="mkapi-item-type">str | list[str] | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The language codes of the languages to include for models or datasets.
+If specified then this overrides the <code>language</code> parameter for model or
+dataset languages.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">default_language_codes</span> : 
+<span class="mkapi-item-type">list[str]</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The default language codes of the languages to include.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">list[<a href="../config/#scandeval.config.Language" title="scandeval.config.Language">Language</a>]</span> <span class="mkapi-dash">&mdash;</span>
+The prepared model or dataset languages.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_config_factory.prepare_tasks_and_datasets">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/benchmark_config_factory/#scandeval.benchmark_config_factory.prepare_tasks_and_datasets" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_config_factory.prepare_tasks_and_datasets" title="scandeval.benchmark_config_factory.prepare_tasks_and_datasets">prepare_tasks_and_datasets</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">task</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str] | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dataset_languages</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[<a href="../config/#scandeval.config.Language" title="scandeval.config.Language">Language</a>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dataset</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str] | None</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">tuple[list[<a href="../config/#scandeval.config.Task" title="scandeval.config.Task">Task</a>], list[str]]</span></span>
+</p>
+<div class="mkapi-document">
+<p>Prepare task(s) and dataset(s) for benchmarking.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">task</span> : 
+<span class="mkapi-item-type">str | list[str] | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The tasks to include for dataset. If None then datasets will not be
+filtered based on their task.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dataset_languages</span> : 
+<span class="mkapi-item-type">list[<a href="../config/#scandeval.config.Language" title="scandeval.config.Language">Language</a>]</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The languages of the datasets in the benchmark.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dataset</span> : 
+<span class="mkapi-item-type">str | list[str] | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The datasets to include for task. If None then all datasets will be
+included, limited by the <code>task</code> and <code>dataset_languages</code> parameters.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">tuple[list[<a href="../config/#scandeval.config.Task" title="scandeval.config.Task">Task</a>], list[str]]</span> <span class="mkapi-dash">&mdash;</span>
+The prepared tasks and datasets.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">InvalidBenchmark</span>
+ <span class="mkapi-dash">&mdash;</span></p>
+<p>If the task or dataset is not found in the benchmark tasks or datasets.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_config_factory.prepare_device">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/benchmark_config_factory/#scandeval.benchmark_config_factory.prepare_device" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_config_factory.prepare_device" title="scandeval.benchmark_config_factory.prepare_device">prepare_device</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">device</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.Device" title="scandeval.enums.Device">Device</a> | None</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.device">device</span></span></span>
+</p>
+<div class="mkapi-document">
+<p>Prepare device for benchmarking.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">device</span> : 
+<span class="mkapi-item-type"><a href="../enums/#scandeval.enums.Device" title="scandeval.enums.Device">Device</a> | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The device to use for running the models. If None then the device will be
+set automatically.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.device">device</span></span> <span class="mkapi-dash">&mdash;</span>
+The prepared device.</p>
+</li>
+</ul>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+        <script src="../../../javascript/mkapi.js"></script>
+      
+    
+  </body>
+</html>

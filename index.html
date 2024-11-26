@@ -1,0 +1,1437 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="api/scandeval/">
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.46">
+    
+    
+      
+        <title>ScandEval</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.6f8fc17f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="css/mkapi-common.css">
+    
+      <link rel="stylesheet" href="css/mkapi-material.css">
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#evaluation-of-pretrained-language-models-on-mono-or-multilingual-language-tasks" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="ScandEval" class="md-header__button md-logo" aria-label="ScandEval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ScandEval
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="ScandEval" class="md-nav__button md-logo" aria-label="ScandEval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    ScandEval
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-of-pretrained-language-models-on-mono-or-multilingual-language-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluation of pretrained language models on mono- or multilingual language tasks.
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintainers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quickstart
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking from the Command Line
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-from-a-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking from a Script
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-from-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking from Docker
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-thanks-pray" class="md-nav__link">
+    <span class="md-ellipsis">
+      Special Thanks :pray:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citing-scandeval" class="md-nav__link">
+    <span class="md-ellipsis">
+      Citing ScandEval
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Remarks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    scandeval
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            scandeval
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/benchmarker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Benchmarker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/benchmark_config_factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_config_factory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/benchmark_dataset/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Benchmark dataset
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/callbacks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Callbacks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/cli/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cli
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/dataset_configs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.dataset_configs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/dataset_factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dataset factory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/enums/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.enums
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/exceptions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.exceptions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/finetuning/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Finetuning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/generation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/human_evaluation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Human evaluation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/languages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.languages
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/model_cache/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model cache
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/model_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/model_loading/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model loading
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/model_setups/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Model setups
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/named_entity_recognition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Named entity recognition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/openai_models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Openai models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/protocols/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Protocols
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/question_answering/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Question answering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/question_answering_trainer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Question answering trainer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/scores/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scores
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/sequence_classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sequence classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/speed_benchmark/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Speed benchmark
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/structured_generation_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Structured generation utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.tasks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/text_to_text/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Text to text
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/scandeval/vllm_models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Vllm models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-of-pretrained-language-models-on-mono-or-multilingual-language-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluation of pretrained language models on mono- or multilingual language tasks.
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintainers
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quickstart
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-from-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking from the Command Line
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-from-a-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking from a Script
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-from-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking from Docker
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-thanks-pray" class="md-nav__link">
+    <span class="md-ellipsis">
+      Special Thanks :pray:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citing-scandeval" class="md-nav__link">
+    <span class="md-ellipsis">
+      Citing ScandEval
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Remarks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  <h1>Home</h1>
+
+<div align='center'>
+<img src="https://raw.githubusercontent.com/ScandEval/ScandEval/main/gfx/scandeval.png" width="517" height="217">
+</div>
+
+<h3 id="evaluation-of-pretrained-language-models-on-mono-or-multilingual-language-tasks">Evaluation of pretrained language models on mono- or multilingual language tasks.</h3>
+<hr />
+<p><a href="https://pypi.org/project/scandeval/"><img alt="PyPI Status" src="https://badge.fury.io/py/scandeval.svg" /></a>
+<a href="https://arxiv.org/abs/2304.00906"><img alt="First paper" src="https://img.shields.io/badge/arXiv-2304.00906-b31b1b.svg" /></a>
+<a href="https://arxiv.org/abs/2406.13469"><img alt="Second paper" src="https://img.shields.io/badge/arXiv-2406.13469-b31b1b.svg" /></a>
+<a href="https://github.com/ScandEval/ScandEval/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/ScandEval/ScandEval" /></a>
+<a href="https://github.com/ScandEval/ScandEval/commits/main"><img alt="LastCommit" src="https://img.shields.io/github/last-commit/ScandEval/ScandEval" /></a>
+<a href="https://github.com/ScandEval/ScandEval/tree/main/tests"><img alt="Code Coverage" src="https://img.shields.io/badge/Coverage-65%25-yellow.svg" /></a>
+<a href="https://github.com/ScandEval/ScandEval/blob/main/CODE_OF_CONDUCT.md"><img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg" /></a></p>
+<h2 id="maintainers">Maintainers</h2>
+<ul>
+<li>Dan Saattrup Nielsen (@saattrupdan, dan.nielsen@alexandra.dk)</li>
+<li>Kenneth Enevoldsen (@KennethEnevoldsen, kenneth.enevoldsen@cas.au.dk)</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>To install the package simply write the following command in your favorite terminal:
+<div class="highlight"><pre><span></span><code>$ pip install scandeval[all]
+</code></pre></div></p>
+<p>This will install the ScandEval package with all extras. You can also install the
+minimal version by leaving out the <code>[all]</code>, in which case the package will let you know
+when an evaluation requires a certain extra dependency, and how you install it.</p>
+<h2 id="quickstart">Quickstart</h2>
+<h3 id="benchmarking-from-the-command-line">Benchmarking from the Command Line</h3>
+<p>The easiest way to benchmark pretrained models is via the command line interface. After
+having installed the package, you can benchmark your favorite model like so:
+<div class="highlight"><pre><span></span><code>$ scandeval --model &lt;model-id&gt;
+</code></pre></div></p>
+<p>Here <code>model</code> is the HuggingFace model ID, which can be found on the <a href="https://huggingface.co/models">HuggingFace
+Hub</a>. By default this will benchmark the model on all
+the tasks available. If you want to benchmark on a particular task, then use the
+<code>--task</code> argument:
+<div class="highlight"><pre><span></span><code>$ scandeval --model &lt;model-id&gt; --task sentiment-classification
+</code></pre></div></p>
+<p>We can also narrow down which languages we would like to benchmark on. This can be done
+by setting the <code>--language</code> argument. Here we thus benchmark the model on the Danish
+sentiment classification task:
+<div class="highlight"><pre><span></span><code>$ scandeval --model &lt;model-id&gt; --task sentiment-classification --language da
+</code></pre></div></p>
+<p>Multiple models, datasets and/or languages can be specified by just attaching multiple
+arguments. Here is an example with two models:
+<div class="highlight"><pre><span></span><code>$ scandeval --model &lt;model-id1&gt; --model &lt;model-id2&gt;
+</code></pre></div></p>
+<p>The specific model version/revision to use can also be added after the suffix '@':
+<div class="highlight"><pre><span></span><code>$ scandeval --model &lt;model-id&gt;@&lt;commit&gt;
+</code></pre></div></p>
+<p>This can be a branch name, a tag name, or a commit id. It defaults to 'main' for latest.</p>
+<p>See all the arguments and options available for the <code>scandeval</code> command by typing
+<div class="highlight"><pre><span></span><code>$ scandeval --help
+</code></pre></div></p>
+<h3 id="benchmarking-from-a-script">Benchmarking from a Script</h3>
+<p>In a script, the syntax is similar to the command line interface. You simply initialise
+an object of the <code>Benchmarker</code> class, and call this benchmark object with your favorite
+model:
+<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; from scandeval import Benchmarker
+&gt;&gt;&gt; benchmark = Benchmarker()
+&gt;&gt;&gt; benchmark(model=&quot;&lt;model&gt;&quot;)
+</code></pre></div></p>
+<p>To benchmark on a specific task and/or language, you simply specify the <code>task</code> or
+<code>language</code> arguments, shown here with same example as above:
+<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; benchmark(model=&quot;&lt;model&gt;&quot;, task=&quot;sentiment-classification&quot;, language=&quot;da&quot;)
+</code></pre></div></p>
+<p>If you want to benchmark a subset of all the models on the Hugging Face Hub, you can
+simply leave out the <code>model</code> argument. In this example, we're benchmarking all Danish
+models on the Danish sentiment classification task:
+<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; benchmark(task=&quot;sentiment-classification&quot;, language=&quot;da&quot;)
+</code></pre></div></p>
+<h3 id="benchmarking-from-docker">Benchmarking from Docker</h3>
+<p>A Dockerfile is provided in the repo, which can be downloaded and run, without needing
+to clone the repo and installing from source. This can be fetched programmatically by
+running the following:
+<div class="highlight"><pre><span></span><code>$ wget https://raw.githubusercontent.com/ScandEval/ScandEval/main/Dockerfile.cuda
+</code></pre></div></p>
+<p>Next, to be able to build the Docker image, first ensure that the NVIDIA Container
+Toolkit is
+<a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installation">installed</a>
+and
+<a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#configuring-docker">configured</a>.
+Ensure that the the CUDA version stated at the top of the Dockerfile matches the CUDA
+version installed (which you can check using <code>nvidia-smi</code>). After that, we build the
+image as follows:
+<div class="highlight"><pre><span></span><code>$ docker build --pull -t scandeval -f Dockerfile.cuda .
+</code></pre></div></p>
+<p>With the Docker image built, we can now evaluate any model as follows:
+<div class="highlight"><pre><span></span><code>$ docker run -e args=&quot;&lt;scandeval-arguments&gt;&quot; --gpus 1 --name scandeval --rm scandeval
+</code></pre></div></p>
+<p>Here <code>&lt;scandeval-arguments&gt;</code> consists of the arguments added to the <code>scandeval</code> CLI
+argument. This could for instance be <code>--model &lt;model-id&gt; --task
+sentiment-classification</code>.</p>
+<h2 id="special-thanks-pray">Special Thanks :pray:</h2>
+<ul>
+<li>Thanks to <a href="https://openai.com/">OpenAI</a> for sponsoring OpenAI credits as part of their
+  <a href="https://openai.com/form/researcher-access-program/">Researcher Access Program</a>.</li>
+<li>Thanks to <a href="https://www.uwv.nl/">UWV</a> and <a href="https://www.arts.kuleuven.be/ling/ccl">KU
+  Leuven</a> for sponsoring the Azure OpenAI
+  credits used to evaluate GPT-4-turbo in Dutch.</li>
+<li>Thanks to <a href="https://mideind.is/english.html">Miðeind</a> for sponsoring the OpenAI
+  credits used to evaluate GPT-4-turbo in Icelandic and Faroese.</li>
+<li>Thanks to <a href="https://chc.au.dk/">CHC</a> for sponsoring the OpenAI credits used to
+  evaluate GPT-4-turbo in German.</li>
+</ul>
+<h2 id="citing-scandeval">Citing ScandEval</h2>
+<p>If you want to cite the framework then feel free to use this:</p>
+<div class="highlight"><pre><span></span><code>@article{nielsen2024encoder,
+  title={Encoder vs Decoder: Comparative Analysis of Encoder and Decoder Language Models on Multilingual NLU Tasks},
+  author={Nielsen, Dan Saattrup and Enevoldsen, Kenneth and Schneider-Kamp, Peter},
+  journal={arXiv preprint arXiv:2406.13469},
+  year={2024}
+}
+@inproceedings{nielsen2023scandeval,
+  author = {Nielsen, Dan Saattrup},
+  booktitle = {Proceedings of the 24th Nordic Conference on Computational Linguistics (NoDaLiDa)},
+  month = may,
+  pages = {185--201},
+  title = {{ScandEval: A Benchmark for Scandinavian Natural Language Processing}},
+  year = {2023}
+}
+</code></pre></div>
+<h2 id="remarks">Remarks</h2>
+<p>The image used in the logo has been created by the amazing <a href="https://satwcomic.com/">Scandinavia and the
+World</a> team. Go check them out!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+        <script src="javascript/mkapi.js"></script>
+      
+    
+  </body>
+</html>
