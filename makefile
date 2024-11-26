@@ -70,7 +70,50 @@ publish-docs:  ## Publish documentation to GitHub Pages
 	@echo "Updated documentation website: https://scandeval.com/ScandEval/"
 
 test:  ## Run tests
-	@uv run pytest && uv run readme-cov
+	@if [ "$(shell which nvidia-smi)" != "" ]; then \
+		$(MAKE) --quiet test-cuda-vllm; \
+	else \
+		$(MAKE) --quiet test-cpu; \
+	fi
+	@$(MAKE) --quiet update-coverage-badge
+	@date "+%H:%M:%S ⋅ All done!"
+
+test-cuda-vllm:
+	@rm tests_with_cuda_and_vllm.log; \
+		date "+%H:%M:%S ⋅ Running tests with CUDA and vLLM..." \
+		&& USE_CUDA=1 USE_VLLM=1 \
+			uv run pytest | tee tests_with_cuda_and_vllm.log \
+		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and vLLM!"
+
+test-cuda-no-vllm:
+	@rm tests_with_cuda_and_no_vllm.log; \
+		date "+%H:%M:%S ⋅ Running tests with CUDA and no vLLM..." \
+		&& USE_CUDA=1 USE_VLLM=0 \
+			uv run pytest | tee tests_with_cuda_and_no_vllm.log \
+		&& date "+%H:%M:%S ⋅ Finished testing with CUDA and no vLLM!"
+
+test-cpu:
+	@rm tests_with_cpu.log; \
+		date "+%H:%M:%S ⋅ Running tests with CPU..." \
+		&& USE_CUDA=0 uv run pytest | tee tests_with_cpu.log \
+		&& date "+%H:%M:%S ⋅ Finished testing with CPU!"
+
+test-fast:  # Run CPU tests without evaluations
+	@rm tests_with_cpu_fast.log; \
+		date "+%H:%M:%S ⋅ Running fast tests with CPU..." \
+		&& USE_CUDA=0 TEST_EVALUATIONS=0 \
+			uv run pytest | tee tests_with_cpu_fast.log \
+		&& date "+%H:%M:%S ⋅ Finished fast testing with CPU!"
+
+test-slow:  # Run all tests
+	@if [ "$(shell which nvidia-smi)" != "" ]; then \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cuda-vllm; \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cuda-no-vllm; \
+	else \
+		TEST_ALL_DATASETS=1 $(MAKE) --quiet test-cpu; \
+	fi
+	@$(MAKE) --quiet update-coverage-badge
+	@date "+%H:%M:%S ⋅ All done!"
 
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .
