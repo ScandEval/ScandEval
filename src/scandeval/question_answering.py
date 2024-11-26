@@ -6,6 +6,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Any, Type
 
 import numpy as np
+from evaluate import EvaluationModule
 from transformers.data.data_collator import DataCollatorWithPadding
 
 from .benchmark_dataset import BenchmarkDataset
@@ -171,6 +172,7 @@ class QuestionAnswering(BenchmarkDataset):
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
+            assert isinstance(metric, EvaluationModule)
             score_dict: dict[str, float] | None = metric.compute(
                 predictions=predictions, references=labels, **cfg.compute_kwargs
             )

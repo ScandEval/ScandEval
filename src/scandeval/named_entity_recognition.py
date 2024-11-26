@@ -11,6 +11,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from evaluate import EvaluationModule
 from transformers import DataCollatorWithPadding
 from transformers.data.data_collator import DataCollatorForTokenClassification
 
@@ -178,9 +179,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         if predictions_all_zero and labels_all_zero:
             results = dict(overall_f1=1.0)
         else:
-            results = self._metrics["micro_f1"].compute(
-                predictions=predictions, references=labels
-            )
+            metric = self._metrics["micro_f1"]
+            assert isinstance(metric, EvaluationModule)
+            results = metric.compute(predictions=predictions, references=labels)
 
         # Compute the metrics without MISC tags
         # We manually set the F1 metric to be 100% if both the labels and the models
@@ -197,7 +198,9 @@ class NamedEntityRecognition(BenchmarkDataset):
         if predictions_no_misc_all_zero and labels_no_misc_all_zero:
             results_no_misc = dict(overall_f1=1.0)
         else:
-            results_no_misc = self._metrics["micro_f1_no_misc"].compute(
+            metric = self._metrics["micro_f1_no_misc"]
+            assert isinstance(metric, EvaluationModule)
+            results_no_misc = metric.compute(
                 predictions=predictions_no_misc, references=labels_no_misc
             )
 

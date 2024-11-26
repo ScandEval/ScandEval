@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import torch
+from evaluate import EvaluationModule
 from transformers.data.data_collator import DataCollatorWithPadding
 
 from .benchmark_dataset import BenchmarkDataset
@@ -190,6 +191,7 @@ class SequenceClassification(BenchmarkDataset):
         results: dict[str, float] = dict()
         for cfg in self.dataset_config.task.metrics:
             metric = self._metrics[cfg.name]
+            assert isinstance(metric, EvaluationModule)
             score_dict: dict[str, float] | None = metric.compute(
                 predictions=predictions, references=label_ids, **cfg.compute_kwargs
             )
