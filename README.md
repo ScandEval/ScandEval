@@ -5,6 +5,7 @@
 ### Evaluation of pretrained language models on mono- or multilingual language tasks.
 
 ______________________________________________________________________
+[![Documentation](https://img.shields.io/badge/docs-passing-green)](https://scandeval.com/ScandEval)
 [![PyPI Status](https://badge.fury.io/py/scandeval.svg)](https://pypi.org/project/scandeval/)
 [![First paper](https://img.shields.io/badge/arXiv-2304.00906-b31b1b.svg)](https://arxiv.org/abs/2304.00906)
 [![Second paper](https://img.shields.io/badge/arXiv-2406.13469-b31b1b.svg)](https://arxiv.org/abs/2406.13469)
