@@ -67,7 +67,7 @@ docs:  ## View documentation locally
 
 publish-docs:  ## Publish documentation to GitHub Pages
 	@uv run mkdocs gh-deploy
-	@echo "Updated documentation website: https://alexandrainst.github.io/ugens_elev"
+	@echo "Updated documentation website: https://scandeval.com/ScandEval/"
 
 test:  ## Run tests
 	@uv run pytest && uv run readme-cov
