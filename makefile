@@ -152,6 +152,7 @@ publish:
 	else \
 		echo "Publishing to PyPI..."; \
 		uv publish --build --username "__token__" --password ${PYPI_API_TOKEN}; \
+		$(MAKE) --quiet publish-docs; \
 	fi
 	@echo "Published!"
 
