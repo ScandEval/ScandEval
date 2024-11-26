@@ -40,8 +40,8 @@ jax = [
 generative = [
     "demjson3>=3.0.6",
     "outlines>=0.0.44,<0.1",
-    "bitsandbytes>=0.43.1",
-    "vllm>=0.6.3",
+    "bitsandbytes>=0.43.1; platform_system == 'Linux'",
+    "vllm>=0.6.3; platform_system == 'Linux'",
     "rouge-score>=0.1.2",
     "bert-score>=0.3.13",
 ]
@@ -64,8 +64,8 @@ all = [
     "bert-score>=0.3.13",
     "demjson3>=3.0.6",
     "outlines>=0.0.44,<0.1",
-    "bitsandbytes>=0.43.1",
-    "vllm>=0.6.3",
+    "bitsandbytes>=0.43.1; platform_system == 'Linux'",
+    "vllm>=0.6.3; platform_system == 'Linux'",
     "openai>=1.51.2",
     "tiktoken>=0.7.0",
     "levenshtein>=0.24.0",
