@@ -162,6 +162,12 @@ def main():
         axis=1,
     )
 
+    # Overwrite the original dataframe with the cleaned version
+    df = cleaned_df
+
+    # should not change since we use seed and temp 0 for rephrasing
+    assert len(df) == 2406
+
     # Create validation split
     val_size = 256
     val_df = df.sample(n=val_size, random_state=4242)
