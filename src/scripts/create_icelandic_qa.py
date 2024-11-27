@@ -83,6 +83,8 @@ def main() -> None:
                 }
             ],
             model="gpt-4o",
+            temperature=0.0,
+            seed=4242,
         )
 
         rephrased_answer = chat_completion.choices[0].message.content
