@@ -784,6 +784,7 @@ NORGLM_MULTI_QA = DatasetConfig(
     "med maks 3 ord.\n\nSpørsmål: {question}",
     num_few_shot_examples=2,
     max_generated_tokens=32,
+    unofficial=True,
 )
 
 SCANDIQA_SV_CONFIG = DatasetConfig(
