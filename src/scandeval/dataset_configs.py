@@ -118,7 +118,8 @@ HOTTER_AND_COLDER_SENTIMENT_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
     ),
-    instruction_prompt="",  # TODO: Add instruction prompt
+    instruction_prompt="Texti: {text}\n\nFlokkaðu tilfinninguna í textanum. "
+    "Svaraðu með 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
