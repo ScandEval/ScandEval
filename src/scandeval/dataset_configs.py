@@ -180,22 +180,23 @@ SST5_CONFIG = DatasetConfig(
     max_generated_tokens=1,
 )
 
-# TODO: Faroese Sentiment Classification
-# FOREC_CONFIG = DatasetConfig(
-#     name="forec",
-#     pretty_name="the truncated version of FoReC",
-#     huggingface_id="ScandEval/forec-mini",
-#     task=SENT,
-#     languages=[FO],
-#     prompt_prefix="Her koma nøkur ummæli og teirra kensluliga sjónarmið, sum kunnu "
-#     "vera 'positivur', 'neutralur' ella 'negativur'.",
-#     prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
-#     prompt_label_mapping=dict(
-#         positive="positivur", neutral="neutralur", negative="negativur"
-#     ),
-#     num_few_shot_examples=12,
-#     max_generated_tokens=1,
-# )
+FOSENT_CONFIG = DatasetConfig(
+    name="fosent",
+    pretty_name="the Faroese sentiment classification dataset FoSent",
+    huggingface_id="ScandEval/fosent",
+    task=SENT,
+    languages=[FO],
+    prompt_prefix="Her koma nøkur tekstir og teirra kensluliga sjónarmið, sum kunnu "
+    "vera 'positivur', 'neutralur' ella 'negativur'.",
+    prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
+    prompt_label_mapping=dict(
+        positive="positivur", neutral="neutralur", negative="negativur"
+    ),
+    instruction_prompt="Tekstur: {text}\n\nFlokk kensluna í tekstinum. Svara við "
+    "'positivur', 'neutralur' ella 'negativur'.",
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+)
 
 
 ### NAMED ENTITY RECOGNITION DATASETS ###

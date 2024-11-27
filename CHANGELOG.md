@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   being a gold standard dataset. As no Icelandic sentiment classification dataset was
   included in the benchmark previously, this is now the official Icelandic sentiment
   classification dataset.
+- Added the Faroese sentiment classification dataset FoSent, being a gold standard
+  dataset. Note that this dataset is very small (74 train, 35 val, 283 test samples).
+  The dataset consists of manually annotated Faroese news articles as well as individual
+  sentences from the news articles. In creating the splits we ensure that there is no
+  overlap between the news articles in the train, validation and test sets. As no
+  Faroese sentiment classification dataset was included in the benchmark previously,
+  this is now the official Icelandic sentiment classification dataset.
 
 
 ## [v13.2.0] - 2024-11-14
