@@ -187,14 +187,14 @@ FOSENT_CONFIG = DatasetConfig(
     huggingface_id="ScandEval/fosent",
     task=SENT,
     languages=[FO],
-    prompt_prefix="Her koma nøkur tekstir og teirra kensluliga sjónarmið, sum kunnu "
-    "vera 'positivur', 'neutralur' ella 'negativur'.",
-    prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
+    prompt_prefix="Her eru nakrir tekstir flokkaðir eftir lyndi, sum kann vera "
+    "'positivt', 'neutralt' ella 'negativt'.",
+    prompt_template="Text: {text}\nLyndi: {label}",
     prompt_label_mapping=dict(
-        positive="positivur", neutral="neutralur", negative="negativur"
+        positive="positivt", neutral="neutralt", negative="negativt"
     ),
-    instruction_prompt="Tekstur: {text}\n\nFlokk kensluna í tekstinum. Svara við "
-    "'positivur', 'neutralur' ella 'negativur'.",
+    instruction_prompt="Tekstur: {text}\n\nFlokka lyndið í tekstinum. Svara við "
+    "'positivt', 'neutralt' ella 'negativt'.",
     num_few_shot_examples=5,
     max_generated_tokens=1,
 )
