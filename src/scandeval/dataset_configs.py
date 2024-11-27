@@ -118,7 +118,8 @@ HOTTER_AND_COLDER_SENTIMENT_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(
         positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
     ),
-    instruction_prompt="",  # TODO: Add instruction prompt
+    instruction_prompt="Texti: {text}\n\nFlokkaðu tilfinninguna í textanum. "
+    "Svaraðu með 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
     num_few_shot_examples=12,
     max_generated_tokens=1,
 )
@@ -180,22 +181,23 @@ SST5_CONFIG = DatasetConfig(
     max_generated_tokens=1,
 )
 
-# TODO: Faroese Sentiment Classification
-# FOREC_CONFIG = DatasetConfig(
-#     name="forec",
-#     pretty_name="the truncated version of FoReC",
-#     huggingface_id="ScandEval/forec-mini",
-#     task=SENT,
-#     languages=[FO],
-#     prompt_prefix="Her koma nøkur ummæli og teirra kensluliga sjónarmið, sum kunnu "
-#     "vera 'positivur', 'neutralur' ella 'negativur'.",
-#     prompt_template="Ummæli: {text}\nKensluligt sjónarmið: {label}",
-#     prompt_label_mapping=dict(
-#         positive="positivur", neutral="neutralur", negative="negativur"
-#     ),
-#     num_few_shot_examples=12,
-#     max_generated_tokens=1,
-# )
+FOSENT_CONFIG = DatasetConfig(
+    name="fosent",
+    pretty_name="the Faroese sentiment classification dataset FoSent",
+    huggingface_id="ScandEval/fosent",
+    task=SENT,
+    languages=[FO],
+    prompt_prefix="Her eru nakrir tekstir flokkaðir eftir lyndi, sum kann vera "
+    "'positivt', 'neutralt' ella 'negativt'.",
+    prompt_template="Text: {text}\nLyndi: {label}",
+    prompt_label_mapping=dict(
+        positive="positivt", neutral="neutralt", negative="negativt"
+    ),
+    instruction_prompt="Tekstur: {text}\n\nFlokka lyndið í tekstinum. Svara við "
+    "'positivt', 'neutralt' ella 'negativt'.",
+    num_few_shot_examples=5,
+    max_generated_tokens=1,
+)
 
 
 ### NAMED ENTITY RECOGNITION DATASETS ###
