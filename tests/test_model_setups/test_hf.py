@@ -4,6 +4,7 @@ import copy
 
 import pytest
 import torch
+
 from scandeval.model_setups.hf import HFModelSetup
 
 

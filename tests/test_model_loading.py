@@ -3,6 +3,7 @@
 import os
 
 import pytest
+
 from scandeval.config import ModelConfig
 from scandeval.enums import Framework
 from scandeval.exceptions import InvalidBenchmark, InvalidModel

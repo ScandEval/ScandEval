@@ -5,6 +5,7 @@ from typing import Generator
 import pytest
 from click import INT, ParamType
 from click.types import BOOL, STRING, Choice
+
 from scandeval.cli import benchmark
 
 

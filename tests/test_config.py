@@ -1,6 +1,7 @@
 """Unit tests for the `config` module."""
 
 import pytest
+
 from scandeval.config import (
     BenchmarkConfig,
     DatasetConfig,

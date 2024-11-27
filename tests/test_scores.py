@@ -5,6 +5,7 @@ from typing import Generator
 
 import numpy as np
 import pytest
+
 from scandeval.scores import aggregate_scores, log_scores
 from scandeval.types import ScoreDict
 

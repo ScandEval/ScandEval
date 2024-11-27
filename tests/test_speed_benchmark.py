@@ -3,12 +3,13 @@
 from typing import Generator
 
 import pytest
-from scandeval.config import ModelConfig
-from scandeval.model_setups import HFModelSetup
-from scandeval.speed_benchmark import benchmark_speed
 from tqdm.auto import tqdm
 from transformers import PreTrainedModel, PreTrainedTokenizer
 from transformers.models.auto import AutoModelForSequenceClassification, AutoTokenizer
+
+from scandeval.config import ModelConfig
+from scandeval.model_setups import HFModelSetup
+from scandeval.speed_benchmark import benchmark_speed
 
 
 @pytest.fixture(scope="module")
