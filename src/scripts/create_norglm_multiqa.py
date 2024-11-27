@@ -172,13 +172,13 @@ def main():
     val_size = 256
     val_df = df.sample(n=val_size, random_state=4242)
 
-    # Create test split
-    test_size = 1024
-    filtered_df = df[~df.index.isin(val_df.index)]
-    test_df = filtered_df.sample(n=test_size, random_state=4242)
-
     # Create train split
-    train_df = filtered_df[~filtered_df.index.isin(test_df.index)]
+    train_size = 1024
+    filtered_df = df[~df.index.isin(val_df.index)]
+    train_df = filtered_df.sample(n=train_size, random_state=4242)
+
+    # Create test split, using the remaining samples
+    test_df = filtered_df[~filtered_df.index.isin(train_df.index)]
 
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
