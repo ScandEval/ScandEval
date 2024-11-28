@@ -27,7 +27,7 @@ from transformers import logging as tf_logging
 from .enums import Framework
 from .exceptions import InvalidModel, NaNValueInModelOutput
 from .languages import DA, NB, NN, NO, SV, get_all_languages
-from .openai_models import OpenAIModel, OpenAITokenizer
+from .model_wrappers import OpenAIModel, OpenAITokenizer
 
 if TYPE_CHECKING:
     from huggingface_hub.hf_api import ModelInfo

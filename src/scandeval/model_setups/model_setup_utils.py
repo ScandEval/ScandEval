@@ -6,9 +6,9 @@ import torch
 import torch.nn as nn
 
 from ..exceptions import InvalidModel
+from ..model_wrappers import VLLMModel
 from ..protocols import GenerativeModel, Tokenizer
 from ..utils import DUMMY_FILL_VALUE, get_model_max_length
-from ..vllm_models import VLLMModel
 
 if TYPE_CHECKING:
     from transformers import PreTrainedModel

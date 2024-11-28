@@ -19,7 +19,10 @@ from ..config import ModelConfig
 from ..enums import Framework, ModelType
 from ..exceptions import InvalidBenchmark, InvalidModel
 from ..utils import block_terminal_output, create_model_cache_dir, model_is_generative
-from .utils import align_model_and_tokenizer, setup_model_for_question_answering
+from .model_setup_utils import (
+    align_model_and_tokenizer,
+    setup_model_for_question_answering,
+)
 
 if TYPE_CHECKING:
     from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizerBase

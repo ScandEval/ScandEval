@@ -9,7 +9,7 @@ from transformers import PretrainedConfig
 
 from ..config import ModelConfig
 from ..enums import Framework, ModelType
-from ..openai_models import OpenAIModel, OpenAITokenizer
+from ..model_wrappers import OpenAIModel, OpenAITokenizer
 from ..utils import create_model_cache_dir
 
 if TYPE_CHECKING:

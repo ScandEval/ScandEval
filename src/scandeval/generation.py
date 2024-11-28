@@ -25,14 +25,13 @@ from .model_cache import (
     load_cached_model_outputs,
     split_dataset_into_cached_and_non_cached,
 )
-from .openai_models import OpenAIModel
+from .model_wrappers import OpenAIModel, VLLMModel
 from .structured_generation_utils import (
     get_ner_logits_processors,
     get_ner_prefix_allowed_tokens_fn,
 )
 from .tasks import LA, NER, RC, SENT, SUMM
 from .utils import SUPERTASKS_USING_LOGPROBS, clear_memory, get_end_of_chat_token_ids
-from .vllm_models import VLLMModel
 
 if TYPE_CHECKING:
     from transformers import DataCollator

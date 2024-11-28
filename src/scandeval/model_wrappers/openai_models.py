@@ -272,6 +272,7 @@ class OpenAITokenizer:
         # default, and we want padding to the left
         flipped_input_ids: list["Tensor"] = []
         for input_id_list in input_ids:
+            assert isinstance(input_id_list, list)
             input_id_list.reverse()
             flipped_input_ids.append(LongTensor(input_id_list))
 

@@ -34,6 +34,7 @@ from ..exceptions import (
     NoInternetConnection,
 )
 from ..languages import get_all_languages
+from ..model_wrappers import VLLMModel
 from ..protocols import GenerativeModel
 from ..utils import (
     GENERATIVE_DATASET_SUPERTASKS,
@@ -45,8 +46,10 @@ from ..utils import (
     internet_connection_available,
     model_is_generative,
 )
-from ..vllm_models import VLLMModel
-from .utils import align_model_and_tokenizer, setup_model_for_question_answering
+from .model_setup_utils import (
+    align_model_and_tokenizer,
+    setup_model_for_question_answering,
+)
 
 if TYPE_CHECKING:
     from peft.config import PeftConfig
