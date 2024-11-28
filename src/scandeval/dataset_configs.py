@@ -773,6 +773,22 @@ NORQUAD_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+NORGLM_MULTI_QA = DatasetConfig(
+    name="norglm-multi-qa",
+    pretty_name="the question answering part of the Norwegian NorGLM multi-task human annotated dataset "
+    "NO-Multi-QA-Sum",
+    huggingface_id="ScandEval/norglm-multi-qa",
+    task=RC,
+    languages=[NB, NN, NO],
+    prompt_prefix="Her følger tekster med tilhørende spørsmål og svar.",
+    prompt_template="Tekst: {text}\nSpørsmål: {question}\nSvar på maks 3 ord: {label}",
+    instruction_prompt="Tekst: {text}\n\nBesvar følgende spørsmål om teksten ovenfor "
+    "med maks 3 ord.\n\nSpørsmål: {question}",
+    num_few_shot_examples=2,
+    max_generated_tokens=32,
+    unofficial=True,
+)
+
 SCANDIQA_SV_CONFIG = DatasetConfig(
     name="scandiqa-sv",
     pretty_name="the Swedish part of the truncated version of the question answering "
