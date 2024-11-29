@@ -5,8 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
+
+
+
+## [v13.3.0] - 2024-11-29
 ### Added
+- Added the question answering part of the Norwegian NorGLM multi-task human annotated
+  dataset NO-Multi-QA-Sum (norglm-multi-qa). This dataset is part of the NLEBench
+  Norwegian benchmarks. The answers from the original dataset have been rephrased with
+  gpt-4o to contain the answer from the context. It has been marked as `unofficial` for
+  now. This was contributed by [@viggo-gascou](https://github.com/viggo-gascou) ✨
 - Added the sentiment classification part of the Icelandic dataset Hotter and Colder,
   being a gold standard dataset. As no Icelandic sentiment classification dataset was
   included in the benchmark previously, this is now the official Icelandic sentiment

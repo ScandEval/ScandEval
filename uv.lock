@@ -3740,7 +3740,7 @@ wheels = [
 
 [[package]]
 name = "scandeval"
-version = "13.2.0"
+version = "13.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
