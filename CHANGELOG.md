@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v13.3.0] - 2024-11-29
 ### Added
 - Added the question answering part of the Norwegian NorGLM multi-task human annotated
   dataset NO-Multi-QA-Sum (norglm-multi-qa). This dataset is part of the NLEBench
