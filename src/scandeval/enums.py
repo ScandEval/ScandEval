@@ -62,6 +62,8 @@ class ModelType(AutoStrEnum):
             Locally stored Hugging Face model.
         OPENAI:
             Model from OpenAI.
+        ANTHROPIC:
+            Model from Anthropic.
         HUMAN:
             Human evaluator.
     """
@@ -70,6 +72,7 @@ class ModelType(AutoStrEnum):
     HF = auto()
     LOCAL = auto()
     OPENAI = auto()
+    ANTHROPIC = auto()
     HUMAN = auto()
 
 

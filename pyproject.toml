@@ -84,6 +84,9 @@ cpu_all = [
     "levenshtein>=0.24.0",
     "gradio>=4.26.0",
 ]
+anthropic = [
+    "anthropic>=0.40.0",
+]
 
 [project.urls]
 Repository = "https://github.com/ScandEval/ScandEval"
@@ -185,3 +188,8 @@ testpaths = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+anthropic = [
+    "anthropic>=0.40.0",
+]

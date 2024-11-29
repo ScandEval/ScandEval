@@ -14,16 +14,16 @@ from tqdm import tqdm
 from transformers import GenerationConfig
 from transformers.utils import ModelOutput
 
-from .exceptions import NeedsExtraInstalled
-from .protocols import Tokenizer
-from .utils import clear_memory, get_end_of_chat_token_ids
+from ..exceptions import NeedsExtraInstalled
+from ..protocols import Tokenizer
+from ..utils import clear_memory, get_end_of_chat_token_ids
 
 if TYPE_CHECKING:
     from transformers import PretrainedConfig, PreTrainedTokenizerBase
     from vllm import LLM, RequestOutput
     from vllm.lora.request import LoRARequest
 
-    from .config import ModelConfig
+    from ..config import ModelConfig
 
 if importlib.util.find_spec("ray") is not None:
     import ray
@@ -55,7 +55,7 @@ class VLLMModel:
         tokenizer: "PreTrainedTokenizerBase | None" = None,
         adapter_base_model_id: str | None = None,
     ) -> None:
-        """Initialize a vLLM model.
+        """Initialise a vLLM model.
 
         Args:
             model_config:

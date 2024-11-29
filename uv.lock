@@ -160,6 +160,24 @@ wheels = [
 ]
 
 [[package]]
+name = "anthropic"
+version = "0.40.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "jiter" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4d/d9/c39005f04c602607d68d48d1c917b35af8d16b687b7ca427ca787c39d8b9/anthropic-0.40.0.tar.gz", hash = "sha256:3efeca6d9e97813f93ed34322c6c7ea2279bf0824cd0aa71b59ce222665e2b87", size = 190939 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/18/a68cfb9a11990377650c36c25b5dfb0baece900e9e505b68e1aa06ad0227/anthropic-0.40.0-py3-none-any.whl", hash = "sha256:442028ae8790ff9e3b6f8912043918755af1230d193904ae2ef78cc22995280c", size = 199484 },
+]
+
+[[package]]
 name = "anyio"
 version = "4.6.2.post1"
 source = { registry = "https://pypi.org/simple" }
@@ -3760,6 +3778,9 @@ all = [
     { name = "tiktoken" },
     { name = "vllm", marker = "platform_system == 'Linux'" },
 ]
+anthropic = [
+    { name = "anthropic" },
+]
 cpu-all = [
     { name = "bert-score" },
     { name = "demjson3" },
@@ -3799,6 +3820,9 @@ openai = [
 ]
 
 [package.dev-dependencies]
+anthropic = [
+    { name = "anthropic" },
+]
 dev = [
     { name = "click" },
     { name = "coverage" },
@@ -3822,6 +3846,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=0.34.2" },
+    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.40.0" },
     { name = "bert-score", marker = "extra == 'all'", specifier = ">=0.3.13" },
     { name = "bert-score", marker = "extra == 'cpu-all'", specifier = ">=0.3.13" },
     { name = "bert-score", marker = "extra == 'generative'", specifier = ">=0.3.13" },
@@ -3881,6 +3906,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+anthropic = [{ name = "anthropic", specifier = ">=0.40.0" }]
 dev = [
     { name = "click", specifier = ">=8.1.7" },
     { name = "coverage", specifier = ">=5.5" },

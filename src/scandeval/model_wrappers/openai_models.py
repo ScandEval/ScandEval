@@ -11,10 +11,10 @@ from torch.nn.utils.rnn import pad_sequence
 from transformers import BatchEncoding, GenerationConfig
 from transformers.modeling_utils import ModelOutput
 
-from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-from .exceptions import InvalidBenchmark, InvalidModel, NeedsExtraInstalled
-from .tasks import NER
-from .types import is_list_of_int, is_list_of_list_of_int
+from ..config import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..exceptions import InvalidBenchmark, InvalidModel, NeedsExtraInstalled
+from ..tasks import NER
+from ..types import is_list_of_int, is_list_of_list_of_int
 
 if TYPE_CHECKING:
     import tiktoken
@@ -55,7 +55,7 @@ class OpenAITokenizer:
     def __init__(
         self, model_config: ModelConfig, hf_model_config: "PretrainedConfig"
     ) -> None:
-        """Initialize the tokenizer.
+        """Initialise the tokenizer.
 
         Args:
             model_config:
@@ -333,7 +333,7 @@ class OpenAIModel:
         benchmark_config: BenchmarkConfig,
         tokenizer: OpenAITokenizer,
     ) -> None:
-        """Initialize the model.
+        """Initialise the model.
 
         Args:
             model_config:
@@ -356,12 +356,12 @@ class OpenAIModel:
         self.benchmark_config = benchmark_config
         self.tokenizer = tokenizer
         self.device = torch.device("cpu")
-        self.client = self._initialize_openai_client()
+        self.client = self._initialise_openai_client()
         self.is_chat_model = self._is_chat_model()
         self.supports_json_mode = self._supports_json_mode()
 
-    def _initialize_openai_client(self) -> "OpenAI | AzureOpenAI":
-        """Initialize and return the OpenAI client.
+    def _initialise_openai_client(self) -> "OpenAI | AzureOpenAI":
+        """Initialise and return the OpenAI client.
 
         Returns:
             The OpenAI client.
