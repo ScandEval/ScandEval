@@ -1,129 +1,37 @@
 """Class that benchmarks Scandinavian language models."""
 
-import importlib.metadata
 import json
 import logging
 import re
 import sys
+import typing as t
 from copy import deepcopy
 from pathlib import Path
 from shutil import rmtree
 from time import sleep
-from typing import TYPE_CHECKING
-
-from pydantic import BaseModel, ConfigDict
 
 from .benchmark_config_factory import build_benchmark_config
-from .config import BenchmarkConfig
+from .constants import GENERATIVE_MODEL_TASKS
+from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
-from .dataset_factory import DatasetFactory
+from .dataset_factory import build_benchmark_dataset
 from .enums import Device, Framework
 from .exceptions import InvalidBenchmark, InvalidModel
-from .types import ScoreDict
-from .utils import get_huggingface_model_lists
+from .finetuning import finetune
+from .generation import generate
+from .model_config import get_model_config
+from .model_loading import load_model
+from .scores import log_scores
+from .speed_benchmark import benchmark_speed
+from .tasks import SPEED
+from .utils import enforce_reproducibility
 
-if TYPE_CHECKING:
-    from .config import DatasetConfig, Language
-    from .protocols import GenerativeModel, Tokenizer
-
-
-logger = logging.getLogger(__package__)
-
-
-class BenchmarkConfigParams(BaseModel):
-    """The parameters for the benchmark configuration."""
-
-    model_config = ConfigDict(protected_namespaces=())
-
-    progress_bar: bool
-    save_results: bool
-    task: str | list[str] | None
-    dataset: str | list[str] | None
-    language: str | list[str]
-    model_language: str | list[str] | None
-    dataset_language: str | list[str] | None
-    framework: Framework | str | None
-    device: Device | None
-    batch_size: int
-    evaluate_train: bool
-    raise_errors: bool
-    cache_dir: str
-    token: bool | str
-    openai_api_key: str | None
-    prefer_azure: bool
-    azure_openai_api_key: str | None
-    azure_openai_endpoint: str | None
-    azure_openai_api_version: str | None
-    force: bool
-    verbose: bool
-    trust_remote_code: bool
-    load_in_4bit: bool | None
-    use_flash_attention: bool | None
-    clear_model_cache: bool
-    only_validation_split: bool
-    few_shot: bool
-    num_iterations: int
-    debug: bool
-    run_with_cli: bool
+if t.TYPE_CHECKING:
+    from .benchmark_modules import BenchmarkModule
+    from .data_models import BenchmarkConfig, DatasetConfig, ModelConfig
 
 
-class BenchmarkResult(BaseModel):
-    """A benchmark result."""
-
-    dataset: str
-    task: str
-    dataset_languages: list[str]
-    model: str
-    results: ScoreDict
-    num_model_parameters: int
-    max_sequence_length: int
-    vocabulary_size: int
-    generative: bool
-    few_shot: bool
-    validation_split: bool
-    scandeval_version: str = importlib.metadata.version(__package__)
-
-    @classmethod
-    def from_dict(cls, config: dict) -> "BenchmarkResult":
-        """Create a benchmark result from a dictionary.
-
-        Args:
-            config:
-                The configuration dictionary.
-
-        Returns:
-            The benchmark result.
-        """
-        # To be backwards compatible, we accept old results which changed the model
-        # name with parameters rather than adding them as explicit parameters
-        val_matches = re.search(r"\(.*val.*\)$", config["model"])
-        few_shot_matches = re.search(r"\(.*few-shot.*\)$", config["model"])
-        config["model"] = re.sub(
-            r"\(.*(few-shot|val).*\)$", "", config["model"]
-        ).strip()
-
-        # The default value for `few_shot` is True. It won't do anything if the model
-        # is not generative, so this is fine
-        if "generative" not in config:
-            config["generative"] = few_shot_matches is not None
-        if "few_shot" not in config:
-            config["few_shot"] = True
-
-        if "validation_split" not in config:
-            config["validation_split"] = val_matches is not None
-
-        return cls(**config)
-
-    def append_to_results(self, results_path: Path) -> None:
-        """Append the benchmark result to the results file.
-
-        Args:
-            results_path:
-                The path to the results file.
-        """
-        json_str = json.dumps(self.model_dump())
-        with results_path.open("a") as f:
-            f.write("\n" + json_str)
+logger = logging.getLogger("scandeval")
 
 
 class Benchmarker:
@@ -157,15 +65,9 @@ class Benchmarker:
         framework: Framework | str | None = None,
         device: Device | None = None,
         batch_size: int = 32,
-        evaluate_train: bool = False,
         raise_errors: bool = False,
         cache_dir: str = ".scandeval_cache",
-        token: bool | str = True,
-        openai_api_key: str | None = None,
-        prefer_azure: bool = False,
-        azure_openai_api_key: str | None = None,
-        azure_openai_endpoint: str | None = None,
-        azure_openai_api_version: str | None = None,
+        api_key: str | None = None,
         force: bool = False,
         verbose: bool = False,
         trust_remote_code: bool = False,
@@ -213,38 +115,13 @@ class Benchmarker:
                 The device to use for benchmarking. Defaults to None.
             batch_size:
                 The batch size to use. Defaults to 32.
-            evaluate_train:
-                Whether to evaluate the training set as well. Defaults to False.
             raise_errors:
                 Whether to raise errors instead of skipping the model evaluation.
                 Defaults to False.
             cache_dir:
                 Directory to store cached models. Defaults to '.scandeval_cache'.
-            token:
-                The authentication token for the Hugging Face Hub. If a boolean value
-                is specified then the token will be fetched from the Hugging Face CLI,
-                where the user has logged in through `huggingface-cli login`. If a
-                string is specified then it will be used as the token. Defaults to
-                True.
-            openai_api_key:
-                The OpenAI API key to use for authentication. If None, then this will
-                be loaded from the environment variable `OPENAI_API_KEY`. Defaults to
-                None.
-            prefer_azure:
-                In the case where both OpenAI and Azure OpenAI models are available,
-                whether to use the Azure OpenAI models. Defaults to False.
-            azure_openai_api_key:
-                The Azure OpenAI API key to use for authentication. If None, then this
-                will be loaded from the environment variable `AZURE_OPENAI_API_KEY`.
-                Defaults to None.
-            azure_openai_endpoint:
-                The Azure OpenAI endpoint to use for authentication. If None, then this
-                will be loaded from the environment variable `AZURE_OPENAI_ENDPOINT`.
-                Defaults to None.
-            azure_openai_api_version:
-                The Azure OpenAI API version to use for authentication. If None, then this
-                will be loaded from the environment variable `AZURE_OPENAI_API_VERSION`.
-                Defaults to None.
+            api_key:
+                The API key to use for a given inference API.
             force:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to False.
@@ -296,15 +173,9 @@ class Benchmarker:
             framework=framework,
             device=device,
             batch_size=batch_size,
-            evaluate_train=evaluate_train,
             raise_errors=raise_errors,
             cache_dir=cache_dir,
-            token=token,
-            openai_api_key=openai_api_key,
-            prefer_azure=prefer_azure,
-            azure_openai_api_key=azure_openai_api_key,
-            azure_openai_endpoint=azure_openai_endpoint,
-            azure_openai_api_version=azure_openai_api_version,
+            api_key=api_key,
             force=force,
             verbose=verbose,
             trust_remote_code=trust_remote_code,
@@ -325,9 +196,7 @@ class Benchmarker:
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: dict[str, list[str]] | None = None
 
-        # Set up the results path
         self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
-
         adjust_logging_level(verbose=self.benchmark_config.verbose)
 
     @property
@@ -345,7 +214,7 @@ class Benchmarker:
 
     def benchmark(
         self,
-        model: list[str] | str | None = None,
+        model: list[str] | str,
         task: str | list[str] | None = None,
         dataset: list[str] | str | None = None,
         progress_bar: bool | None = None,
@@ -356,14 +225,9 @@ class Benchmarker:
         framework: Framework | str | None = None,
         device: Device | None = None,
         batch_size: int | None = None,
-        evaluate_train: bool | None = None,
         raise_errors: bool | None = None,
         cache_dir: str | None = None,
-        token: bool | str | None = None,
-        openai_api_key: str | None = None,
-        azure_openai_api_key: str | None = None,
-        azure_openai_endpoint: str | None = None,
-        azure_openai_api_version: str | None = None,
+        api_key: str | None = None,
         force: bool | None = None,
         verbose: bool | None = None,
         trust_remote_code: bool | None = None,
@@ -381,8 +245,7 @@ class Benchmarker:
                 The full Hugging Face Hub path(s) to the pretrained transformer model.
                 The specific model version to use can be added after the suffix '@':
                 "model@v1.0.0". It can be a branch name, a tag name, or a commit id,
-                and defaults to the latest version if not specified. If None then all
-                relevant model IDs will be benchmarked. Defaults to None.
+                and defaults to the latest version if not specified.
             task:
                 The tasks benchmark the model(s) on. Mutually exclusive with `dataset`.
                 If both `task` and `dataset` are None then all datasets will be
@@ -422,36 +285,14 @@ class Benchmarker:
             batch_size:
                 The batch size to use. Defaults to the value specified when initialising
                 the benchmarker.
-            evaluate_train:
-                Whether to evaluate the training set as well. Defaults to the value
-                specified when initialising the benchmarker.
             raise_errors:
                 Whether to raise errors instead of skipping the model evaluation.
             cache_dir:
                 Directory to store cached models. Defaults to the value specified when
                 initialising the benchmarker.
-            token:
-                The authentication token for the Hugging Face Hub. If a boolean value is
-                specified then the token will be fetched from the Hugging Face CLI, where
-                the user has logged in through `huggingface-cli login`. If a string is
-                specified then it will be used as the token. Defaults to the value
+            api_key:
+                The API key to use for a given inference server. Defaults to the value
                 specified when initialising the benchmarker.
-            openai_api_key:
-                The OpenAI API key to use for authentication. If None, then this will be
-                loaded from the environment variable `OPENAI_API_KEY`. Defaults to the
-                value specified when initialising the benchmarker.
-            azure_openai_api_key:
-                The Azure OpenAI API key to use for authentication. If None, then this
-                will be loaded from the environment variable `AZURE_OPENAI_API_KEY`.
-                Defaults to the value specified when initialising the benchmarker.
-            azure_openai_endpoint:
-                The Azure OpenAI endpoint to use for authentication. If None, then this
-                will be loaded from the environment variable `AZURE_OPENAI_ENDPOINT`.
-                Defaults to the value specified when initialising the benchmarker.
-            azure_openai_api_version:
-                The api version for the Azure OpenAI API, e.g. "2023-12-01-preview". If
-                None then the environment varaible `AZURE_OPENAI_API_VERSION` will be used.
-                Defaults to the value specified when initialising the benchmarker.
             force:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to the value specified when initialising
@@ -495,86 +336,50 @@ class Benchmarker:
         if task is not None and dataset is not None:
             raise ValueError("Only one of `task` and `dataset` can be specified.")
 
-        benchmark_config_params = deepcopy(self.benchmark_config_default_params)
-        if task is not None:
-            benchmark_config_params.task = task
-            benchmark_config_params.dataset = None
-        if dataset is not None:
-            benchmark_config_params.dataset = dataset
-            benchmark_config_params.task = None
-        if progress_bar is not None:
-            benchmark_config_params.progress_bar = progress_bar
-        if save_results is not None:
-            benchmark_config_params.save_results = save_results
-        if language is not None:
-            benchmark_config_params.language = language
-        if model_language is not None:
-            benchmark_config_params.model_language = model_language
-        if dataset_language is not None:
-            benchmark_config_params.dataset_language = dataset_language
-        if framework is not None:
-            benchmark_config_params.framework = framework
-        if device is not None:
-            benchmark_config_params.device = device
-        if batch_size is not None:
-            benchmark_config_params.batch_size = batch_size
-        if evaluate_train is not None:
-            benchmark_config_params.evaluate_train = evaluate_train
-        if raise_errors is not None:
-            benchmark_config_params.raise_errors = raise_errors
-        if cache_dir is not None:
-            benchmark_config_params.cache_dir = cache_dir
-        if token is not None:
-            benchmark_config_params.token = token
-        if openai_api_key is not None:
-            benchmark_config_params.openai_api_key = openai_api_key
-        if azure_openai_api_key is not None:
-            benchmark_config_params.azure_openai_api_key = azure_openai_api_key
-        if azure_openai_endpoint is not None:
-            benchmark_config_params.azure_openai_endpoint = azure_openai_endpoint
-        if azure_openai_api_version is not None:
-            benchmark_config_params.azure_openai_api_version = azure_openai_api_version
-        if force is not None:
-            benchmark_config_params.force = force
-        if verbose is not None:
-            benchmark_config_params.verbose = verbose
-        if trust_remote_code is not None:
-            benchmark_config_params.trust_remote_code = trust_remote_code
-        if load_in_4bit is not None:
-            benchmark_config_params.load_in_4bit = load_in_4bit
-        if use_flash_attention is not None:
-            benchmark_config_params.use_flash_attention = use_flash_attention
-        if clear_model_cache is not None:
-            benchmark_config_params.clear_model_cache = clear_model_cache
-        if only_validation_split is not None:
-            benchmark_config_params.only_validation_split = only_validation_split
-        if few_shot is not None:
-            benchmark_config_params.few_shot = few_shot
-        if num_iterations is not None:
-            benchmark_config_params.num_iterations = num_iterations
-
-        benchmark_config = build_benchmark_config(
-            **benchmark_config_params.model_dump()
+        benchmark_config = self._get_updated_benchmark_config(
+            task=task,
+            dataset=dataset,
+            progress_bar=progress_bar,
+            save_results=save_results,
+            language=language,
+            model_language=model_language,
+            dataset_language=dataset_language,
+            framework=framework,
+            device=device,
+            batch_size=batch_size,
+            raise_errors=raise_errors,
+            cache_dir=cache_dir,
+            api_key=api_key,
+            force=force,
+            verbose=verbose,
+            trust_remote_code=trust_remote_code,
+            load_in_4bit=load_in_4bit,
+            use_flash_attention=use_flash_attention,
+            clear_model_cache=clear_model_cache,
+            only_validation_split=only_validation_split,
+            few_shot=few_shot,
+            num_iterations=num_iterations,
         )
+
         adjust_logging_level(verbose=benchmark_config.verbose)
 
         if benchmark_config.clear_model_cache:
             clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
 
-        model_ids = self._prepare_model_ids(
-            model=model,
-            model_languages=benchmark_config.model_languages,
-            token=benchmark_config.token,
-        )
+        model_ids = self._prepare_model_ids(model_id=model)
         dataset_configs = prepare_dataset_configs(
             dataset_names=benchmark_config.datasets
         )
 
         current_benchmark_results: list[BenchmarkResult] = list()
         for m_id in model_ids:
-            m_id = m_id.rstrip(" /")
-            loaded_model = None
-            loaded_tokenizer = None
+            try:
+                model_config = get_model_config(
+                    model_id=m_id, benchmark_config=benchmark_config
+                )
+            except InvalidModel as e:
+                logger.info(e.message)
+                continue
 
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
@@ -593,78 +398,72 @@ class Benchmarker:
                     continue
 
                 # Benchmark a single model on a single dataset
-                try:
-                    benchmark_output = self._benchmark_single(
-                        dataset_config=dataset_config,
-                        model_id=m_id,
-                        raise_errors=benchmark_config.raise_errors,
-                        model=loaded_model,
-                        tokenizer=loaded_tokenizer,
-                        benchmark_config=benchmark_config,
-                    )
-                except InvalidModel as e:
-                    if benchmark_config.raise_errors:
-                        raise e
-                    logger.info(e)
-                    break
+                benchmark_output_or_err = self._benchmark_single(
+                    model_config=model_config,
+                    dataset_config=dataset_config,
+                    benchmark_config=benchmark_config,
+                )
 
-                # If the benchmark was unsuccessful then skip
-                if isinstance(benchmark_output, dict) and "error" in benchmark_output:
-                    error_msg = benchmark_output["error"]
+                if (
+                    isinstance(benchmark_output_or_err, Exception)
+                    and benchmark_config.raise_errors
+                ):
+                    raise benchmark_output_or_err
+
+                elif isinstance(benchmark_output_or_err, InvalidBenchmark):
                     logger.info(
                         f"{m_id} could not be benchmarked on "
                         f"{dataset_config.pretty_name}. Skipping. The error message "
-                        f"raised was {error_msg!r}."
+                        f"raised was {benchmark_output_or_err.message!r}."
                     )
                     continue
 
-                assert isinstance(benchmark_output, tuple)
-                record, loaded_model, loaded_tokenizer = benchmark_output
+                elif isinstance(benchmark_output_or_err, InvalidModel):
+                    logger.info(benchmark_output_or_err.message)
+                    break
 
-                # Save the benchmark results
-                assert isinstance(record, BenchmarkResult)
-                current_benchmark_results.append(record)
-                if benchmark_config.save_results:
-                    record.append_to_results(results_path=self.results_path)
+                else:
+                    record = benchmark_output_or_err
+                    current_benchmark_results.append(record)
+                    if benchmark_config.save_results:
+                        record.append_to_results(results_path=self.results_path)
 
             if benchmark_config.clear_model_cache:
                 clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
 
         return current_benchmark_results
 
-    def _prepare_model_ids(
-        self,
-        model: list[str] | str | None,
-        model_languages: list["Language"],
-        token: bool | str | None,
-    ) -> list[str]:
+    def _get_updated_benchmark_config(self, **kwargs) -> "BenchmarkConfig":
+        """Get an updated benchmark configuration.
+
+        Args:
+            **kwargs:
+                The new parameters for the benchmark configuration.
+
+        Returns:
+            The updated benchmark configuration.
+        """
+        benchmark_config_params = deepcopy(self.benchmark_config_default_params)
+        for key, value in kwargs.items():
+            if value is not None and hasattr(benchmark_config_params, key):
+                setattr(benchmark_config_params, key, value)
+                if key == "task":
+                    benchmark_config_params.dataset = None
+                elif key == "dataset":
+                    benchmark_config_params.task = None
+        return build_benchmark_config(**benchmark_config_params.model_dump())
+
+    def _prepare_model_ids(self, model_id: list[str] | str) -> list[str]:
         """Prepare the model ID(s) to be benchmarked.
 
         Args:
-            model:
-                The model ID(s) of the models to benchmark. If None then all model IDs
-                will be retrieved.
-            model_languages:
-                The languages of the models to fetch.
-            token:
-                The authentication token for the Hugging Face Hub.
+            model_id:
+                The model ID(s) of the models to benchmark.
 
         Returns:
             The prepared list of model IDs.
         """
-        model_ids: list[str]
-
-        # If `model_id` is not specified, then fetch all the relevant model IDs
-        if model is None:
-            model_ids = self._get_model_ids(languages=model_languages, token=token)
-
-        # Otherwise, if `model_id` is a string, ensure that it is a list
-        elif isinstance(model, str):
-            model_ids = [model]
-
-        # Otherwise `model_id` is already a list, so we do nothing
-        else:
-            model_ids = model
+        model_ids = [model_id] if isinstance(model_id, str) else model_id
 
         # Reorder the `model_ids` list to include the ones present in the benchmark
         # results first
@@ -677,40 +476,31 @@ class Benchmarker:
             m_id for m_id in model_ids if m_id not in benchmarked_model_ids
         ]
 
-        return model_ids_sorted
+        return [m_id.rstrip(" /") for m_id in model_ids_sorted]
 
     def _benchmark_single(
         self,
+        model_config: "ModelConfig",
         dataset_config: "DatasetConfig",
-        model_id: str,
-        raise_errors: bool,
-        model: "GenerativeModel | None",
-        tokenizer: "Tokenizer | None",
-        benchmark_config: BenchmarkConfig,
-    ) -> (
-        tuple[BenchmarkResult, "GenerativeModel | None", "Tokenizer | None"]
-        | dict[str, str]
-    ):
+        benchmark_config: "BenchmarkConfig",
+    ) -> BenchmarkResult | InvalidBenchmark | InvalidModel:
         """Benchmark a single model on a single dataset.
 
         Args:
+            model_config:
+                The configuration of the model we are evaluating.
             dataset_config:
-                The dataset configuration to use.
-            model_id:
-                The model ID to use.
-            raise_errors:
-                Whether to raise errors instead of skipping the model evaluation.
-            model:
-                The pre-loaded model, if available.
-            tokenizer:
-                The pre-loaded tokenizer, if available.
+                The configuration of the dataset we are evaluating on.
             benchmark_config:
-                The benchmark configuration.
+                The general benchmark configuration.
 
         Returns:
-            The benchmark result, or a dictionary containing an error message.
+            The benchmark result, or an error if the benchmark was unsuccessful.
         """
-        logger.info(f"Benchmarking {model_id} on {dataset_config.pretty_name}")
+        # Initial logging
+        logger.info(
+            f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}"
+        )
         if dataset_config.unofficial:
             logger.info(
                 f"Note that the {dataset_config.name!r} dataset is unofficial, "
@@ -724,35 +514,110 @@ class Benchmarker:
                 "batch. For this reason, evaluation will be slower."
             )
 
+        benchmark_dataset = build_benchmark_dataset(
+            dataset=dataset_config, benchmark_config=benchmark_config
+        )
+
+        model: BenchmarkModule | None = None
         while True:
             try:
-                dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
-                dataset = dataset_factory.build_dataset(dataset_config)
-                results, metadata_dict, model, tokenizer = dataset(
-                    model_id=model_id, model=model, tokenizer=tokenizer
+                model_config = get_model_config(
+                    model_id=model_config.model_id,
+                    benchmark_config=self.benchmark_config,
                 )
+
+                # Set random seeds to enforce reproducibility of the randomly
+                # initialised weights
+                rng = enforce_reproducibility(framework=model_config.framework)
+
+                if model is None or not model.is_generative:
+                    logger.info("Loading model...")
+                    model = load_model(
+                        model_config=model_config,
+                        dataset_config=dataset_config,
+                        benchmark_config=benchmark_config,
+                    )
+                assert model is not None
+
+                # This happens when a local model is used, as we cannot fetch the model
+                # metadata. Note that this is only the case if the model type is not any
+                # of the ones hardcoded in `local.py`
+                if model_config.task == "unknown":
+                    if model.is_generative:
+                        model_config.task = GENERATIVE_MODEL_TASKS[0]
+                    else:
+                        model_config.task = "fill-mask"
+
+                if dataset_config.task == SPEED:
+                    scores = benchmark_speed(
+                        model=model, benchmark_config=self.benchmark_config
+                    )
+
+                else:
+                    bootstrapped_datasets = benchmark_dataset.load_data(rng=rng)
+                    prepared_datasets = model.prepare_datasets(
+                        datasets=bootstrapped_datasets, task=dataset_config.task
+                    )
+                    if model.is_generative:
+                        scores = generate(
+                            model=model,
+                            datasets=prepared_datasets,
+                            compute_metrics=benchmark_dataset.compute_metrics,
+                            extract_labels_fn=(
+                                benchmark_dataset.extract_labels_from_generation
+                            ),
+                            model_config=model_config,
+                            dataset_config=dataset_config,
+                            benchmark_config=self.benchmark_config,
+                        )
+                    else:
+                        scores = finetune(
+                            model=model,
+                            datasets=prepared_datasets,
+                            compute_metrics=benchmark_dataset.compute_metrics,
+                            trainer_class=benchmark_dataset.trainer_class,
+                            data_collator=benchmark_dataset.get_data_collator(
+                                model=model
+                            ),
+                            model_config=model_config,
+                            dataset_config=dataset_config,
+                            benchmark_config=benchmark_config,
+                        )
+
+                results = log_scores(
+                    dataset_name=dataset_config.pretty_name,
+                    metric_configs=dataset_config.task.metrics,
+                    scores=scores,
+                    model_id=model_config.model_id,
+                )
+
                 record = BenchmarkResult(
                     dataset=dataset_config.name,
                     task=dataset_config.task.name,
                     dataset_languages=[
                         language.code for language in dataset_config.languages
                     ],
-                    model=model_id,
+                    model=model_config.model_id,
                     results=results,
-                    **metadata_dict,
+                    num_model_parameters=model.num_params,
+                    max_sequence_length=model.model_max_length,
+                    vocabulary_size=model.vocab_size,
+                    generative=model.is_generative,
+                    few_shot=benchmark_config.few_shot,
+                    validation_split=benchmark_config.only_validation_split,
                 )
                 logger.debug(f"Results:\n{results}")
-                return record, model, tokenizer
+                return record
 
             except InvalidBenchmark as e:
-                # If the model ID is not valid then raise an error, if specified
+                # If the model ID is not valid then raise an error
                 model_err_msg = "does not exist on the Hugging Face Hub"
-                if raise_errors and model_err_msg in str(e):
+                if benchmark_config.raise_errors and model_err_msg in str(e):
                     raise e
 
                 # Otherwise, if the error is due to Hugging Face Hub being down, then
                 # wait a bit and try again
-                if "The Hugging Face Hub seems to be down." in str(e):
+                elif "The Hugging Face Hub seems to be down." in str(e):
                     wait_time = 30
                     logger.debug(
                         "The Hugging Face Hub seems to be down. Retrying in "
@@ -772,54 +637,13 @@ class Benchmarker:
 
                 # Otherwise, raise the error or return the error message
                 else:
-                    if raise_errors:
+                    if benchmark_config.raise_errors:
                         raise e
-                    return dict(error=str(e))
+                    return e
 
     def __call__(self, *args, **kwargs) -> list[BenchmarkResult]:
         """Call the benchmarker. See `Benchmarker.benchmark`."""
         return self.benchmark(*args, **kwargs)
-
-    def _get_model_ids(
-        self, languages: list["Language"], token: bool | str | None
-    ) -> list[str]:
-        """Get list of model IDs from the Hugging Face Hub.
-
-        Args:
-            languages:
-                The languages of the models to fetch.
-            token:
-                The authentication token for the Hugging Face Hub.
-
-        Returns:
-            List of model IDs.
-        """
-        # Specify boolean variables determining whether the input variables are new
-        new_languages = self._model_lists is not None and any(
-            lang.code not in self._model_lists for lang in languages
-        )
-
-        # If the model lists have not been fetched already, then do it
-        if self._model_lists is None or new_languages:
-            self._model_lists = get_huggingface_model_lists(
-                languages=languages, token=token
-            )
-
-        # Extract all the model IDs from the model lists, for the chosen languages
-        model_ids: list[str] = list()
-        for language in languages:
-            model_ids.extend(self._model_lists[language.code])
-
-        # Add the multilingual models
-        model_ids.extend(self._model_lists["multilingual"])
-
-        # Add the fresh models
-        model_ids.extend(self._model_lists["fresh"])
-
-        # Remove duplicate model IDs
-        model_ids = list(set(model_ids))
-
-        return model_ids
 
 
 def model_has_been_benchmarked(

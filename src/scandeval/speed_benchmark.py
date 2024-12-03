@@ -1,152 +1,100 @@
 """Benchmarking model inference speed."""
 
+import collections.abc as c
 import logging
-from collections import defaultdict
-from typing import TYPE_CHECKING
+import typing as t
 
 import pyinfer
-import torch
 from tqdm.auto import tqdm
-from transformers.modeling_utils import GenerationConfig, PreTrainedModel
+from transformers import AutoTokenizer
 
+from .benchmark_modules import (
+    BenchmarkModule,
+    HuggingFaceEncoderModel,
+    LiteLLMModel,
+    VLLMModel,
+)
+from .data_models import BenchmarkConfig
 from .exceptions import InvalidBenchmark
-from .model_loading import load_model
-from .utils import clear_memory, model_is_generative
+from .utils import clear_memory
 
-if TYPE_CHECKING:
-    from transformers.tokenization_utils import PreTrainedTokenizer
-
-    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-    from .protocols import GenerativeModel, Tokenizer
-
-
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("scandeval")
 
 
 def benchmark_speed(
-    itr: tqdm,
-    tokenizer: "PreTrainedTokenizer",
-    model: PreTrainedModel,
-    model_config: "ModelConfig",
-    dataset_config: "DatasetConfig",
-    benchmark_config: "BenchmarkConfig",
-) -> dict[str, list[dict[str, float]]]:
+    model: "BenchmarkModule", benchmark_config: "BenchmarkConfig"
+) -> list[dict[str, float]]:
     """Benchmark model inference speed.
 
     Args:
-        itr:
-            tqdm iterator.
-        tokenizer:
-            Tokenizer to use.
         model:
             Model to use.
-        model_config:
-            Model configuration.
-        dataset_config:
-            Dataset configuration.
         benchmark_config:
-            Benchmark configuration.
+            Configuration for the benchmark.
 
     Returns:
         Dictionary of scores.
     """
-    scores: dict[str, list[dict[str, float]]] = defaultdict(list)
-
-    for itr_idx in itr:
-        itr_scores = benchmark_speed_single_iteration(
-            tokenizer=tokenizer,
-            model=model,
-            itr_idx=itr_idx,
-            model_config=model_config,
-            dataset_config=dataset_config,
-            benchmark_config=benchmark_config,
-        )
+    scores: list[dict[str, float]] = list()
+    for idx in tqdm(
+        iterable=range(benchmark_config.num_iterations),
+        desc="Benchmarking",
+        disable=not benchmark_config.progress_bar,
+    ):
+        itr_scores = benchmark_speed_single_iteration(model=model, itr_idx=idx)
         clear_memory()
-
-        if isinstance(itr_scores, Exception):
-            raise InvalidBenchmark(f"Speed benchmark failed with error: {itr_scores!r}")
-        else:
-            scores["test"].append(itr_scores["test"])
-            if benchmark_config.evaluate_train:
-                scores["train"].append(itr_scores["train"])
-            logger.debug(f"Scores for iteration {itr_idx}: {itr_scores}")
-
+        scores.append(itr_scores)
+        logger.debug(f"Scores for iteration {idx}: {itr_scores}")
     return scores
 
 
 def benchmark_speed_single_iteration(
-    tokenizer: "Tokenizer",
-    model: "PreTrainedModel | GenerativeModel",
-    itr_idx: int,
-    model_config: "ModelConfig",
-    dataset_config: "DatasetConfig",
-    benchmark_config: "BenchmarkConfig",
-) -> dict[str, dict[str, float]] | Exception:
+    model: "BenchmarkModule", itr_idx: int
+) -> dict[str, float]:
     """Run a single iteration of the speed benchmark.
 
     Args:
-        tokenizer:
-            The tokenizer to use in the benchmark.
         model:
             The model to use in the benchmark.
         itr_idx:
             The index of the iteration.
-        model_config:
-            The model configuration.
-        dataset_config:
-            The dataset configuration.
-        benchmark_config:
-            The benchmark configuration.
 
     Returns:
-        A dictionary containing the scores for the current iteration, with keys `train`
-        and `test`. If an exception is raised, then the exception is returned.
+        A dictionary containing the scores for the current iteration.
     """
-    is_generative = model_is_generative(model=model)
+    gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2")
 
-    scores: dict[str, dict[str, float]] = dict()
+    base_doc = "Document which contains roughly 10 tokens. "
+    multiplier = 10 * (1 + itr_idx)
+    doc = base_doc * multiplier
+    short_multiplier = 1.25 * (1 + itr_idx)
+    short_doc = base_doc * round(short_multiplier)
+
+    def generate_messages_predict(doc: str) -> None:
+        model.generate(inputs=dict(messages=[[dict(role="user", content=doc)]]))
+
+    def generate_prompt_predict(doc: str) -> None:
+        model.generate(inputs=dict(prompt=[doc]))
+
+    def encoder_predict(doc: str) -> None:
+        tokenizer = model.get_tokenizer()
+        pytorch_model = model.get_pytorch_module()
+        inputs = {
+            key: tensor.to(pytorch_model.device)
+            for key, tensor in tokenizer(
+                text=[doc], truncation=True, return_tensors="pt"
+            ).items()
+        }
+        pytorch_model(**inputs)
+
+    predict_fn_mapping: dict[t.Type[BenchmarkModule], c.Callable[[str], None]] = {
+        HuggingFaceEncoderModel: encoder_predict,
+        LiteLLMModel: generate_messages_predict,
+        VLLMModel: generate_prompt_predict,
+    }
+    predict = predict_fn_mapping[type(model)]
+
     try:
-        # Reinitialise a new model
-        if tokenizer is None or model is None:
-            model, tokenizer = load_model(
-                model_config=model_config,
-                dataset_config=dataset_config,
-                benchmark_config=benchmark_config,
-            )
-
-        def predict(doc: str) -> None:
-            """Function used to benchmark inference speed of the model."""
-            # Raise an error if the tokenizer or model is undefined
-            if tokenizer is None or model is None:
-                raise ValueError("Tokenizer and model must not be None.")
-
-            # Tokenize the document
-            inputs = tokenizer(doc, padding=True, truncation=True, return_tensors="pt")
-
-            inputs = {name: tensor.to(model.device) for name, tensor in inputs.items()}
-
-            # Run inference with the model
-            with torch.inference_mode():
-                if is_generative:
-                    model.generate(
-                        inputs=inputs["input_ids"],
-                        generation_config=GenerationConfig(
-                            max_new_tokens=1,
-                            pad_token_id=model.config.pad_token_id,
-                            eos_token_id=model.config.eos_token_id,
-                            do_sample=False,
-                        ),
-                    )
-                else:
-                    assert isinstance(model, PreTrainedModel)
-                    model(**inputs)
-
-        base_doc = "Document which contains roughly 10 tokens. "
-        multiplier = 10 * (1 + itr_idx)
-        doc = base_doc * multiplier
-        short_multiplier = 1.25 * (1 + itr_idx)
-        short_doc = base_doc * round(short_multiplier)
-
         # Do a warmup run, as the first run is always slower
         pyinfer.InferenceReport(model=predict, inputs=base_doc, n_seconds=1).run(
             print_report=False
@@ -155,25 +103,22 @@ def benchmark_speed_single_iteration(
         speed_scores = pyinfer.InferenceReport(
             model=predict, inputs=doc, n_seconds=3
         ).run(print_report=False)
-        num_tokens = len(tokenizer([doc], truncation=True)["input_ids"][0])
-        tokens_per_second = speed_scores["Infer(p/sec)"] * num_tokens
+        num_gpt2_tokens = len(gpt2_tokenizer([doc], truncation=True)["input_ids"][0])
+        gpt2_tokens_per_second = speed_scores["Infer(p/sec)"] * num_gpt2_tokens
 
         speed_scores_short = pyinfer.InferenceReport(
             model=predict, inputs=short_doc, n_seconds=3
         ).run(print_report=False)
-        num_tokens_short = len(tokenizer([short_doc], truncation=True)["input_ids"][0])
-        tokens_per_second_short = speed_scores_short["Infer(p/sec)"] * num_tokens_short
-
-        scores["test"] = dict(
-            test_speed=tokens_per_second, test_speed_short=tokens_per_second_short
+        num_gpt2_tokens_short = len(
+            gpt2_tokenizer([short_doc], truncation=True)["input_ids"][0]
         )
-        if benchmark_config.evaluate_train:
-            scores["train"] = dict(
-                train_speed=tokens_per_second, train_speed_short=tokens_per_second_short
-            )
-
-        # Return the scores
-        return scores
+        gpt2_tokens_per_second_short = (
+            speed_scores_short["Infer(p/sec)"] * num_gpt2_tokens_short
+        )
 
     except (RuntimeError, ValueError, IndexError) as e:
-        return e
+        raise InvalidBenchmark(f"Speed benchmark failed with error: {e!r}")
+
+    return dict(
+        test_speed=gpt2_tokens_per_second, test_speed_short=gpt2_tokens_per_second_short
+    )

@@ -29,6 +29,9 @@ dependencies = [
     "sentencepiece>=0.1.96",
     "protobuf~=3.20.0",
     "sacremoses>=0.1.1",
+    "more-itertools>=10.5.0",
+    "litellm>=1.53.1",
+    "tenacity>=9.0.0",
 ]
 
 [project.optional-dependencies]
@@ -48,7 +51,6 @@ generative = [
 openai = [
     "rouge-score>=0.1.2",
     "bert-score>=0.3.13",
-    "openai>=1.51.2",
     "tiktoken>=0.7.0",
     "levenshtein>=0.24.0",
 ]
@@ -83,9 +85,6 @@ cpu_all = [
     "tiktoken>=0.7.0",
     "levenshtein>=0.24.0",
     "gradio>=4.26.0",
-]
-anthropic = [
-    "anthropic>=0.40.0",
 ]
 
 [project.urls]
@@ -188,8 +187,3 @@ testpaths = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[dependency-groups]
-anthropic = [
-    "anthropic>=0.40.0",
-]

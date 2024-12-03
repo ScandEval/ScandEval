@@ -160,24 +160,6 @@ wheels = [
 ]
 
 [[package]]
-name = "anthropic"
-version = "0.40.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anyio" },
-    { name = "distro" },
-    { name = "httpx" },
-    { name = "jiter" },
-    { name = "pydantic" },
-    { name = "sniffio" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4d/d9/c39005f04c602607d68d48d1c917b35af8d16b687b7ca427ca787c39d8b9/anthropic-0.40.0.tar.gz", hash = "sha256:3efeca6d9e97813f93ed34322c6c7ea2279bf0824cd0aa71b59ce222665e2b87", size = 190939 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/18/a68cfb9a11990377650c36c25b5dfb0baece900e9e505b68e1aa06ad0227/anthropic-0.40.0-py3-none-any.whl", hash = "sha256:442028ae8790ff9e3b6f8912043918755af1230d193904ae2ef78cc22995280c", size = 199484 },
-]
-
-[[package]]
 name = "anyio"
 version = "4.6.2.post1"
 source = { registry = "https://pypi.org/simple" }
@@ -1131,7 +1113,7 @@ name = "importlib-metadata"
 version = "8.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp", marker = "platform_system != 'Darwin'" },
+    { name = "zipp" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/cd/12/33e59336dca5be0c398a7482335911a33aa0e20776128f038019f1a95f1b/importlib_metadata-8.5.0.tar.gz", hash = "sha256:71522656f0abace1d072b9e5481a48f07c138e00f079c38c8f883823f9c26bd7", size = 55304 }
 wheels = [
@@ -1495,6 +1477,28 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/94/65/28fb5c59871a673f93e72c00c33c43bcc27eff6f9be5e515252e6da28a7f/levenshtein-0.26.1-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:07227281e12071168e6ae59238918a56d2a0682e529f747b5431664f302c0b42", size = 160411 },
     { url = "https://files.pythonhosted.org/packages/4c/c7/b8fe968f92ed672cd346d38f4077586eb7ff63bade2e8d7c93a9259573c4/levenshtein-0.26.1-pp310-pypy310_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:8191241cd8934feaf4d05d0cc0e5e72877cbb17c53bbf8c92af9f1aedaa247e9", size = 247483 },
     { url = "https://files.pythonhosted.org/packages/f3/98/c119974fdce4808afdf3622230759c871bc4c73287cf34b338db2be936b8/levenshtein-0.26.1-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:9e70d7ee157a9b698c73014f6e2b160830e7d2d64d2e342fefc3079af3c356fc", size = 95854 },
+]
+
+[[package]]
+name = "litellm"
+version = "1.53.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "click" },
+    { name = "importlib-metadata" },
+    { name = "jinja2" },
+    { name = "jsonschema" },
+    { name = "openai" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "requests" },
+    { name = "tiktoken" },
+    { name = "tokenizers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/70/fc/fb491dc60307cd1a8826050fbdeeef84e560000a3a2593430887f0b44598/litellm-1.53.1.tar.gz", hash = "sha256:20bb2f98a4613c4c7b86e9186df84c27d7166eca65a7b58584c1e061a29f7519", size = 6170999 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/a6/8a3b430d89b9935ef6d1e88e565f631038d3124788e6effa3c0c9ad4756e/litellm-1.53.1-py3-none-any.whl", hash = "sha256:7a0b480c0bd4f9236910a426d8d8f46a517af4daae2a61d57e42bff4b4daf9b0", size = 6418676 },
 ]
 
 [[package]]
@@ -1940,6 +1944,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ed/c6/358d85e274e22d53def0c85f3cbe0933475fa3cf6922e9dca66eb25cb22f/ml_dtypes-0.5.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e04fde367b2fe901b1d47234426fe8819909bd1dd862a5adb630f27789c20599", size = 4424962 },
     { url = "https://files.pythonhosted.org/packages/4c/b4/d766586e24e7a073333c8eb8bd9275f3c6fe0569b509ae7b1699d4f00c74/ml_dtypes-0.5.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:54415257f00eb44fbcc807454efac3356f75644f1cbfc2d4e5522a72ae1dacab", size = 4475201 },
     { url = "https://files.pythonhosted.org/packages/14/87/30323ad2e52f56262019a4493fe5f5e71067c5561ce7e2f9c75de520f5e8/ml_dtypes-0.5.0-cp313-cp313-win_amd64.whl", hash = "sha256:cb5cc7b25acabd384f75bbd78892d0c724943f3e2e1986254665a1aa10982e07", size = 213195 },
+]
+
+[[package]]
+name = "more-itertools"
+version = "10.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/51/78/65922308c4248e0eb08ebcbe67c95d48615cc6f27854b6f2e57143e9178f/more-itertools-10.5.0.tar.gz", hash = "sha256:5482bfef7849c25dc3c6dd53a6173ae4795da2a41a80faea6700d9f5846c5da6", size = 121020 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/7e/3a64597054a70f7c86eb0a7d4fc315b8c1ab932f64883a297bdffeb5f967/more_itertools-10.5.0-py3-none-any.whl", hash = "sha256:037b0d3203ce90cca8ab1defbbdac29d5f993fc20131f3664dc8d6acfa872aef", size = 60952 },
 ]
 
 [[package]]
@@ -3748,6 +3761,8 @@ dependencies = [
     { name = "datasets" },
     { name = "evaluate" },
     { name = "huggingface-hub" },
+    { name = "litellm" },
+    { name = "more-itertools" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "protobuf" },
@@ -3757,6 +3772,7 @@ dependencies = [
     { name = "sacremoses" },
     { name = "sentencepiece" },
     { name = "seqeval" },
+    { name = "tenacity" },
     { name = "termcolor" },
     { name = "torch" },
     { name = "transformers" },
@@ -3777,9 +3793,6 @@ all = [
     { name = "rouge-score" },
     { name = "tiktoken" },
     { name = "vllm", marker = "platform_system == 'Linux'" },
-]
-anthropic = [
-    { name = "anthropic" },
 ]
 cpu-all = [
     { name = "bert-score" },
@@ -3814,15 +3827,11 @@ jax = [
 openai = [
     { name = "bert-score" },
     { name = "levenshtein" },
-    { name = "openai" },
     { name = "rouge-score" },
     { name = "tiktoken" },
 ]
 
 [package.dev-dependencies]
-anthropic = [
-    { name = "anthropic" },
-]
 dev = [
     { name = "click" },
     { name = "coverage" },
@@ -3846,7 +3855,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=0.34.2" },
-    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.40.0" },
     { name = "bert-score", marker = "extra == 'all'", specifier = ">=0.3.13" },
     { name = "bert-score", marker = "extra == 'cpu-all'", specifier = ">=0.3.13" },
     { name = "bert-score", marker = "extra == 'generative'", specifier = ">=0.3.13" },
@@ -3876,10 +3884,11 @@ requires-dist = [
     { name = "levenshtein", marker = "extra == 'cpu-all'", specifier = ">=0.24.0" },
     { name = "levenshtein", marker = "extra == 'human-evaluation'", specifier = ">=0.24.0" },
     { name = "levenshtein", marker = "extra == 'openai'", specifier = ">=0.24.0" },
+    { name = "litellm", specifier = ">=1.53.1" },
+    { name = "more-itertools", specifier = ">=10.5.0" },
     { name = "numpy", specifier = ">=1.23.0,<2.0.0" },
     { name = "openai", marker = "extra == 'all'", specifier = ">=1.51.2" },
     { name = "openai", marker = "extra == 'cpu-all'", specifier = ">=1.51.2" },
-    { name = "openai", marker = "extra == 'openai'", specifier = ">=1.51.2" },
     { name = "outlines", marker = "extra == 'all'", specifier = ">=0.0.44,<0.1" },
     { name = "outlines", marker = "extra == 'cpu-all'", specifier = ">=0.0.44,<0.1" },
     { name = "outlines", marker = "extra == 'generative'", specifier = ">=0.0.44,<0.1" },
@@ -3895,6 +3904,7 @@ requires-dist = [
     { name = "sacremoses", specifier = ">=0.1.1" },
     { name = "sentencepiece", specifier = ">=0.1.96" },
     { name = "seqeval", specifier = ">=1.2.2" },
+    { name = "tenacity", specifier = ">=9.0.0" },
     { name = "termcolor", specifier = ">=2.0.0" },
     { name = "tiktoken", marker = "extra == 'all'", specifier = ">=0.7.0" },
     { name = "tiktoken", marker = "extra == 'cpu-all'", specifier = ">=0.7.0" },
@@ -3906,7 +3916,6 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-anthropic = [{ name = "anthropic", specifier = ">=0.40.0" }]
 dev = [
     { name = "click", specifier = ">=8.1.7" },
     { name = "coverage", specifier = ">=5.5" },
@@ -4183,6 +4192,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ec/fe/802052aecb21e3797b8f7902564ab6ea0d60ff8ca23952079064155d1ae1/tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c", size = 81090 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f", size = 35252 },
+]
+
+[[package]]
+name = "tenacity"
+version = "9.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/94/91fccdb4b8110642462e653d5dcb27e7b674742ad68efd146367da7bdb10/tenacity-9.0.0.tar.gz", hash = "sha256:807f37ca97d62aa361264d497b0e31e92b8027044942bfa756160d908320d73b", size = 47421 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b6/cb/b86984bed139586d01532a587464b5805f12e397594f19f931c4c2fbfa61/tenacity-9.0.0-py3-none-any.whl", hash = "sha256:93de0c98785b27fcf659856aa9f54bfbd399e29969b0621bc7f762bd441b4539", size = 28169 },
 ]
 
 [[package]]

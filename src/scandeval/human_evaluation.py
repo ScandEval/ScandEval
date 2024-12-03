@@ -3,32 +3,33 @@
 import importlib.util
 import json
 import logging
+from collections import defaultdict
 from functools import partial
 from pathlib import Path
 
 import click
 from datasets import Dataset
-from transformers import AutoConfig, AutoTokenizer
-from transformers.utils import ModelOutput
+from transformers import AutoTokenizer
+
+from scandeval.types import ScoreDict
 
 from .benchmark_config_factory import build_benchmark_config
-from .benchmark_dataset import BenchmarkDataset
+from .benchmark_datasets import BenchmarkDataset
 from .benchmarker import BenchmarkResult
-from .config import ModelConfig
+from .data_models import GenerativeModelOutput
 from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
-from .dataset_factory import DatasetFactory
-from .enums import Framework, ModelType
+from .dataset_factory import build_benchmark_dataset
+from .enums import Framework
 from .exceptions import NeedsExtraInstalled
 from .scores import aggregate_scores
 from .tasks import NER
-from .types import ScoreDict
-from .utils import create_model_cache_dir, enforce_reproducibility
+from .utils import enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
 
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("scandeval")
 
 
 class HumanEvaluator:
@@ -170,7 +171,9 @@ class HumanEvaluator:
             )
         return app
 
-    def update_dataset_choices(self, language: str, task: str) -> "gr.Dropdown":
+    def update_dataset_choices(
+        self, language: str | None, task: str | None
+    ) -> "gr.Dropdown":
         """Update the dataset choices based on the selected language and task.
 
         Args:
@@ -251,15 +254,9 @@ class HumanEvaluator:
             framework=None,
             device=None,
             batch_size=1,
-            evaluate_train=False,
             raise_errors=False,
             cache_dir=".scandeval_cache",
-            token=None,
-            openai_api_key=None,
-            prefer_azure=False,
-            azure_openai_api_key=None,
-            azure_openai_endpoint=None,
-            azure_openai_api_version=None,
+            api_key=None,
             force=False,
             verbose=False,
             trust_remote_code=False,
@@ -272,24 +269,27 @@ class HumanEvaluator:
             debug=False,
             run_with_cli=True,
         )
-        dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
         dataset_config = get_all_dataset_configs()[dataset_name]
 
-        model_id = f"human-{iteration}"
-        model_config = ModelConfig(
-            model_id=model_id,
-            revision="main",
-            framework=Framework.HUMAN,
-            task="text-generation",
-            languages=dataset_config.languages,
-            model_type=ModelType.HUMAN,
-            model_cache_dir=create_model_cache_dir(
-                cache_dir=benchmark_config.cache_dir, model_id=model_id
-            ),
-            adapter_base_model_id=None,
+        # TODO: Is this needed?
+        # model_id = f"human-{iteration}"
+        # model_config = ModelConfig(
+        #     model_id=model_id,
+        #     revision="main",
+        #     framework=Framework.HUMAN,
+        #     task="text-generation",
+        #     languages=dataset_config.languages,
+        #     model_type=ModelType.HUMAN,
+        #     model_cache_dir=create_model_cache_dir(
+        #         cache_dir=benchmark_config.cache_dir, model_id=model_id
+        #     ),
+        #     adapter_base_model_id=None,
+        # )
+
+        self.benchmark_dataset = build_benchmark_dataset(
+            dataset=dataset_config, benchmark_config=benchmark_config
         )
 
-        self.benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)
         self.sample_idx = 0
 
         dataset_path = (
@@ -299,7 +299,9 @@ class HumanEvaluator:
             / f"human-{iteration}.csv"
         )
         if dataset_path.exists():
-            self.active_dataset = Dataset.from_csv(str(dataset_path))
+            active_dataset = Dataset.from_csv(str(dataset_path))
+            assert isinstance(active_dataset, Dataset)
+            self.active_dataset = active_dataset
             try:
                 while self.active_dataset["answer"][self.sample_idx] is not None:
                     self.sample_idx += 1
@@ -308,20 +310,19 @@ class HumanEvaluator:
                 return blank_answer
         else:
             rng = enforce_reproducibility(framework=Framework.PYTORCH)
-            train, val, tests = self.benchmark_dataset._load_data(rng=rng)
-            _, _, tests = self.benchmark_dataset._load_prepared_data(
-                train=train,
-                val=val,
-                tests=tests,
-                model_config=model_config,
-                hf_model_config=AutoConfig.from_pretrained(self.dummy_model_id),
-                tokenizer=AutoTokenizer.from_pretrained(self.dummy_model_id),
-                benchmarking_generative_model=True,
-            )
+            datasets = self.benchmark_dataset.load_data(rng=rng)
+            # TODO: Prepare data?
             self.active_dataset = (
-                tests[iteration]
-                .remove_columns(column_names=["input_ids", "attention_mask"])
-                .add_column(name="answer", column=[None] * len(tests[iteration]))
+                datasets[iteration]["test"]
+                .remove_columns(
+                    column_names=["input_ids", "attention_mask"],
+                    new_fingerprint=datasets[iteration]["test"]._fingerprint,
+                )
+                .add_column(
+                    name="answer",
+                    column=[None] * len(datasets[iteration]["test"]),
+                    new_fingerprint=datasets[iteration]["test"]._fingerprint,
+                )
             )
 
         task_examples, question = self.example_to_markdown(
@@ -481,8 +482,12 @@ class HumanEvaluator:
         # Store the user's answer
         answers = self.active_dataset["answer"]
         answers[self.sample_idx] = answer
-        self.active_dataset = self.active_dataset.remove_columns("answer").add_column(
-            name="answer", column=answers
+        self.active_dataset = self.active_dataset.remove_columns(
+            column_names=["answer"], new_fingerprint=self.active_dataset._fingerprint
+        ).add_column(
+            name="answer",
+            column=answers,
+            new_fingerprint=self.active_dataset._fingerprint,
         )
         logger.info(
             f"User submitted the answer {answer!r} to the question {question!r}, with "
@@ -557,14 +562,16 @@ class HumanEvaluator:
             padding=True,
             return_tensors="pt",
         ).input_ids
-        model_output = ModelOutput(sequences=sequences)
-        all_preds = self.benchmark_dataset._extract_labels_from_generation(
-            input_batch=self.active_dataset.to_dict(),
-            model_output=model_output,
-            tokenizer=tokenizer,
+        model_output = GenerativeModelOutput(sequences=sequences)
+
+        active_dataset_dict = self.active_dataset.to_dict()
+        assert isinstance(active_dataset_dict, dict)
+
+        all_preds = self.benchmark_dataset.extract_labels_from_generation(
+            input_batch=active_dataset_dict, model_output=model_output
         )
         ground_truth = self.active_dataset["label"]
-        itr_scores: dict[str, float] = self.benchmark_dataset._compute_metrics(
+        itr_scores: dict[str, float] = self.benchmark_dataset.compute_metrics(
             model_outputs_and_labels=(all_preds, ground_truth),
             id2label=self.benchmark_dataset.dataset_config.id2label,
         )
@@ -588,7 +595,7 @@ class HumanEvaluator:
         # only a single iteration, so the results from the current annotation should be
         # added to the previous results.
         results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
-        results: ScoreDict = dict(raw=dict(test=list()))  # type: ignore[dict-item]
+        results: ScoreDict = defaultdict(list)
         if results_path.exists():
             all_results = [
                 json.loads(line.strip())
@@ -605,18 +612,17 @@ class HumanEvaluator:
                 results = human_result_candidates[0]["results"]
 
         # Append to results
-        results["raw"]["test"].append(  # type: ignore[union-attr]
+        results["raw"].append(  # type: ignore[union-attr]
             {f"test_{metric_name}": score for metric_name, score in itr_scores.items()}
         )
 
         # Aggregate scores
         total_dict: dict[str, float] = dict()
         for metric_cfg in self.benchmark_dataset.dataset_config.task.metrics:
-            agg_scores = aggregate_scores(
+            test_score, test_se = aggregate_scores(
                 scores=results["raw"],  # type: ignore[arg-type]
                 metric_config=metric_cfg,
             )
-            test_score, test_se = agg_scores["test"]
             test_score, _ = metric_cfg.postprocessing_fn(test_score)
             test_se, _ = metric_cfg.postprocessing_fn(test_se)
             total_dict[f"test_{metric_cfg.name}"] = test_score

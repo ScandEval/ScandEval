@@ -4,8 +4,8 @@ import os
 
 import pytest
 
-from scandeval.config import ModelConfig
-from scandeval.enums import Framework
+from scandeval.data_models import ModelConfig
+from scandeval.enums import Framework, ModelType
 from scandeval.exceptions import InvalidBenchmark, InvalidModel
 from scandeval.languages import DA
 from scandeval.model_config import get_model_config
@@ -17,22 +17,20 @@ def test_load_non_generative_model(model_id, dataset_config, benchmark_config):
     model_config = get_model_config(
         model_id=model_id, benchmark_config=benchmark_config
     )
-    tokenizer, model = load_model(
+    model = load_model(
         model_config=model_config,
         dataset_config=dataset_config,
         benchmark_config=benchmark_config,
     )
-    assert tokenizer is not None
     assert model is not None
 
 
 @pytest.mark.skipif(
     condition=os.getenv("USE_VLLM", "0") != "1", reason="Not using VLLM."
 )
-def test_load_generative_model(generative_model_and_tokenizer):
+def test_load_generative_model(generative_model):
     """Test loading a generative model."""
-    model, tokenizer = generative_model_and_tokenizer
-    assert tokenizer is not None
+    model = generative_model
     assert model is not None
 
 
@@ -59,7 +57,7 @@ def test_load_non_existing_model(dataset_config, benchmark_config):
         framework=Framework.PYTORCH,
         task="task",
         languages=[DA],
-        model_type="fresh",
+        model_type=ModelType.FRESH,
         model_cache_dir="cache_dir",
         adapter_base_model_id=None,
     )

@@ -56,23 +56,23 @@ class ModelType(AutoStrEnum):
     Attributes:
         FRESH:
             Randomly initialised Hugging Face model.
-        HF:
-            Model from the Hugging Face Hub.
+        HF_HUB_ENCODER:
+            Hugging Face encoder model from the Hub.
+        HF_HUB_GENERATIVE:
+            Hugging Face generative model from the Hub.
         LOCAL:
-            Locally stored Hugging Face model.
-        OPENAI:
-            Model from OpenAI.
-        ANTHROPIC:
-            Model from Anthropic.
+            Locally stored model.
+        API:
+            Model accessed through an API.
         HUMAN:
             Human evaluator.
     """
 
     FRESH = auto()
-    HF = auto()
+    HF_HUB_ENCODER = auto()
+    HF_HUB_GENERATIVE = auto()
     LOCAL = auto()
-    OPENAI = auto()
-    ANTHROPIC = auto()
+    API = auto()
     HUMAN = auto()
 
 
@@ -91,3 +91,20 @@ class DataType(AutoStrEnum):
     FP32 = auto()
     FP16 = auto()
     BF16 = auto()
+
+
+class BatchingPreference(AutoStrEnum):
+    """The preference for batching.
+
+    Attributes:
+        NO_PREFERENCE:
+            No preference for batching.
+        SINGLE_SAMPLE:
+            Single sample batching.
+        ALL_AT_ONCE:
+            All samples at once batching.
+    """
+
+    NO_PREFERENCE = auto()
+    SINGLE_SAMPLE = auto()
+    ALL_AT_ONCE = auto()

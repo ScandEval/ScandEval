@@ -1,34 +1,116 @@
 """Question-answering benchmark dataset."""
 
 import logging
-import re
-from functools import partial
-from typing import TYPE_CHECKING, Any, Type
+import typing as t
+from collections import defaultdict
 
 import numpy as np
 from evaluate import EvaluationModule
-from transformers.data.data_collator import DataCollatorWithPadding
+from transformers import PreTrainedTokenizer
+from transformers.trainer import Trainer
 
-from .benchmark_dataset import BenchmarkDataset
-from .exceptions import InvalidBenchmark
-from .generation import extract_raw_predictions
-from .question_answering_trainer import QuestionAnsweringTrainer
-from .utils import (
-    convert_prompt_to_instruction,
+from ..data_models import GenerativeModelOutput
+from ..utils import (
     get_special_token_metadata,
     raise_if_model_output_contains_nan_values,
 )
+from .base import BenchmarkDataset
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from datasets.arrow_dataset import Dataset
-    from transformers.modeling_utils import ModelOutput, PreTrainedModel
     from transformers.tokenization_utils_base import BatchEncoding
-    from transformers.trainer import Trainer
 
-    from .protocols import GenerativeModel, Tokenizer
-    from .types import Labels, Predictions
+    from ..types import Labels, Predictions
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("scandeval")
+
+
+class QuestionAnsweringTrainer(Trainer):
+    """Trainer subclass for question answering tasks."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize the trainer."""
+        super().__init__(*args, **kwargs)
+
+        # Get the CLS token id for the tokenizer
+        special_token_metadata = get_special_token_metadata(self.tokenizer)
+        self.cls_token_id = special_token_metadata["cls_token_id"]
+
+        # Set the label names
+        self.label_names = ["start_positions", "end_positions"]
+
+    def evaluate(
+        self,
+        eval_dataset: "Dataset | None" = None,
+        orig_eval_dataset: "Dataset | None" = None,
+        ignore_keys: list[str] | None = None,
+        metric_key_prefix: str = "eval",
+    ) -> dict[str, float] | None:
+        """Evaluate the model on the given dataset.
+
+        Args:
+            eval_dataset:
+                The dataset to evaluate on. If None, then use the stored evaluation
+                dataset.
+            orig_eval_dataset:
+                The original evaluation dataset, before any postprocessing. If None,
+                then use the stored original evaluation dataset.
+            ignore_keys:
+                The keys to ignore when computing the metrics.
+            metric_key_prefix:
+                The prefix to use for the metric keys.
+
+        Returns:
+            The metrics computed on the evaluation dataset.
+        """
+        eval_dataloader = self.get_eval_dataloader(eval_dataset)
+
+        # Temporarily disable metric computation, we will do it in the loop here.
+        compute_metrics = self.compute_metrics  # type: ignore[has-type]
+        self.compute_metrics = None
+        eval_loop = (
+            self.prediction_loop
+            if self.args.use_legacy_prediction_loop
+            else self.evaluation_loop
+        )
+        try:
+            output = eval_loop(
+                eval_dataloader,
+                description="Evaluation",
+                prediction_loss_only=True if compute_metrics is None else None,
+                ignore_keys=ignore_keys,
+                metric_key_prefix=metric_key_prefix,
+            )
+        finally:
+            self.compute_metrics = compute_metrics
+
+        if orig_eval_dataset is not None:
+            preds_and_labels = postprocess_predictions_and_labels(
+                predictions=output.predictions,
+                dataset=orig_eval_dataset,
+                prepared_dataset=eval_dataset,
+                cls_token_index=self.cls_token_id,
+            )
+            output.metrics.update(self.compute_metrics(preds_and_labels))
+
+            # Prefix all keys with metric_key_prefix + '_'
+            for key in list(output.metrics.keys()):
+                if not key.startswith(f"{metric_key_prefix}_"):
+                    output.metrics[f"{metric_key_prefix}_{key}"] = output.metrics.pop(
+                        key
+                    )
+
+        # Only the main node log the results by default
+        if self.args.should_log:
+            self.log(output.metrics)
+
+        self.control = self.callback_handler.on_evaluate(
+            self.args,
+            self.state,
+            self.control,  # type: ignore[has-type]
+            output.metrics,
+        )
+        return output.metrics
 
 
 class QuestionAnswering(BenchmarkDataset):
@@ -47,101 +129,9 @@ class QuestionAnswering(BenchmarkDataset):
             The configuration of the benchmark.
     """
 
-    def _preprocess_data(self, dataset: "Dataset", **kwargs) -> "Dataset":
-        """Preprocess a dataset by tokenizing and aligning the labels.
+    trainer_class = QuestionAnsweringTrainer
 
-        Args:
-            dataset:
-                The dataset to preprocess.
-            kwargs:
-                Extra keyword arguments containing objects used in preprocessing the
-                dataset.
-
-        Returns:
-            The preprocessed dataset.
-        """
-        split: str = kwargs.pop("split")
-        tokenizer: "Tokenizer" = kwargs.pop("tokenizer")
-        generative_model: bool = kwargs.pop("generative_model")
-
-        # If the tokenizer is not a fast variant then raise an error
-        if not tokenizer.is_fast and not generative_model:
-            raise InvalidBenchmark(
-                "Question-answering benchmarks require a fast tokenizer."
-            )
-
-        if generative_model:
-            preprocess_fn = partial(
-                prepare_examples_for_generation, tokenizer=tokenizer
-            )
-        elif split == "test":
-            preprocess_fn = partial(prepare_test_examples, tokenizer=tokenizer)
-        else:
-            preprocess_fn = partial(prepare_train_examples, tokenizer=tokenizer)
-
-        # Preprocess the data and return it
-        try:
-            if generative_model:
-                cols_to_remove = [
-                    col for col in dataset.column_names if col not in ["id", "text"]
-                ]
-            else:
-                cols_to_remove = dataset.column_names
-            preprocessed = dataset.map(
-                preprocess_fn,
-                batched=True,
-                batch_size=10,
-                remove_columns=cols_to_remove,
-                load_from_cache_file=False,
-                keep_in_memory=True,
-            )
-
-        except NotImplementedError as e:
-            raise InvalidBenchmark(str(e))
-
-        # The Trainer hides the columns that are not used by the model (here `id` and
-        # `offset_mapping` which we will need for our post-processing), so we put them
-        # back
-        preprocessed.set_format(
-            type=preprocessed.format["type"], columns=list(preprocessed.features.keys())
-        )
-
-        # Return the preprocessed dataset
-        return preprocessed
-
-    def _get_trainer_class(self) -> Type["Trainer"]:
-        return QuestionAnsweringTrainer
-
-    def _get_evaluate_inputs(
-        self, dataset: "Dataset", prepared_dataset: "Dataset", metric_key_prefix: str
-    ):
-        return dict(
-            orig_eval_dataset=dataset,
-            eval_dataset=prepared_dataset,
-            metric_key_prefix=metric_key_prefix,
-        )
-
-    def _load_data_collator(
-        self,
-        tokenizer: "Tokenizer | None" = None,
-        model: "PreTrainedModel | GenerativeModel | None" = None,
-    ):
-        """Load the data collator used to prepare samples during finetuning.
-
-        Args:
-            tokenizer:
-                A pretrained tokenizer. Can be None if the tokenizer is not used in the
-                initialisation of the data collator. Defaults to None.
-            model:
-                A pretrained model. Can be None if the model is not used in the
-                initialisation of the data collator. Defaults to None.
-
-        Returns:
-            The data collator.
-        """
-        return DataCollatorWithPadding(tokenizer=tokenizer)
-
-    def _compute_metrics(
+    def compute_metrics(
         self,
         model_outputs_and_labels: tuple["Predictions", "Labels"],
         id2label: dict[int, str],
@@ -187,127 +177,9 @@ class QuestionAnswering(BenchmarkDataset):
 
         return results
 
-    def _extract_few_shot_examples(
-        self, train_dataset: "Dataset", random_seed: int
-    ) -> list[dict[str, Any]]:
-        """Extract few-shot examples from the training dataset.
-
-        Args:
-            train_dataset:
-                The training dataset.
-            random_seed:
-                The random seed to use when extracting the few-shot examples.
-
-        Returns:
-            The few-shot examples.
-        """
-        # Locate the maximum number of tokens that constitutes a short example. We
-        # start with 512 tokens and double it until there is at least `num_few_shots`
-        # many examples that are shorter than the maximum number of tokens.
-        max_num_tokens = 512
-        while True:
-            train_with_short_examples = train_dataset.filter(
-                lambda example: len(example["context"]) < max_num_tokens
-            )
-            num_short_examples = len(train_with_short_examples)
-            if num_short_examples >= self.dataset_config.num_few_shot_examples:
-                break
-            max_num_tokens *= 2
-
-        train_with_short_examples = train_dataset.filter(
-            lambda example: len(example["context"]) < max_num_tokens
-        )
-        shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
-        num_few_shots = self.dataset_config.num_few_shot_examples
-        few_shot_examples: list[dict[str, Any]] = list()
-
-        # We pick the few-shot examples one at a time rather than all at once since
-        # we're working with a bootstrapped training dataset, meaning that it will have
-        # duplicates. This ensures that we don't have any duplicates in the few-shot
-        # examples
-        while len(few_shot_examples) < num_few_shots:
-            example = shuffled_train.select(range(1))[0]
-            few_shot_examples.append(example)
-            shuffled_train = shuffled_train.filter(
-                lambda x: x["context"] != example["context"]
-            )
-
-        return few_shot_examples
-
-    def _apply_few_shot_prompt(
-        self, examples: dict, few_shot_examples: list[dict], tokenizer: "Tokenizer"
-    ) -> dict:
-        """Apply a few-shot prompt to the examples.
-
-        Args:
-            examples:
-                The examples to apply the prompt to.
-            few_shot_examples:
-                The examples to be included in the few-shot prompt.
-            tokenizer:
-                The tokenizer to use to encode the few-shot prompt.
-
-        Returns:
-            The examples with the few-shot prompt applied.
-        """
-        # Build the few-shot part of the prompt
-        few_shot_prompts = [
-            self.dataset_config.prompt_template.format(
-                text=example["context"].replace("\n", " ").strip(),
-                question=example["question"].strip(),
-                label=example["answers"]["text"][0],
-            )
-            for example in few_shot_examples
-        ]
-        prompt_prefix = ""
-        if self.dataset_config.prompt_prefix:
-            prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
-        few_shot_prompt = prompt_prefix + "\n\n".join(few_shot_prompts)
-
-        # Add the texts from the examples to the prompts
-        new_prompts = [
-            self.dataset_config.prompt_template.format(
-                text=context.replace("\n", " ").strip(), question=question, label=""
-            )
-            for context, question in zip(examples["context"], examples["question"])
-        ]
-        examples["text"] = [
-            few_shot_prompt + "\n\n" + new_prompt for new_prompt in new_prompts
-        ]
-
-        return examples
-
-    def _apply_instruction_prompt(self, examples: dict, tokenizer: "Tokenizer") -> dict:
-        """Apply an instruction prompt to the examples.
-
-        Args:
-            examples:
-                The examples to apply the prompt to.
-            tokenizer:
-                The tokenizer to use to encode the instruction prompt.
-
-        Returns:
-            The examples with the instruction prompt applied.
-        """
-        prompts = [
-            self.dataset_config.instruction_prompt.format(
-                text=re.sub(r"\n+", "\n", text).strip(), question=question.strip()
-            )
-            for (text, question) in zip(examples["context"], examples["question"])
-        ]
-        prompts = [
-            convert_prompt_to_instruction(prompt=prompt, tokenizer=tokenizer)
-            for prompt in prompts
-        ]
-        examples["text"] = prompts
-        return examples
-
-    def _extract_labels_from_generation(
-        self,
-        input_batch: dict[str, list],
-        model_output: "ModelOutput",
-        tokenizer: "Tokenizer",
-    ) -> list[Any]:
+    def extract_labels_from_generation(
+        self, input_batch: dict[str, list], model_output: "GenerativeModelOutput"
+    ) -> list[t.Any]:
         """Extract the predicted labels from the generated output.
 
         Args:
@@ -322,10 +194,7 @@ class QuestionAnswering(BenchmarkDataset):
         Returns:
             The predicted labels.
         """
-        raw_predictions = extract_raw_predictions(
-            generated_sequences=model_output["sequences"], tokenizer=tokenizer
-        )
-
+        raw_predictions = model_output.sequences
         predictions = [
             dict(
                 id=id,
@@ -334,12 +203,11 @@ class QuestionAnswering(BenchmarkDataset):
             )
             for id, predicted_answer in zip(input_batch["id"], raw_predictions)
         ]
-
         return predictions
 
 
 def prepare_train_examples(
-    examples: "BatchEncoding", tokenizer: "Tokenizer"
+    examples: "BatchEncoding", tokenizer: "PreTrainedTokenizer"
 ) -> "BatchEncoding":
     """Prepare the features for training.
 
@@ -491,7 +359,7 @@ def prepare_train_examples(
 
 
 def prepare_test_examples(
-    examples: "BatchEncoding", tokenizer: "Tokenizer"
+    examples: "BatchEncoding", tokenizer: "PreTrainedTokenizer"
 ) -> "BatchEncoding":
     """Prepare test examples.
 
@@ -578,29 +446,231 @@ def prepare_test_examples(
     return tokenized_examples
 
 
-def prepare_examples_for_generation(
-    examples: "BatchEncoding", tokenizer: "Tokenizer"
-) -> "BatchEncoding":
-    """Prepare test examples.
+def postprocess_predictions_and_labels(
+    predictions: list,
+    dataset: "Dataset",
+    prepared_dataset: "Dataset",
+    cls_token_index: int,
+) -> tuple[list[dict], list[dict]]:
+    """Postprocess the predictions and labels, to allow easier metric computation.
 
     Args:
-        examples:
-            Dictionary of test examples.
-        tokenizer:
-            The tokenizer used to preprocess the examples.
+        predictions:
+            A pair of (start_logits, end_logits) predictions.
+        dataset:
+            The dataset containing the examples.
+        prepared_dataset:
+            The dataset containing the prepared examples.
+        cls_token_index:
+            The index of the CLS token.
 
     Returns:
-        The prepared test examples.
+        The postprocessed predictions and labels.
     """
-    tokenized_examples = tokenizer(text=examples["text"], truncation=True)
-    tokenized_examples["label"] = [
-        dict(
-            id=id,
+    # Extract the logits from the predictions
+    all_start_logits = predictions[0]
+    all_end_logits = predictions[1]
+
+    # Build a map from an example to its corresponding features, being the blocks of
+    # text from the context that we're feeding into the model. An example can have
+    # multiple features/blocks if it has a long context.
+    id_to_index = {k: i for i, k in enumerate(dataset["id"])}
+    features_per_example = defaultdict(list)
+    for i, feature in enumerate(prepared_dataset):
+        id = feature["id"]
+        example_index = id_to_index[id]
+        features_per_example[example_index].append(i)
+
+    # Loop over all the examples
+    predictions = list()
+    labels = list()
+    for example_index, example in enumerate(dataset):
+        # Extract the best valid answer associated with the current example
+        best_answer = find_best_answer(
+            all_start_logits=all_start_logits,
+            all_end_logits=all_end_logits,
+            prepared_dataset=prepared_dataset,
+            feature_indices=features_per_example[example_index],
+            context=example["context"],
+            max_answer_length=30,
+            num_best_logits=20,
+            min_null_score=0.0,
+            cls_token_index=cls_token_index,
+        )
+
+        # Create the final prediction dictionary, to be added to the list of
+        # predictions
+        prediction = dict(
+            id=example["id"], prediction_text=best_answer, no_answer_probability=0.0
+        )
+
+        # Add the answer to the list of predictions
+        predictions.append(prediction)
+
+        # Create the associated reference dictionary, to be added to the list of
+        # references
+        label = dict(
+            id=example["id"],
             answers=dict(
-                answer_start=answer_dct["answer_start"],
-                text=[answer_text.lower() for answer_text in answer_dct["text"]],
+                text=example["answers"]["text"],
+                answer_start=example["answers"]["answer_start"],
             ),
         )
-        for id, answer_dct in zip(examples["id"], examples["answers"])
-    ]
-    return tokenized_examples
+
+        # Add the answer and label to the list of predictions and labels, respectively
+        labels.append(label)
+
+    return predictions, labels
+
+
+def find_best_answer(
+    all_start_logits: np.ndarray,
+    all_end_logits: np.ndarray,
+    prepared_dataset: "Dataset",
+    feature_indices: list[int],
+    context: str,
+    max_answer_length: int,
+    num_best_logits: int,
+    min_null_score: float,
+    cls_token_index: int,
+) -> str:
+    """Find the best answer for a given example.
+
+    Args:
+        all_start_logits:
+            The start logits for all the features.
+        all_end_logits:
+            The end logits for all the features.
+        prepared_dataset:
+            The dataset containing the prepared examples.
+        feature_indices:
+            The indices of the features associated with the current example.
+        context:
+            The context of the example.
+        max_answer_length:
+            The maximum length of the answer.
+        num_best_logits:
+            The number of best logits to consider.
+        min_null_score:
+            The minimum score an answer can have.
+        cls_token_index:
+            The index of the CLS token.
+
+    Returns:
+        The best answer for the example.
+    """
+    # Loop through all the features associated to the current example
+    valid_answers = list()
+    for feature_index in feature_indices:
+        # Get the features associated with the current example
+        features = prepared_dataset[feature_index]
+
+        # Get the predictions of the model for this feature
+        start_logits = all_start_logits[feature_index]
+        end_logits = all_end_logits[feature_index]
+
+        # Update minimum null prediction
+        cls_index = features["input_ids"].index(cls_token_index)
+        feature_null_score = (start_logits[cls_index] + end_logits[cls_index]).item()
+        if min_null_score < feature_null_score:
+            min_null_score = feature_null_score
+
+        # Find the valid answers for the feature
+        valid_answers_for_feature = find_valid_answers(
+            start_logits=start_logits,
+            end_logits=end_logits,
+            offset_mapping=features["offset_mapping"],
+            context=context,
+            max_answer_length=max_answer_length,
+            num_best_logits=num_best_logits,
+            min_null_score=min_null_score,
+        )
+        valid_answers.extend(valid_answers_for_feature)
+
+    # In the very rare edge case we have not a single non-null prediction, we create a
+    # fake prediction to avoid failure
+    if not valid_answers:
+        return ""
+
+    # Otherwise, we select the answer with the largest score as the best answer, and
+    # return it
+    best_answer_dict = sorted(valid_answers, key=lambda x: x["score"], reverse=True)[0]
+    return best_answer_dict["text"]
+
+
+def find_valid_answers(
+    start_logits: np.ndarray,
+    end_logits: np.ndarray,
+    offset_mapping: list[tuple[int, int]],
+    context: str,
+    max_answer_length: int,
+    num_best_logits: int,
+    min_null_score: float,
+) -> list[dict]:
+    """Find the valid answers from the start and end indexes.
+
+    Args:
+        start_logits:
+            The logits for the start of the answer.
+        end_logits:
+            The logits for the end of the answer.
+        offset_mapping:
+            The offset mapping, being a list of pairs of integers for each token index,
+            containing the start and end character index in the original context.
+        context:
+            The context of the example.
+        max_answer_length:
+            The maximum length of the answer.
+        num_best_logits:
+            The number of best logits to consider. Note that this function will run in
+            O(`num_best_logits` ^ 2) time.
+        min_null_score:
+            The minimum score an answer can have.
+
+    Returns:
+        A list of the valid answers, each being a dictionary with keys "text" and
+        "score", the score being the sum of the start and end logits.
+    """
+    # Fetch the top-k predictions for the start- and end token indices
+    start_indexes = np.argsort(start_logits)[-1 : -num_best_logits - 1 : -1].tolist()
+    end_indexes = np.argsort(end_logits)[-1 : -num_best_logits - 1 : -1].tolist()
+
+    # We loop over all combinations of starting and ending indexes for valid answers
+    valid_answers = list()
+    for start_index in start_indexes:
+        for end_index in end_indexes:
+            # If the starting or ending index is out-of-scope, meaning that they are
+            # either out of bounds or correspond to part of the input_ids that are not
+            # in the context, then we skip this index
+            if (
+                start_index >= len(offset_mapping)
+                or end_index >= len(offset_mapping)
+                or tuple(offset_mapping[start_index]) == (-1, -1)
+                or tuple(offset_mapping[end_index]) == (-1, -1)
+            ):
+                continue
+
+            # Do not consider answers with a length that is either negative or greater
+            # than the context length
+            max_val = max_answer_length + start_index - 1
+            if end_index < start_index or end_index > max_val:
+                continue
+
+            # If we got to this point then the answer is valid, so we store the
+            # corresponding start- and end character indices in the original context,
+            # and from these extract the answer
+            start_char = offset_mapping[start_index][0]
+            end_char = offset_mapping[end_index][1]
+            text = context[start_char:end_char]
+
+            # Compute the score of the answer, being the sum of the start and end
+            # logits. Intuitively, this indicates how likely the answer is to be
+            # correct, and allows us to pick the best valid answer.
+            score = start_logits[start_index] + end_logits[end_index]
+
+            # Add the answer to the list of valid answers, if the score is greater
+            # than the minimum null score
+            if score > min_null_score:
+                valid_answers.append(dict(score=score, text=text))
+
+    return valid_answers

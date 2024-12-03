@@ -1,15 +1,15 @@
 """Types used throughout the project."""
 
-from typing import Any, TypeGuard
+import typing as t
 
 import numpy as np
 
-ScoreDict = dict[str, dict[str, float] | dict[str, list[dict[str, float]]]]
+ScoreDict = dict[str, dict[str, float] | list[dict[str, float]]]
 Predictions = np.ndarray | list[str] | list[list[str]]
 Labels = np.ndarray | list[str] | list[list[str]]
 
 
-def is_list_of_int(x: Any) -> TypeGuard[list[int]]:
+def is_list_of_int(x: t.Any) -> t.TypeGuard[list[int]]:
     """Check if an object is a list of integers.
 
     Args:
@@ -22,7 +22,7 @@ def is_list_of_int(x: Any) -> TypeGuard[list[int]]:
     return isinstance(x, list) and all(isinstance(i, int) for i in x)
 
 
-def is_list_of_list_of_int(x: Any) -> TypeGuard[list[list[int]]]:
+def is_list_of_list_of_int(x: t.Any) -> t.TypeGuard[list[list[int]]]:
     """Check if an object is a list of list of integers.
 
     Args:
@@ -39,7 +39,7 @@ def is_list_of_list_of_int(x: Any) -> TypeGuard[list[list[int]]]:
     )
 
 
-def is_list_of_str(x: Any) -> TypeGuard[list[str]]:
+def is_list_of_str(x: t.Any) -> t.TypeGuard[list[str]]:
     """Check if an object is a list of integers.
 
     Args:

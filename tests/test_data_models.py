@@ -1,8 +1,8 @@
-"""Unit tests for the `config` module."""
+"""Unit tests for the `data_models` module."""
 
 import pytest
 
-from scandeval.config import (
+from scandeval.data_models import (
     BenchmarkConfig,
     DatasetConfig,
     Language,

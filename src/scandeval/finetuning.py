@@ -1,109 +1,74 @@
 """Functions related to the finetuning of models."""
 
+import collections.abc as c
 import importlib.util
 import logging
 import sys
-from collections import defaultdict
+import typing as t
 from functools import partial
-from typing import TYPE_CHECKING, Any, Callable, Type
 
 import torch
-from datasets import Dataset
+from datasets import DatasetDict
 from tqdm.auto import tqdm
 from transformers import (
+    DataCollator,
     EarlyStoppingCallback,
     IntervalStrategy,
-    PreTrainedModel,
     PrinterCallback,
     ProgressCallback,
     TrainingArguments,
 )
 from transformers.trainer import OptimizerNames
 
+from .benchmark_modules import BenchmarkModule
 from .callbacks import NeverLeaveProgressCallback
 from .enums import DataType
 from .exceptions import InvalidBenchmark, NaNValueInModelOutput
 from .model_loading import load_model
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
 
-if TYPE_CHECKING:
-    from transformers import DataCollator, Trainer
+if t.TYPE_CHECKING:
+    from transformers import Trainer
 
-    from .config import BenchmarkConfig, DatasetConfig, ModelConfig
-    from .protocols import Tokenizer
+    from .data_models import BenchmarkConfig, DatasetConfig, ModelConfig
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("scandeval")
 
 
 def finetune(
-    itr: tqdm,
-    train: Dataset,
-    val: Dataset,
-    tests: list[Dataset],
-    prepared_train: Dataset,
-    prepared_val: Dataset,
-    prepared_tests: list[Dataset],
-    model: PreTrainedModel,
-    tokenizer: "Tokenizer",
+    model: BenchmarkModule,
+    datasets: list[DatasetDict],
+    compute_metrics: c.Callable,
+    trainer_class: t.Type["Trainer"],
+    data_collator: DataCollator,
     model_config: "ModelConfig",
-    benchmark_config: "BenchmarkConfig",
     dataset_config: "DatasetConfig",
-    compute_metrics: Callable,
-    data_collator: "DataCollator",
-    trainer_class: Type["Trainer"],
-    evaluate_inputs_fn: Callable[..., dict[str, Any]],
-    preprocess_logits_for_metrics: Callable[
-        [torch.Tensor | tuple, torch.Tensor], torch.Tensor | tuple
-    ],
-) -> dict[str, list[dict[str, float]]]:
+    benchmark_config: "BenchmarkConfig",
+) -> list[dict[str, float]]:
     """Evaluate a model on a dataset through finetuning.
 
     Args:
-        itr:
-            The progress bar iterator.
-        train:
-            The training dataset.
-        val:
-            The validation dataset.
-        tests:
-            The bootstrapped test datasets.
-        prepared_train:
-            The prepared training dataset.
-        prepared_val:
-            The prepared validation dataset.
-        prepared_tests:
-            The prepared bootstrapped test datasets.
         model:
             The model to evaluate.
-        tokenizer:
-            The tokenizer to use.
-        model_config:
-            The configuration of the model.
-        benchmark_config:
-            The benchmark configuration.
-        dataset_config:
-            The dataset configuration.
+        datasets:
+            The datasets to use for training and evaluation.
         compute_metrics:
             The function used to compute the metrics.
-        data_collator:
-            The data collator to use.
         trainer_class:
             The Trainer class to use.
-        evaluate_inputs_fn:
-            A function that generates the appropriate inputs for the `Trainer.evaluate`
-            method.
-        preprocess_logits_for_metrics:
-            A function that preprocesses the logits before they are passed to the
-            `compute_metrics` function. This helps prevent memory issues during
-            evaluation.
+        data_collator:
+            The data collator to use.
+        model_config:
+            The configuration of the model.
+        dataset_config:
+            The dataset configuration.
+        benchmark_config:
+            The benchmark configuration.
 
     Returns:
-        A dictionary containing the scores, with keys "test" and maybe "train", with
-        values being lists of dicts containing the scores for each metric for each
-        iteration.
+        A list of dicts containing the scores for each metric for each iteration.
     """
-    scores: dict[str, list[dict[str, float]]] = defaultdict(list)
-
+    # Set the data type to use for the model weights
     using_cuda = benchmark_config.device == torch.device("cuda")
     if using_cuda and torch.cuda.is_bf16_supported():
         dtype = DataType.BF16
@@ -113,7 +78,12 @@ def finetune(
         dtype = DataType.FP32
 
     bs: int = benchmark_config.batch_size
-    for idx in itr:
+    scores: list[dict[str, float]] = list()
+    for idx in tqdm(
+        iterable=range(benchmark_config.num_iterations),
+        desc="Benchmarking",
+        disable=not benchmark_config.progress_bar,
+    ):
         # Set variable that tracks whether we need to initialize new models in
         # the single iteration call
         model_already_initialized = idx == 0
@@ -126,18 +96,9 @@ def finetune(
                     del model
                 except UnboundLocalError:
                     pass
-                try:
-                    del tokenizer
-                except UnboundLocalError:
-                    pass
                 clear_memory()
 
             try:
-                test = tests[idx]
-                prepared_test = prepared_tests[idx]
-                assert isinstance(test, Dataset)
-                assert isinstance(prepared_test, Dataset)
-
                 # Re-block terminal output, as it gets unblocked by the `transformers`
                 # package before training
                 block_terminal_output()
@@ -151,32 +112,20 @@ def finetune(
                 )
 
                 itr_scores = finetune_single_iteration(
-                    iteration_idx=idx,
-                    model_config=model_config,
-                    train=train,
-                    prepared_train=prepared_train,
-                    prepared_val=prepared_val,
-                    test=test,
-                    prepared_test=prepared_test,
-                    training_args=training_args,
-                    benchmark_config=benchmark_config,
-                    dataset_config=dataset_config,
-                    data_collator=data_collator,
-                    compute_metrics=compute_metrics,
-                    tokenizer=tokenizer if model_already_initialized else None,
                     model=model if model_already_initialized else None,
+                    dataset=datasets[idx],
+                    compute_metrics=compute_metrics,
                     trainer_class=trainer_class,
-                    evaluate_inputs_fn=evaluate_inputs_fn,
-                    preprocess_logits_for_metrics=preprocess_logits_for_metrics,
+                    data_collator=data_collator,
+                    iteration_idx=idx,
+                    training_args=training_args,
+                    model_config=model_config,
+                    dataset_config=dataset_config,
+                    benchmark_config=benchmark_config,
                 )
 
-                if "train" in itr_scores:
-                    logger.debug(
-                        f"Train scores for iteration {idx}: {itr_scores['train']}"
-                    )
-                    scores["train"].append(itr_scores["train"])
-                scores["test"].append(itr_scores["test"])
-                logger.debug(f"Test scores for iteration {idx}: {itr_scores['test']}")
+                scores.append(itr_scores)
+                logger.debug(f"Test scores for iteration {idx}: {itr_scores}")
 
                 break
 
@@ -221,101 +170,65 @@ def finetune(
 
 
 def finetune_single_iteration(
+    model: BenchmarkModule | None,
+    dataset: DatasetDict,
+    compute_metrics: c.Callable,
+    trainer_class: t.Type["Trainer"],
+    data_collator: DataCollator,
     iteration_idx: int,
-    model_config: "ModelConfig",
-    train: Dataset,
-    test: Dataset,
-    prepared_train: Dataset,
-    prepared_val: Dataset,
-    prepared_test: Dataset,
     training_args: TrainingArguments,
-    benchmark_config: "BenchmarkConfig",
+    model_config: "ModelConfig",
     dataset_config: "DatasetConfig",
-    data_collator: "DataCollator",
-    compute_metrics: Callable,
-    tokenizer: "Tokenizer | None",
-    model: PreTrainedModel | None,
-    trainer_class: Type["Trainer"],
-    evaluate_inputs_fn: Callable[..., dict[str, Any]],
-    preprocess_logits_for_metrics: Callable[
-        [torch.Tensor | tuple, torch.Tensor], torch.Tensor | tuple
-    ],
-) -> dict[str, dict[str, float]]:
+    benchmark_config: "BenchmarkConfig",
+) -> dict[str, float]:
     """Run a single iteration of a benchmark.
 
     Args:
-        iteration_idx:
-            The index of the iteration.
-        model_config:
-            The model configuration.
-        train:
-            The original training dataset.
-        test:
-            The original test dataset.
-        prepared_train:
-            The prepared training dataset.
-        prepared_val:
-            The prepared validation dataset.
-        prepared_test:
-            The prepared test dataset.
-        training_args:
-            The training arguments.
-        benchmark_config:
-            The benchmark configuration.
-        dataset_config:
-            The dataset configuration.
-        data_collator:
-            The data collator.
+        model:
+            The model to use in the benchmark. If None then a new model will be loaded.
+        dataset:
+            The dataset to use for training and evaluation.
         compute_metrics:
             The function to compute the metrics.
-        tokenizer:
-            The tokenizer to use in the benchmark. If None then a new tokenizer
-            will be loaded.
-        model:
-            The model to use in the benchmark. If None then a new model will be
-            loaded.
         trainer_class:
             The trainer class to use.
-        evaluate_inputs_fn:
-            A function that generates the appropriate inputs for the `Trainer.evaluate`
-            method.
-        preprocess_logits_for_metrics:
-            A function that preprocesses the logits before they are passed to the
-            `compute_metrics` function. This helps prevent memory issues during
-            evaluation.
+        data_collator:
+            The data collator to use.
+        iteration_idx:
+            The index of the iteration.
+        training_args:
+            The training arguments.
+        model_config:
+            The model configuration.
+        dataset_config:
+            The dataset configuration.
+        benchmark_config:
+            The benchmark configuration.
 
     Returns:
-        A dictionary containing the scores for the current iteration, with keys `train`
-        and `test`.
+        The scores for the test dataset.
     """
-    scores: dict[str, dict[str, float]] = dict()
-
     # Set random seeds to enforce reproducibility of the randomly initialised
     # weights
     seed = 4242 + iteration_idx
     enforce_reproducibility(framework=model_config.framework, seed=seed)
 
-    if tokenizer is None or model is None:
-        model_or_generative_model, tokenizer = load_model(
+    if model is None:
+        model = load_model(
             model_config=model_config,
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
         )
-        assert isinstance(model_or_generative_model, PreTrainedModel)
-        model = model_or_generative_model
 
-    compute_metrics = partial(compute_metrics, id2label=dataset_config.id2label)
-    early_stopping = EarlyStoppingCallback(early_stopping_patience=2)
     trainer = trainer_class(
-        model=model,
+        model=model.get_pytorch_module(),
+        tokenizer=model.get_tokenizer(),
         args=training_args,
-        train_dataset=prepared_train,
-        eval_dataset=prepared_val,
-        tokenizer=tokenizer,
-        compute_metrics=compute_metrics,
-        callbacks=[early_stopping],
+        train_dataset=dataset["train"],
+        eval_dataset=dataset["val"],
+        compute_metrics=partial(compute_metrics, id2label=dataset_config.id2label),
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
         data_collator=data_collator,
-        preprocess_logits_for_metrics=preprocess_logits_for_metrics,
     )
 
     if not benchmark_config.verbose:
@@ -339,30 +252,22 @@ def finetune_single_iteration(
 
     try:
         trainer.train()
-
-        if benchmark_config.evaluate_train:
-            with torch.inference_mode():
-                evaluate_inputs = evaluate_inputs_fn(
-                    dataset=train,
-                    prepared_dataset=prepared_train,
-                    metric_key_prefix="train",
-                )
-                train_scores = trainer.evaluate(**evaluate_inputs)
-            scores["train"] = train_scores
-
         with torch.inference_mode():
-            evaluate_inputs = evaluate_inputs_fn(
-                dataset=test, prepared_dataset=prepared_test, metric_key_prefix="test"
-            )
-            test_scores = trainer.evaluate(**evaluate_inputs)
-        scores["test"] = test_scores
-
-        return scores
+            try:
+                test_scores = trainer.evaluate(
+                    eval_dataset=dataset["test"],
+                    orig_eval_dataset=dataset["original_test"],
+                    metric_key_prefix="test",
+                )
+            except TypeError:
+                test_scores = trainer.evaluate(
+                    eval_dataset=dataset["test"], metric_key_prefix="test"
+                )
+        return test_scores
 
     except NaNValueInModelOutput as e:
         del trainer
         del model
-        del tokenizer
         clear_memory()
         raise e
 

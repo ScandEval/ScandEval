@@ -7,7 +7,8 @@ from typing import Generator
 import pytest
 import torch
 
-from scandeval.config import (
+from scandeval.benchmark_modules.base import BenchmarkModule
+from scandeval.data_models import (
     BenchmarkConfig,
     DatasetConfig,
     Language,
@@ -23,7 +24,6 @@ from scandeval.dataset_configs import (
 from scandeval.enums import Framework, ModelType
 from scandeval.model_config import get_model_config
 from scandeval.model_loading import load_model
-from scandeval.protocols import GenerativeModel, Tokenizer
 from scandeval.tasks import SPEED
 
 
@@ -41,7 +41,7 @@ def pytest_unconfigure() -> None:
 def auth() -> Generator[str | bool, None, None]:
     """Yields the authentication token to the Hugging Face Hub."""
     # Get the authentication token to the Hugging Face Hub
-    auth = os.environ.get("HUGGINGFACE_HUB_TOKEN", True)
+    auth = os.environ.get("HUGGINGFACE_API_KEY", True)
 
     # Ensure that the token does not contain quotes or whitespace
     if isinstance(auth, str):
@@ -76,12 +76,7 @@ def benchmark_config(
         batch_size=32,
         raise_errors=False,
         cache_dir=".scandeval_cache",
-        evaluate_train=False,
-        token=auth,
-        openai_api_key=None,
-        azure_openai_api_key=None,
-        azure_openai_endpoint=None,
-        azure_openai_api_version=None,
+        api_key=auth,
         force=False,
         progress_bar=False,
         save_results=True,
@@ -135,23 +130,19 @@ def generative_model_id() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
-def generative_model_and_tokenizer(
+def generative_model(
     benchmark_config, generative_model_id
-) -> Generator[tuple[GenerativeModel | None, Tokenizer | None], None, None]:
-    """Yields a generative model ID used in tests."""
-    if os.getenv("USE_VLLM", "0") == "1":
-        model_config = get_model_config(
-            model_id=generative_model_id, benchmark_config=benchmark_config
-        )
-        model, tokenizer = load_model(
-            model_config=model_config,
-            dataset_config=ANGRY_TWEETS_CONFIG,
-            benchmark_config=benchmark_config,
-        )
-    else:
-        model = None
-        tokenizer = None
-    yield model, tokenizer
+) -> Generator[BenchmarkModule, None, None]:
+    """Yields a generative model used in tests."""
+    model_config = get_model_config(
+        model_id=generative_model_id, benchmark_config=benchmark_config
+    )
+    model = load_model(
+        model_config=model_config,
+        dataset_config=ANGRY_TWEETS_CONFIG,
+        benchmark_config=benchmark_config,
+    )
+    yield model
 
 
 @pytest.fixture(scope="session")

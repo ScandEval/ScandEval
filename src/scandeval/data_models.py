@@ -1,12 +1,18 @@
-"""Configuration classes used throughout the project."""
+"""Data models used in ScandEval."""
 
+import collections.abc as c
+import importlib.metadata
+import json
+import re
+import typing as t
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable
+from pathlib import Path
 
 import torch
+from pydantic import BaseModel, ConfigDict
 
-if TYPE_CHECKING:
-    from .enums import Framework, ModelType
+from .enums import Device, Framework, ModelType
+from .types import ScoreDict
 
 
 @dataclass
@@ -37,8 +43,8 @@ class MetricConfig:
     pretty_name: str
     huggingface_id: str
     results_key: str
-    compute_kwargs: dict[str, Any] = field(default_factory=dict)
-    postprocessing_fn: Callable[[float], tuple[float, str]] = field(
+    compute_kwargs: dict[str, t.Any] = field(default_factory=dict)
+    postprocessing_fn: c.Callable[[float], tuple[float, str]] = field(
         default_factory=lambda: lambda raw_score: (100 * raw_score, f"{raw_score:.2%}")
     )
 
@@ -113,28 +119,8 @@ class BenchmarkConfig:
             Whether to raise errors instead of skipping them.
         cache_dir:
             Directory to store cached models and datasets.
-        evaluate_train:
-            Whether to evaluate on the training set.
-        token:
-            The authentication token for the Hugging Face Hub. If a boolean value is
-            specified then the token will be fetched from the Hugging Face CLI, where
-            the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token.
-        openai_api_key:
-            The API key for the OpenAI API. If None then OpenAI models will not be
-            benchmarked.
-        azure_openai_api_key:
-            The API key for the Azure OpenAI API. If None then Azure OpenAI models will
-            not be benchmarked.
-        azure_openai_endpoint:
-            The endpoint for the Azure OpenAI API. If None then Azure OpenAI models will
-            not be benchmarked.
-        azure_openai_api_version:
-            The api version for the Azure OpenAI API, e.g. "2023-12-01-preview". If
-            None then Azure OpenAI models will not be benchmarked.
-        anthropic_api_key:
-            The API key for the Anthropic API. If None then Anthropic models will not be
-            benchmarked.
+        api_key:
+            The API key to use for a given inference API.
         force:
             Whether to force the benchmark to run even if the results are already
             cached.
@@ -173,17 +159,11 @@ class BenchmarkConfig:
     dataset_languages: list[Language]
     tasks: list[Task]
     datasets: list[str]
-    framework: "Framework | None"
+    framework: Framework | None
     batch_size: int
     raise_errors: bool
     cache_dir: str
-    evaluate_train: bool
-    token: bool | str | None
-    openai_api_key: str | None
-    azure_openai_api_key: str | None
-    azure_openai_endpoint: str | None
-    azure_openai_api_version: str | None
-    anthropic_api_key: str | None
+    api_key: str | None
     force: bool
     progress_bar: bool
     save_results: bool
@@ -198,6 +178,96 @@ class BenchmarkConfig:
     num_iterations: int
     debug: bool
     run_with_cli: bool
+
+
+class BenchmarkConfigParams(BaseModel):
+    """The parameters for the benchmark configuration."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    progress_bar: bool
+    save_results: bool
+    task: str | list[str] | None
+    dataset: str | list[str] | None
+    language: str | list[str]
+    model_language: str | list[str] | None
+    dataset_language: str | list[str] | None
+    framework: Framework | str | None
+    device: Device | None
+    batch_size: int
+    raise_errors: bool
+    cache_dir: str
+    api_key: str | None
+    force: bool
+    verbose: bool
+    trust_remote_code: bool
+    load_in_4bit: bool | None
+    use_flash_attention: bool | None
+    clear_model_cache: bool
+    only_validation_split: bool
+    few_shot: bool
+    num_iterations: int
+    debug: bool
+    run_with_cli: bool
+
+
+class BenchmarkResult(BaseModel):
+    """A benchmark result."""
+
+    dataset: str
+    task: str
+    dataset_languages: list[str]
+    model: str
+    results: ScoreDict
+    num_model_parameters: int
+    max_sequence_length: int
+    vocabulary_size: int
+    generative: bool
+    few_shot: bool
+    validation_split: bool
+    scandeval_version: str = importlib.metadata.version("scandeval")
+
+    @classmethod
+    def from_dict(cls, config: dict) -> "BenchmarkResult":
+        """Create a benchmark result from a dictionary.
+
+        Args:
+            config:
+                The configuration dictionary.
+
+        Returns:
+            The benchmark result.
+        """
+        # To be backwards compatible, we accept old results which changed the model
+        # name with parameters rather than adding them as explicit parameters
+        val_matches = re.search(r"\(.*val.*\)$", config["model"])
+        few_shot_matches = re.search(r"\(.*few-shot.*\)$", config["model"])
+        config["model"] = re.sub(
+            r"\(.*(few-shot|val).*\)$", "", config["model"]
+        ).strip()
+
+        # The default value for `few_shot` is True. It won't do anything if the model
+        # is not generative, so this is fine
+        if "generative" not in config:
+            config["generative"] = few_shot_matches is not None
+        if "few_shot" not in config:
+            config["few_shot"] = True
+
+        if "validation_split" not in config:
+            config["validation_split"] = val_matches is not None
+
+        return cls(**config)
+
+    def append_to_results(self, results_path: Path) -> None:
+        """Append the benchmark result to the results file.
+
+        Args:
+            results_path:
+                The path to the results file.
+        """
+        json_str = json.dumps(self.model_dump())
+        with results_path.open("a") as f:
+            f.write("\n" + json_str)
 
 
 @dataclass
@@ -303,13 +373,38 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: "Framework"
+    framework: Framework
     task: str
     languages: list[Language]
-    model_type: "ModelType | str"
+    model_type: "ModelType"
     model_cache_dir: str
     adapter_base_model_id: str | None
 
     def __hash__(self) -> int:
         """Return a hash of the model configuration."""
         return hash(self.model_id)
+
+
+@dataclass
+class PreparedModelInputs:
+    """The inputs to a model."""
+
+    texts: list[str] | None = None
+    input_ids: torch.Tensor | None = None
+    attention_mask: torch.Tensor | None = None
+
+
+@dataclass
+class GenerativeModelOutput:
+    """The output of a model."""
+
+    sequences: list[str]
+    scores: list[list[list[tuple[str, float]]]] | None = None
+
+
+@dataclass
+class SingleGenerativeModelOutput:
+    """The output of a single model."""
+
+    sequence: str
+    scores: list[list[tuple[str, float]]] | None = None

@@ -2,24 +2,23 @@
 
 import importlib.util
 import logging
-import os
 import sys
-from typing import TYPE_CHECKING
+import typing as t
 
 import torch
 
-from .config import BenchmarkConfig
+from .data_models import BenchmarkConfig
 from .dataset_configs import get_all_dataset_configs
 from .enums import Device, Framework
 from .exceptions import InvalidBenchmark
 from .languages import get_all_languages
 from .tasks import get_all_tasks
 
-if TYPE_CHECKING:
-    from .config import Language, Task
+if t.TYPE_CHECKING:
+    from .data_models import Language, Task
 
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("scandeval")
 
 
 def build_benchmark_config(
@@ -33,16 +32,9 @@ def build_benchmark_config(
     framework: Framework | str | None,
     device: Device | None,
     batch_size: int,
-    evaluate_train: bool,
     raise_errors: bool,
     cache_dir: str,
-    token: bool | str | None,
-    openai_api_key: str | None,
-    prefer_azure: bool,
-    azure_openai_api_key: str | None,
-    azure_openai_endpoint: str | None,
-    azure_openai_api_version: str | None,
-    anthropic_api_key: str | None,
+    api_key: str | None,
     force: bool,
     verbose: bool,
     trust_remote_code: bool,
@@ -87,27 +79,12 @@ def build_benchmark_config(
             set automatically.
         batch_size:
             The batch size to use for running the models.
-        evaluate_train:
-            Whether to evaluate the models on the training set.
         raise_errors:
             Whether to raise errors when running the benchmark.
         cache_dir:
             The directory to use for caching the models.
-        token:
-            The token to use for running the models.
-        openai_api_key:
-            The OpenAI API key to use for running the models.
-        prefer_azure:
-            Whether to prefer the Azure OpenAI API for running the models, over the
-            OpenAI API.
-        azure_openai_api_key:
-            The Azure OpenAI API key to use for running the models.
-        azure_openai_endpoint:
-            The Azure OpenAI endpoint to use for running the models.
-        azure_openai_api_version:
-            The Azure OpenAI api version to use for running the models.
-        anthropic_api_key:
-            The Anthropic API key to use for running the models.
+        api_key:
+            The API key to use for a given inference server.
         force:
             Whether to force the benchmark to run even if the results are already
             cached.
@@ -153,53 +130,7 @@ def build_benchmark_config(
 
     torch_device = prepare_device(device=device)
 
-    if openai_api_key is None:
-        openai_api_key = os.getenv("OPENAI_API_KEY")
-    if azure_openai_api_key is None:
-        azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
-    if azure_openai_endpoint is None:
-        azure_openai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-    if azure_openai_api_version is None:
-        azure_openai_api_version = os.getenv("AZURE_OPENAI_API_VERSION")
-    if anthropic_api_key is None:
-        anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
-
-    # Ensure that we are not using both OpenAI and Azure OpenAI API keys
-    if all(
-        value is not None
-        for value in (
-            openai_api_key,
-            azure_openai_api_key,
-            azure_openai_endpoint,
-            azure_openai_api_version,
-        )
-    ):
-        if prefer_azure:
-            logger.info(
-                "Both OpenAI and Azure OpenAI API keys are set. Using Azure OpenAI."
-            )
-            openai_api_key = None
-        else:
-            if run_with_cli:
-                logger.info(
-                    "Both OpenAI and Azure OpenAI API keys are set. Using OpenAI since "
-                    "the `--prefer-azure` flag is not set."
-                )
-            else:
-                logger.info(
-                    "Both OpenAI and Azure OpenAI API keys are set. Using OpenAI since "
-                    "the `prefer_azure` argument is not set to True."
-                )
-            azure_openai_api_key = None
-            azure_openai_endpoint = None
-
-    # Sanity check
-    assert not (openai_api_key is not None and azure_openai_api_key is not None)
-
     framework_obj = Framework(framework) if framework is not None else None
-
-    if token is True:
-        token = None
 
     if use_flash_attention is None:
         if torch_device.type != "cuda":
@@ -237,13 +168,7 @@ def build_benchmark_config(
         batch_size=batch_size,
         raise_errors=raise_errors,
         cache_dir=cache_dir,
-        evaluate_train=evaluate_train,
-        token=token,
-        openai_api_key=openai_api_key,
-        azure_openai_api_key=azure_openai_api_key,
-        azure_openai_endpoint=azure_openai_endpoint,
-        azure_openai_api_version=azure_openai_api_version,
-        anthropic_api_key=anthropic_api_key,
+        api_key=api_key,
         force=force,
         progress_bar=progress_bar,
         save_results=save_results,
