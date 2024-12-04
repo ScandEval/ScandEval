@@ -14,6 +14,7 @@ import litellm
 from datasets import DatasetDict
 from litellm.exceptions import (
     APIError,
+    AuthenticationError,
     BadRequestError,
     InternalServerError,
     NotFoundError,
@@ -22,17 +23,11 @@ from litellm.types.utils import ModelResponse
 from transformers import Trainer
 
 from ..constants import SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
-from ..data_models import (
-    BenchmarkConfig,
-    DatasetConfig,
-    GenerativeModelOutput,
-    ModelConfig,
-    Task,
-)
+from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType
 from ..exceptions import (
     InvalidBenchmark,
-    InvalidModel,
+    NeedsAdditionalArgument,
     NeedsEnvironmentVariable,
     NeedsExtraInstalled,
 )
@@ -108,37 +103,6 @@ class LiteLLMModel(BenchmarkModule):
     _is_generative = True
     batching_preference = BatchingPreference.SINGLE_SAMPLE
 
-    def __init__(
-        self,
-        model_config: ModelConfig,
-        dataset_config: DatasetConfig,
-        benchmark_config: BenchmarkConfig,
-    ) -> None:
-        """Initialise the OpenAI model.
-
-        Args:
-            model_config:
-                The model configuration.
-            dataset_config:
-                The dataset configuration.
-            benchmark_config:
-                The benchmark configuration.
-        """
-        super().__init__(model_config, dataset_config, benchmark_config)
-
-        # TODO: Make this a bit more lax, and use env vars if available.
-        if self.benchmark_config.api_key is None:
-            if self.benchmark_config.run_with_cli:
-                raise InvalidModel(
-                    "API models require an API key to be specified. Please specify "
-                    "the `--api-key` argument."
-                )
-            else:
-                raise InvalidModel(
-                    "API models require an API key to be specified. Please specify "
-                    "the `api_key` argument to the `Benchmarker` class."
-                )
-
     def generate(self, inputs: dict) -> GenerativeModelOutput:
         """Generate outputs from the model.
 
@@ -202,6 +166,12 @@ class LiteLLMModel(BenchmarkModule):
                     )
                 sleep(1)
                 continue
+            except AuthenticationError:
+                raise NeedsAdditionalArgument(
+                    cli_argument="--api-key",
+                    script_argument="api_key=<your-api-key>",
+                    run_with_cli=self.benchmark_config.run_with_cli,
+                )
         else:
             raise InvalidBenchmark(
                 message=f"Failed to generate text, after {num_attempts} attempts."

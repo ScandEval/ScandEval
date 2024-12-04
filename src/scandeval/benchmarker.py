@@ -597,7 +597,7 @@ class Benchmarker:
                 logger.debug(f"Results:\n{results}")
                 return record
 
-            except InvalidBenchmark as e:
+            except (InvalidBenchmark, InvalidModel) as e:
                 # If the model ID is not valid then raise an error
                 model_err_msg = "does not exist on the Hugging Face Hub"
                 if benchmark_config.raise_errors and model_err_msg in str(e):
@@ -623,11 +623,9 @@ class Benchmarker:
                         "environment variable to `1` and try again."
                     )
 
-                # Otherwise, raise the error or return the error message
-                else:
-                    if benchmark_config.raise_errors:
-                        raise e
-                    return e
+                elif benchmark_config.raise_errors:
+                    raise e
+                return e
 
     def __call__(self, *args, **kwargs) -> list[BenchmarkResult]:
         """Call the benchmarker. See `Benchmarker.benchmark`."""
