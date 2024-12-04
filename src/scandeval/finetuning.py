@@ -1,6 +1,5 @@
 """Functions related to the finetuning of models."""
 
-import collections.abc as c
 import importlib.util
 import logging
 import sys
@@ -11,7 +10,6 @@ import torch
 from datasets import DatasetDict
 from tqdm.auto import tqdm
 from transformers import (
-    DataCollator,
     EarlyStoppingCallback,
     IntervalStrategy,
     PrinterCallback,
@@ -28,8 +26,6 @@ from .model_loading import load_model
 from .utils import block_terminal_output, clear_memory, enforce_reproducibility
 
 if t.TYPE_CHECKING:
-    from transformers import Trainer
-
     from .data_models import BenchmarkConfig, DatasetConfig, ModelConfig
 
 logger = logging.getLogger("scandeval")
@@ -38,9 +34,6 @@ logger = logging.getLogger("scandeval")
 def finetune(
     model: BenchmarkModule,
     datasets: list[DatasetDict],
-    compute_metrics: c.Callable,
-    trainer_class: t.Type["Trainer"],
-    data_collator: DataCollator,
     model_config: "ModelConfig",
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
@@ -52,12 +45,6 @@ def finetune(
             The model to evaluate.
         datasets:
             The datasets to use for training and evaluation.
-        compute_metrics:
-            The function used to compute the metrics.
-        trainer_class:
-            The Trainer class to use.
-        data_collator:
-            The data collator to use.
         model_config:
             The configuration of the model.
         dataset_config:
@@ -114,9 +101,6 @@ def finetune(
                 itr_scores = finetune_single_iteration(
                     model=model if model_already_initialized else None,
                     dataset=datasets[idx],
-                    compute_metrics=compute_metrics,
-                    trainer_class=trainer_class,
-                    data_collator=data_collator,
                     iteration_idx=idx,
                     training_args=training_args,
                     model_config=model_config,
@@ -172,9 +156,6 @@ def finetune(
 def finetune_single_iteration(
     model: BenchmarkModule | None,
     dataset: DatasetDict,
-    compute_metrics: c.Callable,
-    trainer_class: t.Type["Trainer"],
-    data_collator: DataCollator,
     iteration_idx: int,
     training_args: TrainingArguments,
     model_config: "ModelConfig",
@@ -188,12 +169,6 @@ def finetune_single_iteration(
             The model to use in the benchmark. If None then a new model will be loaded.
         dataset:
             The dataset to use for training and evaluation.
-        compute_metrics:
-            The function to compute the metrics.
-        trainer_class:
-            The trainer class to use.
-        data_collator:
-            The data collator to use.
         iteration_idx:
             The index of the iteration.
         training_args:
@@ -220,15 +195,17 @@ def finetune_single_iteration(
             benchmark_config=benchmark_config,
         )
 
-    trainer = trainer_class(
+    trainer = model.trainer_class(
         model=model.get_pytorch_module(),
         tokenizer=model.get_tokenizer(),
         args=training_args,
         train_dataset=dataset["train"],
         eval_dataset=dataset["val"],
-        compute_metrics=partial(compute_metrics, id2label=dataset_config.id2label),
+        compute_metrics=partial(
+            model.compute_metrics, id2label=dataset_config.id2label
+        ),
         callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
-        data_collator=data_collator,
+        data_collator=model.data_collator,
     )
 
     if not benchmark_config.verbose:

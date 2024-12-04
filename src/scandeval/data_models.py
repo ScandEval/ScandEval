@@ -142,8 +142,8 @@ class BenchmarkConfig:
             generative models.
         clear_model_cache:
             Whether to clear the model cache after benchmarking each model.
-        only_validation_split:
-            Whether to only evaluate on the validation split.
+        evaluate_test_split:
+            Whether to evaluate on the test split.
         few_shot:
             Whether to only evaluate the model using few-shot evaluation. Only relevant
             if the model is generative.
@@ -173,7 +173,7 @@ class BenchmarkConfig:
     load_in_4bit: bool | None
     use_flash_attention: bool | None
     clear_model_cache: bool
-    only_validation_split: bool
+    evaluate_test_split: bool
     few_shot: bool
     num_iterations: int
     debug: bool
@@ -204,7 +204,7 @@ class BenchmarkConfigParams(BaseModel):
     load_in_4bit: bool | None
     use_flash_attention: bool | None
     clear_model_cache: bool
-    only_validation_split: bool
+    evaluate_test_split: bool
     few_shot: bool
     num_iterations: int
     debug: bool

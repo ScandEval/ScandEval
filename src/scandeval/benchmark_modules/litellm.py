@@ -1,5 +1,6 @@
 """Generative models from an inference API, using the LiteLLM framework."""
 
+import collections.abc as c
 import itertools as it
 import json
 import logging
@@ -18,6 +19,7 @@ from litellm.exceptions import (
     NotFoundError,
 )
 from litellm.types.utils import ModelResponse
+from transformers import Trainer
 
 from ..constants import SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import (
@@ -34,6 +36,13 @@ from ..exceptions import (
     NeedsEnvironmentVariable,
     NeedsExtraInstalled,
 )
+from ..task_utils import (
+    question_answering,
+    sequence_classification,
+    text_to_text,
+    token_classification,
+)
+from ..types import ExtractLabelsFunction
 from ..utils import create_model_cache_dir
 from .base import BenchmarkModule
 
@@ -249,6 +258,55 @@ class LiteLLMModel(BenchmarkModule):
             if re.match(pattern=key, string=self.model_config.model_id) is not None:
                 return value
         return -1
+
+    @cached_property
+    def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
+        """The data collator used to prepare samples during finetuning.
+
+        Returns:
+            The data collator.
+        """
+        raise NotImplementedError(
+            "The `data_collator` property has not been implemented for LiteLLM models."
+        )
+
+    @cached_property
+    def extract_labels_from_generation(self) -> ExtractLabelsFunction:
+        """The function used to extract the labels from the generated output.
+
+        Returns:
+            The function used to extract the labels from the generated output.
+        """
+        match self.dataset_config.task.supertask:
+            case "sequence-classification":
+                return partial(
+                    sequence_classification.extract_labels_from_generation,
+                    dataset_config=self.dataset_config,
+                )
+            case "text-to-text":
+                return text_to_text.extract_labels_from_generation
+            case "token-classification":
+                return partial(
+                    token_classification.extract_labels_from_generation,
+                    dataset_config=self.dataset_config,
+                )
+            case "question-answering":
+                return question_answering.extract_labels_from_generation
+            case _:
+                raise NotImplementedError(
+                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                )
+
+    @cached_property
+    def trainer_class(self) -> t.Type["Trainer"]:
+        """The Trainer class to use for finetuning.
+
+        Returns:
+            The Trainer class.
+        """
+        raise NotImplementedError(
+            "The `trainer_class` property has not been implemented for LiteLLM models."
+        )
 
     @classmethod
     def model_exists(

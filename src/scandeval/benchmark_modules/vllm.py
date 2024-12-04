@@ -1,11 +1,12 @@
 """Generative models using the vLLM inference framework."""
 
+import collections.abc as c
 import importlib.util
 import typing as t
 from functools import cached_property
 
 from datasets import DatasetDict
-from transformers import PreTrainedTokenizer
+from transformers import PreTrainedTokenizer, Trainer
 
 from ..data_models import (
     BenchmarkConfig,
@@ -15,6 +16,7 @@ from ..data_models import (
     Task,
 )
 from ..exceptions import NeedsEnvironmentVariable, NeedsExtraInstalled
+from ..types import ExtractLabelsFunction
 from .base import BenchmarkModule
 
 if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
@@ -72,6 +74,49 @@ class VLLMModel(BenchmarkModule):
             The maximum context length of the model.
         """
         raise NotImplementedError
+
+    @cached_property
+    def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
+        """The data collator used to prepare samples during finetuning.
+
+        Returns:
+            The data collator.
+        """
+        raise NotImplementedError(
+            "The `data_collator` property has not been implemented for vLLM models."
+        )
+
+    @cached_property
+    def extract_labels_from_generation(self) -> ExtractLabelsFunction:
+        """The function used to extract the labels from the generated output.
+
+        Returns:
+            The function used to extract the labels from the generated output.
+        """
+        match self.dataset_config.task.supertask:
+            case "sequence-classification":
+                raise NotImplementedError
+            case "text-to-text":
+                raise NotImplementedError
+            case "token-classification":
+                raise NotImplementedError
+            case "question-answering":
+                raise NotImplementedError
+            case _:
+                raise NotImplementedError(
+                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                )
+
+    @cached_property
+    def trainer_class(self) -> t.Type["Trainer"]:
+        """The Trainer class to use for finetuning.
+
+        Returns:
+            The Trainer class.
+        """
+        raise NotImplementedError(
+            "The `trainer_class` property has not been implemented for vLLM models."
+        )
 
     def prepare_dataset(
         self, dataset: DatasetDict, task: Task, itr_idx: int

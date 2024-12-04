@@ -1,13 +1,16 @@
 """Abstract benchmark module class that the model classes inherit from."""
 
+import collections.abc as c
 import logging
+import sys
+import typing as t
 from abc import ABC, abstractmethod
-from functools import cached_property
+from functools import cached_property, partial
 
 from datasets import DatasetDict
 from torch import nn
 from tqdm.auto import tqdm
-from transformers import PreTrainedTokenizer
+from transformers import PreTrainedTokenizer, Trainer
 
 from ..data_models import (
     BenchmarkConfig,
@@ -18,6 +21,13 @@ from ..data_models import (
 )
 from ..enums import BatchingPreference
 from ..exceptions import NeedsEnvironmentVariable, NeedsExtraInstalled
+from ..task_utils import (
+    question_answering,
+    sequence_classification,
+    text_to_text,
+    token_classification,
+)
+from ..types import ComputeMetricsFunction, ExtractLabelsFunction
 
 logger = logging.getLogger("scandeval")
 
@@ -62,6 +72,15 @@ class BenchmarkModule(ABC):
 
     def _log_metadata(self) -> None:
         """Log the metadata of the model."""
+        # Set logging level based on verbosity
+        if hasattr(sys, "_called_from_test"):
+            logging_level = logging.CRITICAL
+        elif self.benchmark_config.verbose:
+            logging_level = logging.DEBUG
+        else:
+            logging_level = logging.INFO
+        logger.setLevel(logging_level)
+
         logging_msg: str = ""
         if self.num_params < 0:
             logging_msg += "The model has an unknown number of parameters, "
@@ -146,6 +165,75 @@ class BenchmarkModule(ABC):
         """
         ...
 
+    @cached_property
+    @abstractmethod
+    def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
+        """The data collator used to prepare samples during finetuning.
+
+        Returns:
+            The data collator.
+        """
+        ...
+
+    @cached_property
+    def compute_metrics(self) -> ComputeMetricsFunction:
+        """The function used to compute the metrics.
+
+        Returns:
+            The function used to compute the metrics.
+        """
+        match self.dataset_config.task.supertask:
+            case "sequence-classification":
+                return partial(
+                    sequence_classification.compute_metrics,
+                    id2label=self.dataset_config.id2label,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=self.benchmark_config,
+                )
+            case "text-to-text":
+                return partial(
+                    text_to_text.compute_metrics,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=self.benchmark_config,
+                )
+            case "token-classification":
+                return partial(
+                    token_classification.compute_metrics,
+                    has_misc_tags=self._has_misc_tags,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=self.benchmark_config,
+                )
+            case "question-answering":
+                return partial(
+                    question_answering.compute_metrics,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=self.benchmark_config,
+                )
+            case _:
+                raise NotImplementedError(
+                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                )
+
+    @cached_property
+    @abstractmethod
+    def extract_labels_from_generation(self) -> ExtractLabelsFunction:
+        """The function used to extract the labels from the generated output.
+
+        Returns:
+            The function used to extract the labels from the generated output.
+        """
+        ...
+
+    @cached_property
+    @abstractmethod
+    def trainer_class(self) -> t.Type["Trainer"]:
+        """The Trainer class to use for finetuning.
+
+        Returns:
+            The Trainer class.
+        """
+        ...
+
     def prepare_datasets(
         self, datasets: list[DatasetDict], task: Task
     ) -> list[DatasetDict]:
@@ -168,6 +256,13 @@ class BenchmarkModule(ABC):
             prepared_dataset = self.prepare_dataset(
                 dataset=dataset, task=task, itr_idx=idx
             )
+            if self.dataset_config.task.supertask == "token-classification":
+                labels_in_train: set[str] = {
+                    tag for tag_list in dataset["train"]["labels"] for tag in tag_list
+                }
+                self._has_misc_tags = (
+                    "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
+                )
             datasets[idx] = DatasetDict(
                 dict(
                     train=prepared_dataset["train"],

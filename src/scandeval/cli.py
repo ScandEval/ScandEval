@@ -174,11 +174,11 @@ from .tasks import get_all_tasks
     to avoid running out of disk space.""",
 )
 @click.option(
-    "--only-validation-split/--no-only-validation-split",
+    "--evaluate-test-split/--evaluate-val-split",
     default=False,
     show_default=True,
-    help="""Whether to only evaluate on the validation split. This is useful if you're
-    optimising hyperparameters, to avoid overfitting to the test sets.""",
+    help="""Whether to only evaluate on the test split. Only use this for your final
+    evaluation, as the test split should not be used for development.""",
 )
 @click.option(
     "--few-shot/--zero-shot",
@@ -224,7 +224,7 @@ def benchmark(
     load_in_4bit: bool | None,
     use_flash_attention: bool | None,
     clear_model_cache: bool,
-    only_validation_split: bool,
+    evaluate_test_split: bool,
     few_shot: bool,
     num_iterations: int,
     debug: bool,
@@ -259,7 +259,7 @@ def benchmark(
         load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
-        only_validation_split=only_validation_split,
+        evaluate_test_split=evaluate_test_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
         debug=debug,

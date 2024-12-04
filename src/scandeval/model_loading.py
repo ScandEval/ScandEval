@@ -2,10 +2,12 @@
 
 import typing as t
 
-from scandeval.benchmark_modules.fresh import FreshEncoderModel
-from scandeval.benchmark_modules.vllm import VLLMModel
-
-from .benchmark_modules import HuggingFaceEncoderModel, LiteLLMModel
+from .benchmark_modules import (
+    FreshEncoderModel,
+    HuggingFaceEncoderModel,
+    LiteLLMModel,
+    VLLMModel,
+)
 from .constants import GENERATIVE_DATASET_SUPERTASKS, GENERATIVE_DATASET_TASKS
 from .enums import ModelType
 from .exceptions import InvalidBenchmark

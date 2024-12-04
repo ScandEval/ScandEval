@@ -1,5 +1,6 @@
 """Encoder models from the Hugging Face Hub."""
 
+import collections.abc as c
 import logging
 import typing as t
 from functools import cached_property, partial
@@ -21,17 +22,15 @@ from torch import nn
 from transformers import (
     AutoConfig,
     AutoTokenizer,
+    DataCollatorForTokenClassification,
+    DataCollatorWithPadding,
     PretrainedConfig,
     PreTrainedModel,
     PreTrainedTokenizer,
+    Trainer,
 )
 from urllib3.exceptions import RequestError
 
-from ..benchmark_datasets.named_entity_recognition import tokenize_and_align_labels
-from ..benchmark_datasets.question_answering import (
-    prepare_test_examples,
-    prepare_train_examples,
-)
 from ..constants import DUMMY_FILL_VALUE
 from ..data_models import BenchmarkConfig, DatasetConfig, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType
@@ -45,6 +44,8 @@ from ..exceptions import (
     NoInternetConnection,
 )
 from ..languages import get_all_languages
+from ..task_utils import question_answering, token_classification
+from ..types import ExtractLabelsFunction
 from ..utils import (
     block_terminal_output,
     create_model_cache_dir,
@@ -211,6 +212,54 @@ class HuggingFaceEncoderModel(BenchmarkModule):
 
         return model_max_length
 
+    @cached_property
+    def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
+        """The data collator used to prepare samples during finetuning.
+
+        Returns:
+            The data collator.
+        """
+        match self.dataset_config.task.supertask:
+            case "sequence-classification" | "text-to-text" | "question-answering":
+                return DataCollatorWithPadding(self._tokenizer, padding="longest")
+            case "token-classification":
+                return DataCollatorForTokenClassification(
+                    tokenizer=self._tokenizer, label_pad_token_id=-100
+                )
+            case _:
+                raise NotImplementedError(
+                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                )
+
+    @cached_property
+    def extract_labels_from_generation(self) -> ExtractLabelsFunction:
+        """The function used to extract the labels from the generated output.
+
+        Returns:
+            The function used to extract the labels from the generated output.
+        """
+        raise NotImplementedError(
+            "The `extract_labels_from_generation` property has not been implemented "
+            "for Hugging Face Encoder models."
+        )
+
+    @cached_property
+    def trainer_class(self) -> t.Type["Trainer"]:
+        """The Trainer class to use for finetuning.
+
+        Returns:
+            The Trainer class.
+        """
+        match self.dataset_config.task.supertask:
+            case "sequence-classification" | "text-to-text" | "token-classification":
+                return Trainer
+            case "question-answering":
+                return question_answering.QuestionAnsweringTrainer
+            case _:
+                raise NotImplementedError(
+                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                )
+
     def prepare_dataset(
         self, dataset: DatasetDict, task: Task, itr_idx: int
     ) -> DatasetDict:
@@ -265,7 +314,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             case "token-classification":
                 dataset = dataset.map(
                     partial(
-                        tokenize_and_align_labels,
+                        token_classification.tokenize_and_align_labels,
                         tokenizer=self._tokenizer,
                         label2id=self._model.config.label2id,
                     ),
@@ -278,7 +327,10 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 dataset = DatasetDict(
                     dict(
                         train=dataset["train"].map(
-                            partial(prepare_train_examples, tokenizer=self._tokenizer),
+                            partial(
+                                question_answering.prepare_train_examples,
+                                tokenizer=self._tokenizer,
+                            ),
                             batched=True,
                             batch_size=10,
                             remove_columns=dataset["test"].column_names,
@@ -286,7 +338,10 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                             keep_in_memory=True,
                         ),
                         val=dataset["val"].map(
-                            partial(prepare_train_examples, tokenizer=self._tokenizer),
+                            partial(
+                                question_answering.prepare_train_examples,
+                                tokenizer=self._tokenizer,
+                            ),
                             batched=True,
                             batch_size=10,
                             remove_columns=dataset["test"].column_names,
@@ -294,7 +349,10 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                             keep_in_memory=True,
                         ),
                         test=dataset["test"].map(
-                            partial(prepare_test_examples, tokenizer=self._tokenizer),
+                            partial(
+                                question_answering.prepare_test_examples,
+                                tokenizer=self._tokenizer,
+                            ),
                             batched=True,
                             batch_size=10,
                             remove_columns=dataset["test"].column_names,

@@ -12,9 +12,9 @@ from time import sleep
 
 from .benchmark_config_factory import build_benchmark_config
 from .constants import GENERATIVE_MODEL_TASKS
+from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
-from .dataset_factory import build_benchmark_dataset
 from .enums import Device, Framework
 from .exceptions import InvalidBenchmark, InvalidModel
 from .finetuning import finetune
@@ -45,8 +45,6 @@ class Benchmarker:
         force:
             Whether to force evaluations of models, even if they have been benchmarked
             already.
-        dataset_factory:
-            The factory for creating datasets.
         results_path:
             The path to the results file.
         benchmark_results:
@@ -74,7 +72,7 @@ class Benchmarker:
         load_in_4bit: bool | None = None,
         use_flash_attention: bool | None = None,
         clear_model_cache: bool = False,
-        only_validation_split: bool = False,
+        evaluate_test_split: bool = False,
         few_shot: bool = True,
         num_iterations: int = 10,
         debug: bool = False,
@@ -139,9 +137,8 @@ class Benchmarker:
             clear_model_cache:
                 Whether to clear the model cache after benchmarking each model.
                 Defaults to False.
-            only_validation_split:
-                Whether to only evaluate the validation split of the datasets. Defaults
-                to False.
+            evaluate_test_split:
+                Whether to evaluate the test split of the datasets. Defaults to False.
             few_shot:
                 Whether to only evaluate the model using few-shot evaluation. Only
                 relevant if the model is generative. Defaults to True.
@@ -182,7 +179,7 @@ class Benchmarker:
             load_in_4bit=load_in_4bit,
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
-            only_validation_split=only_validation_split,
+            evaluate_test_split=evaluate_test_split,
             few_shot=few_shot,
             num_iterations=num_iterations,
             debug=debug,
@@ -234,7 +231,7 @@ class Benchmarker:
         load_in_4bit: bool | None = None,
         use_flash_attention: bool | None = None,
         clear_model_cache: bool | None = None,
-        only_validation_split: bool | None = None,
+        evaluate_test_split: bool | None = None,
         few_shot: bool | None = None,
         num_iterations: int | None = None,
     ) -> list[BenchmarkResult]:
@@ -313,9 +310,9 @@ class Benchmarker:
             clear_model_cache:
                 Whether to clear the model cache after benchmarking each model. Defaults
                 to the value specified when initialising the benchmarker.
-            only_validation_split:
-                Whether to only evaluate the validation split of the datasets. Defaults
-                to the value specified when initialising the benchmarker.
+            evaluate_test_split:
+                Whether to evaluate the test split of the datasets. Defaults to the
+                value specified when initialising the benchmarker.
             few_shot:
                 Whether to only evaluate the model using few-shot evaluation. Only
                 relevant if the model is generative. Defaults to the value specified
@@ -356,7 +353,7 @@ class Benchmarker:
             load_in_4bit=load_in_4bit,
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
-            only_validation_split=only_validation_split,
+            evaluate_test_split=evaluate_test_split,
             few_shot=few_shot,
             num_iterations=num_iterations,
         )
@@ -388,7 +385,7 @@ class Benchmarker:
                     model_id=m_id,
                     dataset=dataset_config.name,
                     few_shot=benchmark_config.few_shot,
-                    validation_split=benchmark_config.only_validation_split,
+                    validation_split=not benchmark_config.evaluate_test_split,
                     benchmark_results=self.benchmark_results,
                 ):
                     logger.debug(
@@ -514,10 +511,6 @@ class Benchmarker:
                 "batch. For this reason, evaluation will be slower."
             )
 
-        benchmark_dataset = build_benchmark_dataset(
-            dataset=dataset_config, benchmark_config=benchmark_config
-        )
-
         model: BenchmarkModule | None = None
         while True:
             try:
@@ -554,7 +547,11 @@ class Benchmarker:
                     )
 
                 else:
-                    bootstrapped_datasets = benchmark_dataset.load_data(rng=rng)
+                    bootstrapped_datasets = load_data(
+                        rng=rng,
+                        dataset_config=dataset_config,
+                        benchmark_config=benchmark_config,
+                    )
                     prepared_datasets = model.prepare_datasets(
                         datasets=bootstrapped_datasets, task=dataset_config.task
                     )
@@ -562,10 +559,6 @@ class Benchmarker:
                         scores = generate(
                             model=model,
                             datasets=prepared_datasets,
-                            compute_metrics=benchmark_dataset.compute_metrics,
-                            extract_labels_fn=(
-                                benchmark_dataset.extract_labels_from_generation
-                            ),
                             model_config=model_config,
                             dataset_config=dataset_config,
                             benchmark_config=self.benchmark_config,
@@ -574,11 +567,6 @@ class Benchmarker:
                         scores = finetune(
                             model=model,
                             datasets=prepared_datasets,
-                            compute_metrics=benchmark_dataset.compute_metrics,
-                            trainer_class=benchmark_dataset.trainer_class,
-                            data_collator=benchmark_dataset.get_data_collator(
-                                model=model
-                            ),
                             model_config=model_config,
                             dataset_config=dataset_config,
                             benchmark_config=benchmark_config,
@@ -604,7 +592,7 @@ class Benchmarker:
                     vocabulary_size=model.vocab_size,
                     generative=model.is_generative,
                     few_shot=benchmark_config.few_shot,
-                    validation_split=benchmark_config.only_validation_split,
+                    validation_split=not benchmark_config.evaluate_test_split,
                 )
                 logger.debug(f"Results:\n{results}")
                 return record

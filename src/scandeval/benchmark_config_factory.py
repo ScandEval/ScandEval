@@ -41,7 +41,7 @@ def build_benchmark_config(
     load_in_4bit: bool | None,
     use_flash_attention: bool | None,
     clear_model_cache: bool,
-    only_validation_split: bool,
+    evaluate_test_split: bool,
     few_shot: bool,
     num_iterations: int,
     debug: bool,
@@ -99,8 +99,8 @@ def build_benchmark_config(
             if it is available.
         clear_model_cache:
             Whether to clear the model cache before running the benchmark.
-        only_validation_split:
-            Whether to only use the validation split for the datasets.
+        evaluate_test_split:
+            Whether to use the test split for the datasets.
         few_shot:
             Whether to use few-shot learning for the models.
         num_iterations:
@@ -179,7 +179,7 @@ def build_benchmark_config(
         load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
-        only_validation_split=only_validation_split,
+        evaluate_test_split=evaluate_test_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
         debug=debug,

@@ -1,6 +1,5 @@
 """Functions related to text generation of models."""
 
-import collections.abc as c
 import logging
 import sys
 import typing as t
@@ -10,10 +9,9 @@ import more_itertools as mit
 from datasets import Dataset, DatasetDict
 from tqdm.auto import tqdm
 
-from scandeval.exceptions import InvalidBenchmark
-
 from .benchmark_modules import BenchmarkModule
 from .enums import BatchingPreference
+from .exceptions import InvalidBenchmark
 from .model_cache import (
     ModelCache,
     load_cached_model_outputs,
@@ -30,8 +28,6 @@ logger = logging.getLogger("scandeval")
 def generate(
     model: "BenchmarkModule",
     datasets: list[DatasetDict],
-    compute_metrics: c.Callable,
-    extract_labels_fn: c.Callable[..., list[t.Any]],
     model_config: "ModelConfig",
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
@@ -43,10 +39,6 @@ def generate(
             The model to evaluate.
         datasets:
             The datasets to evaluate on.
-        compute_metrics:
-            The function to use to compute the metrics.
-        extract_labels_fn:
-            The function to use to extract the labels from the model output.
         model_config:
             The configuration of the model.
         benchmark_config:
@@ -87,8 +79,6 @@ def generate(
         test_scores = generate_single_iteration(
             model=model,
             dataset=datasets[idx]["test"],
-            compute_metrics=compute_metrics,
-            extract_labels_fn=extract_labels_fn,
             cache=cache,
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
@@ -107,8 +97,6 @@ def generate(
 def generate_single_iteration(
     dataset: Dataset,
     model: "BenchmarkModule",
-    compute_metrics: c.Callable,
-    extract_labels_fn: c.Callable[..., list[t.Any]],
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
     cache: ModelCache,
@@ -120,10 +108,6 @@ def generate_single_iteration(
             The dataset to evaluate on.
         model:
             The model to evaluate.
-        compute_metrics:
-            The function to use to compute the metrics.
-        extract_labels_fn:
-            The function to use to extract the labels from the dataset.
         dataset_config:
             The configuration of the dataset.
         benchmark_config:
@@ -174,7 +158,7 @@ def generate_single_iteration(
                 batch = {key: [value] for key, value in batch.items()}
 
             model_output = model.generate(inputs=batch)
-            extracted_labels: list = extract_labels_fn(
+            extracted_labels: list = model.extract_labels_from_generation(
                 input_batch=batch, model_output=model_output
             )
 
@@ -205,8 +189,8 @@ def generate_single_iteration(
         model_output = load_cached_model_outputs(
             cached_dataset=cached_dataset, cache=cache
         )
-        extracted_labels = extract_labels_fn(
-            input_batch=cached_dataset, model_output=model_output
+        extracted_labels = model.extract_labels_from_generation(
+            input_batch=cached_dataset[:], model_output=model_output
         )
         all_preds.extend(extracted_labels)
 
@@ -227,7 +211,7 @@ def generate_single_iteration(
             "The dataset must have either a 'label', 'labels', or 'target_text' column"
         )
 
-    itr_scores: dict[str, float] = compute_metrics(
+    itr_scores: dict[str, float] = model.compute_metrics(
         model_outputs_and_labels=(all_preds, ground_truth),
         id2label=dataset_config.id2label,
     )
