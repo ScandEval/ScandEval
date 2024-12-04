@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added support for [LiteLLM](https://docs.litellm.ai/), meaning that all LLMs on 100+
+  APIs can now be benchmarked! This includes OpenAI, Anthropic, Google, Mistral AI,
+  Cohere, Ollama, LM Studio, vLLM servers, and Hugging Face inference endpoints.
 
+### Changed
+- No more tokenisation for generation tasks, resulting in faster preprocessing times.
+
+### Removed
+- Removed the option to evaluate on the training split, as this is not a common use
+  case and simplified the codebase.
+- All generative on-premises models are now evaluated with vLLM and thus does not use
+  the `transformers` backend as a backup, as this was not used in practice, and
+  simplified the codebase.
 
 
 ## [v13.3.0] - 2024-11-29
