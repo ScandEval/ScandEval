@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added support for [LiteLLM](https://docs.litellm.ai/), meaning that all LLMs on 100+
   APIs can now be benchmarked! This includes OpenAI, Anthropic, Google, Mistral AI,
-  Cohere, Ollama, LM Studio, vLLM servers, and Hugging Face inference endpoints.
+  Cohere, Ollama, LM Studio, vLLM servers, and Hugging Face inference endpoints. Check
+  out the full list of LiteLLM providers [here](https://docs.litellm.ai/docs/providers).
 
 ### Changed
 - No more tokenisation for generation tasks, resulting in faster preprocessing times.
