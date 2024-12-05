@@ -162,7 +162,6 @@ def get_closest_logprobs_labels(
     ]
     output_labels: list[str] = list()
     given_warning: bool = False
-    breakpoint()
     for sample in generation_logprobs:
         for logprob_list in sample:
             generated_labels = [

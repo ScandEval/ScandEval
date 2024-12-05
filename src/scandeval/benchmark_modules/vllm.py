@@ -284,7 +284,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             ],
             skip_special_tokens=True,
         )
-        breakpoint()
+        completions = [completion.strip() for completion in completions]
 
         # Add logprobs scores to the output
         if self.output_scores:
@@ -302,7 +302,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         else:
             output = GenerativeModelOutput(sequences=completions)
 
-        breakpoint()
         return output
 
     @classmethod
