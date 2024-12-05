@@ -1,6 +1,5 @@
 """Utility functions related to the sequence-classification supertask."""
 
-import importlib.util
 import logging
 import re
 import typing as t
@@ -11,7 +10,6 @@ import numpy as np
 from evaluate import EvaluationModule
 
 from ..data_models import BenchmarkConfig, GenerativeModelOutput
-from ..exceptions import NeedsExtraInstalled
 from ..utils import raise_if_model_output_contains_nan_values
 
 if t.TYPE_CHECKING:
@@ -219,9 +217,6 @@ def get_closest_word_edit_labels(
     Returns:
         The candidate labels with the smallest edit distance to the predicted labels.
     """
-    if importlib.util.find_spec("Levenshtein") is None:
-        raise NeedsExtraInstalled(extra="openai")
-
     candidate_labels = [
         dataset_config.prompt_label_mapping[lbl]
         for lbl in dataset_config.id2label.values()

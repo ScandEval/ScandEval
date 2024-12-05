@@ -396,11 +396,6 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
-    # We don't add a prefix space to OpenAI tokenizers, since they output strings
-    # directly, and we always strip these for token ID consistency
-    if tokenizer.__class__.__name__ == "OpenAITokenizer":
-        return False
-
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
