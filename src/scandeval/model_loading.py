@@ -51,6 +51,7 @@ def load_model(
         dataset_config=dataset_config,
         benchmark_config=benchmark_config,
     )
+    breakpoint()
 
     # Refuse to benchmark non-generative models on generative tasks
     if (
