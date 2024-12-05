@@ -99,6 +99,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         self.output_scores = (
             self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS
         )
+        self._log_metadata()
 
         model, tokenizer = self._load_model_and_tokenizer()
         self._model: LLM = model
@@ -113,8 +114,6 @@ class VLLMModel(HuggingFaceEncoderModel):
             self.lora_request = LoRARequest(
                 lora_name="adapter", lora_int_id=1, lora_path=adapter_path
             )
-
-        self._log_metadata()
 
     @cached_property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
