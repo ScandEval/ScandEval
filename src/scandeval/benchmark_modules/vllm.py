@@ -449,8 +449,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             trust_remote_code=self.benchmark_config.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
-            # TEMP
-            # distributed_executor_backend="ray",
+            distributed_executor_backend=None if self.benchmark_config.debug else "ray",
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,
