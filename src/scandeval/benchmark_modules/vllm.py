@@ -287,9 +287,17 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         # Add logprobs scores to the output
         if self.output_scores:
+            scores: list[list[list[tuple[str, float]]]] = [
+                [
+                    [
+                        (obj.decoded_token, obj.logprob)
+                        for obj in token_logprobs_dict.values()
+                    ]
+                    for token_logprobs_dict in raw_output.outputs[0].logprobs
+                ]
+                for raw_output in raw_outputs
+            ]
             breakpoint()
-            # TODO: Define this
-            scores = raw_outputs
             output = GenerativeModelOutput(sequences=completions, scores=scores)
         else:
             output = GenerativeModelOutput(sequences=completions)
