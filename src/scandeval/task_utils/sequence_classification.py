@@ -156,7 +156,7 @@ def get_closest_logprobs_labels(
         InvalidBenchmark:
             If no candidate label can be found for any of the generated labels.
     """
-    candidate_labels = [
+    candidate_labels = list(dataset_config.id2label.values()) + [
         dataset_config.prompt_label_mapping[lbl].lower()
         for lbl in dataset_config.id2label.values()
     ]
