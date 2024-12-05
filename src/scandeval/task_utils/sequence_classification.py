@@ -156,10 +156,12 @@ def get_closest_logprobs_labels(
         InvalidBenchmark:
             If no candidate label can be found for any of the generated labels.
     """
-    candidate_labels = list(dataset_config.id2label.values()) + [
-        dataset_config.prompt_label_mapping[lbl].lower()
-        for lbl in dataset_config.id2label.values()
-    ]
+    english_labels = list(dataset_config.id2label.values())
+    english2local = dataset_config.prompt_label_mapping
+    candidate_labels = [
+        english2local[lbl].lower() for lbl in english_labels
+    ] + english_labels
+
     output_labels: list[str] = list()
     given_warning: bool = False
     for sample in generation_logprobs:
@@ -188,6 +190,7 @@ def get_closest_logprobs_labels(
                     break
 
             if output_label is not None:
+                output_label = english2local.get(output_label, output_label)
                 output_labels.append(output_label)
                 break
         else:
