@@ -11,7 +11,7 @@ import numpy as np
 from evaluate import EvaluationModule
 
 from ..data_models import BenchmarkConfig, GenerativeModelOutput
-from ..exceptions import InvalidBenchmark, NeedsExtraInstalled
+from ..exceptions import NeedsExtraInstalled
 from ..utils import raise_if_model_output_contains_nan_values
 
 if t.TYPE_CHECKING:
@@ -162,6 +162,7 @@ def get_closest_logprobs_labels(
         for lbl in dataset_config.id2label.values()
     ]
     output_labels: list[str] = list()
+    given_warning: bool = False
     for sample in generation_logprobs:
         for logprob_list in sample:
             generated_labels = [
@@ -182,10 +183,14 @@ def get_closest_logprobs_labels(
                 output_labels.append(candidate_output_labels[0])
                 break
         else:
-            raise InvalidBenchmark(
-                f"Could not find a candidate label for any of the generated labels "
-                f"in the sample {sample}."
-            )
+            if not given_warning:
+                logger.warning(
+                    f"Could not find a candidate label for any of the generated labels "
+                    f"in the sample {sample}. Using {candidate_labels[0]!r} as the output "
+                    f"label."
+                )
+                given_warning = True
+            output_labels.append(candidate_labels[0])
     return output_labels
 
 
