@@ -8,12 +8,9 @@ import torch
 from pydantic import BaseModel, conlist, create_model
 
 if importlib.util.find_spec("outlines") is not None:
-    from outlines.integrations.transformers import JSONPrefixAllowedTokens
     from outlines.integrations.vllm import JSONLogitsProcessor
 
 if t.TYPE_CHECKING:
-    from outlines.integrations.transformers import JSONPrefixAllowedTokens
-    from transformers import PreTrainedTokenizerBase
     from vllm import LLM
 
 
@@ -32,27 +29,6 @@ def get_ner_schema(ner_tag_names: list[str]) -> type[BaseModel]:
     }
     schema = create_model("AnswerFormat", **keys_and_their_types)
     return schema
-
-
-def get_ner_prefix_allowed_tokens_fn(
-    ner_tag_names: list[str], tokenizer: "PreTrainedTokenizerBase"
-) -> "JSONPrefixAllowedTokens":
-    """Get the prefix allowed tokens function for the NER task, used in `transformers`.
-
-    Args:
-        ner_tag_names:
-            The NER tag names.
-        tokenizer:
-            The tokenizer to use for tokenizing the JSON Schema.
-
-    Returns:
-        The prefix allowed tokens function for the NER task.
-    """
-    return JSONPrefixAllowedTokens(
-        schema=get_ner_schema(ner_tag_names=ner_tag_names),
-        tokenizer_or_pipe=tokenizer,
-        whitespace_pattern=r" ?",
-    )
 
 
 def get_ner_logits_processors(

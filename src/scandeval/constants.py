@@ -28,3 +28,13 @@ SUPERTASKS_USING_LOGPROBS = ["sequence-classification"]
 
 
 METRIC_ATTRIBUTES_TAKING_UP_MEMORY = ["cached_bertscorer"]
+
+
+GENERATIVE_TAGS = [
+    "trl",
+    "mistral",
+    "text-generation-inference",
+    "unsloth",
+    "text-generation",
+    "llama",
+]

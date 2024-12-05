@@ -387,7 +387,18 @@ class ModelConfig:
 
 @dataclass
 class PreparedModelInputs:
-    """The inputs to a model."""
+    """The inputs to a model.
+
+    Attributes:
+        texts:
+            The texts to input to the model. Can be None if the input IDs and attention
+            mask are provided instead.
+        input_ids:
+            The input IDs of the texts. Can be None if the texts are provided instead.
+        attention_mask:
+            The attention mask of the texts. Can be None if the texts are provided
+            instead.
+    """
 
     texts: list[str] | None = None
     input_ids: torch.Tensor | None = None
@@ -396,7 +407,16 @@ class PreparedModelInputs:
 
 @dataclass
 class GenerativeModelOutput:
-    """The output of a model."""
+    """The output of a generative model.
+
+    Attributes:
+        sequences:
+            The generated sequences.
+        scores:
+            The scores of the sequences. This is an array of shape (batch_size,
+            num_tokens, num_logprobs, 2), where the last dimension contains the
+            token and its logprob. Can be None if the scores are not available.
+    """
 
     sequences: list[str]
     scores: list[list[list[tuple[str, float]]]] | None = None
@@ -404,7 +424,35 @@ class GenerativeModelOutput:
 
 @dataclass
 class SingleGenerativeModelOutput:
-    """The output of a single model."""
+    """A single output of a generative model.
+
+    Attributes:
+        sequence:
+            The generated sequence.
+        scores:
+            The scores of the sequence. This is an array of shape (num_tokens,
+            num_logprobs, 2), where the last dimension contains the token and its
+            logprob. Can be None if the scores are not available.
+    """
 
     sequence: str
     scores: list[list[tuple[str, float]]] | None = None
+
+
+@dataclass
+class HFModelInfo:
+    """Information about a Hugging Face model.
+
+    Attributes:
+        pipeline_tag:
+            The pipeline tag of the model.
+        tags:
+            The other tags of the model.
+        adapter_base_model_id:
+            The model ID of the base model if the model is an adapter model. Can be None
+            if the model is not an adapter model.
+    """
+
+    pipeline_tag: str
+    tags: list[str]
+    adapter_base_model_id: str | None

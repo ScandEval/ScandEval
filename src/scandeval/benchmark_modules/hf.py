@@ -11,7 +11,7 @@ import torch
 from datasets import DatasetDict
 from huggingface_hub import HfApi
 from huggingface_hub import whoami as hf_whoami
-from huggingface_hub.hf_api import ModelInfo, RepositoryNotFoundError
+from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
 from huggingface_hub.utils import (
     GatedRepoError,
     HFValidationError,
@@ -31,8 +31,8 @@ from transformers import (
 )
 from urllib3.exceptions import RequestError
 
-from ..constants import DUMMY_FILL_VALUE
-from ..data_models import BenchmarkConfig, DatasetConfig, ModelConfig, Task
+from ..constants import DUMMY_FILL_VALUE, GENERATIVE_TAGS
+from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType
 from ..exceptions import (
     HuggingFaceHubDown,
@@ -94,13 +94,19 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         Returns:
             The number of parameters in the model.
         """
-        api = HfApi()
+        hf_api = HfApi()
         try:
-            repo_info = api.repo_info(
-                repo_id=self.model_config.model_id, repo_type="model"
+            repo_info = hf_api.model_info(
+                repo_id=self.model_config.model_id,
+                revision=self.model_config.revision,
+                token=self.benchmark_config.api_key or True,
             )
-            assert isinstance(repo_info, ModelInfo)
-        except (RequestException, HFValidationError):
+        except (
+            RepositoryNotFoundError,
+            RevisionNotFoundError,
+            RequestException,
+            HFValidationError,
+        ):
             repo_info = None
 
         if (
@@ -118,7 +124,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             and repo_info.card_data["base_model"] is not None
             and len(repo_info.card_data["base_model"]) > 0
             and (
-                base_repo_info := api.repo_info(
+                base_repo_info := hf_api.repo_info(
                     repo_info.card_data["base_model"][-1], repo_type="model"
                 )
             )
@@ -393,48 +399,13 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             Whether the model exists, or an error describing why we cannot check
             whether the model exists.
         """
-        # Extract the revision from the model_id, if present
         model_id, revision = (
             model_id.split("@") if "@" in model_id else (model_id, "main")
         )
-
-        # Connect to the Hugging Face Hub API
-        hf_api = HfApi()
-
-        # Get the model info, and return it
-        try:
-            hf_api.model_info(
-                repo_id=model_id,
-                revision=revision,
-                token=benchmark_config.api_key or True,
-            )
-            return True
-
-        except (GatedRepoError, LocalTokenNotFoundError) as e:
-            try:
-                hf_whoami()
-                logger.warning(
-                    f"Could not access the model {model_id} with the revision "
-                    f"{revision}. The error was {str(e)!r}."
-                )
-                return False
-            except LocalTokenNotFoundError:
-                raise NeedsAdditionalArgument(
-                    cli_argument="--api-key",
-                    script_argument="api_key=<your-api-key>",
-                    run_with_cli=benchmark_config.run_with_cli,
-                )
-
-        except (RepositoryNotFoundError, HFValidationError):
-            return False
-
-        # If fetching from the Hugging Face Hub failed in a different way then throw a
-        # reasonable exception
-        except OSError:
-            if internet_connection_available():
-                raise HuggingFaceHubDown()
-            else:
-                raise NoInternetConnection()
+        model_info = get_model_repo_info(
+            model_id=model_id, revision=revision, benchmark_config=benchmark_config
+        )
+        return model_info is not None and model_info.pipeline_tag != "text-generation"
 
     @classmethod
     def get_model_config(
@@ -451,126 +422,44 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         Returns:
             The model configuration.
         """
-        # Extract the revision from the model IDs, if they are specified
-        if "@" in model_id:
-            model_id_without_revision, revision = model_id.split("@", 1)
-        else:
-            model_id_without_revision = model_id
-            revision = "main"
+        model_id, revision = (
+            model_id.split("@") if "@" in model_id else (model_id, "main")
+        )
+        model_info = get_model_repo_info(
+            model_id=model_id, revision=revision, benchmark_config=benchmark_config
+        )
+        if model_info is None:
+            raise InvalidModel(f"The model {model_id!r} could not be found.")
 
-        # Extract the author and model name from the model ID
-        author: str | None
-        if "/" in model_id_without_revision:
-            author, model_name = model_id_without_revision.split("/")
-        else:
-            author = None
-            model_name = model_id_without_revision
+        framework = Framework.PYTORCH
+        if "pytorch" in model_info.tags:
+            pass
+        elif "jax" in model_info.tags:
+            framework = Framework.JAX
+        elif "spacy" in model_info.tags:
+            raise InvalidModel("SpaCy models are not supported.")
+        elif any(tag in model_info.tags for tag in {"tf", "tensorflow", "keras"}):
+            raise InvalidModel("TensorFlow/Keras models are not supported.")
 
-        # Attempt to fetch model data from the Hugging Face Hub
-        try:
-            api: HfApi = HfApi()
+        language_mapping = get_all_languages()
+        language_codes = list(language_mapping.keys())
 
-            # Fetch the model metadata
-            models = api.list_models(
-                author=author,
-                model_name=model_name,
-                token=benchmark_config.api_key or True,
-            )
-
-            # Filter the models to only keep the one with the specified model ID
-            models = [
-                model for model in models if model.id == model_id_without_revision
-            ]
-
-            # Check that the model exists. If it does not then raise an error
-            if len(models) == 0:
-                raise InvalidModel(
-                    f"The model {model_id} does not exist on the Hugging Face Hub."
-                )
-
-            model: ModelInfo = models[0]
-            tags: list[str] = model.tags or list()
-
-            framework = Framework.PYTORCH
-            if "pytorch" in tags:
-                pass
-            elif "jax" in tags:
-                framework = Framework.JAX
-            elif "spacy" in tags:
-                raise InvalidModel("SpaCy models are not supported.")
-            elif "tf" in tags or "tensorflow" in tags or "keras" in tags:
-                raise InvalidModel("TensorFlow/Keras models are not supported.")
-
-            base_model_ids: list[str] = list()
-
-            # If the model is a finetuned model then we fetch the base model ID
-            has_base_model_tag = any(
-                tag.startswith("base_model:") and tag.count(":") == 1 for tag in tags
-            )
-            if has_base_model_tag:
-                base_model_id = [
-                    tag.split(":")[1]
-                    for tag in tags
-                    if tag.startswith("base_model:") and tag.count(":") == 1
-                ][0]
-                base_model_ids.append(base_model_id)
-
-            # Add tags from the base models
-            for base_model_id in base_model_ids:
-                base_model_author, base_model_name = base_model_id.split("/")
-                base_models = [
-                    model
-                    for model in api.list_models(
-                        author=base_model_author,
-                        model_name=base_model_name,
-                        token=benchmark_config.api_key or True,
-                    )
-                    if model.id == base_model_id
-                ]
-                if len(base_models) > 0:
-                    tags += base_models[0].tags or list()
-                    tags = list(set(tags))
-
-            model_task: str | None = model.pipeline_tag
-            if model_task is None:
-                generative_tags = [
-                    "trl",
-                    "mistral",
-                    "text-generation-inference",
-                    "unsloth",
-                    "text-generation",
-                    "llama",
-                ]
-                if any(tag in tags for tag in generative_tags):
-                    model_task = "text-generation"
-                else:
-                    model_task = "fill-mask"
-
-            language_mapping = get_all_languages()
-            language_codes = list(language_mapping.keys())
-
-            model_config = ModelConfig(
-                model_id=model_id,
-                framework=framework,
-                task=model_task,
-                languages=[
-                    language_mapping[tag] for tag in tags if tag in language_codes
-                ],
-                revision=revision,
-                model_type=ModelType.HF_HUB_ENCODER,
-                model_cache_dir=create_model_cache_dir(
-                    cache_dir=benchmark_config.cache_dir, model_id=model_id
-                ),
-                adapter_base_model_id=None,
-            )
-
-        # If fetching from the Hugging Face Hub failed then throw a reasonable
-        # exception
-        except RequestException:
-            if internet_connection_available():
-                raise HuggingFaceHubDown()
-            else:
-                raise NoInternetConnection()
+        model_config = ModelConfig(
+            model_id=model_id,
+            revision=revision,
+            framework=framework,
+            task=model_info.pipeline_tag,
+            languages=[
+                language_mapping[tag]
+                for tag in model_info.tags
+                if tag in language_codes
+            ],
+            model_type=ModelType.HF_HUB_ENCODER,
+            model_cache_dir=create_model_cache_dir(
+                cache_dir=benchmark_config.cache_dir, model_id=model_id
+            ),
+            adapter_base_model_id=None,
+        )
 
         return model_config
 
@@ -715,6 +604,87 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         return model, tokenizer
 
 
+def get_model_repo_info(
+    model_id: str, revision: str, benchmark_config: BenchmarkConfig
+) -> HFModelInfo | None:
+    """Get the information about the model from the Hugging Face Hub.
+
+    Args:
+        model_id:
+            The model ID.
+        revision:
+            The revision of the model.
+        benchmark_config:
+            The benchmark configuration.
+
+    Returns:
+        The information about the model, or None if the model could not be found.
+    """
+    hf_api = HfApi(token=benchmark_config.api_key or True)
+    model_id, revision = model_id.split("@") if "@" in model_id else (model_id, "main")
+
+    try:
+        model_info = hf_api.model_info(repo_id=model_id, revision=revision)
+
+    # Case where the model is gated; note this to the user
+    except (GatedRepoError, LocalTokenNotFoundError) as e:
+        try:
+            hf_whoami()
+            logger.warning(
+                f"Could not access the model {model_id} with the revision "
+                f"{revision}. The error was {str(e)!r}."
+            )
+            return None
+        except LocalTokenNotFoundError:
+            raise NeedsAdditionalArgument(
+                cli_argument="--api-key",
+                script_argument="api_key=<your-api-key>",
+                run_with_cli=benchmark_config.run_with_cli,
+            )
+
+    # Case where the model could not be found
+    except (RepositoryNotFoundError, HFValidationError):
+        return None
+
+    # Other internet-related errors
+    except (OSError, RequestException):
+        if internet_connection_available():
+            raise HuggingFaceHubDown()
+        else:
+            raise NoInternetConnection()
+
+    tags = model_info.tags or list()
+
+    has_base_model_tag = any(
+        tag.startswith("base_model:") and tag.count(":") == 1 for tag in tags
+    )
+    base_model_id: str | None = None
+    if has_base_model_tag:
+        base_model_id = [
+            tag.split(":")[1]
+            for tag in tags
+            if tag.startswith("base_model:") and tag.count(":") == 1
+        ][0]
+        base_model_info = hf_api.model_info(
+            repo_id=base_model_id,
+            revision=revision,
+            token=benchmark_config.api_key or True,
+        )
+        tags += base_model_info.tags or list()
+        tags = list(set(tags))
+
+    pipeline_tag = model_info.pipeline_tag
+    if pipeline_tag is None:
+        if any(tag in GENERATIVE_TAGS for tag in tags):
+            pipeline_tag = "text-generation"
+        else:
+            pipeline_tag = "fill-mask"
+
+    return HFModelInfo(
+        pipeline_tag=pipeline_tag, tags=tags, adapter_base_model_id=base_model_id
+    )
+
+
 def load_tokenizer(
     model: "PreTrainedModel", model_id: str, trust_remote_code: bool
 ) -> "PreTrainedTokenizer":
@@ -733,7 +703,11 @@ def load_tokenizer(
         The loaded tokenizer.
     """
     loading_kwargs: dict[str, bool | str] = dict(
-        use_fast=True, verbose=False, trust_remote_code=trust_remote_code
+        use_fast=True,
+        verbose=False,
+        trust_remote_code=trust_remote_code,
+        padding_side="right",
+        truncation_side="right",
     )
 
     # If the model is a subclass of a certain model types then we have to add a
@@ -742,9 +716,6 @@ def load_tokenizer(
     add_prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
     if add_prefix:
         loading_kwargs["add_prefix_space"] = True
-
-    loading_kwargs["padding_side"] = "right"
-    loading_kwargs["truncation_side"] = "right"
 
     while True:
         try:
