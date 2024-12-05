@@ -182,6 +182,7 @@ def get_closest_logprobs_labels(
                 output_labels.append(candidate_output_labels[0])
                 break
         else:
+            breakpoint()
             if not given_warning:
                 logger.warning(
                     f"Could not find a candidate label for any of the generated labels "
