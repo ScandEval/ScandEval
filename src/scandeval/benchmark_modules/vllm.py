@@ -261,9 +261,6 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         prompts = inputs["text"]
 
-        # TEMP
-        logger.info(f"{prompts = }")
-
         # If any of the prompts are empty then we need to replace them with a BOS token
         # so that the vLLM model can generate from them
         if any(len(prompt) == 0 for prompt in prompts):
