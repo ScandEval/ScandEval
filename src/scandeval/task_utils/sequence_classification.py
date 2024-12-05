@@ -185,6 +185,7 @@ def get_closest_logprobs_labels(
                 if candidate_output_labels:
                     output_labels.append(candidate_output_labels[0])
                     break
+            breakpoint()
         else:
             if not given_warning:
                 logger.debug(
