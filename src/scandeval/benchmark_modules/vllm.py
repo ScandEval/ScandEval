@@ -747,7 +747,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         ), "The number of examples and messages must be the same."
         return examples
 
-    # TODO: Change to chat templates instead of ChatML
     def _apply_instruction_prompt(
         self, examples: dict[str, t.Any], task: Task
     ) -> dict[str, t.Any]:
@@ -787,9 +786,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     f"Unsupported task supertask: {task.supertask}."
                 )
 
-        examples["messages"] = [
-            [dict(role="user", content=prompt)] for prompt in prompts
-        ]
+        examples["text"] = prompts
         return examples
 
     def __del__(self) -> None:
