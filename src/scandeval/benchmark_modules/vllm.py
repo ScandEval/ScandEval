@@ -287,6 +287,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         # Add logprobs scores to the output
         if output_scores:
+            breakpoint()
             # TODO: Define this
             scores = None
             output = GenerativeModelOutput(sequences=completions, scores=scores)
