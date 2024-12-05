@@ -176,6 +176,7 @@ def get_closest_logprobs_labels(
 
             # We want to use the first generated label which starts with a candidate
             # label, as the output label
+            output_label: str | None = None
             for generated_label in generated_labels:
                 candidate_output_labels = [
                     candidate_label
@@ -183,9 +184,12 @@ def get_closest_logprobs_labels(
                     if candidate_label.startswith(generated_label)
                 ]
                 if candidate_output_labels:
-                    output_labels.append(candidate_output_labels[0])
+                    output_label = candidate_output_labels[0]
                     break
-            breakpoint()
+
+            if output_label is not None:
+                output_labels.append(output_label)
+                break
         else:
             if not given_warning:
                 logger.debug(
