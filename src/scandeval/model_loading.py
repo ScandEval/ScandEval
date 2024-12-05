@@ -35,12 +35,14 @@ def load_model(
     Returns:
         The model.
     """
+    # The order matters; the first model type that matches will be used. For this
+    # reason, they have been ordered in terms of the most common model types.
     model_type_to_module_mapping: dict[ModelType, t.Type[BenchmarkModule]] = {
-        ModelType.FRESH: FreshEncoderModel,
-        ModelType.HF_HUB_ENCODER: HuggingFaceEncoderModel,
         ModelType.HF_HUB_GENERATIVE: VLLMModel,
+        ModelType.HF_HUB_ENCODER: HuggingFaceEncoderModel,
         ModelType.API: LiteLLMModel,
         ModelType.LOCAL: VLLMModel,  # TODO: Add LocalModel
+        ModelType.FRESH: FreshEncoderModel,
     }
     model_class = model_type_to_module_mapping[model_config.model_type]
 
