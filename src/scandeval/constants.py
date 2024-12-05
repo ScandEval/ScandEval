@@ -38,3 +38,6 @@ GENERATIVE_TAGS = [
     "text-generation",
     "llama",
 ]
+
+
+MAX_LOGPROBS = 5

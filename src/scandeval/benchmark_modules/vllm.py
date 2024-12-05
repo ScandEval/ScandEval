@@ -21,7 +21,7 @@ from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
 
-from ..constants import SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
+from ..constants import MAX_LOGPROBS, SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import (
     BenchmarkConfig,
     DatasetConfig,
@@ -96,6 +96,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         self.model_config = model_config
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
+        self.output_scores = (
+            self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS
+        )
 
         model, tokenizer = self._load_model_and_tokenizer()
         self._model: LLM = model
@@ -239,8 +242,6 @@ class VLLMModel(HuggingFaceEncoderModel):
             if end_of_chat_token:
                 stop_tokens.append(end_of_chat_token)
 
-        output_scores = self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS
-
         if self.dataset_config.task.name in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
             logits_processors = get_ner_logits_processors(
@@ -253,7 +254,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         max_tokens: int = self.dataset_config.max_generated_tokens
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
-            logprobs=10 if output_scores else None,
+            logprobs=MAX_LOGPROBS if self.output_scores else None,
             temperature=0.0,
             stop=[stop_token for stop_token in stop_tokens if stop_token],
             logits_processors=logits_processors,
@@ -283,13 +284,12 @@ class VLLMModel(HuggingFaceEncoderModel):
             ],
             skip_special_tokens=True,
         )
-        breakpoint()
 
         # Add logprobs scores to the output
-        if output_scores:
+        if self.output_scores:
             breakpoint()
             # TODO: Define this
-            scores = None
+            scores = raw_outputs
             output = GenerativeModelOutput(sequences=completions, scores=scores)
         else:
             output = GenerativeModelOutput(sequences=completions)
@@ -446,7 +446,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             quantization=quantization,
             dtype=dtype,
             enforce_eager=True,
-            max_logprobs=10,
+            max_logprobs=MAX_LOGPROBS if self.output_scores else None,
             # TEMP: Prefix caching isn't supported with sliding window in vLLM yet, so
             # we disable it for now
             enable_prefix_caching=False,

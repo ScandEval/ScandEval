@@ -22,7 +22,7 @@ from litellm.exceptions import (
 from litellm.types.utils import ModelResponse
 from transformers import Trainer
 
-from ..constants import SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
+from ..constants import MAX_LOGPROBS, SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType
 from ..exceptions import (
@@ -129,7 +129,7 @@ class LiteLLMModel(BenchmarkModule):
 
         if self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS:
             generation_kwargs["logprobs"] = True
-            generation_kwargs["top_logprobs"] = 10
+            generation_kwargs["top_logprobs"] = MAX_LOGPROBS
 
         if self.dataset_config.task.name in TASKS_USING_JSON:
             assert (
