@@ -5,7 +5,6 @@ import importlib.util
 import itertools as it
 import json
 import logging
-import os
 import random
 import re
 import sys
@@ -464,9 +463,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         )
 
         clear_vllm()
-        os.environ["TQDM_DISABLE"] = "True"
         model = LLM(**vllm_kwargs)
-        os.environ["TQDM_DISABLE"] = "False"
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
         model.config = hf_model_config
 
