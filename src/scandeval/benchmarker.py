@@ -124,7 +124,8 @@ class Benchmarker:
                 Whether to force evaluations of models, even if they have been
                 benchmarked already. Defaults to False.
             verbose:
-                Whether to output additional output. Defaults to False.
+                Whether to output additional output. This is automatically set if
+                `debug` is True. Defaults to False.
             trust_remote_code:
                 Whether to trust remote code when loading models. Defaults to False.
             load_in_4bit:

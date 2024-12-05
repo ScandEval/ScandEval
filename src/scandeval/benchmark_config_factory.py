@@ -89,7 +89,8 @@ def build_benchmark_config(
             Whether to force the benchmark to run even if the results are already
             cached.
         verbose:
-            Whether to print verbose output when running the benchmark.
+            Whether to print verbose output when running the benchmark. This is
+            automatically set if `debug` is True.
         trust_remote_code:
             Whether to trust remote code when running the benchmark.
         load_in_4bit:
@@ -172,7 +173,7 @@ def build_benchmark_config(
         force=force,
         progress_bar=progress_bar,
         save_results=save_results,
-        verbose=verbose,
+        verbose=verbose or debug,
         framework=framework_obj,
         device=torch_device,
         trust_remote_code=trust_remote_code,
