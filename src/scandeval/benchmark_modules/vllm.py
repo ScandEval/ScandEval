@@ -92,7 +92,26 @@ class VLLMModel(HuggingFaceEncoderModel):
             or importlib.util.find_spec("ray") is None
         ):
             raise NeedsExtraInstalled(extra="generative")
-        super().__init__(model_config, dataset_config, benchmark_config)
+
+        self.model_config = model_config
+        self.dataset_config = dataset_config
+        self.benchmark_config = benchmark_config
+
+        model, tokenizer = self._load_model_and_tokenizer()
+        self._model: LLM = model
+        self._tokenizer: PreTrainedTokenizer = tokenizer
+
+        self.lora_request: LoRARequest | None = None
+        if self.model_config.adapter_base_model_id is not None:
+            adapter_path = snapshot_download(
+                repo_id=self.model_config.model_id,
+                cache_dir=Path(self.model_config.model_cache_dir),
+            )
+            self.lora_request = LoRARequest(
+                lora_name="adapter", lora_int_id=1, lora_path=adapter_path
+            )
+
+        self._log_metadata()
 
     @cached_property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
@@ -439,20 +458,12 @@ class VLLMModel(HuggingFaceEncoderModel):
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
         model.config = hf_model_config
 
-        if self.model_config.adapter_base_model_id is not None:
-            self.adapter_path = snapshot_download(
-                repo_id=self.model_config.model_id,
-                cache_dir=Path(self.model_config.model_cache_dir),
-            )
-            self.lora_request = LoRARequest(
-                lora_name="adapter", lora_int_id=1, lora_path=self.adapter_path
-            )
-
         tokenizer = load_tokenizer(
             model_id=self.model_config.model_id,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             model_max_length=max_model_len,
         )
+
         return model, tokenizer
 
     def _extract_few_shot_examples(
