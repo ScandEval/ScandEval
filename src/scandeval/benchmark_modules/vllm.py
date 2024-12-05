@@ -259,7 +259,10 @@ class VLLMModel(HuggingFaceEncoderModel):
             logits_processors=logits_processors,
         )
 
-        prompts = [inputs["text"]]
+        prompts = inputs["text"]
+
+        # TEMP
+        logger.info(f"{prompts = }")
 
         # If any of the prompts are empty then we need to replace them with a BOS token
         # so that the vLLM model can generate from them
