@@ -21,8 +21,6 @@ from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
 
-from scandeval.structured_generation_utils import get_ner_logits_processors
-
 from ..constants import SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import (
     BenchmarkConfig,
@@ -39,6 +37,7 @@ from ..exceptions import (
     NeedsExtraInstalled,
 )
 from ..languages import get_all_languages
+from ..structured_generation_utils import get_ner_logits_processors
 from ..task_utils import (
     question_answering,
     sequence_classification,
