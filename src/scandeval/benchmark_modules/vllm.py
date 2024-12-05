@@ -602,7 +602,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             assistant_part = section.split("\n")[-1]
             return user_part, assistant_part
 
-        few_shot_messages: list[dict[str, str]]
+        few_shot_messages: list[str]
         match task.supertask:
             case "sequence-classification" | "text-to-text":
                 label_name = (
@@ -610,7 +610,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     if task.supertask == "sequence-classification"
                     else "target_text"
                 )
-                prompt_sections = [
+                few_shot_messages = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
                         label=example[label_name].strip(),
@@ -618,145 +618,124 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for example in few_shot_examples
                 ]
 
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections[1:]
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
-                    )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
-
+                prompt_prefix = ""
                 if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
+                    prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
 
-                examples["messages"] = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=text, label=""
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
+                examples["text"] = [
+                    prompt_prefix
+                    + "\n\n".join(few_shot_messages)
+                    + "\n\n"
+                    + self.dataset_config.prompt_template.format(text=text, label="")
                     for text in examples["text"]
                 ]
 
-            case "token-classification":
+            # case "token-classification":
 
-                def create_label(example: dict) -> str:
-                    prompt_labels = self.dataset_config.prompt_label_mapping.values()
-                    labels: dict[str, list[str]] = {
-                        prompt_label: list() for prompt_label in prompt_labels
-                    }
-                    for token, label in zip(example["tokens"], example["labels"]):
-                        label = label.lower()
-                        if label == "o":
-                            continue
-                        prompt_label = self.dataset_config.prompt_label_mapping[label]
-                        if label.startswith("b-"):
-                            labels[prompt_label].append(token)
-                        elif label.startswith("i-"):
-                            labels[prompt_label][-1] += " " + token
-                    return json.dumps(labels, ensure_ascii=False)
+            #     def create_label(example: dict) -> str:
+            #         prompt_labels = self.dataset_config.prompt_label_mapping.values()
+            #         labels: dict[str, list[str]] = {
+            #             prompt_label: list() for prompt_label in prompt_labels
+            #         }
+            #         for token, label in zip(example["tokens"], example["labels"]):
+            #             label = label.lower()
+            #             if label == "o":
+            #                 continue
+            #             prompt_label = self.dataset_config.prompt_label_mapping[label]
+            #             if label.startswith("b-"):
+            #                 labels[prompt_label].append(token)
+            #             elif label.startswith("i-"):
+            #                 labels[prompt_label][-1] += " " + token
+            #         return json.dumps(labels, ensure_ascii=False)
 
-                prompt_sections = [
-                    self.dataset_config.prompt_template.format(
-                        text=" ".join(example["tokens"]).replace("\n", " ").strip(),
-                        label=create_label(example=example),
-                    )
-                    for example in few_shot_examples
-                ]
+            #     prompt_sections = [
+            #         self.dataset_config.prompt_template.format(
+            #             text=" ".join(example["tokens"]).replace("\n", " ").strip(),
+            #             label=create_label(example=example),
+            #         )
+            #         for example in few_shot_examples
+            #     ]
 
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections[1:]
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
-                    )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
+            #     few_shot_messages = [
+            #         dict(role=role, content=content.split(":", 1)[1].strip())
+            #         for section in prompt_sections[1:]
+            #         for role, content in zip(
+            #             it.cycle(["user", "assistant"]), split_section(section=section)
+            #         )
+            #         if content.split(":", 1)[1].strip() != ""
+            #     ]
 
-                if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
+            #     if self.dataset_config.prompt_prefix:
+            #         few_shot_messages[0]["content"] = (
+            #             self.dataset_config.prompt_prefix
+            #             + "\n\n"
+            #             + few_shot_messages[0]["content"]
+            #         )
 
-                examples["messages"] = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=" ".join(tokens).replace("\n", " ").strip(),
-                                    label="",
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
-                    for tokens in examples["tokens"]
-                ]
+            #     examples["messages"] = [
+            #         few_shot_messages
+            #         + [
+            #             dict(
+            #                 role="user",
+            #                 content=split_section(
+            #                     section=self.dataset_config.prompt_template.format(
+            #                         text=" ".join(tokens).replace("\n", " ").strip(),
+            #                         label="",
+            #                     )
+            #                 )[0]
+            #                 .split(":", 1)[1]
+            #                 .strip(),
+            #             )
+            #         ]
+            #         for tokens in examples["tokens"]
+            #     ]
 
-            case "question-answering":
-                prompt_sections = [
-                    self.dataset_config.prompt_template.format(
-                        text=example["context"].replace("\n", " ").strip(),
-                        question=example["question"].strip(),
-                        label=example["answers"]["text"][0],
-                    )
-                    for example in few_shot_examples
-                ]
+            # case "question-answering":
+            #     prompt_sections = [
+            #         self.dataset_config.prompt_template.format(
+            #             text=example["context"].replace("\n", " ").strip(),
+            #             question=example["question"].strip(),
+            #             label=example["answers"]["text"][0],
+            #         )
+            #         for example in few_shot_examples
+            #     ]
 
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections[1:]
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
-                    )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
+            #     few_shot_messages = [
+            #         dict(role=role, content=content.split(":", 1)[1].strip())
+            #         for section in prompt_sections[1:]
+            #         for role, content in zip(
+            #             it.cycle(["user", "assistant"]), split_section(section=section)
+            #         )
+            #         if content.split(":", 1)[1].strip() != ""
+            #     ]
 
-                if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
+            #     if self.dataset_config.prompt_prefix:
+            #         few_shot_messages[0]["content"] = (
+            #             self.dataset_config.prompt_prefix
+            #             + "\n\n"
+            #             + few_shot_messages[0]["content"]
+            #         )
 
-                examples["messages"] = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=context.replace("\n", " ").strip(),
-                                    question=question,
-                                    label="",
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
-                    for context, question in zip(
-                        examples["context"], examples["question"]
-                    )
-                ]
+            #     examples["messages"] = [
+            #         few_shot_messages
+            #         + [
+            #             dict(
+            #                 role="user",
+            #                 content=split_section(
+            #                     section=self.dataset_config.prompt_template.format(
+            #                         text=context.replace("\n", " ").strip(),
+            #                         question=question,
+            #                         label="",
+            #                     )
+            #                 )[0]
+            #                 .split(":", 1)[1]
+            #                 .strip(),
+            #             )
+            #         ]
+            #         for context, question in zip(
+            #             examples["context"], examples["question"]
+            #         )
+            #     ]
 
             case _:
                 raise NotImplementedError(
