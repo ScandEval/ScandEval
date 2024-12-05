@@ -178,6 +178,7 @@ def get_closest_logprobs_labels(
                 for candidate_label in candidate_labels
                 if generated_label != "" and candidate_label.startswith(generated_label)
             ]
+            breakpoint()
             if candidate_output_labels:
                 output_labels.append(candidate_output_labels[0])
                 break
