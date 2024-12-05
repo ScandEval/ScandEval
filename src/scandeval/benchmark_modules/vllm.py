@@ -284,6 +284,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             ],
             skip_special_tokens=True,
         )
+        breakpoint()
 
         # Add logprobs scores to the output
         if output_scores:
