@@ -176,7 +176,7 @@ def get_closest_logprobs_labels(
                 candidate_label
                 for generated_label in generated_labels
                 for candidate_label in candidate_labels
-                if candidate_label.startswith(generated_label)
+                if generated_label != "" and candidate_label.startswith(generated_label)
             ]
             if candidate_output_labels:
                 output_labels.append(candidate_output_labels[0])
@@ -185,9 +185,9 @@ def get_closest_logprobs_labels(
             breakpoint()
             if not given_warning:
                 logger.warning(
-                    f"Could not find a candidate label for any of the generated labels "
-                    f"in the sample {sample}. Using {candidate_labels[0]!r} as the output "
-                    f"label."
+                    "Could not find a candidate label for any of the generated "
+                    f"labels in the sample {sample}. Using {candidate_labels[0]!r} "
+                    "as the output label."
                 )
                 given_warning = True
             output_labels.append(candidate_labels[0])
