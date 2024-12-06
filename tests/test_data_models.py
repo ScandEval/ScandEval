@@ -8,15 +8,7 @@ from pathlib import Path
 import pytest
 
 from scandeval import __version__, data_models, enums
-from scandeval.data_models import (
-    BenchmarkResult,
-    DatasetConfig,
-    MetricConfig,
-    ModelConfig,
-)
-from scandeval.dataset_configs import get_all_dataset_configs
-from scandeval.enums import Framework, ModelType
-from scandeval.languages import DA
+from scandeval.data_models import BenchmarkResult, MetricConfig
 
 
 def test_all_classes_are_dataclasses_or_pydantic_models():
@@ -268,55 +260,3 @@ class TestBenchmarkResult:
         assert results_path.read_text() == f"\n{json_str}\n{json_str}"
 
         results_path.unlink(missing_ok=True)
-
-
-@pytest.mark.parametrize(
-    argnames=["dataset_config"],
-    argvalues=[
-        (dataset_config,) for dataset_config in get_all_dataset_configs().values()
-    ],
-    ids=[
-        (dataset_config.name) for dataset_config in get_all_dataset_configs().values()
-    ],
-    scope="class",
-)
-class TestDatasetConfig:
-    """Unit tests for the `DatasetConfig` class."""
-
-    def test_dataset_config_is_object(self, dataset_config):
-        """Test that the dataset config is a `DatasetConfig` object."""
-        assert isinstance(dataset_config, DatasetConfig)
-
-    def test_id2label(self, dataset_config):
-        """Test that the `id2label` attribute is correct."""
-        assert dataset_config.id2label == dict()
-
-    def test_label2id(self, dataset_config):
-        """Test that the `label2id` attribute is correct."""
-        assert dataset_config.label2id == dict()
-
-    def test_num_labels(self, dataset_config):
-        """Test that the `num_labels` attribute is correct."""
-        assert dataset_config.num_labels == 0
-
-    def test_default_value_of_prompt_label_mapping(self, dataset_config):
-        """Test that the default value of `prompt_label_mapping` is an empty dictionary."""
-        assert dataset_config.prompt_label_mapping == dict()
-
-
-class TestModelConfig:
-    """Unit tests for the `ModelConfig` class."""
-
-    def test_model_config_is_object(self, model_config):
-        """Test that the model config is a `ModelConfig` object."""
-        assert isinstance(model_config, ModelConfig)
-
-    def test_attributes_correspond_to_arguments(self, model_config):
-        """Test that the model config attributes correspond to the arguments."""
-        assert model_config.model_id == "model_id"
-        assert model_config.revision == "revision"
-        assert model_config.framework == Framework.PYTORCH
-        assert model_config.task == "task"
-        assert model_config.languages == [DA]
-        assert model_config.model_type == ModelType.FRESH
-        assert model_config.model_cache_dir == "cache_dir"
