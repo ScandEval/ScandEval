@@ -500,6 +500,9 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             torch_dtype=get_torch_dtype(
                 device=self.benchmark_config.device,
                 torch_dtype_is_set=config.to_dict().get("torch_dtype") is not None,
+                bf16_available=(
+                    torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+                ),
             ),
         )
 
@@ -729,7 +732,7 @@ def load_tokenizer(
 
 
 def get_torch_dtype(
-    device: torch.device, torch_dtype_is_set: bool
+    device: torch.device, torch_dtype_is_set: bool, bf16_available: bool
 ) -> str | torch.dtype:
     """Get the torch dtype, used for loading the model.
 
@@ -738,12 +741,13 @@ def get_torch_dtype(
             The device to use.
         torch_dtype_is_set:
             Whether the torch data type is set in the model configuration.
+        bf16_available:
+            Whether bfloat16 is available.
 
     Returns:
         The torch dtype.
     """
     using_cuda = device == torch.device("cuda")
-    bf16_available = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
     if using_cuda and torch_dtype_is_set:
         return "auto"
     elif using_cuda and bf16_available:
