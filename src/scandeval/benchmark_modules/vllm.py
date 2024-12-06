@@ -503,7 +503,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         match task.supertask:
             case "sequence-classification":
                 labels = it.cycle(self.dataset_config.task.labels)
-                while len(few_shot_examples) < num_few_shots:
+                while (
+                    len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
+                ):
                     label = next(labels)
                     possible_examples = shuffled_train.filter(
                         lambda x: x["label"].lower() == label.lower()
@@ -517,7 +519,9 @@ class VLLMModel(HuggingFaceEncoderModel):
                     )
 
             case "text-to-text":
-                while len(few_shot_examples) < num_few_shots:
+                while (
+                    len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
+                ):
                     example = shuffled_train.select(range(1))[0]
                     few_shot_examples.append(example)
                     shuffled_train = shuffled_train.filter(
@@ -532,7 +536,9 @@ class VLLMModel(HuggingFaceEncoderModel):
                         if label.lower().startswith("b-")
                     ]
                 )
-                while len(few_shot_examples) < num_few_shots:
+                while (
+                    len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
+                ):
                     label = next(labels)
                     possible_examples = shuffled_train.filter(
                         lambda x: label in [tag.lower() for tag in x["labels"]]
@@ -560,7 +566,9 @@ class VLLMModel(HuggingFaceEncoderModel):
                     )
 
                 shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
-                while len(few_shot_examples) < num_few_shots:
+                while (
+                    len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
+                ):
                     example = shuffled_train.select(range(1))[0]
                     few_shot_examples.append(example)
                     shuffled_train = shuffled_train.filter(
