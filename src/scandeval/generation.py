@@ -158,7 +158,7 @@ def generate_single_iteration(
                 batch = {key: [value] for key, value in batch.items()}
 
             model_output = model.generate(inputs=batch)
-            extracted_labels: list = model.extract_labels_from_generation(
+            extracted_labels = model.extract_labels_from_generation(
                 input_batch=batch, model_output=model_output
             )
 
@@ -166,7 +166,7 @@ def generate_single_iteration(
             if benchmark_config.debug:
                 debug_log(
                     batch=batch,
-                    extracted_labels=extracted_labels,
+                    extracted_labels=extracted_labels,  # type: ignore[arg-type]
                     dataset_config=dataset_config,
                 )
 
