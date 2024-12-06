@@ -500,7 +500,9 @@ class LiteLLMModel(BenchmarkModule):
                     )
 
                 shuffled_train = train_with_short_examples.shuffle(seed=random_seed)
-                while len(few_shot_examples) < num_few_shots:
+                while (
+                    len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
+                ):
                     example = shuffled_train.select(range(1))[0]
                     few_shot_examples.append(example)
                     shuffled_train = shuffled_train.filter(
