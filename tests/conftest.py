@@ -10,8 +10,8 @@ import torch
 from scandeval.data_models import BenchmarkConfig, MetricConfig, ModelConfig, Task
 from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
 from scandeval.enums import Framework, ModelType
-from scandeval.languages import get_all_languages
-from scandeval.tasks import get_all_tasks
+from scandeval.languages import DA, get_all_languages
+from scandeval.tasks import SENT, get_all_tasks
 
 
 def pytest_configure() -> None:
@@ -61,14 +61,12 @@ def device() -> Generator[torch.device, None, None]:
 
 
 @pytest.fixture(scope="session")
-def benchmark_config(
-    language, task, auth, device
-) -> Generator[BenchmarkConfig, None, None]:
+def benchmark_config(auth, device) -> Generator[BenchmarkConfig, None, None]:
     """Yields a benchmark configuration used in tests."""
     yield BenchmarkConfig(
-        model_languages=[language],
-        dataset_languages=[language],
-        tasks=[task],
+        model_languages=[DA],
+        dataset_languages=[DA],
+        tasks=[SENT],
         datasets=list(get_all_dataset_configs().keys()),
         framework=None,
         batch_size=1,
