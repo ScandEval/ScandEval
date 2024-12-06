@@ -20,11 +20,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - Removed the option to evaluate on the training split, as this is not a common use
-  case and simplified the codebase.
+  case and simplified the codebase. If you find that this should be re-added, please
+  open an issue in the GitHub repository.
 - All generative on-premises models are now evaluated with vLLM and thus does not use
   the `transformers` backend as a backup, as this was not used in practice, and
-  simplified the codebase.
-- Removed the `--only-validation-split` flag, as this is now the default behaviour.
+  simplified the codebase. If you find that this should be re-added, please open an
+  issue in the GitHub repository.
+- Removed the `--only-validation-split` flag, as this is now the default behaviour. If
+  you find that this should be re-added, please open an issue in the GitHub repository.
+- Removed the option to benchmark local models, as this was not used in practice, and
+  simplified the codebase. If you find that this should be re-added, please open an
+  issue in the GitHub repository.
 
 
 ## [v13.3.0] - 2024-11-29
