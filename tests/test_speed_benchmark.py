@@ -13,21 +13,23 @@ from scandeval.speed_benchmark import benchmark_speed
 
 
 @pytest.fixture(scope="module")
-def tokenizer(model_id) -> Generator[PreTrainedTokenizer, None, None]:
+def tokenizer(encoder_model_id) -> Generator[PreTrainedTokenizer, None, None]:
     """Yields a tokenizer."""
-    yield AutoTokenizer.from_pretrained(model_id)
+    yield AutoTokenizer.from_pretrained(encoder_model_id)
 
 
 @pytest.fixture(scope="module")
-def model(model_id) -> Generator[PreTrainedModel, None, None]:
+def model(encoder_model_id) -> Generator[PreTrainedModel, None, None]:
     """Yields a model."""
-    yield AutoModelForSequenceClassification.from_pretrained(model_id)
+    yield AutoModelForSequenceClassification.from_pretrained(encoder_model_id)
 
 
 @pytest.fixture(scope="module")
-def model_config(model_id, benchmark_config) -> Generator[ModelConfig, None, None]:
+def model_config(
+    encoder_model_id, benchmark_config
+) -> Generator[ModelConfig, None, None]:
     """Yields a model configuration."""
-    yield get_model_config(model_id=model_id, benchmark_config=benchmark_config)
+    yield get_model_config(model_id=encoder_model_id, benchmark_config=benchmark_config)
 
 
 class TestBenchmarkSpeed:
