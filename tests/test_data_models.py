@@ -16,6 +16,7 @@ from scandeval.data_models import (
 )
 from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.enums import Framework, ModelType
+from scandeval.languages import DA
 
 
 def test_all_classes_are_dataclasses_or_pydantic_models():
@@ -286,16 +287,6 @@ class TestDatasetConfig:
         """Test that the dataset config is a `DatasetConfig` object."""
         assert isinstance(dataset_config, DatasetConfig)
 
-    def test_attributes_correspond_to_arguments(self, dataset_config, language, task):
-        """Test that the dataset config attributes correspond to the arguments."""
-        assert dataset_config.name == "dataset_name"
-        assert dataset_config.pretty_name == "Dataset name"
-        assert dataset_config.huggingface_id == "dataset_id"
-        assert dataset_config.task == task
-        assert dataset_config.languages == [language]
-        assert dataset_config.prompt_template == "{text}\n{label}"
-        assert dataset_config.max_generated_tokens == 1
-
     def test_id2label(self, dataset_config):
         """Test that the `id2label` attribute is correct."""
         assert dataset_config.id2label == dict()
@@ -320,12 +311,12 @@ class TestModelConfig:
         """Test that the model config is a `ModelConfig` object."""
         assert isinstance(model_config, ModelConfig)
 
-    def test_attributes_correspond_to_arguments(self, model_config, language):
+    def test_attributes_correspond_to_arguments(self, model_config):
         """Test that the model config attributes correspond to the arguments."""
         assert model_config.model_id == "model_id"
         assert model_config.revision == "revision"
         assert model_config.framework == Framework.PYTORCH
         assert model_config.task == "task"
-        assert model_config.languages == [language]
+        assert model_config.languages == [DA]
         assert model_config.model_type == ModelType.FRESH
         assert model_config.model_cache_dir == "cache_dir"

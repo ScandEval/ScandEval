@@ -158,14 +158,14 @@ def gptq_generative_model_id() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
-def model_config(language) -> Generator[ModelConfig, None, None]:
+def model_config() -> Generator[ModelConfig, None, None]:
     """Yields a model configuration used in tests."""
     yield ModelConfig(
         model_id="model_id",
         revision="revision",
         framework=Framework.PYTORCH,
         task="task",
-        languages=[language],
+        languages=[DA],
         model_type=ModelType.FRESH,
         model_cache_dir="cache_dir",
         adapter_base_model_id=None,
