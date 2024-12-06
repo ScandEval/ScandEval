@@ -14,9 +14,10 @@ from scandeval.data_models import (
     ModelConfig,
     Task,
 )
-from scandeval.dataset_configs import MMLU_CONFIG, get_all_dataset_configs
+from scandeval.dataset_configs import MMLU_CONFIG, SPEED_CONFIG, get_all_dataset_configs
 from scandeval.enums import Framework, ModelType
 from scandeval.languages import get_all_languages
+from scandeval.tasks import get_all_tasks
 
 
 def pytest_configure() -> None:
@@ -27,6 +28,17 @@ def pytest_configure() -> None:
 def pytest_unconfigure() -> None:
     """Unset the global flag when `pytest` is finished."""
     delattr(sys, "_called_from_test")
+
+
+ACTIVE_LANGUAGES = {
+    language_code: language
+    for language_code, language in get_all_languages().items()
+    if any(
+        language in cfg.languages
+        for cfg in get_all_dataset_configs().values()
+        if cfg != SPEED_CONFIG
+    )
+}
 
 
 @pytest.fixture(scope="session")
@@ -97,13 +109,21 @@ def metric_config() -> Generator[MetricConfig, None, None]:
     )
 
 
-@pytest.fixture(scope="session", params=list(get_all_dataset_configs().values()))
+@pytest.fixture(
+    scope="session",
+    params=list(get_all_tasks().values()),
+    ids=list(get_all_tasks().keys()),
+)
 def task(request) -> Generator[Task, None, None]:
     """Yields a dataset task used in tests."""
     yield request.param
 
 
-@pytest.fixture(scope="session", params=list(get_all_languages().values()))
+@pytest.fixture(
+    scope="session",
+    params=list(ACTIVE_LANGUAGES.values()),
+    ids=list(ACTIVE_LANGUAGES.keys()),
+)
 def language(request):
     """Yields a language used in tests."""
     yield request.param
