@@ -14,6 +14,7 @@ from scandeval.data_models import (
     MetricConfig,
     ModelConfig,
 )
+from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.enums import Framework, ModelType
 
 
@@ -268,6 +269,16 @@ class TestBenchmarkResult:
         results_path.unlink(missing_ok=True)
 
 
+@pytest.mark.parametrize(
+    argnames=["dataset_config"],
+    argvalues=[
+        (dataset_config,) for dataset_config in get_all_dataset_configs().values()
+    ],
+    ids=[
+        (dataset_config.name) for dataset_config in get_all_dataset_configs().values()
+    ],
+    scope="class",
+)
 class TestDatasetConfig:
     """Unit tests for the `DatasetConfig` class."""
 

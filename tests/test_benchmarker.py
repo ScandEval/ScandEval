@@ -22,7 +22,7 @@ from scandeval.dataset_configs import ANGRY_TWEETS_CONFIG, DANSK_CONFIG
 @pytest.fixture(scope="module")
 def benchmarker() -> Generator[Benchmarker, None, None]:
     """A `Benchmarker` instance."""
-    yield Benchmarker(progress_bar=False, save_results=False)
+    yield Benchmarker(progress_bar=False, save_results=False, num_iterations=1)
 
 
 def test_benchmark_results_is_a_list(benchmarker) -> None:
