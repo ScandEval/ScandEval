@@ -125,7 +125,7 @@ def generate_single_iteration(
         dataset=dataset, cache=cache
     )
 
-    all_preds: list[dict | str | list[str]] = list()
+    all_preds: list[str] = list()
 
     if len(non_cached_dataset) > 0:
         match model.batching_preference:
