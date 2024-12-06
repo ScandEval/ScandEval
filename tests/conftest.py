@@ -7,24 +7,16 @@ from typing import Generator
 import pytest
 import torch
 
-from scandeval.benchmark_modules.base import BenchmarkModule
 from scandeval.data_models import (
     BenchmarkConfig,
     DatasetConfig,
-    Language,
     MetricConfig,
     ModelConfig,
     Task,
 )
-from scandeval.dataset_configs import (
-    ANGRY_TWEETS_CONFIG,
-    MMLU_CONFIG,
-    get_all_dataset_configs,
-)
+from scandeval.dataset_configs import MMLU_CONFIG, get_all_dataset_configs
 from scandeval.enums import Framework, ModelType
-from scandeval.model_config import get_model_config
-from scandeval.model_loading import load_model
-from scandeval.tasks import SPEED
+from scandeval.languages import get_all_languages
 
 
 def pytest_configure() -> None:
@@ -86,7 +78,7 @@ def benchmark_config(
         load_in_4bit=None,
         use_flash_attention=False,
         clear_model_cache=False,
-        only_validation_split=False,
+        evaluate_test_split=False,
         few_shot=True,
         num_iterations=10,
         debug=False,
@@ -105,20 +97,20 @@ def metric_config() -> Generator[MetricConfig, None, None]:
     )
 
 
-@pytest.fixture(scope="session")
-def task() -> Generator[Task, None, None]:
+@pytest.fixture(scope="session", params=list(get_all_dataset_configs().values()))
+def task(request) -> Generator[Task, None, None]:
     """Yields a dataset task used in tests."""
-    yield SPEED
+    yield request.param
 
 
-@pytest.fixture(scope="session")
-def language():
+@pytest.fixture(scope="session", params=list(get_all_languages().values()))
+def language(request):
     """Yields a language used in tests."""
-    yield Language(code="language_code", name="Language name")
+    yield request.param
 
 
 @pytest.fixture(scope="session")
-def model_id() -> Generator[str, None, None]:
+def encoder_model_id() -> Generator[str, None, None]:
     """Yields a model ID used in tests."""
     yield "jonfd/electra-small-nordic"
 
@@ -130,19 +122,15 @@ def generative_model_id() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
-def generative_model(
-    benchmark_config, generative_model_id
-) -> Generator[BenchmarkModule, None, None]:
-    """Yields a generative model used in tests."""
-    model_config = get_model_config(
-        model_id=generative_model_id, benchmark_config=benchmark_config
-    )
-    model = load_model(
-        model_config=model_config,
-        dataset_config=ANGRY_TWEETS_CONFIG,
-        benchmark_config=benchmark_config,
-    )
-    yield model
+def openai_model_id() -> Generator[str, None, None]:
+    """Yields an OpenAI model ID used in tests."""
+    yield "gpt-4o-mini"
+
+
+@pytest.fixture(scope="session")
+def anthropic_model_id() -> Generator[str, None, None]:
+    """Yields an Anthropic model ID used in tests."""
+    yield "claude-3-5-haiku-20241022"
 
 
 @pytest.fixture(scope="session")

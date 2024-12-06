@@ -7,8 +7,8 @@ from tqdm.auto import tqdm
 from transformers import PreTrainedModel, PreTrainedTokenizer
 from transformers.models.auto import AutoModelForSequenceClassification, AutoTokenizer
 
-from scandeval.config import ModelConfig
-from scandeval.model_setups import HFModelSetup
+from scandeval.data_models import ModelConfig
+from scandeval.model_config import get_model_config
 from scandeval.speed_benchmark import benchmark_speed
 
 
@@ -27,8 +27,7 @@ def model(model_id) -> Generator[PreTrainedModel, None, None]:
 @pytest.fixture(scope="module")
 def model_config(model_id, benchmark_config) -> Generator[ModelConfig, None, None]:
     """Yields a model configuration."""
-    model_setup = HFModelSetup(benchmark_config=benchmark_config)
-    yield model_setup.get_model_config(model_id=model_id)
+    yield get_model_config(model_id=model_id, benchmark_config=benchmark_config)
 
 
 class TestBenchmarkSpeed:
@@ -41,17 +40,10 @@ class TestBenchmarkSpeed:
 
     @pytest.fixture(scope="class")
     def scores(
-        self, itr, tokenizer, model, model_config, dataset_config, benchmark_config
-    ) -> Generator[dict[str, list[dict[str, float]]], None, None]:
+        self, model, benchmark_config
+    ) -> Generator[list[dict[str, float]], None, None]:
         """Yields the benchmark speed scores."""
-        yield benchmark_speed(
-            itr=itr,
-            tokenizer=tokenizer,
-            model=model,
-            model_config=model_config,
-            dataset_config=dataset_config,
-            benchmark_config=benchmark_config,
-        )
+        yield benchmark_speed(model=model, benchmark_config=benchmark_config)
 
     def test_scores_is_dict(self, scores):
         """Tests that the scores are a dict."""

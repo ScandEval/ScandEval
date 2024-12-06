@@ -12,7 +12,7 @@ from scandeval.cli import benchmark
 @pytest.fixture(scope="module")
 def params() -> Generator[dict[str | None, ParamType], None, None]:
     """Yields a dictionary of the CLI parameters."""
-    ctx = benchmark.make_context(None, list())
+    ctx = benchmark.make_context(info_name="testing", args=["--model", "test-model"])
     yield {p.name: p.type for p in benchmark.get_params(ctx)}
 
 
@@ -26,19 +26,12 @@ def test_cli_param_names(params):
         "dataset_language",
         "dataset",
         "batch_size",
-        "evaluate_train",
         "progress_bar",
         "raise_errors",
         "verbose",
         "save_results",
         "cache_dir",
-        "token",
-        "use_token",
-        "openai_api_key",
-        "prefer_azure",
-        "azure_openai_api_key",
-        "azure_openai_endpoint",
-        "azure_openai_api_version",
+        "api_key",
         "force",
         "framework",
         "device",
@@ -46,7 +39,7 @@ def test_cli_param_names(params):
         "load_in_4bit",
         "use_flash_attention",
         "clear_model_cache",
-        "only_validation_split",
+        "evaluate_test_split",
         "few_shot",
         "num_iterations",
         "debug",
@@ -63,19 +56,12 @@ def test_cli_param_types(params):
     assert isinstance(params["dataset_language"], Choice)
     assert isinstance(params["task"], Choice)
     assert isinstance(params["batch_size"], Choice)
-    assert params["evaluate_train"] == BOOL
     assert params["progress_bar"] == BOOL
     assert params["raise_errors"] == BOOL
     assert params["verbose"] == BOOL
     assert params["save_results"] == BOOL
     assert params["cache_dir"] == STRING
-    assert params["token"] == STRING
-    assert params["use_token"] == BOOL
-    assert params["openai_api_key"] == STRING
-    assert params["prefer_azure"] == BOOL
-    assert params["azure_openai_api_key"] == STRING
-    assert params["azure_openai_endpoint"] == STRING
-    assert params["azure_openai_api_version"] == STRING
+    assert params["api_key"] == STRING
     assert params["force"] == BOOL
     assert isinstance(params["framework"], Choice)
     assert isinstance(params["device"], Choice)
@@ -83,7 +69,7 @@ def test_cli_param_types(params):
     assert params["load_in_4bit"] == BOOL
     assert params["use_flash_attention"] == BOOL
     assert params["clear_model_cache"] == BOOL
-    assert params["only_validation_split"] == BOOL
+    assert params["evaluate_test_split"] == BOOL
     assert params["few_shot"] == BOOL
     assert params["num_iterations"] == INT
     assert params["debug"] == BOOL

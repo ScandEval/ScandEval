@@ -666,20 +666,26 @@ def model_has_been_benchmarked(
     return False
 
 
-def adjust_logging_level(verbose: bool) -> None:
+def adjust_logging_level(verbose: bool, ignore_testing: bool = False) -> int:
     """Adjust the logging level based on verbosity.
 
     Args:
         verbose:
             Whether to output additional output.
+        ignore_testing:
+            Whether to ignore the testing flag.
+
+    Returns:
+        The logging level that was set.
     """
-    if hasattr(sys, "_called_from_test"):
+    if hasattr(sys, "_called_from_test") and not ignore_testing:
         logging_level = logging.CRITICAL
     elif verbose:
         logging_level = logging.DEBUG
     else:
         logging_level = logging.INFO
     logger.setLevel(logging_level)
+    return logging_level
 
 
 def clear_model_cache_fn(cache_dir: str) -> None:

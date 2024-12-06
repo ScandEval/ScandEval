@@ -3,13 +3,13 @@
 import collections.abc as c
 import importlib.metadata
 import json
+import pathlib
 import re
 import typing as t
 from dataclasses import dataclass, field
-from pathlib import Path
 
+import pydantic
 import torch
-from pydantic import BaseModel, ConfigDict
 
 from .enums import Device, Framework, ModelType
 from .types import ScoreDict
@@ -180,10 +180,10 @@ class BenchmarkConfig:
     run_with_cli: bool
 
 
-class BenchmarkConfigParams(BaseModel):
+class BenchmarkConfigParams(pydantic.BaseModel):
     """The parameters for the benchmark configuration."""
 
-    model_config = ConfigDict(protected_namespaces=())
+    model_config = pydantic.ConfigDict(protected_namespaces=())
 
     progress_bar: bool
     save_results: bool
@@ -211,7 +211,7 @@ class BenchmarkConfigParams(BaseModel):
     run_with_cli: bool
 
 
-class BenchmarkResult(BaseModel):
+class BenchmarkResult(pydantic.BaseModel):
     """A benchmark result."""
 
     dataset: str
@@ -258,7 +258,7 @@ class BenchmarkResult(BaseModel):
 
         return cls(**config)
 
-    def append_to_results(self, results_path: Path) -> None:
+    def append_to_results(self, results_path: pathlib.Path) -> None:
         """Append the benchmark result to the results file.
 
         Args:
@@ -376,7 +376,7 @@ class ModelConfig:
     framework: Framework
     task: str
     languages: list[Language]
-    model_type: "ModelType"
+    model_type: ModelType
     model_cache_dir: str
     adapter_base_model_id: str | None
 

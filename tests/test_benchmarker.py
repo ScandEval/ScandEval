@@ -1,183 +1,80 @@
 """Unit tests for the `benchmarker` module."""
 
-import json
+import logging
+import os
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, TypedDict
 
 import pytest
+import torch
 
-from scandeval import __version__
 from scandeval.benchmarker import (
     Benchmarker,
     BenchmarkResult,
+    adjust_logging_level,
+    clear_model_cache_fn,
     model_has_been_benchmarked,
+    prepare_dataset_configs,
 )
-from scandeval.types import ScoreDict
+from scandeval.dataset_configs import ANGRY_TWEETS_CONFIG, DANSK_CONFIG
 
 
-class DataKwargs(TypedDict):
-    """Helper dict with keyword arguments for `BenchmarkResult`, to avoid redundancy."""
-
-    num_model_parameters: int
-    max_sequence_length: int
-    vocabulary_size: int
-    dataset_languages: list[str]
-    task: str
-    results: ScoreDict
+@pytest.fixture(scope="module")
+def benchmarker() -> Generator[Benchmarker, None, None]:
+    """A `Benchmarker` instance."""
+    yield Benchmarker(progress_bar=False, save_results=False)
 
 
-DATA_KWARGS = DataKwargs(
-    num_model_parameters=100,
-    max_sequence_length=100,
-    vocabulary_size=100,
-    dataset_languages=["da"],
-    task="task",
-    results=dict(),
-)
+def test_benchmark_results_is_a_list(benchmarker) -> None:
+    """Test that the `benchmark_results` property is a list."""
+    assert isinstance(benchmarker.benchmark_results, list)
 
 
-def test_benchmarker_initialisation():
-    """Test that the `Benchmarker` class can be initialised."""
-    Benchmarker()
-
-
-class TestBenchmarkResult:
-    """Tests related to the `BenchmarkResult` class."""
-
-    @pytest.fixture(scope="class")
-    def benchmark_result(self) -> Generator[BenchmarkResult, None, None]:
-        """Fixture for a `BenchmarkResult` object."""
-        yield BenchmarkResult(
-            dataset="dataset",
-            model="model",
-            generative=False,
-            few_shot=True,
-            validation_split=False,
-            **DATA_KWARGS,
-        )
-
-    @pytest.fixture(scope="class")
-    def results_path(self) -> Generator[Path, None, None]:
-        """Fixture for a `Path` object to a results file."""
-        results_path = Path(".scandeval_cache/test_results.jsonl")
-        results_path.parent.mkdir(parents=True, exist_ok=True)
-        yield results_path
-
-    def test_benchmark_result_parameters(self, benchmark_result):
-        """Test that the `BenchmarkResult` parameters are correct."""
-        assert benchmark_result.dataset == "dataset"
-        assert benchmark_result.model == "model"
-        assert benchmark_result.generative is False
-        assert benchmark_result.few_shot is True
-        assert benchmark_result.validation_split is False
-        assert benchmark_result.num_model_parameters == 100
-        assert benchmark_result.max_sequence_length == 100
-        assert benchmark_result.vocabulary_size == 100
-        assert benchmark_result.dataset_languages == ["da"]
-        assert benchmark_result.task == "task"
-        assert benchmark_result.results == dict()
-        assert benchmark_result.scandeval_version == __version__
-
-    @pytest.mark.parametrize(
-        argnames=["config", "expected"],
-        argvalues=[
-            (
-                dict(
-                    dataset="dataset",
-                    model="model",
-                    few_shot=True,
-                    validation_split=False,
-                    **DATA_KWARGS,
-                ),
-                BenchmarkResult(
-                    dataset="dataset",
-                    model="model",
-                    generative=False,
-                    few_shot=True,
-                    validation_split=False,
-                    **DATA_KWARGS,
-                ),
-            ),
-            (
-                dict(
-                    dataset="dataset",
-                    model="model (few-shot)",
-                    validation_split=False,
-                    **DATA_KWARGS,
-                ),
-                BenchmarkResult(
-                    dataset="dataset",
-                    model="model",
-                    generative=True,
-                    few_shot=True,
-                    validation_split=False,
-                    **DATA_KWARGS,
-                ),
-            ),
-            (
-                dict(
-                    dataset="dataset", model="model (val)", few_shot=True, **DATA_KWARGS
-                ),
-                BenchmarkResult(
-                    dataset="dataset",
-                    model="model",
-                    generative=False,
-                    few_shot=True,
-                    validation_split=True,
-                    **DATA_KWARGS,
-                ),
-            ),
-            (
-                dict(dataset="dataset", model="model (few-shot, val)", **DATA_KWARGS),
-                BenchmarkResult(
-                    dataset="dataset",
-                    model="model",
-                    generative=True,
-                    few_shot=True,
-                    validation_split=True,
-                    **DATA_KWARGS,
-                ),
-            ),
-        ],
-        ids=[
-            "normal case",
-            "few-shot model name",
-            "validation split model name",
-            "few-shot and validation split model name",
-        ],
+def test_benchmark_encoder(benchmarker, task, language, encoder_model_id):
+    """Test that an encoder model can be benchmarked."""
+    benchmark_result = benchmarker.benchmark(
+        model=encoder_model_id, task=task.name, language=language.code
     )
-    def test_from_dict(self, config, expected):
-        """Test that `BenchmarkResult.from_dict` works as expected."""
-        assert BenchmarkResult.from_dict(config) == expected
+    assert isinstance(benchmark_result, list)
+    assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
-    def test_append_to_results(self, benchmark_result, results_path):
-        """Test that `BenchmarkResult.append_to_results` works as expected."""
-        results_path.unlink(missing_ok=True)
-        results_path.touch(exist_ok=True)
 
-        benchmark_result.append_to_results(results_path=results_path)
-        json_str = json.dumps(
-            dict(
-                dataset=benchmark_result.dataset,
-                task=benchmark_result.task,
-                dataset_languages=benchmark_result.dataset_languages,
-                model=benchmark_result.model,
-                results=benchmark_result.results,
-                num_model_parameters=benchmark_result.num_model_parameters,
-                max_sequence_length=benchmark_result.max_sequence_length,
-                vocabulary_size=benchmark_result.vocabulary_size,
-                generative=benchmark_result.generative,
-                few_shot=benchmark_result.few_shot,
-                validation_split=benchmark_result.validation_split,
-                scandeval_version=benchmark_result.scandeval_version,
-            )
-        )
-        assert results_path.read_text() == f"\n{json_str}"
+@pytest.mark.skipif(
+    condition=not torch.cuda.is_available(), reason="CUDA is not available."
+)
+def test_benchmark_generative(benchmarker, task, language, generative_model_id):
+    """Test that a generative model can be benchmarked."""
+    benchmark_result = benchmarker.benchmark(
+        model=generative_model_id, task=task.name, language=language.code
+    )
+    assert isinstance(benchmark_result, list)
+    assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
-        benchmark_result.append_to_results(results_path=results_path)
-        assert results_path.read_text() == f"\n{json_str}\n{json_str}"
 
-        results_path.unlink(missing_ok=True)
+@pytest.mark.skipif(
+    condition=os.getenv("OPENAI_API_KEY") is None,
+    reason="OpenAI API key is not available.",
+)
+def test_benchmark_openai(benchmarker, task, language, openai_model_id):
+    """Test that an OpenAI model can be benchmarked."""
+    benchmark_result = benchmarker.benchmark(
+        model=openai_model_id, task=task.name, language=language.code
+    )
+    assert isinstance(benchmark_result, list)
+    assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
+
+
+@pytest.mark.skipif(
+    condition=os.getenv("ANTHROPIC_API_KEY") is None,
+    reason="Anthropic API key is not available.",
+)
+def test_benchmark_anthropic(benchmarker, task, language):
+    """Test that an Anthropic model can be benchmarked."""
+    benchmark_result = benchmarker.benchmark(
+        model="anthropic/anthropictext", task=task.name, language=language.code
+    )
+    assert isinstance(benchmark_result, list)
+    assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
 
 @pytest.mark.parametrize(
@@ -203,7 +100,12 @@ class TestBenchmarkResult:
                     generative=False,
                     few_shot=False,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 )
             ],
             True,
@@ -220,7 +122,12 @@ class TestBenchmarkResult:
                     generative=False,
                     few_shot=False,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 )
             ],
             False,
@@ -237,7 +144,12 @@ class TestBenchmarkResult:
                     generative=True,
                     few_shot=False,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 )
             ],
             False,
@@ -254,7 +166,12 @@ class TestBenchmarkResult:
                     generative=True,
                     few_shot=True,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 )
             ],
             True,
@@ -271,7 +188,12 @@ class TestBenchmarkResult:
                     generative=False,
                     few_shot=False,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 )
             ],
             True,
@@ -288,7 +210,12 @@ class TestBenchmarkResult:
                     generative=False,
                     few_shot=False,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 )
             ],
             False,
@@ -305,7 +232,12 @@ class TestBenchmarkResult:
                     generative=False,
                     few_shot=False,
                     validation_split=True,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 )
             ],
             True,
@@ -322,7 +254,12 @@ class TestBenchmarkResult:
                     generative=False,
                     few_shot=False,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 ),
                 BenchmarkResult(
                     model="model",
@@ -330,7 +267,12 @@ class TestBenchmarkResult:
                     generative=False,
                     few_shot=False,
                     validation_split=False,
-                    **DATA_KWARGS,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
                 ),
             ],
             True,
@@ -365,3 +307,48 @@ def test_model_has_been_benchmarked(
         benchmark_results=benchmark_results,
     )
     assert benchmarked == expected
+
+
+@pytest.mark.parametrize(
+    argnames=["verbose", "expected_logging_level"],
+    argvalues=[(False, logging.INFO), (True, logging.DEBUG)],
+)
+def test_adjust_logging_level(verbose, expected_logging_level):
+    """Test that the logging level is adjusted correctly."""
+    logging_level = adjust_logging_level(verbose=verbose, ignore_testing=True)
+    assert logging_level == expected_logging_level
+
+
+class TestClearCacheFn:
+    """Tests related to the `clear_cache_fn` function."""
+
+    def test_clear_non_existing_cache(self):
+        """Test that no errors are thrown when clearing a non-existing cache."""
+        clear_model_cache_fn(cache_dir="does-not-exist")
+
+    def test_clear_existing_cache(self):
+        """Test that a cache can be cleared."""
+        cache_dir = Path(".test_scandeval_cache")
+        model_cache_dir = cache_dir / "model_cache"
+        example_model_dir = model_cache_dir / "example_model"
+        dir_to_be_deleted = example_model_dir / "dir_to_be_deleted"
+
+        dir_to_be_deleted.mkdir(parents=True, exist_ok=True)
+        assert dir_to_be_deleted.exists()
+
+        clear_model_cache_fn(cache_dir=cache_dir.as_posix())
+        assert not dir_to_be_deleted.exists()
+        assert example_model_dir.exists()
+
+
+@pytest.mark.parametrize(
+    argnames=["dataset_names", "dataset_configs"],
+    argvalues=[
+        ([], []),
+        (["angry-tweets"], [ANGRY_TWEETS_CONFIG]),
+        (["angry-tweets", "dansk"], [ANGRY_TWEETS_CONFIG, DANSK_CONFIG]),
+    ],
+)
+def test_prepare_dataset_configs(dataset_names, dataset_configs):
+    """Test that the `prepare_dataset_configs` function works as expected."""
+    assert prepare_dataset_configs(dataset_names=dataset_names) == dataset_configs

@@ -2,15 +2,15 @@
 
 import typing as t
 
-import numpy as np
+from numpy.typing import NDArray
 
 if t.TYPE_CHECKING:
     from .data_models import GenerativeModelOutput
 
 
 ScoreDict = dict[str, dict[str, float] | list[dict[str, float]]]
-Predictions = np.ndarray | list[str] | list[list[str]]
-Labels = np.ndarray | list[str] | list[list[str]]
+Predictions = NDArray | list[str] | list[list[str]]
+Labels = NDArray | list[str] | list[list[str]]
 
 
 class ComputeMetricsFunction(t.Protocol):
@@ -19,8 +19,7 @@ class ComputeMetricsFunction(t.Protocol):
     def __call__(
         self,
         model_outputs_and_labels: tuple[
-            np.ndarray | list[str] | list[list[str]],
-            np.ndarray | list[str] | list[list[str]],
+            NDArray | list[str] | list[list[str]], NDArray | list[str] | list[list[str]]
         ],
         id2label: dict[int, str],
     ) -> dict[str, float]:

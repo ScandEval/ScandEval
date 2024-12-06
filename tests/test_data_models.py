@@ -1,16 +1,37 @@
 """Unit tests for the `data_models` module."""
 
+import inspect
+import json
+from collections.abc import Generator
+from pathlib import Path
+
 import pytest
 
+from scandeval import __version__, data_models, enums
 from scandeval.data_models import (
-    BenchmarkConfig,
+    BenchmarkResult,
     DatasetConfig,
-    Language,
     MetricConfig,
     ModelConfig,
-    Task,
 )
 from scandeval.enums import Framework, ModelType
+
+
+def test_all_classes_are_dataclasses_or_pydantic_models():
+    """Test that all classes in `data_models` are dataclasses or Pydantic models."""
+    all_classes = [
+        getattr(data_models, obj_name)
+        for obj_name in dir(data_models)
+        if not obj_name.startswith("_")
+        and inspect.isclass(object=getattr(data_models, obj_name))
+        and not hasattr(enums, obj_name)
+    ]
+    for obj in all_classes:
+        obj_is_dataclass = hasattr(obj, "__dataclass_fields__")
+        obj_is_pydantic_model = hasattr(obj, "model_fields")
+        assert (
+            obj_is_dataclass or obj_is_pydantic_model
+        ), f"{obj.__name__} is not a dataclass or Pydantic model. "
 
 
 class TestMetricConfig:
@@ -48,64 +69,203 @@ class TestMetricConfig:
         assert metric_config.postprocessing_fn(inputs) == expected
 
 
-class TestTask:
-    """Unit tests for the `Task` class."""
+# TODO
+@pytest.mark.skip("Not implemented")
+class TestBenchmarkConfigParams:
+    """Unit tests for the `BenchmarkConfigParams` class."""
 
-    def test_task_is_object(self, task):
-        """Test that the dataset task is a `Task` object."""
-        assert isinstance(task, Task)
-
-    def test_attributes_correspond_to_arguments(self, task):
-        """Test that the dataset task attributes correspond to the arguments."""
-        assert task.name == "speed"
-        assert task.supertask == "sequence-classification"
-        assert task.labels == []
+    pass
 
 
-class TestLanguage:
-    """Unit tests for the `Language` class."""
+class TestBenchmarkResult:
+    """Tests related to the `BenchmarkResult` class."""
 
-    def test_language_is_object(self, language):
-        """Test that the language is a `Language` object."""
-        assert isinstance(language, Language)
+    @pytest.fixture(scope="class")
+    def benchmark_result(self) -> Generator[BenchmarkResult, None, None]:
+        """Fixture for a `BenchmarkResult` object."""
+        yield BenchmarkResult(
+            dataset="dataset",
+            model="model",
+            generative=False,
+            few_shot=True,
+            validation_split=False,
+            num_model_parameters=100,
+            max_sequence_length=100,
+            vocabulary_size=100,
+            dataset_languages=["da"],
+            task="task",
+            results=dict(),
+        )
 
-    def test_attributes_correspond_to_arguments(self, language):
-        """Test that the language attributes correspond to the arguments."""
-        assert language.code == "language_code"
-        assert language.name == "Language name"
+    @pytest.fixture(scope="class")
+    def results_path(self) -> Generator[Path, None, None]:
+        """Fixture for a `Path` object to a results file."""
+        results_path = Path(".scandeval_cache/test_results.jsonl")
+        results_path.parent.mkdir(parents=True, exist_ok=True)
+        yield results_path
 
+    def test_benchmark_result_parameters(self, benchmark_result):
+        """Test that the `BenchmarkResult` parameters are correct."""
+        assert benchmark_result.dataset == "dataset"
+        assert benchmark_result.model == "model"
+        assert benchmark_result.generative is False
+        assert benchmark_result.few_shot is True
+        assert benchmark_result.validation_split is False
+        assert benchmark_result.num_model_parameters == 100
+        assert benchmark_result.max_sequence_length == 100
+        assert benchmark_result.vocabulary_size == 100
+        assert benchmark_result.dataset_languages == ["da"]
+        assert benchmark_result.task == "task"
+        assert benchmark_result.results == dict()
+        assert benchmark_result.scandeval_version == __version__
 
-class TestBenchmarkConfig:
-    """Unit tests for the `BenchmarkConfig` class."""
+    @pytest.mark.parametrize(
+        argnames=["config", "expected"],
+        argvalues=[
+            (
+                dict(
+                    dataset="dataset",
+                    model="model",
+                    few_shot=True,
+                    validation_split=False,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+                BenchmarkResult(
+                    dataset="dataset",
+                    model="model",
+                    generative=False,
+                    few_shot=True,
+                    validation_split=False,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+            ),
+            (
+                dict(
+                    dataset="dataset",
+                    model="model (few-shot)",
+                    validation_split=False,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+                BenchmarkResult(
+                    dataset="dataset",
+                    model="model",
+                    generative=True,
+                    few_shot=True,
+                    validation_split=False,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+            ),
+            (
+                dict(
+                    dataset="dataset",
+                    model="model (val)",
+                    few_shot=True,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+                BenchmarkResult(
+                    dataset="dataset",
+                    model="model",
+                    generative=False,
+                    few_shot=True,
+                    validation_split=True,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+            ),
+            (
+                dict(
+                    dataset="dataset",
+                    model="model (few-shot, val)",
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+                BenchmarkResult(
+                    dataset="dataset",
+                    model="model",
+                    generative=True,
+                    few_shot=True,
+                    validation_split=True,
+                    num_model_parameters=100,
+                    max_sequence_length=100,
+                    vocabulary_size=100,
+                    dataset_languages=["da"],
+                    task="task",
+                    results=dict(),
+                ),
+            ),
+        ],
+        ids=[
+            "normal case",
+            "few-shot model name",
+            "validation split model name",
+            "few-shot and validation split model name",
+        ],
+    )
+    def test_from_dict(self, config, expected):
+        """Test that `BenchmarkResult.from_dict` works as expected."""
+        assert BenchmarkResult.from_dict(config) == expected
 
-    def test_benchmark_config_is_object(self, benchmark_config):
-        """Test that the benchmark config is a `BenchmarkConfig` object."""
-        assert isinstance(benchmark_config, BenchmarkConfig)
+    def test_append_to_results(self, benchmark_result, results_path):
+        """Test that `BenchmarkResult.append_to_results` works as expected."""
+        results_path.unlink(missing_ok=True)
+        results_path.touch(exist_ok=True)
 
-    def test_attributes_correspond_to_arguments(
-        self, benchmark_config, language, task, auth, device
-    ):
-        """Test that the benchmark config attributes correspond to the arguments."""
-        assert benchmark_config.model_languages == [language]
-        assert benchmark_config.dataset_languages == [language]
-        assert benchmark_config.tasks == [task]
-        assert benchmark_config.framework is None
-        assert benchmark_config.batch_size == 32
-        assert benchmark_config.raise_errors is False
-        assert benchmark_config.cache_dir == ".scandeval_cache"
-        assert benchmark_config.evaluate_train is False
-        assert benchmark_config.token is auth
-        assert benchmark_config.openai_api_key is None
-        assert benchmark_config.progress_bar is False
-        assert benchmark_config.save_results is True
-        assert benchmark_config.device == device
-        assert benchmark_config.verbose is False
-        assert benchmark_config.trust_remote_code is True
-        assert benchmark_config.load_in_4bit is None
-        assert benchmark_config.use_flash_attention is False
-        assert benchmark_config.clear_model_cache is False
-        assert benchmark_config.only_validation_split is False
-        assert benchmark_config.few_shot is True
+        benchmark_result.append_to_results(results_path=results_path)
+        json_str = json.dumps(
+            dict(
+                dataset=benchmark_result.dataset,
+                task=benchmark_result.task,
+                dataset_languages=benchmark_result.dataset_languages,
+                model=benchmark_result.model,
+                results=benchmark_result.results,
+                num_model_parameters=benchmark_result.num_model_parameters,
+                max_sequence_length=benchmark_result.max_sequence_length,
+                vocabulary_size=benchmark_result.vocabulary_size,
+                generative=benchmark_result.generative,
+                few_shot=benchmark_result.few_shot,
+                validation_split=benchmark_result.validation_split,
+                scandeval_version=benchmark_result.scandeval_version,
+            )
+        )
+        assert results_path.read_text() == f"\n{json_str}"
+
+        benchmark_result.append_to_results(results_path=results_path)
+        assert results_path.read_text() == f"\n{json_str}\n{json_str}"
+
+        results_path.unlink(missing_ok=True)
 
 
 class TestDatasetConfig:
