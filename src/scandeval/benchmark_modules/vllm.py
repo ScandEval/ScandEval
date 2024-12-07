@@ -438,6 +438,10 @@ class VLLMModel(HuggingFaceEncoderModel):
                 if model_len is not None:
                     max_model_len = min(max_model_len, model_len)
 
+        distributed_backend: str | None = "ray"
+        if self.benchmark_config.debug or hasattr(sys, "_called_from_test"):
+            distributed_backend = None
+
         vllm_kwargs = dict(
             model=self.model_config.adapter_base_model_id or self.model_config.model_id,
             tokenizer=self.model_config.adapter_base_model_id
@@ -448,7 +452,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             trust_remote_code=self.benchmark_config.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
-            distributed_executor_backend=None if self.benchmark_config.debug else "ray",
+            distributed_executor_backend=distributed_backend,
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,
