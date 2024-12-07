@@ -148,7 +148,7 @@ convention = "google"
 minversion = "7.0"
 addopts = [
     "--cov=src/scandeval",
-    "--color=no",
+    "--color=yes",
     "-v",
 ]
 xfail_strict = true

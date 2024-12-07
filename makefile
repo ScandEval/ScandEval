@@ -74,9 +74,7 @@ publish-docs:  ## Publish documentation to GitHub Pages
 	@echo "Updated documentation website: https://scandeval.com/ScandEval/"
 
 test:  ## Run tests
-	@uv run pytest | tee tests.log
-	@$(MAKE) --quiet update-coverage-badge
-	@date "+%H:%M:%S ⋅ All done!"
+	@uv run pytest && uv run readme-c
 
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .
