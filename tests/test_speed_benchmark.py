@@ -4,32 +4,24 @@ from typing import Generator
 
 import pytest
 from tqdm.auto import tqdm
-from transformers import PreTrainedModel, PreTrainedTokenizer
-from transformers.models.auto import AutoModelForSequenceClassification, AutoTokenizer
 
-from scandeval.data_models import ModelConfig
+from scandeval.benchmark_modules.base import BenchmarkModule
+from scandeval.benchmark_modules.hf import HuggingFaceEncoderModel
+from scandeval.dataset_configs import SPEED_CONFIG
 from scandeval.model_config import get_model_config
 from scandeval.speed_benchmark import benchmark_speed
 
 
 @pytest.fixture(scope="module")
-def tokenizer(encoder_model_id) -> Generator[PreTrainedTokenizer, None, None]:
-    """Yields a tokenizer."""
-    yield AutoTokenizer.from_pretrained(encoder_model_id)
-
-
-@pytest.fixture(scope="module")
-def model(encoder_model_id) -> Generator[PreTrainedModel, None, None]:
+def model(encoder_model_id, benchmark_config) -> Generator[BenchmarkModule, None, None]:
     """Yields a model."""
-    yield AutoModelForSequenceClassification.from_pretrained(encoder_model_id)
-
-
-@pytest.fixture(scope="module")
-def model_config(
-    encoder_model_id, benchmark_config
-) -> Generator[ModelConfig, None, None]:
-    """Yields a model configuration."""
-    yield get_model_config(model_id=encoder_model_id, benchmark_config=benchmark_config)
+    yield HuggingFaceEncoderModel(
+        model_config=get_model_config(
+            model_id=encoder_model_id, benchmark_config=benchmark_config
+        ),
+        dataset_config=SPEED_CONFIG,
+        benchmark_config=benchmark_config,
+    )
 
 
 class TestBenchmarkSpeed:
@@ -47,31 +39,20 @@ class TestBenchmarkSpeed:
         """Yields the benchmark speed scores."""
         yield benchmark_speed(model=model, benchmark_config=benchmark_config)
 
-    def test_scores_is_dict(self, scores):
-        """Tests that the scores are a dict."""
-        assert isinstance(scores, dict)
+    def test_scores_is_list(self, scores):
+        """Tests that the scores is a list."""
+        assert isinstance(scores, list)
 
-    def test_scores_keys(self, scores):
-        """Tests that the scores have the correct keys."""
-        assert set(scores.keys()) == {"test"}
+    def test_scores_contain_dicts(self, scores):
+        """Tests that the scores contain dicts."""
+        assert all(isinstance(x, dict) for x in scores)
 
-    def test_test_scores_is_list(self, scores):
-        """Tests that the test scores are a list."""
-        assert isinstance(scores["test"], list)
+    def test_scores_dicts_keys(self, scores):
+        """Tests that the scores dicts have the correct keys."""
+        assert all(set(x.keys()) == {"test_speed", "test_speed_short"} for x in scores)
 
-    def test_test_scores_contain_dicts(self, scores):
-        """Tests that the test scores contain dicts."""
-        assert all(isinstance(x, dict) for x in scores["test"])
-
-    def test_test_scores_dicts_keys(self, scores):
-        """Tests that the test scores dicts have the correct keys."""
+    def test_scores_dicts_values_dtypes(self, scores):
+        """Tests that the scores dicts have the correct values dtypes."""
         assert all(
-            set(x.keys()) == {"test_speed", "test_speed_short"} for x in scores["test"]
-        )
-
-    def test_test_scores_dicts_values_dtypes(self, scores):
-        """Tests that the test scores dicts have the correct values dtypes."""
-        assert all(
-            all(isinstance(value, float) for value in x.values())
-            for x in scores["test"]
+            all(isinstance(value, float) for value in x.values()) for x in scores
         )
