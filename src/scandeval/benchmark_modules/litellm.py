@@ -552,28 +552,31 @@ class LiteLLMModel(BenchmarkModule):
 
         few_shot_messages: list[dict[str, str]]
         match task.supertask:
-            case "sequence-classification" | "text-to-text":
-                label_name = (
-                    "label"
-                    if task.supertask == "sequence-classification"
-                    else "target_text"
-                )
+            case "sequence-classification":
                 prompt_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
-                        label=example[label_name].strip(),
+                        label=example["label"].strip(),
                     )
                     for example in few_shot_examples
                 ]
 
                 few_shot_messages = [
                     dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections[1:]
+                    for section in prompt_sections
                     for role, content in zip(
                         it.cycle(["user", "assistant"]), split_section(section=section)
                     )
                     if content.split(":", 1)[1].strip() != ""
                 ]
+
+                # Sanity check that we should expect two few-shot messages per example
+                # (one for the user and one for the assistant)
+                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
+                assert len(few_shot_messages) == expected_few_shots, (
+                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
+                    f"messages, but got {len(few_shot_messages)}."
+                )
 
                 if self.dataset_config.prompt_prefix:
                     few_shot_messages[0]["content"] = (
@@ -590,6 +593,56 @@ class LiteLLMModel(BenchmarkModule):
                             content=split_section(
                                 section=self.dataset_config.prompt_template.format(
                                     text=text, label=""
+                                )
+                            )[0]
+                            .split(":", 1)[1]
+                            .strip(),
+                        )
+                    ]
+                    for text in examples["text"]
+                ]
+
+            case "text-to-text":
+                prompt_sections = [
+                    self.dataset_config.prompt_template.format(
+                        text=example["text"].replace("\n", " ").strip(),
+                        target_text=example["target_text"].strip(),
+                    )
+                    for example in few_shot_examples
+                ]
+
+                few_shot_messages = [
+                    dict(role=role, content=content.split(":", 1)[1].strip())
+                    for section in prompt_sections
+                    for role, content in zip(
+                        it.cycle(["user", "assistant"]), split_section(section=section)
+                    )
+                    if content.split(":", 1)[1].strip() != ""
+                ]
+
+                # Sanity check that we should expect two few-shot messages per example
+                # (one for the user and one for the assistant)
+                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
+                assert len(few_shot_messages) == expected_few_shots, (
+                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
+                    f"messages, but got {len(few_shot_messages)}."
+                )
+
+                if self.dataset_config.prompt_prefix:
+                    few_shot_messages[0]["content"] = (
+                        self.dataset_config.prompt_prefix
+                        + "\n\n"
+                        + few_shot_messages[0]["content"]
+                    )
+
+                examples["messages"] = [
+                    few_shot_messages
+                    + [
+                        dict(
+                            role="user",
+                            content=split_section(
+                                section=self.dataset_config.prompt_template.format(
+                                    text=text, target_text=""
                                 )
                             )[0]
                             .split(":", 1)[1]
@@ -627,12 +680,20 @@ class LiteLLMModel(BenchmarkModule):
 
                 few_shot_messages = [
                     dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections[1:]
+                    for section in prompt_sections
                     for role, content in zip(
                         it.cycle(["user", "assistant"]), split_section(section=section)
                     )
                     if content.split(":", 1)[1].strip() != ""
                 ]
+
+                # Sanity check that we should expect two few-shot messages per example
+                # (one for the user and one for the assistant)
+                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
+                assert len(few_shot_messages) == expected_few_shots, (
+                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
+                    f"messages, but got {len(few_shot_messages)}."
+                )
 
                 if self.dataset_config.prompt_prefix:
                     few_shot_messages[0]["content"] = (
@@ -671,12 +732,20 @@ class LiteLLMModel(BenchmarkModule):
 
                 few_shot_messages = [
                     dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections[1:]
+                    for section in prompt_sections
                     for role, content in zip(
                         it.cycle(["user", "assistant"]), split_section(section=section)
                     )
                     if content.split(":", 1)[1].strip() != ""
                 ]
+
+                # Sanity check that we should expect two few-shot messages per example
+                # (one for the user and one for the assistant)
+                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
+                assert len(few_shot_messages) == expected_few_shots, (
+                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
+                    f"messages, but got {len(few_shot_messages)}."
+                )
 
                 if self.dataset_config.prompt_prefix:
                     few_shot_messages[0]["content"] = (
