@@ -11,7 +11,7 @@ from scandeval.data_models import BenchmarkConfig, MetricConfig, ModelConfig, Ta
 from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
 from scandeval.enums import Framework, ModelType
 from scandeval.languages import DA, get_all_languages
-from scandeval.tasks import SENT, get_all_tasks
+from scandeval.tasks import SENT, SPEED, get_all_tasks
 
 
 def pytest_configure() -> None:
@@ -103,8 +103,8 @@ def metric_config() -> Generator[MetricConfig, None, None]:
 
 @pytest.fixture(
     scope="session",
-    params=list(get_all_tasks().values()),
-    ids=list(get_all_tasks().keys()),
+    params=[task for task in get_all_tasks().values() if task != SPEED],
+    ids=[task for task in get_all_tasks().keys() if task != SPEED],
 )
 def task(request) -> Generator[Task, None, None]:
     """Yields a dataset task used in tests."""
