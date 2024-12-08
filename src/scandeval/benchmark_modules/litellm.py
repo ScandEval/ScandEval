@@ -602,6 +602,7 @@ class LiteLLMModel(BenchmarkModule):
                     )
                     for example in few_shot_examples
                 ]
+                breakpoint()
 
                 few_shot_messages = [
                     dict(role=role, content=content.split(":", 1)[1].strip())
