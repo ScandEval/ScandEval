@@ -438,9 +438,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 if model_len is not None:
                     max_model_len = min(max_model_len, model_len)
 
-        distributed_backend: str | None = "ray"
-        if self.benchmark_config.debug or hasattr(sys, "_called_from_test"):
-            distributed_backend = None
+        distributed_backend = "ray" if torch.cuda.device_count() > 1 else None
 
         vllm_kwargs = dict(
             model=self.model_config.adapter_base_model_id or self.model_config.model_id,
