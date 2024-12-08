@@ -556,7 +556,7 @@ class LiteLLMModel(BenchmarkModule):
                 prompt_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
-                        label=example["label"].strip(),
+                        label=example["label"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
@@ -598,11 +598,10 @@ class LiteLLMModel(BenchmarkModule):
                 prompt_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
-                        target_text=example["target_text"].strip(),
+                        target_text=example["target_text"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
-                breakpoint()
 
                 few_shot_messages = [
                     dict(role=role, content=content.split(":", 1)[1].strip())
@@ -701,8 +700,8 @@ class LiteLLMModel(BenchmarkModule):
                 prompt_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["context"].replace("\n", " ").strip(),
-                        question=example["question"].strip(),
-                        label=example["answers"]["text"][0],
+                        question=example["question"].replace("\n", " ").strip(),
+                        label=example["answers"]["text"][0].replace("\n", " "),
                     )
                     for example in few_shot_examples
                 ]
