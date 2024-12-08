@@ -104,7 +104,7 @@ def metric_config() -> Generator[MetricConfig, None, None]:
 @pytest.fixture(
     scope="session",
     params=[task for task in get_all_tasks().values() if task != SPEED],
-    ids=[task for task in get_all_tasks().keys() if task != SPEED],
+    ids=[name for name, task in get_all_tasks().items() if task != SPEED],
 )
 def task(request) -> Generator[Task, None, None]:
     """Yields a dataset task used in tests."""
