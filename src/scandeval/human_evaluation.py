@@ -3,32 +3,37 @@
 import importlib.util
 import json
 import logging
+from collections import defaultdict
 from functools import partial
 from pathlib import Path
 
 import click
 from datasets import Dataset
-from transformers import AutoConfig, AutoTokenizer
-from transformers.utils import ModelOutput
+from transformers import AutoTokenizer
 
 from .benchmark_config_factory import build_benchmark_config
-from .benchmark_dataset import BenchmarkDataset
 from .benchmarker import BenchmarkResult
-from .config import ModelConfig
+from .data_loading import load_data
+from .data_models import GenerativeModelOutput
 from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
-from .dataset_factory import DatasetFactory
-from .enums import Framework, ModelType
+from .enums import Framework
 from .exceptions import NeedsExtraInstalled
 from .scores import aggregate_scores
+from .task_utils import (
+    question_answering,
+    sequence_classification,
+    text_to_text,
+    token_classification,
+)
 from .tasks import NER
-from .types import ScoreDict
-from .utils import create_model_cache_dir, enforce_reproducibility
+from .types import ComputeMetricsFunction, ExtractLabelsFunction, ScoreDict
+from .utils import enforce_reproducibility
 
 if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
 
 
-logger = logging.getLogger(__package__)
+logger = logging.getLogger("scandeval")
 
 
 class HumanEvaluator:
@@ -59,7 +64,6 @@ class HumanEvaluator:
         self.dummy_model_id = dummy_model_id
 
         self.sample_idx: int
-        self.benchmark_dataset: BenchmarkDataset
         self.active_dataset: Dataset
 
         self.dataset_configs = {
@@ -83,6 +87,9 @@ class HumanEvaluator:
                 if language.name not in {"Norwegian Bokmål", "Norwegian Nynorsk"}
             }
         )
+
+        self.extract_labels_from_generation: ExtractLabelsFunction
+        self.compute_metrics: ComputeMetricsFunction
 
     def create_app(self) -> "gr.Blocks":
         """Create the Gradio app for human evaluation.
@@ -170,7 +177,9 @@ class HumanEvaluator:
             )
         return app
 
-    def update_dataset_choices(self, language: str, task: str) -> "gr.Dropdown":
+    def update_dataset_choices(
+        self, language: str | None, task: str | None
+    ) -> "gr.Dropdown":
         """Update the dataset choices based on the selected language and task.
 
         Args:
@@ -251,45 +260,38 @@ class HumanEvaluator:
             framework=None,
             device=None,
             batch_size=1,
-            evaluate_train=False,
             raise_errors=False,
             cache_dir=".scandeval_cache",
-            token=None,
-            openai_api_key=None,
-            prefer_azure=False,
-            azure_openai_api_key=None,
-            azure_openai_endpoint=None,
-            azure_openai_api_version=None,
+            api_key=None,
             force=False,
             verbose=False,
             trust_remote_code=False,
             load_in_4bit=None,
             use_flash_attention=None,
             clear_model_cache=False,
-            only_validation_split=True,
+            evaluate_test_split=False,
             few_shot=True,
             num_iterations=iteration + 1,
             debug=False,
             run_with_cli=True,
         )
-        dataset_factory = DatasetFactory(benchmark_config=benchmark_config)
-        dataset_config = get_all_dataset_configs()[dataset_name]
+        self.dataset_config = get_all_dataset_configs()[dataset_name]
 
-        model_id = f"human-{iteration}"
-        model_config = ModelConfig(
-            model_id=model_id,
-            revision="main",
-            framework=Framework.HUMAN,
-            task="text-generation",
-            languages=dataset_config.languages,
-            model_type=ModelType.HUMAN,
-            model_cache_dir=create_model_cache_dir(
-                cache_dir=benchmark_config.cache_dir, model_id=model_id
-            ),
-            adapter_base_model_id=None,
-        )
+        # TODO: Is this needed?
+        # model_id = f"human-{iteration}"
+        # model_config = ModelConfig(
+        #     model_id=model_id,
+        #     revision="main",
+        #     framework=Framework.HUMAN,
+        #     task="text-generation",
+        #     languages=dataset_config.languages,
+        #     model_type=ModelType.HUMAN,
+        #     model_cache_dir=create_model_cache_dir(
+        #         cache_dir=benchmark_config.cache_dir, model_id=model_id
+        #     ),
+        #     adapter_base_model_id=None,
+        # )
 
-        self.benchmark_dataset = dataset_factory.build_dataset(dataset=dataset_config)
         self.sample_idx = 0
 
         dataset_path = (
@@ -299,7 +301,9 @@ class HumanEvaluator:
             / f"human-{iteration}.csv"
         )
         if dataset_path.exists():
-            self.active_dataset = Dataset.from_csv(str(dataset_path))
+            active_dataset = Dataset.from_csv(str(dataset_path))
+            assert isinstance(active_dataset, Dataset)
+            self.active_dataset = active_dataset
             try:
                 while self.active_dataset["answer"][self.sample_idx] is not None:
                     self.sample_idx += 1
@@ -308,21 +312,79 @@ class HumanEvaluator:
                 return blank_answer
         else:
             rng = enforce_reproducibility(framework=Framework.PYTORCH)
-            train, val, tests = self.benchmark_dataset._load_data(rng=rng)
-            _, _, tests = self.benchmark_dataset._load_prepared_data(
-                train=train,
-                val=val,
-                tests=tests,
-                model_config=model_config,
-                hf_model_config=AutoConfig.from_pretrained(self.dummy_model_id),
-                tokenizer=AutoTokenizer.from_pretrained(self.dummy_model_id),
-                benchmarking_generative_model=True,
+            datasets = load_data(
+                rng=rng,
+                dataset_config=self.dataset_config,
+                benchmark_config=benchmark_config,
             )
+            # TODO: Prepare data?
             self.active_dataset = (
-                tests[iteration]
-                .remove_columns(column_names=["input_ids", "attention_mask"])
-                .add_column(name="answer", column=[None] * len(tests[iteration]))
+                datasets[iteration]["test"]
+                .remove_columns(
+                    column_names=["input_ids", "attention_mask"],
+                    new_fingerprint=datasets[iteration]["test"]._fingerprint,
+                )
+                .add_column(
+                    name="answer",
+                    column=[None] * len(datasets[iteration]["test"]),
+                    new_fingerprint=datasets[iteration]["test"]._fingerprint,
+                )
             )
+            if self.dataset_config.task == NER:
+                labels_in_train: set[str] = {
+                    tag
+                    for tag_list in self.active_dataset["labels"]
+                    for tag in tag_list
+                }
+                self.has_misc_tags = (
+                    "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
+                )
+
+        match self.dataset_config.task.supertask:
+            case "sequence-classification":
+                self.compute_metrics = partial(
+                    sequence_classification.compute_metrics,
+                    id2label=self.dataset_config.id2label,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=benchmark_config,
+                )
+                self.extract_labels_from_generation = partial(
+                    sequence_classification.extract_labels_from_generation,
+                    dataset_config=self.dataset_config,
+                )
+            case "text-to-text":
+                self.compute_metrics = partial(
+                    text_to_text.compute_metrics,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=benchmark_config,
+                )
+                self.extract_labels_from_generation = (
+                    text_to_text.extract_labels_from_generation
+                )
+            case "token-classification":
+                self.compute_metrics = partial(
+                    token_classification.compute_metrics,
+                    has_misc_tags=self.has_misc_tags,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=benchmark_config,
+                )
+                self.extract_labels_from_generation = partial(
+                    token_classification.extract_labels_from_generation,
+                    dataset_config=self.dataset_config,
+                )
+            case "question-answering":
+                self.compute_metrics = partial(
+                    question_answering.compute_metrics,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=benchmark_config,
+                )
+                self.extract_labels_from_generation = (
+                    question_answering.extract_labels_from_generation
+                )
+            case _:
+                raise NotImplementedError(
+                    f"Supertask {self.dataset_config.task.supertask} is not supported."
+                )
 
         task_examples, question = self.example_to_markdown(
             example=self.active_dataset[self.sample_idx]
@@ -333,9 +395,9 @@ class HumanEvaluator:
             f"{task_examples}"
         )
 
-        if self.benchmark_dataset.dataset_config.task == NER:
+        if self.dataset_config.task == NER:
             ner_tags = list()
-            for ner_tag in dataset_config.prompt_label_mapping.values():
+            for ner_tag in self.dataset_config.prompt_label_mapping.values():
                 if ner_tag not in ner_tags:
                     ner_tags.append(ner_tag)
             return (
@@ -411,9 +473,7 @@ class HumanEvaluator:
             A blank answer.
         """
         ner_tags = list()
-        for (
-            ner_tag
-        ) in self.benchmark_dataset.dataset_config.prompt_label_mapping.values():
+        for ner_tag in self.dataset_config.prompt_label_mapping.values():
             if ner_tag not in ner_tags:
                 ner_tags.append(ner_tag)
         return gr.Textbox(json.dumps({ner_tag: [] for ner_tag in ner_tags}))
@@ -443,7 +503,7 @@ class HumanEvaluator:
             return question, answer
 
         # Custom NER validation
-        if self.benchmark_dataset.dataset_config.task == NER:
+        if self.dataset_config.task == NER:
             try:
                 json.loads(answer)
             except json.JSONDecodeError:
@@ -460,9 +520,7 @@ class HumanEvaluator:
                 )
                 return question, answer
 
-            ner_tags = list(
-                self.benchmark_dataset.dataset_config.prompt_label_mapping.values()
-            )
+            ner_tags = list(self.dataset_config.prompt_label_mapping.values())
             for ner_tag in ner_tags:
                 if ner_tag not in json.loads(answer).keys():
                     gr.Warning(
@@ -481,8 +539,12 @@ class HumanEvaluator:
         # Store the user's answer
         answers = self.active_dataset["answer"]
         answers[self.sample_idx] = answer
-        self.active_dataset = self.active_dataset.remove_columns("answer").add_column(
-            name="answer", column=answers
+        self.active_dataset = self.active_dataset.remove_columns(
+            column_names=["answer"], new_fingerprint=self.active_dataset._fingerprint
+        ).add_column(
+            name="answer",
+            column=answers,
+            new_fingerprint=self.active_dataset._fingerprint,
         )
         logger.info(
             f"User submitted the answer {answer!r} to the question {question!r}, with "
@@ -505,11 +567,9 @@ class HumanEvaluator:
                 example=self.active_dataset[self.sample_idx]
             )
 
-            if self.benchmark_dataset.dataset_config.task == NER:
+            if self.dataset_config.task == NER:
                 ner_tags = list()
-                for ner_tag in (
-                    self.benchmark_dataset.dataset_config.prompt_label_mapping.values()
-                ):
+                for ner_tag in self.dataset_config.prompt_label_mapping.values():
                     if ner_tag not in ner_tags:
                         ner_tags.append(ner_tag)
                 answer = json.dumps({ner_tag: [] for ner_tag in ner_tags})
@@ -557,16 +617,18 @@ class HumanEvaluator:
             padding=True,
             return_tensors="pt",
         ).input_ids
-        model_output = ModelOutput(sequences=sequences)
-        all_preds = self.benchmark_dataset._extract_labels_from_generation(
-            input_batch=self.active_dataset.to_dict(),
-            model_output=model_output,
-            tokenizer=tokenizer,
+        model_output = GenerativeModelOutput(sequences=sequences)
+
+        active_dataset_dict = self.active_dataset.to_dict()
+        assert isinstance(active_dataset_dict, dict)
+
+        all_preds = self.extract_labels_from_generation(
+            input_batch=active_dataset_dict, model_output=model_output
         )
         ground_truth = self.active_dataset["label"]
-        itr_scores: dict[str, float] = self.benchmark_dataset._compute_metrics(
+        itr_scores: dict[str, float] = self.compute_metrics(
             model_outputs_and_labels=(all_preds, ground_truth),
-            id2label=self.benchmark_dataset.dataset_config.id2label,
+            id2label=self.dataset_config.id2label,
         )
 
         # We reverse the order, as the Info messages are printed in reverse order
@@ -580,7 +642,7 @@ class HumanEvaluator:
             gr.Info(f"\n\n{metric_name}: {score:.2%}")
         gr.Info("You have completed this dataset! Here are your scores:")
         logger.info(
-            f"User completed the dataset {self.benchmark_dataset.dataset_config.name!r}"
+            f"User completed the dataset {self.dataset_config.name!r}"
             f", with the following scores: {itr_scores}"
         )
 
@@ -588,7 +650,7 @@ class HumanEvaluator:
         # only a single iteration, so the results from the current annotation should be
         # added to the previous results.
         results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
-        results: ScoreDict = dict(raw=dict(test=list()))  # type: ignore[dict-item]
+        results: ScoreDict = defaultdict(list)
         if results_path.exists():
             all_results = [
                 json.loads(line.strip())
@@ -599,24 +661,23 @@ class HumanEvaluator:
                 result
                 for result in all_results
                 if result["model"] == "human"
-                and result["dataset"] == self.benchmark_dataset.dataset_config.name
+                and result["dataset"] == self.dataset_config.name
             ]
             if human_result_candidates:
                 results = human_result_candidates[0]["results"]
 
         # Append to results
-        results["raw"]["test"].append(  # type: ignore[union-attr]
+        results["raw"].append(  # type: ignore[union-attr]
             {f"test_{metric_name}": score for metric_name, score in itr_scores.items()}
         )
 
         # Aggregate scores
         total_dict: dict[str, float] = dict()
-        for metric_cfg in self.benchmark_dataset.dataset_config.task.metrics:
-            agg_scores = aggregate_scores(
+        for metric_cfg in self.dataset_config.task.metrics:
+            test_score, test_se = aggregate_scores(
                 scores=results["raw"],  # type: ignore[arg-type]
                 metric_config=metric_cfg,
             )
-            test_score, test_se = agg_scores["test"]
             test_score, _ = metric_cfg.postprocessing_fn(test_score)
             test_se, _ = metric_cfg.postprocessing_fn(test_se)
             total_dict[f"test_{metric_cfg.name}"] = test_score
@@ -624,11 +685,10 @@ class HumanEvaluator:
         results["total"] = total_dict
 
         benchmark_result = BenchmarkResult(
-            dataset=self.benchmark_dataset.dataset_config.name,
-            task=self.benchmark_dataset.dataset_config.task.name,
+            dataset=self.dataset_config.name,
+            task=self.dataset_config.task.name,
             dataset_languages=[
-                language.code
-                for language in self.benchmark_dataset.dataset_config.languages
+                language.code for language in self.dataset_config.languages
             ],
             model="human",
             results=results,

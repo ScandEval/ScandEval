@@ -5,7 +5,7 @@ Taken from https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes.
 Last updated 19 June 2022.
 """
 
-from .config import Language
+from .data_models import Language
 
 
 def get_all_languages() -> dict[str, Language]:

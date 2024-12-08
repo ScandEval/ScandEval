@@ -11,6 +11,7 @@ from scandeval.benchmark_config_factory import (
     prepare_languages,
     prepare_tasks_and_datasets,
 )
+from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.enums import Device
 from scandeval.exceptions import InvalidBenchmark
 from scandeval.languages import DA, EN, NB, NN, NO, get_all_languages
@@ -18,18 +19,18 @@ from scandeval.tasks import LA, NER, SENT, get_all_tasks
 
 
 @pytest.fixture(scope="module")
-def all_official_dataset_names(all_dataset_configs) -> Generator[list[str], None, None]:
+def all_official_dataset_names() -> Generator[list[str], None, None]:
     """Fixture for all linguistic acceptability dataset configurations."""
-    yield [cfg.name for cfg in all_dataset_configs if not cfg.unofficial]
+    yield [cfg.name for cfg in get_all_dataset_configs().values() if not cfg.unofficial]
 
 
 @pytest.fixture(scope="module")
-def all_official_la_dataset_names(
-    all_dataset_configs,
-) -> Generator[list[str], None, None]:
+def all_official_la_dataset_names() -> Generator[list[str], None, None]:
     """Fixture for all linguistic acceptability dataset configurations."""
     yield [
-        cfg.name for cfg in all_dataset_configs if LA == cfg.task and not cfg.unofficial
+        cfg.name
+        for cfg in get_all_dataset_configs().values()
+        if LA == cfg.task and not cfg.unofficial
     ]
 
 

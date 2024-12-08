@@ -1,6 +1,6 @@
 """All dataset configurations used in ScandEval."""
 
-from .config import DatasetConfig
+from .data_models import DatasetConfig
 from .languages import DA, DE, EN, FO, IS, NB, NL, NN, NO, SV, get_all_languages
 from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
 
@@ -64,7 +64,7 @@ SWEREC_CONFIG = DatasetConfig(
     instruction_prompt="Recension: {text}\n\nKlassificera sentimentet i recensionen. "
     "Svara med 'positiv', 'neutral' eller 'negativ'.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 ANGRY_TWEETS_CONFIG = DatasetConfig(
@@ -83,7 +83,7 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
     instruction_prompt="Tweet: {text}\n\nKlassificer sentimentet i tweetet. Svar kun "
     "med 'positiv', 'neutral' eller 'negativ'.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 NOREC_CONFIG = DatasetConfig(
@@ -102,7 +102,7 @@ NOREC_CONFIG = DatasetConfig(
     instruction_prompt="Anmeldelse: {text}\n\nKlassifiser sentimentet i anmeldelsen. "
     "Svar med 'positiv', 'nøytral' eller 'negativ'.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 HOTTER_AND_COLDER_SENTIMENT_CONFIG = DatasetConfig(
@@ -121,7 +121,7 @@ HOTTER_AND_COLDER_SENTIMENT_CONFIG = DatasetConfig(
     instruction_prompt="Texti: {text}\n\nFlokkaðu tilfinninguna í textanum. "
     "Svaraðu með 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SB10K_CONFIG = DatasetConfig(
@@ -140,7 +140,7 @@ SB10K_CONFIG = DatasetConfig(
     instruction_prompt="Tweet: {text}\n\nKlassifizieren Sie die Stimmung im Tweet. "
     "Antworten Sie mit 'positiv', 'neutral' oder 'negativ'.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 DUTCH_SOCIAL_CONFIG = DatasetConfig(
@@ -159,7 +159,7 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
     instruction_prompt="Tweet: {text}\n\nClassificeer het sentiment in de tweet. "
     "Antwoord met 'positief', 'neutraal' of 'negatief'.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SST5_CONFIG = DatasetConfig(
@@ -178,7 +178,7 @@ SST5_CONFIG = DatasetConfig(
     instruction_prompt="Text: {text}\n\nClassify the sentiment in the text. Answer "
     "with 'positive', 'neutral' or 'negative'.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 FOSENT_CONFIG = DatasetConfig(
@@ -196,7 +196,7 @@ FOSENT_CONFIG = DatasetConfig(
     instruction_prompt="Tekstur: {text}\n\nFlokka lyndið í tekstinum. Svara við "
     "'positivt', 'neutralt' ella 'negativt'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 
@@ -527,7 +527,7 @@ SCALA_SV_CONFIG = DatasetConfig(
     instruction_prompt="Mening: {text}\n\nBestäm om meningen är grammatiskt korrekt "
     "eller inte. Svara med 'ja' om meningen är korrekt och 'nej' om den inte är.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_DA_CONFIG = DatasetConfig(
@@ -542,7 +542,7 @@ SCALA_DA_CONFIG = DatasetConfig(
     instruction_prompt="Sætning: {text}\n\nBestem om sætningen er grammatisk korrekt "
     "eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_NB_CONFIG = DatasetConfig(
@@ -557,7 +557,7 @@ SCALA_NB_CONFIG = DatasetConfig(
     "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_NN_CONFIG = DatasetConfig(
@@ -572,7 +572,7 @@ SCALA_NN_CONFIG = DatasetConfig(
     instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
     "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_IS_CONFIG = DatasetConfig(
@@ -588,7 +588,7 @@ SCALA_IS_CONFIG = DatasetConfig(
     "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
     "ekki.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_FO_CONFIG = DatasetConfig(
@@ -604,7 +604,7 @@ SCALA_FO_CONFIG = DatasetConfig(
     "rættur ella ikki. Svarið skal vera 'ja' um setningurin er rættur og 'nei' um "
     "hann ikki er.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_DE_CONFIG = DatasetConfig(
@@ -620,7 +620,7 @@ SCALA_DE_CONFIG = DatasetConfig(
     "korrekt ist oder nicht. Antworten Sie mit 'ja', wenn der Satz korrekt ist und "
     "'nein', wenn er es nicht ist.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_NL_CONFIG = DatasetConfig(
@@ -635,7 +635,7 @@ SCALA_NL_CONFIG = DatasetConfig(
     instruction_prompt="Zin: {text}\n\nBepaal of de zin grammaticaal correct is of "
     "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 SCALA_EN_CONFIG = DatasetConfig(
@@ -652,7 +652,7 @@ SCALA_EN_CONFIG = DatasetConfig(
     "grammatically correct or not. Reply with 'yes' if the sentence is correct and "
     "'no' if it is not.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 DUTCH_COLA_CONFIG = DatasetConfig(
@@ -703,7 +703,7 @@ ICE_EC_CONFIG = DatasetConfig(
     "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
     "ekki.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -719,7 +719,7 @@ ICE_EC_FULL_CONFIG = DatasetConfig(
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
     "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -735,7 +735,7 @@ ICE_LINGUISTIC_CONFIG = DatasetConfig(
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
     "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
     num_few_shot_examples=12,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1084,7 +1084,7 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
     "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
@@ -1099,7 +1099,7 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
     "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 MMLU_NO_CONFIG = DatasetConfig(
@@ -1115,7 +1115,7 @@ MMLU_NO_CONFIG = DatasetConfig(
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
     "'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 MMLU_SV_CONFIG = DatasetConfig(
@@ -1131,7 +1131,7 @@ MMLU_SV_CONFIG = DatasetConfig(
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
     "eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 MMLU_IS_CONFIG = DatasetConfig(
@@ -1147,7 +1147,7 @@ MMLU_IS_CONFIG = DatasetConfig(
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
     "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1164,7 +1164,7 @@ MMLU_DE_CONFIG = DatasetConfig(
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
     "'c' oder 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 MMLU_NL_CONFIG = DatasetConfig(
@@ -1180,7 +1180,7 @@ MMLU_NL_CONFIG = DatasetConfig(
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
     "'c' of 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 MMLU_CONFIG = DatasetConfig(
@@ -1195,7 +1195,7 @@ MMLU_CONFIG = DatasetConfig(
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
     "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 MMLU_DA_CONFIG = DatasetConfig(
@@ -1211,7 +1211,7 @@ MMLU_DA_CONFIG = DatasetConfig(
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
     "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1228,7 +1228,7 @@ ARC_DA_CONFIG = DatasetConfig(
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
     "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1245,7 +1245,7 @@ ARC_NO_CONFIG = DatasetConfig(
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
     "'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1262,7 +1262,7 @@ ARC_SV_CONFIG = DatasetConfig(
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
     "eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1279,7 +1279,7 @@ ARC_IS_CONFIG = DatasetConfig(
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
     "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 ARC_DE_CONFIG = DatasetConfig(
@@ -1295,7 +1295,7 @@ ARC_DE_CONFIG = DatasetConfig(
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
     "'c' oder 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1312,7 +1312,7 @@ ARC_NL_CONFIG = DatasetConfig(
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
     "'b', 'c' of 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1328,7 +1328,7 @@ ARC_CONFIG = DatasetConfig(
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
     "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1350,7 +1350,7 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
     "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 HELLASWAG_NO_CONFIG = DatasetConfig(
@@ -1366,7 +1366,7 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
     "'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 HELLASWAG_SV_CONFIG = DatasetConfig(
@@ -1382,7 +1382,7 @@ HELLASWAG_SV_CONFIG = DatasetConfig(
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
     "eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 HELLASWAG_IS_CONFIG = DatasetConfig(
@@ -1398,7 +1398,7 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
     "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1415,7 +1415,7 @@ WINOGRANDE_IS = DatasetConfig(
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
     "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 HELLASWAG_DE_CONFIG = DatasetConfig(
@@ -1431,7 +1431,7 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
     "'c' oder 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 HELLASWAG_NL_CONFIG = DatasetConfig(
@@ -1447,7 +1447,7 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
     "'c' of 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 HELLASWAG_CONFIG = DatasetConfig(
@@ -1463,7 +1463,7 @@ HELLASWAG_CONFIG = DatasetConfig(
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
     "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
 
 # TODO: Faroese common sense reasoning
@@ -1485,7 +1485,7 @@ BELEBELE_DA_CONFIG = DatasetConfig(
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
     "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1503,7 +1503,7 @@ BELEBELE_SV_CONFIG = DatasetConfig(
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
     "eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1520,7 +1520,7 @@ BELEBELE_NO_CONFIG = DatasetConfig(
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
     "'c' eller 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1538,7 +1538,7 @@ BELEBELE_IS_CONFIG = DatasetConfig(
     "'b', 'c' eða 'd'.",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1556,7 +1556,7 @@ BELEBELE_DE_CONFIG = DatasetConfig(
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
     "'c' oder 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1574,7 +1574,7 @@ BELEBELE_NL_CONFIG = DatasetConfig(
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
     "'b', 'c' of 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1591,7 +1591,7 @@ BELEBELE_CONFIG = DatasetConfig(
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
     "replying with 'a', 'b', 'c' or 'd'.",
     num_few_shot_examples=5,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
     unofficial=True,
 )
 
@@ -1608,5 +1608,5 @@ SPEED_CONFIG = DatasetConfig(
     prompt_template="",
     instruction_prompt="",
     num_few_shot_examples=0,
-    max_generated_tokens=1,
+    max_generated_tokens=5,
 )
