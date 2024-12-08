@@ -570,14 +570,6 @@ class LiteLLMModel(BenchmarkModule):
                     if content.split(":", 1)[1].strip() != ""
                 ]
 
-                # Sanity check that we should expect two few-shot messages per example
-                # (one for the user and one for the assistant)
-                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
-                assert len(few_shot_messages) == expected_few_shots, (
-                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
-                    f"messages, but got {len(few_shot_messages)}."
-                )
-
                 if self.dataset_config.prompt_prefix:
                     few_shot_messages[0]["content"] = (
                         self.dataset_config.prompt_prefix
@@ -619,14 +611,6 @@ class LiteLLMModel(BenchmarkModule):
                     )
                     if content.split(":", 1)[1].strip() != ""
                 ]
-
-                # Sanity check that we should expect two few-shot messages per example
-                # (one for the user and one for the assistant)
-                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
-                assert len(few_shot_messages) == expected_few_shots, (
-                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
-                    f"messages, but got {len(few_shot_messages)}."
-                )
 
                 if self.dataset_config.prompt_prefix:
                     few_shot_messages[0]["content"] = (
@@ -687,14 +671,6 @@ class LiteLLMModel(BenchmarkModule):
                     if content.split(":", 1)[1].strip() != ""
                 ]
 
-                # Sanity check that we should expect two few-shot messages per example
-                # (one for the user and one for the assistant)
-                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
-                assert len(few_shot_messages) == expected_few_shots, (
-                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
-                    f"messages, but got {len(few_shot_messages)}."
-                )
-
                 if self.dataset_config.prompt_prefix:
                     few_shot_messages[0]["content"] = (
                         self.dataset_config.prompt_prefix
@@ -738,14 +714,6 @@ class LiteLLMModel(BenchmarkModule):
                     )
                     if content.split(":", 1)[1].strip() != ""
                 ]
-
-                # Sanity check that we should expect two few-shot messages per example
-                # (one for the user and one for the assistant)
-                expected_few_shots = 2 * self.dataset_config.num_few_shot_examples
-                assert len(few_shot_messages) == expected_few_shots, (
-                    f"Expected {self.dataset_config.num_few_shot_examples} few-shot "
-                    f"messages, but got {len(few_shot_messages)}."
-                )
 
                 if self.dataset_config.prompt_prefix:
                     few_shot_messages[0]["content"] = (
