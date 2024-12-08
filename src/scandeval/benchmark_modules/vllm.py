@@ -609,16 +609,11 @@ class VLLMModel(HuggingFaceEncoderModel):
         """
         few_shot_messages: list[str]
         match task.supertask:
-            case "sequence-classification" | "text-to-text":
-                label_name = (
-                    "label"
-                    if task.supertask == "sequence-classification"
-                    else "target_text"
-                )
+            case "sequence-classification":
                 few_shot_messages = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
-                        label=example[label_name].strip(),
+                        label=example["label"].strip(),
                     )
                     for example in few_shot_examples
                 ]
@@ -632,6 +627,29 @@ class VLLMModel(HuggingFaceEncoderModel):
                     + "\n\n".join(few_shot_messages)
                     + "\n\n"
                     + self.dataset_config.prompt_template.format(text=text, label="")
+                    for text in examples["text"]
+                ]
+
+            case "text-to-text":
+                few_shot_messages = [
+                    self.dataset_config.prompt_template.format(
+                        text=example["text"].replace("\n", " ").strip(),
+                        target_text=example["target_text"].strip(),
+                    )
+                    for example in few_shot_examples
+                ]
+
+                prompt_prefix = ""
+                if self.dataset_config.prompt_prefix:
+                    prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+
+                examples["text"] = [
+                    prompt_prefix
+                    + "\n\n".join(few_shot_messages)
+                    + "\n\n"
+                    + self.dataset_config.prompt_template.format(
+                        text=text, target_text=""
+                    )
                     for text in examples["text"]
                 ]
 
