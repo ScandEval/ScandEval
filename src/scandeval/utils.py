@@ -479,13 +479,9 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "PreTrainedTokenizer")
     if tokenizer.chat_template is None:
         return prompt
 
-    user_message: dict[t.Literal["role", "content"], str] = dict()
-    user_message["role"] = "user"
-    user_message["content"] = prompt
-
     instruction_prompt = tokenizer.apply_chat_template(
-        conversation=[user_message],
-        chat_template=tokenizer.chat_template,
+        conversation=[dict(role="user", content=prompt)],
+        chat_template=tokenizer.get_chat_template(),
         add_generation_prompt=True,
         tokenize=False,
     )
