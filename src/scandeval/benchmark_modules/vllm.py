@@ -603,10 +603,17 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The example with the few-shot examples applied.
         """
-        few_shot_messages: list[str]
+
+        def split_section(section: str) -> tuple[str, str]:
+            """Split a section of the prompt to user and assistant messages."""
+            user_part = "\n".join(section.split("\n")[:-1])
+            assistant_part = section.split("\n")[-1]
+            return user_part, assistant_part
+
+        few_shot_sections: list[str]
         match task.supertask:
             case "sequence-classification":
-                few_shot_messages = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
                         label=example["label"].replace("\n", " ").strip(),
@@ -614,20 +621,58 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for example in few_shot_examples
                 ]
 
-                prompt_prefix = ""
-                if self.dataset_config.prompt_prefix:
-                    prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+                few_shot_messages = [
+                    dict(role=role, content=content.split(":", 1)[1].strip())
+                    for section in few_shot_sections
+                    for role, content in zip(
+                        it.cycle(["user", "assistant"]), split_section(section=section)
+                    )
+                    if content.split(":", 1)[1].strip() != ""
+                ]
 
-                examples["text"] = [
-                    prompt_prefix
-                    + "\n\n".join(few_shot_messages)
-                    + "\n\n"
-                    + self.dataset_config.prompt_template.format(text=text, label="")
+                if self.dataset_config.prompt_prefix:
+                    few_shot_messages[0]["content"] = (
+                        self.dataset_config.prompt_prefix
+                        + "\n\n"
+                        + few_shot_messages[0]["content"]
+                    )
+
+                messages_list = [
+                    few_shot_messages
+                    + [
+                        dict(
+                            role="user",
+                            content=split_section(
+                                section=self.dataset_config.prompt_template.format(
+                                    text=text, label=""
+                                )
+                            )[0]
+                            .split(":", 1)[1]
+                            .strip(),
+                        )
+                    ]
                     for text in examples["text"]
                 ]
 
+                examples["text"] = [
+                    self._tokenizer.apply_chat_template(conversation=messages)
+                    for messages in messages_list
+                ]
+
+                # prompt_prefix = ""
+                # if self.dataset_config.prompt_prefix:
+                #     prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+
+                # examples["text"] = [
+                #     prompt_prefix
+                #     + "\n\n".join(few_shot_examples)
+                #     + "\n\n"
+                #     + self.dataset_config.prompt_template.format(text=text, label="")
+                #     for text in examples["text"]
+                # ]
+
             case "text-to-text":
-                few_shot_messages = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
                         target_text=example["target_text"].replace("\n", " ").strip(),
@@ -641,7 +686,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
                 examples["text"] = [
                     prompt_prefix
-                    + "\n\n".join(few_shot_messages)
+                    + "\n\n".join(few_shot_sections)
                     + "\n\n"
                     + self.dataset_config.prompt_template.format(
                         text=text, target_text=""
@@ -667,7 +712,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                             labels[prompt_label][-1] += " " + token
                     return json.dumps(labels, ensure_ascii=False)
 
-                few_shot_messages = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                         label=create_label(example=example),
@@ -681,7 +726,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
                 examples["text"] = [
                     prompt_prefix
-                    + "\n\n".join(few_shot_messages)
+                    + "\n\n".join(few_shot_sections)
                     + "\n\n"
                     + self.dataset_config.prompt_template.format(
                         text=" ".join(tokens).replace("\n", " ").strip(), label=""
@@ -690,7 +735,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 ]
 
             case "question-answering":
-                few_shot_messages = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["context"].replace("\n", " ").strip(),
                         question=example["question"].replace("\n", " ").strip(),
@@ -705,7 +750,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
                 examples["text"] = [
                     prompt_prefix
-                    + "\n\n".join(few_shot_messages)
+                    + "\n\n".join(few_shot_sections)
                     + "\n\n"
                     + self.dataset_config.prompt_template.format(
                         text=context.replace("\n", " ").strip(),
