@@ -149,7 +149,6 @@ minversion = "7.0"
 addopts = [
     "--cov=src/scandeval",
     "--color=yes",
-    "-v",
 ]
 xfail_strict = true
 filterwarnings = [
