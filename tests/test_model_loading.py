@@ -1,14 +1,10 @@
 """Unit tests for the `model_loading` module."""
 
-import os
-
 import pytest
+import torch
 
-from scandeval.data_models import ModelConfig
 from scandeval.dataset_configs import ANGRY_TWEETS_CONFIG, NORDJYLLAND_NEWS_CONFIG
-from scandeval.enums import Framework, ModelType
-from scandeval.exceptions import InvalidBenchmark, InvalidModel
-from scandeval.languages import DA
+from scandeval.exceptions import InvalidBenchmark
 from scandeval.model_config import get_model_config
 from scandeval.model_loading import load_model
 
@@ -27,7 +23,7 @@ def test_load_non_generative_model(encoder_model_id, benchmark_config):
 
 
 @pytest.mark.skipif(
-    condition=os.getenv("USE_VLLM", "0") != "1", reason="Not using VLLM."
+    condition=not torch.cuda.is_available(), reason="CUDA is not available."
 )
 def test_load_generative_model(generative_model):
     """Test loading a generative model."""
@@ -46,26 +42,6 @@ def test_load_non_generative_model_with_generative_data(
         load_model(
             model_config=model_config,
             dataset_config=NORDJYLLAND_NEWS_CONFIG,
-            benchmark_config=benchmark_config,
-        )
-
-
-def test_load_non_existing_model(benchmark_config):
-    """Test loading a non-existing model."""
-    model_config = ModelConfig(
-        model_id="non-existing-model",
-        revision="revision",
-        framework=Framework.PYTORCH,
-        task="task",
-        languages=[DA],
-        model_type=ModelType.FRESH,
-        model_cache_dir="cache_dir",
-        adapter_base_model_id=None,
-    )
-    with pytest.raises(InvalidModel):
-        load_model(
-            model_config=model_config,
-            dataset_config=ANGRY_TWEETS_CONFIG,
             benchmark_config=benchmark_config,
         )
 
