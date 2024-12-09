@@ -17,6 +17,7 @@ from scandeval.benchmarker import (
     prepare_dataset_configs,
 )
 from scandeval.dataset_configs import ANGRY_TWEETS_CONFIG, DANSK_CONFIG
+from scandeval.exceptions import HuggingFaceHubDown
 
 
 @pytest.fixture(scope="module")
@@ -32,9 +33,16 @@ def test_benchmark_results_is_a_list(benchmarker) -> None:
 
 def test_benchmark_encoder(benchmarker, task, language, encoder_model_id):
     """Test that an encoder model can be benchmarked."""
-    benchmark_result = benchmarker.benchmark(
-        model=encoder_model_id, task=task.name, language=language.code
-    )
+    for _ in range(10):
+        try:
+            benchmark_result = benchmarker.benchmark(
+                model=encoder_model_id, task=task.name, language=language.code
+            )
+            break
+        except HuggingFaceHubDown:
+            continue
+    else:
+        raise HuggingFaceHubDown()
     assert isinstance(benchmark_result, list)
     assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
@@ -44,9 +52,16 @@ def test_benchmark_encoder(benchmarker, task, language, encoder_model_id):
 )
 def test_benchmark_generative(benchmarker, task, language, generative_model_id):
     """Test that a generative model can be benchmarked."""
-    benchmark_result = benchmarker.benchmark(
-        model=generative_model_id, task=task.name, language=language.code
-    )
+    for _ in range(10):
+        try:
+            benchmark_result = benchmarker.benchmark(
+                model=generative_model_id, task=task.name, language=language.code
+            )
+            break
+        except HuggingFaceHubDown:
+            continue
+    else:
+        raise HuggingFaceHubDown()
     assert isinstance(benchmark_result, list)
     assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
