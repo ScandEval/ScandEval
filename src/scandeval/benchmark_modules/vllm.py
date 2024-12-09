@@ -877,4 +877,5 @@ def clear_vllm() -> None:
     except ImportError:
         pass
     clear_memory()
-    ray.shutdown()
+    if ray.is_initialized():
+        ray.disconnect()
