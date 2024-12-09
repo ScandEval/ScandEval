@@ -1,6 +1,6 @@
 """All benchmarks tasks used in ScandEval."""
 
-from .config import MetricConfig, Task
+from .data_models import MetricConfig, Task
 
 
 def get_all_tasks() -> dict[str, Task]:

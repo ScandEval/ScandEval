@@ -1,14 +1,14 @@
 """Functions related to getting the model configuration."""
 
 import importlib.util
-from typing import TYPE_CHECKING
+import typing as t
 
+from . import benchmark_modules
 from .enums import Framework
-from .exceptions import InvalidModel, NeedsExtraInstalled
-from .model_setups import MODEL_SETUP_CLASSES
+from .exceptions import InvalidModel, NeedsEnvironmentVariable, NeedsExtraInstalled
 
-if TYPE_CHECKING:
-    from .config import BenchmarkConfig, ModelConfig
+if t.TYPE_CHECKING:
+    from .data_models import BenchmarkConfig, ModelConfig
 
 
 def get_model_config(
@@ -29,24 +29,28 @@ def get_model_config(
         InvalidModel:
             If all model setups can handle the model, but the model does not exist.
     """
+    all_benchmark_modules = [
+        cls
+        for cls in benchmark_modules.__dict__.values()
+        if isinstance(cls, type)
+        and issubclass(cls, benchmark_modules.BenchmarkModule)
+        and cls is not benchmark_modules.BenchmarkModule
+    ]
+
     needs_extras: list[str] = list()
     needs_env_vars: list[str] = list()
-    for setup_class in MODEL_SETUP_CLASSES:
-        setup = setup_class(benchmark_config=benchmark_config)
-
-        exists_or_dict = setup.model_exists(model_id=model_id)
-        if isinstance(exists_or_dict, dict):
-            if "missing_extra" in exists_or_dict:
-                needs_extras.append(exists_or_dict["missing_extra"])
-            elif "missing_env_var" in exists_or_dict:
-                needs_env_vars.append(exists_or_dict["missing_env_var"])
-            else:
-                raise ValueError(
-                    "The dictionary returned by `model_exists` must contain either "
-                    "the key `missing_extra` or `missing_env_var`."
-                )
-        elif exists_or_dict:
-            model_config = setup.get_model_config(model_id=model_id)
+    for benchmark_module in all_benchmark_modules:
+        exists_or_err = benchmark_module.model_exists(
+            model_id=model_id, benchmark_config=benchmark_config
+        )
+        if isinstance(exists_or_err, NeedsExtraInstalled):
+            needs_extras.append(exists_or_err.extra)
+        elif isinstance(exists_or_err, NeedsEnvironmentVariable):
+            needs_env_vars.append(exists_or_err.env_var)
+        elif exists_or_err is True:
+            model_config = benchmark_module.get_model_config(
+                model_id=model_id, benchmark_config=benchmark_config
+            )
             if (
                 model_config.framework == Framework.JAX
                 and importlib.util.find_spec("jax") is None

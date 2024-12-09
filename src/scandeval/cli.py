@@ -13,14 +13,9 @@ from .tasks import get_all_tasks
 @click.option(
     "--model",
     "-m",
-    default=None,
-    show_default=True,
+    required=True,
     multiple=True,
-    help="""The Hugging Face model ID of the model(s) to be benchmarked. If not
-    specified then all models will be benchmarked, filtered by `model_language` or
-    `language`. The specific model revision to use can be added after the suffix "@":
-    "<model>@v1.0.0". It can be a branch name, a tag name, or a commit id, and
-    defaults to the latest version if not specified.""",
+    help="The ID of the model to benchmark.",
 )
 @click.option(
     "--task",
@@ -81,12 +76,6 @@ from .tasks import get_all_tasks
     help="The batch size to use.",
 )
 @click.option(
-    "--evaluate-train/--no-evaluate-train",
-    default=False,
-    show_default=True,
-    help="Whether to evaluate the model on the training set.",
-)
-@click.option(
     "--progress-bar/--no-progress-bar",
     default=True,
     show_default=True,
@@ -120,59 +109,14 @@ from .tasks import get_all_tasks
     help="The directory where models are datasets are cached.",
 )
 @click.option(
-    "--token",
-    type=str,
-    default="",
-    show_default=True,
-    help="""The authentication token for the Hugging Face Hub. If specified then the
-    `--token` flag will be set to True.""",
-)
-@click.option(
-    "--use-token/--no-use-token",
-    default=True,
-    show_default=True,
-    help="""Whether an authentication token should be used, enabling evaluation of
-    private models. Requires that you are logged in via the `huggingface-cli login`
-    command.""",
-)
-@click.option(
-    "--openai-api-key",
+    "--api-key",
     type=str,
     default=None,
     show_default=True,
-    help="""The API key for the OpenAI API. If not specified then the environment
-    variable `OPENAI_API_KEY` will be used.""",
-)
-@click.option(
-    "--prefer-azure/--no-prefer-azure",
-    default=False,
-    show_default=True,
-    help="""Whether to prefer the Azure OpenAI API over the OpenAI API, if both are
-    available.""",
-)
-@click.option(
-    "--azure-openai-api-key",
-    type=str,
-    default=None,
-    show_default=True,
-    help="""The API key for the Azure OpenAI API. If not specified then the environment
-    variable `AZURE_OPENAI_API_KEY` will be used.""",
-)
-@click.option(
-    "--azure-openai-endpoint",
-    type=str,
-    default=None,
-    show_default=True,
-    help="""The endpoint for the Azure OpenAI API. If not specified then the environment
-    variable `AZURE_OPENAI_ENDPOINT` will be used.""",
-)
-@click.option(
-    "--azure-openai-api-version",
-    type=str,
-    default=None,
-    show_default=True,
-    help="""The api version for the Azure OpenAI API, e.g. "2023-12-01-preview". If
-            None then the environment varaible `AZURE_OPENAI_API_VERSION` will be used.""",
+    help="""The API key to use for a given inference API. If you are benchmarking an "
+    "OpenAI model then this would be the OpenAI API key, if you are benchmarking a "
+    "model on the Hugging Face inference API then this would be the Hugging Face API "
+    "key, and so on.""",
 )
 @click.option(
     "--force/--no-force",
@@ -230,11 +174,11 @@ from .tasks import get_all_tasks
     to avoid running out of disk space.""",
 )
 @click.option(
-    "--only-validation-split/--no-only-validation-split",
+    "--evaluate-test-split/--evaluate-val-split",
     default=False,
     show_default=True,
-    help="""Whether to only evaluate on the validation split. This is useful if you're
-    optimising hyperparameters, to avoid overfitting to the test sets.""",
+    help="""Whether to only evaluate on the test split. Only use this for your final
+    evaluation, as the test split should not be used for development.""",
 )
 @click.option(
     "--few-shot/--zero-shot",
@@ -268,17 +212,10 @@ def benchmark(
     raise_errors: bool,
     task: tuple[str],
     batch_size: str,
-    evaluate_train: bool,
     progress_bar: bool,
     save_results: bool,
     cache_dir: str,
-    use_token: bool,
-    token: str,
-    openai_api_key: str | None,
-    prefer_azure: bool,
-    azure_openai_api_key: str | None,
-    azure_openai_endpoint: str | None,
-    azure_openai_api_version: str | None,
+    api_key: str | None,
     force: bool,
     verbose: bool,
     framework: str | None,
@@ -287,14 +224,13 @@ def benchmark(
     load_in_4bit: bool | None,
     use_flash_attention: bool | None,
     clear_model_cache: bool,
-    only_validation_split: bool,
+    evaluate_test_split: bool,
     few_shot: bool,
     num_iterations: int,
     debug: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
-    # Set up language variables
-    models = None if len(model) == 0 else list(model)
+    models = list(model)
     datasets = None if len(dataset) == 0 else list(dataset)
     languages: list[str] = list(language)
     model_languages = None if len(model_language) == 0 else list(model_language)
@@ -302,9 +238,7 @@ def benchmark(
     tasks = None if len(task) == 0 else list(task)
     batch_size_int = int(batch_size)
     device = Device[device.upper()] if device is not None else None
-    token_str_bool: str | bool = token if token != "" else use_token
 
-    # Initialise the benchmarker class
     benchmarker = Benchmarker(
         language=languages,
         model_language=model_languages,
@@ -314,15 +248,9 @@ def benchmark(
         batch_size=batch_size_int,
         progress_bar=progress_bar,
         save_results=save_results,
-        evaluate_train=evaluate_train,
         raise_errors=raise_errors,
         verbose=verbose,
-        token=token_str_bool,
-        openai_api_key=openai_api_key,
-        prefer_azure=prefer_azure,
-        azure_openai_api_key=azure_openai_api_key,
-        azure_openai_endpoint=azure_openai_endpoint,
-        azure_openai_api_version=azure_openai_api_version,
+        api_key=api_key,
         force=force,
         cache_dir=cache_dir,
         framework=framework,
@@ -331,7 +259,7 @@ def benchmark(
         load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
-        only_validation_split=only_validation_split,
+        evaluate_test_split=evaluate_test_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
         debug=debug,

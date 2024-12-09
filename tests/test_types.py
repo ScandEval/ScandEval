@@ -1,26 +1,50 @@
 """Unit tests for the `types` module."""
 
-import re
-import typing
-from typing import Generator
-
 import pytest
 
-import scandeval.types as types
+from scandeval.types import is_list_of_int, is_list_of_list_of_int, is_list_of_str
 
 
-@pytest.fixture(scope="module")
-def module_variable_names() -> Generator[list[str], None, None]:
-    """Yields the module variable names."""
-    yield [
-        var
-        for var in dir(types)
-        if "_" not in var and not hasattr(typing, var) and var != "np"
-    ]
+@pytest.mark.parametrize(
+    argnames=["obj", "expected"],
+    argvalues=[
+        ([1, 2, 3], True),
+        ([1.0, 2.0, 3.0], False),
+        (["a", "b", "c"], False),
+        (["a", 1, 2.0], False),
+        ([], True),
+    ],
+)
+def test_is_list_of_int(obj, expected):
+    """Test the `is_list_of_int` function."""
+    assert is_list_of_int(x=obj) == expected
 
 
-def test_type_variable_names_are_title_case(module_variable_names) -> None:
-    """Tests that all type variable names are title case."""
-    for var in module_variable_names:
-        assert var[0].isupper()
-        assert re.search(r"[^A-Za-z]", var) is None
+@pytest.mark.parametrize(
+    argnames=["obj", "expected"],
+    argvalues=[
+        ([1, 2, 3], False),
+        ([[1, 2, 3], [4, 5, 6]], True),
+        ([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], False),
+        ([["a", "b", "c"], ["d", "e", "f"]], False),
+        ([["a", 1, 2.0], [3, 4, 5]], False),
+        ([[], []], True),
+    ],
+)
+def test_is_list_of_list_of_int(obj, expected):
+    """Test the `is_list_of_int` function."""
+    assert is_list_of_list_of_int(x=obj) == expected
+
+
+@pytest.mark.parametrize(
+    argnames=["obj", "expected"],
+    argvalues=[
+        (["a", "b", "c"], True),
+        (["a", 1, 2.0], False),
+        ([1, 2, 3], False),
+        ([], True),
+    ],
+)
+def test_is_list_of_str(obj, expected):
+    """Test the `is_list_of_str` function."""
+    assert is_list_of_str(x=obj) == expected
