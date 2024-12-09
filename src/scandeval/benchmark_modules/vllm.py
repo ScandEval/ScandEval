@@ -603,14 +603,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The example with the few-shot examples applied.
         """
-
-        def split_section(section: str) -> tuple[str, str]:
-            """Split a section of the prompt to user and assistant messages."""
-            user_part = "\n".join(section.split("\n")[:-1])
-            assistant_part = section.split("\n")[-1]
-            return user_part, assistant_part
-
-        few_shot_sections: list[str]
         match task.supertask:
             case "sequence-classification":
                 few_shot_sections = [
@@ -620,61 +612,12 @@ class VLLMModel(HuggingFaceEncoderModel):
                     )
                     for example in few_shot_examples
                 ]
-
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in few_shot_sections
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
+                        text=text.replace("\n", " ").strip(), label=""
                     )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
-
-                if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
-
-                messages_list = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=text, label=""
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
                     for text in examples["text"]
                 ]
-
-                examples["text"] = [
-                    self._tokenizer.apply_chat_template(
-                        conversation=messages,
-                        tokenize=False,
-                        add_generation_prompt=True,
-                    )
-                    for messages in messages_list
-                ]
-                breakpoint()
-
-                # prompt_prefix = ""
-                # if self.dataset_config.prompt_prefix:
-                #     prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
-
-                # examples["text"] = [
-                #     prompt_prefix
-                #     + "\n\n".join(few_shot_examples)
-                #     + "\n\n"
-                #     + self.dataset_config.prompt_template.format(text=text, label="")
-                #     for text in examples["text"]
-                # ]
 
             case "text-to-text":
                 few_shot_sections = [
@@ -684,17 +627,9 @@ class VLLMModel(HuggingFaceEncoderModel):
                     )
                     for example in few_shot_examples
                 ]
-
-                prompt_prefix = ""
-                if self.dataset_config.prompt_prefix:
-                    prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
-
-                examples["text"] = [
-                    prompt_prefix
-                    + "\n\n".join(few_shot_sections)
-                    + "\n\n"
-                    + self.dataset_config.prompt_template.format(
-                        text=text, target_text=""
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
+                        text=text.replace("\n", " ").strip(), target_text=""
                     )
                     for text in examples["text"]
                 ]
@@ -724,16 +659,8 @@ class VLLMModel(HuggingFaceEncoderModel):
                     )
                     for example in few_shot_examples
                 ]
-
-                prompt_prefix = ""
-                if self.dataset_config.prompt_prefix:
-                    prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
-
-                examples["text"] = [
-                    prompt_prefix
-                    + "\n\n".join(few_shot_sections)
-                    + "\n\n"
-                    + self.dataset_config.prompt_template.format(
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
                         text=" ".join(tokens).replace("\n", " ").strip(), label=""
                     )
                     for tokens in examples["tokens"]
@@ -748,18 +675,10 @@ class VLLMModel(HuggingFaceEncoderModel):
                     )
                     for example in few_shot_examples
                 ]
-
-                prompt_prefix = ""
-                if self.dataset_config.prompt_prefix:
-                    prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
-
-                examples["text"] = [
-                    prompt_prefix
-                    + "\n\n".join(few_shot_sections)
-                    + "\n\n"
-                    + self.dataset_config.prompt_template.format(
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
                         text=context.replace("\n", " ").strip(),
-                        question=question,
+                        question=question.replace("\n", " ").strip(),
                         label="",
                     )
                     for context, question in zip(
@@ -772,9 +691,61 @@ class VLLMModel(HuggingFaceEncoderModel):
                     f"Unsupported task supertask: {task.supertask}."
                 )
 
-        assert len(
-            {len(values) for values in examples.values()}
-        ), "The number of examples and messages must be the same."
+        instruction_model = self._tokenizer.chat_template is not None
+        if instruction_model:
+
+            def split_section(section: str) -> tuple[str, str]:
+                """Split a section of the prompt to user and assistant messages."""
+                user_part = "\n".join(section.split("\n")[:-1])
+                assistant_part = section.split("\n")[-1]
+                return user_part, assistant_part
+
+            few_shot_messages = [
+                dict(role=role, content=content.split(":", 1)[1].strip())
+                for section in few_shot_sections
+                for role, content in zip(
+                    it.cycle(["user", "assistant"]), split_section(section=section)
+                )
+                if content.split(":", 1)[1].strip() != ""
+            ]
+
+            if self.dataset_config.prompt_prefix:
+                few_shot_messages[0]["content"] = (
+                    self.dataset_config.prompt_prefix
+                    + "\n\n"
+                    + few_shot_messages[0]["content"]
+                )
+
+            messages_list = [
+                few_shot_messages
+                + [
+                    dict(
+                        role="user",
+                        content=split_section(section=new_section)[0]
+                        .split(":", 1)[1]
+                        .strip(),
+                    )
+                ]
+                for new_section in new_sections
+            ]
+
+            examples["text"] = [
+                self._tokenizer.apply_chat_template(
+                    conversation=messages, tokenize=False, add_generation_prompt=True
+                )
+                for messages in messages_list
+            ]
+
+        else:
+            prompt_prefix = ""
+            if self.dataset_config.prompt_prefix:
+                prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
+
+            examples["text"] = [
+                prompt_prefix + "\n\n".join(few_shot_sections) + "\n\n" + new_section
+                for new_section in new_sections
+            ]
+
         return examples
 
     def _apply_instruction_prompt(
