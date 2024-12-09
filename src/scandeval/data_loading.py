@@ -1,5 +1,6 @@
 """Functions related to the loading of the data."""
 
+import logging
 import sys
 
 from datasets import Dataset, DatasetDict, load_dataset
@@ -9,6 +10,8 @@ from numpy.random import Generator
 from .data_models import BenchmarkConfig, DatasetConfig
 from .exceptions import InvalidBenchmark
 from .utils import unscramble
+
+logger = logging.getLogger("scandeval")
 
 
 def load_data(
@@ -27,16 +30,29 @@ def load_data(
     Returns:
         A list of bootstrapped datasets, one for each iteration.
     """
-    try:
-        dataset = load_dataset(
-            path=dataset_config.huggingface_id,
-            cache_dir=benchmark_config.cache_dir,
-            token=unscramble("HjccJFhIozVymqXDVqTUTXKvYhZMTbfIjMxG_"),
+    num_attempts = 5
+    for _ in range(num_attempts):
+        try:
+            dataset = load_dataset(
+                path=dataset_config.huggingface_id,
+                cache_dir=benchmark_config.cache_dir,
+                token=unscramble("HjccJFhIozVymqXDVqTUTXKvYhZMTbfIjMxG_"),
+            )
+            break
+        except FileNotFoundError:
+            logger.warning(
+                f"Failed to load dataset {dataset_config.huggingface_id!r}. Retrying..."
+            )
+            continue
+        except HfHubHTTPError:
+            raise InvalidBenchmark("The Hugging Face Hub seems to be down.")
+    else:
+        raise InvalidBenchmark(
+            f"Failed to load dataset {dataset_config.huggingface_id!r} after "
+            f"{num_attempts} attempts."
         )
-    except HfHubHTTPError:
-        raise InvalidBenchmark("The Hugging Face Hub seems to be down.")
 
-    assert isinstance(dataset, DatasetDict)
+    assert isinstance(dataset, DatasetDict)  # type: ignore[used-before-def]
 
     dataset = DatasetDict({key: dataset[key] for key in ["train", "val", "test"]})
 
