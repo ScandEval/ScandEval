@@ -655,7 +655,9 @@ class VLLMModel(HuggingFaceEncoderModel):
                 ]
 
                 examples["text"] = [
-                    self._tokenizer.apply_chat_template(conversation=messages)
+                    self._tokenizer.apply_chat_template(
+                        conversation=messages, tokenize=False
+                    )
                     for messages in messages_list
                 ]
 
