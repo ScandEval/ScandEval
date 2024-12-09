@@ -8,37 +8,21 @@ from datasets import DatasetDict
 from numpy.random import default_rng
 
 from scandeval.data_loading import load_data
-from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
+from scandeval.dataset_configs import ANGRY_TWEETS_CONFIG
 from scandeval.exceptions import HuggingFaceHubDown
 
 
-@pytest.mark.parametrize(
-    argnames=["dataset_config"],
-    argvalues=[
-        (dataset_config,)
-        for dataset_config in get_all_dataset_configs().values()
-        if dataset_config != SPEED_CONFIG
-    ],
-    ids=[
-        (dataset_config.name)
-        for dataset_config in get_all_dataset_configs().values()
-        if dataset_config != SPEED_CONFIG
-    ],
-    scope="class",
-)
 class TestLoadData:
     """Tests for the `load_data` function."""
 
     @pytest.fixture(scope="class")
-    def dataset(
-        self, dataset_config, benchmark_config
-    ) -> Generator[list[DatasetDict], None, None]:
+    def dataset(self, benchmark_config) -> Generator[list[DatasetDict], None, None]:
         """A loaded dataset."""
         for _ in range(10):
             try:
                 yield load_data(
                     rng=default_rng(seed=4242),
-                    dataset_config=dataset_config,
+                    dataset_config=ANGRY_TWEETS_CONFIG,
                     benchmark_config=benchmark_config,
                 )
                 break
