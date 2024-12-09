@@ -52,7 +52,10 @@ def test_benchmark_encoder(benchmarker, task, language, encoder_model_id):
 )
 def test_benchmark_generative(benchmarker, task, language, generative_model_id):
     """Test that a generative model can be benchmarked."""
+    from scandeval.benchmark_modules.vllm import clear_vllm
+
     for _ in range(10):
+        clear_vllm()
         try:
             benchmark_result = benchmarker.benchmark(
                 model=generative_model_id, task=task.name, language=language.code
