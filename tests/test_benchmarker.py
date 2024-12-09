@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 from collections.abc import Generator
 from pathlib import Path
 
@@ -40,7 +41,7 @@ def test_benchmark_encoder(benchmarker, task, language, encoder_model_id):
             )
             break
         except HuggingFaceHubDown:
-            continue
+            time.sleep(5)
     else:
         raise HuggingFaceHubDown()
     assert isinstance(benchmark_result, list)
@@ -62,7 +63,7 @@ def test_benchmark_generative(benchmarker, task, language, generative_model_id):
             )
             break
         except HuggingFaceHubDown:
-            continue
+            time.sleep(5)
     else:
         raise HuggingFaceHubDown()
     assert isinstance(benchmark_result, list)

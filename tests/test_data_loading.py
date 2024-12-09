@@ -1,5 +1,6 @@
 """Tests for the `data_loading` module."""
 
+import time
 from collections.abc import Generator
 
 import pytest
@@ -42,7 +43,7 @@ class TestLoadData:
                 )
                 break
             except HuggingFaceHubDown:
-                continue
+                time.sleep(5)
         else:
             raise HuggingFaceHubDown()
 
