@@ -59,6 +59,9 @@ if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
     except ImportError:
         from vllm.distributed.parallel_state import destroy_model_parallel
 
+if t.TYPE_CHECKING or importlib.util.find_spec("ray") is not None:
+    import ray
+
 logger = logging.getLogger("scandeval")
 
 
@@ -84,7 +87,10 @@ class VLLMModel(HuggingFaceEncoderModel):
             benchmark_config:
                 The benchmark configuration.
         """
-        if importlib.util.find_spec("vllm") is None:
+        if (
+            importlib.util.find_spec("vllm") is None
+            or importlib.util.find_spec("ray") is None
+        ):
             raise NeedsExtraInstalled(extra="generative")
 
         self.model_config = model_config
@@ -442,7 +448,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             trust_remote_code=self.benchmark_config.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
-            distributed_executor_backend="mp",
+            distributed_executor_backend="ray",
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,
@@ -869,3 +875,5 @@ def clear_vllm() -> None:
     except ImportError:
         pass
     clear_memory()
+    if ray.is_initialized():
+        ray.shutdown()

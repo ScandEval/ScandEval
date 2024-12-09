@@ -25,6 +25,9 @@ from transformers import logging as tf_logging
 from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 
+if importlib.util.find_spec("ray") is not None:
+    import ray
+
 if t.TYPE_CHECKING:
     from .types import Predictions
 
@@ -141,6 +144,7 @@ def block_terminal_output():
     logging.getLogger("vllm.core.scheduler").setLevel(logging.CRITICAL)
     logging.getLogger("vllm.model_executor.weight_utils").setLevel(logging.CRITICAL)
     logging.getLogger("httpx").setLevel(logging.CRITICAL)
+    logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.CRITICAL)
     logging.getLogger("accelerate").setLevel(logging.CRITICAL)
     logging.getLogger("LiteLLM").setLevel(logging.CRITICAL)
@@ -148,6 +152,9 @@ def block_terminal_output():
     # This suppresses vLLM logging
     os.environ["LOG_LEVEL"] = "CRITICAL"
     os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
+
+    if importlib.util.find_spec("ray") is not None:
+        ray._private.worker._worker_logs_enabled = False
 
     # Disable the tokeniser progress bars
     disable_progress_bar()
