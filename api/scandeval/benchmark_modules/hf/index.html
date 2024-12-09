@@ -1,0 +1,2768 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../fresh/">
+      
+      
+        <link rel="next" href="../litellm/">
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.46">
+    
+    
+      
+        <title>scandeval.benchmark_modules.hf - ScandEval</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../css/mkapi-common.css">
+    
+      <link rel="stylesheet" href="../../../../css/mkapi-material.css">
+    
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#scandeval.benchmark_modules.hf" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="ScandEval" class="md-header__button md-logo" aria-label="ScandEval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ScandEval
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              scandeval.benchmark_modules.hf
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="ScandEval" class="md-nav__button md-logo" aria-label="ScandEval" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    ScandEval
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    scandeval
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            scandeval
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1_2" id="__nav_2_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            scandeval.benchmark_modules
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../base/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules.base
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fresh/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules.fresh
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules.hf
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules.hf
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" class="md-nav__link">
+    <span class="md-ellipsis">
+      HuggingFaceEncoderModel
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HuggingFaceEncoderModel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      num_params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      vocab_size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_max_length
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator" class="md-nav__link">
+    <span class="md-ellipsis">
+      data_collator
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_labels_from_generation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class" class="md-nav__link">
+    <span class="md-ellipsis">
+      trainer_class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_dataset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_exists
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_model_config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_model_repo_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_model_repo_info
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.load_tokenizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_tokenizer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_torch_dtype" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_torch_dtype
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.load_hf_model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_hf_model_config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.setup_model_for_question_answering" class="md-nav__link">
+    <span class="md-ellipsis">
+      setup_model_for_question_answering
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_children_of_module" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_children_of_module
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.align_model_and_tokenizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      align_model_and_tokenizer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_model_max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_model_max_length
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../litellm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules.litellm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vllm/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_modules.vllm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1_3" id="__nav_2_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    scandeval.task_utils
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            scandeval.task_utils
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../task_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.task_utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../task_utils/question_answering/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.task_utils.question_answering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../task_utils/sequence_classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.task_utils.sequence_classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../task_utils/text_to_text/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.task_utils.text_to_text
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../task_utils/token_classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.task_utils.token_classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmarker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmark_config_factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.benchmark_config_factory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../callbacks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.callbacks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.cli
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../constants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.constants
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dataset_configs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.dataset_configs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_loading/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.data_loading
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data_models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.data_models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../enums/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.enums
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../exceptions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.exceptions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../finetuning/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.finetuning
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../generation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.generation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../human_evaluation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.human_evaluation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../languages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.languages
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../model_cache/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.model_cache
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../model_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.model_config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../model_loading/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.model_loading
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../scores/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.scores
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../speed_benchmark/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.speed_benchmark
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../structured_generation_utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.structured_generation_utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.tasks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scandeval.utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" class="md-nav__link">
+    <span class="md-ellipsis">
+      HuggingFaceEncoderModel
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HuggingFaceEncoderModel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      num_params
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      vocab_size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_max_length
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator" class="md-nav__link">
+    <span class="md-ellipsis">
+      data_collator
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      extract_labels_from_generation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class" class="md-nav__link">
+    <span class="md-ellipsis">
+      trainer_class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_dataset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_exists
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_model_config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_model_repo_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_model_repo_info
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.load_tokenizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_tokenizer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_torch_dtype" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_torch_dtype
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.load_hf_model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_hf_model_config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.setup_model_for_question_answering" class="md-nav__link">
+    <span class="md-ellipsis">
+      setup_model_for_question_answering
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_children_of_module" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_children_of_module
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.align_model_and_tokenizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      align_model_and_tokenizer
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.get_model_max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_model_max_length
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 style="display: none;">scandeval.benchmark_modules.hf</h1><p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">module</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf" title="scandeval.benchmark_modules.hf">scandeval.benchmark_modules.hf</a></span>
+</p>
+<div class="mkapi-document">
+<p>Encoder models from the Hugging Face Hub.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle classes">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Classes</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+An encoder model from the Hugging Face Hub.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle functions">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Functions</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.get_model_repo_info" title="scandeval.benchmark_modules.hf.get_model_repo_info">get_model_repo_info</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Get the information about the model from the Hugging Face Hub.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.load_tokenizer" title="scandeval.benchmark_modules.hf.load_tokenizer">load_tokenizer</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Load the tokenizer.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.get_torch_dtype" title="scandeval.benchmark_modules.hf.get_torch_dtype">get_torch_dtype</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Get the torch dtype, used for loading the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.load_hf_model_config" title="scandeval.benchmark_modules.hf.load_hf_model_config">load_hf_model_config</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Load the Hugging Face model configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.setup_model_for_question_answering" title="scandeval.benchmark_modules.hf.setup_model_for_question_answering">setup_model_for_question_answering</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Setup a model for question answering.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.get_children_of_module" title="scandeval.benchmark_modules.hf.get_children_of_module">get_children_of_module</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Get the children of a module.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.align_model_and_tokenizer" title="scandeval.benchmark_modules.hf.align_model_and_tokenizer">align_model_and_tokenizer</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Aligns the model and the tokenizer.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.get_model_max_length" title="scandeval.benchmark_modules.hf.get_model_max_length">get_model_max_length</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Get the maximum context length of a model.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">class</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">dataset_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.DatasetConfig" title="scandeval.data_models.DatasetConfig">DatasetConfig</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">benchmark_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span><span class="mkapi-paren">)</span></span>
+</p>
+<div class="mkapi-document">
+<p><p class="mkapi-bases" markdown="1">Bases :
+<span class="mkapi-base"><a href="../base/#scandeval.benchmark_modules.base.BenchmarkModule" title="scandeval.benchmark_modules.base.BenchmarkModule">BenchmarkModule</a></span></p></p>
+<p>An encoder model from the Hugging Face Hub.</p>
+<p>Initialise the model.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dataset_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.DatasetConfig" title="scandeval.data_models.DatasetConfig">DatasetConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The dataset configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">benchmark_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The benchmark configuration.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle methods">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Methods</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params">num_params</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+The number of parameters in the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size">vocab_size</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+The vocabulary size of the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length">model_max_length</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+The maximum context length of the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator">data_collator</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+The data collator used to prepare samples during finetuning.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation">extract_labels_from_generation</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+The function used to extract the labels from the generated output.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class">trainer_class</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+The Trainer class to use for finetuning.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset">prepare_dataset</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Prepare the dataset for the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists">model_exists</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Check if a model exists.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config">get_model_config</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Fetch the model configuration.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">method</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.num_params">num_params</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">int</span></span>
+</p>
+<div class="mkapi-document">
+<p>The number of parameters in the model.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span>
+The number of parameters in the model.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">method</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.vocab_size">vocab_size</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">int</span></span>
+</p>
+<div class="mkapi-document">
+<p>The vocabulary size of the model.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span>
+The vocabulary size of the model.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">method</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_max_length">model_max_length</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">int</span></span>
+</p>
+<div class="mkapi-document">
+<p>The maximum context length of the model.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span>
+The maximum context length of the model.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">method</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.data_collator">data_collator</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="collections.abc">c</span>.<span class="mkapi-tooltip" title="collections.abc.Callable">Callable</span>[[list[<span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]], dict[str, <span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]]</span></span>
+</p>
+<div class="mkapi-document">
+<p>The data collator used to prepare samples during finetuning.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="collections.abc">c</span>.<span class="mkapi-tooltip" title="collections.abc.Callable">Callable</span>[[list[<span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]], dict[str, <span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]]</span> <span class="mkapi-dash">&mdash;</span>
+The data collator.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">NotImplementedError</span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">method</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation">extract_labels_from_generation</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><a href="../../types/#scandeval.types.ExtractLabelsFunction" title="scandeval.types.ExtractLabelsFunction">ExtractLabelsFunction</a></span></span>
+</p>
+<div class="mkapi-document">
+<p>The function used to extract the labels from the generated output.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../types/#scandeval.types.ExtractLabelsFunction" title="scandeval.types.ExtractLabelsFunction">ExtractLabelsFunction</a></span> <span class="mkapi-dash">&mdash;</span>
+The function used to extract the labels from the generated output.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">NotImplementedError</span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">method</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.trainer_class">trainer_class</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span>[<span class="mkapi-tooltip" title="transformers.trainer.Trainer">Trainer</span>]</span></span>
+</p>
+<div class="mkapi-document">
+<p>The Trainer class to use for finetuning.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span>[<span class="mkapi-tooltip" title="transformers.trainer.Trainer">Trainer</span>]</span> <span class="mkapi-dash">&mdash;</span>
+The Trainer class.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">NotImplementedError</span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">method</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.prepare_dataset">prepare_dataset</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">dataset</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="datasets.dataset_dict.DatasetDict">DatasetDict</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">task</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.Task" title="scandeval.data_models.Task">Task</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">itr_idx</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="datasets.dataset_dict.DatasetDict">DatasetDict</span></span></span>
+</p>
+<div class="mkapi-document">
+<p>Prepare the dataset for the model.</p>
+<p>This includes things like tokenisation.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">dataset</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="datasets.dataset_dict.DatasetDict">DatasetDict</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The dataset to prepare.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">task</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.Task" title="scandeval.data_models.Task">Task</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The task to prepare the dataset for.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">itr_idx</span> : 
+<span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The index of the dataset in the iterator.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="datasets.dataset_dict.DatasetDict">DatasetDict</span></span> <span class="mkapi-dash">&mdash;</span>
+The prepared dataset.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">NotImplementedError</span></p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.InvalidBenchmark" title="scandeval.exceptions.InvalidBenchmark">InvalidBenchmark</a></span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">classmethod</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.model_exists">model_exists</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">benchmark_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">bool | <a href="../../exceptions/#scandeval.exceptions.NeedsExtraInstalled" title="scandeval.exceptions.NeedsExtraInstalled">NeedsExtraInstalled</a> | <a href="../../exceptions/#scandeval.exceptions.NeedsEnvironmentVariable" title="scandeval.exceptions.NeedsEnvironmentVariable">NeedsEnvironmentVariable</a></span></span>
+</p>
+<div class="mkapi-document">
+<p>Check if a model exists.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model_id</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model ID.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">benchmark_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The benchmark configuration.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">bool | <a href="../../exceptions/#scandeval.exceptions.NeedsExtraInstalled" title="scandeval.exceptions.NeedsExtraInstalled">NeedsExtraInstalled</a> | <a href="../../exceptions/#scandeval.exceptions.NeedsEnvironmentVariable" title="scandeval.exceptions.NeedsEnvironmentVariable">NeedsEnvironmentVariable</a></span> <span class="mkapi-dash">&mdash;</span>
+Whether the model exists, or an error describing why we cannot check
+whether the model exists.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config">
+<span class="mkapi-object-link">
+<span class="mkapi-parent-toggle" title="Toggle class names">
+<i class="fa-solid fa-square-plus"></i>
+</span>
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">classmethod</span>
+<span class="mkapi-object-parent">
+<a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.get_model_config">get_model_config</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">benchmark_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><a href="../../data_models/#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span></span>
+</p>
+<div class="mkapi-document">
+<p>Fetch the model configuration.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model_id</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model ID.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">benchmark_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The benchmark configuration.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span> <span class="mkapi-dash">&mdash;</span>
+The model configuration.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.InvalidModel" title="scandeval.exceptions.InvalidModel">InvalidModel</a></span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.get_model_repo_info">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.get_model_repo_info" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.get_model_repo_info" title="scandeval.benchmark_modules.hf.get_model_repo_info">get_model_repo_info</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">revision</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">benchmark_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><a href="../../data_models/#scandeval.data_models.HFModelInfo" title="scandeval.data_models.HFModelInfo">HFModelInfo</a> | None</span></span>
+</p>
+<div class="mkapi-document">
+<p>Get the information about the model from the Hugging Face Hub.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model_id</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model ID.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">revision</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The revision of the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">benchmark_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The benchmark configuration.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.HFModelInfo" title="scandeval.data_models.HFModelInfo">HFModelInfo</a> | None</span> <span class="mkapi-dash">&mdash;</span>
+The information about the model, or None if the model could not be found.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.HuggingFaceHubDown" title="scandeval.exceptions.HuggingFaceHubDown">HuggingFaceHubDown</a></span></p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.NoInternetConnection" title="scandeval.exceptions.NoInternetConnection">NoInternetConnection</a></span></p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.NeedsAdditionalArgument" title="scandeval.exceptions.NeedsAdditionalArgument">NeedsAdditionalArgument</a></span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.load_tokenizer">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.load_tokenizer" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.load_tokenizer" title="scandeval.benchmark_modules.hf.load_tokenizer">load_tokenizer</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">trust_remote_code</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span></span>
+</p>
+<div class="mkapi-document">
+<p>Load the tokenizer.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model, which is used to determine whether to add a prefix space to
+the tokens.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_id</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model identifier. Used for logging.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">trust_remote_code</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to trust remote code.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span> <span class="mkapi-dash">&mdash;</span>
+The loaded tokenizer.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.InvalidModel" title="scandeval.exceptions.InvalidModel">InvalidModel</a></span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.get_torch_dtype">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.get_torch_dtype" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.get_torch_dtype" title="scandeval.benchmark_modules.hf.get_torch_dtype">get_torch_dtype</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">device</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.device">device</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">torch_dtype_is_set</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">bf16_available</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">str | <span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.dtype">dtype</span></span></span>
+</p>
+<div class="mkapi-document">
+<p>Get the torch dtype, used for loading the model.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">device</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.device">device</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The device to use.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">torch_dtype_is_set</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether the torch data type is set in the model configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">bf16_available</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether bfloat16 is available.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">str | <span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.dtype">dtype</span></span> <span class="mkapi-dash">&mdash;</span>
+The torch dtype.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.load_hf_model_config">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.load_hf_model_config" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.load_hf_model_config" title="scandeval.benchmark_modules.hf.load_hf_model_config">load_hf_model_config</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">num_labels</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-comma">, </span><span class="mkapi-arg">id2label</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict[int, str]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">label2id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict[str, int]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">revision</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_cache_dir</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">api_key</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">trust_remote_code</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">run_with_cli</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="transformers.configuration_utils.PretrainedConfig">PretrainedConfig</span></span></span>
+</p>
+<div class="mkapi-document">
+<p>Load the Hugging Face model configuration.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model_id</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The Hugging Face model ID.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">num_labels</span> : 
+<span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The number of labels in the dataset.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">id2label</span> : 
+<span class="mkapi-item-type">dict[int, str]</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The mapping from label IDs to labels.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">label2id</span> : 
+<span class="mkapi-item-type">dict[str, int]</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The mapping from labels to label IDs.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">revision</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The revision of the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_cache_dir</span> : 
+<span class="mkapi-item-type">str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The directory to cache the model in.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">api_key</span> : 
+<span class="mkapi-item-type">str | None</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The Hugging Face API key.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">trust_remote_code</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to trust remote code.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">run_with_cli</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether the script is being run with the CLI.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.configuration_utils.PretrainedConfig">PretrainedConfig</span></span> <span class="mkapi-dash">&mdash;</span>
+The Hugging Face model configuration.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.InvalidModel" title="scandeval.exceptions.InvalidModel">InvalidModel</a></span></p>
+</li>
+<li>
+<p><span class="mkapi-item-type">e</span></p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.NeedsAdditionalArgument" title="scandeval.exceptions.NeedsAdditionalArgument">NeedsAdditionalArgument</a></span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.setup_model_for_question_answering">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.setup_model_for_question_answering" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.setup_model_for_question_answering" title="scandeval.benchmark_modules.hf.setup_model_for_question_answering">setup_model_for_question_answering</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span></span>
+</p>
+<div class="mkapi-document">
+<p>Setup a model for question answering.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model to setup.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span> <span class="mkapi-dash">&mdash;</span>
+The setup model.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.get_children_of_module">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.get_children_of_module" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.get_children_of_module" title="scandeval.benchmark_modules.hf.get_children_of_module">get_children_of_module</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">module</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.modules.module.Module">Module</span></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.modules.module.Module">Module</span> | dict[str, <span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>] | None</span></span>
+</p>
+<div class="mkapi-document">
+<p>Get the children of a module.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">name</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The name of the module.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">module</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.modules.module.Module">Module</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The module to get the children of.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.modules.module.Module">Module</span> | dict[str, <span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>] | None</span> <span class="mkapi-dash">&mdash;</span>
+The children of the module, or None if the module has no children.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.align_model_and_tokenizer">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.align_model_and_tokenizer" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.align_model_and_tokenizer" title="scandeval.benchmark_modules.hf.align_model_and_tokenizer">align_model_and_tokenizer</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">tokenizer</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">raise_errors</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">tuple[<span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span>, <span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span>]</span></span>
+</p>
+<div class="mkapi-document">
+<p>Aligns the model and the tokenizer.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model to fix.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">tokenizer</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The tokenizer to fix.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">raise_errors</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether to raise errors instead of trying to fix them silently.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">tuple[<span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span>, <span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span>]</span> <span class="mkapi-dash">&mdash;</span>
+The fixed model and tokenizer.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.InvalidModel" title="scandeval.exceptions.InvalidModel">InvalidModel</a></span></p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.hf.get_model_max_length">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.get_model_max_length" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.get_model_max_length" title="scandeval.benchmark_modules.hf.get_model_max_length">get_model_max_length</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">tokenizer</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">int</span></span>
+</p>
+<div class="mkapi-document">
+<p>Get the maximum context length of a model.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">tokenizer</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The tokenizer.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span>
+The maximum context length.</p>
+</li>
+</ul>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../../..", "features": [], "search": "../../../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+        <script src="../../../../javascript/mkapi.js"></script>
+      
+    
+  </body>
+</html>
