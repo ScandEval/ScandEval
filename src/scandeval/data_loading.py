@@ -2,8 +2,10 @@
 
 import logging
 import sys
+import time
 
 from datasets import Dataset, DatasetDict, load_dataset
+from datasets.exceptions import DatasetsError
 from huggingface_hub.utils import HfHubHTTPError
 from numpy.random import Generator
 
@@ -39,10 +41,11 @@ def load_data(
                 token=unscramble("HjccJFhIozVymqXDVqTUTXKvYhZMTbfIjMxG_"),
             )
             break
-        except FileNotFoundError:
+        except (FileNotFoundError, DatasetsError):
             logger.warning(
                 f"Failed to load dataset {dataset_config.huggingface_id!r}. Retrying..."
             )
+            time.sleep(1)
             continue
         except HfHubHTTPError:
             raise InvalidBenchmark("The Hugging Face Hub seems to be down.")
