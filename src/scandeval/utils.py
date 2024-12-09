@@ -52,7 +52,8 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
 
 def clear_memory():
     """Clears the memory of unused items."""
-    gc.collect()
+    for gc_generation in range(3):
+        gc.collect(generation=gc_generation)
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     if torch.backends.mps.is_available():
