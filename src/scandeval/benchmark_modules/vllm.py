@@ -656,10 +656,13 @@ class VLLMModel(HuggingFaceEncoderModel):
 
                 examples["text"] = [
                     self._tokenizer.apply_chat_template(
-                        conversation=messages, tokenize=False
+                        conversation=messages,
+                        tokenize=False,
+                        add_generation_prompt=True,
                     )
                     for messages in messages_list
                 ]
+                breakpoint()
 
                 # prompt_prefix = ""
                 # if self.dataset_config.prompt_prefix:
