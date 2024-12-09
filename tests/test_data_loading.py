@@ -8,6 +8,7 @@ from numpy.random import default_rng
 
 from scandeval.data_loading import load_data
 from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
+from scandeval.exceptions import HuggingFaceHubDown
 
 
 @pytest.mark.parametrize(
@@ -32,11 +33,18 @@ class TestLoadData:
         self, dataset_config, benchmark_config
     ) -> Generator[list[DatasetDict], None, None]:
         """A loaded dataset."""
-        yield load_data(
-            rng=default_rng(seed=4242),
-            dataset_config=dataset_config,
-            benchmark_config=benchmark_config,
-        )
+        for _ in range(10):
+            try:
+                yield load_data(
+                    rng=default_rng(seed=4242),
+                    dataset_config=dataset_config,
+                    benchmark_config=benchmark_config,
+                )
+                break
+            except HuggingFaceHubDown:
+                continue
+        else:
+            raise HuggingFaceHubDown()
 
     def test_load_data_is_list_of_dataset_dicts(self, dataset):
         """Test that the `load_data` function returns a list of `DatasetDict`."""
