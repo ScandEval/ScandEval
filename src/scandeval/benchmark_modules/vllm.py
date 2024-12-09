@@ -775,11 +775,11 @@ class VLLMModel(HuggingFaceEncoderModel):
         """Clear the GPU memory used by the model, and remove the model itself."""
         # If Python is shutting down then the `sys.meta_path` attribute will be `None`,
         # in which case we don't have to do anything
-        if sys.meta_path is not None:
-            if hasattr(self, "_model"):
-                del self._model
-            del self
-            clear_vllm()
+        # if sys.meta_path is not None:
+        if hasattr(self, "_model"):
+            del self._model
+        del self
+        clear_vllm()
 
     @cached_property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
