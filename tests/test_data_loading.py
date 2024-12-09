@@ -1,6 +1,5 @@
 """Tests for the `data_loading` module."""
 
-import time
 from collections.abc import Generator
 
 import pytest
@@ -9,7 +8,6 @@ from numpy.random import default_rng
 
 from scandeval.data_loading import load_data
 from scandeval.dataset_configs import ANGRY_TWEETS_CONFIG
-from scandeval.exceptions import HuggingFaceHubDown
 
 
 class TestLoadData:
@@ -18,18 +16,11 @@ class TestLoadData:
     @pytest.fixture(scope="class")
     def dataset(self, benchmark_config) -> Generator[list[DatasetDict], None, None]:
         """A loaded dataset."""
-        for _ in range(10):
-            try:
-                yield load_data(
-                    rng=default_rng(seed=4242),
-                    dataset_config=ANGRY_TWEETS_CONFIG,
-                    benchmark_config=benchmark_config,
-                )
-                break
-            except HuggingFaceHubDown:
-                time.sleep(5)
-        else:
-            raise HuggingFaceHubDown()
+        yield load_data(
+            rng=default_rng(seed=4242),
+            dataset_config=ANGRY_TWEETS_CONFIG,
+            benchmark_config=benchmark_config,
+        )
 
     def test_load_data_is_list_of_dataset_dicts(self, dataset):
         """Test that the `load_data` function returns a list of `DatasetDict`."""
