@@ -550,89 +550,34 @@ class LiteLLMModel(BenchmarkModule):
             assistant_part = section.split("\n")[-1]
             return user_part, assistant_part
 
-        few_shot_messages: list[dict[str, str]]
         match task.supertask:
             case "sequence-classification":
-                prompt_sections = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
                         label=example["label"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
-
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
+                        text=text.replace("\n", " ").strip(), label=""
                     )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
-
-                if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
-
-                examples["messages"] = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=text, label=""
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
                     for text in examples["text"]
                 ]
 
             case "text-to-text":
-                prompt_sections = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
                         target_text=example["target_text"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
-
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
+                        text=text.replace("\n", " ").strip(), target_text=""
                     )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
-
-                if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
-
-                examples["messages"] = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=text, target_text=""
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
                     for text in examples["text"]
                 ]
 
@@ -654,50 +599,22 @@ class LiteLLMModel(BenchmarkModule):
                             labels[prompt_label][-1] += " " + token
                     return json.dumps(labels, ensure_ascii=False)
 
-                prompt_sections = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                         label=create_label(example=example),
                     )
                     for example in few_shot_examples
                 ]
-
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
+                        text=" ".join(tokens).replace("\n", " ").strip(), label=""
                     )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
-
-                if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
-
-                examples["messages"] = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=" ".join(tokens).replace("\n", " ").strip(),
-                                    label="",
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
                     for tokens in examples["tokens"]
                 ]
 
             case "question-answering":
-                prompt_sections = [
+                few_shot_sections = [
                     self.dataset_config.prompt_template.format(
                         text=example["context"].replace("\n", " ").strip(),
                         question=example["question"].replace("\n", " ").strip(),
@@ -705,39 +622,12 @@ class LiteLLMModel(BenchmarkModule):
                     )
                     for example in few_shot_examples
                 ]
-
-                few_shot_messages = [
-                    dict(role=role, content=content.split(":", 1)[1].strip())
-                    for section in prompt_sections
-                    for role, content in zip(
-                        it.cycle(["user", "assistant"]), split_section(section=section)
+                new_sections = [
+                    self.dataset_config.prompt_template.format(
+                        text=context.replace("\n", " ").strip(),
+                        question=question.replace("\n", " ").strip(),
+                        label="",
                     )
-                    if content.split(":", 1)[1].strip() != ""
-                ]
-
-                if self.dataset_config.prompt_prefix:
-                    few_shot_messages[0]["content"] = (
-                        self.dataset_config.prompt_prefix
-                        + "\n\n"
-                        + few_shot_messages[0]["content"]
-                    )
-
-                examples["messages"] = [
-                    few_shot_messages
-                    + [
-                        dict(
-                            role="user",
-                            content=split_section(
-                                section=self.dataset_config.prompt_template.format(
-                                    text=context.replace("\n", " ").strip(),
-                                    question=question,
-                                    label="",
-                                )
-                            )[0]
-                            .split(":", 1)[1]
-                            .strip(),
-                        )
-                    ]
                     for context, question in zip(
                         examples["context"], examples["question"]
                     )
@@ -748,9 +638,35 @@ class LiteLLMModel(BenchmarkModule):
                     f"Unsupported task supertask: {task.supertask}."
                 )
 
-        assert len(
-            {len(values) for values in examples.values()}
-        ), "The number of examples and messages must be the same."
+        few_shot_messages = [
+            dict(role=role, content=content.split(":", 1)[1].strip())
+            for section in few_shot_sections
+            for role, content in zip(
+                it.cycle(["user", "assistant"]), split_section(section=section)
+            )
+            if content.split(":", 1)[1].strip() != ""
+        ]
+
+        if self.dataset_config.prompt_prefix:
+            few_shot_messages[0]["content"] = (
+                self.dataset_config.prompt_prefix
+                + "\n\n"
+                + few_shot_messages[0]["content"]
+            )
+
+        examples["messages"] = [
+            few_shot_messages
+            + [
+                dict(
+                    role="user",
+                    content=split_section(section=new_section)[0]
+                    .split(":", 1)[1]
+                    .strip(),
+                )
+            ]
+            for new_section in new_sections
+        ]
+
         return examples
 
     def _apply_instruction_prompt(
