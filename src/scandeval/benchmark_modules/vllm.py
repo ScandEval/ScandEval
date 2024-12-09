@@ -773,9 +773,6 @@ class VLLMModel(HuggingFaceEncoderModel):
 
     def __del__(self) -> None:
         """Clear the GPU memory used by the model, and remove the model itself."""
-        # If Python is shutting down then the `sys.meta_path` attribute will be `None`,
-        # in which case we don't have to do anything
-        # if sys.meta_path is not None:
         if hasattr(self, "_model"):
             del self._model
         del self
@@ -875,10 +872,9 @@ def _run_engine_with_fixed_progress_bars(
 
 def clear_vllm() -> None:
     """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
-    if importlib.util.find_spec("vllm") is not None:
-        try:
-            destroy_model_parallel()
-        except ImportError:
-            pass
-        clear_memory()
-        ray.shutdown()
+    try:
+        destroy_model_parallel()
+    except ImportError:
+        pass
+    clear_memory()
+    ray.shutdown()
