@@ -74,7 +74,7 @@ publish-docs:  ## Publish documentation to GitHub Pages
 	@echo "Updated documentation website: https://scandeval.com/ScandEval/"
 
 test:  ## Run tests
-	@uv run pytest && uv run readme-c
+	@uv run pytest && uv run readme-cov
 
 tree:  ## Print directory tree
 	@tree -a --gitignore -I .git .
