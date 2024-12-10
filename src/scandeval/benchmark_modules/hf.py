@@ -663,6 +663,7 @@ def get_model_repo_info(
     )
     base_model_id: str | None = None
     if has_base_model_tag:
+        breakpoint()
         base_model_id = [
             tag.split(":")[1]
             for tag in tags
