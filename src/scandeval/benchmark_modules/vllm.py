@@ -390,11 +390,17 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The loaded model and tokenizer.
         """
-        hf_model_config = AutoConfig.from_pretrained(
-            self.model_config.model_id,
-            revision=self.model_config.revision,
-            cache_dir=self.model_config.model_cache_dir,
-        )
+        try:
+            hf_model_config = AutoConfig.from_pretrained(
+                self.model_config.adapter_base_model_id or self.model_config.model_id,
+                revision=self.model_config.revision,
+                cache_dir=self.model_config.model_cache_dir,
+            )
+        except ValueError as e:
+            raise InvalidModel(
+                "Could not load model configuration for "
+                f"{self.model_config.model_id!r}. The error was: {str(e)}"
+            )
 
         quantization = None
         if hasattr(hf_model_config, "quantization_config"):
