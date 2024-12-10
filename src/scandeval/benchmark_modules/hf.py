@@ -646,16 +646,16 @@ def get_model_repo_info(
     )
     base_model_id: str | None = None
     if has_base_model_tag:
-        base_model_id = [
-            tag.split(":")[1]
-            for tag in tags
-            if tag.startswith("base_model:") and tag.count(":") == 1
-        ][0]
         has_adapter_config = model_info.siblings is not None and any(
             sibling.rfilename == "adapter_config.json"
             for sibling in model_info.siblings
         )
         if has_adapter_config:
+            base_model_id = [
+                tag.split(":")[1]
+                for tag in tags
+                if tag.startswith("base_model:") and tag.count(":") == 1
+            ][0]
             base_model_info = hf_api.model_info(
                 repo_id=base_model_id,
                 revision=revision,
