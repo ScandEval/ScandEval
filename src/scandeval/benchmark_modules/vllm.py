@@ -391,6 +391,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             The loaded model and tokenizer.
         """
         try:
+            breakpoint()
             hf_model_config = AutoConfig.from_pretrained(
                 self.model_config.adapter_base_model_id or self.model_config.model_id,
                 revision=self.model_config.revision,
