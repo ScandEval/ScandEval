@@ -475,8 +475,11 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         tokenizer = load_tokenizer(
             model_id=self.model_config.model_id,
+            revision=self.model_config.revision,
+            adapter_base_model_id=self.model_config.adapter_base_model_id,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             model_max_length=max_model_len,
+            model_cache_dir=self.model_config.model_cache_dir,
         )
 
         return model, tokenizer
@@ -827,23 +830,40 @@ class VLLMModel(HuggingFaceEncoderModel):
 
 
 def load_tokenizer(
-    model_id: str, trust_remote_code: bool, model_max_length: int
+    model_id: str,
+    revision: str,
+    adapter_base_model_id: str | None,
+    trust_remote_code: bool,
+    model_max_length: int,
+    model_cache_dir: str,
 ) -> "PreTrainedTokenizer":
     """Load the tokenizer.
 
     Args:
         model_id:
-            The model identifier. Used for logging.
+            The model identifier.
+        revision:
+            The revision of the model.
+        adapter_base_model_id:
+            The base model ID for the adapter model. Can be None if the model is not an
+            adapter model.
         trust_remote_code:
             Whether to trust remote code.
         model_max_length:
             The maximum length of the model.
+        model_cache_dir:
+            The cache directory for the model.
 
     Returns:
         The loaded tokenizer.
     """
     while True:
         try:
+            config = AutoConfig.from_pretrained(
+                adapter_base_model_id or model_id,
+                revision=revision,
+                cache_dir=model_cache_dir,
+            )
             tokenizer = AutoTokenizer.from_pretrained(
                 model_id,
                 use_fast=True,
@@ -852,6 +872,7 @@ def load_tokenizer(
                 padding_side="left",
                 truncation_side="left",
                 model_max_length=model_max_length,
+                config=config,
             )
             if tokenizer.pad_token_id is None:
                 tokenizer.pad_token = tokenizer.eos_token
