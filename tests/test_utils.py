@@ -8,7 +8,6 @@ import torch
 from transformers import AutoTokenizer
 
 from scandeval.utils import (
-    convert_prompt_to_instruction,
     enforce_reproducibility,
     get_end_of_chat_token_ids,
     is_module_installed,
@@ -138,60 +137,6 @@ def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string
     if expected_string is not None:
         end_of_chat_string = tokenizer.decode(end_of_chat_token_ids).strip()
         assert end_of_chat_string == expected_string
-
-
-@pytest.mark.parametrize(
-    argnames=["prompt", "model_id", "expected"],
-    argvalues=[
-        (
-            "Do what you're told\n\nExample: This is a test",
-            "mistralai/Mistral-7B-Instruct-v0.1",
-            "<s> [INST] Do what you're told\n\nExample: This is a test [/INST]",
-        ),
-        (
-            "Do what you're told\n\nExample: This is a test",
-            "occiglot/occiglot-7b-de-en-instruct",
-            "<s><|im_start|>system\nYou are a helpful assistant. Please give a long "
-            "and detailed answer.<|im_end|>\n<|im_start|>user\nDo what you're told\n\n"
-            "Example: This is a test<|im_end|>\n<|im_start|>assistant\n",
-        ),
-        (
-            "Do what you're told\n\nExample: This is a test",
-            "mhenrichsen/danskgpt-tiny-chat",
-            "<|im_start|>system\nDu er en hjælpsom assistent.<|im_end|>\n"
-            "<|im_start|>user\nDo what you're told\n\nExample: This is a test"
-            "<|im_end|>\n<|im_start|>assistant\n",
-        ),
-        (
-            "Do what you're told\n\nExample: This is a test",
-            "mistralai/Mistral-7B-v0.1",
-            "Do what you're told\n\nExample: This is a test",
-        ),
-        (
-            "Do what you're told\n\nExample: This is a test",
-            "occiglot/occiglot-7b-de-en",
-            "Do what you're told\n\nExample: This is a test",
-        ),
-        (
-            "Do what you're told\n\nExample: This is a test",
-            "mhenrichsen/danskgpt-tiny",
-            "Do what you're told\n\nExample: This is a test",
-        ),
-    ],
-    ids=[
-        "mistral-instruct",
-        "occiglot-instruct",
-        "danskgpt-instruct",
-        "mistral-no-instruct",
-        "occiglot-no-instruct",
-        "danskgpt-no-instruct",
-    ],
-)
-def test_convert_prompt_to_instruction(prompt, model_id, expected, auth):
-    """Test that a prompt is correctly converted to an instruction."""
-    tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
-    instruction = convert_prompt_to_instruction(prompt=prompt, tokenizer=tokenizer)
-    assert instruction == expected
 
 
 @pytest.mark.parametrize(

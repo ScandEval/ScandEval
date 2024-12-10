@@ -463,34 +463,6 @@ def get_end_of_chat_token_ids(tokenizer: "PreTrainedTokenizer") -> list[int] | N
     return end_of_chat_tokens
 
 
-def convert_prompt_to_instruction(prompt: str, tokenizer: "PreTrainedTokenizer") -> str:
-    """Make an instruction prompt conform to a chat template.
-
-    Note that it is expected that the prompt has the following format:
-
-    Args:
-        prompt:
-            The prompt.
-        tokenizer:
-            The tokenizer.
-
-    Returns:
-        The chat template formatted prompt.
-    """
-    if tokenizer.chat_template is None:
-        return prompt
-
-    instruction_prompt = tokenizer.apply_chat_template(
-        conversation=[dict(role="user", content=prompt)],
-        chat_template=tokenizer.get_chat_template(),
-        add_generation_prompt=True,
-        tokenize=False,
-    )
-    assert isinstance(instruction_prompt, str)
-
-    return instruction_prompt
-
-
 def scramble(text: str) -> str:
     """Scramble a string in a bijective manner.
 
