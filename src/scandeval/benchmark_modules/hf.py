@@ -122,12 +122,15 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             and hasattr(repo_info, "card_data")
             and repo_info.card_data is not None
             and "base_model" in repo_info.card_data
-            and repo_info.card_data["base_model"] is not None
-            and len(repo_info.card_data["base_model"]) > 0
+            and (base_model := repo_info.card_data["base_model"]) is not None
             and (
-                base_repo_info := hf_api.repo_info(
-                    repo_info.card_data["base_model"][-1], repo_type="model"
-                )
+                isinstance(base_model, str)
+                or (isinstance(base_model, list) and len(base_model) > 0)
+            )
+            and (
+                base_repo_info := hf_api.repo_info(base_model, repo_type="model")
+                if isinstance(base_model, str)
+                else hf_api.repo_info(base_model[0], repo_type="model")
             )
             is not None
             and hasattr(base_repo_info, "safetensors")
