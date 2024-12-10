@@ -523,6 +523,7 @@ class Benchmarker:
                 # Set random seeds to enforce reproducibility of the randomly
                 # initialised weights
                 rng = enforce_reproducibility(framework=model_config.framework)
+                breakpoint()
 
                 if model is None or not model.is_generative:
                     logger.info("Loading model...")
