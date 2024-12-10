@@ -42,6 +42,7 @@ def test_cli_param_names(params):
         "evaluate_test_split",
         "few_shot",
         "num_iterations",
+        "base_url",
         "debug",
         "help",
     }
@@ -72,5 +73,6 @@ def test_cli_param_types(params):
     assert params["evaluate_test_split"] == BOOL
     assert params["few_shot"] == BOOL
     assert params["num_iterations"] == INT
+    assert params["base_url"] == STRING
     assert params["debug"] == BOOL
     assert params["help"] == BOOL

@@ -41,7 +41,6 @@ def load_model(
         ModelType.HF_HUB_GENERATIVE: VLLMModel,
         ModelType.HF_HUB_ENCODER: HuggingFaceEncoderModel,
         ModelType.API: LiteLLMModel,
-        ModelType.LOCAL: VLLMModel,  # TODO: Add LocalModel
         ModelType.FRESH: FreshEncoderModel,
     }
     model_class = model_type_to_module_mapping[model_config.model_type]

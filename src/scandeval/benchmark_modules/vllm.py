@@ -21,7 +21,12 @@ from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
 
-from ..constants import MAX_LOGPROBS, SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
+from ..constants import (
+    GENERATIVE_MODEL_TASKS,
+    MAX_LOGPROBS,
+    SUPERTASKS_USING_LOGPROBS,
+    TASKS_USING_JSON,
+)
 from ..data_models import (
     BenchmarkConfig,
     DatasetConfig,
@@ -331,7 +336,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         model_info = get_model_repo_info(
             model_id=model_id, revision=revision, benchmark_config=benchmark_config
         )
-        return model_info is not None and model_info.pipeline_tag == "text-generation"
+        return (
+            model_info is not None and model_info.pipeline_tag in GENERATIVE_MODEL_TASKS
+        )
 
     @classmethod
     def get_model_config(

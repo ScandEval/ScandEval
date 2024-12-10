@@ -60,8 +60,6 @@ class ModelType(AutoStrEnum):
             Hugging Face encoder model from the Hub.
         HF_HUB_GENERATIVE:
             Hugging Face generative model from the Hub.
-        LOCAL:
-            Locally stored model.
         API:
             Model accessed through an API.
         HUMAN:
@@ -71,7 +69,6 @@ class ModelType(AutoStrEnum):
     FRESH = auto()
     HF_HUB_ENCODER = auto()
     HF_HUB_GENERATIVE = auto()
-    LOCAL = auto()
     API = auto()
     HUMAN = auto()
 

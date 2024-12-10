@@ -44,6 +44,7 @@ def build_benchmark_config(
     evaluate_test_split: bool,
     few_shot: bool,
     num_iterations: int,
+    base_url: str | None,
     debug: bool,
     run_with_cli: bool,
     first_time: bool = False,
@@ -106,6 +107,9 @@ def build_benchmark_config(
             Whether to use few-shot learning for the models.
         num_iterations:
             The number of iterations each model should be evaluated for.
+        base_url:
+            The base URL for a given inference API. Only relevant if `model` refers to a
+            model on an inference API.
         debug:
             Whether to run the benchmark in debug mode.
         run_with_cli:
@@ -183,6 +187,7 @@ def build_benchmark_config(
         evaluate_test_split=evaluate_test_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
+        base_url=base_url,
         debug=debug,
         run_with_cli=run_with_cli,
     )
