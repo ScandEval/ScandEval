@@ -12,11 +12,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   APIs can now be benchmarked! This includes OpenAI, Anthropic, Google, Mistral AI,
   Cohere, Ollama, LM Studio, vLLM servers, and Hugging Face inference endpoints. Check
   out the full list of LiteLLM providers [here](https://docs.litellm.ai/docs/providers).
+- Added new `--base-url` argument, which allows you to specify the base URL of your
+  model, if you are using an OpenAI-compatible inference API.
 
 ### Changed
 - No more tokenisation for generation tasks, resulting in faster preprocessing times.
 - Now evaluates models on the validation split by default, to avoid overfitting to the
-  test set. The test set can be evaluated on using the `--evaluate-test-split` flag.
+  test set. The test set can be evaluated on using the new `--evaluate-test-split` flag.
 
 ### Removed
 - Removed the option to evaluate on the training split, as this is not a common use
