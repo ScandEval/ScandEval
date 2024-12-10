@@ -45,7 +45,12 @@ from ..task_utils import (
     token_classification,
 )
 from ..types import ExtractLabelsFunction
-from ..utils import clear_memory, create_model_cache_dir, get_end_of_chat_token_ids
+from ..utils import (
+    clear_memory,
+    create_model_cache_dir,
+    get_end_of_chat_token_ids,
+    log_once,
+)
 from .hf import HuggingFaceEncoderModel, get_model_repo_info
 
 if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
@@ -759,12 +764,33 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for new_section in new_sections
             ]
 
-            examples["text"] = [
+            # Pick the chat template that matches the language of the dataset, if such a
+            # template exists
+            chat_template: str | None = None
+            if isinstance(self._tokenizer.chat_template, dict):
+                language_codes = [
+                    language.code for language in self.dataset_config.languages
+                ]
+                for name, candidate_template in self._tokenizer.chat_template.items():
+                    if name.lower() in language_codes:
+                        chat_template = candidate_template
+                        log_once(
+                            f"Using the {name!r} chat template for the tokenizer.",
+                            level=logging.DEBUG,
+                        )
+                        break
+
+            texts = [
                 self._tokenizer.apply_chat_template(
-                    conversation=messages, tokenize=False, add_generation_prompt=True
+                    conversation=messages,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                    chat_template=chat_template,
                 )
                 for messages in messages_list
             ]
+
+            examples["text"] = texts
 
         else:
             prompt_prefix = ""

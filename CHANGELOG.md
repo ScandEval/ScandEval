@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - No more tokenisation for generation tasks, resulting in faster preprocessing times.
 - Now evaluates models on the validation split by default, to avoid overfitting to the
   test set. The test set can be evaluated on using the `--evaluate-test-split` flag.
+- Now evaluates instruction tuned models with their chat template. This _does_ often
+  result in worse scores, but it is more representative of how the model is used in
+  practice. Further, if a tokeniser has multiple chat templates, then we use the one
+  corresponding to the ISO 639-1 language code of the dataset, if available -
+  otherwise we will just use the default chat template of the tokeniser.
 
 ### Removed
 - Removed the option to evaluate on the training split, as this is not a common use

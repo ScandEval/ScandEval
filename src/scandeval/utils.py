@@ -10,6 +10,7 @@ import re
 import sys
 import typing as t
 import warnings
+from functools import cache
 from pathlib import Path
 
 import litellm
@@ -494,3 +495,31 @@ def unscramble(scrambled_text: str) -> str:
     inverse_permutation = np.argsort(permutation)
     unscrambled = "".join(scrambled_text[i] for i in inverse_permutation)
     return unscrambled
+
+
+@cache
+def log_once(message: str, level: int = logging.INFO) -> None:
+    """Log a message once.
+
+    This is ensured by caching the input/output pairs of this function, using the
+    `functools.cache` decorator.
+
+    Args:
+        message:
+            The message to log.
+        level:
+            The logging level. Defaults to logging.INFO.
+    """
+    match level:
+        case logging.DEBUG:
+            logger.debug(message)
+        case logging.INFO:
+            logger.info(message)
+        case logging.WARNING:
+            logger.warning(message)
+        case logging.ERROR:
+            logger.error(message)
+        case logging.CRITICAL:
+            logger.critical(message)
+        case _:
+            raise ValueError(f"Invalid logging level: {level}")
