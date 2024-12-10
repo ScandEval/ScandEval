@@ -473,21 +473,11 @@ class VLLMModel(HuggingFaceEncoderModel):
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
         model.config = hf_model_config
 
-        try:
-            tokenizer = load_tokenizer(
-                model_id=self.model_config.model_id,
-                trust_remote_code=self.benchmark_config.trust_remote_code,
-                model_max_length=max_model_len,
-            )
-        except Exception as e:
-            if self.model_config.adapter_base_model_id is None:
-                raise e
-            breakpoint()
-            tokenizer = load_tokenizer(
-                model_id=self.model_config.adapter_base_model_id,
-                trust_remote_code=self.benchmark_config.trust_remote_code,
-                model_max_length=max_model_len,
-            )
+        tokenizer = load_tokenizer(
+            model_id=self.model_config.model_id,
+            trust_remote_code=self.benchmark_config.trust_remote_code,
+            model_max_length=max_model_len,
+        )
 
         return model, tokenizer
 
