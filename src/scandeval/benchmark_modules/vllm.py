@@ -857,14 +857,12 @@ def load_tokenizer(
     Returns:
         The loaded tokenizer.
     """
-    while True:
+    config = AutoConfig.from_pretrained(
+        adapter_base_model_id or model_id, revision=revision, cache_dir=model_cache_dir
+    )
+    num_retries = 5
+    for _ in range(num_retries):
         try:
-            config = AutoConfig.from_pretrained(
-                adapter_base_model_id or model_id,
-                revision=revision,
-                cache_dir=model_cache_dir,
-            )
-            breakpoint()
             tokenizer = AutoTokenizer.from_pretrained(
                 model_id,
                 use_fast=True,
@@ -875,18 +873,32 @@ def load_tokenizer(
                 model_max_length=model_max_length,
                 config=config,
             )
-            if tokenizer.pad_token_id is None:
-                tokenizer.pad_token = tokenizer.eos_token
-            return tokenizer
+            break
         except (json.JSONDecodeError, OSError, TypeError) as e:
-            raise InvalidModel(
-                f"Could not load tokenizer for model {model_id!r}. The error was "
-                f"{str(e)}."
+            if adapter_base_model_id is None or model_id == adapter_base_model_id:
+                raise InvalidModel(
+                    f"Could not load tokenizer for model {model_id!r}. The error was "
+                    f"{str(e)}."
+                )
+            logger.debug(
+                f"Could not load tokenizer for {model_id!r}. Falling back to "
+                f"{adapter_base_model_id!r}."
             )
+            model_id = adapter_base_model_id
         except (TimeoutError, RequestError):
             logger.info(f"Couldn't load tokenizer for {model_id!r}. Retrying.")
             sleep(5)
             continue
+    else:
+        raise InvalidModel(
+            f"Could not load tokenizer for model {model_id!r} after {num_retries} "
+            "attempts."
+        )
+
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    return tokenizer
 
 
 def _run_engine_with_fixed_progress_bars(
