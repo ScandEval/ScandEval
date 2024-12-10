@@ -759,12 +759,32 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for new_section in new_sections
             ]
 
-            examples["text"] = [
+            # Pick the chat template that matches the language of the dataset, if such a
+            # template exists
+            chat_template: str | None = None
+            if isinstance(self._tokenizer.chat_template, dict):
+                language_codes = [
+                    language.code for language in self.dataset_config.languages
+                ]
+                for name, candidate_template in self._tokenizer.chat_template.items():
+                    if name.lower() in language_codes:
+                        chat_template = candidate_template
+                        logger.debug(
+                            f"Using the {name!r} chat template for the tokenizer."
+                        )
+                        break
+
+            texts = [
                 self._tokenizer.apply_chat_template(
-                    conversation=messages, tokenize=False, add_generation_prompt=True
+                    conversation=messages,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                    chat_template=chat_template,
                 )
                 for messages in messages_list
             ]
+
+            examples["text"] = texts
 
         else:
             prompt_prefix = ""
