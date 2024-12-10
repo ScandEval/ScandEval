@@ -668,14 +668,18 @@ def get_model_repo_info(
             for tag in tags
             if tag.startswith("base_model:") and tag.count(":") == 1
         ][0]
-        breakpoint()
-        base_model_info = hf_api.model_info(
-            repo_id=base_model_id,
-            revision=revision,
-            token=benchmark_config.api_key or True,
+        has_adapter_config = model_info.siblings is not None and any(
+            sibling.rfilename == "adapter_config.json"
+            for sibling in model_info.siblings
         )
-        tags += base_model_info.tags or list()
-        tags = list(set(tags))
+        if has_adapter_config:
+            base_model_info = hf_api.model_info(
+                repo_id=base_model_id,
+                revision=revision,
+                token=benchmark_config.api_key or True,
+            )
+            tags += base_model_info.tags or list()
+            tags = list(set(tags))
 
     pipeline_tag = model_info.pipeline_tag
     if pipeline_tag is None:
