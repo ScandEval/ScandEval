@@ -390,11 +390,17 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The loaded model and tokenizer.
         """
-        hf_model_config = AutoConfig.from_pretrained(
-            self.model_config.model_id,
-            revision=self.model_config.revision,
-            cache_dir=self.model_config.model_cache_dir,
-        )
+        try:
+            hf_model_config = AutoConfig.from_pretrained(
+                self.model_config.adapter_base_model_id or self.model_config.model_id,
+                revision=self.model_config.revision,
+                cache_dir=self.model_config.model_cache_dir,
+            )
+        except ValueError as e:
+            raise InvalidModel(
+                "Could not load model configuration for "
+                f"{self.model_config.model_id!r}. The error was: {str(e)}"
+            )
 
         quantization = None
         if hasattr(hf_model_config, "quantization_config"):
@@ -423,7 +429,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         else:
             download_dir = str(self.model_config.model_cache_dir)
 
-        max_model_len = 5_000
         potential_max_model_length_config_names = [
             "max_position_embeddings",
             "max_sequence_length",
@@ -432,23 +437,29 @@ class VLLMModel(HuggingFaceEncoderModel):
             "sliding_window_size",
             "n_positions",
         ]
+        true_max_model_len_candidates: list[int] = list()
         for config_name in potential_max_model_length_config_names:
             if hasattr(hf_model_config, config_name):
                 model_len = getattr(hf_model_config, config_name)
                 if model_len is not None:
-                    max_model_len = min(max_model_len, model_len)
+                    true_max_model_len_candidates.append(model_len)
+
+        if len(true_max_model_len_candidates) > 0:
+            true_max_model_len = min(true_max_model_len_candidates)
+        else:
+            true_max_model_len = 5_000
 
         vllm_kwargs = dict(
             model=self.model_config.adapter_base_model_id or self.model_config.model_id,
             tokenizer=self.model_config.adapter_base_model_id
             or self.model_config.model_id,
             gpu_memory_utilization=0.95,
-            max_model_len=max_model_len,
+            max_model_len=min(true_max_model_len, 5_000),
             download_dir=download_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             revision=self.model_config.revision,
             seed=4242,
-            distributed_executor_backend="mp",  # "ray",
+            distributed_executor_backend="mp",  # "ray",  # TEMP?
             tensor_parallel_size=torch.cuda.device_count(),
             disable_custom_all_reduce=True,
             quantization=quantization,
@@ -463,14 +474,33 @@ class VLLMModel(HuggingFaceEncoderModel):
         )
 
         clear_vllm()
-        model = LLM(**vllm_kwargs)
+
+        try:
+            model = LLM(**vllm_kwargs)
+        except ValueError as e:
+            model_id = (
+                self.model_config.adapter_base_model_id or self.model_config.model_id
+            )
+            if "trust_remote_code" in str(e):
+                raise InvalidModel(
+                    f"Loading the model {model_id!r} needs to trust remote code. "
+                    "If you trust the suppliers of this model, then you can enable "
+                    "this by setting the `--trust-remote-code` flag."
+                )
+            raise InvalidModel(
+                f"The model {model_id!r} could not be loaded. The error was {e!r}."
+            )
+
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
         model.config = hf_model_config
 
         tokenizer = load_tokenizer(
             model_id=self.model_config.model_id,
+            revision=self.model_config.revision,
+            adapter_base_model_id=self.model_config.adapter_base_model_id,
             trust_remote_code=self.benchmark_config.trust_remote_code,
-            model_max_length=max_model_len,
+            model_max_length=true_max_model_len,
+            model_cache_dir=self.model_config.model_cache_dir,
         )
 
         return model, tokenizer
@@ -821,22 +851,38 @@ class VLLMModel(HuggingFaceEncoderModel):
 
 
 def load_tokenizer(
-    model_id: str, trust_remote_code: bool, model_max_length: int
+    model_id: str,
+    revision: str,
+    adapter_base_model_id: str | None,
+    trust_remote_code: bool,
+    model_max_length: int,
+    model_cache_dir: str,
 ) -> "PreTrainedTokenizer":
     """Load the tokenizer.
 
     Args:
         model_id:
-            The model identifier. Used for logging.
+            The model identifier.
+        revision:
+            The revision of the model.
+        adapter_base_model_id:
+            The base model ID for the adapter model. Can be None if the model is not an
+            adapter model.
         trust_remote_code:
             Whether to trust remote code.
         model_max_length:
             The maximum length of the model.
+        model_cache_dir:
+            The cache directory for the model.
 
     Returns:
         The loaded tokenizer.
     """
-    while True:
+    config = AutoConfig.from_pretrained(
+        adapter_base_model_id or model_id, revision=revision, cache_dir=model_cache_dir
+    )
+    num_retries = 5
+    for _ in range(num_retries):
         try:
             tokenizer = AutoTokenizer.from_pretrained(
                 model_id,
@@ -846,16 +892,34 @@ def load_tokenizer(
                 padding_side="left",
                 truncation_side="left",
                 model_max_length=model_max_length,
+                config=config,
             )
-            if tokenizer.pad_token_id is None:
-                tokenizer.pad_token = tokenizer.eos_token
-            return tokenizer
-        except (json.JSONDecodeError, OSError, TypeError):
-            raise InvalidModel(f"Could not load tokenizer for model {model_id!r}.")
+            break
+        except (json.JSONDecodeError, OSError, TypeError) as e:
+            if adapter_base_model_id is None or model_id == adapter_base_model_id:
+                raise InvalidModel(
+                    f"Could not load tokenizer for model {model_id!r}. The error was "
+                    f"{str(e)}."
+                )
+            logger.debug(
+                f"Could not load tokenizer for {model_id!r}. Falling back to "
+                f"{adapter_base_model_id!r}."
+            )
+            model_id = adapter_base_model_id
         except (TimeoutError, RequestError):
             logger.info(f"Couldn't load tokenizer for {model_id!r}. Retrying.")
             sleep(5)
             continue
+    else:
+        raise InvalidModel(
+            f"Could not load tokenizer for model {model_id!r} after {num_retries} "
+            "attempts."
+        )
+
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    return tokenizer
 
 
 def _run_engine_with_fixed_progress_bars(

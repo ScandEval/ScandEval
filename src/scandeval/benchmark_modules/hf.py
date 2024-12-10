@@ -97,7 +97,8 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         hf_api = HfApi()
         try:
             repo_info = hf_api.model_info(
-                repo_id=self.model_config.model_id,
+                repo_id=self.model_config.adapter_base_model_id
+                or self.model_config.model_id,
                 revision=self.model_config.revision,
                 token=self.benchmark_config.api_key or True,
             )
@@ -116,24 +117,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             and "total" in repo_info.safetensors
         ):
             num_params = repo_info.safetensors["total"]
-        elif (
-            repo_info is not None
-            and hasattr(repo_info, "card_data")
-            and repo_info.card_data is not None
-            and "base_model" in repo_info.card_data
-            and repo_info.card_data["base_model"] is not None
-            and len(repo_info.card_data["base_model"]) > 0
-            and (
-                base_repo_info := hf_api.repo_info(
-                    repo_info.card_data["base_model"][-1], repo_type="model"
-                )
-            )
-            is not None
-            and hasattr(base_repo_info, "safetensors")
-            and base_repo_info.safetensors is not None
-            and "total" in base_repo_info.safetensors
-        ):
-            num_params = base_repo_info.safetensors["total"]
         elif (
             hasattr(self._model.config, "num_params")
             and self._model.config.num_params is not None
@@ -192,10 +175,11 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         # Add max length candidates from the model's configuration
         candidate_config_max_lengths = [
             "max_position_embeddings",
-            "model_max_length",
             "max_sequence_length",
+            "model_max_length",
             "sliding_window",
             "sliding_window_size",
+            "n_positions",
         ]
         for candidate_config_max_length in candidate_config_max_lengths:
             if (
@@ -663,18 +647,23 @@ def get_model_repo_info(
     )
     base_model_id: str | None = None
     if has_base_model_tag:
-        base_model_id = [
-            tag.split(":")[1]
-            for tag in tags
-            if tag.startswith("base_model:") and tag.count(":") == 1
-        ][0]
-        base_model_info = hf_api.model_info(
-            repo_id=base_model_id,
-            revision=revision,
-            token=benchmark_config.api_key or True,
+        has_adapter_config = model_info.siblings is not None and any(
+            sibling.rfilename == "adapter_config.json"
+            for sibling in model_info.siblings
         )
-        tags += base_model_info.tags or list()
-        tags = list(set(tags))
+        if has_adapter_config:
+            base_model_id = [
+                tag.split(":")[1]
+                for tag in tags
+                if tag.startswith("base_model:") and tag.count(":") == 1
+            ][0]
+            base_model_info = hf_api.model_info(
+                repo_id=base_model_id,
+                revision=revision,
+                token=benchmark_config.api_key or True,
+            )
+            tags += base_model_info.tags or list()
+            tags = list(set(tags))
 
     pipeline_tag = model_info.pipeline_tag
     if pipeline_tag is None:

@@ -71,6 +71,32 @@ def test_benchmark_generative(benchmarker, task, language, generative_model_id):
 
 
 @pytest.mark.skipif(
+    condition=not torch.cuda.is_available(), reason="CUDA is not available."
+)
+def test_benchmark_generative_adapter(
+    benchmarker, task, language, generative_adapter_model_id
+):
+    """Test that a generative adapter model can be benchmarked."""
+    from scandeval.benchmark_modules.vllm import clear_vllm
+
+    for _ in range(10):
+        clear_vllm()
+        try:
+            benchmark_result = benchmarker.benchmark(
+                model=generative_adapter_model_id,
+                task=task.name,
+                language=language.code,
+            )
+            break
+        except HuggingFaceHubDown:
+            time.sleep(5)
+    else:
+        raise HuggingFaceHubDown()
+    assert isinstance(benchmark_result, list)
+    assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
+
+
+@pytest.mark.skipif(
     condition=os.getenv("OPENAI_API_KEY") is None,
     reason="OpenAI API key is not available.",
 )
