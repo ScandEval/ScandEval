@@ -474,7 +474,8 @@ class VLLMModel(HuggingFaceEncoderModel):
         model.config = hf_model_config
 
         tokenizer = load_tokenizer(
-            model_id=self.model_config.model_id,
+            model_id=self.model_config.adapter_base_model_id
+            or self.model_config.model_id,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             model_max_length=max_model_len,
         )
