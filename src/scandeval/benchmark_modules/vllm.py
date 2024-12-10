@@ -864,6 +864,7 @@ def load_tokenizer(
                 revision=revision,
                 cache_dir=model_cache_dir,
             )
+            breakpoint()
             tokenizer = AutoTokenizer.from_pretrained(
                 model_id,
                 use_fast=True,
