@@ -97,7 +97,8 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         hf_api = HfApi()
         try:
             repo_info = hf_api.model_info(
-                repo_id=self.model_config.model_id,
+                repo_id=self.model_config.adapter_base_model_id
+                or self.model_config.model_id,
                 revision=self.model_config.revision,
                 token=self.benchmark_config.api_key or True,
             )
@@ -109,7 +110,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         ):
             repo_info = None
 
-        breakpoint()
         if (
             repo_info is not None
             and hasattr(repo_info, "safetensors")
@@ -117,27 +117,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             and "total" in repo_info.safetensors
         ):
             num_params = repo_info.safetensors["total"]
-        elif (
-            repo_info is not None
-            and hasattr(repo_info, "card_data")
-            and repo_info.card_data is not None
-            and "base_model" in repo_info.card_data
-            and (base_model := repo_info.card_data["base_model"]) is not None
-            and (
-                isinstance(base_model, str)
-                or (isinstance(base_model, list) and len(base_model) > 0)
-            )
-            and (
-                base_repo_info := hf_api.repo_info(base_model, repo_type="model")
-                if isinstance(base_model, str)
-                else hf_api.repo_info(base_model[0], repo_type="model")
-            )
-            is not None
-            and hasattr(base_repo_info, "safetensors")
-            and base_repo_info.safetensors is not None
-            and "total" in base_repo_info.safetensors
-        ):
-            num_params = base_repo_info.safetensors["total"]
         elif (
             hasattr(self._model.config, "num_params")
             and self._model.config.num_params is not None
