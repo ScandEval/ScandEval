@@ -272,6 +272,7 @@ class HumanEvaluator:
             evaluate_test_split=False,
             few_shot=True,
             num_iterations=iteration + 1,
+            base_url=None,
             debug=False,
             run_with_cli=True,
         )
