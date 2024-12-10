@@ -219,40 +219,6 @@ def generate_single_iteration(
     return itr_scores
 
 
-# TODO: Consider removing
-# def extract_raw_predictions(generated_sequences: torch.Tensor) -> list[str]:
-#     """Get the raw predictions from the generated sequences.
-#
-#     Args:
-#         generated_sequences:
-#             The generated sequences from the model. The outer-most list is the
-#             batch dimension, the inner-most list is the sequence dimension,
-#             consisting of token IDs.
-#
-#     Returns:
-#         The candidate labels with the smallest edit distance to the predicted labels.
-#     """
-#     raw_predictions: list[str] = [
-#         tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True).split(
-#             "\n\n"
-#         )[0]
-#         for completion_ids in generated_sequences.long()
-#     ]
-#
-#     end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
-#     if end_of_chat_token_ids is not None:
-#         end_of_chat_token = tokenizer.decode(end_of_chat_token_ids).strip()
-#         if end_of_chat_token:
-#             raw_predictions = [
-#                 raw_prediction.split(end_of_chat_token)[0]
-#                 for raw_prediction in raw_predictions
-#             ]
-#
-#     raw_predictions = [raw_prediction.strip() for raw_prediction in raw_predictions]
-#
-#     return raw_predictions
-
-
 def debug_log(
     batch: dict[str, t.Any],
     extracted_labels: list[dict | str | list[str]],
