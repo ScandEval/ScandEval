@@ -175,10 +175,11 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         # Add max length candidates from the model's configuration
         candidate_config_max_lengths = [
             "max_position_embeddings",
-            "model_max_length",
             "max_sequence_length",
+            "model_max_length",
             "sliding_window",
             "sliding_window_size",
+            "n_positions",
         ]
         for candidate_config_max_length in candidate_config_max_lengths:
             if (

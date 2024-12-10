@@ -429,7 +429,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         else:
             download_dir = str(self.model_config.model_cache_dir)
 
-        max_model_len = 5_000
         potential_max_model_length_config_names = [
             "max_position_embeddings",
             "max_sequence_length",
@@ -438,18 +437,24 @@ class VLLMModel(HuggingFaceEncoderModel):
             "sliding_window_size",
             "n_positions",
         ]
+        true_max_model_len_candidates: list[int] = list()
         for config_name in potential_max_model_length_config_names:
             if hasattr(hf_model_config, config_name):
                 model_len = getattr(hf_model_config, config_name)
                 if model_len is not None:
-                    max_model_len = min(max_model_len, model_len)
+                    true_max_model_len_candidates.append(model_len)
+
+        if len(true_max_model_len_candidates) > 0:
+            true_max_model_len = min(true_max_model_len_candidates)
+        else:
+            true_max_model_len = 5_000
 
         vllm_kwargs = dict(
             model=self.model_config.adapter_base_model_id or self.model_config.model_id,
             tokenizer=self.model_config.adapter_base_model_id
             or self.model_config.model_id,
             gpu_memory_utilization=0.95,
-            max_model_len=max_model_len,
+            max_model_len=min(true_max_model_len, 5_000),
             download_dir=download_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             revision=self.model_config.revision,
@@ -494,7 +499,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             revision=self.model_config.revision,
             adapter_base_model_id=self.model_config.adapter_base_model_id,
             trust_remote_code=self.benchmark_config.trust_remote_code,
-            model_max_length=max_model_len,
+            model_max_length=true_max_model_len,
             model_cache_dir=self.model_config.model_cache_dir,
         )
 
