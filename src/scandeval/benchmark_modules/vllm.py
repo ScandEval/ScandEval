@@ -469,7 +469,23 @@ class VLLMModel(HuggingFaceEncoderModel):
         )
 
         clear_vllm()
-        model = LLM(**vllm_kwargs)
+
+        try:
+            model = LLM(**vllm_kwargs)
+        except ValueError as e:
+            model_id = (
+                self.model_config.adapter_base_model_id or self.model_config.model_id
+            )
+            if "trust_remote_code" in str(e):
+                raise InvalidModel(
+                    f"Loading the model {model_id!r} needs to trust remote code. "
+                    "If you trust the suppliers of this model, then you can enable "
+                    "this by setting the `--trust-remote-code` flag."
+                )
+            raise InvalidModel(
+                f"The model {model_id!r} could not be loaded. The error was {e!r}."
+            )
+
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
         model.config = hf_model_config
 
