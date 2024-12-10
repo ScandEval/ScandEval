@@ -29,6 +29,12 @@ dependencies = [
     "sentencepiece>=0.1.96",
     "protobuf~=3.20.0",
     "sacremoses>=0.1.1",
+    "more-itertools>=10.5.0",
+    "tenacity>=9.0.0",
+    "litellm>=1.53.1",
+    "rouge-score>=0.1.2",
+    "bert-score>=0.3.13",
+    "levenshtein>=0.24.0",
 ]
 
 [project.optional-dependencies]
@@ -42,46 +48,26 @@ generative = [
     "outlines>=0.0.44,<0.1",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
     "vllm>=0.6.3; platform_system == 'Linux'",
-    "rouge-score>=0.1.2",
-    "bert-score>=0.3.13",
-]
-openai = [
-    "rouge-score>=0.1.2",
-    "bert-score>=0.3.13",
-    "openai>=1.51.2",
-    "tiktoken>=0.7.0",
-    "levenshtein>=0.24.0",
 ]
 human_evaluation = [
     "gradio>=4.26.0",
-    "levenshtein>=0.24.0",
 ]
 all = [
     "jax>=0.4.24",
     "jaxlib>=0.4.24",
     "flax>=0.8.1",
-    "rouge-score>=0.1.2",
-    "bert-score>=0.3.13",
     "demjson3>=3.0.6",
     "outlines>=0.0.44,<0.1",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
     "vllm>=0.6.3; platform_system == 'Linux'",
-    "openai>=1.51.2",
-    "tiktoken>=0.7.0",
-    "levenshtein>=0.24.0",
     "gradio>=4.26.0",
 ]
 cpu_all = [
     "jax>=0.4.24",
     "jaxlib>=0.4.24",
     "flax>=0.8.1",
-    "rouge-score>=0.1.2",
-    "bert-score>=0.3.13",
     "demjson3>=3.0.6",
     "outlines>=0.0.44,<0.1",
-    "openai>=1.51.2",
-    "tiktoken>=0.7.0",
-    "levenshtein>=0.24.0",
     "gradio>=4.26.0",
 ]
 
@@ -161,10 +147,8 @@ convention = "google"
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = [
-    '--durations=10',
-    '--color=yes',
-    '--doctest-modules',
-    '--cov=src/scandeval',
+    "--cov=src/scandeval",
+    "--color=yes",
 ]
 xfail_strict = true
 filterwarnings = [

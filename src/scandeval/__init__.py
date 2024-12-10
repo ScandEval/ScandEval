@@ -12,7 +12,7 @@ from .benchmarker import Benchmarker
 from .utils import block_terminal_output
 
 # Fetches the version of the package as defined in pyproject.toml
-__version__ = importlib.metadata.version(__package__)
+__version__ = importlib.metadata.version("scandeval")
 
 
 # Block unwanted terminal outputs

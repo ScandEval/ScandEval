@@ -61,7 +61,8 @@ def main():
 
     df["question_answer"] = df["question_answer"].apply(qa_to_list)
 
-    # split question_answer list [(question, answer) ...] column to question and answer with same context
+    # split question_answer list [(question, answer) ...] column to question and answer
+    # with same context
     df = df.explode("question_answer")
     df[["question", "answer"]] = pd.DataFrame(
         df.question_answer.tolist(), index=df.index
@@ -93,7 +94,8 @@ def main():
                 The context.
 
         Returns:
-            The rephrased answer (if the answer is already in the context, it is returned as is).
+            The rephrased answer (if the answer is already in the context, it is
+            returned as is).
         """
         answer = answer[:-1] if answer.endswith(".") else answer
 
@@ -106,11 +108,14 @@ def main():
                 {
                     "role": "user",
                     "content": (
-                        f"Given the following context: '{context}', and the '{question}' please rephrase the answer, so that it matches exactly "
-                        f"with a phrase from the context in a case-insensitive way. E.g. it must be possible to find the rephrased answer "
-                        f"in the context without any modifications. "
-                        f"The rephrased answer should be as concise as possible, preferable not more than 7 words, and ideally 3 or less words."
-                        f"Now rephrase this answer: '{answer}'"
+                        f"Given the following context: '{context}', and the "
+                        f"'{question}' please rephrase the answer, so that it matches "
+                        "exactly with a phrase from the context in a case-insensitive "
+                        "way. E.g. it must be possible to find the rephrased answer "
+                        "in the context without any modifications. The rephrased "
+                        "answer should be as concise as possible, preferable not "
+                        "more than 7 words, and ideally 3 or less words. Now "
+                        f"rephrase this answer: '{answer}'"
                     ),
                 }
             ],
@@ -120,7 +125,7 @@ def main():
         )
 
         rephrased_answer = chat_completion.choices[0].message.content
-        return rephrased_answer
+        return rephrased_answer or answer
 
     # Use the original answer if it could be found in the context
     df_orig_bool = df[["answer", "context"]].apply(

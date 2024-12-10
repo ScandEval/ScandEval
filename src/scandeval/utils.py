@@ -8,67 +8,31 @@ import os
 import random
 import re
 import sys
+import typing as t
 import warnings
-from collections import defaultdict
-from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, Type
 
+import litellm
 import numpy as np
 import pkg_resources
 import requests
 import torch
 from datasets.utils import disable_progress_bar
-from huggingface_hub import HfApi
 from requests.exceptions import RequestException
-from transformers import GenerationConfig
+from transformers import PreTrainedTokenizer
 from transformers import logging as tf_logging
 
 from .enums import Framework
-from .exceptions import InvalidModel, NaNValueInModelOutput
-from .languages import DA, NB, NN, NO, SV, get_all_languages
-from .openai_models import OpenAIModel, OpenAITokenizer
-
-if TYPE_CHECKING:
-    from huggingface_hub.hf_api import ModelInfo
-    from transformers import PreTrainedModel
-
-    from .config import Language
-    from .protocols import GenerativeModel, Tokenizer
-    from .types import Predictions
-
-logger = logging.getLogger(__package__)
-
+from .exceptions import NaNValueInModelOutput
 
 if importlib.util.find_spec("ray") is not None:
     import ray
 
-
-# This is used as input to generative models; it cannot be a special token
-DUMMY_FILL_VALUE = 100
-
-
-GENERATIVE_MODEL_TASKS = [
-    "text-generation",
-    "conversational",
-    # "text2text-generation",  # TODO: Add this when we support it
-]
+if t.TYPE_CHECKING:
+    from .types import Predictions
 
 
-GENERATIVE_DATASET_TASKS = [
-    "knowledge",
-    "common-sense-reasoning",
-    "multiple-choice-reading-comprehension",
-]
-
-
-GENERATIVE_DATASET_SUPERTASKS = ["text-to-text", "text-modelling"]
-
-
-SUPERTASKS_USING_LOGPROBS = ["sequence-classification"]
-
-
-METRIC_ATTRIBUTES_TAKING_UP_MEMORY = ["cached_bertscorer"]
+logger = logging.getLogger("scandeval")
 
 
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
@@ -91,7 +55,8 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
 
 def clear_memory():
     """Clears the memory of unused items."""
-    gc.collect()
+    for gc_generation in range(3):
+        gc.collect(generation=gc_generation)
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     if torch.backends.mps.is_available():
@@ -182,6 +147,7 @@ def block_terminal_output():
     logging.getLogger("ray._private.worker").setLevel(logging.CRITICAL)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.CRITICAL)
     logging.getLogger("accelerate").setLevel(logging.CRITICAL)
+    logging.getLogger("LiteLLM").setLevel(logging.CRITICAL)
 
     # This suppresses vLLM logging
     os.environ["LOG_LEVEL"] = "CRITICAL"
@@ -198,10 +164,13 @@ def block_terminal_output():
     tf_logging.set_verbosity(logging.CRITICAL)
     logging.getLogger("transformers.trainer").setLevel(logging.CRITICAL)
 
+    # Disable logging from `litellm`
+    litellm.suppress_debug_info = True
+
 
 def get_class_by_name(
     class_name: str | list[str], module_name: str | None = None
-) -> Type | None:
+) -> t.Type | None:
     """Get a class by its name.
 
     Args:
@@ -218,36 +187,30 @@ def get_class_by_name(
     Returns:
         The class. If the class is not found, None is returned.
     """
-    # Ensure that `class_name` is a sequence
     if isinstance(class_name, str):
         class_name = [class_name]
 
-    # Loop over the class names
     error_messages = list()
     for name in class_name:
-        # Get the snake_case and PascalCase version of the class name
         name_snake = name.replace("-", "_")
         name_pascal = kebab_to_pascal(kebab_string=name)
 
-        # Import the module
-        try:
-            if not module_name:
-                module_name = f"scandeval.{name_snake}"
-            module = importlib.import_module(name=module_name)
-        except ModuleNotFoundError as e:
-            error_messages.append(str(e))
-            module_name = None
-            continue
-
-        # Get the class from the module
-        try:
-            class_: Type = getattr(module, name_pascal)
-        except AttributeError:
-            module_name = None
-            continue
-
-        # Return the class
-        return class_
+        module_names = (
+            [module_name]
+            if module_name is not None
+            else [
+                f"scandeval.{name_snake}",
+                f"scandeval.benchmark_datasets.{name_snake}",
+                f"scandeval.benchmark_modules.{name_snake}",
+            ]
+        )
+        for m_name in module_names:
+            try:
+                module = importlib.import_module(name=m_name)
+                class_: t.Type = getattr(module, name_pascal)
+                return class_
+            except (ModuleNotFoundError, AttributeError) as e:
+                error_messages.append(str(e))
 
     if error_messages:
         errors = "\n- " + "\n- ".join(error_messages)
@@ -286,7 +249,7 @@ def internet_connection_available() -> bool:
         return False
 
 
-def get_special_token_metadata(tokenizer: "Tokenizer") -> dict:
+def get_special_token_metadata(tokenizer: "PreTrainedTokenizer") -> dict:
     """Get the special token metadata for a tokenizer.
 
     Args:
@@ -338,203 +301,6 @@ def get_special_token_metadata(tokenizer: "Tokenizer") -> dict:
     )
 
 
-def get_huggingface_model_lists(
-    languages: list["Language"] | None, token: bool | str | None
-) -> dict[str, list[str]]:
-    """Fetches up-to-date model lists from the Hugging Face Hub.
-
-    Args:
-        languages:
-            The language codes of the language to consider. If None then the models
-            will not be filtered on language.
-        token:
-            The authentication token for the Hugging Face Hub. If a boolean value is
-            specified then the token will be fetched from the Hugging Face CLI, where
-            the user has logged in through `huggingface-cli login`. If a string is
-            specified then it will be used as the token.
-
-    Returns:
-        The keys are filterings of the list, which includes all language codes,
-        including 'multilingual', as well as 'all'. The values are lists of model IDs.
-    """
-    # Get list of all languages
-    all_languages = list(get_all_languages().values())
-
-    # If no languages are specified, then include all languages
-    language_list = all_languages if languages is None else languages
-
-    # Form string of languages
-    if len(language_list) == 1:
-        language_string = language_list[0].name
-    else:
-        language_list = sorted(language_list, key=lambda x: x.name)
-        if {lang.code for lang in language_list} == {
-            lang.code for lang in all_languages
-        }:
-            language_string = "all"
-        else:
-            # Remove generic 'Norwegian' from the list of languages if both 'Bokmål'
-            # and 'Nynorsk' already exist in the list
-            if all([lang in language_list for lang in [NO, NB, NN]]):
-                language_list = [lang for lang in language_list if lang != NO]
-
-            language_string = (
-                f"{', '.join(lang.name for lang in language_list[:-1])} and "
-                f"{language_list[-1].name}"
-            )
-
-    # Log fetching message
-    logger.info(f"Fetching list of {language_string} models from the Hugging Face Hub.")
-
-    # Initialise the API
-    api: HfApi = HfApi()
-
-    # Initialise model lists
-    model_lists = defaultdict(list)
-
-    # Do not iterate over all the languages if we are not filtering on language
-    language_itr: list["Language | None"]
-    if {lang.code for lang in language_list} == {lang.code for lang in all_languages}:
-        language_itr = [None]
-    else:
-        language_itr = deepcopy(language_list)  # type: ignore[arg-type]
-
-    for language in language_itr:
-        # Extract the language code
-        language_str: str | None
-        if language is not None:
-            language_str = language.code
-        else:
-            language_str = None
-
-        # Fetch the model list
-        models: list["ModelInfo"] = list(
-            api.list_models(language=language_str, token=token)
-        )
-
-        # Filter the models to only keep the ones with the specified language
-        models = [
-            model
-            for model in models
-            if (language is None or language.code in model.tags)
-        ]
-
-        # Only keep the models which are not finetuned
-        models = [
-            model
-            for model in models
-            if model.pipeline_tag is None
-            or model.pipeline_tag
-            in {"fill-mask", "sentence-similarity", "feature-extraction"}
-            | set(GENERATIVE_MODEL_TASKS)
-        ]
-
-        # Extract the model IDs
-        model_ids: list[str] = [model.modelId for model in models if model.modelId]
-
-        # Remove models that have "finetuned" in their name
-        model_ids = [
-            model_id for model_id in model_ids if "finetuned" not in model_id.lower()
-        ]
-
-        # Store the model IDs
-        model_lists["all"].extend(model_ids)
-        if language is not None:
-            model_lists[language.code].extend(model_ids)
-
-    # Add multilingual models manually
-    multi_models = [
-        "google-bert/bert-base-multilingual-cased",
-        "google-bert/bert-base-multilingual-uncased",
-        "distilbert-base-multilingual-cased",
-        "distilbert/cardiffnlp/twitter-xlm-roberta-base",
-        "microsoft/infoxlm-base",
-        "microsoft/infoxlm-large",
-        "microsoft/xlm-align-base",
-        "microsoft/mdeberta-v3-base",
-        "setu4993/LaBSE",
-        "sentence-transformers/distilbert-multilingual-nli-stsb-quora-ranking",
-        "sentence-transformers/distiluse-base-multilingual-cased",
-        "sentence-transformers/distiluse-base-multilingual-cased-v1",
-        "sentence-transformers/distiluse-base-multilingual-cased-v2",
-        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
-        "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
-        "sentence-transformers/quora-distilbert-multilingual",
-        "sentence-transformers/stsb-xlm-r-multilingual",
-        "sentence-transformers/use-cmlm-multilingual",
-        "studio-ousia/mluke-base",
-        "studio-ousia/mluke-large",
-        "FacebookAI/xlm-roberta-base",
-        "FacebookAI/xlm-roberta-large",
-        "dbmdz/bert-tiny-historic-multilingual-cased",
-        "dbmdz/bert-mini-historic-multilingual-cased",
-        "dbmdz/bert-base-historic-multilingual-cased",
-        "dbmdz/bert-medium-historic-multilingual-cased",
-    ]
-    model_lists["multilingual"] = multi_models
-    model_lists["all"].extend(multi_models)
-
-    # Add fresh models
-    fresh_models = ["fresh-xlm-roberta-base", "fresh-electra-small"]
-    model_lists["fresh"].extend(fresh_models)
-    model_lists["all"].extend(fresh_models)
-
-    # Add some multilingual Danish models manually that have not marked 'da' as their
-    # language
-    if DA in language_itr:
-        multi_da_models: list[str] = [
-            "Geotrend/bert-base-en-da-cased",
-            "Geotrend/bert-base-25lang-cased",
-            "Geotrend/bert-base-en-fr-de-no-da-cased",
-            "Geotrend/distilbert-base-en-da-cased",
-            "Geotrend/distilbert-base-25lang-cased",
-            "Geotrend/distilbert-base-en-fr-de-no-da-cased",
-        ]
-        model_lists["da"].extend(multi_da_models)
-        model_lists["all"].extend(multi_da_models)
-
-    # Add some multilingual Swedish models manually that have not marked 'sv' as their
-    # language
-    if SV in language_itr:
-        multi_sv_models: list[str] = []
-        model_lists["sv"].extend(multi_sv_models)
-        model_lists["all"].extend(multi_sv_models)
-
-    # Add some multilingual Norwegian models manually that have not marked 'no', 'nb'
-    # or 'nn' as their language
-    if any(lang in language_itr for lang in [NO, NB, NN]):
-        multi_no_models: list[str] = [
-            "Geotrend/bert-base-en-no-cased",
-            "Geotrend/bert-base-25lang-cased",
-            "Geotrend/bert-base-en-fr-de-no-da-cased",
-            "Geotrend/distilbert-base-en-no-cased",
-            "Geotrend/distilbert-base-25lang-cased",
-            "Geotrend/distilbert-base-en-fr-de-no-da-cased",
-        ]
-        model_lists["no"].extend(multi_no_models)
-        model_lists["all"].extend(multi_no_models)
-
-    # Remove duplicates from the lists
-    for lang, model_list in model_lists.items():
-        model_lists[lang] = list(set(model_list))
-
-    # Remove banned models
-    BANNED_MODELS = [
-        r"TransQuest/siamesetransquest-da.*",
-        r"M-CLIP/.*",
-        r".*/.*CTRL.*",  # TEMP
-    ]
-    for lang, model_list in model_lists.items():
-        model_lists[lang] = [
-            model
-            for model in model_list
-            if not any(re.search(regex, model) is not None for regex in BANNED_MODELS)
-        ]
-
-    return dict(model_lists)
-
-
 class HiddenPrints:
     """Context manager which removes all terminal output."""
 
@@ -551,53 +317,6 @@ class HiddenPrints:
         sys.stderr.close()
         sys.stdout = self._original_stdout
         sys.stderr = self._original_stderr
-
-
-def model_is_generative(model: "PreTrainedModel | GenerativeModel") -> bool:
-    """Check if a model is generative or not.
-
-    Args:
-        model:
-            The model to check.
-
-    Returns:
-        Whether the model is generative or not.
-    """
-    known_generative_models = ["VLLMModel", "OpenAIModel"]
-    if any(model.__class__.__name__ == name for name in known_generative_models):
-        return True
-
-    try:
-        dummy_inputs = torch.tensor(
-            [[DUMMY_FILL_VALUE]], device=model.device, dtype=torch.long
-        )
-        generation_config = GenerationConfig(
-            max_new_tokens=1,
-            pad_token_id=model.config.pad_token_id,
-            eos_token_id=model.config.eos_token_id,
-        )
-        try:
-            model.generate(
-                inputs=dummy_inputs,
-                attention_mask=torch.ones_like(dummy_inputs),
-                generation_config=generation_config,
-            )
-        except ValueError as e:
-            if "attention_mask" not in str(e):
-                raise e
-            model.generate(inputs=dummy_inputs, generation_config=generation_config)
-        return True
-    except (NotImplementedError, TypeError) as e:
-        if "PYTORCH_ENABLE_MPS_FALLBACK" in str(e):
-            raise InvalidModel(
-                "The benchmark failed because the environment variable "
-                "`PYTORCH_ENABLE_MPS_FALLBACK` is not set. Please set this "
-                "environment variable to `1` and try again."
-            )
-        logger.debug(
-            f"The model was found not to be generative, as an error occurred: {e}"
-        )
-        return False
 
 
 def raise_if_model_output_contains_nan_values(model_output: "Predictions") -> None:
@@ -623,7 +342,7 @@ def raise_if_model_output_contains_nan_values(model_output: "Predictions") -> No
 
 
 def should_prompts_be_stripped(
-    labels_to_be_generated: list[str], tokenizer: "Tokenizer"
+    labels_to_be_generated: list[str], tokenizer: "PreTrainedTokenizer"
 ) -> bool:
     """Determine if we should strip the prompts for few-shot evaluation.
 
@@ -662,7 +381,7 @@ def should_prompts_be_stripped(
 
 
 def should_prefix_space_be_added_to_labels(
-    labels_to_be_generated: list[str], tokenizer: "Tokenizer"
+    labels_to_be_generated: list[str], tokenizer: "PreTrainedTokenizer"
 ) -> bool:
     """Determine if we should add a prefix space to the labels.
 
@@ -678,11 +397,6 @@ def should_prefix_space_be_added_to_labels(
     Returns:
         Whether we should add a prefix space to the labels.
     """
-    # We don't add a prefix space to OpenAI models, since they output strings directly,
-    # and we always strip these for token ID consistency
-    if isinstance(tokenizer, OpenAITokenizer):
-        return False
-
     if not should_prompts_be_stripped(
         labels_to_be_generated=labels_to_be_generated, tokenizer=tokenizer
     ):
@@ -707,7 +421,7 @@ def should_prefix_space_be_added_to_labels(
     return add_prefix_space
 
 
-def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
+def get_end_of_chat_token_ids(tokenizer: "PreTrainedTokenizer") -> list[int] | None:
     """Get the end token ID for chat models.
 
     This is only relevant for tokenizers with a chat template.
@@ -727,7 +441,7 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
     if tokenizer.chat_template is None:
         return None
 
-    user_message: dict[Literal["role", "content"], str] = dict()
+    user_message: dict[t.Literal["role", "content"], str] = dict()
     user_message["role"] = "user"
     user_message["content"] = "X"
     token_ids = tokenizer.apply_chat_template(conversation=[user_message])
@@ -749,7 +463,7 @@ def get_end_of_chat_token_ids(tokenizer: "Tokenizer") -> list[int] | None:
     return end_of_chat_tokens
 
 
-def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
+def convert_prompt_to_instruction(prompt: str, tokenizer: "PreTrainedTokenizer") -> str:
     """Make an instruction prompt conform to a chat template.
 
     Note that it is expected that the prompt has the following format:
@@ -766,13 +480,9 @@ def convert_prompt_to_instruction(prompt: str, tokenizer: "Tokenizer") -> str:
     if tokenizer.chat_template is None:
         return prompt
 
-    user_message: dict[Literal["role"] | Literal["content"], str] = dict()
-    user_message["role"] = "user"
-    user_message["content"] = prompt
-
     instruction_prompt = tokenizer.apply_chat_template(
-        conversation=[user_message],
-        chat_template=tokenizer.chat_template,
+        conversation=[dict(role="user", content=prompt)],
+        chat_template=tokenizer.get_chat_template(),
         add_generation_prompt=True,
         tokenize=False,
     )
@@ -812,76 +522,3 @@ def unscramble(scrambled_text: str) -> str:
     inverse_permutation = np.argsort(permutation)
     unscrambled = "".join(scrambled_text[i] for i in inverse_permutation)
     return unscrambled
-
-
-def get_model_max_length(
-    model: "PreTrainedModel | GenerativeModel", tokenizer: "Tokenizer | None" = None
-) -> int:
-    """Get the maximum context length of a model.
-
-    Args:
-        model:
-            The model.
-        tokenizer:
-            The tokenizer, or None if the tokenizer is not available.
-
-    Returns:
-        The maximum context length.
-    """
-    all_max_lengths: list[int] = list()
-
-    if tokenizer is not None:
-        # Add the registered max length of the tokenizer
-        if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < int(
-            1e30
-        ):
-            all_max_lengths.append(tokenizer.model_max_length)
-
-        # Add the max length derived from the model's input sizes
-        if hasattr(tokenizer, "max_model_input_sizes"):
-            all_max_lengths.extend(
-                [
-                    size
-                    for size in tokenizer.max_model_input_sizes.values()
-                    if size is not None
-                ]
-            )
-
-    # Add max length candidates from the model's configuration
-    candidate_config_max_lengths = [
-        "max_position_embeddings",
-        "model_max_length",
-        "max_sequence_length",
-        "sliding_window",
-        "sliding_window_size",
-    ]
-    for candidate_config_max_length in candidate_config_max_lengths:
-        if (
-            hasattr(model.config, candidate_config_max_length)
-            and (value := getattr(model.config, candidate_config_max_length))
-            is not None
-        ):
-            all_max_lengths.append(value)
-
-    # To avoid models having artificially low max lengths, we remove any max lengths
-    # that are less than 128
-    all_max_lengths = [
-        max_length for max_length in all_max_lengths if max_length >= 128
-    ]
-
-    if len(list(all_max_lengths)) > 0:
-        model_max_length = min(list(all_max_lengths))
-
-        # If the model is an OpenAI chat model then we add on 7 extra tokens, as
-        # these are part of the chat prompt and was removed from the sequence
-        # length
-        if (
-            model_max_length >= 0
-            and isinstance(model, OpenAIModel)
-            and model.is_chat_model
-        ):
-            model_max_length += 7
-    else:
-        model_max_length = -1
-
-    return model_max_length
