@@ -45,7 +45,12 @@ from ..task_utils import (
     token_classification,
 )
 from ..types import ExtractLabelsFunction
-from ..utils import clear_memory, create_model_cache_dir, get_end_of_chat_token_ids
+from ..utils import (
+    clear_memory,
+    create_model_cache_dir,
+    get_end_of_chat_token_ids,
+    log_once,
+)
 from .hf import HuggingFaceEncoderModel, get_model_repo_info
 
 if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
@@ -769,8 +774,9 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for name, candidate_template in self._tokenizer.chat_template.items():
                     if name.lower() in language_codes:
                         chat_template = candidate_template
-                        logger.debug(
-                            f"Using the {name!r} chat template for the tokenizer."
+                        log_once(
+                            f"Using the {name!r} chat template for the tokenizer.",
+                            level=logging.DEBUG,
                         )
                         break
 
