@@ -109,6 +109,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         ):
             repo_info = None
 
+        breakpoint()
         if (
             repo_info is not None
             and hasattr(repo_info, "safetensors")
