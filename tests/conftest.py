@@ -85,6 +85,7 @@ def benchmark_config(auth, device) -> Generator[BenchmarkConfig, None, None]:
         evaluate_test_split=False,
         few_shot=True,
         num_iterations=1,
+        base_url=None,
         debug=False,
         run_with_cli=True,
     )
