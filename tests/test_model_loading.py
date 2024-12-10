@@ -44,35 +44,3 @@ def test_load_non_generative_model_with_generative_data(
             dataset_config=NORDJYLLAND_NEWS_CONFIG,
             benchmark_config=benchmark_config,
         )
-
-
-# TODO: Fix these OOM errors.
-@pytest.mark.skip(reason="Skipping quantisation tests due to OOM errors.")
-class TestQuantisedModels:
-    """Tests for quantised models."""
-
-    def test_load_awq_model(self, awq_generative_model_id, benchmark_config):
-        """Test loading an AWQ quantised model."""
-        if benchmark_config.device.type != "cuda":
-            pytest.skip("Skipping test because the device is not a GPU.")
-        model_config = get_model_config(
-            model_id=awq_generative_model_id, benchmark_config=benchmark_config
-        )
-        load_model(
-            model_config=model_config,
-            dataset_config=ANGRY_TWEETS_CONFIG,
-            benchmark_config=benchmark_config,
-        )
-
-    def test_load_gptq_model(self, gptq_generative_model_id, benchmark_config):
-        """Test loading a GPTQ quantised model."""
-        if benchmark_config.device.type != "cuda":
-            pytest.skip("Skipping test because the device is not a GPU.")
-        model_config = get_model_config(
-            model_id=gptq_generative_model_id, benchmark_config=benchmark_config
-        )
-        load_model(
-            model_config=model_config,
-            dataset_config=ANGRY_TWEETS_CONFIG,
-            benchmark_config=benchmark_config,
-        )
