@@ -4,11 +4,7 @@
 DUMMY_FILL_VALUE = 100
 
 
-GENERATIVE_MODEL_TASKS = [
-    "text-generation",
-    "conversational",
-    # "text2text-generation",  # TODO: Add this when we support it
-]
+GENERATIVE_MODEL_TASKS = ["text-generation", "conversational", "text2text-generation"]
 
 
 GENERATIVE_DATASET_TASKS = [

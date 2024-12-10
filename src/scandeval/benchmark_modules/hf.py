@@ -31,7 +31,7 @@ from transformers import (
 )
 from urllib3.exceptions import RequestError
 
-from ..constants import DUMMY_FILL_VALUE, GENERATIVE_TAGS
+from ..constants import DUMMY_FILL_VALUE, GENERATIVE_MODEL_TASKS, GENERATIVE_TAGS
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType
 from ..exceptions import (
@@ -389,7 +389,10 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         model_info = get_model_repo_info(
             model_id=model_id, revision=revision, benchmark_config=benchmark_config
         )
-        return model_info is not None and model_info.pipeline_tag != "text-generation"
+        return (
+            model_info is not None
+            and model_info.pipeline_tag not in GENERATIVE_MODEL_TASKS
+        )
 
     @classmethod
     def get_model_config(
