@@ -877,8 +877,11 @@ def load_tokenizer(
             if tokenizer.pad_token_id is None:
                 tokenizer.pad_token = tokenizer.eos_token
             return tokenizer
-        except (json.JSONDecodeError, OSError, TypeError):
-            raise InvalidModel(f"Could not load tokenizer for model {model_id!r}.")
+        except (json.JSONDecodeError, OSError, TypeError) as e:
+            raise InvalidModel(
+                f"Could not load tokenizer for model {model_id!r}. The error was "
+                f"{str(e)}."
+            )
         except (TimeoutError, RequestError):
             logger.info(f"Couldn't load tokenizer for {model_id!r}. Retrying.")
             sleep(5)
