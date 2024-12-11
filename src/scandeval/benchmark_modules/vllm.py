@@ -16,7 +16,6 @@ from types import MethodType
 import torch
 from datasets import DatasetDict
 from huggingface_hub import snapshot_download
-from torch.distributed import destroy_process_group
 from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
@@ -813,16 +812,16 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         return examples
 
-    def __del__(self) -> None:
-        """Clear the GPU memory used by the model, and remove the model itself."""
-        if hasattr(self, "_model"):
-            del self._model
-        del self
-        try:
-            destroy_process_group()
-        except AssertionError:
-            pass
-        clear_vllm()
+    # def __del__(self) -> None:
+    #     """Clear the GPU memory used by the model, and remove the model itself."""
+    #     if hasattr(self, "_model"):
+    #         del self._model
+    #     del self
+    #     try:
+    #         destroy_process_group()
+    #     except AssertionError:
+    #         pass
+    #     clear_vllm()
 
     @cached_property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
