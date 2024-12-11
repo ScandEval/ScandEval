@@ -1931,7 +1931,194 @@
 <span class="normal">660</span>
 <span class="normal">661</span>
 <span class="normal">662</span>
-<span class="normal">663</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models from an inference API, using the LiteLLM framework.&quot;&quot;&quot;</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span>
+<span class="normal">674</span>
+<span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
+<span class="normal">678</span>
+<span class="normal">679</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span>
+<span class="normal">787</span>
+<span class="normal">788</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span>
+<span class="normal">805</span>
+<span class="normal">806</span>
+<span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span>
+<span class="normal">811</span>
+<span class="normal">812</span>
+<span class="normal">813</span>
+<span class="normal">814</span>
+<span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
+<span class="normal">821</span>
+<span class="normal">822</span>
+<span class="normal">823</span>
+<span class="normal">824</span>
+<span class="normal">825</span>
+<span class="normal">826</span>
+<span class="normal">827</span>
+<span class="normal">828</span>
+<span class="normal">829</span>
+<span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
+<span class="normal">833</span>
+<span class="normal">834</span>
+<span class="normal">835</span>
+<span class="normal">836</span>
+<span class="normal">837</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models from an inference API, using the LiteLLM framework.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">itertools</span> <span class="k">as</span> <span class="nn">it</span>
@@ -1945,6 +2132,9 @@
 
 <span class="kn">import</span> <span class="nn">litellm</span>
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">DatasetDict</span>
+<span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">HfApi</span>
+<span class="kn">from</span> <span class="nn">huggingface_hub.hf_api</span> <span class="kn">import</span> <span class="n">RepositoryNotFoundError</span><span class="p">,</span> <span class="n">RevisionNotFoundError</span>
+<span class="kn">from</span> <span class="nn">huggingface_hub.utils</span> <span class="kn">import</span> <span class="n">HFValidationError</span>
 <span class="kn">from</span> <span class="nn">litellm.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">APIError</span><span class="p">,</span>
     <span class="n">AuthenticationError</span><span class="p">,</span>
@@ -1953,7 +2143,14 @@
     <span class="n">NotFoundError</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">litellm.types.utils</span> <span class="kn">import</span> <span class="n">ModelResponse</span>
+<span class="kn">from</span> <span class="nn">requests.exceptions</span> <span class="kn">import</span> <span class="n">RequestException</span>
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">Trainer</span>
+
+<span class="kn">from</span> <span class="nn">scandeval.benchmark_modules.hf</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">HuggingFaceEncoderModel</span><span class="p">,</span>
+    <span class="n">load_hf_model_config</span><span class="p">,</span>
+    <span class="n">load_tokenizer</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">MAX_LOGPROBS</span><span class="p">,</span> <span class="n">SUPERTASKS_USING_LOGPROBS</span><span class="p">,</span> <span class="n">TASKS_USING_JSON</span>
 <span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfig</span><span class="p">,</span> <span class="n">GenerativeModelOutput</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">Task</span>
@@ -2058,6 +2255,9 @@
             <span class="n">stop</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">],</span>
             <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">seed</span><span class="o">=</span><span class="mi">4242</span><span class="p">,</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+            <span class="n">api_base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_base</span><span class="p">,</span>
+            <span class="n">api_version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_version</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span> <span class="ow">in</span> <span class="n">SUPERTASKS_USING_LOGPROBS</span><span class="p">:</span>
@@ -2113,7 +2313,8 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_response</span><span class="p">,</span> <span class="n">ModelResponse</span><span class="p">)</span>
         <span class="n">model_response_choices</span> <span class="o">=</span> <span class="n">model_response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_response_choices</span><span class="p">,</span> <span class="n">litellm</span><span class="o">.</span><span class="n">Choices</span><span class="p">)</span>
-        <span class="n">generation_output</span> <span class="o">=</span> <span class="n">model_response_choices</span><span class="o">.</span><span class="n">message</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">generation_output</span> <span class="o">=</span> <span class="n">model_response_choices</span><span class="o">.</span><span class="n">message</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">generation_output</span> <span class="o">=</span> <span class="n">generation_output</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="c1"># Structure the model output as a GenerativeModelOutput object</span>
         <span class="n">model_output</span> <span class="o">=</span> <span class="n">GenerativeModelOutput</span><span class="p">(</span><span class="n">sequences</span><span class="o">=</span><span class="p">[</span><span class="n">generation_output</span><span class="p">])</span>
@@ -2136,6 +2337,52 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">NUM_PARAMS_MAPPING</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;huggingface/&quot;</span><span class="p">):</span>
+            <span class="n">model_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">HuggingFaceEncoderModel</span><span class="o">.</span><span class="n">model_exists</span><span class="p">(</span>
+                <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span>
+            <span class="p">):</span>
+                <span class="n">hf_config</span> <span class="o">=</span> <span class="n">load_hf_model_config</span><span class="p">(</span>
+                    <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                    <span class="n">num_labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">num_labels</span><span class="p">,</span>
+                    <span class="n">id2label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
+                    <span class="n">label2id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">label2id</span><span class="p">,</span>
+                    <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                    <span class="n">model_cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
+                    <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+                    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
+                    <span class="n">run_with_cli</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">run_with_cli</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">hf_api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">repo_info</span> <span class="o">=</span> <span class="n">hf_api</span><span class="o">.</span><span class="n">model_info</span><span class="p">(</span>
+                        <span class="n">repo_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                        <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                        <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">or</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span>
+                    <span class="n">RepositoryNotFoundError</span><span class="p">,</span>
+                    <span class="n">RevisionNotFoundError</span><span class="p">,</span>
+                    <span class="n">RequestException</span><span class="p">,</span>
+                    <span class="n">HFValidationError</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="n">repo_info</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">repo_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">repo_info</span><span class="p">,</span> <span class="s2">&quot;safetensors&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">safetensors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="s2">&quot;total&quot;</span> <span class="ow">in</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">safetensors</span>
+                <span class="p">):</span>
+                    <span class="k">return</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">safetensors</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="p">(</span>
+                    <span class="nb">hasattr</span><span class="p">(</span><span class="n">hf_config</span><span class="p">,</span> <span class="s2">&quot;num_params&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">hf_config</span><span class="o">.</span><span class="n">num_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">):</span>
+                    <span class="k">return</span> <span class="n">hf_config</span><span class="o">.</span><span class="n">num_params</span>
+
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
     <span class="nd">@cached_property</span>
@@ -2148,6 +2395,44 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">VOCAB_SIZE_MAPPING</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;huggingface/&quot;</span><span class="p">):</span>
+            <span class="n">model_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">HuggingFaceEncoderModel</span><span class="o">.</span><span class="n">model_exists</span><span class="p">(</span>
+                <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span>
+            <span class="p">):</span>
+                <span class="n">hf_config</span> <span class="o">=</span> <span class="n">load_hf_model_config</span><span class="p">(</span>
+                    <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                    <span class="n">num_labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">num_labels</span><span class="p">,</span>
+                    <span class="n">id2label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
+                    <span class="n">label2id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">label2id</span><span class="p">,</span>
+                    <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                    <span class="n">model_cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
+                    <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+                    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
+                    <span class="n">run_with_cli</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">run_with_cli</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load_tokenizer</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">hasattr</span><span class="p">(</span><span class="n">hf_config</span><span class="p">,</span> <span class="s2">&quot;vocab_size&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">hf_config</span><span class="o">.</span><span class="n">vocab_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">):</span>
+                    <span class="n">vocab_size</span> <span class="o">=</span> <span class="n">hf_config</span><span class="o">.</span><span class="n">vocab_size</span>
+                <span class="k">elif</span> <span class="p">(</span>
+                    <span class="nb">hasattr</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;vocab_size&quot;</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">vocab_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">):</span>
+                    <span class="n">vocab_size</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">vocab_size</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vocab_size</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">return</span> <span class="n">vocab_size</span>
+
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
     <span class="nd">@cached_property</span>
@@ -2160,6 +2445,74 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">MODEL_MAX_LENGTH_MAPPING</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;huggingface/&quot;</span><span class="p">):</span>
+            <span class="n">model_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">HuggingFaceEncoderModel</span><span class="o">.</span><span class="n">model_exists</span><span class="p">(</span>
+                <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span>
+            <span class="p">):</span>
+                <span class="n">hf_config</span> <span class="o">=</span> <span class="n">load_hf_model_config</span><span class="p">(</span>
+                    <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                    <span class="n">num_labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">num_labels</span><span class="p">,</span>
+                    <span class="n">id2label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
+                    <span class="n">label2id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">label2id</span><span class="p">,</span>
+                    <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                    <span class="n">model_cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
+                    <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+                    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
+                    <span class="n">run_with_cli</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">run_with_cli</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load_tokenizer</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">all_max_lengths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+                <span class="c1"># Add the registered max length of the tokenizer</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span>
+                    <span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;model_max_length&quot;</span>
+                <span class="p">)</span> <span class="ow">and</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e30</span><span class="p">):</span>
+                    <span class="n">all_max_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span><span class="p">)</span>
+
+                <span class="c1"># Add the max length derived from the model&#39;s input sizes</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> <span class="s2">&quot;max_model_input_sizes&quot;</span><span class="p">):</span>
+                    <span class="n">all_max_lengths</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="n">size</span>
+                            <span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">max_model_input_sizes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Add max length candidates from the model&#39;s configuration</span>
+                <span class="n">candidate_config_max_lengths</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s2">&quot;max_position_embeddings&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;max_sequence_length&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;model_max_length&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;sliding_window&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;sliding_window_size&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;n_positions&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+                <span class="k">for</span> <span class="n">candidate_config_max_length</span> <span class="ow">in</span> <span class="n">candidate_config_max_lengths</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="nb">hasattr</span><span class="p">(</span><span class="n">hf_config</span><span class="p">,</span> <span class="n">candidate_config_max_length</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="o">:=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">hf_config</span><span class="p">,</span> <span class="n">candidate_config_max_length</span><span class="p">))</span>
+                        <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="p">):</span>
+                        <span class="n">all_max_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+                <span class="c1"># To avoid models having artificially low max lengths, we remove any max</span>
+                <span class="c1"># lengths that are less than 128</span>
+                <span class="n">all_max_lengths</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">max_length</span> <span class="k">for</span> <span class="n">max_length</span> <span class="ow">in</span> <span class="n">all_max_lengths</span> <span class="k">if</span> <span class="n">max_length</span> <span class="o">&gt;=</span> <span class="mi">128</span>
+                <span class="p">]</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">all_max_lengths</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">all_max_lengths</span><span class="p">))</span>
+
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
     <span class="nd">@cached_property</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator"><a href="../../../../api/scandeval/benchmark_modules/litellm/#scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator" title="Go to docs">docs</a></div>
@@ -2230,31 +2583,52 @@
         <span class="k">if</span> <span class="n">model_id</span> <span class="ow">in</span> <span class="n">litellm</span><span class="o">.</span><span class="n">model_list</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">litellm</span><span class="o">.</span><span class="n">completion</span><span class="p">(</span>
-                <span class="n">messages</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">)],</span> <span class="n">model</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1</span>
+        <span class="n">num_attempts</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_attempts</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">litellm</span><span class="o">.</span><span class="n">completion</span><span class="p">(</span>
+                    <span class="n">messages</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">)],</span>
+                    <span class="n">model</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">api_key</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
+                    <span class="n">api_base</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_base</span><span class="p">,</span>
+                    <span class="n">api_version</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_version</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="n">APIError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;&#39;503 Service Unavailable&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">e</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Failed to check if model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> exists. Retrying in &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_attempts</span><span class="si">}</span><span class="s2"> seconds...&quot;</span>
+                <span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">BadRequestError</span><span class="p">,</span> <span class="n">NotFoundError</span><span class="p">):</span>
+                <span class="n">candidate_models</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">candidate_model_id</span>
+                    <span class="k">for</span> <span class="n">candidate_model_id</span> <span class="ow">in</span> <span class="n">litellm</span><span class="o">.</span><span class="n">model_list</span>
+                    <span class="k">if</span> <span class="n">candidate_model_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="k">match</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_models</span><span class="p">):</span>
+                    <span class="k">case</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Could not find the model ID </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Did you mean &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">candidate_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">!r}</span><span class="s2">?&quot;</span>
+                        <span class="p">)</span>
+                    <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                        <span class="n">candidate_models_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">candidate_models</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Could not find the model ID </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Did you mean &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;any of the following model IDs: &#39;</span><span class="si">{</span><span class="n">candidate_models_str</span><span class="si">}</span><span class="s2">&#39;?&quot;</span>
+                        <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to check if model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> exists after </span><span class="si">{</span><span class="n">num_attempts</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;attempts. Assuming it does not exist.&quot;</span>
             <span class="p">)</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="p">(</span><span class="n">BadRequestError</span><span class="p">,</span> <span class="n">NotFoundError</span><span class="p">):</span>
-            <span class="n">candidate_models</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">candidate_model_id</span>
-                <span class="k">for</span> <span class="n">candidate_model_id</span> <span class="ow">in</span> <span class="n">litellm</span><span class="o">.</span><span class="n">model_list</span>
-                <span class="k">if</span> <span class="n">candidate_model_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
-            <span class="p">]</span>
-            <span class="k">match</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_models</span><span class="p">):</span>
-                <span class="k">case</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">pass</span>
-                <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Could not find the model ID </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Did you mean &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">candidate_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">!r}</span><span class="s2">?&quot;</span>
-                    <span class="p">)</span>
-                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                    <span class="n">candidate_models_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;, &#39;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">candidate_models</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Could not find the model ID </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Did you mean any of &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;the following model IDs: &#39;</span><span class="si">{</span><span class="n">candidate_models_str</span><span class="si">}</span><span class="s2">&#39;?&quot;</span>
-                    <span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@classmethod</span>

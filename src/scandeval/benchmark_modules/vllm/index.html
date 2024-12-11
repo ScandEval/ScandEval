@@ -2231,7 +2231,14 @@
 <span class="normal">969</span>
 <span class="normal">970</span>
 <span class="normal">971</span>
-<span class="normal">972</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models using the vLLM inference framework.&quot;&quot;&quot;</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span>
+<span class="normal">975</span>
+<span class="normal">976</span>
+<span class="normal">977</span>
+<span class="normal">978</span>
+<span class="normal">979</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models using the vLLM inference framework.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">importlib.util</span>
@@ -2592,6 +2599,13 @@
 <span class="sd">            Whether the model exists, or an error describing why we cannot check</span>
 <span class="sd">            whether the model exists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">using_api</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">using_api</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
         <span class="n">model_id</span><span class="p">,</span> <span class="n">revision</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;@&quot;</span> <span class="ow">in</span> <span class="n">model_id</span> <span class="k">else</span> <span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="s2">&quot;main&quot;</span><span class="p">)</span>
         <span class="p">)</span>

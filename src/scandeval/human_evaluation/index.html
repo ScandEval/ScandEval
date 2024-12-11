@@ -2003,7 +2003,8 @@
 <span class="normal">741</span>
 <span class="normal">742</span>
 <span class="normal">743</span>
-<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Gradio app for conducting human evaluation of the tasks.&quot;&quot;&quot;</span>
+<span class="normal">744</span>
+<span class="normal">745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Gradio app for conducting human evaluation of the tasks.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">importlib.util</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -2277,7 +2278,8 @@
             <span class="n">evaluate_test_split</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">few_shot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">num_iterations</span><span class="o">=</span><span class="n">iteration</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="n">base_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">api_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">api_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">run_with_cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>

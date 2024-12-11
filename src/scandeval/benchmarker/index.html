@@ -1958,7 +1958,11 @@
 <span class="normal">723</span>
 <span class="normal">724</span>
 <span class="normal">725</span>
-<span class="normal">726</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -2036,7 +2040,8 @@
         <span class="n">evaluate_test_split</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">few_shot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_base</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">run_with_cli</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2109,9 +2114,11 @@
 <span class="sd">                The number of times each model should be evaluated. This is only meant</span>
 <span class="sd">                to be used for power users, and scores will not be allowed on the</span>
 <span class="sd">                leaderboards if this is changed. Defaults to 10.</span>
-<span class="sd">            base_url:</span>
+<span class="sd">            api_base:</span>
 <span class="sd">                The base URL for a given inference API. Only relevant if `model` refers</span>
 <span class="sd">                to a model on an inference API. Defaults to None.</span>
+<span class="sd">            api_version:</span>
+<span class="sd">                The version of the API to use. Defaults to None.</span>
 <span class="sd">            debug:</span>
 <span class="sd">                Whether to output debug information. Defaults to False.</span>
 <span class="sd">            run_with_cli:</span>
@@ -2148,7 +2155,8 @@
             <span class="n">evaluate_test_split</span><span class="o">=</span><span class="n">evaluate_test_split</span><span class="p">,</span>
             <span class="n">few_shot</span><span class="o">=</span><span class="n">few_shot</span><span class="p">,</span>
             <span class="n">num_iterations</span><span class="o">=</span><span class="n">num_iterations</span><span class="p">,</span>
-            <span class="n">base_url</span><span class="o">=</span><span class="n">base_url</span><span class="p">,</span>
+            <span class="n">api_base</span><span class="o">=</span><span class="n">api_base</span><span class="p">,</span>
+            <span class="n">api_version</span><span class="o">=</span><span class="n">api_version</span><span class="p">,</span>
             <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
             <span class="n">run_with_cli</span><span class="o">=</span><span class="n">run_with_cli</span><span class="p">,</span>
         <span class="p">)</span>

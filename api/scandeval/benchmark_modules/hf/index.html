@@ -2258,7 +2258,7 @@ The information about the model, or None if the model could not be found.</p>
 <i class="fa-regular fa-square-minus"></i>
 </span>
 </span>
-<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.load_tokenizer" title="scandeval.benchmark_modules.hf.load_tokenizer">load_tokenizer</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">trust_remote_code</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span></span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.hf.load_tokenizer" title="scandeval.benchmark_modules.hf.load_tokenizer">load_tokenizer</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span> | None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">trust_remote_code</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span></span>
 </p>
 <div class="mkapi-document">
 <p>Load the tokenizer.</p>
@@ -2274,9 +2274,9 @@ The information about the model, or None if the model could not be found.</p>
 <ul class="mkapi-item-list">
 <li>
 <p><span class="mkapi-item-name">model</span> : 
-<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span></span> <span class="mkapi-dash">&mdash;</span></p>
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span> | None</span> <span class="mkapi-dash">&mdash;</span></p>
 <p>The model, which is used to determine whether to add a prefix space to
-the tokens.</p>
+the tokens. Can be None.</p>
 </li>
 <li>
 <p><span class="mkapi-item-name">model_id</span> : 
