@@ -11,7 +11,6 @@ from shutil import rmtree
 from time import sleep
 
 from .benchmark_config_factory import build_benchmark_config
-from .constants import GENERATIVE_MODEL_TASKS
 from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
@@ -520,11 +519,6 @@ class Benchmarker:
         model: BenchmarkModule | None = None
         while True:
             try:
-                model_config = get_model_config(
-                    model_id=model_config.model_id,
-                    benchmark_config=self.benchmark_config,
-                )
-
                 # Set random seeds to enforce reproducibility of the randomly
                 # initialised weights
                 rng = enforce_reproducibility(framework=model_config.framework)
@@ -537,15 +531,6 @@ class Benchmarker:
                         benchmark_config=benchmark_config,
                     )
                 assert model is not None
-
-                # This happens when a local model is used, as we cannot fetch the model
-                # metadata. Note that this is only the case if the model type is not any
-                # of the ones hardcoded in `local.py`
-                if model_config.task == "unknown":
-                    if model.is_generative:
-                        model_config.task = GENERATIVE_MODEL_TASKS[0]
-                    else:
-                        model_config.task = "fill-mask"
 
                 if dataset_config.task == SPEED:
                     scores = benchmark_speed(
