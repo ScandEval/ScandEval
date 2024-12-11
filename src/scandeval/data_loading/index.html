@@ -1265,12 +1265,17 @@
 <span class="normal">90</span>
 <span class="normal">91</span>
 <span class="normal">92</span>
-<span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to the loading of the data.&quot;&quot;&quot;</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to the loading of the data.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DatasetDict</span><span class="p">,</span> <span class="n">load_dataset</span>
+<span class="kn">from</span> <span class="nn">datasets.exceptions</span> <span class="kn">import</span> <span class="n">DatasetsError</span>
 <span class="kn">from</span> <span class="nn">huggingface_hub.utils</span> <span class="kn">import</span> <span class="n">HfHubHTTPError</span>
 <span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">Generator</span>
 
@@ -1306,10 +1311,11 @@
                 <span class="n">token</span><span class="o">=</span><span class="n">unscramble</span><span class="p">(</span><span class="s2">&quot;HjccJFhIozVymqXDVqTUTXKvYhZMTbfIjMxG_&quot;</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="k">break</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="n">DatasetsError</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Failed to load dataset </span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">huggingface_id</span><span class="si">!r}</span><span class="s2">. Retrying...&quot;</span>
             <span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="k">except</span> <span class="n">HfHubHTTPError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span><span class="s2">&quot;The Hugging Face Hub seems to be down.&quot;</span><span class="p">)</span>

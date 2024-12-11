@@ -2384,15 +2384,7 @@
 <span class="normal">1050</span>
 <span class="normal">1051</span>
 <span class="normal">1052</span>
-<span class="normal">1053</span>
-<span class="normal">1054</span>
-<span class="normal">1055</span>
-<span class="normal">1056</span>
-<span class="normal">1057</span>
-<span class="normal">1058</span>
-<span class="normal">1059</span>
-<span class="normal">1060</span>
-<span class="normal">1061</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
+<span class="normal">1053</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -2425,7 +2417,7 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">urllib3.exceptions</span> <span class="kn">import</span> <span class="n">RequestError</span>
 
-<span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">DUMMY_FILL_VALUE</span><span class="p">,</span> <span class="n">GENERATIVE_TAGS</span>
+<span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">DUMMY_FILL_VALUE</span><span class="p">,</span> <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">,</span> <span class="n">GENERATIVE_TAGS</span>
 <span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfig</span><span class="p">,</span> <span class="n">DatasetConfig</span><span class="p">,</span> <span class="n">HFModelInfo</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">Task</span>
 <span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">ModelType</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="p">(</span>
@@ -2491,7 +2483,8 @@
         <span class="n">hf_api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">repo_info</span> <span class="o">=</span> <span class="n">hf_api</span><span class="o">.</span><span class="n">model_info</span><span class="p">(</span>
-                <span class="n">repo_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
+                <span class="n">repo_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
                 <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
                 <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">or</span> <span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
@@ -2510,24 +2503,6 @@
             <span class="ow">and</span> <span class="s2">&quot;total&quot;</span> <span class="ow">in</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">safetensors</span>
         <span class="p">):</span>
             <span class="n">num_params</span> <span class="o">=</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">safetensors</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="p">(</span>
-            <span class="n">repo_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">repo_info</span><span class="p">,</span> <span class="s2">&quot;card_data&quot;</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">card_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="s2">&quot;base_model&quot;</span> <span class="ow">in</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">card_data</span>
-            <span class="ow">and</span> <span class="n">repo_info</span><span class="o">.</span><span class="n">card_data</span><span class="p">[</span><span class="s2">&quot;base_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">repo_info</span><span class="o">.</span><span class="n">card_data</span><span class="p">[</span><span class="s2">&quot;base_model&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="ow">and</span> <span class="p">(</span>
-                <span class="n">base_repo_info</span> <span class="o">:=</span> <span class="n">hf_api</span><span class="o">.</span><span class="n">repo_info</span><span class="p">(</span>
-                    <span class="n">repo_info</span><span class="o">.</span><span class="n">card_data</span><span class="p">[</span><span class="s2">&quot;base_model&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">repo_type</span><span class="o">=</span><span class="s2">&quot;model&quot;</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base_repo_info</span><span class="p">,</span> <span class="s2">&quot;safetensors&quot;</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="n">base_repo_info</span><span class="o">.</span><span class="n">safetensors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="s2">&quot;total&quot;</span> <span class="ow">in</span> <span class="n">base_repo_info</span><span class="o">.</span><span class="n">safetensors</span>
-        <span class="p">):</span>
-            <span class="n">num_params</span> <span class="o">=</span> <span class="n">base_repo_info</span><span class="o">.</span><span class="n">safetensors</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span>
         <span class="k">elif</span> <span class="p">(</span>
             <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;num_params&quot;</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">num_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -2586,10 +2561,11 @@
         <span class="c1"># Add max length candidates from the model&#39;s configuration</span>
         <span class="n">candidate_config_max_lengths</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;max_position_embeddings&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;model_max_length&quot;</span><span class="p">,</span>
             <span class="s2">&quot;max_sequence_length&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;model_max_length&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sliding_window&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sliding_window_size&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;n_positions&quot;</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">candidate_config_max_length</span> <span class="ow">in</span> <span class="n">candidate_config_max_lengths</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
@@ -2799,7 +2775,10 @@
         <span class="n">model_info</span> <span class="o">=</span> <span class="n">get_model_repo_info</span><span class="p">(</span>
             <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">,</span> <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">model_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span> <span class="o">!=</span> <span class="s2">&quot;text-generation&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">model_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_model_config</span><span class="p">(</span>
@@ -3057,18 +3036,23 @@
     <span class="p">)</span>
     <span class="n">base_model_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">has_base_model_tag</span><span class="p">:</span>
-        <span class="n">base_model_id</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span>
-            <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;base_model:&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tag</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">base_model_info</span> <span class="o">=</span> <span class="n">hf_api</span><span class="o">.</span><span class="n">model_info</span><span class="p">(</span>
-            <span class="n">repo_id</span><span class="o">=</span><span class="n">base_model_id</span><span class="p">,</span>
-            <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">,</span>
-            <span class="n">token</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">or</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">has_adapter_config</span> <span class="o">=</span> <span class="n">model_info</span><span class="o">.</span><span class="n">siblings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">sibling</span><span class="o">.</span><span class="n">rfilename</span> <span class="o">==</span> <span class="s2">&quot;adapter_config.json&quot;</span>
+            <span class="k">for</span> <span class="n">sibling</span> <span class="ow">in</span> <span class="n">model_info</span><span class="o">.</span><span class="n">siblings</span>
         <span class="p">)</span>
-        <span class="n">tags</span> <span class="o">+=</span> <span class="n">base_model_info</span><span class="o">.</span><span class="n">tags</span> <span class="ow">or</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="n">tags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">has_adapter_config</span><span class="p">:</span>
+            <span class="n">base_model_id</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span>
+                <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;base_model:&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tag</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">base_model_info</span> <span class="o">=</span> <span class="n">hf_api</span><span class="o">.</span><span class="n">model_info</span><span class="p">(</span>
+                <span class="n">repo_id</span><span class="o">=</span><span class="n">base_model_id</span><span class="p">,</span>
+                <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">,</span>
+                <span class="n">token</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">or</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">tags</span> <span class="o">+=</span> <span class="n">base_model_info</span><span class="o">.</span><span class="n">tags</span> <span class="ow">or</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span>
 
     <span class="n">pipeline_tag</span> <span class="o">=</span> <span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span>
     <span class="k">if</span> <span class="n">pipeline_tag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

@@ -2138,7 +2138,100 @@
 <span class="normal">876</span>
 <span class="normal">877</span>
 <span class="normal">878</span>
-<span class="normal">879</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models using the vLLM inference framework.&quot;&quot;&quot;</span>
+<span class="normal">879</span>
+<span class="normal">880</span>
+<span class="normal">881</span>
+<span class="normal">882</span>
+<span class="normal">883</span>
+<span class="normal">884</span>
+<span class="normal">885</span>
+<span class="normal">886</span>
+<span class="normal">887</span>
+<span class="normal">888</span>
+<span class="normal">889</span>
+<span class="normal">890</span>
+<span class="normal">891</span>
+<span class="normal">892</span>
+<span class="normal">893</span>
+<span class="normal">894</span>
+<span class="normal">895</span>
+<span class="normal">896</span>
+<span class="normal">897</span>
+<span class="normal">898</span>
+<span class="normal">899</span>
+<span class="normal">900</span>
+<span class="normal">901</span>
+<span class="normal">902</span>
+<span class="normal">903</span>
+<span class="normal">904</span>
+<span class="normal">905</span>
+<span class="normal">906</span>
+<span class="normal">907</span>
+<span class="normal">908</span>
+<span class="normal">909</span>
+<span class="normal">910</span>
+<span class="normal">911</span>
+<span class="normal">912</span>
+<span class="normal">913</span>
+<span class="normal">914</span>
+<span class="normal">915</span>
+<span class="normal">916</span>
+<span class="normal">917</span>
+<span class="normal">918</span>
+<span class="normal">919</span>
+<span class="normal">920</span>
+<span class="normal">921</span>
+<span class="normal">922</span>
+<span class="normal">923</span>
+<span class="normal">924</span>
+<span class="normal">925</span>
+<span class="normal">926</span>
+<span class="normal">927</span>
+<span class="normal">928</span>
+<span class="normal">929</span>
+<span class="normal">930</span>
+<span class="normal">931</span>
+<span class="normal">932</span>
+<span class="normal">933</span>
+<span class="normal">934</span>
+<span class="normal">935</span>
+<span class="normal">936</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span>
+<span class="normal">961</span>
+<span class="normal">962</span>
+<span class="normal">963</span>
+<span class="normal">964</span>
+<span class="normal">965</span>
+<span class="normal">966</span>
+<span class="normal">967</span>
+<span class="normal">968</span>
+<span class="normal">969</span>
+<span class="normal">970</span>
+<span class="normal">971</span>
+<span class="normal">972</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models using the vLLM inference framework.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">importlib.util</span>
@@ -2146,7 +2239,6 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">random</span>
-<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">t</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span><span class="p">,</span> <span class="n">partial</span>
@@ -2161,7 +2253,12 @@
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoConfig</span><span class="p">,</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span> <span class="n">Trainer</span>
 <span class="kn">from</span> <span class="nn">urllib3.exceptions</span> <span class="kn">import</span> <span class="n">RequestError</span>
 
-<span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">MAX_LOGPROBS</span><span class="p">,</span> <span class="n">SUPERTASKS_USING_LOGPROBS</span><span class="p">,</span> <span class="n">TASKS_USING_JSON</span>
+<span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">,</span>
+    <span class="n">MAX_LOGPROBS</span><span class="p">,</span>
+    <span class="n">SUPERTASKS_USING_LOGPROBS</span><span class="p">,</span>
+    <span class="n">TASKS_USING_JSON</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BenchmarkConfig</span><span class="p">,</span>
     <span class="n">DatasetConfig</span><span class="p">,</span>
@@ -2185,7 +2282,13 @@
     <span class="n">token_classification</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">ExtractLabelsFunction</span>
-<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">clear_memory</span><span class="p">,</span> <span class="n">create_model_cache_dir</span><span class="p">,</span> <span class="n">get_end_of_chat_token_ids</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">clear_memory</span><span class="p">,</span>
+    <span class="n">create_model_cache_dir</span><span class="p">,</span>
+    <span class="n">get_end_of_chat_token_ids</span><span class="p">,</span>
+    <span class="n">log_once</span><span class="p">,</span>
+    <span class="n">should_prompts_be_stripped</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.hf</span> <span class="kn">import</span> <span class="n">HuggingFaceEncoderModel</span><span class="p">,</span> <span class="n">get_model_repo_info</span>
 
 <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">TYPE_CHECKING</span> <span class="ow">or</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;vllm&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2243,6 +2346,8 @@
         <span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_model_and_tokenizer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span> <span class="n">LLM</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">instruction_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2327,23 +2432,16 @@
             <span class="n">few_shot_examples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_few_shot_examples</span><span class="p">(</span>
                 <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">itr_idx</span><span class="o">=</span><span class="n">itr_idx</span>
             <span class="p">)</span>
-            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
-                <span class="n">partial</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_apply_few_shot_prompt</span><span class="p">,</span>
-                    <span class="n">few_shot_examples</span><span class="o">=</span><span class="n">few_shot_examples</span><span class="p">,</span>
-                    <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
-                <span class="p">),</span>
-                <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
-                <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apply_instruction_prompt</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">),</span>
-                <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">few_shot_examples</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+            <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apply_prompt</span><span class="p">,</span> <span class="n">few_shot_examples</span><span class="o">=</span><span class="n">few_shot_examples</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">),</span>
+            <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">dataset</span>
 
     <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GenerativeModelOutput</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.vllm.VLLMModel.generate"><a href="../../../../api/scandeval/benchmark_modules/vllm/#scandeval.benchmark_modules.vllm.VLLMModel.generate" title="Go to docs">docs</a></div>
@@ -2373,6 +2471,29 @@
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">bos_token</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">eos_token</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pad_token_candidates</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;pad&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;[pad]&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;|endoftext|&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;|im_end|&gt;&quot;</span><span class="p">]</span>
+            <span class="n">pad_token_candidates</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pad_token_candidates</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">pad_token_candidates</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">():</span>
+                    <span class="n">pad_token_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">get_vocab</span><span class="p">()[</span><span class="n">candidate</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token</span> <span class="o">=</span> <span class="n">candidate</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="n">pad_token_id</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
+                    <span class="s2">&quot;Could not find a suitable token to use as a padding token, since &quot;</span>
+                    <span class="s2">&quot;the model does not have a BOS, EOS, or padding token, and does &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;not have any of the following tokens in its vocabulary: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pad_token_candidates</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
         <span class="c1"># Add end of chat token as a stopping token, if it exists</span>
@@ -2409,6 +2530,17 @@
                 <span class="n">prompt</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">bos_token</span>
                 <span class="k">for</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="n">prompts</span>
             <span class="p">]</span>
+
+        <span class="c1"># Strip the prompts if the model&#39;s tokeniser requires it</span>
+        <span class="n">labels_to_be_generated</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_label_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_model</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels_to_be_generated</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="n">should_prompts_be_stripped</span><span class="p">(</span>
+                <span class="n">labels_to_be_generated</span><span class="o">=</span><span class="n">labels_to_be_generated</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span><span class="n">prompt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="n">prompts</span><span class="p">]</span>
 
         <span class="c1"># Generate sequences using vLLM</span>
         <span class="n">input_is_a_test</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">prompts</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
@@ -2466,7 +2598,9 @@
         <span class="n">model_info</span> <span class="o">=</span> <span class="n">get_model_repo_info</span><span class="p">(</span>
             <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">,</span> <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">model_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span> <span class="o">==</span> <span class="s2">&quot;text-generation&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">model_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
+        <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_model_config</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.vllm.VLLMModel.get_model_config"><a href="../../../../api/scandeval/benchmark_modules/vllm/#scandeval.benchmark_modules.vllm.VLLMModel.get_model_config" title="Go to docs">docs</a></div>
@@ -2530,11 +2664,17 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The loaded model and tokenizer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">hf_model_config</span> <span class="o">=</span> <span class="n">AutoConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
-            <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
-            <span class="n">cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hf_model_config</span> <span class="o">=</span> <span class="n">AutoConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
+                <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                <span class="n">cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
+                <span class="s2">&quot;Could not load model configuration for &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. The error was: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="n">quantization</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">hf_model_config</span><span class="p">,</span> <span class="s2">&quot;quantization_config&quot;</span><span class="p">):</span>
@@ -2563,7 +2703,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">download_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">)</span>
 
-        <span class="n">max_model_len</span> <span class="o">=</span> <span class="mi">5_000</span>
         <span class="n">potential_max_model_length_config_names</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;max_position_embeddings&quot;</span><span class="p">,</span>
             <span class="s2">&quot;max_sequence_length&quot;</span><span class="p">,</span>
@@ -2572,45 +2711,69 @@
             <span class="s2">&quot;sliding_window_size&quot;</span><span class="p">,</span>
             <span class="s2">&quot;n_positions&quot;</span><span class="p">,</span>
         <span class="p">]</span>
+        <span class="n">true_max_model_len_candidates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">config_name</span> <span class="ow">in</span> <span class="n">potential_max_model_length_config_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">hf_model_config</span><span class="p">,</span> <span class="n">config_name</span><span class="p">):</span>
                 <span class="n">model_len</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">hf_model_config</span><span class="p">,</span> <span class="n">config_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">model_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">max_model_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_model_len</span><span class="p">,</span> <span class="n">model_len</span><span class="p">)</span>
+                    <span class="n">true_max_model_len_candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_len</span><span class="p">)</span>
 
-        <span class="n">vllm_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
-            <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span>
-            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
-            <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
-            <span class="n">max_model_len</span><span class="o">=</span><span class="n">max_model_len</span><span class="p">,</span>
-            <span class="n">download_dir</span><span class="o">=</span><span class="n">download_dir</span><span class="p">,</span>
-            <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
-            <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
-            <span class="n">seed</span><span class="o">=</span><span class="mi">4242</span><span class="p">,</span>
-            <span class="n">distributed_executor_backend</span><span class="o">=</span><span class="s2">&quot;ray&quot;</span><span class="p">,</span>
-            <span class="n">tensor_parallel_size</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">(),</span>
-            <span class="n">disable_custom_all_reduce</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">quantization</span><span class="o">=</span><span class="n">quantization</span><span class="p">,</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
-            <span class="n">enforce_eager</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">max_logprobs</span><span class="o">=</span><span class="n">MAX_LOGPROBS</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_scores</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="c1"># TEMP: Prefix caching isn&#39;t supported with sliding window in vLLM yet, so</span>
-            <span class="c1"># we disable it for now</span>
-            <span class="n">enable_prefix_caching</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">enable_lora</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">max_lora_rank</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">true_max_model_len_candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">true_max_model_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">true_max_model_len_candidates</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">true_max_model_len</span> <span class="o">=</span> <span class="mi">5_000</span>
 
         <span class="n">clear_vllm</span><span class="p">()</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">LLM</span><span class="p">(</span><span class="o">**</span><span class="n">vllm_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Prefer base model ID if the model is an adapter - the adapter will be added on</span>
+        <span class="c1"># during inference in this case</span>
+        <span class="n">model_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">LLM</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                <span class="n">tokenizer</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
+                <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+                <span class="n">max_model_len</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">true_max_model_len</span><span class="p">,</span> <span class="mi">5_000</span><span class="p">),</span>
+                <span class="n">download_dir</span><span class="o">=</span><span class="n">download_dir</span><span class="p">,</span>
+                <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
+                <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                <span class="n">seed</span><span class="o">=</span><span class="mi">4242</span><span class="p">,</span>
+                <span class="n">distributed_executor_backend</span><span class="o">=</span><span class="s2">&quot;mp&quot;</span><span class="p">,</span>  <span class="c1"># &quot;ray&quot;,  # TEMP?</span>
+                <span class="n">tensor_parallel_size</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">(),</span>
+                <span class="n">disable_custom_all_reduce</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">quantization</span><span class="o">=</span><span class="n">quantization</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">enforce_eager</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">max_logprobs</span><span class="o">=</span><span class="n">MAX_LOGPROBS</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_scores</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="c1"># TEMP: Prefix caching isn&#39;t supported with sliding window in vLLM yet,</span>
+                <span class="c1"># so we disable it for now</span>
+                <span class="n">enable_prefix_caching</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">enable_lora</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">max_lora_rank</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+                <span class="n">guided_decoding_backend</span><span class="o">=</span><span class="s2">&quot;outlines&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;trust_remote_code&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Loading the model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> needs to trust remote code. &quot;</span>
+                    <span class="s2">&quot;If you trust the suppliers of this model, then you can enable &quot;</span>
+                    <span class="s2">&quot;this by setting the `--trust-remote-code` flag.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> could not be loaded. The error was </span><span class="si">{</span><span class="n">e</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
         <span class="n">model</span><span class="o">.</span><span class="n">_run_engine</span> <span class="o">=</span> <span class="n">MethodType</span><span class="p">(</span><span class="n">_run_engine_with_fixed_progress_bars</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">hf_model_config</span>
 
         <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load_tokenizer</span><span class="p">(</span>
             <span class="n">model_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
+            <span class="n">revision</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+            <span class="n">adapter_base_model_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">adapter_base_model_id</span><span class="p">,</span>
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">trust_remote_code</span><span class="p">,</span>
-            <span class="n">model_max_length</span><span class="o">=</span><span class="n">max_model_len</span><span class="p">,</span>
+            <span class="n">model_max_length</span><span class="o">=</span><span class="n">true_max_model_len</span><span class="p">,</span>
+            <span class="n">model_cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span>
@@ -2724,13 +2887,13 @@
         <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">few_shot_examples</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">few_shot_examples</span>
 
-    <span class="k">def</span> <span class="nf">_apply_few_shot_prompt</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">_apply_prompt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">examples</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
         <span class="n">few_shot_examples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply few-shot examples to an example.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply prompt template to an example, potentially with few-shot examples.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            examples:</span>
@@ -2743,49 +2906,52 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The example with the few-shot examples applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">few_shot_messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">create_prompt</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Create a prompt from the given keyword arguments.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                kwargs:</span>
+<span class="sd">                    The keyword arguments to use in the prompt.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                A pair (prompt, label), where &quot;label&quot; is an empty string if the model is</span>
+<span class="sd">                not instruction tuned (as in this case it is included in the prompt).</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_model</span><span class="p">:</span>
+                <span class="n">label_key</span> <span class="o">=</span> <span class="s2">&quot;label&quot;</span> <span class="k">if</span> <span class="s2">&quot;label&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="s2">&quot;target_text&quot;</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">label_key</span><span class="p">)</span>
+                <span class="n">label_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_label_mapping</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">label_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+                <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">instruction_prompt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">label</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="s2">&quot;&quot;</span>
+
         <span class="k">match</span> <span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
             <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span><span class="p">:</span>
-                <span class="n">few_shot_messages</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
-
-                <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span><span class="p">:</span>
-                    <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-
-                <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">prompt_prefix</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">few_shot_messages</span><span class="p">)</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
                 <span class="p">]</span>
 
             <span class="k">case</span> <span class="s2">&quot;text-to-text&quot;</span><span class="p">:</span>
-                <span class="n">few_shot_messages</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">target_text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;target_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
-
-                <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span><span class="p">:</span>
-                    <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-
-                <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">prompt_prefix</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">few_shot_messages</span><span class="p">)</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">target_text</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
-                    <span class="p">)</span>
+                <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">target_text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
                 <span class="p">]</span>
 
@@ -2807,49 +2973,33 @@
                             <span class="n">labels</span><span class="p">[</span><span class="n">prompt_label</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">token</span>
                     <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-                <span class="n">few_shot_messages</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;tokens&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">create_label</span><span class="p">(</span><span class="n">example</span><span class="o">=</span><span class="n">example</span><span class="p">),</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
-
-                <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span><span class="p">:</span>
-                    <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-
-                <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">prompt_prefix</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">few_shot_messages</span><span class="p">)</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">tokens</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;tokens&quot;</span><span class="p">]</span>
                 <span class="p">]</span>
 
             <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
-                <span class="n">few_shot_messages</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;context&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">question</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;question&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;answers&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
-
-                <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span><span class="p">:</span>
-                    <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-
-                <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="n">prompt_prefix</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">few_shot_messages</span><span class="p">)</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-                        <span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="p">,</span>
+                        <span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">context</span><span class="p">,</span> <span class="n">question</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
@@ -2862,59 +3012,61 @@
                     <span class="sa">f</span><span class="s2">&quot;Unsupported task supertask: </span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span>
-            <span class="p">{</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">examples</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
-        <span class="p">),</span> <span class="s2">&quot;The number of examples and messages must be the same.&quot;</span>
-        <span class="k">return</span> <span class="n">examples</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instruction_model</span><span class="p">:</span>
+            <span class="n">few_shot_messages</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">few_shot_sections</span>
+                <span class="k">for</span> <span class="n">role</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">prompt</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">)]</span>
+            <span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_apply_instruction_prompt</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">examples</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply instruction prompts to an example.</span>
+            <span class="n">messages_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">few_shot_messages</span> <span class="o">+</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">prompt</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">new_sections</span>
+            <span class="p">]</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            examples:</span>
-<span class="sd">                The examples to apply the instruction prompts to.</span>
-<span class="sd">            task:</span>
-<span class="sd">                The task that is being benchmarked.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The example with the instruction prompts applied.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">match</span> <span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span> <span class="o">|</span> <span class="s2">&quot;text-to-text&quot;</span> <span class="o">|</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
-                <span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">instruction_prompt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">text</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\n+&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                    <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+            <span class="c1"># Pick the chat template that matches the language of the dataset, if such a</span>
+            <span class="c1"># template exists</span>
+            <span class="n">chat_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">chat_template</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">language_codes</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">language</span><span class="o">.</span><span class="n">code</span> <span class="k">for</span> <span class="n">language</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">languages</span>
                 <span class="p">]</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">candidate_template</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">chat_template</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">language_codes</span><span class="p">:</span>
+                        <span class="n">chat_template</span> <span class="o">=</span> <span class="n">candidate_template</span>
+                        <span class="n">log_once</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Using the </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> chat template for the tokenizer.&quot;</span><span class="p">,</span>
+                            <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="k">break</span>
 
-            <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
-                <span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">instruction_prompt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">text</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\n+&quot;</span><span class="p">,</span> <span class="n">repl</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-                        <span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-                    <span class="p">)</span>
-                    <span class="k">for</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">question</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                        <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;context&quot;</span><span class="p">],</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;question&quot;</span><span class="p">]</span>
-                    <span class="p">)</span>
-                <span class="p">]</span>
-
-            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unsupported task supertask: </span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+                    <span class="n">conversation</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+                    <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">chat_template</span><span class="o">=</span><span class="n">chat_template</span><span class="p">,</span>
                 <span class="p">)</span>
+                <span class="k">for</span> <span class="n">messages</span> <span class="ow">in</span> <span class="n">messages_list</span>
+            <span class="p">]</span>
 
-        <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prompts</span>
+            <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">texts</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span><span class="p">:</span>
+                <span class="n">prompt_prefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+            <span class="n">few_shot_prompt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">prompt</span> <span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">few_shot_sections</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">few_shot_prompt</span><span class="p">:</span>
+                <span class="n">few_shot_prompt</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+            <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">prompt_prefix</span> <span class="o">+</span> <span class="n">few_shot_prompt</span> <span class="o">+</span> <span class="n">new_prompt</span>
+                <span class="k">for</span> <span class="n">new_prompt</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">new_sections</span>
+            <span class="p">]</span>
+
         <span class="k">return</span> <span class="n">examples</span>
-
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear the GPU memory used by the model, and remove the model itself.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_model&quot;</span><span class="p">):</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span>
-        <span class="k">del</span> <span class="bp">self</span>
-        <span class="n">clear_vllm</span><span class="p">()</span>
 
     <span class="nd">@cached_property</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.vllm.VLLMModel.data_collator"><a href="../../../../api/scandeval/benchmark_modules/vllm/#scandeval.benchmark_modules.vllm.VLLMModel.data_collator" title="Go to docs">docs</a></div>
     <span class="k">def</span> <span class="nf">data_collator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">c</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]]:</span>
@@ -2940,22 +3092,38 @@
 
 
 <span class="k">def</span> <span class="nf">load_tokenizer</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.vllm.load_tokenizer"><a href="../../../../api/scandeval/benchmark_modules/vllm/#scandeval.benchmark_modules.vllm.load_tokenizer" title="Go to docs">docs</a></div>
-    <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">model_max_length</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">revision</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">adapter_base_model_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">model_max_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">model_cache_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PreTrainedTokenizer&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the tokenizer.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model_id:</span>
-<span class="sd">            The model identifier. Used for logging.</span>
+<span class="sd">            The model identifier.</span>
+<span class="sd">        revision:</span>
+<span class="sd">            The revision of the model.</span>
+<span class="sd">        adapter_base_model_id:</span>
+<span class="sd">            The base model ID for the adapter model. Can be None if the model is not an</span>
+<span class="sd">            adapter model.</span>
 <span class="sd">        trust_remote_code:</span>
 <span class="sd">            Whether to trust remote code.</span>
 <span class="sd">        model_max_length:</span>
 <span class="sd">            The maximum length of the model.</span>
+<span class="sd">        model_cache_dir:</span>
+<span class="sd">            The cache directory for the model.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The loaded tokenizer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">AutoConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+        <span class="n">adapter_base_model_id</span> <span class="ow">or</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">model_cache_dir</span>
+    <span class="p">)</span>
+    <span class="n">num_retries</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_retries</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
                 <span class="n">model_id</span><span class="p">,</span>
@@ -2965,16 +3133,34 @@
                 <span class="n">padding_side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
                 <span class="n">truncation_side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
                 <span class="n">model_max_length</span><span class="o">=</span><span class="n">model_max_length</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tokenizer</span><span class="o">.</span><span class="n">pad_token</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token</span>
-            <span class="k">return</span> <span class="n">tokenizer</span>
-        <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not load tokenizer for model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">adapter_base_model_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">model_id</span> <span class="o">==</span> <span class="n">adapter_base_model_id</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not load tokenizer for model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. The error was &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not load tokenizer for </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Falling back to &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">adapter_base_model_id</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">model_id</span> <span class="o">=</span> <span class="n">adapter_base_model_id</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">TimeoutError</span><span class="p">,</span> <span class="n">RequestError</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Couldn&#39;t load tokenizer for </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Retrying.&quot;</span><span class="p">)</span>
             <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
             <span class="k">continue</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Could not load tokenizer for model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> after </span><span class="si">{</span><span class="n">num_retries</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="s2">&quot;attempts.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tokenizer</span><span class="o">.</span><span class="n">pad_token</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token</span>
+
+    <span class="k">return</span> <span class="n">tokenizer</span>
 
 
 <span class="k">def</span> <span class="nf">_run_engine_with_fixed_progress_bars</span><span class="p">(</span>

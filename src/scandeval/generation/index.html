@@ -1485,44 +1485,7 @@
 <span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to text generation of models.&quot;&quot;&quot;</span>
+<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to text generation of models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -1673,11 +1636,8 @@
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
 
             <span class="n">single_sample_batch</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;text&quot;</span> <span class="ow">in</span> <span class="n">batch</span>
-                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
-                <span class="ow">or</span> <span class="s2">&quot;messages&quot;</span> <span class="ow">in</span> <span class="n">batch</span>
-                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span>
-            <span class="p">)</span>
+                <span class="s2">&quot;text&quot;</span> <span class="ow">in</span> <span class="n">batch</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;messages&quot;</span> <span class="ow">in</span> <span class="n">batch</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">single_sample_batch</span><span class="p">:</span>
                 <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
@@ -1741,40 +1701,6 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">itr_scores</span>
-
-
-<span class="c1"># TODO: Consider removing</span>
-<span class="c1"># def extract_raw_predictions(generated_sequences: torch.Tensor) -&gt; list[str]:</span>
-<span class="c1">#     &quot;&quot;&quot;Get the raw predictions from the generated sequences.</span>
-<span class="c1">#</span>
-<span class="c1">#     Args:</span>
-<span class="c1">#         generated_sequences:</span>
-<span class="c1">#             The generated sequences from the model. The outer-most list is the</span>
-<span class="c1">#             batch dimension, the inner-most list is the sequence dimension,</span>
-<span class="c1">#             consisting of token IDs.</span>
-<span class="c1">#</span>
-<span class="c1">#     Returns:</span>
-<span class="c1">#         The candidate labels with the smallest edit distance to the predicted labels.</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     raw_predictions: list[str] = [</span>
-<span class="c1">#         tokenizer.decode(completion_ids.tolist(), skip_special_tokens=True).split(</span>
-<span class="c1">#             &quot;\n\n&quot;</span>
-<span class="c1">#         )[0]</span>
-<span class="c1">#         for completion_ids in generated_sequences.long()</span>
-<span class="c1">#     ]</span>
-<span class="c1">#</span>
-<span class="c1">#     end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)</span>
-<span class="c1">#     if end_of_chat_token_ids is not None:</span>
-<span class="c1">#         end_of_chat_token = tokenizer.decode(end_of_chat_token_ids).strip()</span>
-<span class="c1">#         if end_of_chat_token:</span>
-<span class="c1">#             raw_predictions = [</span>
-<span class="c1">#                 raw_prediction.split(end_of_chat_token)[0]</span>
-<span class="c1">#                 for raw_prediction in raw_predictions</span>
-<span class="c1">#             ]</span>
-<span class="c1">#</span>
-<span class="c1">#     raw_predictions = [raw_prediction.strip() for raw_prediction in raw_predictions]</span>
-<span class="c1">#</span>
-<span class="c1">#     return raw_predictions</span>
 
 
 <span class="k">def</span> <span class="nf">debug_log</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.generation.debug_log"><a href="../../../api/scandeval/generation/#scandeval.generation.debug_log" title="Go to docs">docs</a></div>

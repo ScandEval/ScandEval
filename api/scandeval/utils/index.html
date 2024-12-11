@@ -1261,15 +1261,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#scandeval.utils.convert_prompt_to_instruction" class="md-nav__link">
-    <span class="md-ellipsis">
-      convert_prompt_to_instruction
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#scandeval.utils.scramble" class="md-nav__link">
     <span class="md-ellipsis">
       scramble
@@ -1282,6 +1273,15 @@
   <a href="#scandeval.utils.unscramble" class="md-nav__link">
     <span class="md-ellipsis">
       unscramble
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.utils.log_once" class="md-nav__link">
+    <span class="md-ellipsis">
+      log_once
     </span>
   </a>
   
@@ -1464,15 +1464,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#scandeval.utils.convert_prompt_to_instruction" class="md-nav__link">
-    <span class="md-ellipsis">
-      convert_prompt_to_instruction
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#scandeval.utils.scramble" class="md-nav__link">
     <span class="md-ellipsis">
       scramble
@@ -1485,6 +1476,15 @@
   <a href="#scandeval.utils.unscramble" class="md-nav__link">
     <span class="md-ellipsis">
       unscramble
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.utils.log_once" class="md-nav__link">
+    <span class="md-ellipsis">
+      log_once
     </span>
   </a>
   
@@ -1611,11 +1611,6 @@ Determine if we should add a prefix space to the labels.</p>
 Get the end token ID for chat models.</p>
 </li>
 <li>
-<p><span class="mkapi-item-name"><a href="./#scandeval.utils.convert_prompt_to_instruction" title="scandeval.utils.convert_prompt_to_instruction">convert_prompt_to_instruction</a></span>
- <span class="mkapi-dash">&mdash;</span>
-Make an instruction prompt conform to a chat template.</p>
-</li>
-<li>
 <p><span class="mkapi-item-name"><a href="./#scandeval.utils.scramble" title="scandeval.utils.scramble">scramble</a></span>
  <span class="mkapi-dash">&mdash;</span>
 Scramble a string in a bijective manner.</p>
@@ -1624,6 +1619,11 @@ Scramble a string in a bijective manner.</p>
 <p><span class="mkapi-item-name"><a href="./#scandeval.utils.unscramble" title="scandeval.utils.unscramble">unscramble</a></span>
  <span class="mkapi-dash">&mdash;</span>
 Unscramble a string in a bijective manner.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.utils.log_once" title="scandeval.utils.log_once">log_once</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Log a message once.</p>
 </li>
 </ul>
 </div>
@@ -2217,59 +2217,6 @@ template.</p>
 </ul>
 </div>
 </div>
-<p class="mkapi-object mkapi-page-source" id="scandeval.utils.convert_prompt_to_instruction">
-<span class="mkapi-object-link">
-
-
-<a href="../../../src/scandeval/utils/#scandeval.utils.convert_prompt_to_instruction" title="Go to source">source</a>
-<span class="mkapi-document-toggle" title="Toggle all docs">
-<i class="fa-regular fa-square-minus"></i>
-</span>
-</span>
-<span class="mkapi-object-name"><a href="./#scandeval.utils.convert_prompt_to_instruction" title="scandeval.utils.convert_prompt_to_instruction">convert_prompt_to_instruction</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">prompt</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">tokenizer</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">str</span></span>
-</p>
-<div class="mkapi-document">
-<p>Make an instruction prompt conform to a chat template.</p>
-<p>Note that it is expected that the prompt has the following format:</p>
-<p class="mkapi-section">
-<span class="mkapi-object-link">
-<span class="mkapi-section-toggle" title="Toggle parameters">
-<i class="fa-regular fa-square-minus"></i>
-</span>
-</span>
-<span class="mkapi-section-name">Parameters</span>
-</p>
-<div class="mkapi-section-content">
-<ul class="mkapi-item-list">
-<li>
-<p><span class="mkapi-item-name">prompt</span> : 
-<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
-<p>The prompt.</p>
-</li>
-<li>
-<p><span class="mkapi-item-name">tokenizer</span> : 
-<span class="mkapi-item-type"><span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span></span> <span class="mkapi-dash">&mdash;</span></p>
-<p>The tokenizer.</p>
-</li>
-</ul>
-</div>
-<p class="mkapi-section">
-<span class="mkapi-object-link">
-<span class="mkapi-section-toggle" title="Toggle returns">
-<i class="fa-regular fa-square-minus"></i>
-</span>
-</span>
-<span class="mkapi-section-name">Returns</span>
-</p>
-<div class="mkapi-section-content">
-<ul class="mkapi-item-list">
-<li>
-<p><span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span>
-The chat template formatted prompt.</p>
-</li>
-</ul>
-</div>
-</div>
 <p class="mkapi-object mkapi-page-source" id="scandeval.utils.scramble">
 <span class="mkapi-object-link">
 
@@ -2360,6 +2307,59 @@ The scrambled string.</p>
 <li>
 <p><span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span>
 The unscrambled string.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.utils.log_once">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/utils/#scandeval.utils.log_once" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.utils.log_once" title="scandeval.utils.log_once">log_once</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">message</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">level</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default"><span class="mkapi-tooltip" title="logging">logging</span>.<span class="mkapi-tooltip" title="logging.INFO">INFO</span></span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">None</span></span>
+</p>
+<div class="mkapi-document">
+<p>Log a message once.</p>
+<p>This is ensured by caching the input/output pairs of this function, using the
+<span class="mkapi-tooltip" title="functools.cache"><code>functools.cache</code></span> decorator.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">message</span> : 
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The message to log.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">level</span> : 
+<span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The logging level. Defaults to logging.INFO.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">ValueError</span></p>
 </li>
 </ul>
 </div>

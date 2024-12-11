@@ -1446,7 +1446,16 @@
 <span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
-<span class="normal">274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Command-line interface for benchmarking.&quot;&quot;&quot;</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Command-line interface for benchmarking.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">click</span>
 
@@ -1644,6 +1653,13 @@
 <span class="s2">    is changed.&quot;&quot;&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--base-url&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The base URL for a given inference API. Only relevant if `model` refers to a &quot;</span>
+    <span class="s2">&quot;model on an inference API.&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
     <span class="s2">&quot;--debug/--no-debug&quot;</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1675,6 +1691,7 @@
     <span class="n">evaluate_test_split</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">few_shot</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Benchmark pretrained language models on language tasks.&quot;&quot;&quot;</span>
@@ -1710,6 +1727,7 @@
         <span class="n">evaluate_test_split</span><span class="o">=</span><span class="n">evaluate_test_split</span><span class="p">,</span>
         <span class="n">few_shot</span><span class="o">=</span><span class="n">few_shot</span><span class="p">,</span>
         <span class="n">num_iterations</span><span class="o">=</span><span class="n">num_iterations</span><span class="p">,</span>
+        <span class="n">base_url</span><span class="o">=</span><span class="n">base_url</span><span class="p">,</span>
         <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
         <span class="n">run_with_cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>

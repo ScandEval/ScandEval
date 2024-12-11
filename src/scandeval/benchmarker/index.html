@@ -1953,7 +1953,12 @@
 <span class="normal">718</span>
 <span class="normal">719</span>
 <span class="normal">720</span>
-<span class="normal">721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -1965,8 +1970,9 @@
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">rmtree</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 
+<span class="kn">from</span> <span class="nn">torch.distributed</span> <span class="kn">import</span> <span class="n">destroy_process_group</span>
+
 <span class="kn">from</span> <span class="nn">.benchmark_config_factory</span> <span class="kn">import</span> <span class="n">build_benchmark_config</span>
-<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
 <span class="kn">from</span> <span class="nn">.data_loading</span> <span class="kn">import</span> <span class="n">load_data</span>
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfigParams</span><span class="p">,</span> <span class="n">BenchmarkResult</span>
 <span class="kn">from</span> <span class="nn">.dataset_configs</span> <span class="kn">import</span> <span class="n">get_all_dataset_configs</span>
@@ -2030,6 +2036,7 @@
         <span class="n">evaluate_test_split</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">few_shot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">run_with_cli</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2102,6 +2109,9 @@
 <span class="sd">                The number of times each model should be evaluated. This is only meant</span>
 <span class="sd">                to be used for power users, and scores will not be allowed on the</span>
 <span class="sd">                leaderboards if this is changed. Defaults to 10.</span>
+<span class="sd">            base_url:</span>
+<span class="sd">                The base URL for a given inference API. Only relevant if `model` refers</span>
+<span class="sd">                to a model on an inference API. Defaults to None.</span>
 <span class="sd">            debug:</span>
 <span class="sd">                Whether to output debug information. Defaults to False.</span>
 <span class="sd">            run_with_cli:</span>
@@ -2138,6 +2148,7 @@
             <span class="n">evaluate_test_split</span><span class="o">=</span><span class="n">evaluate_test_split</span><span class="p">,</span>
             <span class="n">few_shot</span><span class="o">=</span><span class="n">few_shot</span><span class="p">,</span>
             <span class="n">num_iterations</span><span class="o">=</span><span class="n">num_iterations</span><span class="p">,</span>
+            <span class="n">base_url</span><span class="o">=</span><span class="n">base_url</span><span class="p">,</span>
             <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
             <span class="n">run_with_cli</span><span class="o">=</span><span class="n">run_with_cli</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2384,6 +2395,19 @@
             <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">clear_model_cache</span><span class="p">:</span>
                 <span class="n">clear_model_cache_fn</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">)</span>
 
+        <span class="c1"># This avoids the following warning at the end of the benchmarking:</span>
+        <span class="c1">#   Warning: WARNING: process group has NOT been destroyed before we destruct</span>
+        <span class="c1">#   ProcessGroupNCCL. On normal program exit, the application should call</span>
+        <span class="c1">#   destroy_process_group to ensure that any pending NCCL operations have</span>
+        <span class="c1">#   finished in this process. In rare cases this process can exit before this</span>
+        <span class="c1">#   point and block the progress of another member of the process group. This</span>
+        <span class="c1">#   constraint has always been present,  but this warning has only been added</span>
+        <span class="c1">#   since PyTorch 2.4 (function operator())</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">destroy_process_group</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
         <span class="k">return</span> <span class="n">current_benchmark_results</span>
 
     <span class="k">def</span> <span class="nf">_get_updated_benchmark_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BenchmarkConfig&quot;</span><span class="p">:</span>
@@ -2470,11 +2494,6 @@
         <span class="n">model</span><span class="p">:</span> <span class="n">BenchmarkModule</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">model_config</span> <span class="o">=</span> <span class="n">get_model_config</span><span class="p">(</span>
-                    <span class="n">model_id</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span>
-                    <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="p">,</span>
-                <span class="p">)</span>
-
                 <span class="c1"># Set random seeds to enforce reproducibility of the randomly</span>
                 <span class="c1"># initialised weights</span>
                 <span class="n">rng</span> <span class="o">=</span> <span class="n">enforce_reproducibility</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">framework</span><span class="p">)</span>
@@ -2487,15 +2506,6 @@
                         <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="k">assert</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-
-                <span class="c1"># This happens when a local model is used, as we cannot fetch the model</span>
-                <span class="c1"># metadata. Note that this is only the case if the model type is not any</span>
-                <span class="c1"># of the ones hardcoded in `local.py`</span>
-                <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;unknown&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">is_generative</span><span class="p">:</span>
-                        <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="s2">&quot;fill-mask&quot;</span>
 
                 <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">SPEED</span><span class="p">:</span>
                     <span class="n">scores</span> <span class="o">=</span> <span class="n">benchmark_speed</span><span class="p">(</span>

@@ -1265,15 +1265,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#scandeval.utils.convert_prompt_to_instruction" class="md-nav__link">
-    <span class="md-ellipsis">
-      convert_prompt_to_instruction
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#scandeval.utils.scramble" class="md-nav__link">
     <span class="md-ellipsis">
       scramble
@@ -1286,6 +1277,15 @@
   <a href="#scandeval.utils.unscramble" class="md-nav__link">
     <span class="md-ellipsis">
       unscramble
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.utils.log_once" class="md-nav__link">
+    <span class="md-ellipsis">
+      log_once
     </span>
   </a>
   
@@ -1840,7 +1840,9 @@
 <span class="normal">521</span>
 <span class="normal">522</span>
 <span class="normal">523</span>
-<span class="normal">524</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Utility functions to be used in other scripts.&quot;&quot;&quot;</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Utility functions to be used in other scripts.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
@@ -1852,6 +1854,7 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">t</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cache</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">litellm</span>
@@ -2222,6 +2225,7 @@
     <span class="k">return</span> <span class="n">strip_prompts</span>
 
 
+<span class="c1"># TODO: This is currently not used - maybe remove.</span>
 <span class="k">def</span> <span class="nf">should_prefix_space_be_added_to_labels</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.utils.should_prefix_space_be_added_to_labels"><a href="../../../api/scandeval/utils/#scandeval.utils.should_prefix_space_be_added_to_labels" title="Go to docs">docs</a></div>
     <span class="n">labels_to_be_generated</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">tokenizer</span><span class="p">:</span> <span class="s2">&quot;PreTrainedTokenizer&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -2304,34 +2308,6 @@
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">end_of_chat_tokens</span>
 
-<div class="mkapi-source-link" id="scandeval.utils.convert_prompt_to_instruction"><a href="../../../api/scandeval/utils/#scandeval.utils.convert_prompt_to_instruction" title="Go to docs">docs</a></div>
-<span class="k">def</span> <span class="nf">convert_prompt_to_instruction</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">:</span> <span class="s2">&quot;PreTrainedTokenizer&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make an instruction prompt conform to a chat template.</span>
-
-<span class="sd">    Note that it is expected that the prompt has the following format:</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        prompt:</span>
-<span class="sd">            The prompt.</span>
-<span class="sd">        tokenizer:</span>
-<span class="sd">            The tokenizer.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        The chat template formatted prompt.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">prompt</span>
-
-    <span class="n">instruction_prompt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-        <span class="n">conversation</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">prompt</span><span class="p">)],</span>
-        <span class="n">chat_template</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_chat_template</span><span class="p">(),</span>
-        <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instruction_prompt</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">instruction_prompt</span>
-
 
 <span class="k">def</span> <span class="nf">scramble</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.utils.scramble"><a href="../../../api/scandeval/utils/#scandeval.utils.scramble" title="Go to docs">docs</a></div>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scramble a string in a bijective manner.</span>
@@ -2364,6 +2340,34 @@
     <span class="n">inverse_permutation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
     <span class="n">unscrambled</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">scrambled_text</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inverse_permutation</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">unscrambled</span>
+
+
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">log_once</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.utils.log_once"><a href="../../../api/scandeval/utils/#scandeval.utils.log_once" title="Go to docs">docs</a></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Log a message once.</span>
+
+<span class="sd">    This is ensured by caching the input/output pairs of this function, using the</span>
+<span class="sd">    `functools.cache` decorator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message:</span>
+<span class="sd">            The message to log.</span>
+<span class="sd">        level:</span>
+<span class="sd">            The logging level. Defaults to logging.INFO.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">match</span> <span class="n">level</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">logging</span><span class="o">.</span><span class="n">CRITICAL</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid logging level: </span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 
 
