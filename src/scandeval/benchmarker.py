@@ -76,7 +76,8 @@ class Benchmarker:
         evaluate_test_split: bool = False,
         few_shot: bool = True,
         num_iterations: int = 10,
-        base_url: str | None = None,
+        api_base: str | None = None,
+        api_version: str | None = None,
         debug: bool = False,
         run_with_cli: bool = False,
     ) -> None:
@@ -149,9 +150,11 @@ class Benchmarker:
                 The number of times each model should be evaluated. This is only meant
                 to be used for power users, and scores will not be allowed on the
                 leaderboards if this is changed. Defaults to 10.
-            base_url:
+            api_base:
                 The base URL for a given inference API. Only relevant if `model` refers
                 to a model on an inference API. Defaults to None.
+            api_version:
+                The version of the API to use. Defaults to None.
             debug:
                 Whether to output debug information. Defaults to False.
             run_with_cli:
@@ -188,7 +191,8 @@ class Benchmarker:
             evaluate_test_split=evaluate_test_split,
             few_shot=few_shot,
             num_iterations=num_iterations,
-            base_url=base_url,
+            api_base=api_base,
+            api_version=api_version,
             debug=debug,
             run_with_cli=run_with_cli,
         )

@@ -359,6 +359,13 @@ class VLLMModel(HuggingFaceEncoderModel):
             Whether the model exists, or an error describing why we cannot check
             whether the model exists.
         """
+        using_api = (
+            benchmark_config.api_base is not None
+            or benchmark_config.api_version is not None
+        )
+        if using_api:
+            return False
+
         model_id, revision = (
             model_id.split("@") if "@" in model_id else (model_id, "main")
         )

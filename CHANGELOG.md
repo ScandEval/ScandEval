@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added the `api_version` argument, mimicking the LiteLLM API.
 
+### Changed
+- Changed the `base_url` argument to `api_base`, to mimic the LiteLLM API.
+
+### Fixed
+- Now correctly uses the `api_base` argument when evaluating models with the LiteLLM
+  API.
 
 
 ## [v14.0.0] - 2024-12-11
