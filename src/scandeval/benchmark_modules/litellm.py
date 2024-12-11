@@ -119,11 +119,9 @@ class LiteLLMModel(BenchmarkModule):
         ), "API models only support single-sample batching."
         messages = inputs["messages"][0]
 
-        max_input_and_output_tokens = 5_000 + self.dataset_config.max_generated_tokens
         generation_kwargs: dict[str, t.Any] = dict(
             model=self.model_config.model_id,
-            max_tokens=max_input_and_output_tokens,
-            max_new_tokens=self.dataset_config.max_generated_tokens,
+            max_completion_tokens=self.dataset_config.max_generated_tokens,
             stop=["\n\n"],
             temperature=0.0,
             seed=4242,
