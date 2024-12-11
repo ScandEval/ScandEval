@@ -753,10 +753,10 @@ class VLLMModel(HuggingFaceEncoderModel):
         instruction_model = self._tokenizer.chat_template is not None
         if instruction_model:
             few_shot_messages = [
-                dict(role=role, content=content.split(":", 1)[1].strip())
-                for prompt_label in few_shot_sections
-                for role, content in zip(it.cycle(["user", "assistant"]), prompt_label)
-                if content.split(":", 1)[1].strip() != ""
+                dict(role=role, content=content)
+                for prompt, label in few_shot_sections
+                for role, content in zip(("user", "assistant"), (prompt, label))
+                if label != ""
             ]
 
             messages_list = [
