@@ -245,11 +245,21 @@ class VLLMModel(HuggingFaceEncoderModel):
             self._tokenizer.pad_token_id = self._tokenizer.eos_token_id
             self._tokenizer.pad_token = self._tokenizer.eos_token
         elif self._tokenizer.pad_token_id is None:
-            breakpoint()
-            raise InvalidModel(
-                "Could not find a suitable token to use as a padding token, since "
-                "the model does not have a BOS, EOS, or padding token."
-            )
+            pad_token_candidates = ["<pad>", "[pad]", "<|endoftext|>", "<|im_end|>"]
+            pad_token_candidates.extend([c.upper() for c in pad_token_candidates])
+            for candidate in pad_token_candidates:
+                if candidate in self._tokenizer.get_vocab():
+                    pad_token_id = self._tokenizer.get_vocab()[candidate]
+                    self._tokenizer.pad_token = candidate
+                    self._tokenizer.pad_token_id = pad_token_id
+                    break
+            else:
+                raise InvalidModel(
+                    "Could not find a suitable token to use as a padding token, since "
+                    "the model does not have a BOS, EOS, or padding token, and does "
+                    f"not have any of the following tokens in its vocabulary: "
+                    f"{pad_token_candidates}."
+                )
 
         assert self._tokenizer.pad_token_id is not None
 
