@@ -238,6 +238,18 @@ class VLLMModel(HuggingFaceEncoderModel):
         ):
             self._tokenizer.pad_token_id = self._tokenizer.bos_token_id
             self._tokenizer.pad_token = self._tokenizer.bos_token
+        elif (
+            self._tokenizer.eos_token_id is not None
+            and self._tokenizer.pad_token_id is None
+        ):
+            self._tokenizer.pad_token_id = self._tokenizer.eos_token_id
+            self._tokenizer.pad_token = self._tokenizer.eos_token
+        elif self._tokenizer.pad_token_id is None:
+            raise InvalidModel(
+                "Could not find a suitable token to use as a padding token, since "
+                "the model does not have a BOS, EOS, or padding token."
+            )
+
         assert self._tokenizer.pad_token_id is not None
 
         # Add end of chat token as a stopping token, if it exists
