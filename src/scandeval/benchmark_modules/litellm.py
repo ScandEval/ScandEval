@@ -311,6 +311,7 @@ class LiteLLMModel(BenchmarkModule):
             )
             return True
         except (BadRequestError, NotFoundError):
+            breakpoint()
             candidate_models = [
                 candidate_model_id
                 for candidate_model_id in litellm.model_list
