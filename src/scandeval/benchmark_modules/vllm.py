@@ -645,17 +645,23 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The example with the few-shot examples applied.
         """
+        instruction_model = self._tokenizer.chat_template is not None
+        if instruction_model:
+            prompt_template = self.dataset_config.instruction_prompt
+        else:
+            prompt_template = self.dataset_config.prompt_template
+
         match task.supertask:
             case "sequence-classification":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
                         label=example["label"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=text.replace("\n", " ").strip(), label=""
                     )
                     for text in examples["text"]
@@ -663,14 +669,14 @@ class VLLMModel(HuggingFaceEncoderModel):
 
             case "text-to-text":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=example["text"].replace("\n", " ").strip(),
                         target_text=example["target_text"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=text.replace("\n", " ").strip(), target_text=""
                     )
                     for text in examples["text"]
@@ -695,14 +701,14 @@ class VLLMModel(HuggingFaceEncoderModel):
                     return json.dumps(labels, ensure_ascii=False)
 
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                         label=create_label(example=example),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=" ".join(tokens).replace("\n", " ").strip(), label=""
                     )
                     for tokens in examples["tokens"]
@@ -710,7 +716,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
             case "question-answering":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=example["context"].replace("\n", " ").strip(),
                         question=example["question"].replace("\n", " ").strip(),
                         label=example["answers"]["text"][0].replace("\n", " "),
@@ -718,7 +724,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    prompt_template.format(
                         text=context.replace("\n", " ").strip(),
                         question=question.replace("\n", " ").strip(),
                         label="",
@@ -750,13 +756,6 @@ class VLLMModel(HuggingFaceEncoderModel):
                 )
                 if content.split(":", 1)[1].strip() != ""
             ]
-
-            if self.dataset_config.prompt_prefix:
-                few_shot_messages[0]["content"] = (
-                    self.dataset_config.instruction_prompt
-                    + "\n\n"
-                    + few_shot_messages[0]["content"]
-                )
 
             messages_list = [
                 few_shot_messages
