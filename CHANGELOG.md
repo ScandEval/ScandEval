@@ -42,6 +42,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Better handling of adapter models. The Hugging Face model configuration and the
   tokeniser will now be attempted to be loaded from the base model ID, if available.
+- Now uses EOS token as the PAD token if a generative model has neither PAD nor BOS
+  token available.
 
 
 ## [v13.3.0] - 2024-11-29
