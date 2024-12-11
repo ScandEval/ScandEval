@@ -313,6 +313,7 @@ class LiteLLMModel(BenchmarkModule):
                 )
                 return True
             except APIError as e:
+                breakpoint()
                 if "'503 Service Unavailable" not in str(e):
                     raise e
                 logger.warning(
