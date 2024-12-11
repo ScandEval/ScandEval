@@ -191,12 +191,19 @@ def get_closest_logprobs_labels(
                 output_labels.append(output_label)
                 break
         else:
-            log_once(
-                "Could not find a candidate label for any of the generated "
-                f"labels in the sample {sample}. Using {candidate_labels[0]!r} "
-                "as the output label.",
-                level=logging.DEBUG,
-            )
+            if len(sample) == 0:
+                log_once(
+                    "The model outputted an empty string, so no candidate labels could "
+                    "be determined. Using {candidate_labels[0]!r} as the output label.",
+                    level=logging.DEBUG,
+                )
+            else:
+                log_once(
+                    "Could not find a candidate label for any of the generated "
+                    f"labels in the sample {sample}. Using {candidate_labels[0]!r} "
+                    "as the output label.",
+                    level=logging.DEBUG,
+                )
             output_labels.append(candidate_labels[0])
 
     assert len(output_labels) == len(generation_logprobs)
