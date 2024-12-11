@@ -300,37 +300,52 @@ class LiteLLMModel(BenchmarkModule):
         if model_id in litellm.model_list:
             return True
 
-        try:
-            litellm.completion(
-                messages=[dict(role="user", content="X")],
-                model=model_id,
-                max_tokens=1,
-                api_key=benchmark_config.api_key,
-                api_base=benchmark_config.api_base,
-                api_version=benchmark_config.api_version,
+        num_attempts = 10
+        for _ in range(num_attempts):
+            try:
+                litellm.completion(
+                    messages=[dict(role="user", content="X")],
+                    model=model_id,
+                    max_tokens=1,
+                    api_key=benchmark_config.api_key,
+                    api_base=benchmark_config.api_base,
+                    api_version=benchmark_config.api_version,
+                )
+                return True
+            except APIError as e:
+                if "'503 Service Unavailable" not in str(e):
+                    raise e
+                logger.warning(
+                    f"Failed to check if model {model_id!r} exists. Retrying in "
+                    f"{num_attempts} seconds..."
+                )
+                sleep(10)
+            except (BadRequestError, NotFoundError):
+                candidate_models = [
+                    candidate_model_id
+                    for candidate_model_id in litellm.model_list
+                    if candidate_model_id.startswith(model_id)
+                ]
+                match len(candidate_models):
+                    case 0:
+                        pass
+                    case 1:
+                        logger.warning(
+                            f"Could not find the model ID {model_id!r}. Did you mean "
+                            f"{candidate_models[0]!r}?"
+                        )
+                    case _:
+                        candidate_models_str = "', '".join(candidate_models)
+                        logger.warning(
+                            f"Could not find the model ID {model_id!r}. Did you mean "
+                            f"any of the following model IDs: '{candidate_models_str}'?"
+                        )
+                return False
+        else:
+            logger.error(
+                f"Failed to check if model {model_id!r} exists after {num_attempts} "
+                "attempts. Assuming it does not exist."
             )
-            return True
-        except (BadRequestError, NotFoundError):
-            breakpoint()
-            candidate_models = [
-                candidate_model_id
-                for candidate_model_id in litellm.model_list
-                if candidate_model_id.startswith(model_id)
-            ]
-            match len(candidate_models):
-                case 0:
-                    pass
-                case 1:
-                    logger.warning(
-                        f"Could not find the model ID {model_id!r}. Did you mean "
-                        f"{candidate_models[0]!r}?"
-                    )
-                case _:
-                    candidate_models_str = "', '".join(candidate_models)
-                    logger.warning(
-                        f"Could not find the model ID {model_id!r}. Did you mean any of "
-                        f"the following model IDs: '{candidate_models_str}'?"
-                    )
             return False
 
     @classmethod
