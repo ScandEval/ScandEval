@@ -1,1 +1,5 @@
+---
+hide:
+    - toc
+---
 # 🇮🇸 Icelandic

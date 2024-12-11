@@ -1,1 +1,5 @@
+---
+hide:
+    - toc
+---
 # 🇩🇰🇸🇪🇳🇴 Mainland Scandinavian
