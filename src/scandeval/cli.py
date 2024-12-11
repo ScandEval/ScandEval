@@ -203,6 +203,13 @@ from .tasks import get_all_tasks
     "model on an inference API.",
 )
 @click.option(
+    "--api-version",
+    default=None,
+    show_default=True,
+    help="The version of the API to use. Only relevant if `model` refers to a model on "
+    "an inference API.",
+)
+@click.option(
     "--debug/--no-debug",
     default=False,
     show_default=True,
