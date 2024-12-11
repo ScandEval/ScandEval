@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.0.0] - 2024-12-11
 ### Added
 - Added support for [LiteLLM](https://docs.litellm.ai/), meaning that all LLMs on 100+
   APIs can now be benchmarked! This includes OpenAI, Anthropic, Google, Mistral AI,

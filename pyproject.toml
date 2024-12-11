@@ -1,6 +1,6 @@
 [project]
 name = "ScandEval"
-version = "13.3.0"
+version = "14.0.0"
 description = "Evaluation of pretrained language models on mono- or multilingual language tasks."
 readme = "README.md"
 authors = [
