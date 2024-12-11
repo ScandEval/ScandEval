@@ -137,6 +137,15 @@ class LiteLLMModel(BenchmarkModule):
             ), "Prompt must contain 'json' for JSON tasks."
             generation_kwargs["response_format"] = dict(type="json_object")
 
+        if self.benchmark_config.api_key is not None:
+            generation_kwargs["api_key"] = self.benchmark_config.api_key
+
+        if self.benchmark_config.api_base is not None:
+            generation_kwargs["api_base"] = self.benchmark_config.api_base
+
+        if self.benchmark_config.api_version is not None:
+            generation_kwargs["api_version"] = self.benchmark_config.api_version
+
         # This drops generation kwargs that are not supported by the model
         litellm.drop_params = True
 

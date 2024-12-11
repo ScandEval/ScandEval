@@ -196,11 +196,18 @@ from .tasks import get_all_tasks
     is changed.""",
 )
 @click.option(
-    "--base-url",
+    "--api-base",
     default=None,
     show_default=True,
     help="The base URL for a given inference API. Only relevant if `model` refers to a "
     "model on an inference API.",
+)
+@click.option(
+    "--api-version",
+    default=None,
+    show_default=True,
+    help="The version of the API to use. Only relevant if `model` refers to a model on "
+    "an inference API.",
 )
 @click.option(
     "--debug/--no-debug",
@@ -234,7 +241,8 @@ def benchmark(
     evaluate_test_split: bool,
     few_shot: bool,
     num_iterations: int,
-    base_url: str | None,
+    api_base: str | None,
+    api_version: str | None,
     debug: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
@@ -270,7 +278,8 @@ def benchmark(
         evaluate_test_split=evaluate_test_split,
         few_shot=few_shot,
         num_iterations=num_iterations,
-        base_url=base_url,
+        api_base=api_base,
+        api_version=api_version,
         debug=debug,
         run_with_cli=True,
     )
