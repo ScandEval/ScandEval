@@ -121,9 +121,7 @@ class LiteLLMModel(BenchmarkModule):
 
         generation_kwargs: dict[str, t.Any] = dict(
             model=self.model_config.model_id,
-            max_completion_tokens=self.dataset_config.max_generated_tokens,
-            max_new_tokens=self.dataset_config.max_generated_tokens,
-            max_tokens=5000,
+            max_tokens=self.dataset_config.max_generated_tokens,
             stop=["\n\n"],
             temperature=0.0,
             seed=4242,
