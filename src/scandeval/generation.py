@@ -157,6 +157,8 @@ def generate_single_iteration(
             if single_sample_batch:
                 batch = {key: [value] for key, value in batch.items()}
 
+            breakpoint()
+
             model_output = model.generate(inputs=batch)
             extracted_labels = model.extract_labels_from_generation(
                 input_batch=batch, model_output=model_output
