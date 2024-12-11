@@ -645,7 +645,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The example with the few-shot examples applied.
         """
-        instruction_model = self._tokenizer.chat_template is not None
+        instruction_model = self._tokenizer.chat_template is not None and False  # TEMP
 
         def create_prompt(**kwargs) -> tuple[str, str]:
             """Create a prompt from the given keyword arguments.
@@ -750,8 +750,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     f"Unsupported task supertask: {task.supertask}."
                 )
 
-        instruction_model = self._tokenizer.chat_template is not None
-        if instruction_model and False:  # TEMP
+        if instruction_model:
             few_shot_messages = [
                 dict(role=role, content=content)
                 for prompt, label in few_shot_sections
