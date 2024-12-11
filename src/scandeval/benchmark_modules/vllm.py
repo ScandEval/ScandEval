@@ -753,7 +753,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
             if self.dataset_config.prompt_prefix:
                 few_shot_messages[0]["content"] = (
-                    self.dataset_config.prompt_prefix
+                    self.dataset_config.instruction_prompt
                     + "\n\n"
                     + few_shot_messages[0]["content"]
                 )
