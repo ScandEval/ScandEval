@@ -473,6 +473,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         # Prefer base model ID if the model is an adapter - the adapter will be added on
         # during inference in this case
         model_id = self.model_config.adapter_base_model_id or self.model_config.model_id
+        breakpoint()
 
         try:
             model = LLM(
