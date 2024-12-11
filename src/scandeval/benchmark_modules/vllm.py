@@ -17,6 +17,7 @@ from types import MethodType
 import torch
 from datasets import DatasetDict
 from huggingface_hub import snapshot_download
+from torch.distributed import destroy_process_group
 from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
@@ -985,6 +986,7 @@ def clear_vllm() -> None:
     """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
     try:
         destroy_model_parallel()
+        destroy_process_group()
     except ImportError:
         pass
     clear_memory()
