@@ -16,6 +16,7 @@ from types import MethodType
 import torch
 from datasets import DatasetDict
 from huggingface_hub import snapshot_download
+from torch.distributed import destroy_process_group
 from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
@@ -951,11 +952,10 @@ def clear_vllm() -> None:
         destroy_model_parallel()
     except ImportError:
         pass
-    # TEMP: Check if this is needed
-    # try:
-    #     destroy_process_group()
-    # except AssertionError:
-    #     pass
+    try:
+        destroy_process_group()
+    except AssertionError:
+        pass
     clear_memory()
     if ray.is_initialized():
         ray.shutdown()
