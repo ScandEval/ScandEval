@@ -50,7 +50,6 @@ from ..task_utils import (
 )
 from ..types import ExtractLabelsFunction
 from ..utils import (
-    HiddenPrints,
     clear_memory,
     create_model_cache_dir,
     get_end_of_chat_token_ids,
@@ -948,16 +947,15 @@ def _run_engine_with_fixed_progress_bars(
 
 def clear_vllm() -> None:
     """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
-    with HiddenPrints():
-        try:
-            destroy_model_parallel()
-        except ImportError:
-            pass
-        # TEMP: Check if this is needed
-        # try:
-        #     destroy_process_group()
-        # except AssertionError:
-        #     pass
-        clear_memory()
-        if ray.is_initialized():
-            ray.shutdown()
+    try:
+        destroy_model_parallel()
+    except ImportError:
+        pass
+    # TEMP: Check if this is needed
+    # try:
+    #     destroy_process_group()
+    # except AssertionError:
+    #     pass
+    clear_memory()
+    if ray.is_initialized():
+        ray.shutdown()
