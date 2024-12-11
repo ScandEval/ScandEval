@@ -303,6 +303,7 @@ class LiteLLMModel(BenchmarkModule):
         num_attempts = 10
         for _ in range(num_attempts):
             try:
+                breakpoint()
                 litellm.completion(
                     messages=[dict(role="user", content="X")],
                     model=model_id,
@@ -313,7 +314,6 @@ class LiteLLMModel(BenchmarkModule):
                 )
                 return True
             except APIError as e:
-                breakpoint()
                 if "'503 Service Unavailable" not in str(e):
                     raise e
                 logger.warning(
