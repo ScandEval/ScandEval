@@ -183,7 +183,8 @@ class LiteLLMModel(BenchmarkModule):
         assert isinstance(model_response, ModelResponse)
         model_response_choices = model_response.choices[0]
         assert isinstance(model_response_choices, litellm.Choices)
-        generation_output = model_response_choices.message["content"].strip()
+        generation_output = model_response_choices.message["content"] or ""
+        generation_output = generation_output.strip()
 
         # Structure the model output as a GenerativeModelOutput object
         model_output = GenerativeModelOutput(sequences=[generation_output])
