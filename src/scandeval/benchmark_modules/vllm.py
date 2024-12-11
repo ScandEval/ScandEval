@@ -473,7 +473,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         # Prefer base model ID if the model is an adapter - the adapter will be added on
         # during inference in this case
         model_id = self.model_config.adapter_base_model_id or self.model_config.model_id
-        breakpoint()
 
         try:
             model = LLM(
@@ -491,7 +490,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 quantization=quantization,
                 dtype=dtype,
                 enforce_eager=True,
-                max_logprobs=MAX_LOGPROBS,
+                max_logprobs=MAX_LOGPROBS if self.output_scores else None,
                 # TEMP: Prefix caching isn't supported with sliding window in vLLM yet,
                 # so we disable it for now
                 enable_prefix_caching=False,
@@ -508,6 +507,9 @@ class VLLMModel(HuggingFaceEncoderModel):
             raise InvalidModel(
                 f"The model {model_id!r} could not be loaded. The error was {e!r}."
             )
+        except TypeError:
+            breakpoint()
+            pass
 
         model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
         model.config = hf_model_config
