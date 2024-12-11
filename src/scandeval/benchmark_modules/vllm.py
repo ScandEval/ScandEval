@@ -283,9 +283,14 @@ class VLLMModel(HuggingFaceEncoderModel):
             ]
 
         # Strip the prompts if the model's tokeniser requires it
+        instruction_model = self._tokenizer.chat_template is not None
         labels_to_be_generated = list(self.dataset_config.prompt_label_mapping.values())
-        if labels_to_be_generated and should_prompts_be_stripped(
-            labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
+        if (
+            not instruction_model
+            and len(labels_to_be_generated) > 0
+            and should_prompts_be_stripped(
+                labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
+            )
         ):
             prompts = [prompt.strip() for prompt in prompts]
 
