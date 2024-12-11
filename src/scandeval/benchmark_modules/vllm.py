@@ -654,7 +654,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The example with the few-shot examples applied.
         """
-        instruction_model = self._tokenizer.chat_template is not None and False  # TEMP
+        instruction_model = self._tokenizer.chat_template is not None
 
         def create_prompt(**kwargs) -> tuple[str, str]:
             """Create a prompt from the given keyword arguments.
@@ -764,7 +764,6 @@ class VLLMModel(HuggingFaceEncoderModel):
                 dict(role=role, content=content)
                 for prompt, label in few_shot_sections
                 for role, content in [("user", prompt), ("assistant", label)]
-                if label != ""
             ]
 
             messages_list = [
@@ -797,6 +796,8 @@ class VLLMModel(HuggingFaceEncoderModel):
                 )
                 for messages in messages_list
             ]
+
+            breakpoint()
 
             examples["text"] = texts
 
