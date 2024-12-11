@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.0.1] - 2024-12-11
+### Added
+- Added the `api_version` argument, mimicking the LiteLLM API.
+
+### Changed
+- Changed the `base_url` argument to `api_base`, to mimic the LiteLLM API.
+
+### Fixed
+- Now correctly uses the `api_base` argument when evaluating models with the LiteLLM
+  API.
+
+
+## [v14.0.0] - 2024-12-11
 ### Added
 - Added support for [LiteLLM](https://docs.litellm.ai/), meaning that all LLMs on 100+
   APIs can now be benchmarked! This includes OpenAI, Anthropic, Google, Mistral AI,
@@ -19,11 +35,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - No more tokenisation for generation tasks, resulting in faster preprocessing times.
 - Now evaluates models on the validation split by default, to avoid overfitting to the
   test set. The test set can be evaluated on using the new `--evaluate-test-split` flag.
-- Now evaluates instruction tuned models with their chat template. This _does_ often
-  result in worse scores, but it is more representative of how the model is used in
-  practice. Further, if a tokeniser has multiple chat templates, then we use the one
-  corresponding to the ISO 639-1 language code of the dataset, if available -
-  otherwise we will just use the default chat template of the tokeniser.
+- Now evaluates instruction tuned models with their chat template. Further, if a
+  tokeniser has multiple chat templates, then we use the one corresponding to the ISO
+  639-1 language code of the dataset, if available (e.g., "en" for English, "is" for
+  Icelandic and so on) - otherwise we will just use the default chat template of the
+  tokeniser.
 
 ### Removed
 - Removed the option to evaluate on the training split, as this is not a common use
@@ -42,6 +58,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Better handling of adapter models. The Hugging Face model configuration and the
   tokeniser will now be attempted to be loaded from the base model ID, if available.
+- Now uses EOS token as the PAD token if a generative model has neither PAD nor BOS
+  token available.
+- If a generative model has not defined its pad token ID then we now manually check the
+  candidate tokens `<pad>`, `[pad]`, `<|endoftext|>`, `<|im_end|>`, and upper case
+  versions of these tokens.
 
 
 ## [v13.3.0] - 2024-11-29

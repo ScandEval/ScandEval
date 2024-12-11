@@ -6,7 +6,6 @@ import itertools as it
 import json
 import logging
 import random
-import re
 import sys
 import typing as t
 from functools import cached_property, partial
@@ -55,6 +54,7 @@ from ..utils import (
     create_model_cache_dir,
     get_end_of_chat_token_ids,
     log_once,
+    should_prompts_be_stripped,
 )
 from .hf import HuggingFaceEncoderModel, get_model_repo_info
 
@@ -113,6 +113,8 @@ class VLLMModel(HuggingFaceEncoderModel):
         model, tokenizer = self._load_model_and_tokenizer()
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
+
+        self.instruction_model = self._tokenizer.chat_template is not None
 
         self.lora_request: LoRARequest | None = None
         if self.model_config.adapter_base_model_id is not None:
@@ -197,23 +199,16 @@ class VLLMModel(HuggingFaceEncoderModel):
             few_shot_examples = self._extract_few_shot_examples(
                 dataset=dataset, task=task, itr_idx=itr_idx
             )
-            dataset["test"] = dataset["test"].map(
-                partial(
-                    self._apply_few_shot_prompt,
-                    few_shot_examples=few_shot_examples,
-                    task=task,
-                ),
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
-            )
         else:
-            dataset["test"] = dataset["test"].map(
-                partial(self._apply_instruction_prompt, task=task),
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
-            )
+            few_shot_examples = list()
+
+        dataset["test"] = dataset["test"].map(
+            partial(self._apply_prompt, few_shot_examples=few_shot_examples, task=task),
+            batched=True,
+            load_from_cache_file=False,
+            keep_in_memory=True,
+        )
+
         return dataset
 
     def generate(self, inputs: dict) -> GenerativeModelOutput:
@@ -243,6 +238,29 @@ class VLLMModel(HuggingFaceEncoderModel):
         ):
             self._tokenizer.pad_token_id = self._tokenizer.bos_token_id
             self._tokenizer.pad_token = self._tokenizer.bos_token
+        elif (
+            self._tokenizer.eos_token_id is not None
+            and self._tokenizer.pad_token_id is None
+        ):
+            self._tokenizer.pad_token_id = self._tokenizer.eos_token_id
+            self._tokenizer.pad_token = self._tokenizer.eos_token
+        elif self._tokenizer.pad_token_id is None:
+            pad_token_candidates = ["<pad>", "[pad]", "<|endoftext|>", "<|im_end|>"]
+            pad_token_candidates.extend([c.upper() for c in pad_token_candidates])
+            for candidate in pad_token_candidates:
+                if candidate in self._tokenizer.get_vocab():
+                    pad_token_id = self._tokenizer.get_vocab()[candidate]
+                    self._tokenizer.pad_token = candidate
+                    self._tokenizer.pad_token_id = pad_token_id
+                    break
+            else:
+                raise InvalidModel(
+                    "Could not find a suitable token to use as a padding token, since "
+                    "the model does not have a BOS, EOS, or padding token, and does "
+                    f"not have any of the following tokens in its vocabulary: "
+                    f"{pad_token_candidates}."
+                )
+
         assert self._tokenizer.pad_token_id is not None
 
         # Add end of chat token as a stopping token, if it exists
@@ -279,6 +297,17 @@ class VLLMModel(HuggingFaceEncoderModel):
                 prompt if len(prompt) > 0 else self._tokenizer.bos_token
                 for prompt in prompts
             ]
+
+        # Strip the prompts if the model's tokeniser requires it
+        labels_to_be_generated = list(self.dataset_config.prompt_label_mapping.values())
+        if (
+            not self.instruction_model
+            and len(labels_to_be_generated) > 0
+            and should_prompts_be_stripped(
+                labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
+            )
+        ):
+            prompts = [prompt.strip() for prompt in prompts]
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
@@ -330,6 +359,13 @@ class VLLMModel(HuggingFaceEncoderModel):
             Whether the model exists, or an error describing why we cannot check
             whether the model exists.
         """
+        using_api = (
+            benchmark_config.api_base is not None
+            or benchmark_config.api_version is not None
+        )
+        if using_api:
+            return False
+
         model_id, revision = (
             model_id.split("@") if "@" in model_id else (model_id, "main")
         )
@@ -461,38 +497,37 @@ class VLLMModel(HuggingFaceEncoderModel):
         else:
             true_max_model_len = 5_000
 
-        vllm_kwargs = dict(
-            model=self.model_config.adapter_base_model_id or self.model_config.model_id,
-            tokenizer=self.model_config.adapter_base_model_id
-            or self.model_config.model_id,
-            gpu_memory_utilization=0.95,
-            max_model_len=min(true_max_model_len, 5_000),
-            download_dir=download_dir,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-            revision=self.model_config.revision,
-            seed=4242,
-            distributed_executor_backend="mp",  # "ray",  # TEMP?
-            tensor_parallel_size=torch.cuda.device_count(),
-            disable_custom_all_reduce=True,
-            quantization=quantization,
-            dtype=dtype,
-            enforce_eager=True,
-            max_logprobs=MAX_LOGPROBS if self.output_scores else None,
-            # TEMP: Prefix caching isn't supported with sliding window in vLLM yet, so
-            # we disable it for now
-            enable_prefix_caching=False,
-            enable_lora=self.model_config.adapter_base_model_id is not None,
-            max_lora_rank=256,
-        )
-
         clear_vllm()
 
+        # Prefer base model ID if the model is an adapter - the adapter will be added on
+        # during inference in this case
+        model_id = self.model_config.adapter_base_model_id or self.model_config.model_id
+
         try:
-            model = LLM(**vllm_kwargs)
-        except ValueError as e:
-            model_id = (
-                self.model_config.adapter_base_model_id or self.model_config.model_id
+            model = LLM(
+                model=model_id,
+                tokenizer=model_id,
+                gpu_memory_utilization=0.95,
+                max_model_len=min(true_max_model_len, 5_000),
+                download_dir=download_dir,
+                trust_remote_code=self.benchmark_config.trust_remote_code,
+                revision=self.model_config.revision,
+                seed=4242,
+                distributed_executor_backend="mp",  # "ray",  # TEMP?
+                tensor_parallel_size=torch.cuda.device_count(),
+                disable_custom_all_reduce=True,
+                quantization=quantization,
+                dtype=dtype,
+                enforce_eager=True,
+                max_logprobs=MAX_LOGPROBS if self.output_scores else None,
+                # TEMP: Prefix caching isn't supported with sliding window in vLLM yet,
+                # so we disable it for now
+                enable_prefix_caching=False,
+                enable_lora=self.model_config.adapter_base_model_id is not None,
+                max_lora_rank=256,
+                guided_decoding_backend="outlines",
             )
+        except ValueError as e:
             if "trust_remote_code" in str(e):
                 raise InvalidModel(
                     f"Loading the model {model_id!r} needs to trust remote code. "
@@ -626,13 +661,13 @@ class VLLMModel(HuggingFaceEncoderModel):
         random.shuffle(few_shot_examples)
         return few_shot_examples
 
-    def _apply_few_shot_prompt(
+    def _apply_prompt(
         self,
         examples: dict[str, t.Any],
         few_shot_examples: list[dict[str, t.Any]],
         task: Task,
     ) -> dict[str, t.Any]:
-        """Apply few-shot examples to an example.
+        """Apply prompt template to an example, potentially with few-shot examples.
 
         Args:
             examples:
@@ -645,34 +680,52 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The example with the few-shot examples applied.
         """
+
+        def create_prompt(**kwargs) -> tuple[str, str]:
+            """Create a prompt from the given keyword arguments.
+
+            Args:
+                kwargs:
+                    The keyword arguments to use in the prompt.
+
+            Returns:
+                A pair (prompt, label), where "label" is an empty string if the model is
+                not instruction tuned (as in this case it is included in the prompt).
+            """
+            if self.instruction_model:
+                label_key = "label" if "label" in kwargs else "target_text"
+                label = kwargs.pop(label_key)
+                label_mapping = self.dataset_config.prompt_label_mapping
+                label = label_mapping.get(label, label)
+                prompt = self.dataset_config.instruction_prompt.format(**kwargs)
+                return prompt, label
+            else:
+                return self.dataset_config.prompt_template.format(**kwargs), ""
+
         match task.supertask:
             case "sequence-classification":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
                         label=example["label"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
-                        text=text.replace("\n", " ").strip(), label=""
-                    )
+                    create_prompt(text=text.replace("\n", " ").strip(), label="")
                     for text in examples["text"]
                 ]
 
             case "text-to-text":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
                         target_text=example["target_text"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
-                        text=text.replace("\n", " ").strip(), target_text=""
-                    )
+                    create_prompt(text=text.replace("\n", " ").strip(), target_text="")
                     for text in examples["text"]
                 ]
 
@@ -695,14 +748,14 @@ class VLLMModel(HuggingFaceEncoderModel):
                     return json.dumps(labels, ensure_ascii=False)
 
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                         label=create_label(example=example),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=" ".join(tokens).replace("\n", " ").strip(), label=""
                     )
                     for tokens in examples["tokens"]
@@ -710,7 +763,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
             case "question-answering":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=example["context"].replace("\n", " ").strip(),
                         question=example["question"].replace("\n", " ").strip(),
                         label=example["answers"]["text"][0].replace("\n", " "),
@@ -718,7 +771,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=context.replace("\n", " ").strip(),
                         question=question.replace("\n", " ").strip(),
                         label="",
@@ -733,42 +786,16 @@ class VLLMModel(HuggingFaceEncoderModel):
                     f"Unsupported task supertask: {task.supertask}."
                 )
 
-        instruction_model = self._tokenizer.chat_template is not None
-        if instruction_model:
-
-            def split_section(section: str) -> tuple[str, str]:
-                """Split a section of the prompt to user and assistant messages."""
-                user_part = "\n".join(section.split("\n")[:-1])
-                assistant_part = section.split("\n")[-1]
-                return user_part, assistant_part
-
+        if self.instruction_model:
             few_shot_messages = [
-                dict(role=role, content=content.split(":", 1)[1].strip())
-                for section in few_shot_sections
-                for role, content in zip(
-                    it.cycle(["user", "assistant"]), split_section(section=section)
-                )
-                if content.split(":", 1)[1].strip() != ""
+                dict(role=role, content=content)
+                for prompt, label in few_shot_sections
+                for role, content in [("user", prompt), ("assistant", label)]
             ]
 
-            if self.dataset_config.prompt_prefix:
-                few_shot_messages[0]["content"] = (
-                    self.dataset_config.prompt_prefix
-                    + "\n\n"
-                    + few_shot_messages[0]["content"]
-                )
-
             messages_list = [
-                few_shot_messages
-                + [
-                    dict(
-                        role="user",
-                        content=split_section(section=new_section)[0]
-                        .split(":", 1)[1]
-                        .strip(),
-                    )
-                ]
-                for new_section in new_sections
+                few_shot_messages + [dict(role="user", content=prompt)]
+                for prompt, _ in new_sections
             ]
 
             # Pick the chat template that matches the language of the dataset, if such a
@@ -804,61 +831,16 @@ class VLLMModel(HuggingFaceEncoderModel):
             if self.dataset_config.prompt_prefix:
                 prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
 
+            few_shot_prompt = "\n\n".join([prompt for prompt, _ in few_shot_sections])
+            if few_shot_prompt:
+                few_shot_prompt += "\n\n"
+
             examples["text"] = [
-                prompt_prefix + "\n\n".join(few_shot_sections) + "\n\n" + new_section
-                for new_section in new_sections
+                prompt_prefix + few_shot_prompt + new_prompt
+                for new_prompt, _ in new_sections
             ]
 
         return examples
-
-    def _apply_instruction_prompt(
-        self, examples: dict[str, t.Any], task: Task
-    ) -> dict[str, t.Any]:
-        """Apply instruction prompts to an example.
-
-        Args:
-            examples:
-                The examples to apply the instruction prompts to.
-            task:
-                The task that is being benchmarked.
-
-        Returns:
-            The example with the instruction prompts applied.
-        """
-        match task.supertask:
-            case "sequence-classification" | "text-to-text" | "token-classification":
-                prompts = [
-                    self.dataset_config.instruction_prompt.format(
-                        text=re.sub(r"\n+", "\n", text).strip()
-                    )
-                    for text in examples["text"]
-                ]
-
-            case "question-answering":
-                prompts = [
-                    self.dataset_config.instruction_prompt.format(
-                        text=re.sub(pattern=r"\n+", repl="\n", string=text).strip(),
-                        question=question.strip(),
-                    )
-                    for (text, question) in zip(
-                        examples["context"], examples["question"]
-                    )
-                ]
-
-            case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
-
-        examples["text"] = prompts
-        return examples
-
-    def __del__(self) -> None:
-        """Clear the GPU memory used by the model, and remove the model itself."""
-        if hasattr(self, "_model"):
-            del self._model
-        del self
-        clear_vllm()
 
     @cached_property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:

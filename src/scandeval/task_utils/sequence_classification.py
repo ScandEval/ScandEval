@@ -10,7 +10,7 @@ import numpy as np
 from evaluate import EvaluationModule
 
 from ..data_models import BenchmarkConfig, GenerativeModelOutput
-from ..utils import raise_if_model_output_contains_nan_values
+from ..utils import log_once, raise_if_model_output_contains_nan_values
 
 if t.TYPE_CHECKING:
     from ..data_models import DatasetConfig
@@ -161,7 +161,6 @@ def get_closest_logprobs_labels(
     ] + english_labels
 
     output_labels: list[str] = list()
-    given_warning: bool = False
     for sample in generation_logprobs:
         for logprob_list in sample:
             generated_labels = [
@@ -192,14 +191,23 @@ def get_closest_logprobs_labels(
                 output_labels.append(output_label)
                 break
         else:
-            if not given_warning:
-                logger.debug(
+            if len(sample) == 0:
+                log_once(
+                    "The model outputted an empty string, so no candidate labels could "
+                    f"be determined. Using {candidate_labels[0]!r} as the output "
+                    "label.",
+                    level=logging.DEBUG,
+                )
+            else:
+                log_once(
                     "Could not find a candidate label for any of the generated "
                     f"labels in the sample {sample}. Using {candidate_labels[0]!r} "
-                    "as the output label."
+                    "as the output label.",
+                    level=logging.DEBUG,
                 )
-                given_warning = True
             output_labels.append(candidate_labels[0])
+
+    assert len(output_labels) == len(generation_logprobs)
     return output_labels
 
 

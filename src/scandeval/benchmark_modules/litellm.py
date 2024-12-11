@@ -12,6 +12,9 @@ from time import sleep
 
 import litellm
 from datasets import DatasetDict
+from huggingface_hub import HfApi
+from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
+from huggingface_hub.utils import HFValidationError
 from litellm.exceptions import (
     APIError,
     AuthenticationError,
@@ -20,7 +23,14 @@ from litellm.exceptions import (
     NotFoundError,
 )
 from litellm.types.utils import ModelResponse
+from requests.exceptions import RequestException
 from transformers import Trainer
+
+from scandeval.benchmark_modules.hf import (
+    HuggingFaceEncoderModel,
+    load_hf_model_config,
+    load_tokenizer,
+)
 
 from ..constants import MAX_LOGPROBS, SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
@@ -125,6 +135,9 @@ class LiteLLMModel(BenchmarkModule):
             stop=["\n\n"],
             temperature=0.0,
             seed=4242,
+            api_key=self.benchmark_config.api_key,
+            api_base=self.benchmark_config.api_base,
+            api_version=self.benchmark_config.api_version,
         )
 
         if self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS:
@@ -180,7 +193,8 @@ class LiteLLMModel(BenchmarkModule):
         assert isinstance(model_response, ModelResponse)
         model_response_choices = model_response.choices[0]
         assert isinstance(model_response_choices, litellm.Choices)
-        generation_output = model_response_choices.message["content"].strip()
+        generation_output = model_response_choices.message["content"] or ""
+        generation_output = generation_output.strip()
 
         # Structure the model output as a GenerativeModelOutput object
         model_output = GenerativeModelOutput(sequences=[generation_output])
@@ -203,6 +217,52 @@ class LiteLLMModel(BenchmarkModule):
         for key, value in NUM_PARAMS_MAPPING.items():
             if re.match(pattern=key, string=self.model_config.model_id) is not None:
                 return value
+
+        if self.model_config.model_id.startswith("huggingface/"):
+            model_id = self.model_config.model_id.split(sep="/", maxsplit=1)[-1]
+            if HuggingFaceEncoderModel.model_exists(
+                model_id=model_id, benchmark_config=self.benchmark_config
+            ):
+                hf_config = load_hf_model_config(
+                    model_id=model_id,
+                    num_labels=self.dataset_config.num_labels,
+                    id2label=self.dataset_config.id2label,
+                    label2id=self.dataset_config.label2id,
+                    revision=self.model_config.revision,
+                    model_cache_dir=self.model_config.model_cache_dir,
+                    api_key=self.benchmark_config.api_key,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
+                    run_with_cli=self.benchmark_config.run_with_cli,
+                )
+
+                hf_api = HfApi()
+                try:
+                    repo_info = hf_api.model_info(
+                        repo_id=model_id,
+                        revision=self.model_config.revision,
+                        token=self.benchmark_config.api_key or True,
+                    )
+                except (
+                    RepositoryNotFoundError,
+                    RevisionNotFoundError,
+                    RequestException,
+                    HFValidationError,
+                ):
+                    repo_info = None
+
+                if (
+                    repo_info is not None
+                    and hasattr(repo_info, "safetensors")
+                    and repo_info.safetensors is not None
+                    and "total" in repo_info.safetensors
+                ):
+                    return repo_info.safetensors["total"]
+                elif (
+                    hasattr(hf_config, "num_params")
+                    and hf_config.num_params is not None
+                ):
+                    return hf_config.num_params
+
         return -1
 
     @cached_property
@@ -215,6 +275,44 @@ class LiteLLMModel(BenchmarkModule):
         for key, value in VOCAB_SIZE_MAPPING.items():
             if re.match(pattern=key, string=self.model_config.model_id) is not None:
                 return value
+
+        if self.model_config.model_id.startswith("huggingface/"):
+            model_id = self.model_config.model_id.split(sep="/", maxsplit=1)[-1]
+            if HuggingFaceEncoderModel.model_exists(
+                model_id=model_id, benchmark_config=self.benchmark_config
+            ):
+                hf_config = load_hf_model_config(
+                    model_id=model_id,
+                    num_labels=self.dataset_config.num_labels,
+                    id2label=self.dataset_config.id2label,
+                    label2id=self.dataset_config.label2id,
+                    revision=self.model_config.revision,
+                    model_cache_dir=self.model_config.model_cache_dir,
+                    api_key=self.benchmark_config.api_key,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
+                    run_with_cli=self.benchmark_config.run_with_cli,
+                )
+
+                tokenizer = load_tokenizer(
+                    model=None,
+                    model_id=model_id,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
+                )
+
+                if (
+                    hasattr(hf_config, "vocab_size")
+                    and hf_config.vocab_size is not None
+                ):
+                    vocab_size = hf_config.vocab_size
+                elif (
+                    hasattr(tokenizer, "vocab_size")
+                    and tokenizer.vocab_size is not None
+                ):
+                    vocab_size = tokenizer.vocab_size
+                else:
+                    vocab_size = -1
+                return vocab_size
+
         return -1
 
     @cached_property
@@ -227,6 +325,74 @@ class LiteLLMModel(BenchmarkModule):
         for key, value in MODEL_MAX_LENGTH_MAPPING.items():
             if re.match(pattern=key, string=self.model_config.model_id) is not None:
                 return value
+
+        if self.model_config.model_id.startswith("huggingface/"):
+            model_id = self.model_config.model_id.split(sep="/", maxsplit=1)[-1]
+            if HuggingFaceEncoderModel.model_exists(
+                model_id=model_id, benchmark_config=self.benchmark_config
+            ):
+                hf_config = load_hf_model_config(
+                    model_id=model_id,
+                    num_labels=self.dataset_config.num_labels,
+                    id2label=self.dataset_config.id2label,
+                    label2id=self.dataset_config.label2id,
+                    revision=self.model_config.revision,
+                    model_cache_dir=self.model_config.model_cache_dir,
+                    api_key=self.benchmark_config.api_key,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
+                    run_with_cli=self.benchmark_config.run_with_cli,
+                )
+
+                tokenizer = load_tokenizer(
+                    model=None,
+                    model_id=model_id,
+                    trust_remote_code=self.benchmark_config.trust_remote_code,
+                )
+
+                all_max_lengths: list[int] = list()
+
+                # Add the registered max length of the tokenizer
+                if hasattr(
+                    tokenizer, "model_max_length"
+                ) and tokenizer.model_max_length < int(1e30):
+                    all_max_lengths.append(tokenizer.model_max_length)
+
+                # Add the max length derived from the model's input sizes
+                if hasattr(tokenizer, "max_model_input_sizes"):
+                    all_max_lengths.extend(
+                        [
+                            size
+                            for size in tokenizer.max_model_input_sizes.values()
+                            if size is not None
+                        ]
+                    )
+
+                # Add max length candidates from the model's configuration
+                candidate_config_max_lengths = [
+                    "max_position_embeddings",
+                    "max_sequence_length",
+                    "model_max_length",
+                    "sliding_window",
+                    "sliding_window_size",
+                    "n_positions",
+                ]
+                for candidate_config_max_length in candidate_config_max_lengths:
+                    if (
+                        hasattr(hf_config, candidate_config_max_length)
+                        and (value := getattr(hf_config, candidate_config_max_length))
+                        is not None
+                    ):
+                        all_max_lengths.append(value)
+
+                # To avoid models having artificially low max lengths, we remove any max
+                # lengths that are less than 128
+                all_max_lengths = [
+                    max_length for max_length in all_max_lengths if max_length >= 128
+                ]
+
+                if len(list(all_max_lengths)) > 0:
+                    return min(list(all_max_lengths))
+
         return -1
 
     @cached_property
@@ -297,31 +463,52 @@ class LiteLLMModel(BenchmarkModule):
         if model_id in litellm.model_list:
             return True
 
-        try:
-            litellm.completion(
-                messages=[dict(role="user", content="X")], model=model_id, max_tokens=1
+        num_attempts = 10
+        for _ in range(num_attempts):
+            try:
+                litellm.completion(
+                    messages=[dict(role="user", content="X")],
+                    model=model_id,
+                    max_tokens=1,
+                    api_key=benchmark_config.api_key,
+                    api_base=benchmark_config.api_base,
+                    api_version=benchmark_config.api_version,
+                )
+                return True
+            except APIError as e:
+                if "'503 Service Unavailable" not in str(e):
+                    raise e
+                logger.warning(
+                    f"Failed to check if model {model_id!r} exists. Retrying in "
+                    f"{num_attempts} seconds..."
+                )
+                sleep(10)
+            except (BadRequestError, NotFoundError):
+                candidate_models = [
+                    candidate_model_id
+                    for candidate_model_id in litellm.model_list
+                    if candidate_model_id.startswith(model_id)
+                ]
+                match len(candidate_models):
+                    case 0:
+                        pass
+                    case 1:
+                        logger.warning(
+                            f"Could not find the model ID {model_id!r}. Did you mean "
+                            f"{candidate_models[0]!r}?"
+                        )
+                    case _:
+                        candidate_models_str = "', '".join(candidate_models)
+                        logger.warning(
+                            f"Could not find the model ID {model_id!r}. Did you mean "
+                            f"any of the following model IDs: '{candidate_models_str}'?"
+                        )
+                return False
+        else:
+            logger.error(
+                f"Failed to check if model {model_id!r} exists after {num_attempts} "
+                "attempts. Assuming it does not exist."
             )
-            return True
-        except (BadRequestError, NotFoundError):
-            candidate_models = [
-                candidate_model_id
-                for candidate_model_id in litellm.model_list
-                if candidate_model_id.startswith(model_id)
-            ]
-            match len(candidate_models):
-                case 0:
-                    pass
-                case 1:
-                    logger.warning(
-                        f"Could not find the model ID {model_id!r}. Did you mean "
-                        f"{candidate_models[0]!r}?"
-                    )
-                case _:
-                    candidate_models_str = "', '".join(candidate_models)
-                    logger.warning(
-                        f"Could not find the model ID {model_id!r}. Did you mean any of "
-                        f"the following model IDs: '{candidate_models_str}'?"
-                    )
             return False
 
     @classmethod
@@ -396,23 +583,16 @@ class LiteLLMModel(BenchmarkModule):
             few_shot_examples = self._extract_few_shot_examples(
                 dataset=dataset, task=task, itr_idx=itr_idx
             )
-            dataset["test"] = dataset["test"].map(
-                partial(
-                    self._apply_few_shot_prompt,
-                    few_shot_examples=few_shot_examples,
-                    task=task,
-                ),
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
-            )
         else:
-            dataset["test"] = dataset["test"].map(
-                partial(self._apply_instruction_prompt, task=task),
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
-            )
+            few_shot_examples = list()
+
+        dataset["test"] = dataset["test"].map(
+            partial(self._apply_prompt, few_shot_examples=few_shot_examples, task=task),
+            batched=True,
+            load_from_cache_file=False,
+            keep_in_memory=True,
+        )
+
         return dataset
 
     def _extract_few_shot_examples(
@@ -524,13 +704,13 @@ class LiteLLMModel(BenchmarkModule):
         random.shuffle(few_shot_examples)
         return few_shot_examples
 
-    def _apply_few_shot_prompt(
+    def _apply_prompt(
         self,
         examples: dict[str, t.Any],
         few_shot_examples: list[dict[str, t.Any]],
         task: Task,
     ) -> dict[str, t.Any]:
-        """Apply few-shot examples to an example.
+        """Apply prompt template to an example, potentially with few-shot examples.
 
         Args:
             examples:
@@ -667,48 +847,4 @@ class LiteLLMModel(BenchmarkModule):
             for new_section in new_sections
         ]
 
-        return examples
-
-    def _apply_instruction_prompt(
-        self, examples: dict[str, t.Any], task: Task
-    ) -> dict[str, t.Any]:
-        """Apply instruction prompts to an example.
-
-        Args:
-            examples:
-                The examples to apply the instruction prompts to.
-            task:
-                The task that is being benchmarked.
-
-        Returns:
-            The example with the instruction prompts applied.
-        """
-        match task.supertask:
-            case "sequence-classification" | "text-to-text" | "token-classification":
-                prompts = [
-                    self.dataset_config.instruction_prompt.format(
-                        text=re.sub(r"\n+", "\n", text).strip()
-                    )
-                    for text in examples["text"]
-                ]
-
-            case "question-answering":
-                prompts = [
-                    self.dataset_config.instruction_prompt.format(
-                        text=re.sub(pattern=r"\n+", repl="\n", string=text).strip(),
-                        question=question.strip(),
-                    )
-                    for (text, question) in zip(
-                        examples["context"], examples["question"]
-                    )
-                ]
-
-            case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
-
-        examples["messages"] = [
-            [dict(role="user", content=prompt)] for prompt in prompts
-        ]
         return examples

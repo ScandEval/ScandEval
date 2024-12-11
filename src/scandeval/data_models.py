@@ -149,9 +149,12 @@ class BenchmarkConfig:
             if the model is generative.
         num_iterations:
             The number of iterations each model should be evaluated for.
-        base_url:
+        api_base:
             The base URL for a given inference API. Only relevant if `model` refers to a
             model on an inference API.
+        api_version:
+            The version of the API to use. Only relevant if `model` refers to a model on
+            an inference API.
         debug:
             Whether to run the benchmark in debug mode.
         run_with_cli:
@@ -179,7 +182,8 @@ class BenchmarkConfig:
     evaluate_test_split: bool
     few_shot: bool
     num_iterations: int
-    base_url: str | None
+    api_base: str | None
+    api_version: str | None
     debug: bool
     run_with_cli: bool
 
@@ -211,7 +215,8 @@ class BenchmarkConfigParams(pydantic.BaseModel):
     evaluate_test_split: bool
     few_shot: bool
     num_iterations: int
-    base_url: str | None
+    api_base: str | None
+    api_version: str | None
     debug: bool
     run_with_cli: bool
 

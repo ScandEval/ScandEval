@@ -112,14 +112,12 @@ publish:
 		echo "No PyPI API token specified in the '.env' file, so cannot publish."; \
 	else \
 		echo "Publishing to PyPI..."; \
-		$(MAKE) --quiet install \
-			&& $(MAKE) --quiet check \
+		$(MAKE) --quiet check \
 			&& uv build \
 			&& uv publish --username "__token__" --password ${PYPI_API_TOKEN} \
 			&& $(MAKE) --quiet publish-docs \
-			&& echo "Published!" \
+			&& echo "Published!"; \
 	fi
-	@(MAKE) --quiet publish-docs
 
 publish-major: bump-major publish  ## Publish a major version
 
