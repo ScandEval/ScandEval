@@ -953,6 +953,7 @@ def clear_vllm() -> None:
     except ImportError:
         pass
     try:
+        breakpoint()
         destroy_process_group()
     except AssertionError:
         pass
