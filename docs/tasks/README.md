@@ -1,11 +1,16 @@
+---
+hide:
+    - toc
+---
 # Tasks
+
+👈 Choose a task on the left to see detailed information about that task.
+
+## 📚 Overview
 
 This page covers all the evaluation tasks used in ScandEval. These tasks fall under two
 categories, corresponding to whether the models should merely _understand_ the input
 documents, or rather they are also required to _generate_ new text.
-
-
-## Natural Language Understanding (NLU)
 
 NLU tasks are tasks where the model is required to understand the natural language input
 and provide an output based on this understanding. The outputs are typically very short,
@@ -24,9 +29,6 @@ The tasks in this category are:
 4. [Reading Comprehension](reading-comprehension.md)
 5. [Knowledge](knowledge.md)
 6. [Common-sense Reasoning](common-sense-reasoning.md)
-
-
-## Natural Language Generation (NLG)
 
 NLG tasks are tasks where the model is required to generate natural language output
 based on some input. The outputs are typically longer than in NLU tasks, often multiple

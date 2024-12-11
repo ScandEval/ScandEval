@@ -41,3 +41,6 @@ papers:
 ScandEval is maintained by researchers at [Alexandra
 Institute](https://alexandra.dk) and [Aarhus University](https://au.dk), and is funded
 by the EU project [TrustLLM](https://trustllm.eu/).
+
+The image used in the logo has been created by the amazing [Scandinavia and the
+World](https://satwcomic.com/) team. Go check them out!
