@@ -468,38 +468,36 @@ class VLLMModel(HuggingFaceEncoderModel):
         else:
             true_max_model_len = 5_000
 
-        vllm_kwargs = dict(
-            model=self.model_config.adapter_base_model_id or self.model_config.model_id,
-            tokenizer=self.model_config.adapter_base_model_id
-            or self.model_config.model_id,
-            gpu_memory_utilization=0.95,
-            max_model_len=min(true_max_model_len, 5_000),
-            download_dir=download_dir,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-            revision=self.model_config.revision,
-            seed=4242,
-            distributed_executor_backend="mp",  # "ray",  # TEMP?
-            tensor_parallel_size=torch.cuda.device_count(),
-            disable_custom_all_reduce=True,
-            quantization=quantization,
-            dtype=dtype,
-            enforce_eager=True,
-            max_logprobs=MAX_LOGPROBS if self.output_scores else None,
-            # TEMP: Prefix caching isn't supported with sliding window in vLLM yet, so
-            # we disable it for now
-            enable_prefix_caching=False,
-            enable_lora=self.model_config.adapter_base_model_id is not None,
-            max_lora_rank=256,
-        )
-
         clear_vllm()
 
+        # Prefer base model ID if the model is an adapter - the adapter will be added on
+        # during inference in this case
+        model_id = self.model_config.adapter_base_model_id or self.model_config.model_id
+
         try:
-            model = LLM(**vllm_kwargs)
-        except ValueError as e:
-            model_id = (
-                self.model_config.adapter_base_model_id or self.model_config.model_id
+            model = LLM(
+                model=model_id,
+                tokenizer=model_id,
+                gpu_memory_utilization=0.95,
+                max_model_len=min(true_max_model_len, 5_000),
+                download_dir=download_dir,
+                trust_remote_code=self.benchmark_config.trust_remote_code,
+                revision=self.model_config.revision,
+                seed=4242,
+                distributed_executor_backend="mp",  # "ray",  # TEMP?
+                tensor_parallel_size=torch.cuda.device_count(),
+                disable_custom_all_reduce=True,
+                quantization=quantization,
+                dtype=dtype,
+                enforce_eager=True,
+                max_logprobs=MAX_LOGPROBS,
+                # TEMP: Prefix caching isn't supported with sliding window in vLLM yet,
+                # so we disable it for now
+                enable_prefix_caching=False,
+                enable_lora=self.model_config.adapter_base_model_id is not None,
+                max_lora_rank=256,
             )
+        except ValueError as e:
             if "trust_remote_code" in str(e):
                 raise InvalidModel(
                     f"Loading the model {model_id!r} needs to trust remote code. "
