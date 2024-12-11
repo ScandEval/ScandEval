@@ -115,6 +115,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
+        # TEMP
+        self.instruction_model = self._tokenizer.chat_template is not None and False
+
         self.lora_request: LoRARequest | None = None
         if self.model_config.adapter_base_model_id is not None:
             adapter_path = snapshot_download(
@@ -275,10 +278,9 @@ class VLLMModel(HuggingFaceEncoderModel):
             ]
 
         # Strip the prompts if the model's tokeniser requires it
-        instruction_model = self._tokenizer.chat_template is not None
         labels_to_be_generated = list(self.dataset_config.prompt_label_mapping.values())
         if (
-            not instruction_model
+            not self.instruction_model
             and len(labels_to_be_generated) > 0
             and should_prompts_be_stripped(
                 labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
@@ -651,7 +653,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The example with the few-shot examples applied.
         """
-        instruction_model = self._tokenizer.chat_template is not None
 
         def create_prompt(**kwargs) -> tuple[str, str]:
             """Create a prompt from the given keyword arguments.
@@ -664,7 +665,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 A pair (prompt, label), where "label" is an empty string if the model is
                 not instruction tuned (as in this case it is included in the prompt).
             """
-            if instruction_model:
+            if self.instruction_model:
                 label_key = "label" if "label" in kwargs else "target_text"
                 label = kwargs.pop(label_key)
                 label_mapping = self.dataset_config.prompt_label_mapping
@@ -758,7 +759,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     f"Unsupported task supertask: {task.supertask}."
                 )
 
-        if instruction_model:
+        if self.instruction_model:
             few_shot_messages = [
                 dict(role=role, content=content)
                 for prompt, label in few_shot_sections
