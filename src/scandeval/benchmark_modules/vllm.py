@@ -755,7 +755,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             few_shot_messages = [
                 dict(role=role, content=content)
                 for prompt, label in few_shot_sections
-                for role, content in zip(("user", "assistant"), (prompt, label))
+                for role, content in [("user", prompt), ("assistant", label)]
                 if label != ""
             ]
 
