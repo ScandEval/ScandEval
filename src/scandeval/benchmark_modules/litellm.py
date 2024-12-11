@@ -125,6 +125,9 @@ class LiteLLMModel(BenchmarkModule):
             stop=["\n\n"],
             temperature=0.0,
             seed=4242,
+            api_key=self.benchmark_config.api_key,
+            api_base=self.benchmark_config.api_base,
+            api_version=self.benchmark_config.api_version,
         )
 
         if self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS:
@@ -136,15 +139,6 @@ class LiteLLMModel(BenchmarkModule):
                 "json" in messages[0]["content"]
             ), "Prompt must contain 'json' for JSON tasks."
             generation_kwargs["response_format"] = dict(type="json_object")
-
-        if self.benchmark_config.api_key is not None:
-            generation_kwargs["api_key"] = self.benchmark_config.api_key
-
-        if self.benchmark_config.api_base is not None:
-            generation_kwargs["api_base"] = self.benchmark_config.api_base
-
-        if self.benchmark_config.api_version is not None:
-            generation_kwargs["api_version"] = self.benchmark_config.api_version
 
         # This drops generation kwargs that are not supported by the model
         litellm.drop_params = True
@@ -308,7 +302,12 @@ class LiteLLMModel(BenchmarkModule):
 
         try:
             litellm.completion(
-                messages=[dict(role="user", content="X")], model=model_id, max_tokens=1
+                messages=[dict(role="user", content="X")],
+                model=model_id,
+                max_tokens=1,
+                api_key=benchmark_config.api_key,
+                api_base=benchmark_config.api_base,
+                api_version=benchmark_config.api_version,
             )
             return True
         except (BadRequestError, NotFoundError):
