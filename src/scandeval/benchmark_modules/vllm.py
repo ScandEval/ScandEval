@@ -16,7 +16,6 @@ from types import MethodType
 import torch
 from datasets import DatasetDict
 from huggingface_hub import snapshot_download
-from torch.distributed import destroy_process_group
 from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
@@ -496,6 +495,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 enable_prefix_caching=False,
                 enable_lora=self.model_config.adapter_base_model_id is not None,
                 max_lora_rank=256,
+                guided_decoding_backend="outlines",
             )
         except ValueError as e:
             if "trust_remote_code" in str(e):
@@ -954,10 +954,10 @@ def clear_vllm() -> None:
         destroy_model_parallel()
     except ImportError:
         pass
-    try:
-        destroy_process_group()
-    except AssertionError:
-        pass
+    # try:
+    #     destroy_process_group()
+    # except AssertionError:
+    #     pass
     clear_memory()
     if ray.is_initialized():
         ray.shutdown()
