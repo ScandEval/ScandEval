@@ -799,8 +799,6 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for messages in messages_list
             ]
 
-            breakpoint()
-
             examples["text"] = texts
 
         else:
