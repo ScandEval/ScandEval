@@ -670,6 +670,9 @@ class VLLMModel(HuggingFaceEncoderModel):
             if instruction_model:
                 label_key = "label" if "label" in kwargs else "target_text"
                 label = kwargs.pop(label_key)
+                label_mapping = self.dataset_config.prompt_label_mapping
+                if label_mapping:
+                    label = label_mapping[label]
                 prompt = self.dataset_config.instruction_prompt.format(**kwargs)
                 return prompt, label
             else:
