@@ -6,7 +6,6 @@ import itertools as it
 import json
 import logging
 import random
-import re
 import sys
 import typing as t
 from functools import cached_property, partial
@@ -199,23 +198,16 @@ class VLLMModel(HuggingFaceEncoderModel):
             few_shot_examples = self._extract_few_shot_examples(
                 dataset=dataset, task=task, itr_idx=itr_idx
             )
-            dataset["test"] = dataset["test"].map(
-                partial(
-                    self._apply_few_shot_prompt,
-                    few_shot_examples=few_shot_examples,
-                    task=task,
-                ),
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
-            )
         else:
-            dataset["test"] = dataset["test"].map(
-                partial(self._apply_instruction_prompt, task=task),
-                batched=True,
-                load_from_cache_file=False,
-                keep_in_memory=True,
-            )
+            few_shot_examples = list()
+
+        dataset["test"] = dataset["test"].map(
+            partial(self._apply_prompt, few_shot_examples=few_shot_examples, task=task),
+            batched=True,
+            load_from_cache_file=False,
+            keep_in_memory=True,
+        )
+
         return dataset
 
     def generate(self, inputs: dict) -> GenerativeModelOutput:
@@ -640,13 +632,13 @@ class VLLMModel(HuggingFaceEncoderModel):
         random.shuffle(few_shot_examples)
         return few_shot_examples
 
-    def _apply_few_shot_prompt(
+    def _apply_prompt(
         self,
         examples: dict[str, t.Any],
         few_shot_examples: list[dict[str, t.Any]],
         task: Task,
     ) -> dict[str, t.Any]:
-        """Apply few-shot examples to an example.
+        """Apply prompt template to an example, potentially with few-shot examples.
 
         Args:
             examples:
@@ -811,56 +803,15 @@ class VLLMModel(HuggingFaceEncoderModel):
             if self.dataset_config.prompt_prefix:
                 prompt_prefix = self.dataset_config.prompt_prefix + "\n\n"
 
+            few_shot_prompt = "\n\n".join([prompt for prompt, _ in few_shot_sections])
+            if few_shot_prompt:
+                few_shot_prompt += "\n\n"
+
             examples["text"] = [
-                prompt_prefix
-                + "\n\n".join([prompt for prompt, _ in few_shot_sections])
-                + "\n\n"
-                + new_prompt
+                prompt_prefix + few_shot_prompt + new_prompt
                 for new_prompt, _ in new_sections
             ]
 
-        return examples
-
-    def _apply_instruction_prompt(
-        self, examples: dict[str, t.Any], task: Task
-    ) -> dict[str, t.Any]:
-        """Apply instruction prompts to an example.
-
-        Args:
-            examples:
-                The examples to apply the instruction prompts to.
-            task:
-                The task that is being benchmarked.
-
-        Returns:
-            The example with the instruction prompts applied.
-        """
-        match task.supertask:
-            case "sequence-classification" | "text-to-text" | "token-classification":
-                prompts = [
-                    self.dataset_config.instruction_prompt.format(
-                        text=re.sub(r"\n+", "\n", text).strip()
-                    )
-                    for text in examples["text"]
-                ]
-
-            case "question-answering":
-                prompts = [
-                    self.dataset_config.instruction_prompt.format(
-                        text=re.sub(pattern=r"\n+", repl="\n", string=text).strip(),
-                        question=question.strip(),
-                    )
-                    for (text, question) in zip(
-                        examples["context"], examples["question"]
-                    )
-                ]
-
-            case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
-
-        examples["text"] = prompts
         return examples
 
     def __del__(self) -> None:
