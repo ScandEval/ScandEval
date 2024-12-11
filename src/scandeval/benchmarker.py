@@ -10,6 +10,8 @@ from pathlib import Path
 from shutil import rmtree
 from time import sleep
 
+from torch.distributed import destroy_process_group
+
 from .benchmark_config_factory import build_benchmark_config
 from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
@@ -432,6 +434,19 @@ class Benchmarker:
 
             if benchmark_config.clear_model_cache:
                 clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
+
+        # This avoids the following warning at the end of the benchmarking:
+        #   Warning: WARNING: process group has NOT been destroyed before we destruct
+        #   ProcessGroupNCCL. On normal program exit, the application should call
+        #   destroy_process_group to ensure that any pending NCCL operations have
+        #   finished in this process. In rare cases this process can exit before this
+        #   point and block the progress of another member of the process group. This
+        #   constraint has always been present,  but this warning has only been added
+        #   since PyTorch 2.4 (function operator())
+        try:
+            destroy_process_group()
+        except AssertionError:
+            pass
 
         return current_benchmark_results
 

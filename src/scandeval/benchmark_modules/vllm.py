@@ -812,17 +812,6 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         return examples
 
-    # def __del__(self) -> None:
-    #     """Clear the GPU memory used by the model, and remove the model itself."""
-    #     if hasattr(self, "_model"):
-    #         del self._model
-    #     del self
-    #     try:
-    #         destroy_process_group()
-    #     except AssertionError:
-    #         pass
-    #     clear_vllm()
-
     @cached_property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
         """The data collator used to prepare samples during finetuning.
@@ -953,7 +942,7 @@ def clear_vllm() -> None:
     """Clear the GPU memory used by the vLLM model, enabling re-initialisation."""
     try:
         destroy_model_parallel()
-    except (ImportError, ValueError):
+    except ImportError:
         pass
     clear_memory()
     if ray.is_initialized():
