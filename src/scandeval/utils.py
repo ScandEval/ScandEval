@@ -381,6 +381,7 @@ def should_prompts_be_stripped(
     return strip_prompts
 
 
+# TODO: This is currently not used - maybe remove.
 def should_prefix_space_be_added_to_labels(
     labels_to_be_generated: list[str], tokenizer: "PreTrainedTokenizer"
 ) -> bool:
