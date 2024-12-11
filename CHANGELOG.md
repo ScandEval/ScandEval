@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.0.1] - 2024-12-11
 ### Added
 - Added the `api_version` argument, mimicking the LiteLLM API.
 
