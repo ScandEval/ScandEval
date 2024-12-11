@@ -149,11 +149,8 @@ def generate_single_iteration(
             assert isinstance(batch, dict)
 
             single_sample_batch = (
-                "text" in batch
-                and isinstance(batch["text"], str)
-                or "messages" in batch
-                and isinstance(batch["messages"][0], dict)
-            )
+                "text" in batch and isinstance(batch["text"], str)
+            ) or ("messages" in batch and isinstance(batch["messages"][0], dict))
             if single_sample_batch:
                 batch = {key: [value] for key, value in batch.items()}
 
