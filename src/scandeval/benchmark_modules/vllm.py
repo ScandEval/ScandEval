@@ -56,6 +56,7 @@ from ..utils import (
     create_model_cache_dir,
     get_end_of_chat_token_ids,
     log_once,
+    should_prompts_be_stripped,
 )
 from .hf import HuggingFaceEncoderModel, get_model_repo_info
 
@@ -280,6 +281,13 @@ class VLLMModel(HuggingFaceEncoderModel):
                 prompt if len(prompt) > 0 else self._tokenizer.bos_token
                 for prompt in prompts
             ]
+
+        # Strip the prompts if the model's tokeniser requires it
+        labels_to_be_generated = list(self.dataset_config.prompt_label_mapping.values())
+        if labels_to_be_generated and should_prompts_be_stripped(
+            labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
+        ):
+            prompts = [prompt.strip() for prompt in prompts]
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
