@@ -194,7 +194,8 @@ def get_closest_logprobs_labels(
             if len(sample) == 0:
                 log_once(
                     "The model outputted an empty string, so no candidate labels could "
-                    "be determined. Using {candidate_labels[0]!r} as the output label.",
+                    f"be determined. Using {candidate_labels[0]!r} as the output "
+                    "label.",
                     level=logging.DEBUG,
                 )
             else:
