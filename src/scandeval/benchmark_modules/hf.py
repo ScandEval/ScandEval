@@ -681,14 +681,14 @@ def get_model_repo_info(
 
 
 def load_tokenizer(
-    model: "PreTrainedModel", model_id: str, trust_remote_code: bool
+    model: "PreTrainedModel | None", model_id: str, trust_remote_code: bool
 ) -> "PreTrainedTokenizer":
     """Load the tokenizer.
 
     Args:
         model:
             The model, which is used to determine whether to add a prefix space to
-            the tokens.
+            the tokens. Can be None.
         model_id:
             The model identifier. Used for logging.
         trust_remote_code:
@@ -705,12 +705,15 @@ def load_tokenizer(
         truncation_side="right",
     )
 
-    # If the model is a subclass of a certain model types then we have to add a
-    # prefix space to the tokens, by the way the model is constructed.
-    prefix_models = ["Roberta", "GPT", "Deberta"]
-    add_prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
-    if add_prefix:
-        loading_kwargs["add_prefix_space"] = True
+    # If the model is a subclass of a certain model types then we have to add a prefix
+    # space to the tokens, by the way the model is constructed.
+    if model is not None:
+        prefix_models = ["Roberta", "GPT", "Deberta"]
+        add_prefix = any(
+            model_type in type(model).__name__ for model_type in prefix_models
+        )
+        if add_prefix:
+            loading_kwargs["add_prefix_space"] = True
 
     while True:
         try:
