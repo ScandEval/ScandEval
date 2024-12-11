@@ -818,7 +818,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         if hasattr(self, "_model"):
             del self._model
         del self
-        clear_vllm()
 
     @cached_property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
@@ -953,7 +952,6 @@ def clear_vllm() -> None:
     except ImportError:
         pass
     try:
-        breakpoint()
         destroy_process_group()
     except AssertionError:
         pass
