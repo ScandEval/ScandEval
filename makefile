@@ -119,7 +119,7 @@ publish:
 			&& $(MAKE) --quiet publish-docs \
 			&& echo "Published!" \
 	fi
-	@(MAKE) --quiet publish-docs
+	@$(MAKE) --quiet publish-docs
 
 publish-major: bump-major publish  ## Publish a major version
 
