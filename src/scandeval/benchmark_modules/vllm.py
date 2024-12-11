@@ -115,8 +115,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
-        # TEMP
-        self.instruction_model = self._tokenizer.chat_template is not None and False
+        self.instruction_model = self._tokenizer.chat_template is not None
 
         self.lora_request: LoRARequest | None = None
         if self.model_config.adapter_base_model_id is not None:
