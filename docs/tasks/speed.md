@@ -1,6 +1,5 @@
 # Speed
 
-
 ## 📚 Overview
 
 Speed is a task of measuring how quickly a model can process a given input. The model
