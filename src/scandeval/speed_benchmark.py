@@ -72,7 +72,7 @@ def benchmark_speed_single_iteration(
         model.generate(inputs=dict(messages=[[dict(role="user", content=doc)]]))
 
     def generate_prompt_predict(doc: str) -> None:
-        model.generate(inputs=dict(prompt=[doc]))
+        model.generate(inputs=dict(text=[doc]))
 
     def encoder_predict(doc: str) -> None:
         tokenizer = model.get_tokenizer()
@@ -90,10 +90,7 @@ def benchmark_speed_single_iteration(
     elif isinstance(model, LiteLLMModel):
         predict = generate_messages_predict
     elif isinstance(model, VLLMModel):
-        if model.instruction_model:
-            predict = generate_messages_predict
-        else:
-            predict = generate_prompt_predict
+        predict = generate_prompt_predict
     else:
         raise ValueError(f"Model type {model} not supported for speed benchmark")
 
