@@ -206,7 +206,6 @@ class LiteLLMModel(BenchmarkModule):
             ]
             model_output.scores = [logprobs_list]
 
-        breakpoint()
         return model_output
 
     @cached_property
