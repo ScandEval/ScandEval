@@ -1,6 +1,5 @@
 # Summarization
 
-
 ## 📚 Overview
 
 Summarization is a task of generating a shorter version of a given text, while
@@ -8,6 +7,9 @@ preserving the main points of the original text. The model receives a long text 
 to generate a shorter version of it, typically a handful of sentences long. This is
 abstractive summarization, meaning that the summary typically do not appear verbatim in
 the original text, but that the model has to generate new text based on the input.
+
+When evaluating generative models, we allow the model to generate 256 tokens on this
+task.
 
 
 ## 📊 Metrics
