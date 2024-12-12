@@ -309,7 +309,7 @@ When evaluating generative models, we use the following setup (see the
   ```
 - Instruction-tuned prompt template:
   ```
-  Spørgsmål: {text}?
+  Spørgsmål: {text}
   Svarmuligheder:
   a. {option_a}
   b. {option_b}
