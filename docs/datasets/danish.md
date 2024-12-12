@@ -113,7 +113,7 @@ When evaluating generative models, we use the following setup (see the
 
 ### Unofficial: DaNE
 
-Missing.
+Coming soon!
 
 
 ## Linguistic Acceptability
@@ -159,37 +159,71 @@ When evaluating generative models, we use the following setup (see the
 
 ### ScandiQA-da
 
-Missing.
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the Danish part of the [MKQA
+dataset](https://aclanthology.org/2021.tacl-1.82/). The MKQA dataset is based on the
+English [Natural Questions dataset](https://aclanthology.org/Q19-1026/), based on search
+queries from the Google search engine. The questions and answers were manually
+translated to Danish (and other languages) as part of MKQA, and the contexts were in
+ScandiQA-da machine translated using the [DeepL translation
+API](https://www.deepl.com/en/pro-api/). A rule-based approach was used to ensure that
+the translated contexts still contained the answer to the question, potentially by
+changing the answers slightly.
+
+The original full dataset consists of 6,810 / 500 / 500 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). All validation
+samples in our version also belong to the original validation set, and all original test
+samples are included in our test set. The remaining 1,548 test samples in our version
+was sampled from the original training set.
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Følgende er tekster med tilhørende spørgsmål og svar.
+  ```
+- Base prompt template:
+  ```
+  Tekst: {text}\nSpørgsmål: {question}\nSvar med maks. 3 ord: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Tekst: {text}\n\nBesvar følgende spørgsmål om teksten ovenfor med maks. 3
+  ord.\n\nSpørgsmål: {question}
+  ```
 
 
 ## Knowledge
 
 ### Danske Talemåder
 
-Missing.
+Coming soon!
 
 ### Danish Citizen Tests
 
-Missing.
+Coming soon!
 
 ### Unofficial: MMLU-da
 
-Missing.
+Coming soon!
 
 ### Unofficial: ARC-da
 
-Missing.
+Coming soon!
 
 
 ## Common-sense Reasoning
 
 ### HellaSwag-da
 
-Missing.
+Coming soon!
 
 
 ## Summarization
 
 ### Nordjylland News
 
-Missing.
+Coming soon!
