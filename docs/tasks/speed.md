@@ -18,8 +18,11 @@ measurement.
 ## 📊 Metrics
 
 The primary metric used to evaluate the performance of a model on the speed task is the
-average number of GPT-2 tokens processed per second on a CPU, when the model is
-processing documents with roughly 100, 200, ..., 1,000 tokens.
+average number of GPT-2 tokens processed per second on GPUs, when the model is
+processing documents with roughly 100, 200, ..., 1,000 tokens. If the model is only
+accessible through an API then the speed is measured on the API. The GPUs used here
+vary, depending on the size of the model - we preferably use an NVIDIA RTX 3090 Ti GPU,
+if the model has less than ~8B parameters, and one or more NVIDIA A100 GPUs is larger.
 
 The secondary metric is the same, but where the documents are shorter, with roughly
 12.5, 15, ..., 125 tokens.
