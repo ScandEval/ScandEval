@@ -1081,8 +1081,8 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
     prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    instruction_prompt="Hvad er betydningen af følgende talemåde: {text}\n\nBesvar "
+    "ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1095,9 +1095,9 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     languages=[DA],
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    prompt_label_mapping=dict(a="a", b="b", c="c"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    "svare med 'a', 'b' eller 'c'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
