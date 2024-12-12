@@ -21,6 +21,7 @@ from litellm.exceptions import (
     BadRequestError,
     InternalServerError,
     NotFoundError,
+    ServiceUnavailableError,
 )
 from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
@@ -177,7 +178,10 @@ class LiteLLMModel(BenchmarkModule):
                     raise InvalidBenchmark(
                         f"Failed to generate text. The error message was: {e}"
                     )
-                sleep(1)
+                sleep(5)
+                continue
+            except ServiceUnavailableError:
+                sleep(5)
                 continue
             except AuthenticationError:
                 raise NeedsAdditionalArgument(
