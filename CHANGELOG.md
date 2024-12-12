@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Fixed
+- Fixed a bug with the speed benchmark for vLLM models, when the model is instruction
+  tuned.
 
 
 ## [v14.0.1] - 2024-12-11
