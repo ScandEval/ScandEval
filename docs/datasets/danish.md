@@ -200,7 +200,36 @@ When evaluating generative models, we use the following setup (see the
 
 ### Danske Talemåder
 
-Coming soon!
+This dataset was created by The Danish Language and Literature Society, published
+[here](https://sprogteknologi.dk/dataset/1000-talemader-evalueringsdatasaet). The
+dataset features Danish idioms along with their official meaning. For each idiom, three
+negative samples were created: (a) a random idiom, (b) a concrete made-up idiom, and (c)
+an abstract made-up idiom. The dataset was created to evaluate the ability of language
+models to understand Danish idioms.
+
+The original full dataset consists of 1,000 samples. We use a 128 / 64 / 808 split for
+training, validation and testing, respectively (so 1,000 samples used in total).
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Følgende er sætninger og deres betydning, opsat som multiple-choice spørgsmål
+  og svar.
+  ```
+- Base prompt template:
+  ```
+  Sætning: {text}\nSvarmuligheder:\na. {option_a}\nb. {option_b}\n
+  c. {option_c}\nd. {option_d}\nSvar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Sætning: Hvad er betydningen af følgende sætning: {text}\nSvarmuligheder:\n
+  a. {option_a}\nb. {option_b}\nc. {option_c}\nd. {option_d}\n\n
+  Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.
+  ```
 
 ### Danish Citizen Tests
 
