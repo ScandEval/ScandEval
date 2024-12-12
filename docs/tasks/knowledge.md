@@ -1,6 +1,5 @@
 # Knowledge
 
-
 ## 📚 Overview
 
 The knowledge task is testing how much factual knowledge a model has. The task is set up
@@ -8,6 +7,8 @@ as a multiple-choice question answering task, where the model is given a questio
 set of possible answers, and it has to choose the correct answer. Crucially, it is not
 given any context in which the answer appears, so it has to answer purely based on its
 knowledge of the world.
+
+When evaluating generative models, we allow the model to generate 5 tokens on this task.
 
 
 ## 📊 Metrics

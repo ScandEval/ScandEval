@@ -1,12 +1,13 @@
 # Linguistic Acceptability
 
-
 ## 📚 Overview
 
 Linguistic acceptability is a task of determining whether a given text is grammatically
 correct or not. It thus tests whether the model is able to understand the detailed
 syntax of a given document, and not just understand the overall gist of it. It roughly
 corresponds to when a native speaker would say "this sentence sounds weird".
+
+When evaluating generative models, we allow the model to generate 5 tokens on this task.
 
 
 ## 📊 Metrics

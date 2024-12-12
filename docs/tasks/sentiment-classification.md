@@ -1,11 +1,12 @@
 # Sentiment Classification
 
-
 ## 📚 Overview
 
 Sentiment classification is a classical task of determining the sentiment of a given
 text, which can be positive, negative, or neutral. It thus tests whether the model is
 able to understand the overall semantics of a given document.
+
+When evaluating generative models, we allow the model to generate 5 tokens on this task.
 
 
 ## 📊 Metrics

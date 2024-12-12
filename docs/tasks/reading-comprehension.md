@@ -1,6 +1,5 @@
 # Reading Comprenhension
 
-
 ## 📚 Overview
 
 Reading comprehension is a task of determining whether a model is able to understand a
@@ -8,6 +7,9 @@ given text and answer questions about it. The model receives a text passage and 
 question about the text, and it has to provide the answer as it is stated in the text.
 This is very related to Retrieval-augmented Generation (RAG) applications, where a
 generative model is used to answer a question based on one or more retrieved documents.
+
+When evaluating generative models, we allow the model to generate 32 tokens on this
+task.
 
 
 ## 📊 Metrics

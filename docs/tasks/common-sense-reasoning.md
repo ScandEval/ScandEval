@@ -1,6 +1,5 @@
 # Common-sense Reasoning
 
-
 ## 📚 Overview
 
 Common-sense reasoning is testing whether a model is able to understand basic deduction
@@ -9,6 +8,8 @@ outside, and Peter is in his garden without an umbrella", it should be able to d
 that Peter is getting wet. The task is set up as a multiple-choice question answering
 task, where the model is given a question and a set of possible answers, and it has to
 choose the correct answer.
+
+When evaluating generative models, we allow the model to generate 5 tokens on this task.
 
 
 ## 📊 Metrics
