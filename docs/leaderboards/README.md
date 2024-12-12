@@ -22,7 +22,7 @@ The columns that follow the `rank` column are metadata about the model:
 - `commercially_licensed`: Whether the model can be used for commercial purposes. See
   [here](/faq.md) for more information.
 - `merge`: Whether the model is a merge of other models.
-- `speed`: The inference time of the model on a CPU, in tokens per second.
+- `speed`: The inference time of the model - see more [here](/tasks/speed).
 
 After these metadata columns, the individual scores for each dataset is shown. Note that
 we only include the primary score of each task in the leaderboard - you can see these in
