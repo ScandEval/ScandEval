@@ -85,12 +85,12 @@ def benchmark_speed_single_iteration(
         }
         pytorch_model(**inputs)
 
-    if isinstance(model, HuggingFaceEncoderModel):
-        predict = encoder_predict
+    if isinstance(model, VLLMModel):
+        predict = generate_prompt_predict
     elif isinstance(model, LiteLLMModel):
         predict = generate_messages_predict
-    elif isinstance(model, VLLMModel):
-        predict = generate_prompt_predict
+    elif isinstance(model, HuggingFaceEncoderModel):
+        predict = encoder_predict
     else:
         raise ValueError(f"Model type {model} not supported for speed benchmark")
 
