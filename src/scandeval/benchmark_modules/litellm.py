@@ -22,6 +22,7 @@ from litellm.exceptions import (
     InternalServerError,
     NotFoundError,
     ServiceUnavailableError,
+    Timeout,
 )
 from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
@@ -169,20 +170,18 @@ class LiteLLMModel(BenchmarkModule):
                         f"Failed to generate text. The error message was: {e}"
                     )
                 generation_kwargs["stop"] = None
-            except APIError as e:
-                raise InvalidBenchmark(
-                    f"Failed to generate text. The error message was: {e}"
-                )
             except InternalServerError as e:
                 if "overloaded" not in str(e).lower():
                     raise InvalidBenchmark(
                         f"Failed to generate text. The error message was: {e}"
                     )
                 sleep(5)
-                continue
             except ServiceUnavailableError:
                 sleep(5)
-                continue
+            except (Timeout, APIError) as e:
+                raise InvalidBenchmark(
+                    f"Failed to generate text. The error message was: {e}"
+                )
             except AuthenticationError:
                 raise NeedsAdditionalArgument(
                     cli_argument="--api-key",
