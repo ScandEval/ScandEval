@@ -42,6 +42,12 @@ When evaluating generative models, we use the following setup (see the
     - `neutral` ➡️ `neutral`
     - `negative` ➡️ `negativ`
 
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset angry-tweeets
+```
+
 
 ## Named Entity Recognition
 
@@ -110,6 +116,12 @@ When evaluating generative models, we use the following setup (see the
     - `B-MISC` ➡️ `diverse`
     - `I-MISC` ➡️ `diverse`
 
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset dansk
+```
+
 
 ### Unofficial: DaNE
 
@@ -154,6 +166,12 @@ When evaluating generative models, we use the following setup (see the
     - `correct` ➡️ `ja`
     - `incorrect` ➡️ `nej`
 
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset scala-da
+```
+
 
 ## Reading Comprehension
 
@@ -195,6 +213,12 @@ When evaluating generative models, we use the following setup (see the
   ord.\n\nSpørgsmål: {question}
   ```
 
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset scandiqa-da
+```
+
 
 ## Knowledge
 
@@ -231,13 +255,22 @@ When evaluating generative models, we use the following setup (see the
   Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.
   ```
 
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset danske-talemaader
+```
+
+
 ### Danish Citizen Tests
 
 Coming soon!
 
+
 ### Unofficial: MMLU-da
 
 Coming soon!
+
 
 ### Unofficial: ARC-da
 
