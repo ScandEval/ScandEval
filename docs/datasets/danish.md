@@ -30,12 +30,14 @@ When evaluating generative models, we use the following setup (see the
   ```
 - Base prompt template:
   ```
-  Tweet: {text}\nSentiment: {label}
+  Tweet: {text}
+  Sentiment: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Tweet: {text}\n\nKlassificer sentimentet i tweetet. Svar kun med 'positiv',
-  'neutral' eller 'negativ'.
+  Tweet: {text}
+
+  Klassificer sentimentet i tweetet. Svar kun med 'positiv', 'neutral' eller 'negativ'.
   ```
 - Label mapping:
     - `positive` ➡️ `positiv`
@@ -97,14 +99,14 @@ When evaluating generative models, we use the following setup (see the
   ```
 - Base prompt template:
   ```
-  Sætning: {text}\nNavngivne enheder: {label}
+  Sætning: {text}
+  Navngivne enheder: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Sætning: {text}\n\nIdentificér de navngivne enheder i sætningen. Du skal
-  outputte dette som en JSON-ordbog med nøglerne 'person', 'sted',
-  'organisation' og 'diverse'. Værdierne skal være lister over de navngivne
-  enheder af den type, præcis som de forekommer i sætningen.
+  Sætning: {text}
+
+  Identificér de navngivne enheder i sætningen. Du skal outputte dette som en JSON-ordbog med nøglerne 'person', 'sted', 'organisation' og 'diverse'. Værdierne skal være lister over de navngivne enheder af den type, præcis som de forekommer i sætningen.
   ```
 - Label mapping:
     - `B-PER` ➡️ `person`
@@ -155,12 +157,14 @@ When evaluating generative models, we use the following setup (see the
   ```
 - Base prompt template:
   ```
-  Sætning: {text}\nGrammatisk korrekt: {label}
+  Sætning: {text}
+  Grammatisk korrekt: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Sætning: {text}\n\nBestem om sætningen er grammatisk korrekt eller ej. Svar med 'ja',
-  hvis sætningen er korrekt, og 'nej', hvis den ikke er.
+  Sætning: {text}
+
+  Bestem om sætningen er grammatisk korrekt eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er.
   ```
 - Label mapping:
     - `correct` ➡️ `ja`
@@ -205,12 +209,17 @@ When evaluating generative models, we use the following setup (see the
   ```
 - Base prompt template:
   ```
-  Tekst: {text}\nSpørgsmål: {question}\nSvar med maks. 3 ord: {label}
+  Tekst: {text}
+  Spørgsmål: {question}
+  Svar med maks. 3 ord: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Tekst: {text}\n\nBesvar følgende spørgsmål om teksten ovenfor med maks. 3
-  ord.\n\nSpørgsmål: {question}
+  Tekst: {text}
+
+  Besvar følgende spørgsmål om teksten ovenfor med maks. 3 ord.
+
+  Spørgsmål: {question}
   ```
 
 You can evaluate this dataset directly as follows:
@@ -240,18 +249,27 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  Følgende er sætninger og deres betydning, opsat som multiple-choice spørgsmål
-  og svar.
+  Følgende er multiple choice spørgsmål (med svar).
   ```
 - Base prompt template:
   ```
-  Sætning: {text}\nSvarmuligheder:\na. {option_a}\nb. {option_b}\n
-  c. {option_c}\nd. {option_d}\nSvar: {label}
+  Hvad er betydningen af følgende talemåde: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svar: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Sætning: Hvad er betydningen af følgende sætning: {text}\nSvarmuligheder:\n
-  a. {option_a}\nb. {option_b}\nc. {option_c}\nd. {option_d}\n\n
+  Hvad er betydningen af følgende talemåde: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
   Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.
   ```
 
@@ -264,7 +282,47 @@ $ scandeval --model <model-id> --dataset danske-talemaader
 
 ### Danish Citizen Tests
 
-Coming soon!
+This dataset was created by the Alexandra Institute by scraping the Danish citizenship
+tests (indfødsretsprøven) and permanent residency tests (medborgerskabsprøven) from 2016
+to 2023. These are available on the [official website of the Danish Ministry of
+International Recruitment and Integration](https://danskogproever.dk/).
+
+The original full dataset consists of 720 samples. We use an 80 / 128 / 512 split for
+training, validation and testing, respectively (so 720 samples used in total).
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Følgende er multiple choice spørgsmål (med svar).
+  ```
+- Base prompt template:
+  ```
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Spørgsmål: {text}?
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+
+  Besvar ovenstående spørgsmål ved at svare med 'a', 'b' eller 'c'.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset danish-citizen-tests
+```
 
 
 ### Unofficial: MMLU-da
