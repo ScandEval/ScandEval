@@ -21,6 +21,12 @@ while still being rewarded for capturing the same meaning. We use the
 `microsoft/mdeberta-v3-base` encoder model for all languages, as it is the best
 performing encoder model consistently across all languages in the framework.
 
+We also report the [ROUGE-L](https://www.aclweb.org/anthology/W04-1013/) score, which
+measures the longest sequence of words that the generated summary and the reference
+summary have in common. This is a more traditional metric for summarization, which is
+why we report it as well, but it correlates less well with human judgments than
+BERTScore.
+
 
 ## 🛠️ How to run
 

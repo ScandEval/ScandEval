@@ -1,3 +1,7 @@
+---
+hide:
+    - toc
+---
 # Leaderboards
 
 👈 Choose a leaderboard on the left to see the results.
@@ -20,7 +24,10 @@ The columns that follow the `rank` column are metadata about the model:
 - `merge`: Whether the model is a merge of other models.
 - `speed`: The inference time of the model on a CPU, in tokens per second.
 
-After these metadata columns, the individual scores for each dataset is shown. To read
-more about the datasets, see the [datasets](/datasets) page. To read more about the
-tasks, see the [tasks](/tasks) page. Lastly, if you're interested in the methodology
-behind the benchmark, see the [methodology](/methodology) page.
+After these metadata columns, the individual scores for each dataset is shown. Note that
+we only include the primary score of each task in the leaderboard - you can see these in
+the [tasks](/tasks) page.
+
+To read more about the individual datasets, see the [datasets](/datasets) page. Uf
+you're interested in the methodology behind the benchmark, see the
+[methodology](/methodology) page.

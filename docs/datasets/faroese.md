@@ -1,1 +1,3 @@
 # 🇫🇴 Faroese
+
+Coming soon!
