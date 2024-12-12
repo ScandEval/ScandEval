@@ -171,12 +171,17 @@ class LiteLLMModel(BenchmarkModule):
                         f"Failed to generate text. The error message was: {e}"
                     )
                 generation_kwargs["stop"] = None
-            except (ServiceUnavailableError, APIConnectionError, InternalServerError):
+            except (
+                Timeout,
+                ServiceUnavailableError,
+                APIConnectionError,
+                InternalServerError,
+            ):
                 logger.debug(
                     "Service temporarily unavailable. Retrying in 5 seconds..."
                 )
                 sleep(5)
-            except (Timeout, APIError) as e:
+            except APIError as e:
                 raise InvalidBenchmark(
                     f"Failed to generate text. The error message was: {e}"
                 )
