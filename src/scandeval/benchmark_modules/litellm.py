@@ -16,6 +16,7 @@ from huggingface_hub import HfApi
 from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
 from huggingface_hub.utils import HFValidationError
 from litellm.exceptions import (
+    APIConnectionError,
     APIError,
     AuthenticationError,
     BadRequestError,
@@ -170,13 +171,18 @@ class LiteLLMModel(BenchmarkModule):
                         f"Failed to generate text. The error message was: {e}"
                     )
                 generation_kwargs["stop"] = None
-            except InternalServerError as e:
+            except (
+                ServiceUnavailableError,
+                APIConnectionError,
+                InternalServerError,
+            ) as e:
                 if "overloaded" not in str(e).lower():
                     raise InvalidBenchmark(
                         f"Failed to generate text. The error message was: {e}"
                     )
-                sleep(5)
-            except ServiceUnavailableError:
+                logger.debug(
+                    "Service temporarily unavailable. Retrying in 5 seconds..."
+                )
                 sleep(5)
             except (Timeout, APIError) as e:
                 raise InvalidBenchmark(
