@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fixed a bug with the speed benchmark for vLLM models, when the model is instruction
   tuned.
+- LiteLLM models now uses the instruction prompt, also when few-shot evaluating, just
+  like all vLLM models.
 
 
 ## [v14.0.1] - 2024-12-11
