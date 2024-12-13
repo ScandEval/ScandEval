@@ -2115,10 +2115,7 @@
 <span class="normal">844</span>
 <span class="normal">845</span>
 <span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models from an inference API, using the LiteLLM framework.&quot;&quot;&quot;</span>
+<span class="normal">847</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models from an inference API, using the LiteLLM framework.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">itertools</span> <span class="k">as</span> <span class="nn">it</span>
@@ -2136,11 +2133,14 @@
 <span class="kn">from</span> <span class="nn">huggingface_hub.hf_api</span> <span class="kn">import</span> <span class="n">RepositoryNotFoundError</span><span class="p">,</span> <span class="n">RevisionNotFoundError</span>
 <span class="kn">from</span> <span class="nn">huggingface_hub.utils</span> <span class="kn">import</span> <span class="n">HFValidationError</span>
 <span class="kn">from</span> <span class="nn">litellm.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">APIConnectionError</span><span class="p">,</span>
     <span class="n">APIError</span><span class="p">,</span>
     <span class="n">AuthenticationError</span><span class="p">,</span>
     <span class="n">BadRequestError</span><span class="p">,</span>
     <span class="n">InternalServerError</span><span class="p">,</span>
     <span class="n">NotFoundError</span><span class="p">,</span>
+    <span class="n">ServiceUnavailableError</span><span class="p">,</span>
+    <span class="n">Timeout</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">litellm.types.utils</span> <span class="kn">import</span> <span class="n">ModelResponse</span>
 <span class="kn">from</span> <span class="nn">requests.exceptions</span> <span class="kn">import</span> <span class="n">RequestException</span>
@@ -2288,17 +2288,20 @@
                         <span class="sa">f</span><span class="s2">&quot;Failed to generate text. The error message was: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="p">)</span>
                 <span class="n">generation_kwargs</span><span class="p">[</span><span class="s2">&quot;stop&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">except</span> <span class="p">(</span>
+                <span class="n">Timeout</span><span class="p">,</span>
+                <span class="n">ServiceUnavailableError</span><span class="p">,</span>
+                <span class="n">APIConnectionError</span><span class="p">,</span>
+                <span class="n">InternalServerError</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s2">&quot;Service temporarily unavailable. Retrying in 5 seconds...&quot;</span>
+                <span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">APIError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Failed to generate text. The error message was: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
-            <span class="k">except</span> <span class="n">InternalServerError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s2">&quot;overloaded&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-                    <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Failed to generate text. The error message was: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                <span class="k">continue</span>
             <span class="k">except</span> <span class="n">AuthenticationError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">NeedsAdditionalArgument</span><span class="p">(</span>
                     <span class="n">cli_argument</span><span class="o">=</span><span class="s2">&quot;--api-key&quot;</span><span class="p">,</span>
@@ -2844,40 +2847,48 @@
 <span class="sd">            The example with the few-shot examples applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">split_section</span><span class="p">(</span><span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Split a section of the prompt to user and assistant messages.&quot;&quot;&quot;</span>
-            <span class="n">user_part</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">assistant_part</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">user_part</span><span class="p">,</span> <span class="n">assistant_part</span>
+        <span class="k">def</span> <span class="nf">create_prompt</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Create a prompt from the given keyword arguments.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                kwargs:</span>
+<span class="sd">                    The keyword arguments to use in the prompt.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                A pair (prompt, label), where &quot;label&quot; is an empty string if the model is</span>
+<span class="sd">                not instruction tuned (as in this case it is included in the prompt).</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">label_key</span> <span class="o">=</span> <span class="s2">&quot;label&quot;</span> <span class="k">if</span> <span class="s2">&quot;label&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="s2">&quot;target_text&quot;</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">label_key</span><span class="p">)</span>
+            <span class="n">label_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_label_mapping</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">label_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">instruction_prompt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">label</span>
 
         <span class="k">match</span> <span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
             <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span><span class="p">:</span>
                 <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
                 <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
-                    <span class="p">)</span>
+                    <span class="n">create_prompt</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
                 <span class="p">]</span>
 
             <span class="k">case</span> <span class="s2">&quot;text-to-text&quot;</span><span class="p">:</span>
                 <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">target_text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;target_text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
                 <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">target_text</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
-                    <span class="p">)</span>
+                    <span class="n">create_prompt</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">target_text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
                 <span class="p">]</span>
 
@@ -2900,14 +2911,14 @@
                     <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
                 <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;tokens&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">create_label</span><span class="p">(</span><span class="n">example</span><span class="o">=</span><span class="n">example</span><span class="p">),</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
                 <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
                     <span class="p">)</span>
                     <span class="k">for</span> <span class="n">tokens</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;tokens&quot;</span><span class="p">]</span>
@@ -2915,7 +2926,7 @@
 
             <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
                 <span class="n">few_shot_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;context&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">question</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;question&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;answers&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">),</span>
@@ -2923,7 +2934,7 @@
                     <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">few_shot_examples</span>
                 <span class="p">]</span>
                 <span class="n">new_sections</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">create_prompt</span><span class="p">(</span>
                         <span class="n">text</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">question</span><span class="o">=</span><span class="n">question</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
                         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -2939,34 +2950,17 @@
                 <span class="p">)</span>
 
         <span class="n">few_shot_messages</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-            <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">few_shot_sections</span>
-            <span class="k">for</span> <span class="n">role</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                <span class="n">it</span><span class="o">.</span><span class="n">cycle</span><span class="p">([</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;assistant&quot;</span><span class="p">]),</span> <span class="n">split_section</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">few_shot_sections</span>
+            <span class="k">for</span> <span class="n">role</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">prompt</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">)]</span>
         <span class="p">]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span><span class="p">:</span>
-            <span class="n">few_shot_messages</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_prefix</span>
-                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-                <span class="o">+</span> <span class="n">few_shot_messages</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-
-        <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">few_shot_messages</span>
-            <span class="o">+</span> <span class="p">[</span>
-                <span class="nb">dict</span><span class="p">(</span>
-                    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span>
-                    <span class="n">content</span><span class="o">=</span><span class="n">split_section</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">new_section</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-                <span class="p">)</span>
-            <span class="p">]</span>
-            <span class="k">for</span> <span class="n">new_section</span> <span class="ow">in</span> <span class="n">new_sections</span>
+        <span class="n">messages_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">few_shot_messages</span> <span class="o">+</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">prompt</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">new_sections</span>
         <span class="p">]</span>
 
+        <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">messages_list</span>
         <span class="k">return</span> <span class="n">examples</span>
 </code></pre></div></td></tr></table></div>
 
