@@ -42,7 +42,7 @@ jobs:
         run: uv sync --no-dev --extra cpu_all
 
       - name: Test with pytest
-        run: uv run pytest
+        run: uv run pytest --no-cache
         env:
           HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
