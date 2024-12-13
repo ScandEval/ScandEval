@@ -29,12 +29,6 @@ from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
 from transformers import Trainer
 
-from scandeval.benchmark_modules.hf import (
-    HuggingFaceEncoderModel,
-    load_hf_model_config,
-    load_tokenizer,
-)
-
 from ..constants import MAX_LOGPROBS, SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType
@@ -53,6 +47,7 @@ from ..task_utils import (
 from ..types import ExtractLabelsFunction
 from ..utils import create_model_cache_dir
 from .base import BenchmarkModule
+from .hf import HuggingFaceEncoderModel, load_hf_model_config, load_tokenizer
 
 logger = logging.getLogger("scandeval")
 
