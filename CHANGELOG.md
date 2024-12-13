@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Fixed
+- Fixed a bug with the speed benchmark for vLLM models, when the model is instruction
+  tuned.
+- LiteLLM models now uses the instruction prompt, also when few-shot evaluating, just
+  like all vLLM models.
+- Now catches more LiteLLM exceptions when evaluating API models, and retries the
+  evaluation after a short delay if the exception is due to a temporary issue.
 
 
 ## [v14.0.1] - 2024-12-11
