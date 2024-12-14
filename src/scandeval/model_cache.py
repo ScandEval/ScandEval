@@ -8,7 +8,6 @@ import typing as t
 from collections import defaultdict
 from dataclasses import asdict
 
-import pandas as pd
 from tqdm.auto import tqdm
 
 from .data_models import GenerativeModelOutput, SingleGenerativeModelOutput
@@ -188,11 +187,10 @@ def split_dataset_into_cached_and_non_cached(
     # Get the sample indices of the non-cached examples, which are unique with respect
     # to the "text" column.
     input_column = "messages" if "messages" in dataset.column_names else "text"
-    dataset_texts = pd.Series(dataset[input_column])
-    dataset_texts.drop_duplicates(inplace=True)
-    unique_non_cached_ids = set(
-        dataset_texts[~dataset_texts.isin(cache)].index.tolist()
-    )
+    dataset_texts = dataset[input_column]
+    unique_non_cached_ids = {
+        dataset_text for dataset_text in dataset_texts if dataset_text not in cache
+    }
 
     # The cached examples are the ones that are not in the non-cached examples. This
     # means that if the dataset has duplicates, only a single copy of the duplicate
