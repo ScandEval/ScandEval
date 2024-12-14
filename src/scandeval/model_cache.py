@@ -122,9 +122,18 @@ class ModelCache:
         self.cache_path.unlink()
         del self.cache
 
-    def cached_texts(self) -> list[str]:
-        """Return the text inputs indexed in the cache."""
-        return [key for key in self.cache.keys()]
+    def __in__(self, key: str | list[dict[str, str]]) -> bool:
+        """Check if a key is in the cache.
+
+        Args:
+            key:
+                The key to check.
+
+        Returns:
+            Whether the key is in the cache.
+        """
+        hashed_key = self._hash_key(key=key)
+        return hashed_key in self.cache
 
     def add_to_cache(
         self, model_inputs: dict, model_output: GenerativeModelOutput
@@ -182,7 +191,7 @@ def split_dataset_into_cached_and_non_cached(
     dataset_texts = pd.Series(dataset[input_column])
     dataset_texts.drop_duplicates(inplace=True)
     unique_non_cached_ids = set(
-        dataset_texts[~dataset_texts.isin(cache.cached_texts())].index.tolist()
+        dataset_texts[~dataset_texts.isin(cache)].index.tolist()
     )
 
     # The cached examples are the ones that are not in the non-cached examples. This
