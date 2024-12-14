@@ -124,7 +124,6 @@ def generate_single_iteration(
     cached_dataset, non_cached_dataset = split_dataset_into_cached_and_non_cached(
         dataset=dataset, cache=cache
     )
-    breakpoint()
 
     all_preds: list[str] = list()
 
