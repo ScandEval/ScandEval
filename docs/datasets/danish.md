@@ -339,11 +339,85 @@ Coming soon!
 
 ### HellaSwag-da
 
-Coming soon!
+This dataset is a machine translated version of the English [HellaSwag
+dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
+video descriptions from ActivityNet as well as how-to articles from WikiHow. The dataset
+was translated by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
+
+The original full dataset consists of 9,310 samples. We use an 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Følgende er multiple choice spørgsmål (med svar).
+  ```
+- Base prompt template:
+  ```
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset hellaswag-da
+```
 
 
 ## Summarization
 
 ### Nordjylland News
 
-Coming soon!
+This dataset is based on news articles from the Danish news site [TV2
+Nord](https://www.tv2nord.dk/), where the summaries are taken as the introductory
+paragraphs of the articles.
+
+The original full dataset consists of 75,200 samples. We use an 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total).
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 1
+- Prefix prompt:
+  ```
+  Følgende er nyhedsartikler med tilhørende resuméer.
+  ```
+- Base prompt template:
+  ```
+  Nyhedsartikel: {text}
+  Resumé: {target_text}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Nyhedsartikel: {text}
+
+  Skriv et resumé af ovenstående artikel.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset nordjylland-news
+```
