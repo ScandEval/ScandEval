@@ -43,7 +43,7 @@ nav:
   - Tasks: tasks
   - Datasets: datasets
   - Methodology: methodology.md
-  - Python Package: python-package.md
   - FAQ: faq.md
+  - Python Package: python-package.md
   - API Reference:
     - $api:src/scandeval.***
