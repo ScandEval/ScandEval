@@ -2,6 +2,6 @@
 hide:
     - toc
 ---
-# 🇳🇴 Bokmål
+# 🇳🇴 Norwegian
 
 Coming soon!

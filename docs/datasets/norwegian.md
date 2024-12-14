@@ -1,0 +1,3 @@
+# 🇳🇴 Norwegian
+
+Coming soon!

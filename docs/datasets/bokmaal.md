@@ -1,3 +1,0 @@
-# 🇳🇴 Bokmål
-
-Coming soon!
