@@ -35,6 +35,7 @@ dependencies = [
     "rouge-score>=0.1.2",
     "bert-score>=0.3.13",
     "levenshtein>=0.24.0",
+    "scikit-learn<1.6.0",  # 1.6.0 breaks evaluate - remove when evaluate has fixes this issue: https://github.com/huggingface/evaluate/issues/655
 ]
 
 [project.optional-dependencies]
