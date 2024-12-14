@@ -13,7 +13,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   issue](https://github.com/huggingface/evaluate/issues/655) has been fixed.
 
 
-
 ## [v14.0.2] - 2024-12-13
 ### Fixed
 - Fixed a bug with the speed benchmark for vLLM models, when the model is instruction
