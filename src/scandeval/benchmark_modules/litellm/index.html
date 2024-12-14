@@ -2110,12 +2110,7 @@
 <span class="normal">839</span>
 <span class="normal">840</span>
 <span class="normal">841</span>
-<span class="normal">842</span>
-<span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models from an inference API, using the LiteLLM framework.&quot;&quot;&quot;</span>
+<span class="normal">842</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Generative models from an inference API, using the LiteLLM framework.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">itertools</span> <span class="k">as</span> <span class="nn">it</span>
@@ -2146,12 +2141,6 @@
 <span class="kn">from</span> <span class="nn">requests.exceptions</span> <span class="kn">import</span> <span class="n">RequestException</span>
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">Trainer</span>
 
-<span class="kn">from</span> <span class="nn">scandeval.benchmark_modules.hf</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">HuggingFaceEncoderModel</span><span class="p">,</span>
-    <span class="n">load_hf_model_config</span><span class="p">,</span>
-    <span class="n">load_tokenizer</span><span class="p">,</span>
-<span class="p">)</span>
-
 <span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">MAX_LOGPROBS</span><span class="p">,</span> <span class="n">SUPERTASKS_USING_LOGPROBS</span><span class="p">,</span> <span class="n">TASKS_USING_JSON</span>
 <span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfig</span><span class="p">,</span> <span class="n">GenerativeModelOutput</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">Task</span>
 <span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">ModelType</span>
@@ -2170,6 +2159,7 @@
 <span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">ExtractLabelsFunction</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">create_model_cache_dir</span>
 <span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">BenchmarkModule</span>
+<span class="kn">from</span> <span class="nn">.hf</span> <span class="kn">import</span> <span class="n">HuggingFaceEncoderModel</span><span class="p">,</span> <span class="n">load_hf_model_config</span><span class="p">,</span> <span class="n">load_tokenizer</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;scandeval&quot;</span><span class="p">)</span>
 
