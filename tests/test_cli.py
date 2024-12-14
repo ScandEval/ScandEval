@@ -20,7 +20,6 @@ def test_cli_param_names(params):
     """Test that the CLI parameters have the correct names."""
     assert set(params.keys()) == {
         "model",
-        "missing",  # TEMP
         "task",
         "language",
         "model_language",
