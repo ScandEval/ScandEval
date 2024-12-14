@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.0.3] - 2024-12-14
 ### Fixed
 - Enforce `scikit-learn<1.6.0`, since 1.6.0 is incompatible with `evaluate`. This bound
   will be removed when [this `evaluate`
