@@ -39,10 +39,10 @@ these tasks, as encoder models do not have the capability to generate text. The 
 this category are:
 
 1. [Summarization](summarization.md)
-2. [Knowledge](knowledge.md) *
-3. [Common-sense Reasoning](common-sense-reasoning.md) *
+2. [Knowledge](knowledge.md) ＊
+3. [Common-sense Reasoning](common-sense-reasoning.md) ＊
 
-* These tasks should be considered as NLU tasks, but currently encoder models have not
-  been set up to be evaluated on them. This will be added in a future version of
-  ScandEval - see the progress in [this
-  issue](https://github.com/ScandEval/ScandEval/issues/653).
+＊ These tasks should be considered as NLU tasks, but currently encoder models have not
+been set up to be evaluated on them. This will be added in a future version of
+ScandEval - see the progress in [this
+issue](https://github.com/ScandEval/ScandEval/issues/653).
