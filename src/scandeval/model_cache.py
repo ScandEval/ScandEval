@@ -122,7 +122,7 @@ class ModelCache:
         self.cache_path.unlink()
         del self.cache
 
-    def __in__(self, key: str | list[dict[str, str]]) -> bool:
+    def __contains__(self, key: str | list[dict[str, str]]) -> bool:
         """Check if a key is in the cache.
 
         Args:
