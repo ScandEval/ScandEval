@@ -188,9 +188,12 @@ def split_dataset_into_cached_and_non_cached(
     # to the "text" column.
     input_column = "messages" if "messages" in dataset.column_names else "text"
     dataset_texts = dataset[input_column]
-    unique_non_cached_ids = {
-        dataset_text for dataset_text in dataset_texts if dataset_text not in cache
-    }
+    unique_non_cached_ids = set()
+    unique_texts = set()
+    for idx, dataset_text in enumerate(dataset_texts):
+        if dataset_text not in cache and dataset_text not in unique_texts:
+            unique_non_cached_ids.add(idx)
+            unique_texts.add(dataset_text)
 
     # The cached examples are the ones that are not in the non-cached examples. This
     # means that if the dataset has duplicates, only a single copy of the duplicate
