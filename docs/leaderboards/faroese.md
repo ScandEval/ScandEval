@@ -4,7 +4,7 @@ hide:
 ---
 # 🇫🇴 Faroese
 
-See the [leaderboard page](/leaderboard) for more information about all the columns.
+See the [leaderboard page](/leaderboards) for more information about all the columns.
 
 To see only generative models, you can search for "few-shot" or "zero-shot" in the
 search bar below
