@@ -25,8 +25,7 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  Følgende er tweets og deres sentiment, som kan være 'positiv', 'neutral'
-  eller 'negativ'.
+  Følgende er tweets og deres sentiment, som kan være 'positiv', 'neutral' eller 'negativ'.
   ```
 - Base prompt template:
   ```
@@ -94,8 +93,7 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 8
 - Prefix prompt:
   ```
-  Følgende er sætninger og JSON-ordbøger med de navngivne enheder, som
-  forekommer i den givne sætning.
+  Følgende er sætninger og JSON-ordbøger med de navngivne enheder, som forekommer i den givne sætning.
   ```
 - Base prompt template:
   ```
