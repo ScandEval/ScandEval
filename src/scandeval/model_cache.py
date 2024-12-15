@@ -8,7 +8,6 @@ import typing as t
 from collections import defaultdict
 from dataclasses import asdict
 
-import pandas as pd
 from tqdm.auto import tqdm
 
 from .data_models import GenerativeModelOutput, SingleGenerativeModelOutput
@@ -122,9 +121,18 @@ class ModelCache:
         self.cache_path.unlink()
         del self.cache
 
-    def cached_texts(self) -> list[str]:
-        """Return the text inputs indexed in the cache."""
-        return [key for key in self.cache.keys()]
+    def __contains__(self, key: str | list[dict[str, str]]) -> bool:
+        """Check if a key is in the cache.
+
+        Args:
+            key:
+                The key to check.
+
+        Returns:
+            Whether the key is in the cache.
+        """
+        hashed_key = self._hash_key(key=key)
+        return hashed_key in self.cache
 
     def add_to_cache(
         self, model_inputs: dict, model_output: GenerativeModelOutput
@@ -179,11 +187,13 @@ def split_dataset_into_cached_and_non_cached(
     # Get the sample indices of the non-cached examples, which are unique with respect
     # to the "text" column.
     input_column = "messages" if "messages" in dataset.column_names else "text"
-    dataset_texts = pd.Series(dataset[input_column])
-    dataset_texts.drop_duplicates(inplace=True)
-    unique_non_cached_ids = set(
-        dataset_texts[~dataset_texts.isin(cache.cached_texts())].index.tolist()
-    )
+    dataset_texts = dataset[input_column]
+    unique_non_cached_ids = set()
+    unique_texts = list()
+    for idx, dataset_text in enumerate(dataset_texts):
+        if dataset_text not in cache and dataset_text not in unique_texts:
+            unique_non_cached_ids.add(idx)
+            unique_texts.append(dataset_text)
 
     # The cached examples are the ones that are not in the non-cached examples. This
     # means that if the dataset has duplicates, only a single copy of the duplicate

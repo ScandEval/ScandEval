@@ -16,21 +16,18 @@ from huggingface_hub import HfApi
 from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
 from huggingface_hub.utils import HFValidationError
 from litellm.exceptions import (
+    APIConnectionError,
     APIError,
     AuthenticationError,
     BadRequestError,
     InternalServerError,
     NotFoundError,
+    ServiceUnavailableError,
+    Timeout,
 )
 from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
 from transformers import Trainer
-
-from scandeval.benchmark_modules.hf import (
-    HuggingFaceEncoderModel,
-    load_hf_model_config,
-    load_tokenizer,
-)
 
 from ..constants import MAX_LOGPROBS, SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
@@ -50,6 +47,7 @@ from ..task_utils import (
 from ..types import ExtractLabelsFunction
 from ..utils import create_model_cache_dir
 from .base import BenchmarkModule
+from .hf import HuggingFaceEncoderModel, load_hf_model_config, load_tokenizer
 
 logger = logging.getLogger("scandeval")
 
@@ -168,17 +166,20 @@ class LiteLLMModel(BenchmarkModule):
                         f"Failed to generate text. The error message was: {e}"
                     )
                 generation_kwargs["stop"] = None
+            except (
+                Timeout,
+                ServiceUnavailableError,
+                APIConnectionError,
+                InternalServerError,
+            ):
+                logger.debug(
+                    "Service temporarily unavailable. Retrying in 5 seconds..."
+                )
+                sleep(5)
             except APIError as e:
                 raise InvalidBenchmark(
                     f"Failed to generate text. The error message was: {e}"
                 )
-            except InternalServerError as e:
-                if "overloaded" not in str(e).lower():
-                    raise InvalidBenchmark(
-                        f"Failed to generate text. The error message was: {e}"
-                    )
-                sleep(1)
-                continue
             except AuthenticationError:
                 raise NeedsAdditionalArgument(
                     cli_argument="--api-key",
@@ -724,40 +725,48 @@ class LiteLLMModel(BenchmarkModule):
             The example with the few-shot examples applied.
         """
 
-        def split_section(section: str) -> tuple[str, str]:
-            """Split a section of the prompt to user and assistant messages."""
-            user_part = "\n".join(section.split("\n")[:-1])
-            assistant_part = section.split("\n")[-1]
-            return user_part, assistant_part
+        def create_prompt(**kwargs) -> tuple[str, str]:
+            """Create a prompt from the given keyword arguments.
+
+            Args:
+                kwargs:
+                    The keyword arguments to use in the prompt.
+
+            Returns:
+                A pair (prompt, label), where "label" is an empty string if the model is
+                not instruction tuned (as in this case it is included in the prompt).
+            """
+            label_key = "label" if "label" in kwargs else "target_text"
+            label = kwargs.pop(label_key)
+            label_mapping = self.dataset_config.prompt_label_mapping
+            label = label_mapping.get(label, label)
+            prompt = self.dataset_config.instruction_prompt.format(**kwargs)
+            return prompt, label
 
         match task.supertask:
             case "sequence-classification":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
                         label=example["label"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
-                        text=text.replace("\n", " ").strip(), label=""
-                    )
+                    create_prompt(text=text.replace("\n", " ").strip(), label="")
                     for text in examples["text"]
                 ]
 
             case "text-to-text":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
                         target_text=example["target_text"].replace("\n", " ").strip(),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
-                        text=text.replace("\n", " ").strip(), target_text=""
-                    )
+                    create_prompt(text=text.replace("\n", " ").strip(), target_text="")
                     for text in examples["text"]
                 ]
 
@@ -780,14 +789,14 @@ class LiteLLMModel(BenchmarkModule):
                     return json.dumps(labels, ensure_ascii=False)
 
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=" ".join(example["tokens"]).replace("\n", " ").strip(),
                         label=create_label(example=example),
                     )
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=" ".join(tokens).replace("\n", " ").strip(), label=""
                     )
                     for tokens in examples["tokens"]
@@ -795,7 +804,7 @@ class LiteLLMModel(BenchmarkModule):
 
             case "question-answering":
                 few_shot_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=example["context"].replace("\n", " ").strip(),
                         question=example["question"].replace("\n", " ").strip(),
                         label=example["answers"]["text"][0].replace("\n", " "),
@@ -803,7 +812,7 @@ class LiteLLMModel(BenchmarkModule):
                     for example in few_shot_examples
                 ]
                 new_sections = [
-                    self.dataset_config.prompt_template.format(
+                    create_prompt(
                         text=context.replace("\n", " ").strip(),
                         question=question.replace("\n", " ").strip(),
                         label="",
@@ -819,32 +828,15 @@ class LiteLLMModel(BenchmarkModule):
                 )
 
         few_shot_messages = [
-            dict(role=role, content=content.split(":", 1)[1].strip())
-            for section in few_shot_sections
-            for role, content in zip(
-                it.cycle(["user", "assistant"]), split_section(section=section)
-            )
-            if content.split(":", 1)[1].strip() != ""
+            dict(role=role, content=content)
+            for prompt, label in few_shot_sections
+            for role, content in [("user", prompt), ("assistant", label)]
         ]
 
-        if self.dataset_config.prompt_prefix:
-            few_shot_messages[0]["content"] = (
-                self.dataset_config.prompt_prefix
-                + "\n\n"
-                + few_shot_messages[0]["content"]
-            )
-
-        examples["messages"] = [
-            few_shot_messages
-            + [
-                dict(
-                    role="user",
-                    content=split_section(section=new_section)[0]
-                    .split(":", 1)[1]
-                    .strip(),
-                )
-            ]
-            for new_section in new_sections
+        messages_list = [
+            few_shot_messages + [dict(role="user", content=prompt)]
+            for prompt, _ in new_sections
         ]
 
+        examples["messages"] = messages_list
         return examples

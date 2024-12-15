@@ -1,8 +1,6 @@
 """Benchmarking model inference speed."""
 
-import collections.abc as c
 import logging
-import typing as t
 
 import pyinfer
 from tqdm.auto import tqdm
@@ -74,7 +72,7 @@ def benchmark_speed_single_iteration(
         model.generate(inputs=dict(messages=[[dict(role="user", content=doc)]]))
 
     def generate_prompt_predict(doc: str) -> None:
-        model.generate(inputs=dict(prompt=[doc]))
+        model.generate(inputs=dict(text=[doc]))
 
     def encoder_predict(doc: str) -> None:
         tokenizer = model.get_tokenizer()
@@ -87,12 +85,14 @@ def benchmark_speed_single_iteration(
         }
         pytorch_model(**inputs)
 
-    predict_fn_mapping: dict[t.Type[BenchmarkModule], c.Callable[[str], None]] = {
-        HuggingFaceEncoderModel: encoder_predict,
-        LiteLLMModel: generate_messages_predict,
-        VLLMModel: generate_prompt_predict,
-    }
-    predict = predict_fn_mapping[type(model)]
+    if isinstance(model, VLLMModel):
+        predict = generate_prompt_predict
+    elif isinstance(model, LiteLLMModel):
+        predict = generate_messages_predict
+    elif isinstance(model, HuggingFaceEncoderModel):
+        predict = encoder_predict
+    else:
+        raise ValueError(f"Model type {model} not supported for speed benchmark")
 
     try:
         # Do a warmup run, as the first run is always slower

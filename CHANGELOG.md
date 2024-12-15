@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Fixed
+- Model cache was not working properly with zero-shot models, meaning that redundant
+  generations were made. This has been fixed now, which also makes the zero-shot
+  evaluation much faster.
+- Use `ray` as distributed executor backend for vLLM if more than one GPU is available,
+  which fixes an error when using multiple GPUs with vLLM.
 
+
+## [v14.0.3] - 2024-12-14
+### Fixed
+- Enforce `scikit-learn<1.6.0`, since 1.6.0 is incompatible with `evaluate`. This bound
+  will be removed when [this `evaluate`
+  issue](https://github.com/huggingface/evaluate/issues/655) has been fixed.
+
+
+## [v14.0.2] - 2024-12-13
+### Fixed
+- Fixed a bug with the speed benchmark for vLLM models, when the model is instruction
+  tuned.
+- LiteLLM models now uses the instruction prompt, also when few-shot evaluating, just
+  like all vLLM models.
+- Now catches more LiteLLM exceptions when evaluating API models, and retries the
+  evaluation after a short delay if the exception is due to a temporary issue.
 
 
 ## [v14.0.1] - 2024-12-11
