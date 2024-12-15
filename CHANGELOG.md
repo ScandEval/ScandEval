@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Model cache was not working properly with zero-shot models, meaning that redundant
   generations were made. This has been fixed now, which also makes the zero-shot
   evaluation much faster.
+- Use `ray` as distributed executor backend for vLLM if more than one GPU is available,
+  which fixes an error when using multiple GPUs with vLLM.
 
 
 ## [v14.0.3] - 2024-12-14
