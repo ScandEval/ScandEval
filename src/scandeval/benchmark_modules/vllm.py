@@ -503,6 +503,8 @@ class VLLMModel(HuggingFaceEncoderModel):
         # during inference in this case
         model_id = self.model_config.adapter_base_model_id or self.model_config.model_id
 
+        executor_backend = "ray" if torch.cuda.device_count() > 1 else "mp"
+
         try:
             model = LLM(
                 model=model_id,
@@ -513,7 +515,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 trust_remote_code=self.benchmark_config.trust_remote_code,
                 revision=self.model_config.revision,
                 seed=4242,
-                distributed_executor_backend="ray",
+                distributed_executor_backend=executor_backend,
                 tensor_parallel_size=torch.cuda.device_count(),
                 disable_custom_all_reduce=True,
                 quantization=quantization,
