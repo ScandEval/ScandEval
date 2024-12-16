@@ -29,13 +29,13 @@ Here are a few examples from the training split:
 ```
 ```
 {
-  "text": "@USER Véd ikke hvor gammel du er, men på min "Glad-liste" er Stig Møllers "Sikke´n dejlig dag det er i dag" - også Gnags "Lav sol over Århus", "Safari", "Slingrer ned af Vestergade", "Sensommer på Strøget" plus mange andre.",
-  "label": "positive"
+  "text": "@USER @USER Vi bruger også snildt 1-2 timer (nogle gange flere timer end det) på at putte den yngste. Det er oftest Tommi, som gør det, for jeg går helt amok i processen. Så smører jeg madpakker og rydder op i stedet.",
+  "label": "neutral"
 }
 ```
 ```
 {
-  "text": "Næste gang nogen kalder EU for "fredens projekt", kommer jeg til at eksplosiv-ørle!! #eudk #ep19dk #dkpol #daxitNU [LINK]",
+  "text": "Er du nysgerrig på, hvordan du diskvalificerer dig selv fra at blive taget seriøst i den offentlige debat? Naser har svaret. #dkpol #dkmedier [LINK]",
   "label": "negative"
 }
 ```
@@ -112,23 +112,20 @@ Here are a few examples from the training split:
 
 ```
 {
-  'text': 'Klik på linket i den e-mail vi har sendt dig',
-  'tokens': array(['Klik', 'på', 'linket', 'i', 'den', 'e-mail', 'vi', 'har', 'sendt', 'dig'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  'tokens': array(['I', 'dette', 'efterår', 'har', 'Grønland', 'taget', 'en', 'stor', 'beslutning', 'ved', 'folkeafstemningen', 'den', '25.', 'november', '.'], dtype=object),
+  'labels': array(['O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```
-}
-  'text': 'Space Invaders Testområde Artikler 2 Trivia Quiz Udrykninger Klanmedlemmer Server Information Round_n_Navigate Lan Party',
-  'tokens': array(['Space', 'Invaders', 'Testområde', 'Artikler', '2', 'Trivia', 'Quiz', 'Udrykninger', 'Klanmedlemmer', 'Server', 'Information', 'Round_n_Navigate', 'Lan', 'Party'], dtype=object),
-  'labels': array(['B-MISC', 'I-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+{
+  'tokens': array(['Åh', ',', 'Petra', ',', 'vis', 'mig', 'din', 'krop', '.'], dtype=object),
+  'labels': array(['O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```
-}
-  'text': '"The Beast" kunne kun købes i sin tid, ved forudbestilling på selve destilleriet, hvilket min mand tog over og gjorde, og derfor kan vi nu udbyde 4 flasker til salg med flg',
-  'tokens': array(['"', 'The', 'Beast', '"', 'kunne', 'kun', 'købes', 'i', 'sin', 'tid', ',', 'ved', 'forudbestilling', 'på', 'selve', 'destilleriet', ',', 'hvilket', 'min', 'mand', 'tog', 'over', 'og', 'gjorde', ',', 'og', 'derfor', 'kan', 'vi', 'nu', 'udbyde', '4', 'flasker', 'til', 'salg', 'med', 'flg'], dtype=object),
-  'labels': array(['O', 'B-MISC', 'I-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+{
+  'tokens': array(['Fravalget', 'af', 'revision', 'registreres', 'automatisk', 'ved', 'anmeldelse', 'af', 'stiftelse', 'af', 'selskabet', 'hos', 'Erhvervs-styrelsen', '.'], dtype=object),
+  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'O'], dtype=object)
 }
 ```
 
@@ -170,29 +167,35 @@ $ scandeval --model <model-id> --dataset dansk
 
 ### Unofficial: DaNE
 
-Coming soon!
+This dataset was published in [this paper](https://aclanthology.org/2020.lrec-1.565/)
+and is a manually NER annotated version of the [Danish Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Danish-DDT/tree/master). The NER
+labels follow the CoNLL-2003 labelling scheme.
+
+The original full dataset consists of 4,383 / 564 / 565 samples for training, validation
+and testing, respectively. We use a 1,024 / 256 / 2,048 split for training, validation
+and testing, respectively (so 3,328 samples used in total). These splits are new and
+there can thus be some overlap between the original validation and test sets and our
+validation and test sets.
 
 Here are a few examples from the training split:
 
 ```
 {
-  'text': 'Men han gjorde Viborg i en symaskine-spindende og venlig Citroën B 12 fra 1926.',
-  'tokens': array(['Men', 'han', 'gjorde', 'Viborg', 'i', 'en', 'symaskine-spindende', 'og', 'venlig', 'Citroën', 'B', '12', 'fra', '1926', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'O', 'O', 'O'], dtype=object)
+  'tokens': array(['Det', 'var', 'det', 'år', ',', 'hans', 'første', 'LP', ',', '"', 'With', 'A', 'Little', 'Help', 'From', 'My', 'Friends', '"', ',', 'udkom', '.'], dtype=object),
+  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```
 {
-  'text': 'Jeg fik min Secumar-vest på i en rasende fart, mens skipper Tom Christiansen vendte skibet.',
-  'tokens': array(['Jeg', 'fik', 'min', 'Secumar-vest', 'på', 'i', 'en', 'rasende', 'fart', ',', 'mens', 'skipper', 'Tom', 'Christiansen', 'vendte', 'skibet', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O', 'O'], dtype=object)
+  'tokens': array(['Eddie', 'Carbone', ',', 'italiensk-amerikansk', 'havnearbejder', 'i', 'New', 'York', '.'], dtype=object),
+  'labels': array(['B-PER', 'I-PER', 'O', 'B-MISC', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
 }
 ```
 ```
 {
-  'text': 'Når nøglen i en "tilholderlås" er drejet til låst stilling, bør riglen/fallen være i sin yderste stilling med mindst lOmm\'s indgreb.',
-  'tokens': array(['Når', 'nøglen', 'i', 'en', '"', 'tilholderlås', '"', 'er', 'drejet', 'til', 'låst', 'stilling', ',', 'bør', 'riglen/fallen', 'være', 'i', 'sin', 'yderste', 'stilling', 'med', 'mindst', "lOmm's", 'indgreb', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  'tokens': array(['"', 'Jeg', 'er', 'mig', '!', '"', 'insisterer', 'han', 'under', 'det', 'flere', 'hundrede', 'år', 'gamle', 'egetræ', ',', 'liggende', ',', 'som', 'den', 'popflab', 'han', 'er', ',', 'på', 'ryggen', 'i', 'sine', 'orange', 'jeans', ',', 't-shirt', '-', 'som', 'naturligvis', 'stiller', 'et', 'solbrunt', 'behåret', 'bryst', 'til', 'skue', '-', 'et', 'par', '68er', '"', 'make', 'love', 'not', 'war', '"', 'solbriller', 'han', 'netop', 'har', 'købt', 'i', 'Paris', ',', 'og', 'en', 'Kings', 'i', 'kæften', '.'], dtype=object),
+  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O'], dtype=object)
 }
 ```
 
@@ -218,22 +221,19 @@ Here are a few examples from the training split:
 
 ```
 {
-  "text": "Et kort øjeblik frygtede han, at bedstefar Jonas var ved at dø for alvor, men anfaldet var allerede på vej væk og hånden blev slap.",
-  "corruption_type": null,
+  "text": "Samme dame dukkede netop nu op sammen med Odd-Catla's erklærede yndling, væbneren Aikin af Cantir.",
   "label": "correct"
 }
 ```
 ```
-}
-  "text": "Robert brugte sin frokostpause, som han plejede at bruge den.",
-  "corruption_type": null,
-  "label": "correct"
+{
+  "text": "Gebyrets størrelse afhænger nemlig af helt, i hvilken kategori den pågældende \"levnedsmiddelvirksomhed\" placeres.",
+  "label": "incorrect"
 }
 ```
 ```
-}
-  "text": "Hvis der overhovedet var energi nogen tilbage i dig.",
-  "corruption_type": "flip_neighbours",
+{
+  "text": "Den statsansatte dyrlæge Kronfågels på slagteri i Kristiansstad, Karl Erik Bjørkman, understreger, belægningen hos producenten betyder meget for dyrenes trivsel:",
   "label": "incorrect"
 }
 ```
@@ -294,53 +294,32 @@ Here are a few examples from the training split:
 
 ```
 {
-  'id': '2010287291290882376',
-  'question': 'Hvem er kendt som kongen af rock and rock?',
+  'context': '"(Sittin\' On) The Dock of the Bay" er en sang, der er skrevet af soul-sangeren Otis Redding og guitaristen Steve Cropper sammen. Den blev indspillet af Redding to gange i 1967, herunder en gang få dage før hans død i et flystyrt. Sangen blev udgivet på Stax Records\' Volt-label i 1968 og blev den første posthume single, der lå øverst på hitlisterne i USA. Den nåede op som nummer 3 på den britiske single-liste.',
+  'question': 'Hvem sang sitting on the dock of the bay?',
   'answers': {
-    'answer_start': array([514]),
-    'text': array(['Elvis Presley'], dtype=object)
-  },
-  'context': 'The King of Rock and Roll er Little Richards andet album for Reprise Records, et opfølgningsalbum, der indeholdt en original Little Richard-sang, gospelrocken "In the Name", og en ny sang, "Green Power", skrevet i samarbejde med produceren H. B. Barnum, som blev udgivet som single, samt versioner af numre af så forskellige kunstnere som Hank Williams, The Temptations, Martha and the Vandellas, Three Dog Night og The Rolling Stones. Titelnummeret, en spøgelsesagtig praleri, der bl.a. refererede til Tom Jones, Elvis Presley, Ike & Tina Turner, Sly and the Family Stone og Aretha Franklin, forstyrrede nogle fans, selv om albummets titelmelodi fik god airplay i New York - en jump blues i 1950\'ernes stil med en enestående Little Richard-sang! Men fans og kritikere var yderligere oprørte over, at albummet ikke indeholdt akustisk klaver, og at de fleste numre var dårligt mixet med et påtrængende pigegruppekor.',
-  'answers_en': {
-    'answer_start': array([474]),
-    'text': array(['Elvis Presley'], dtype=object)
-  },
-  'context_en': 'The King of Rock and Roll is Little Richard\'s second album for Reprise Records, a follow-up album that contained one original Little Richard song, the gospel rock "In the Name" and a new song co-written by Producer H. B. Barnum, "Green Power", the single release; and versions of tracks by artists as diverse as Hank Williams, The Temptations, Martha and the Vandellas, Three Dog Night, and The Rolling Stones. The title track, a mock braggadocio that referenced Tom Jones, Elvis Presley, Ike & Tina Turner, Sly and the Family Stone, and Aretha Franklin, amongst others, upset some fans, although the album\'s title tune got good airplay in New York - a 1950s style jump blues, with an exceptional Little Richard shouting vocal! But fans and critics were further upset that the album did not feature acoustic piano and that most tracks were badly mixed, with an intrusive girl group chorus.',
-  'title_en': 'The King of Rock and Roll'
-}
-```
-```
-}
-  'id': '6235822902962606890',
-  'question': 'Hvem ejer the boston red sox baseball hold?',
-  'answers': {
-    'answer_start': array([115]),
-    'text': array(['John W. Henry'], dtype=object)
-  },
-  'context': 'John William Henry II (født den 13. september 1949) er en amerikansk forretningsmand og investor og grundlægger af John W. Henry & Company, et investeringsforvaltningsselskab. Han er hovedindehaver af The Boston Globe, Boston Red Sox og Liverpool Football Club og medejer af Roush Fenway Racing. I marts 2006 anslog Boston Magazine Henrys nettoformue til 1,1 mia. dollars, men bemærkede, at hans virksomhed for nylig havde haft problemer. I november 2012 meddelte firmaet, at det ville stoppe med at forvalte kundernes penge ved årets udgang, og Henry bekræftede, at de samlede aktiver under firmaets forvaltning var faldet fra 2,5 mia. dollar i 2006 til under 100 mio. dollar i slutningen af 2012. I juli 2017 anslog Forbes hans nettoformue til at være 2,6 milliarder dollars.',
-  'answers_en': {
-    'answer_start': array([107]),
-    'text': array(['John W. Henry'], dtype=object)
-  },
-  'context_en': "John William Henry II (born September 13, 1949) is an American businessman and investor and the founder of John W. Henry & Company, an investment management firm. He is the principal owner of The Boston Globe, the Boston Red Sox and Liverpool Football Club and co-owner of Roush Fenway Racing. In March 2006, Boston Magazine estimated Henry's net worth at $1.1 billion but noted that his company had recently experienced difficulties. In November 2012, the company announced that it would stop managing clients' money by the end of the year, and Henry confirmed that total assets under the firm's management had fallen from $2.5 billion in 2006 to less than $100 million as of late 2012. As of July 2017, Forbes estimated his net worth to be $2.6 billion.",
-  'title_en': 'John W. Henry'
+    'answer_start': array([79]),
+    'text': array(['Otis Redding'], dtype=object)
+  }
 }
 ```
 ```
 {
-  'id': '6981008936931722768',
-  'question': 'Der grundlagde den første baptistkirke i amerika?',
+  'context': "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne links\n\n\nWebsted\npbskids.org/catinthehat/",
+  'question': 'Hvem synger titelmelodien til the cat in the hat?',
   'answers': {
-    'answer_start': array([222]),
-    'text': array(['Roger Williams'], dtype=object)
-  },
-  'context': "First Baptist Church in America\nDen første baptistkirke i Amerika er First Baptist Church of Providence, Rhode Island, også kendt som First Baptist Meetinghouse. Det er den ældste baptistkirke i USA, som blev grundlagt af Roger Williams i Providence, Rhode Island i 1638. Den nuværende kirkebygning blev opført i 1774-75 og holdt sine første møder i maj 1775. Den ligger på 75 North Main Street i Providence's College Hill-kvarter og er et nationalt historisk vartegn.",
-  'answers_en': {
-    'answer_start': array([217]),
-    'text': array(['Roger Williams'], dtype=object)
-  },
-  'context_en': "The First Baptist Church in America is the First Baptist Church of Providence, Rhode Island, also known as the First Baptist Meetinghouse. It is the oldest Baptist church congregation in the United States, founded by Roger Williams in Providence, Rhode Island in 1638. The present church building was erected in 1774–75 and held its first meetings in May 1775. It is located at 75 North Main Street in Providence's College Hill neighborhood and is a National Historic Landmark.",
-  'title_en': 'First Baptist Church in America'
+    'answer_start': array([269]),
+    'text': array(['David Schweitzer'], dtype=object)
+  }
+}
+```
+```
+{
+  'context': 'Modern Slavery Act 2015\nLoven om moderne slaveri fra 2015 er en lov fra Det Forenede Kongeriges parlament. Den har til formål at bekæmpe slaveri i Det Forenede Kongerige og konsoliderer tidligere lovovertrædelser vedrørende menneskehandel og slaveri. Loven gælder for England og Wales. Lovforslaget blev forelagt underhuset i udkast i oktober 2013 af James Brokenshire, parlamentarisk undersekretær for kriminalitet og sikkerhed, i oktober 2013. Lovforslagets sponsorer i indenrigsministeriet var Theresa May og Lord Bates. Det fik kongelig samstemmende udtalelse og blev lov den 26. marts 2015.',
+  'question': 'Hvornår trådte den moderne slaveri i kraft?',
+  'answers': {
+    'answer_start': array([580]),
+    'text': array(['26. marts 2015'], dtype=object)
+  }
 }
 ```
 
@@ -392,19 +371,19 @@ Here are a few examples from the training split:
 
 ```
 {
-  "text": "Sprog som en havnearbejder\nSvarmuligheder:\na. Grimt sprog\nb. Fortryde\nc. Ikke reagere på noget bestemt\nd. Være presset af en opgave",
+  "text": "Hård banan\nSvarmuligheder:\na. Barsk person\nb. Sige ja vende tommelfingeren nedad\nc. Fortsat klare sig\nd. Slå sig løs",
   "label": "a"
 }
 ```
 ```
 {
-  "text": "Være i gode hænder\nSvarmuligheder:\na. Hård modstand\nb. Være i sikkerhed hos venlige mennesker\nc. Gå meget tidligt i seng\nd. Ødelægge en god stemning",
+  "text": "Få skovlen under nogen\nSvarmuligheder:\na. Ofre en\nb. Kunne bestemme over nogen\nc. Tænke sig om\nd. Anstrenge sig meget",
   "label": "b"
 }
 ```
 ```
 {
-  "text": "Korthuset falder sammen\nSvarmuligheder:\na. Ødelægge noget\nb. Sige ja til noget uden at ville det\nc. Det går galt\nd. Se ned på noget",
+  "text": "Have nogen i snor\nSvarmuligheder:\na. Ikke lade sig gå på af noget\nb. Klare sig, selvom det er svært\nc. Have kontrol med nogen\nd. Få nogen til at tro på en umulig plan",
   "label": "c"
 }
 ```
@@ -448,10 +427,10 @@ $ scandeval --model <model-id> --dataset danske-talemaader
 
 ### Danish Citizen Tests
 
-This dataset was created by the Alexandra Institute by scraping the Danish citizenship
-tests (indfødsretsprøven) and permanent residency tests (medborgerskabsprøven) from 2016
-to 2023. These are available on the [official website of the Danish Ministry of
-International Recruitment and Integration](https://danskogproever.dk/).
+This dataset was created by scraping the Danish citizenship tests (indfødsretsprøven)
+and permanent residency tests (medborgerskabsprøven) from 2016 to 2023. These are
+available on the [official website of the Danish Ministry of International Recruitment
+and Integration](https://danskogproever.dk/).
 
 The original full dataset consists of 720 samples. We use an 80 / 128 / 512 split for
 training, validation and testing, respectively (so 720 samples used in total).
@@ -460,23 +439,20 @@ Here are a few examples from the training split:
 
 ```
 {
-  "text": "Hvornår blev protestantismen indført i Danmark?\nSvarmuligheder:\na. 1100 -tallet\nb. 1300 -tallet\nc. 1500 -tallet",
-  "label": "c",
-  "test_type": "medborgerskabsprøven"
+  "text": "Hvilke lande er med i rigsfællesskab et?\nSvarmuligheder:\na. Danmark, Grønland og Færøerne\nb. Danmark, Island og Norge",
+  "label": "a"
 }
 ```
 ```
-}
-  "text": "Hvad hedder farvandet mellem København og Sverige?\nSvarmuligheder:\na. Øresund\nb. Kattegat\nc. Lillebælt",
-  "label": "a",
-  "test_type": "medborgerskabsprøven"
+{
+  "text": "Hvor mange medlemmer har Folketinget?\nSvarmuligheder:\na. 87\nb. 179\nc. 265",
+  "label": "b"
 }
 ```
 ```
-}
-  "text": "Hvem bestemmer, hvem der skal danne regering efter et valg?\nSvarmuligheder:\na. Dronningen.\nb. Folketinget.\nc. Domstolene.",
-  "label": "b",
-  "test_type": "medborgerskabsprøven"
+{
+  "text": "Hvem kan blive biskop i den danske folkekirke?\nSvarmuligheder:\na. Kun mænd\nb. Kun kvinder\nc. Både m ænd og kvinder",
+  "label": "c"
 }
 ```
 
@@ -517,57 +493,130 @@ $ scandeval --model <model-id> --dataset danish-citizen-tests
 
 ### Unofficial: MMLU-da
 
-Coming soon!
+This dataset is a machine translated version of the English [MMLU
+dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
+different topics, such as elementary mathematics, US history and law. The translation to
+Danish was done by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
+
+The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.
 
 Here are a few examples from the training split:
 
 ```
 {
-  "text": "Ældre voksne yder generelt en fremragende præstation når deres _____ hukommelse testes.\nSvarmuligheder:\na. Episodisk\nb. Arbejds-\nc. Retrospektiv\nd. Semantisk",
-  "label": "d",
-  "category": "human_aging"
+  "text": "Hvilket af følgende coronavirusser har forårsaget tusindvis af dødsfald over hele verden som en 'opstået' virus?\nSvarmuligheder:\na. MERS\nb. SARS\nc. OC43\nd. HKU1",
+  "label": "a"
 }
 ```
 ```
 {
-  "text": "Nipah er en zoonotisk paramyxovirus. Hvor stammer den fra?\nSvarmuligheder:\na. Den stammer fra grise.\nb. Den stammer fra flagermus.\nc. Den stammer fra mennesker.\nd. Den stammer fra heste.",
-  "label": "c",
-  "category": "virology"
+  "text": "Hvilken orbitale væg er mest sandsynligt at kollapse i en 'blow out' fraktur?\nSvarmuligheder:\na. Taget\nb. Gulvet\nc. Den laterale væg\nd. Den mediale væg",
+  "label": "b"
 }
 ```
 ```
 {
-  "text": "Et firma er interesseret i at sammenligne den gennemsnitlige salgsindtægt pr. sælger på to forskellige steder. Chefen tager en tilfældig stikprøve på 10 sælgere fra hver placering uafhængigt af hinanden og registrerer salgsindtægterne, som hver person har genereret i de sidste fire uger. Han beslutter sig for at bruge en t-test til at sammenligne den gennemsnitlige salgsindtægt på de to placeringer. Hvilket af følgende antagelser er nødvendigt for gyldigheden af t-testen?\nSvarmuligheder:\na. De populationsstandardafvigelser på begge placeringer er ens.\nb. De populationsstandardafvigelser på begge placeringer er ikke ens.\nc. De populationsstandardafvigelser på begge placeringer er kendte.\nd. Populationerne af salgsregistreringer på hver placering er normalt fordelt.",
-  "label": "d",
-  "category": "high_school_statistics"
+  "text": "Hvad er navnet på den største struktur i Teotihuacán, og hvor mange platforme og pyramider blev bygget der?\nSvarmuligheder:\na. Månepyramiden; 250\nb. Templet for den fjerkræklædte slange; 400\nc. Solpyramiden; 600\nd. Inskriptionstemplen; 700",
+  "label": "c"
 }
 ```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Følgende er multiple choice spørgsmål (med svar).
+  ```
+- Base prompt template:
+  ```
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.
+  ```
 
 
 ### Unofficial: ARC-da
 
-Coming soon!
+This dataset is a machine translated version of the English [ARC
+dataset](https://doi.org/10.48550/arXiv.1803.05457) and features US grade-school science
+questions. The translation to Danish was done by the University of Oregon as part of
+[this paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
+
+The original full dataset consists of 1,110 / 297 / 1,170 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
+validation and testing, respectively (so 2,304 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
 ```
 {
-  "text": "Hvilket begreb bruges til at beskrive en fysisk egenskab af et mineral?\nSvarmuligheder:\na. organisk\nb. fast\nc. gasformig\nd. fossilholdigt",
+  "text": "Et farmaceutisk firma har offentliggjort resultaterne af et begrænset eksperiment, der undersøger den beskyttende virkning af en kemisk forbindelse mod høje doser af UV-stråler på hudceller. Senere blev det opdaget, at resultaterne ikke var reproducerbare. Hvilken handling kunne forskere fra firmaet have foretaget for at undgå at offentliggøre fejlagtige resultater?\nSvarmuligheder:\na. Udfør flere forsøg.\nb. Brug kun lave niveauer af stråling.\nc. Brug forskellige bølgelængder af stråling.\nd. Undersøg resultaterne af lignende eksperimenter, før man dannede en hypotese.",
+  "label": "a"
+}
+```
+```
+{
+  "text": "En ingeniør skal beregne den potentielle energi af en rutschebanekabine øverst på en skråning. Hvilken information ville bedst hjælpe ingeniøren med at bestemme den potentielle energi af kabine?\nSvarmuligheder:\na. den afstand, som rutschebanekabinen skal rejse\nb. massen af rutschebanekabinen ved fuld kapacitet\nc. den gennemsnitlige vægt af en tom rutschebanekabine\nd. retningen, som rutschebanekabinen bevæger sig i",
   "label": "b"
 }
 ```
 ```
 {
-  "text": "Hvad forårsager DEN STØRSTE forandring i en græsmark over tid?\nSvarmuligheder:\na. Dagens tidspunkt\nb. Mængde af årlig nedbør\nc. Antal fugle, der bygger rede\nd. Årlige dyr bevægelser",
-  "label": "b"
-}
-```
-```
-{
-  "text": "Nogle elever brugte en varmeplade til at opvarme 1 L vand fra 20°C til kogepunktet for vand. Eleverne registrerede temperaturen på vandet hvert minut, indtil det begyndte at koge. Hvad er den mest hensigtsmæssige måde at repræsentere data på?\nSvarmuligheder:\na. en søjlediagram med temperatur på y-aksen og tid på x-aksen\nb. en søjlediagram med tid på y-aksen og temperatur på x-aksen\nc. en linjediagram med temperatur på y-aksen og tid på x-aksen\nd. en linjediagram med tid på y-aksen og temperatur på x-aksen",
+  "text": "En studerende hældte vand i en plastbakke. Studerende satte derefter bakken i fryseren. Hvilken egenskab ved vand ændrede sig, da vandet fryser?\nSvarmuligheder:\na. Vandet blev til en gas.\nb. Massen af vandet steg.\nc. Vandet tog en bestemt form.\nd. Smagen af vandet ændrede sig ikke.",
   "label": "c"
 }
 ```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Følgende er multiple choice spørgsmål (med svar).
+  ```
+- Base prompt template:
+  ```
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.
+  ```
 
 
 ## Common-sense Reasoning
@@ -580,30 +629,27 @@ video descriptions from ActivityNet as well as how-to articles from WikiHow. The
 was translated by the University of Oregon as part of [this
 paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-The original full dataset consists of 9,310 samples. We use an 1,024 / 256 / 2,048 split
+The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
 for training, validation and testing, respectively (so 3,328 samples used in total).
 
 Here are a few examples from the training split:
 
 ```
 {
-  "text": "[header] Sådan rengøres ruskindshandsker [title] Tjek dine handskers plejemærkater. [step] Før du begynder at rengøre dine ruskindshandsker, skal du tjekke plejemærkaterne. Der er mange forskellige typer af ruskind og ruskindafslutninger, og hver type har forskellige plejebehov.\nSvarmuligheder:\na. Lær om hvert enkelt ruskindprodukt og dets plejeskilte for at sikre, at du bruger den rette rensemiddel. [substeps] Plejeskiltene for handsker skal være nummer 1 eller den seneste mængde og niveau for brug.\nb. Mærkaterne skal fortælle dig, hvordan du bedst kan rengøre din type ruskind. [substeps] For eksempel bør du ikke bruge vand på meget fint ruskind, da det sandsynligvis vil misfarve det.\nc. Du bør tjekke disse plejemærkater for at se, om din vare (eller produkt) specifikt skal renses eller presses, inden du tager vare på den. [substeps] Du kan tjekke dit plejemærkat ved at trække det ud af en papkasse eller vaske det i din vaskemaskine.\nd. Genstande som ruskindspander, -panner og -kasser vil have forskellige plejeskilte, som du skal følge. [substeps] Bed forhandleren om at give dig et opkald eller sende dig dit grundlæggende rengøringskit.",
-  "label": "b",
-  "activity_label": "Home and Garden"
+  "text": "Disse mennesker træder pedalerne med kun det ene ben og står midt på cyklen med det andet ben, der holder deres hænder oppe. næste gør de\nSvarmuligheder:\na. en anden øvelse, hvor de sætter det ene ben på pedalen, mens de har det andet ben ude og hopper op og ned.\nb. tager hinandens hænder og udfører en eller anden dansebevægelse på børsterne, som de bruger til at snurre rundt med deres kroppe og hoppe med hænderne oppe.\nc. drejer med deres forstenede hænder, laver en U-vending og starter derefter deres handlinger igen og igen.\nd. skifter til at stå ved hjælp af to arme for at balancere sig selv.",
+  "label": "a"
 }
 ```
 ```
-}
-  "text": "En kværnemaskine vises på en terrasse. en mand\nSvarmuligheder:\na. taler, mens han viser maskindelene.\nb. begynder at sprøjte jorden på terrassen med kværnen.\nc. arbejder på en boliggræsplæne.\nd. vises med at skrabe sne af landeren, efterfulgt af at fjerne tøj.",
-  "label": "a",
-  "activity_label": "Cutting the grass"
+{
+  "text": "[header] Sådan dræber du frugtfluer [title] Brug rådden frugt. [step] Dit problem med frugtfluer begyndte sandsynligvis først, da du opdagede, at du havde efterladt nogle frugter, der til sidst blev rådne. Brug den metode, der samlede fluene første gang til at fange dem igen, men denne gang før dem til en mere morbide slutning.\nSvarmuligheder:\na. Dræb fluene ved at trække dem fra deres rede eller ved at bruge tunge kæder med tænger til at fange dem og placere dem i en spand eller stuen. Du kan også bruge dyreafføring såsom fiske- og ande-urin.\nb. Placer et stykke rådden frugt i en skål og stræk klart plastik over toppen. Skær flere små huller i plastikken med en tandstik og lad det stå tæt på stedet med fluene.\nc. Efter at have forsøgt at fange dobbelt så mange fluer, som du kan, skal du fjerne de ubehagelige frugtstykker fra pakken og bage dem i 2-3 minutter. Fluene vil flyde øverst på den søde marmelade, når du fjerner frugten fra marmeladen.\nd. [substeps] Tjek dåser for knotten, melbiller og fluer. Køb blomster fra havecentret, hvis du ikke har al produktion i nærheden.",
+  "label": "b"
 }
 ```
 ```
-}
-  "text": "En stor gruppe mennesker ses spille en fodboldkamp på en sandet mark, mens mange ser på fra sidelinjen. kameraet\nSvarmuligheder:\na. fortsætter med at følge gruppen og viser mange, der kaster bolden til hinanden, mens spillet bliver spillet for tilskuere.\nb. fanger kampen fra alle vinkler og ser på, mens en scorer et mål i målet.\nc. følger de modsatte hold og fører ind i dem, der sparkes og trækker i hinandens arme.\nd. viser nærbilleder af spillere samt ketsjere og bolden, der bliver ramt.",
-  "label": "b",
-  "activity_label": "Beach soccer"
+{
+  "text": "En mand står indendørs på en platform foran tre tilskuere og løfter en tung vægtstang. En mand nærmer sig en vægtstang på gulvet og står foran den og forbereder sig på at løfte den. manden\nSvarmuligheder:\na. løfter vægtstangen, der hænger i luften på platformen, og vender sig mod tilskuerne.\nb. løfter vægtstangen og viser, hvordan han udfører det, idet han pauser på hver stang for at måle vægten.\nc. bøjer sig derefter i knæene og lægger hænderne på vægtens stangdel.\nd. løfter derefter klokken på sine skuldre, læner sig tilbage, sætter armene bag hovedet og løfter den let.",
+  "label": "c"
 }
 ```
 
@@ -659,26 +705,20 @@ Here are a few examples from the training split:
 
 ```
 {
-  "text": "Lørdag er en dag med masser af vind og blæst. Men for 35 år siden, var blæsevejret endnu voldsommere. I disse dage er det nemlig 35 år siden Danmark blev ramt af en af de kraftigste storme gennem tiderne. Stormen anrettede store skader og væltede hele skove, mens den gav en stormflod, der med rekordhøj vandstand sørgede for omfattende oversvømmelser. Eluf Harring, som dengang var otte år og boede på landet, husker stadig orkanen, som var det i går. - Jeg kan huske, at jeg vågnede hele tiden. Der var ingen af os, som kunne sove. Også havde vi ingen strøm i halvandet døgn, siger Eluf Harring. Også Mette Henriksen fra Aars, der dengang var 23 år, husker tydeligt stormen. Hun var på sin fødselsdag på vej hjem fra Skørping i sin bil, da et træ væltede og spærrede vejen i skoven ved Torstedlund. Herefter ville Mette Henriksen vende om og køre tilbage, men også her var flere træer væltet. Hun var fanget og måtte vente på, der kom nogen for at fjerne træerne. - Jeg sad fanget i min bil i halvanden time, og jeg var så bange for, der ville vælte et træ lige nede i mig, siger Mette Henriksen. Stormen udmærkede sig ved at ramme hele Danmark - og især i den nordlige halvdel af landet. Det var også her man oplevede det kraftigste vindstød overhovedet registeret under stormen. I Thisted blev der om eftermiddagen den 24. november målt vindstød på 43 m/s. Mange steder i landet betød stormen blandt andet, at hele skovområder væltede. Særdeles gik det hårdt ud over Rold Skov i Himmerland. Stormen kostede to mennesker livet. En fisker omkom, da en kutter sank i Nordsøen, mens en skovarbejder omkom, da han blev ramt af et af de mange væltede træer, skriver TV2.dk.",
-  "target_text": "Den 24. november i 1981 blev Danmark ramt af en historisk voldsom storm. Eluf Harring har sendt arkivbilleder til TV2 Nord fra dengang.",
-  "text_len": 1671,
-  "summary_len": 135
+  "text": "Jacob Emil Andersen viste søndag rundt på Halvorsminde Efterskole ved Hjørring. Skolen har ligget på samme sted siden 1903. Han er selv elev, da en IT-linje på skolen fangede hans interesse. - Det betyder meget for mig, jeg ville ikke have været lige så interesseret i den her skole, hvis der ikke havde været IT, fortæller Jacob Emil Andersen, der oprindeligt stammer fra Aalborg, til TV2 Nord. En af dem, han viser rundt til Efterskolernes dag, er Isabella Kristensen, der går i skole i Hune. Hun er på jagt efter noget helt specielt. - Helt sikkert dans, springgymnastik og fitness med noget puls, forklarer Isabella Kristensen til TV2 Nord. Netop efterskolernes specialisering er en af grundene til, at rekordmange vælger at bruge et år væk fra familien i 8.-, 9.- eller 10.-klasse. De særlige linjefag har man flere af på Halvorsminde Efterskole. Jern og metal, arbejde med træ og vinterbadning er blot nogle af de aktiviteter, eleverne kan støde ind i på de forskellige linjefag, som skolen tilbyder. Men efterskolerne skal også huske at have fokus på den faglighe kvalitet, lyder det fra forstanderen. - Vi skal være skarpe på nogle nicheprodukter og nogle linjer med noget god kvalitet. Så skal vi også lave god skole, fortæller forstander på Halvorsminde Efterskole, Jens Beermann, til TV2 Nord. Han bliver bakket op af sin kollega fra Hørby Efterskole ved Sæby omkring 30 kilometer fra Halvorsminde. - Når man laver sit valgfagsudbud, skal det ikke være tilfældigt. Man skal ikke tænke, at ’det er smart! Det må trække elever, det her!’ Der skal være en velovervejet refleksion i forhold til, om det passer ind i det, vi gerne vil som skole,, siger forstander på Hørby Efterskole, Mogens Vestergård, til TV2 Nord. Alene i Nordjylland gik mere end 2.000 elever på efterskole i skoleåret 2018-2019. Både Halvorsminde Efterskole og Hørby Skole har plads til 130 elever. Og noget tyder på, at der i hvert fald er sikret en ny elev til næste skoleår efter dagens åbent hus. - Jeg synes at det ser spændende ud, og jeg har endnu mere lyst til at gå her nu, siger Isabella Kristensen.",
+  "target_text": "Søndag inviterede efterskoler landet over potentielle nye elever inden for. Efterskolerne specialiserer sig for at tiltrække elever, men den gode faglighed må ikke blive glemt, lyder det fra nordjyske forstandere."
 }
 ```
 ```
-}
-  "text": "Der blev sendt flere vogne til Jomfru Ane Gade lørdag eftermiddag, efter der blev meldt om \"anspændt stemning\" i mellem fangrupperinger i anledning af dagens fodboldopgør på Aalborg Portland Park. AaB tager 17.30 imod Århus, hvor de skal forsøge at hive sæsonens første sejr hjem. Selvom der ikke blev rapporteret om slåskampe, valgte Nordjyllands Politi alligevel at sende betjente til Gaden for at holde de to fangrupper adskilt og undgå uroligheder. De to grupperinger befandt sig på hver deres beværtning, og politiet dannede en kæde, så de to fangrupper ikke kom i kontakt med hinanden, da de forlod gaden. Efterfølgende blev de to grupperinger sendt i hver sin retning mod stadion, hvor alt foregik i ro og orden.",
-  "target_text": "Nordjyllands Politi holder et godt øje med fodboldfansene, efter der blev rapporteret om anspændt stemning mellem de grupperinger.",
-  "text_len": 719,
-  "summary_len": 130
+{
+  "text": "Efter en nat med spejl glatte veje i Nordjylland melder Nordjyllands Politi om en helt problemfri morgen. Selvom politikredse i TV2 Nords sendeområde melder om en rolig nat uden større uheld, så kan de bilister, der skal af sted lørdag morgen godt forvente lidt længere rejsetid. Der er nemlig stadig glatte veje, og der er faldet en del sne i Nordjylland. Saltvogne og sneplove har allerede været på vejene, og Politiet opfordre forsat bilisterne til at køre forsigtigt ude på de snefyldte veje.",
+  "target_text": "Nordjyllands Politi melder om en stille morgen trods glatte veje og stort snefald i nat."
 }
 ```
 ```
-}
-  "text": "- Uanset hvilket niveau du spiller fodbold på, så er det jo også for kammeratskabets skyld. Sådan lyder det fra cheftræner hos AaB, Jacob Friis. - Seks uger er lang tid for en fodboldspiller, det er længere tid end en normal sommerferie og en normal vinterpause, så det var pludselig ude, hvor vi ikke kunne bunde, men heldigvis kan vi nu samles igen, siger Jacob Friis, til TV2 Nord. Siden d. 8. marts har Superligaen ligget stille. Spillertrupperne har i en periode været sendt hjem, og ellers har den stået på træning i små grupper. Men nu har Divisionsforeningen meldt ud, at Superligaen genoptages i slutningen af maj. Det sociale ved at komme i gang igen betyder meget for spillertruppen. - Nu får vi lov til at gå til den og spille noget rigtig fodbold igen. Det har vi savnet rigtig meget. Det er fedt at se hele truppen igen og at kunne være sammen en lille smule socialt, inden vi sætter os i bilerne og køre hjem igen, siger AaB-spiller, Jakob Ahlmann, til TV2 Nord. Hårdt prøvet økonomi I Hobro IK er spillertruppen også tilbage i fuld vigør. Nedlukningen af Danmark var i sidste ende ved at komme til at koste klubben rigtig dyrt. - Vi var på vej hen mod en konkurs, men man ved det selvfølgelig aldrig, før man sidder i skifteretten, for der kan jo komme en rig mand med en pose penge, men vi var vildt pressede, hvis vi ikke var kommet i gang igen, siger bestyrelsesformand i Hobro IK, Lars Kühnel, til TV2 Nord. Hobro IK skal en tur til Randers d. 1. juni, mens AaB dagen før gæster Esbjerg. Hobro IK indtager i øjeblikket 12.-pladsen og derfor venter en spændende periode, hvor der skal kæmpes for livet i Superligaen, hvor der er hele tre direkte nedrykkere i denne sæson. Derfor er klubben også særligt glad for, at man selv får indflydelse på sin skæbne. - Det skal ikke afgøres ved et skrivebord, det skal afgøres på en fodboldbane. Det har vi altid sagt, og det bliver vi ved med at sige, så at vi kommer igang igen, det betyder alt for fodbolden, siger Lars Kühnel. Sidste runde af grundspillet bliver spillet d. 7. juni og herefter venter enten et medaljeslutspil eller en kamp for overlevelse i en af to nedrykningspuljer.",
-  "target_text": "Både spillerne i Hobro IK og i AaB er mere end klar til igen at komme i gang med at spille Superliga.",
-  "text_len": 2147,
-  "summary_len": 101
+{
+  "text": "Det var meget tæt på at gå galt for en 10-årig tysk dreng onsdag eftermiddag. Klokken 15:55 modtog alarmcentralen et opkald om en drengen, der var begravet i sand ved Vorupør Strand. - Nogle børn legede på stranden, og her har de så gravet et hul ind i klitten. Det er så det, der er kollapset omkring drengen, fortæller vagtchef Carsten Henriksen ved Midt- og Vestjyllands Politi. Det vides ikke præcist, hvor meget sand der væltede ned over barnet, men det var nok til, at drengen ikke selv kunne komme fri. De tilstedeværende på stranden måtte grave ham fri. Han var helt begravet i sand i omkring fem minutter. - Der var en tysk læge på stranden, der kunne give førstehjælp, indtil ambulancen kunne komme frem, fortæller vagtchefen. Drengen kom sig hurtigt og har det godt, men blev alligevel kørt til tjek på Aalborg Sygehus.",
+  "target_text": "Børn på Vorupør Strand havde gravet et hul ind i klitterne, som kollapsede omkring en 10-årig dreng."
 }
 ```
 
