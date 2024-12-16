@@ -411,6 +411,11 @@ class Benchmarker:
                 # customised to specific datasets
                 if model_config.task in GENERATIVE_MODEL_TASKS:
                     if loaded_model is None:
+                        initial_logging(
+                            model_config=model_config,
+                            dataset_config=dataset_config,
+                            benchmark_config=benchmark_config,
+                        )
                         logger.info("Loading model...")
                         loaded_model = load_model(
                             model_config=model_config,
@@ -537,21 +542,11 @@ class Benchmarker:
         Returns:
             The benchmark result, or an error if the benchmark was unsuccessful.
         """
-        # Initial logging
-        logger.info(
-            f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}"
-        )
-        if dataset_config.unofficial:
-            logger.info(
-                f"Note that the {dataset_config.name!r} dataset is unofficial, "
-                "meaning that the resulting evaluation will not be included in the "
-                "official leaderboard."
-            )
-        if benchmark_config.debug:
-            logger.info(
-                "Running in debug mode. This will output additional information, as "
-                "well as store the model outputs in the current directory after each "
-                "batch. For this reason, evaluation will be slower."
+        if model is not None:
+            initial_logging(
+                model_config=model_config,
+                dataset_config=dataset_config,
+                benchmark_config=benchmark_config,
             )
 
         while True:
@@ -746,3 +741,33 @@ def prepare_dataset_configs(dataset_names: list[str]) -> list["DatasetConfig"]:
     return [
         cfg for cfg in get_all_dataset_configs().values() if cfg.name in dataset_names
     ]
+
+
+def initial_logging(
+    model_config: "ModelConfig",
+    dataset_config: "DatasetConfig",
+    benchmark_config: "BenchmarkConfig",
+) -> None:
+    """Initial logging at the start of the benchmarking process.
+
+    Args:
+        model_config:
+            The configuration of the model we are evaluating.
+        dataset_config:
+            The configuration of the dataset we are evaluating on.
+        benchmark_config:
+            The general benchmark configuration.
+    """
+    logger.info(f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}")
+    if dataset_config.unofficial:
+        logger.info(
+            f"Note that the {dataset_config.name!r} dataset is unofficial, "
+            "meaning that the resulting evaluation will not be included in the "
+            "official leaderboard."
+        )
+    if benchmark_config.debug:
+        logger.info(
+            "Running in debug mode. This will output additional information, as "
+            "well as store the model outputs in the current directory after each "
+            "batch. For this reason, evaluation will be slower."
+        )
