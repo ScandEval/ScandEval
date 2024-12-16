@@ -11,13 +11,14 @@ information about what these constitute.
 
 This dataset was published in [this
 paper](https://aclanthology.org/2021.nodalida-main.53/) and was a crowd-sourcing effort
-to annotate sentiment of Danish tweets. The original full dataset consists of 3,458
-samples, and we are using a split of 1,024 / 256 / 2,048 samples for training,
-validation and testing, respectively (so 3,328 samples used in total). All the samples
-in the original test set are included in our test set, but our test set is furthermore
-using a subset of the original training set as test samples as well. The original
-dataset did not have a validation split, so we have created one by sampling from the
-training set.
+to annotate sentiment of Danish tweets.
+
+The original full dataset consists of 3,458 samples, and we are using a split of 1,024 /
+256 / 2,048 samples for training, validation and testing, respectively (so 3,328 samples
+used in total). All the samples in the original test set are included in our test set,
+but our test set is furthermore using a subset of the original training set as test
+samples as well. The original dataset did not have a validation split, so we have
+created one by sampling from the training set.
 
 Here are a few examples from the training split:
 
