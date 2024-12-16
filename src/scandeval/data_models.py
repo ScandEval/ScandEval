@@ -463,6 +463,6 @@ class HFModelInfo:
             if the model is not an adapter model.
     """
 
-    pipeline_tag: t.Literal["fill-mask", "text-generation"]
+    pipeline_tag: str
     tags: list[str]
     adapter_base_model_id: str | None
