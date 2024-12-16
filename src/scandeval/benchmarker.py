@@ -13,6 +13,7 @@ from time import sleep
 from torch.distributed import destroy_process_group
 
 from .benchmark_config_factory import build_benchmark_config
+from .constants import GENERATIVE_MODEL_TASKS
 from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
@@ -389,6 +390,7 @@ class Benchmarker:
                 logger.info(e.message)
                 continue
 
+            loaded_model: BenchmarkModule | None = None
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
                 # we are not forcing the benchmark
@@ -405,8 +407,22 @@ class Benchmarker:
                     )
                     continue
 
+                # We do not re-initialise generative models as their architecture is not
+                # customised to specific datasets
+                if model_config.task in GENERATIVE_MODEL_TASKS:
+                    if loaded_model is None:
+                        logger.info("Loading model...")
+                        loaded_model = load_model(
+                            model_config=model_config,
+                            dataset_config=dataset_config,
+                            benchmark_config=benchmark_config,
+                        )
+                    else:
+                        loaded_model.dataset_config = dataset_config
+
                 # Benchmark a single model on a single dataset
                 benchmark_output_or_err = self._benchmark_single(
+                    model=loaded_model,
                     model_config=model_config,
                     dataset_config=dataset_config,
                     benchmark_config=benchmark_config,
@@ -501,6 +517,7 @@ class Benchmarker:
 
     def _benchmark_single(
         self,
+        model: "BenchmarkModule | None",
         model_config: "ModelConfig",
         dataset_config: "DatasetConfig",
         benchmark_config: "BenchmarkConfig",
@@ -508,6 +525,8 @@ class Benchmarker:
         """Benchmark a single model on a single dataset.
 
         Args:
+            model:
+                The model to benchmark.
             model_config:
                 The configuration of the model we are evaluating.
             dataset_config:
@@ -535,7 +554,6 @@ class Benchmarker:
                 "batch. For this reason, evaluation will be slower."
             )
 
-        model: BenchmarkModule | None = None
         while True:
             try:
                 # Set random seeds to enforce reproducibility of the randomly
