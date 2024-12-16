@@ -13,6 +13,7 @@ from time import sleep
 from torch.distributed import destroy_process_group
 
 from .benchmark_config_factory import build_benchmark_config
+from .constants import GENERATIVE_MODEL_TASKS
 from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
@@ -389,6 +390,7 @@ class Benchmarker:
                 logger.info(e.message)
                 continue
 
+            loaded_model: BenchmarkModule | None = None
             for dataset_config in dataset_configs:
                 # Skip if we have already benchmarked this model on this dataset and
                 # we are not forcing the benchmark
@@ -405,8 +407,27 @@ class Benchmarker:
                     )
                     continue
 
+                # We do not re-initialise generative models as their architecture is not
+                # customised to specific datasets
+                if model_config.task in GENERATIVE_MODEL_TASKS:
+                    if loaded_model is None:
+                        initial_logging(
+                            model_config=model_config,
+                            dataset_config=dataset_config,
+                            benchmark_config=benchmark_config,
+                        )
+                        logger.info("Loading model...")
+                        loaded_model = load_model(
+                            model_config=model_config,
+                            dataset_config=dataset_config,
+                            benchmark_config=benchmark_config,
+                        )
+                    else:
+                        loaded_model.dataset_config = dataset_config
+
                 # Benchmark a single model on a single dataset
                 benchmark_output_or_err = self._benchmark_single(
+                    model=loaded_model,
                     model_config=model_config,
                     dataset_config=dataset_config,
                     benchmark_config=benchmark_config,
@@ -501,6 +522,7 @@ class Benchmarker:
 
     def _benchmark_single(
         self,
+        model: "BenchmarkModule | None",
         model_config: "ModelConfig",
         dataset_config: "DatasetConfig",
         benchmark_config: "BenchmarkConfig",
@@ -508,6 +530,8 @@ class Benchmarker:
         """Benchmark a single model on a single dataset.
 
         Args:
+            model:
+                The model to benchmark.
             model_config:
                 The configuration of the model we are evaluating.
             dataset_config:
@@ -518,24 +542,13 @@ class Benchmarker:
         Returns:
             The benchmark result, or an error if the benchmark was unsuccessful.
         """
-        # Initial logging
-        logger.info(
-            f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}"
-        )
-        if dataset_config.unofficial:
-            logger.info(
-                f"Note that the {dataset_config.name!r} dataset is unofficial, "
-                "meaning that the resulting evaluation will not be included in the "
-                "official leaderboard."
-            )
-        if benchmark_config.debug:
-            logger.info(
-                "Running in debug mode. This will output additional information, as "
-                "well as store the model outputs in the current directory after each "
-                "batch. For this reason, evaluation will be slower."
+        if model is not None:
+            initial_logging(
+                model_config=model_config,
+                dataset_config=dataset_config,
+                benchmark_config=benchmark_config,
             )
 
-        model: BenchmarkModule | None = None
         while True:
             try:
                 # Set random seeds to enforce reproducibility of the randomly
@@ -728,3 +741,33 @@ def prepare_dataset_configs(dataset_names: list[str]) -> list["DatasetConfig"]:
     return [
         cfg for cfg in get_all_dataset_configs().values() if cfg.name in dataset_names
     ]
+
+
+def initial_logging(
+    model_config: "ModelConfig",
+    dataset_config: "DatasetConfig",
+    benchmark_config: "BenchmarkConfig",
+) -> None:
+    """Initial logging at the start of the benchmarking process.
+
+    Args:
+        model_config:
+            The configuration of the model we are evaluating.
+        dataset_config:
+            The configuration of the dataset we are evaluating on.
+        benchmark_config:
+            The general benchmark configuration.
+    """
+    logger.info(f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}")
+    if dataset_config.unofficial:
+        logger.info(
+            f"Note that the {dataset_config.name!r} dataset is unofficial, "
+            "meaning that the resulting evaluation will not be included in the "
+            "official leaderboard."
+        )
+    if benchmark_config.debug:
+        logger.info(
+            "Running in debug mode. This will output additional information, as "
+            "well as store the model outputs in the current directory after each "
+            "batch. For this reason, evaluation will be slower."
+        )
