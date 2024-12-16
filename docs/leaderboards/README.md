@@ -10,7 +10,7 @@ hide:
 ## 📊 How to Read the Leaderboards
 
 The main score columns are the `nlu_rank` and `nlg_rank` columns, showing the [mean rank
-score](/methodology) of the model across all [NLU and NLG tasks](/tasks),
+score](/methodology) of the model across all [NLU and NLG tasks](/tasks/#overview),
 respectively. The lower the rank, the better the model.
 
 The columns that follow the rank columns are metadata about the model:
