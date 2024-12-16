@@ -9,11 +9,11 @@ hide:
 
 ## 📊 How to Read the Leaderboards
 
-The main score column is the `rank` column, showing the [mean rank
-score](/methodology.md) of the model across all tasks. The lower the rank, the better the
-model.
+The main score columns are the `nlu_rank` and `nlg_rank` columns, showing the [mean rank
+score](/methodology.md) of the model across all [NLU and NLG tasks](/tasks),
+respectively. The lower the rank, the better the model.
 
-The columns that follow the `rank` column are metadata about the model:
+The columns that follow the rank columns are metadata about the model:
 
 - `num_model_parameters`: The total number of parameters in the model, in millions.
 - `vocabulary_size`: The size of the model's vocabulary, in thousands.
@@ -24,9 +24,10 @@ The columns that follow the `rank` column are metadata about the model:
 - `merge`: Whether the model is a merge of other models.
 - `speed`: The inference time of the model - see more [here](/tasks/speed).
 
-After these metadata columns, the individual scores for each dataset is shown. Note that
-we only include the primary score of each task in the leaderboard - you can see these in
-the [tasks](/tasks) page.
+After these metadata columns, the individual scores for each dataset is shown. Each
+dataset has a primary and secondary score - see what these are on the [task
+page](/tasks). Lastly, the final columns show the ScandEval version used to benchmark
+the given model on each of the datasets.
 
 To read more about the individual datasets, see the [datasets](/datasets) page. Uf
 you're interested in the methodology behind the benchmark, see the
