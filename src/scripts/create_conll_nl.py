@@ -9,7 +9,7 @@ from requests import HTTPError
 def main():
     """Create the CoNLL-NL-mini NER dataset and uploads it to the HF Hub."""
     # Define dataset ID
-    repo_id = "conll2002"
+    repo_id = "eriktks/conll2002"
 
     # Download the dataset
     dataset = load_dataset(path=repo_id, name="nl", token=True)
