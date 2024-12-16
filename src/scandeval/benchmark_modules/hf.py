@@ -202,7 +202,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
 
         return model_max_length
 
-    @cached_property
+    @property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
         """The data collator used to prepare samples during finetuning.
 
@@ -221,7 +221,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                     f"Unsupported task supertask: {self.dataset_config.task.supertask}."
                 )
 
-    @cached_property
+    @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
         """The function used to extract the labels from the generated output.
 
@@ -233,7 +233,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             "for Hugging Face Encoder models."
         )
 
-    @cached_property
+    @property
     def trainer_class(self) -> t.Type["Trainer"]:
         """The Trainer class to use for finetuning.
 
