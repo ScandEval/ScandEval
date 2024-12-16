@@ -11,6 +11,27 @@ information about what these constitute.
 
 Description coming soon!
 
+Here are a few examples from the training split:
+
+```
+{
+  "text": "via @NYTimes  https://t.co/IjbCWIwYvR",
+  "label": "neutral"
+}
+```
+```
+{
+  "text": "Novak Djokovic positief getest op coronavirus na eigen tennistoernooi\n\nhttps://t.co/U7VOcjANh9",
+  "label": "positive"
+}
+```
+```
+{
+  "text": "RT @BryanRoyAjax: Dit is echt zo gigantisch groot nieuws. 👇🏿Twee van mijn moeders zusters aan kanker overleden. Is toch heel erg dit. Kan t…",
+  "label": "neutral"
+}
+```
+
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
@@ -47,6 +68,66 @@ $ scandeval --model <model-id> --dataset dutch-social
 ### CoNLL-2002 Dutch
 
 Description coming soon!
+
+Here are a few examples from the training split:
+
+```
+{
+  "tokens": [
+    "Te",
+    "verdienen",
+    "bonificaties"
+  ],
+  "labels": [
+    "O",
+    "O",
+    "O"
+  ],
+  "text": "Te verdienen bonificaties"
+}
+```
+```
+{
+  "tokens": [
+    "Algemeen"
+  ],
+  "labels": [
+    "O"
+  ],
+  "text": "Algemeen"
+}
+```
+```
+{
+  "tokens": [
+    "Kan",
+    "ook",
+    "moeilijk",
+    "met",
+    "de",
+    "Giro",
+    "die",
+    "nog",
+    "bezig",
+    "is",
+    "."
+  ],
+  "labels": [
+    "O",
+    "O",
+    "O",
+    "O",
+    "O",
+    "B-MISC",
+    "O",
+    "O",
+    "O",
+    "O",
+    "O"
+  ],
+  "text": "Kan ook moeilijk met de Giro die nog bezig is ."
+}
+```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
@@ -101,6 +182,30 @@ The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
 validation and testing, respectively (so 3,328 samples used in total). These splits are
 used as-is in the framework.
 
+Here are a few examples from the training split:
+
+```
+{
+  "text": "Met het toepassen van zelfbestuur wordt ook al op de lagere school begonnen.",
+  "corruption_type": null,
+  "label": "correct"
+}
+```
+```
+{
+  "text": "Van vergeving kan alleen gesproken worden, als een mens zo iets onmenselijks bedreven heeft, dat er geen straf, zelfs de doodstraf niet, de schuld kan vereffenen, wanneer de schuld zo mateloos is, dat ze nog alleen vergeven kan worden.",
+  "corruption_type": null,
+  "label": "correct"
+}
+```
+```
+{
+  "text": "We volstonden met het inleggen - een werphengel met aan het nylon snoer drie haken, zonder er wat aan! - gingen wat verpozen in de messroom - waarna we ophaalden en:",
+  "corruption_type": null,
+  "label": "correct"
+}
+```
+
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
@@ -135,12 +240,39 @@ $ scandeval --model <model-id> --dataset scala-nl
 
 Coming soon!
 
+Here are a few examples from the training split:
+
+```
+{
+  "text": "Dat is de op de eend geschoten man.",
+  "label": "incorrect"
+}
+```
+```
+{
+  "text": "Jan zag 't Els 'm aanbieden.",
+  "label": "incorrect"
+}
+```
+```
+{
+  "text": "Hij heeft hun allemaal gisteren een uitnodiging gestuurd.",
+  "label": "incorrect"
+}
+```
+
 
 ## Reading Comprehension
 
 ### SQuAD-nl
 
 Description coming soon!
+
+Here are a few examples from the training split:
+
+```
+Missing
+```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
@@ -179,6 +311,12 @@ $ scandeval --model <model-id> --dataset squad-nl
 ### MMLU-nl
 
 Description coming soon!
+
+Here are a few examples from the training split:
+
+```
+Missing
+```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
@@ -220,6 +358,12 @@ $ scandeval --model <model-id> --dataset mmlu-nl
 ### Unofficial: ARC-nl
 
 Description coming soon!
+
+Here are a few examples from the training split:
+
+```
+Missing
+```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
@@ -313,6 +457,12 @@ $ scandeval --model <model-id> --dataset hellaswag-nl
 ### WikiLingua-nl
 
 Description coming soon!
+
+Here are a few examples from the training split:
+
+```
+Missing
+```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
