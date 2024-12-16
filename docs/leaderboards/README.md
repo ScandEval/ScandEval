@@ -20,7 +20,7 @@ The columns that follow the rank columns are metadata about the model:
 - `max_sequence_length`: The maximum number of tokens that the model can process at a
   time.
 - `commercially_licensed`: Whether the model can be used for commercial purposes. See
-  [here](/faq.md) for more information.
+  [here](/faq) for more information.
 - `merge`: Whether the model is a merge of other models.
 - `speed`: The inference time of the model - see more [here](/tasks/speed).
 
