@@ -4,7 +4,6 @@ This is an overview of all the datasets used in the Faroese part of ScandEval. T
 datasets are grouped by their task - see the [task overview](/tasks) for more
 information about what these constitute.
 
-
 ## Sentiment Classification
 
 ### [dataset]
@@ -42,7 +41,9 @@ When evaluating generative models, we use the following setup (see the
   [instruction-tuned-prompt]
   ```
 - Label mapping:
-    - `X` ➡️ `Y`
+    - `positive` ➡️ `X`
+    - `neutral` ➡️ `X`
+    - `negative` ➡️ `X`
 
 You can evaluate this dataset directly as follows:
 
@@ -88,7 +89,14 @@ When evaluating generative models, we use the following setup (see the
   [instruction-tuned-prompt]
   ```
 - Label mapping:
-    - `X` ➡️ `Y`
+    - `B-PER` ➡️ `X`
+    - `I-PER` ➡️ `X`
+    - `B-LOC` ➡️ `X`
+    - `I-LOC` ➡️ `X`
+    - `B-ORG` ➡️ `X`
+    - `I-ORG` ➡️ `X`
+    - `B-MISC` ➡️ `X`
+    - `I-MISC` ➡️ `X`
 
 You can evaluate this dataset directly as follows:
 
@@ -134,7 +142,8 @@ When evaluating generative models, we use the following setup (see the
   [instruction-tuned-prompt]
   ```
 - Label mapping:
-    - `X` ➡️ `Y`
+    - `correct` ➡️ `X`
+    - `incorrect` ➡️ `X`
 
 You can evaluate this dataset directly as follows:
 
@@ -225,8 +234,6 @@ When evaluating generative models, we use the following setup (see the
   ```
   [instruction-tuned-prompt]
   ```
-- Label mapping:
-    - `X` ➡️ `Y`
 
 You can evaluate this dataset directly as follows:
 
@@ -271,8 +278,6 @@ When evaluating generative models, we use the following setup (see the
   ```
   [instruction-tuned-prompt]
   ```
-- Label mapping:
-    - `X` ➡️ `Y`
 
 You can evaluate this dataset directly as follows:
 
@@ -317,8 +322,6 @@ When evaluating generative models, we use the following setup (see the
   ```
   [instruction-tuned-prompt]
   ```
-- Label mapping:
-    - `X` ➡️ `Y`
 
 You can evaluate this dataset directly as follows:
 
