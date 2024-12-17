@@ -505,7 +505,7 @@ $ scandeval --model <model-id> --dataset mmlu-no
 ```
 
 
-### ARC-no
+### Unofficial: ARC-no
 
 [description]
 

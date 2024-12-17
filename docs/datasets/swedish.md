@@ -316,7 +316,7 @@ $ scandeval --model <model-id> --dataset mmlu-sv
 ```
 
 
-### ARC-sv
+### Unofficial: ARC-sv
 
 [description]
 
