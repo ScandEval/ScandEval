@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.0.4] - 2024-12-17
 ### Fixed
 - Model cache was not working properly with zero-shot models, meaning that redundant
   generations were made. This has been fixed now, which also makes the zero-shot
