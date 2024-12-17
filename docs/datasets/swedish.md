@@ -201,31 +201,31 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'context': "I Freedom Cry får spelaren ta rollen som Adéwalé, en frigiven slav från Trinidad som blev Edward Kenways kvartermästare och senare medlem i Assassin Order. Berättelseläget utspelar sig 15 år efter händelserna i Assassin's Creed IV: Black Flag där Adéwalé har blivit en tränad lönnmördare och finner sig själv skeppsbruten i Saint-Domingue, där han ställs öga mot öga med något av det mest brutala slaveriet i Västindien. DLC:n är skriven av Jill Murray, som skrev Liberation och Aveline-innehållet för Black Flag. I februari 2014 meddelades att Freedom Cry skulle släppas som en fristående titel till PlayStation 4 och PlayStation 3 den 18 februari 2014 för Nordamerika och den 19 februari 2014 för Europa. Det släpptes för PC den 25 februari 2014.",
-  'question': "När släpptes assassin's creed freedom cry?",
-  'answers': {
-    'answer_start': array([637]),
-    'text': array(['18 februari 2014'], dtype=object)
+  "context": "I Freedom Cry får spelaren ta rollen som Adéwalé, en frigiven slav från Trinidad som blev Edward Kenways kvartermästare och senare medlem i Assassin Order. Berättelseläget utspelar sig 15 år efter händelserna i Assassin's Creed IV: Black Flag där Adéwalé har blivit en tränad lönnmördare och finner sig själv skeppsbruten i Saint-Domingue, där han ställs öga mot öga med något av det mest brutala slaveriet i Västindien. DLC:n är skriven av Jill Murray, som skrev Liberation och Aveline-innehållet för Black Flag. I februari 2014 meddelades att Freedom Cry skulle släppas som en fristående titel till PlayStation 4 och PlayStation 3 den 18 februari 2014 för Nordamerika och den 19 februari 2014 för Europa. Det släpptes för PC den 25 februari 2014.",
+  "question": "När släpptes assassin's creed freedom cry?",
+  "answers": {
+    "answer_start": array([637]),
+    "text": array(['18 februari 2014'], dtype=object)
   }
 }
 ```
 ```json
 {
-  'context': 'Political history of the United Kingdom (1945–present)\nÅr 1950 orsakade Koreakriget ett nytt tungt tryck på statskassan för militära utgifter. Detta orsakade en bitter splittring inom Labourpartiet.  De konservativa gjorde åtstramningspolitiken till en viktig fråga i parlamentsvalet 1950. Labour förlorade det mesta av sin stora majoritet. Svängningen var 3,6 % mot dem och de förlorade 78 platser, vilket gav Attlee en knapp majoritet i parlamentet. Ett år senare förlorade Labour dock parlamentsvalet 1951 trots att det fick fler röster än i valet 1945, och faktiskt fler röster än det konservativa partiet.',
-  'question': 'Hur många år har det varit sen 1940?',
-  'answers': {
-    'answer_start': array([388]),
-    'text': array(['78'], dtype=object)
+  "context": 'Political history of the United Kingdom (1945–present)\nÅr 1950 orsakade Koreakriget ett nytt tungt tryck på statskassan för militära utgifter. Detta orsakade en bitter splittring inom Labourpartiet.  De konservativa gjorde åtstramningspolitiken till en viktig fråga i parlamentsvalet 1950. Labour förlorade det mesta av sin stora majoritet. Svängningen var 3,6 % mot dem och de förlorade 78 platser, vilket gav Attlee en knapp majoritet i parlamentet. Ett år senare förlorade Labour dock parlamentsvalet 1951 trots att det fick fler röster än i valet 1945, och faktiskt fler röster än det konservativa partiet.',
+  "question": 'Hur många år har det varit sen 1940?',
+  "answers": {
+    "answer_start": array([388]),
+    "text": array(['78'], dtype=object)
   }
 }
 ```
 ```json
 {
-  'context': 'Data link layer\nOSI-modellen\nper skikt\n\n\n\n\n7.  Applikationslager[visa]\n\n\nNNTP\nSIP\nSSI\nDNS\nFTP\nGopher\nHTTP\nNFS\nNTP\nSMPP\nSMTP\nSNMP\nTelnet\nDHCP\nNetconf\nmer....\n\n\n\n\n\n\n\n\n6.  Presentationslager[visa]\n\n\nMIME\nXDR\n\n\n\n\n\n\n\n\n5.  Sessionsskikt[visa]\n\n\nNamngiven pipe\nNetBIOS\nSAP\nPPTP\nRTP\nSOCKS\nSPDY\n\n\n\n\n\n\n\n\n4.  Transportlager[visa]\n\n\nTCP\nUDP\nSCTP\nDCCP\nSPX\n\n\n\n\n\n\n\n\n3.  Nätverksskikt[visa]\n\n\nIP\n\nIPv4\nIPv6\n\n\nICMP\nIPsec\nIGMP\nIPX\nAppleTalk\nX.25 PLP\n\n\n\n\n\n\n\n\n2.  Datalänkskiktet[visa]\n\n\nATM\nARP\nIS-IS\nSDLC\nHDLC\nCSLIP\nSLIP\nGFP\nPLIP\nIEEE 802.2\nLLC\nMAC\nL2TP\nIEEE 802.3\nFrame Relay\nITU-T G.hn DLL\nPPP\nX.25 LAPB\nQ.921 LAPD\nQ.922 LAPF\n\n\n\n\n\n\n\n\n1.  Fysiskt lager[visa]\n\n\nEIA/TIA-232\nEIA/TIA-449\nITU-T V-serien\nI.430\nI.431\nPDH\nSONET/SDH\nPON\nOTN\nDSL\nIEEE 802.3\nIEEE 802.11\nIEEE 802.15\nIEEE 802.16\nIEEE 1394\nITU-T G.hn PHY\nUSB\nBluetooth\nRS-232\nRS-449\n\n\n\n\n\n\n\n\n\nv\nt\ne',
-  'question': 'Vilket lager av osi-modellen är uppdelad i två delskikt?',
-  'answers': {
-    'answer_start': array([0]),
-    'text': array(['Data link layer'], dtype=object)
+  "context": 'Data link layer\nOSI-modellen\nper skikt\n\n\n\n\n7.  Applikationslager[visa]\n\n\nNNTP\nSIP\nSSI\nDNS\nFTP\nGopher\nHTTP\nNFS\nNTP\nSMPP\nSMTP\nSNMP\nTelnet\nDHCP\nNetconf\nmer....\n\n\n\n\n\n\n\n\n6.  Presentationslager[visa]\n\n\nMIME\nXDR\n\n\n\n\n\n\n\n\n5.  Sessionsskikt[visa]\n\n\nNamngiven pipe\nNetBIOS\nSAP\nPPTP\nRTP\nSOCKS\nSPDY\n\n\n\n\n\n\n\n\n4.  Transportlager[visa]\n\n\nTCP\nUDP\nSCTP\nDCCP\nSPX\n\n\n\n\n\n\n\n\n3.  Nätverksskikt[visa]\n\n\nIP\n\nIPv4\nIPv6\n\n\nICMP\nIPsec\nIGMP\nIPX\nAppleTalk\nX.25 PLP\n\n\n\n\n\n\n\n\n2.  Datalänkskiktet[visa]\n\n\nATM\nARP\nIS-IS\nSDLC\nHDLC\nCSLIP\nSLIP\nGFP\nPLIP\nIEEE 802.2\nLLC\nMAC\nL2TP\nIEEE 802.3\nFrame Relay\nITU-T G.hn DLL\nPPP\nX.25 LAPB\nQ.921 LAPD\nQ.922 LAPF\n\n\n\n\n\n\n\n\n1.  Fysiskt lager[visa]\n\n\nEIA/TIA-232\nEIA/TIA-449\nITU-T V-serien\nI.430\nI.431\nPDH\nSONET/SDH\nPON\nOTN\nDSL\nIEEE 802.3\nIEEE 802.11\nIEEE 802.15\nIEEE 802.16\nIEEE 1394\nITU-T G.hn PHY\nUSB\nBluetooth\nRS-232\nRS-449\n\n\n\n\n\n\n\n\n\nv\nt\ne',
+  "question": 'Vilket lager av osi-modellen är uppdelad i två delskikt?',
+  "answers": {
+    "answer_start": array([0]),
+    "text": array(['Data link layer'], dtype=object)
   }
 }
 ```

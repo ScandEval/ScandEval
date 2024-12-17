@@ -21,8 +21,8 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'text': 'Novak Djokovic positief getest op coronavirus na eigen tennistoernooi\n\nhttps://t.co/U7VOcjANh9',
-  'label': 'positive'
+  "text": 'Novak Djokovic positief getest op coronavirus na eigen tennistoernooi\n\nhttps://t.co/U7VOcjANh9',
+  "label": 'positive'
 }
 ```
 ```json
@@ -256,37 +256,31 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'context': 'Zoals in zijn keizerlijke edicten bleek, was de Hongwu-keizer op de hoogte van de boeddhistische band tussen Tibet en China en wilde hij die versterken. Rolpe Dorje, 4de Karmapa Lama (1340-1383), wees de uitnodiging van de Hongwu-keizer af, hoewel hij wel een paar discipelen als afgezanten naar het hof in Nanjing stuurde. De Hongwu-keizer vertrouwde ook zijn goeroe Zongluo, een van de vele boeddhistische monniken aan het hof, toe om in 1378-1382 een religieuze missie naar Tibet te leiden om boeddhistische teksten te bemachtigen.',
-  'question': 'Wie verwierp een uitnodiging van de Hongwu-keizer?',
-  'answers': {
-    'answer_start': array([153]),
-    'answer_start_en': array([139]),
-    'text': array(['Rolpe Dorje'], dtype=object),
-    'text_en': array(['Rolpe Dorje'], dtype=object)
+  "context": 'Zoals in zijn keizerlijke edicten bleek, was de Hongwu-keizer op de hoogte van de boeddhistische band tussen Tibet en China en wilde hij die versterken. Rolpe Dorje, 4de Karmapa Lama (1340-1383), wees de uitnodiging van de Hongwu-keizer af, hoewel hij wel een paar discipelen als afgezanten naar het hof in Nanjing stuurde. De Hongwu-keizer vertrouwde ook zijn goeroe Zongluo, een van de vele boeddhistische monniken aan het hof, toe om in 1378-1382 een religieuze missie naar Tibet te leiden om boeddhistische teksten te bemachtigen.',
+  "question": 'Wie verwierp een uitnodiging van de Hongwu-keizer?',
+  "answers": {
+    "answer_start": array([153]),
+    "text": array(['Rolpe Dorje'], dtype=object),
   }
 }
 ```
 ```json
 {
-  'context': "De term Ashkenazi verwijst ook naar de nusach Ashkenaz (Hebreeuwse, 'liturgische traditie', of rite) die de Ashkenazische joden gebruiken in hun Siddur (gebedenboek). Een nusach wordt bepaald door de keuze van gebeden, de volgorde van gebeden, de tekst van gebeden en melodieën die wordt gebruikt bij het zingen van gebeden. Twee andere belangrijke vormen van nusach onder de Ashkenazische joden zijn Nusach Sefard (niet te verwarren met het Sefardische ritueel), de Poolse Hasidische nusach, en Nusach Ari, zoals gebruikt door Lubavitch Hasidim.",
-  'question': 'Nusach Ari wordt door wie gebruikt?',
-  'answers': {
-    'answer_start': array([528]),
-    'answer_start_en': array([487]),
-    'text': array(['Lubavitch Hasidim'], dtype=object),
-    'text_en': array(['Lubavitch Hasidim'], dtype=object)
+  "context": "De term Ashkenazi verwijst ook naar de nusach Ashkenaz (Hebreeuwse, 'liturgische traditie', of rite) die de Ashkenazische joden gebruiken in hun Siddur (gebedenboek). Een nusach wordt bepaald door de keuze van gebeden, de volgorde van gebeden, de tekst van gebeden en melodieën die wordt gebruikt bij het zingen van gebeden. Twee andere belangrijke vormen van nusach onder de Ashkenazische joden zijn Nusach Sefard (niet te verwarren met het Sefardische ritueel), de Poolse Hasidische nusach, en Nusach Ari, zoals gebruikt door Lubavitch Hasidim.",
+  "question": 'Nusach Ari wordt door wie gebruikt?',
+  "answers": {
+    "answer_start": array([528]),
+    "text": array(['Lubavitch Hasidim'], dtype=object),
   }
 }
 ```
 ```json
 {
-  'context': "Op dit moment bestaat er verwarring over de naam van de oudste Vinaccia-luthier die de winkel voor het eerst beheerde. Zijn naam is genoemd als Gennaro Vinaccia (actief van 1710 tot 1788) en Nic. Vinaccia. Zijn zoon Antonio Vinaccia was actief van 1734 tot 1796. Een van de vroegste exemplaren van een mandoline is die van Antonio Vinaccia, die in 1759 aan de Universiteit van Edinburgh is gebouwd. Een andere is van Giuseppe Vinaccia, gebouwd in 1893, die ook aan de Universiteit van Edinburgh is gebouwd. De oudste nog bestaande mandoline werd in 1744 gebouwd door Antonio's zoon, Gaetano Vinaccia. Hij verblijft in het Conservatoire Royal de Musique in Brussel, België.",
-  'question': 'Waar woont de mandoline waarin Gaetano Vinaccia woont?',
-  'answers': {
-    'answer_start': array([622]),
-    'answer_start_en': array([565]),
-    'text': array(['Conservatoire Royal de Musique in Brussel, België'], dtype=object),
-    'text_en': array(['Conservatoire Royal de Musique in Brussels, Belgium.'], dtype=object)
+  "context": "Op dit moment bestaat er verwarring over de naam van de oudste Vinaccia-luthier die de winkel voor het eerst beheerde. Zijn naam is genoemd als Gennaro Vinaccia (actief van 1710 tot 1788) en Nic. Vinaccia. Zijn zoon Antonio Vinaccia was actief van 1734 tot 1796. Een van de vroegste exemplaren van een mandoline is die van Antonio Vinaccia, die in 1759 aan de Universiteit van Edinburgh is gebouwd. Een andere is van Giuseppe Vinaccia, gebouwd in 1893, die ook aan de Universiteit van Edinburgh is gebouwd. De oudste nog bestaande mandoline werd in 1744 gebouwd door Antonio's zoon, Gaetano Vinaccia. Hij verblijft in het Conservatoire Royal de Musique in Brussel, België.",
+  "question": 'Waar woont de mandoline waarin Gaetano Vinaccia woont?',
+  "answers": {
+    "answer_start": array([622]),
+    "text": array(['Conservatoire Royal de Musique in Brussel, België'], dtype=object),
   }
 }
 ```

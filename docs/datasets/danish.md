@@ -295,31 +295,31 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'context': '"(Sittin\' On) The Dock of the Bay" er en sang, der er skrevet af soul-sangeren Otis Redding og guitaristen Steve Cropper sammen. Den blev indspillet af Redding to gange i 1967, herunder en gang få dage før hans død i et flystyrt. Sangen blev udgivet på Stax Records\' Volt-label i 1968 og blev den første posthume single, der lå øverst på hitlisterne i USA. Den nåede op som nummer 3 på den britiske single-liste.',
-  'question': 'Hvem sang sitting on the dock of the bay?',
-  'answers': {
-    'answer_start': array([79]),
-    'text': array(['Otis Redding'], dtype=object)
+  "context": '"(Sittin\' On) The Dock of the Bay" er en sang, der er skrevet af soul-sangeren Otis Redding og guitaristen Steve Cropper sammen. Den blev indspillet af Redding to gange i 1967, herunder en gang få dage før hans død i et flystyrt. Sangen blev udgivet på Stax Records\' Volt-label i 1968 og blev den første posthume single, der lå øverst på hitlisterne i USA. Den nåede op som nummer 3 på den britiske single-liste.',
+  "question": 'Hvem sang sitting on the dock of the bay?',
+  "answers": {
+    "answer_start": array([79]),
+    "text": array(['Otis Redding'], dtype=object)
   }
 }
 ```
 ```json
 {
-  'context': "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne links\n\n\nWebsted\npbskids.org/catinthehat/",
-  'question': 'Hvem synger titelmelodien til the cat in the hat?',
-  'answers': {
-    'answer_start': array([269]),
-    'text': array(['David Schweitzer'], dtype=object)
+  "context": "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne links\n\n\nWebsted\npbskids.org/catinthehat/",
+  "question": 'Hvem synger titelmelodien til the cat in the hat?',
+  "answers": {
+    "answer_start": array([269]),
+    "text": array(['David Schweitzer'], dtype=object)
   }
 }
 ```
 ```json
 {
-  'context': 'Modern Slavery Act 2015\nLoven om moderne slaveri fra 2015 er en lov fra Det Forenede Kongeriges parlament. Den har til formål at bekæmpe slaveri i Det Forenede Kongerige og konsoliderer tidligere lovovertrædelser vedrørende menneskehandel og slaveri. Loven gælder for England og Wales. Lovforslaget blev forelagt underhuset i udkast i oktober 2013 af James Brokenshire, parlamentarisk undersekretær for kriminalitet og sikkerhed, i oktober 2013. Lovforslagets sponsorer i indenrigsministeriet var Theresa May og Lord Bates. Det fik kongelig samstemmende udtalelse og blev lov den 26. marts 2015.',
-  'question': 'Hvornår trådte den moderne slaveri i kraft?',
-  'answers': {
-    'answer_start': array([580]),
-    'text': array(['26. marts 2015'], dtype=object)
+  "context": 'Modern Slavery Act 2015\nLoven om moderne slaveri fra 2015 er en lov fra Det Forenede Kongeriges parlament. Den har til formål at bekæmpe slaveri i Det Forenede Kongerige og konsoliderer tidligere lovovertrædelser vedrørende menneskehandel og slaveri. Loven gælder for England og Wales. Lovforslaget blev forelagt underhuset i udkast i oktober 2013 af James Brokenshire, parlamentarisk undersekretær for kriminalitet og sikkerhed, i oktober 2013. Lovforslagets sponsorer i indenrigsministeriet var Theresa May og Lord Bates. Det fik kongelig samstemmende udtalelse og blev lov den 26. marts 2015.',
+  "question": 'Hvornår trådte den moderne slaveri i kraft?',
+  "answers": {
+    "answer_start": array([580]),
+    "text": array(['26. marts 2015'], dtype=object)
   }
 }
 ```
