@@ -14,13 +14,13 @@ information about what these constitute.
 
 Here are a few examples from the training split:
 
-```
+```json
 [example-1]
 ```
-```
+```json
 [example-2]
 ```
-```
+```json
 [example-3]
 ```
 
@@ -62,13 +62,13 @@ $ scandeval --model <model-id> --dataset X
 
 Here are a few examples from the training split:
 
-```
+```json
 [example-1]
 ```
-```
+```json
 [example-2]
 ```
-```
+```json
 [example-3]
 ```
 
@@ -115,13 +115,13 @@ $ scandeval --model <model-id> --dataset X
 
 Here are a few examples from the training split:
 
-```
+```json
 [example-1]
 ```
-```
+```json
 [example-2]
 ```
-```
+```json
 [example-3]
 ```
 
@@ -162,13 +162,13 @@ $ scandeval --model <model-id> --dataset X
 
 Here are a few examples from the training split:
 
-```
+```json
 [example-1]
 ```
-```
+```json
 [example-2]
 ```
-```
+```json
 [example-3]
 ```
 
@@ -208,13 +208,13 @@ $ scandeval --model <model-id> --dataset X
 
 Here are a few examples from the training split:
 
-```
+```json
 [example-1]
 ```
-```
+```json
 [example-2]
 ```
-```
+```json
 [example-3]
 ```
 
@@ -252,13 +252,13 @@ $ scandeval --model <model-id> --dataset X
 
 Here are a few examples from the training split:
 
-```
+```json
 [example-1]
 ```
-```
+```json
 [example-2]
 ```
-```
+```json
 [example-3]
 ```
 
@@ -296,13 +296,13 @@ $ scandeval --model <model-id> --dataset X
 
 Here are a few examples from the training split:
 
-```
+```json
 [example-1]
 ```
-```
+```json
 [example-2]
 ```
-```
+```json
 [example-3]
 ```
 

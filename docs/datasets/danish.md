@@ -22,19 +22,19 @@ created one by sampling from the training set.
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Jeg tror, det der var kampen. Goff virker lost",
   "label": "negative"
 }
 ```
-```
+```json
 {
   "text": "@USER @USER Vi bruger også snildt 1-2 timer (nogle gange flere timer end det) på at putte den yngste. Det er oftest Tommi, som gør det, for jeg går helt amok i processen. Så smører jeg madpakker og rydder op i stedet.",
   "label": "neutral"
 }
 ```
-```
+```json
 {
   "text": "Er du nysgerrig på, hvordan du diskvalificerer dig selv fra at blive taget seriøst i den offentlige debat? Naser har svaret. #dkpol #dkmedier [LINK]",
   "label": "negative"
@@ -111,19 +111,19 @@ labelling scheme, which is more common in the NER literature. The mapping is as 
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   'tokens': array(['I', 'dette', 'efterår', 'har', 'Grønland', 'taget', 'en', 'stor', 'beslutning', 'ved', 'folkeafstemningen', 'den', '25.', 'november', '.'], dtype=object),
   'labels': array(['O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
-```
+```json
 {
   'tokens': array(['Åh', ',', 'Petra', ',', 'vis', 'mig', 'din', 'krop', '.'], dtype=object),
   'labels': array(['O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
-```
+```json
 {
   'tokens': array(['Fravalget', 'af', 'revision', 'registreres', 'automatisk', 'ved', 'anmeldelse', 'af', 'stiftelse', 'af', 'selskabet', 'hos', 'Erhvervs-styrelsen', '.'], dtype=object),
   'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'O'], dtype=object)
@@ -181,19 +181,19 @@ validation and test sets.
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   'tokens': array(['Det', 'var', 'det', 'år', ',', 'hans', 'første', 'LP', ',', '"', 'With', 'A', 'Little', 'Help', 'From', 'My', 'Friends', '"', ',', 'udkom', '.'], dtype=object),
   'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
-```
+```json
 {
   'tokens': array(['Eddie', 'Carbone', ',', 'italiensk-amerikansk', 'havnearbejder', 'i', 'New', 'York', '.'], dtype=object),
   'labels': array(['B-PER', 'I-PER', 'O', 'B-MISC', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
 }
 ```
-```
+```json
 {
   'tokens': array(['"', 'Jeg', 'er', 'mig', '!', '"', 'insisterer', 'han', 'under', 'det', 'flere', 'hundrede', 'år', 'gamle', 'egetræ', ',', 'liggende', ',', 'som', 'den', 'popflab', 'han', 'er', ',', 'på', 'ryggen', 'i', 'sine', 'orange', 'jeans', ',', 't-shirt', '-', 'som', 'naturligvis', 'stiller', 'et', 'solbrunt', 'behåret', 'bryst', 'til', 'skue', '-', 'et', 'par', '68er', '"', 'make', 'love', 'not', 'war', '"', 'solbriller', 'han', 'netop', 'har', 'købt', 'i', 'Paris', ',', 'og', 'en', 'Kings', 'i', 'kæften', '.'], dtype=object),
   'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O'], dtype=object)
@@ -220,19 +220,19 @@ used as-is in the framework.
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Samme dame dukkede netop nu op sammen med Odd-Catla's erklærede yndling, væbneren Aikin af Cantir.",
   "label": "correct"
 }
 ```
-```
+```json
 {
   "text": "Gebyrets størrelse afhænger nemlig af helt, i hvilken kategori den pågældende \"levnedsmiddelvirksomhed\" placeres.",
   "label": "incorrect"
 }
 ```
-```
+```json
 {
   "text": "Den statsansatte dyrlæge Kronfågels på slagteri i Kristiansstad, Karl Erik Bjørkman, understreger, belægningen hos producenten betyder meget for dyrenes trivsel:",
   "label": "incorrect"
@@ -293,7 +293,7 @@ was sampled from the original training set.
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   'context': '"(Sittin\' On) The Dock of the Bay" er en sang, der er skrevet af soul-sangeren Otis Redding og guitaristen Steve Cropper sammen. Den blev indspillet af Redding to gange i 1967, herunder en gang få dage før hans død i et flystyrt. Sangen blev udgivet på Stax Records\' Volt-label i 1968 og blev den første posthume single, der lå øverst på hitlisterne i USA. Den nåede op som nummer 3 på den britiske single-liste.',
   'question': 'Hvem sang sitting on the dock of the bay?',
@@ -303,7 +303,7 @@ Here are a few examples from the training split:
   }
 }
 ```
-```
+```json
 {
   'context': "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne links\n\n\nWebsted\npbskids.org/catinthehat/",
   'question': 'Hvem synger titelmelodien til the cat in the hat?',
@@ -313,7 +313,7 @@ Here are a few examples from the training split:
   }
 }
 ```
-```
+```json
 {
   'context': 'Modern Slavery Act 2015\nLoven om moderne slaveri fra 2015 er en lov fra Det Forenede Kongeriges parlament. Den har til formål at bekæmpe slaveri i Det Forenede Kongerige og konsoliderer tidligere lovovertrædelser vedrørende menneskehandel og slaveri. Loven gælder for England og Wales. Lovforslaget blev forelagt underhuset i udkast i oktober 2013 af James Brokenshire, parlamentarisk undersekretær for kriminalitet og sikkerhed, i oktober 2013. Lovforslagets sponsorer i indenrigsministeriet var Theresa May og Lord Bates. Det fik kongelig samstemmende udtalelse og blev lov den 26. marts 2015.',
   'question': 'Hvornår trådte den moderne slaveri i kraft?',
@@ -370,19 +370,19 @@ training, validation and testing, respectively (so 1,000 samples used in total).
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Hård banan\nSvarmuligheder:\na. Barsk person\nb. Sige ja vende tommelfingeren nedad\nc. Fortsat klare sig\nd. Slå sig løs",
   "label": "a"
 }
 ```
-```
+```json
 {
   "text": "Få skovlen under nogen\nSvarmuligheder:\na. Ofre en\nb. Kunne bestemme over nogen\nc. Tænke sig om\nd. Anstrenge sig meget",
   "label": "b"
 }
 ```
-```
+```json
 {
   "text": "Have nogen i snor\nSvarmuligheder:\na. Ikke lade sig gå på af noget\nb. Klare sig, selvom det er svært\nc. Have kontrol med nogen\nd. Få nogen til at tro på en umulig plan",
   "label": "c"
@@ -438,19 +438,19 @@ training, validation and testing, respectively (so 720 samples used in total).
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Hvilke lande er med i rigsfællesskab et?\nSvarmuligheder:\na. Danmark, Grønland og Færøerne\nb. Danmark, Island og Norge",
   "label": "a"
 }
 ```
-```
+```json
 {
   "text": "Hvor mange medlemmer har Folketinget?\nSvarmuligheder:\na. 87\nb. 179\nc. 265",
   "label": "b"
 }
 ```
-```
+```json
 {
   "text": "Hvem kan blive biskop i den danske folkekirke?\nSvarmuligheder:\na. Kun mænd\nb. Kun kvinder\nc. Både m ænd og kvinder",
   "label": "c"
@@ -508,19 +508,19 @@ our validation and test sets.
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Hvilket af følgende coronavirusser har forårsaget tusindvis af dødsfald over hele verden som en 'opstået' virus?\nSvarmuligheder:\na. MERS\nb. SARS\nc. OC43\nd. HKU1",
   "label": "a"
 }
 ```
-```
+```json
 {
   "text": "Hvilken orbitale væg er mest sandsynligt at kollapse i en 'blow out' fraktur?\nSvarmuligheder:\na. Taget\nb. Gulvet\nc. Den laterale væg\nd. Den mediale væg",
   "label": "b"
 }
 ```
-```
+```json
 {
   "text": "Hvad er navnet på den største struktur i Teotihuacán, og hvor mange platforme og pyramider blev bygget der?\nSvarmuligheder:\na. Månepyramiden; 250\nb. Templet for den fjerkræklædte slange; 400\nc. Solpyramiden; 600\nd. Inskriptionstemplen; 700",
   "label": "c"
@@ -571,19 +571,19 @@ are subsets of the original splits.
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Et farmaceutisk firma har offentliggjort resultaterne af et begrænset eksperiment, der undersøger den beskyttende virkning af en kemisk forbindelse mod høje doser af UV-stråler på hudceller. Senere blev det opdaget, at resultaterne ikke var reproducerbare. Hvilken handling kunne forskere fra firmaet have foretaget for at undgå at offentliggøre fejlagtige resultater?\nSvarmuligheder:\na. Udfør flere forsøg.\nb. Brug kun lave niveauer af stråling.\nc. Brug forskellige bølgelængder af stråling.\nd. Undersøg resultaterne af lignende eksperimenter, før man dannede en hypotese.",
   "label": "a"
 }
 ```
-```
+```json
 {
   "text": "En ingeniør skal beregne den potentielle energi af en rutschebanekabine øverst på en skråning. Hvilken information ville bedst hjælpe ingeniøren med at bestemme den potentielle energi af kabine?\nSvarmuligheder:\na. den afstand, som rutschebanekabinen skal rejse\nb. massen af rutschebanekabinen ved fuld kapacitet\nc. den gennemsnitlige vægt af en tom rutschebanekabine\nd. retningen, som rutschebanekabinen bevæger sig i",
   "label": "b"
 }
 ```
-```
+```json
 {
   "text": "En studerende hældte vand i en plastbakke. Studerende satte derefter bakken i fryseren. Hvilken egenskab ved vand ændrede sig, da vandet fryser?\nSvarmuligheder:\na. Vandet blev til en gas.\nb. Massen af vandet steg.\nc. Vandet tog en bestemt form.\nd. Smagen af vandet ændrede sig ikke.",
   "label": "c"
@@ -635,19 +635,19 @@ for training, validation and testing, respectively (so 3,328 samples used in tot
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Disse mennesker træder pedalerne med kun det ene ben og står midt på cyklen med det andet ben, der holder deres hænder oppe. næste gør de\nSvarmuligheder:\na. en anden øvelse, hvor de sætter det ene ben på pedalen, mens de har det andet ben ude og hopper op og ned.\nb. tager hinandens hænder og udfører en eller anden dansebevægelse på børsterne, som de bruger til at snurre rundt med deres kroppe og hoppe med hænderne oppe.\nc. drejer med deres forstenede hænder, laver en U-vending og starter derefter deres handlinger igen og igen.\nd. skifter til at stå ved hjælp af to arme for at balancere sig selv.",
   "label": "a"
 }
 ```
-```
+```json
 {
   "text": "[header] Sådan dræber du frugtfluer [title] Brug rådden frugt. [step] Dit problem med frugtfluer begyndte sandsynligvis først, da du opdagede, at du havde efterladt nogle frugter, der til sidst blev rådne. Brug den metode, der samlede fluene første gang til at fange dem igen, men denne gang før dem til en mere morbide slutning.\nSvarmuligheder:\na. Dræb fluene ved at trække dem fra deres rede eller ved at bruge tunge kæder med tænger til at fange dem og placere dem i en spand eller stuen. Du kan også bruge dyreafføring såsom fiske- og ande-urin.\nb. Placer et stykke rådden frugt i en skål og stræk klart plastik over toppen. Skær flere små huller i plastikken med en tandstik og lad det stå tæt på stedet med fluene.\nc. Efter at have forsøgt at fange dobbelt så mange fluer, som du kan, skal du fjerne de ubehagelige frugtstykker fra pakken og bage dem i 2-3 minutter. Fluene vil flyde øverst på den søde marmelade, når du fjerner frugten fra marmeladen.\nd. [substeps] Tjek dåser for knotten, melbiller og fluer. Køb blomster fra havecentret, hvis du ikke har al produktion i nærheden.",
   "label": "b"
 }
 ```
-```
+```json
 {
   "text": "En mand står indendørs på en platform foran tre tilskuere og løfter en tung vægtstang. En mand nærmer sig en vægtstang på gulvet og står foran den og forbereder sig på at løfte den. manden\nSvarmuligheder:\na. løfter vægtstangen, der hænger i luften på platformen, og vender sig mod tilskuerne.\nb. løfter vægtstangen og viser, hvordan han udfører det, idet han pauser på hver stang for at måle vægten.\nc. bøjer sig derefter i knæene og lægger hænderne på vægtens stangdel.\nd. løfter derefter klokken på sine skuldre, læner sig tilbage, sætter armene bag hovedet og løfter den let.",
   "label": "c"
@@ -704,19 +704,19 @@ total).
 
 Here are a few examples from the training split:
 
-```
+```json
 {
   "text": "Jacob Emil Andersen viste søndag rundt på Halvorsminde Efterskole ved Hjørring. Skolen har ligget på samme sted siden 1903. Han er selv elev, da en IT-linje på skolen fangede hans interesse. - Det betyder meget for mig, jeg ville ikke have været lige så interesseret i den her skole, hvis der ikke havde været IT, fortæller Jacob Emil Andersen, der oprindeligt stammer fra Aalborg, til TV2 Nord. En af dem, han viser rundt til Efterskolernes dag, er Isabella Kristensen, der går i skole i Hune. Hun er på jagt efter noget helt specielt. - Helt sikkert dans, springgymnastik og fitness med noget puls, forklarer Isabella Kristensen til TV2 Nord. Netop efterskolernes specialisering er en af grundene til, at rekordmange vælger at bruge et år væk fra familien i 8.-, 9.- eller 10.-klasse. De særlige linjefag har man flere af på Halvorsminde Efterskole. Jern og metal, arbejde med træ og vinterbadning er blot nogle af de aktiviteter, eleverne kan støde ind i på de forskellige linjefag, som skolen tilbyder. Men efterskolerne skal også huske at have fokus på den faglighe kvalitet, lyder det fra forstanderen. - Vi skal være skarpe på nogle nicheprodukter og nogle linjer med noget god kvalitet. Så skal vi også lave god skole, fortæller forstander på Halvorsminde Efterskole, Jens Beermann, til TV2 Nord. Han bliver bakket op af sin kollega fra Hørby Efterskole ved Sæby omkring 30 kilometer fra Halvorsminde. - Når man laver sit valgfagsudbud, skal det ikke være tilfældigt. Man skal ikke tænke, at ’det er smart! Det må trække elever, det her!’ Der skal være en velovervejet refleksion i forhold til, om det passer ind i det, vi gerne vil som skole,, siger forstander på Hørby Efterskole, Mogens Vestergård, til TV2 Nord. Alene i Nordjylland gik mere end 2.000 elever på efterskole i skoleåret 2018-2019. Både Halvorsminde Efterskole og Hørby Skole har plads til 130 elever. Og noget tyder på, at der i hvert fald er sikret en ny elev til næste skoleår efter dagens åbent hus. - Jeg synes at det ser spændende ud, og jeg har endnu mere lyst til at gå her nu, siger Isabella Kristensen.",
   "target_text": "Søndag inviterede efterskoler landet over potentielle nye elever inden for. Efterskolerne specialiserer sig for at tiltrække elever, men den gode faglighed må ikke blive glemt, lyder det fra nordjyske forstandere."
 }
 ```
-```
+```json
 {
   "text": "Efter en nat med spejl glatte veje i Nordjylland melder Nordjyllands Politi om en helt problemfri morgen. Selvom politikredse i TV2 Nords sendeområde melder om en rolig nat uden større uheld, så kan de bilister, der skal af sted lørdag morgen godt forvente lidt længere rejsetid. Der er nemlig stadig glatte veje, og der er faldet en del sne i Nordjylland. Saltvogne og sneplove har allerede været på vejene, og Politiet opfordre forsat bilisterne til at køre forsigtigt ude på de snefyldte veje.",
   "target_text": "Nordjyllands Politi melder om en stille morgen trods glatte veje og stort snefald i nat."
 }
 ```
-```
+```json
 {
   "text": "Det var meget tæt på at gå galt for en 10-årig tysk dreng onsdag eftermiddag. Klokken 15:55 modtog alarmcentralen et opkald om en drengen, der var begravet i sand ved Vorupør Strand. - Nogle børn legede på stranden, og her har de så gravet et hul ind i klitten. Det er så det, der er kollapset omkring drengen, fortæller vagtchef Carsten Henriksen ved Midt- og Vestjyllands Politi. Det vides ikke præcist, hvor meget sand der væltede ned over barnet, men det var nok til, at drengen ikke selv kunne komme fri. De tilstedeværende på stranden måtte grave ham fri. Han var helt begravet i sand i omkring fem minutter. - Der var en tysk læge på stranden, der kunne give førstehjælp, indtil ambulancen kunne komme frem, fortæller vagtchefen. Drengen kom sig hurtigt og har det godt, men blev alligevel kørt til tjek på Aalborg Sygehus.",
   "target_text": "Børn på Vorupør Strand havde gravet et hul ind i klitterne, som kollapsede omkring en 10-årig dreng."
