@@ -9,9 +9,12 @@ information about what these constitute.
 
 ### SweReC
 
-[description]
+This dataset was published [in this B.Sc.
+thesis](https://www.diva-portal.org/smash/record.jsf?pid=diva2%3A1105494&dswid=3392) and
+is a manually annotated dataset of Swedish reviews from both Trustpilot and Reco.se.
 
-[size-info]
+The original dataset contains 10,757 reviews. We use a split of 1,024 / 256 / 2,048
+samples for training, validation, and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -69,9 +72,23 @@ $ scandeval --model <model-id> --dataset swerec
 
 ### SUC 3.0
 
-[description]
+This dataset, also known as the Stockholm-Umeå Corpus 3.0, was published
+[here](https://doi.org/10.23695%2Fwy84-ar30) and is a manually NER-annotated dataset,
+based on Swedish texts from the 1990s. The dataset does not follow the CONLL format, so
+we convert it into that format using the following mapping:
 
-[size-info]
+- `animal` ➡️ `MISC`
+- `event` ➡️ `MISC`
+- `inst` ➡️ `ORG`
+- `myth` ➡️ `MISC`
+- `other` ➡️ `MISC`
+- `person` ➡️ `PER`
+- `place` ➡️ `LOC`
+- `product` ➡️ `MISC`
+- `work` ➡️ `MISC`
+
+The dataset consists of 74,245 samples, which we split into 1,024 / 256 / 2,048 samples
+for training, validation, and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -134,9 +151,18 @@ $ scandeval --model <model-id> --dataset suc3
 
 ### ScaLA-sv
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [Swedish Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Swedish-Talbanken) by assuming
+that the documents in the treebank are correct, and corrupting the samples to create
+grammatically incorrect samples. The corruptions were done by either removing a word
+from a sentence, or by swapping two neighbouring words in a sentence. To ensure that
+this does indeed break the grammaticality of the sentence, a set of rules were used on
+the part-of-speech tags of the words in the sentence.
 
-[size-info]
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
 
 Here are a few examples from the training split:
 
@@ -193,9 +219,23 @@ $ scandeval --model <model-id> --dataset scala-sv
 
 ### ScandiQA-sv
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the Swedish part of the [MKQA
+dataset](https://aclanthology.org/2021.tacl-1.82/). The MKQA dataset is based on the
+English [Natural Questions dataset](https://aclanthology.org/Q19-1026/), based on search
+queries from the Google search engine. The questions and answers were manually
+translated to Swedish (and other languages) as part of MKQA, and the contexts were in
+ScandiQA-sv machine translated using the [DeepL translation
+API](https://www.deepl.com/en/pro-api/). A rule-based approach was used to ensure that
+the translated contexts still contained the answer to the question, potentially by
+changing the answers slightly.
 
-[size-info]
+The original full dataset consists of 6,810 / 500 / 500 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). All validation
+samples in our version also belong to the original validation set, and all original test
+samples are included in our test set. The remaining 1,548 test samples in our version
+was sampled from the original training set.
 
 Here are a few examples from the training split:
 
@@ -264,9 +304,17 @@ $ scandeval --model <model-id> --dataset scandiqa-sv
 
 ### MMLU-sv
 
-[description]
+This dataset is a machine translated version of the English [MMLU
+dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
+different topics, such as elementary mathematics, US history and law. The translation to
+Swedish was done by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-[size-info]
+The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.
 
 Here are a few examples from the training split:
 
@@ -318,9 +366,15 @@ $ scandeval --model <model-id> --dataset mmlu-sv
 
 ### Unofficial: ARC-sv
 
-[description]
+This dataset is a machine translated version of the English [ARC
+dataset](https://doi.org/10.48550/arXiv.1803.05457) and features US grade-school science
+questions. The translation to Swedish was done by the University of Oregon as part of
+[this paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-[size-info]
+The original full dataset consists of 1,110 / 297 / 1,170 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
+validation and testing, respectively (so 2,304 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
@@ -374,9 +428,14 @@ $ scandeval --model <model-id> --dataset arc-sv
 
 ### HellaSwag-sv
 
-[description]
+This dataset is a machine translated version of the English [HellaSwag
+dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
+video descriptions from ActivityNet as well as how-to articles from WikiHow. The dataset
+was translated by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-[size-info]
+The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).
 
 Here are a few examples from the training split:
 
@@ -430,9 +489,15 @@ $ scandeval --model <model-id> --dataset hellaswag-sv
 
 ### SweDN
 
-[description]
+This dataset was published in [this
+paper](https://aclanthology.org/2023.emnlp-main.506/) and are based on news articles
+from the Swedish newspaper Dagens Nyheter, with the summaries being the first paragraph
+of the article (and that paragraph being removed from the article).
 
-[size-info]
+The original dataset consists of 29,800 / 4,530 / 3,750 samples for training, validation
+and testing, respectively. We use a 1,024 / 256 / 2,048 split for training, validation
+and testing, respectively (so 3,328 samples used in total). All the new splits are
+subsets of the original splits.
 
 Here are a few examples from the training split:
 
@@ -484,9 +549,13 @@ $ scandeval --model <model-id> --dataset swedn
 
 ### Unofficial: Schibsted-Sv
 
-[description]
+This dataset was published
+[here](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries) and
+features summaries of news articles from Schibsted Medias Swedish newsroom, from
+Aftonbladet.
 
-[size-info]
+The original dataset has 528 / 96 / 89 samples for training, validation and testing,
+respectively. We use these splits as-is.
 
 Here are a few examples from the training split:
 
