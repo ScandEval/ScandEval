@@ -396,7 +396,7 @@ class LiteLLMModel(BenchmarkModule):
 
         return -1
 
-    @cached_property
+    @property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
         """The data collator used to prepare samples during finetuning.
 
@@ -407,7 +407,7 @@ class LiteLLMModel(BenchmarkModule):
             "The `data_collator` property has not been implemented for LiteLLM models."
         )
 
-    @cached_property
+    @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
         """The function used to extract the labels from the generated output.
 
@@ -434,7 +434,7 @@ class LiteLLMModel(BenchmarkModule):
                     f"Unsupported task supertask: {self.dataset_config.task.supertask}."
                 )
 
-    @cached_property
+    @property
     def trainer_class(self) -> t.Type["Trainer"]:
         """The Trainer class to use for finetuning.
 

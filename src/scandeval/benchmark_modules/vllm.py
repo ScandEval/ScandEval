@@ -8,7 +8,7 @@ import logging
 import random
 import sys
 import typing as t
-from functools import cached_property, partial
+from functools import partial
 from pathlib import Path
 from time import sleep
 from types import MethodType
@@ -128,7 +128,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         self._log_metadata()
 
-    @cached_property
+    @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
         """The function used to extract the labels from the generated output.
 
@@ -844,7 +844,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         return examples
 
-    @cached_property
+    @property
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
         """The data collator used to prepare samples during finetuning.
 
@@ -855,7 +855,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             "The `data_collator` property has not been implemented for vLLM models."
         )
 
-    @cached_property
+    @property
     def trainer_class(self) -> t.Type["Trainer"]:
         """The Trainer class to use for finetuning.
 

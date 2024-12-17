@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   evaluation much faster.
 - Use `ray` as distributed executor backend for vLLM if more than one GPU is available,
   which fixes an error when using multiple GPUs with vLLM.
+- Do not re-initialise generative models after each dataset. This both makes evaluation
+  a bit faster as well as avoids an error that occurs when finishing a (model, dataset)
+  evaluation with multiple GPUs. Note that the same error still happens when
+  benchmarking multiple models in the same `scandeval` run when using multiple GPUs, as
+  this is a `ray` issue.
 
 
 ## [v14.0.3] - 2024-12-14
