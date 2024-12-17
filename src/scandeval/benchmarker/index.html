@@ -1207,6 +1207,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmarker.initial_logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      initial_logging
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1962,7 +1971,50 @@
 <span class="normal">727</span>
 <span class="normal">728</span>
 <span class="normal">729</span>
-<span class="normal">730</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -1977,6 +2029,7 @@
 <span class="kn">from</span> <span class="nn">torch.distributed</span> <span class="kn">import</span> <span class="n">destroy_process_group</span>
 
 <span class="kn">from</span> <span class="nn">.benchmark_config_factory</span> <span class="kn">import</span> <span class="n">build_benchmark_config</span>
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
 <span class="kn">from</span> <span class="nn">.data_loading</span> <span class="kn">import</span> <span class="n">load_data</span>
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfigParams</span><span class="p">,</span> <span class="n">BenchmarkResult</span>
 <span class="kn">from</span> <span class="nn">.dataset_configs</span> <span class="kn">import</span> <span class="n">get_all_dataset_configs</span>
@@ -2353,6 +2406,7 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                 <span class="k">continue</span>
 
+            <span class="n">loaded_model</span><span class="p">:</span> <span class="n">BenchmarkModule</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">dataset_config</span> <span class="ow">in</span> <span class="n">dataset_configs</span><span class="p">:</span>
                 <span class="c1"># Skip if we have already benchmarked this model on this dataset and</span>
                 <span class="c1"># we are not forcing the benchmark</span>
@@ -2369,8 +2423,27 @@
                     <span class="p">)</span>
                     <span class="k">continue</span>
 
+                <span class="c1"># We do not re-initialise generative models as their architecture is not</span>
+                <span class="c1"># customised to specific datasets</span>
+                <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">loaded_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">initial_logging</span><span class="p">(</span>
+                            <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
+                            <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
+                            <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading model...&quot;</span><span class="p">)</span>
+                        <span class="n">loaded_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span>
+                            <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
+                            <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
+                            <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">loaded_model</span><span class="o">.</span><span class="n">dataset_config</span> <span class="o">=</span> <span class="n">dataset_config</span>
+
                 <span class="c1"># Benchmark a single model on a single dataset</span>
                 <span class="n">benchmark_output_or_err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_benchmark_single</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">=</span><span class="n">loaded_model</span><span class="p">,</span>
                     <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
                     <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
@@ -2465,6 +2538,7 @@
 
     <span class="k">def</span> <span class="nf">_benchmark_single</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="s2">&quot;BenchmarkModule | None&quot;</span><span class="p">,</span>
         <span class="n">model_config</span><span class="p">:</span> <span class="s2">&quot;ModelConfig&quot;</span><span class="p">,</span>
         <span class="n">dataset_config</span><span class="p">:</span> <span class="s2">&quot;DatasetConfig&quot;</span><span class="p">,</span>
         <span class="n">benchmark_config</span><span class="p">:</span> <span class="s2">&quot;BenchmarkConfig&quot;</span><span class="p">,</span>
@@ -2472,6 +2546,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Benchmark a single model on a single dataset.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            model:</span>
+<span class="sd">                The model to benchmark.</span>
 <span class="sd">            model_config:</span>
 <span class="sd">                The configuration of the model we are evaluating.</span>
 <span class="sd">            dataset_config:</span>
@@ -2482,24 +2558,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The benchmark result, or an error if the benchmark was unsuccessful.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Initial logging</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Benchmarking </span><span class="si">{</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">pretty_name</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">unofficial</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Note that the </span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> dataset is unofficial, &quot;</span>
-                <span class="s2">&quot;meaning that the resulting evaluation will not be included in the &quot;</span>
-                <span class="s2">&quot;official leaderboard.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;Running in debug mode. This will output additional information, as &quot;</span>
-                <span class="s2">&quot;well as store the model outputs in the current directory after each &quot;</span>
-                <span class="s2">&quot;batch. For this reason, evaluation will be slower.&quot;</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">initial_logging</span><span class="p">(</span>
+                <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
+                <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
+                <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="n">model</span><span class="p">:</span> <span class="n">BenchmarkModule</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Set random seeds to enforce reproducibility of the randomly</span>
@@ -2692,6 +2757,36 @@
     <span class="k">return</span> <span class="p">[</span>
         <span class="n">cfg</span> <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">get_all_dataset_configs</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">dataset_names</span>
     <span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">initial_logging</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.benchmarker.initial_logging"><a href="../../../api/scandeval/benchmarker/#scandeval.benchmarker.initial_logging" title="Go to docs">docs</a></div>
+    <span class="n">model_config</span><span class="p">:</span> <span class="s2">&quot;ModelConfig&quot;</span><span class="p">,</span>
+    <span class="n">dataset_config</span><span class="p">:</span> <span class="s2">&quot;DatasetConfig&quot;</span><span class="p">,</span>
+    <span class="n">benchmark_config</span><span class="p">:</span> <span class="s2">&quot;BenchmarkConfig&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initial logging at the start of the benchmarking process.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_config:</span>
+<span class="sd">            The configuration of the model we are evaluating.</span>
+<span class="sd">        dataset_config:</span>
+<span class="sd">            The configuration of the dataset we are evaluating on.</span>
+<span class="sd">        benchmark_config:</span>
+<span class="sd">            The general benchmark configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Benchmarking </span><span class="si">{</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">pretty_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">unofficial</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Note that the </span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> dataset is unofficial, &quot;</span>
+            <span class="s2">&quot;meaning that the resulting evaluation will not be included in the &quot;</span>
+            <span class="s2">&quot;official leaderboard.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Running in debug mode. This will output additional information, as &quot;</span>
+            <span class="s2">&quot;well as store the model outputs in the current directory after each &quot;</span>
+            <span class="s2">&quot;batch. For this reason, evaluation will be slower.&quot;</span>
+        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 
 

@@ -2508,7 +2508,7 @@
 
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
-    <span class="nd">@cached_property</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator"><a href="../../../../api/scandeval/benchmark_modules/litellm/#scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator" title="Go to docs">docs</a></div>
+    <span class="nd">@property</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator"><a href="../../../../api/scandeval/benchmark_modules/litellm/#scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator" title="Go to docs">docs</a></div>
     <span class="k">def</span> <span class="nf">data_collator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">c</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The data collator used to prepare samples during finetuning.</span>
 
@@ -2519,7 +2519,7 @@
             <span class="s2">&quot;The `data_collator` property has not been implemented for LiteLLM models.&quot;</span>
         <span class="p">)</span>
 
-    <span class="nd">@cached_property</span>
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">extract_labels_from_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractLabelsFunction</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation"><a href="../../../../api/scandeval/benchmark_modules/litellm/#scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation" title="Go to docs">docs</a></div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The function used to extract the labels from the generated output.</span>
 
@@ -2546,7 +2546,7 @@
                     <span class="sa">f</span><span class="s2">&quot;Unsupported task supertask: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
-    <span class="nd">@cached_property</span>
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">trainer_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="s2">&quot;Trainer&quot;</span><span class="p">]:</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class"><a href="../../../../api/scandeval/benchmark_modules/litellm/#scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class" title="Go to docs">docs</a></div>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The Trainer class to use for finetuning.</span>
 

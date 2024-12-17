@@ -1461,6 +1461,43 @@ A generative model from LiteLLM.</p>
 <p>A generative model from LiteLLM.</p>
 <p class="mkapi-section">
 <span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle attributes">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Attributes</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">is_generative</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span>
+Whether the model is generative.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_collator</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="collections.abc">c</span>.<span class="mkapi-tooltip" title="collections.abc.Callable">Callable</span>[[list[<span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]], dict[str, <span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]]</span> <span class="mkapi-dash">&mdash;</span>
+The data collator used to prepare samples during finetuning.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">compute_metrics</span> : 
+<span class="mkapi-item-type">ComputeMetricsFunction</span> <span class="mkapi-dash">&mdash;</span>
+The function used to compute the metrics.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">extract_labels_from_generation</span> : 
+<span class="mkapi-item-type"><a href="../../types/#scandeval.types.ExtractLabelsFunction" title="scandeval.types.ExtractLabelsFunction">ExtractLabelsFunction</a></span> <span class="mkapi-dash">&mdash;</span>
+The function used to extract the labels from the generated output.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">trainer_class</span> : 
+<span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span>[<span class="mkapi-tooltip" title="transformers.trainer.Trainer">Trainer</span>]</span> <span class="mkapi-dash">&mdash;</span>
+The Trainer class to use for finetuning.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
 <span class="mkapi-section-toggle" title="Toggle methods">
 <i class="fa-regular fa-square-minus"></i>
 </span>
@@ -1488,21 +1525,6 @@ The vocabulary size of the model.</p>
 <p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.model_max_length" title="scandeval.benchmark_modules.litellm.LiteLLMModel.model_max_length">model_max_length</a></span>
  <span class="mkapi-dash">&mdash;</span>
 The maximum length of the model.</p>
-</li>
-<li>
-<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator" title="scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator">data_collator</a></span>
- <span class="mkapi-dash">&mdash;</span>
-The data collator used to prepare samples during finetuning.</p>
-</li>
-<li>
-<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation" title="scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation">extract_labels_from_generation</a></span>
- <span class="mkapi-dash">&mdash;</span>
-The function used to extract the labels from the generated output.</p>
-</li>
-<li>
-<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class" title="scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class">trainer_class</a></span>
- <span class="mkapi-dash">&mdash;</span>
-The Trainer class to use for finetuning.</p>
 </li>
 <li>
 <p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.model_exists" title="scandeval.benchmark_modules.litellm.LiteLLMModel.model_exists">model_exists</a></span>
@@ -1699,9 +1721,9 @@ The maximum length of the model.</p>
 <span class="mkapi-document-toggle" title="Toggle all docs">
 <i class="fa-regular fa-square-minus"></i>
 </span>
-</span><span class="mkapi-object-kind">method</span>
+</span><span class="mkapi-object-kind">property</span>
 <span class="mkapi-object-parent">
-<a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel" title="scandeval.benchmark_modules.litellm.LiteLLMModel">LiteLLMModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator" title="scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator">data_collator</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="collections.abc">c</span>.<span class="mkapi-tooltip" title="collections.abc.Callable">Callable</span>[[list[<span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]], dict[str, <span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]]</span></span>
+<a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel" title="scandeval.benchmark_modules.litellm.LiteLLMModel">LiteLLMModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator" title="scandeval.benchmark_modules.litellm.LiteLLMModel.data_collator">data_collator</a></span><span class="mkapi-signature"><span class="mkapi-colon">: </span><span class="mkapi-return"><span class="mkapi-tooltip" title="collections.abc">c</span>.<span class="mkapi-tooltip" title="collections.abc.Callable">Callable</span>[[list[<span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]], dict[str, <span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Any">Any</span>]]</span></span>
 </p>
 <div class="mkapi-document">
 <p>The data collator used to prepare samples during finetuning.</p>
@@ -1721,21 +1743,6 @@ The data collator.</p>
 </li>
 </ul>
 </div>
-<p class="mkapi-section">
-<span class="mkapi-object-link">
-<span class="mkapi-section-toggle" title="Toggle raises">
-<i class="fa-regular fa-square-minus"></i>
-</span>
-</span>
-<span class="mkapi-section-name">Raises</span>
-</p>
-<div class="mkapi-section-content">
-<ul class="mkapi-item-list">
-<li>
-<p><span class="mkapi-item-type">NotImplementedError</span></p>
-</li>
-</ul>
-</div>
 </div>
 <p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation">
 <span class="mkapi-object-link">
@@ -1747,9 +1754,9 @@ The data collator.</p>
 <span class="mkapi-document-toggle" title="Toggle all docs">
 <i class="fa-regular fa-square-minus"></i>
 </span>
-</span><span class="mkapi-object-kind">method</span>
+</span><span class="mkapi-object-kind">property</span>
 <span class="mkapi-object-parent">
-<a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel" title="scandeval.benchmark_modules.litellm.LiteLLMModel">LiteLLMModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation" title="scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation">extract_labels_from_generation</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><a href="../../types/#scandeval.types.ExtractLabelsFunction" title="scandeval.types.ExtractLabelsFunction">ExtractLabelsFunction</a></span></span>
+<a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel" title="scandeval.benchmark_modules.litellm.LiteLLMModel">LiteLLMModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation" title="scandeval.benchmark_modules.litellm.LiteLLMModel.extract_labels_from_generation">extract_labels_from_generation</a></span><span class="mkapi-signature"><span class="mkapi-colon">: </span><span class="mkapi-return"><a href="../../types/#scandeval.types.ExtractLabelsFunction" title="scandeval.types.ExtractLabelsFunction">ExtractLabelsFunction</a></span></span>
 </p>
 <div class="mkapi-document">
 <p>The function used to extract the labels from the generated output.</p>
@@ -1769,21 +1776,6 @@ The function used to extract the labels from the generated output.</p>
 </li>
 </ul>
 </div>
-<p class="mkapi-section">
-<span class="mkapi-object-link">
-<span class="mkapi-section-toggle" title="Toggle raises">
-<i class="fa-regular fa-square-minus"></i>
-</span>
-</span>
-<span class="mkapi-section-name">Raises</span>
-</p>
-<div class="mkapi-section-content">
-<ul class="mkapi-item-list">
-<li>
-<p><span class="mkapi-item-type">NotImplementedError</span></p>
-</li>
-</ul>
-</div>
 </div>
 <p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class">
 <span class="mkapi-object-link">
@@ -1795,9 +1787,9 @@ The function used to extract the labels from the generated output.</p>
 <span class="mkapi-document-toggle" title="Toggle all docs">
 <i class="fa-regular fa-square-minus"></i>
 </span>
-</span><span class="mkapi-object-kind">method</span>
+</span><span class="mkapi-object-kind">property</span>
 <span class="mkapi-object-parent">
-<a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel" title="scandeval.benchmark_modules.litellm.LiteLLMModel">LiteLLMModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class" title="scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class">trainer_class</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span>[<span class="mkapi-tooltip" title="transformers.trainer.Trainer">Trainer</span>]</span></span>
+<a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel" title="scandeval.benchmark_modules.litellm.LiteLLMModel">LiteLLMModel</a><span class="mkapi-dot">.</span></span><span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class" title="scandeval.benchmark_modules.litellm.LiteLLMModel.trainer_class">trainer_class</a></span><span class="mkapi-signature"><span class="mkapi-colon">: </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span>[<span class="mkapi-tooltip" title="transformers.trainer.Trainer">Trainer</span>]</span></span>
 </p>
 <div class="mkapi-document">
 <p>The Trainer class to use for finetuning.</p>
@@ -1814,21 +1806,6 @@ The function used to extract the labels from the generated output.</p>
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span>[<span class="mkapi-tooltip" title="transformers.trainer.Trainer">Trainer</span>]</span> <span class="mkapi-dash">&mdash;</span>
 The Trainer class.</p>
-</li>
-</ul>
-</div>
-<p class="mkapi-section">
-<span class="mkapi-object-link">
-<span class="mkapi-section-toggle" title="Toggle raises">
-<i class="fa-regular fa-square-minus"></i>
-</span>
-</span>
-<span class="mkapi-section-name">Raises</span>
-</p>
-<div class="mkapi-section-content">
-<ul class="mkapi-item-list">
-<li>
-<p><span class="mkapi-item-type">NotImplementedError</span></p>
 </li>
 </ul>
 </div>

@@ -1176,15 +1176,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#scandeval.model_cache.ModelCache.cached_texts" class="md-nav__link">
-    <span class="md-ellipsis">
-      cached_texts
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#scandeval.model_cache.ModelCache.add_to_cache" class="md-nav__link">
     <span class="md-ellipsis">
       add_to_cache
@@ -1464,7 +1455,17 @@
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
-<span class="normal">223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;ModelCache class for caching model outputs.&quot;&quot;&quot;</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;ModelCache class for caching model outputs.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -1474,7 +1475,6 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">asdict</span>
 
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">GenerativeModelOutput</span><span class="p">,</span> <span class="n">SingleGenerativeModelOutput</span>
@@ -1588,9 +1588,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
 
-    <span class="k">def</span> <span class="nf">cached_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span><div class="mkapi-source-link" id="scandeval.model_cache.ModelCache.cached_texts"><a href="../../../api/scandeval/model_cache/#scandeval.model_cache.ModelCache.cached_texts" title="Go to docs">docs</a></div>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the text inputs indexed in the cache.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a key is in the cache.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key:</span>
+<span class="sd">                The key to check.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether the key is in the cache.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hashed_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash_key</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hashed_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
 
     <span class="k">def</span> <span class="nf">add_to_cache</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.model_cache.ModelCache.add_to_cache"><a href="../../../api/scandeval/model_cache/#scandeval.model_cache.ModelCache.add_to_cache" title="Go to docs">docs</a></div>
         <span class="bp">self</span><span class="p">,</span> <span class="n">model_inputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">model_output</span><span class="p">:</span> <span class="n">GenerativeModelOutput</span>
@@ -1645,11 +1654,13 @@
     <span class="c1"># Get the sample indices of the non-cached examples, which are unique with respect</span>
     <span class="c1"># to the &quot;text&quot; column.</span>
     <span class="n">input_column</span> <span class="o">=</span> <span class="s2">&quot;messages&quot;</span> <span class="k">if</span> <span class="s2">&quot;messages&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">column_names</span> <span class="k">else</span> <span class="s2">&quot;text&quot;</span>
-    <span class="n">dataset_texts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">input_column</span><span class="p">])</span>
-    <span class="n">dataset_texts</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">unique_non_cached_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-        <span class="n">dataset_texts</span><span class="p">[</span><span class="o">~</span><span class="n">dataset_texts</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">cache</span><span class="o">.</span><span class="n">cached_texts</span><span class="p">())]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="p">)</span>
+    <span class="n">dataset_texts</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">input_column</span><span class="p">]</span>
+    <span class="n">unique_non_cached_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">unique_texts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">dataset_text</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataset_texts</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dataset_text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cache</span> <span class="ow">and</span> <span class="n">dataset_text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_texts</span><span class="p">:</span>
+            <span class="n">unique_non_cached_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="n">unique_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset_text</span><span class="p">)</span>
 
     <span class="c1"># The cached examples are the ones that are not in the non-cached examples. This</span>
     <span class="c1"># means that if the dataset has duplicates, only a single copy of the duplicate</span>
