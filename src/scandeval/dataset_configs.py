@@ -775,8 +775,8 @@ NORQUAD_CONFIG = DatasetConfig(
 
 NORGLM_MULTI_QA = DatasetConfig(
     name="norglm-multi-qa",
-    pretty_name="the question answering part of the Norwegian NorGLM multi-task human annotated dataset "
-    "NO-Multi-QA-Sum",
+    pretty_name="the question answering part of the Norwegian NorGLM multi-task human "
+    "annotated dataset NO-Multi-QA-Sum",
     huggingface_id="ScandEval/norglm-multi-qa",
     task=RC,
     languages=[NB, NN, NO],
