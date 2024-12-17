@@ -9,9 +9,14 @@ information about what these constitute.
 
 ### NoReC
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/L18-1661/) and is
+based on reviews from three different media organisations: Schibsted Media Group, Aller
+Media and NRK.
 
-[size-info]
+The original full dataset consists of 680,792 / 101,106 / 101,594 samples for training,
+validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for
+training, validation and test, respectively. All the new splits are subsets of the
+original splits.
 
 Here are a few examples from the training split:
 
@@ -69,9 +74,27 @@ $ scandeval --model <model-id> --dataset norec
 
 ### NorNE-nb
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2020.lrec-1.559/)
+and is a manually NER annotated version of the [Bokmål Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Norwegian-Bokmaal). The NER labels
+almost follow the CoNLL-2003 standard, but with some additional labels.
 
-[size-info]
+The original full dataset consists of 15,696 / 2,410 / 1,939 samples for training,
+validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for
+training, validation and test, respectively. The splits we use are new, so there might
+be some samples from the training split in the validation or test splits.
+
+We have mapped the labels into the CoNLL-2003 standard as follows:
+
+- `LOC` ➡️ `LOC`
+- `PER` ➡️ `PER`
+- `ORG` ➡️ `ORG`
+- `MISC` ➡️ `MISC`
+- `GPE_LOC` ➡️ `LOC`
+- `GPE_ORG` ➡️ `ORG`
+- `PROD` ➡️ `MISC`
+- `DRV` ➡️ `MISC`
+- `EVT` ➡️ `MISC`
 
 Here are a few examples from the training split:
 
@@ -132,9 +155,27 @@ $ scandeval --model <model-id> --dataset norne-nb
 
 ### NorNE-nn
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2020.lrec-1.559/)
+and is a manually NER annotated version of the [Nynorsk Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Norwegian-Nynorsk). The NER labels
+almost follow the CoNLL-2003 standard, but with some additional labels.
 
-[size-info]
+The original full dataset consists of 14,174 / 1,890 / 1,511 samples for training,
+validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for
+training, validation and test, respectively. The splits we use are new, so there might
+be some samples from the training split in the validation or test splits.
+
+We have mapped the labels into the CoNLL-2003 standard as follows:
+
+- `LOC` ➡️ `LOC`
+- `PER` ➡️ `PER`
+- `ORG` ➡️ `ORG`
+- `MISC` ➡️ `MISC`
+- `GPE_LOC` ➡️ `LOC`
+- `GPE_ORG` ➡️ `ORG`
+- `PROD` ➡️ `MISC`
+- `DRV` ➡️ `MISC`
+- `EVT` ➡️ `MISC`
 
 Here are a few examples from the training split:
 
@@ -197,9 +238,18 @@ $ scandeval --model <model-id> --dataset norne-nn
 
 ### ScaLA-nb
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [Bokmål Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Norwegian-Bokmaal) by
+assuming that the documents in the treebank are correct, and corrupting the samples to
+create grammatically incorrect samples. The corruptions were done by either removing a
+word from a sentence, or by swapping two neighbouring words in a sentence. To ensure
+that this does indeed break the grammaticality of the sentence, a set of rules were used
+on the part-of-speech tags of the words in the sentence.
 
-[size-info]
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
 
 Here are a few examples from the training split:
 
@@ -254,9 +304,18 @@ $ scandeval --model <model-id> --dataset scala-nb
 
 ### ScaLA-nn
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [Nynorsk Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Norwegian-Nynorsk) by
+assuming that the documents in the treebank are correct, and corrupting the samples to
+create grammatically incorrect samples. The corruptions were done by either removing a
+word from a sentence, or by swapping two neighbouring words in a sentence. To ensure
+that this does indeed break the grammaticality of the sentence, a set of rules were used
+on the part-of-speech tags of the words in the sentence.
 
-[size-info]
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
 
 Here are a few examples from the training split:
 
@@ -313,9 +372,14 @@ $ scandeval --model <model-id> --dataset scala-nn
 
 ### NorQuAD
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.17/)
+and is a manually annotated dataset based on data from the Bokmål Wikipedia.
 
-[size-info]
+The original full dataset consists of 3,810 / 472 / 472 samples for training, validation
+and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training,
+validation and test, respectively. When creating the splits, we only select samples that
+contain an answer in the associated context. The splits we use are new, so there might
+be some samples from the training split in the validation or test splits.
 
 Here are a few examples from the training split:
 
@@ -382,9 +446,16 @@ $ scandeval --model <model-id> --dataset norquad
 
 ### Unofficial: NorGLM Multi QA
 
-[description]
+This dataset was released in [this paper](https://doi.org/10.48550/arXiv.2312.01314) and
+features a manually annotated reading comprehension dataset based on Norwegian news
+articles. This dataset is an _abstractive_ question answering dataset, meaning that the
+answers do not always feature in the context. To fix this, they were rephrased using
+[this
+script](https://github.com/ScandEval/ScandEval/blob/main/src/scripts/create_norglm_multiqa.py),
+which utilised the `gpt-4o-2024-05-13` model.
 
-[size-info]
+The original dataset contains 2,406 samples, which we split into 1,024 / 256 / 1,126
+samples for training, validation and test, respectively.
 
 Here are a few examples from the training split:
 
@@ -453,9 +524,17 @@ $ scandeval --model <model-id> --dataset norglm-multi-qa
 
 ### MMLU-no
 
-[description]
+This dataset is a machine translated version of the English [MMLU
+dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
+different topics, such as elementary mathematics, US history and law. The translation to
+Norwegian was conducted using the [DeepL translation
+API](https://www.deepl.com/en/products/api).
 
-[size-info]
+The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.
 
 Here are a few examples from the training split:
 
@@ -507,9 +586,15 @@ $ scandeval --model <model-id> --dataset mmlu-no
 
 ### Unofficial: ARC-no
 
-[description]
+This dataset is a machine translated version of the English [ARC
+dataset](https://doi.org/10.48550/arXiv.1803.05457) and features US grade-school science
+questions. The translation to Norwegian was conducted using the [DeepL translation
+API](https://www.deepl.com/en/products/api).
 
-[size-info]
+The original full dataset consists of 1,110 / 297 / 1,170 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
+validation and testing, respectively (so 2,304 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
@@ -563,9 +648,14 @@ $ scandeval --model <model-id> --dataset arc-no
 
 ### HellaSwag-no
 
-[description]
+This dataset is a machine translated version of the English [HellaSwag
+dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
+video descriptions from ActivityNet as well as how-to articles from WikiHow. The dataset
+was translated to Norwegian using the [DeepL translation
+API](https://www.deepl.com/en/products/api).
 
-[size-info]
+The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).
 
 Here are a few examples from the training split:
 
@@ -619,9 +709,17 @@ $ scandeval --model <model-id> --dataset hellaswag-no
 
 ### NoSammendrag
 
-[description]
+This dataset is a combination of [the SNL and VG summarisation
+datasets](https://nmbu.brage.unit.no/nmbu-xmlui/handle/11250/3079868) as well as a
+translated version of the English [XSum dataset](https://aclanthology.org/D18-1206/),
+based on British BBC news articles. The SNL dataset is based on the Norwegian
+encyclopedia Store Norske Leksikon, while the VG dataset is based on the Norwegian
+articles from the newspaper VG. The translation of the XSum dataset was done using
+the [NLLB model](https://doi.org/10.48550/arXiv.2207.04672).
 
-[size-info]
+The original full dataset consists of 472,000 samples, and we use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total).
 
 Here are a few examples from the training split:
 
@@ -673,9 +771,11 @@ $ scandeval --model <model-id> --dataset no-sammendrag
 
 ### Unofficial: NorGLM Multi Sum
 
-[description]
+This dataset was released in [this paper](https://doi.org/10.48550/arXiv.2312.01314) and
+features a manually annotated summarisation dataset based on Norwegian news articles.
 
-[size-info]
+The original dataset contains 467 samples, which we split into 147 / 64 / 256 samples
+for training, validation and test, respectively.
 
 Here are a few examples from the training split:
 
@@ -727,9 +827,12 @@ $ scandeval --model <model-id> --dataset norglm-multi-sum
 
 ### Unofficial: Schibsted-No
 
-[description]
+This dataset was released
+[here](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries) and
+features summaries of news articles from Schibsted Medias Norwegian newsrooms.
 
-[size-info]
+The original dataset contains 1,240 / 347 / 374 samples for training, validation and
+testing, respectively. We use these splits as-is.
 
 Here are a few examples from the training split:
 
