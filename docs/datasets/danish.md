@@ -113,20 +113,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'tokens': array(['I', 'dette', 'efterår', 'har', 'Grønland', 'taget', 'en', 'stor', 'beslutning', 'ved', 'folkeafstemningen', 'den', '25.', 'november', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['I', 'dette', 'efterår', 'har', 'Grønland', 'taget', 'en', 'stor', 'beslutning', 'ved', 'folkeafstemningen', 'den', '25.', 'november', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['Åh', ',', 'Petra', ',', 'vis', 'mig', 'din', 'krop', '.'], dtype=object),
-  'labels': array(['O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['Åh', ',', 'Petra', ',', 'vis', 'mig', 'din', 'krop', '.'], dtype=object),
+  "labels": array(['O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['Fravalget', 'af', 'revision', 'registreres', 'automatisk', 'ved', 'anmeldelse', 'af', 'stiftelse', 'af', 'selskabet', 'hos', 'Erhvervs-styrelsen', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'O'], dtype=object)
+  "tokens": array(['Fravalget', 'af', 'revision', 'registreres', 'automatisk', 'ved', 'anmeldelse', 'af', 'stiftelse', 'af', 'selskabet', 'hos', 'Erhvervs-styrelsen', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'O'], dtype=object)
 }
 ```
 
@@ -183,20 +183,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'tokens': array(['Det', 'var', 'det', 'år', ',', 'hans', 'første', 'LP', ',', '"', 'With', 'A', 'Little', 'Help', 'From', 'My', 'Friends', '"', ',', 'udkom', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['Det', 'var', 'det', 'år', ',', 'hans', 'første', 'LP', ',', '"', 'With', 'A', 'Little', 'Help', 'From', 'My', 'Friends', '"', ',', 'udkom', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['Eddie', 'Carbone', ',', 'italiensk-amerikansk', 'havnearbejder', 'i', 'New', 'York', '.'], dtype=object),
-  'labels': array(['B-PER', 'I-PER', 'O', 'B-MISC', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
+  "tokens": array(['Eddie', 'Carbone', ',', 'italiensk-amerikansk', 'havnearbejder', 'i', 'New', 'York', '.'], dtype=object),
+  "labels": array(['B-PER', 'I-PER', 'O', 'B-MISC', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['"', 'Jeg', 'er', 'mig', '!', '"', 'insisterer', 'han', 'under', 'det', 'flere', 'hundrede', 'år', 'gamle', 'egetræ', ',', 'liggende', ',', 'som', 'den', 'popflab', 'han', 'er', ',', 'på', 'ryggen', 'i', 'sine', 'orange', 'jeans', ',', 't-shirt', '-', 'som', 'naturligvis', 'stiller', 'et', 'solbrunt', 'behåret', 'bryst', 'til', 'skue', '-', 'et', 'par', '68er', '"', 'make', 'love', 'not', 'war', '"', 'solbriller', 'han', 'netop', 'har', 'købt', 'i', 'Paris', ',', 'og', 'en', 'Kings', 'i', 'kæften', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['"', 'Jeg', 'er', 'mig', '!', '"', 'insisterer', 'han', 'under', 'det', 'flere', 'hundrede', 'år', 'gamle', 'egetræ', ',', 'liggende', ',', 'som', 'den', 'popflab', 'han', 'er', ',', 'på', 'ryggen', 'i', 'sine', 'orange', 'jeans', ',', 't-shirt', '-', 'som', 'naturligvis', 'stiller', 'et', 'solbrunt', 'behåret', 'bryst', 'til', 'skue', '-', 'et', 'par', '68er', '"', 'make', 'love', 'not', 'war', '"', 'solbriller', 'han', 'netop', 'har', 'købt', 'i', 'Paris', ',', 'og', 'en', 'Kings', 'i', 'kæften', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O'], dtype=object)
 }
 ```
 

@@ -77,20 +77,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'tokens': array(['Det', 'fremkommer', 'av', 'årsmeldingene', 'fra', 'Bergen', 'helseråd', 'i', 'årene', '1952', '-', '66', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['Det', 'fremkommer', 'av', 'årsmeldingene', 'fra', 'Bergen', 'helseråd', 'i', 'årene', '1952', '-', '66', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['Viktig', 'var', 'det', 'også', 'at', 'Kina', 'allerede', 'var', 'blitt', 'så', 'avhengig', 'av', 'det', 'amerikanske', 'markedet', 'og', 'av', 'dollaren', ',', 'at', 'en', 'nedgang', 'i', 'USA', 'også', 'ville', 'ramme', 'Kina', 'hardt', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'B-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'B-ORG', 'O', 'O'], dtype=object)
+  "tokens": array(['Viktig', 'var', 'det', 'også', 'at', 'Kina', 'allerede', 'var', 'blitt', 'så', 'avhengig', 'av', 'det', 'amerikanske', 'markedet', 'og', 'av', 'dollaren', ',', 'at', 'en', 'nedgang', 'i', 'USA', 'også', 'ville', 'ramme', 'Kina', 'hardt', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'B-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'B-ORG', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['«', 'Han', 'grät', 'sina', 'första', 'tårar', 'på', 'Oslo', 'central', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
+  "tokens": array(['«', 'Han', 'grät', 'sina', 'första', 'tårar', 'på', 'Oslo', 'central', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
 }
 ```
 
@@ -140,20 +140,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'tokens': array(['-', 'Ulfr', 'provoserer', 'kjapt', 'fram', 'eit', 'slagsmål', ',', 'og', 'han', 'drep', 'hovdingen', '.'], dtype=object),
-  'labels': array(['O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['-', 'Ulfr', 'provoserer', 'kjapt', 'fram', 'eit', 'slagsmål', ',', 'og', 'han', 'drep', 'hovdingen', '.'], dtype=object),
+  "labels": array(['O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['I', 'haust', 'blei', 'det', 'avslørt', 'at', 'minst', 'to', 'tolvåringar', 'på', 'mellomtrinnet', 'ved', 'Gimle', 'skule', 'hadde', 'med', 'seg', 'alkohol', 'på', 'ein', 'skuletur', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'I-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['I', 'haust', 'blei', 'det', 'avslørt', 'at', 'minst', 'to', 'tolvåringar', 'på', 'mellomtrinnet', 'ved', 'Gimle', 'skule', 'hadde', 'med', 'seg', 'alkohol', 'på', 'ein', 'skuletur', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'I-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['Krigen', 'mot', 'Irak', 'skulle', 'aldri', 'ha', 'vore', 'gjennomførd', '.'], dtype=object),
-  'labels': array(['O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['Krigen', 'mot', 'Irak', 'skulle', 'aldri', 'ha', 'vore', 'gjennomførd', '.'], dtype=object),
+  "labels": array(['O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 

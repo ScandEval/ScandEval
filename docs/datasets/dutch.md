@@ -86,20 +86,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'tokens': array(['Puitstraat', '6', ',', '8890', 'Moorslede', '.'], dtype=object),
-  'labels': array(['B-LOC', 'O', 'O', 'O', 'B-LOC', 'O'], dtype=object),
+  "tokens": array(['Puitstraat', '6', ',', '8890', 'Moorslede', '.'], dtype=object),
+  "labels": array(['B-LOC', 'O', 'O', 'O', 'B-LOC', 'O'], dtype=object),
 }
 ```
 ```json
 {
-  'tokens': array(['Monami-Van', 'Roost', 'had', 'nochtans', 'verloren', '.'], dtype=object),
-  'labels': array(['B-PER', 'I-PER', 'O', 'O', 'O', 'O'], dtype=object),
+  "tokens": array(['Monami-Van', 'Roost', 'had', 'nochtans', 'verloren', '.'], dtype=object),
+  "labels": array(['B-PER', 'I-PER', 'O', 'O', 'O', 'O'], dtype=object),
 }
 ```
 ```json
 {
-  'tokens': array(['Het', 'overwicht', 'lag', 'op', 'nieuw', 'nummers', 'als', "'", 'Maria', 'Maria', "'", ',', "'", 'Put', 'Your', 'Lights', 'On', "'", 'en', "'", 'Smooth', "'", ',', 'stuk', 'voor', 'stuk', 'knappe', 'songs', 'die', 'zich', 'op', 'de', 'koop', 'toe', 'in', 'korte', ',', 'krachtige', 'versies', 'lieten', 'bewonderen', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'B-PER', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object),
+  "tokens": array(['Het', 'overwicht', 'lag', 'op', 'nieuw', 'nummers', 'als', "'", 'Maria', 'Maria', "'", ',', "'", 'Put', 'Your', 'Lights', 'On', "'", 'en', "'", 'Smooth', "'", ',', 'stuk', 'voor', 'stuk', 'knappe', 'songs', 'die', 'zich', 'op', 'de', 'koop', 'toe', 'in', 'korte', ',', 'krachtige', 'versies', 'lieten', 'bewonderen', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'B-PER', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object),
 }
 ```
 

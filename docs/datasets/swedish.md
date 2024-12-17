@@ -77,20 +77,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  'tokens': array(['Det', 'låter', 'som', 'en', 'västanfläkt', 'jämfört', 'med', 'den', 'i', 'filmen', 'förkättrade', 'biljätten', 'General', 'Motors', ',', 'som', 'friställt', '35000', 'jobbare', 'i', 'staden', 'Flint', ',', 'Michigan', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'B-LOC', 'O'], dtype=object)
+  "tokens": array(['Det', 'låter', 'som', 'en', 'västanfläkt', 'jämfört', 'med', 'den', 'i', 'filmen', 'förkättrade', 'biljätten', 'General', 'Motors', ',', 'som', 'friställt', '35000', 'jobbare', 'i', 'staden', 'Flint', ',', 'Michigan', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'B-LOC', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['En', 'liknande', 'kunskapsteoretisk', 'grundfråga', ',', 'fast', 'i', 'mer', 'modernt', 'sofistikerad', 'form', ',', 'når', 'oss', 'nu', 'från', 'Paris', ':'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O'], dtype=object)
+  "tokens": array(['En', 'liknande', 'kunskapsteoretisk', 'grundfråga', ',', 'fast', 'i', 'mer', 'modernt', 'sofistikerad', 'form', ',', 'når', 'oss', 'nu', 'från', 'Paris', ':'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  'tokens': array(['-', 'Dessvärre', ',', 'sa', 'man', ',', 'vi', 'har', 'ingen', 'Björn', 'Eriksson', 'på', 'passagerarlistan', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O', 'O'], dtype=object)
+  "tokens": array(['-', 'Dessvärre', ',', 'sa', 'man', ',', 'vi', 'har', 'ingen', 'Björn', 'Eriksson', 'på', 'passagerarlistan', '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O', 'O'], dtype=object)
 }
 ```
 
