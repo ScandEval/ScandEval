@@ -7,7 +7,7 @@ information about what these constitute.
 
 ## Sentiment Classification
 
-### [dataset]
+### SST-5
 
 [description]
 
@@ -55,7 +55,7 @@ $ scandeval --model <model-id> --dataset X
 
 ## Named Entity Recognition
 
-### [dataset]
+### CoNLL-2003-En
 
 [description]
 
@@ -108,7 +108,7 @@ $ scandeval --model <model-id> --dataset X
 
 ## Linguistic Acceptability
 
-### [dataset]
+### ScaLA-En
 
 [description]
 
@@ -155,7 +155,7 @@ $ scandeval --model <model-id> --dataset X
 
 ## Reading Comprehension
 
-### [dataset]
+### SQuAD
 
 [description]
 
@@ -201,7 +201,49 @@ $ scandeval --model <model-id> --dataset X
 
 ## Knowledge
 
-### [dataset]
+### MMLU
+
+[description]
+
+[size-info]
+
+Here are a few examples from the training split:
+
+```json
+[example-1]
+```
+```json
+[example-2]
+```
+```json
+[example-3]
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: XX
+- Prefix prompt:
+  ```
+  [prefix-prompt]
+  ```
+- Base prompt template:
+  ```
+  [base-prompt]
+  ```
+- Instruction-tuned prompt template:
+  ```
+  [instruction-tuned-prompt]
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset X
+```
+
+
+### Unofficial: ARC
 
 [description]
 
@@ -245,7 +287,7 @@ $ scandeval --model <model-id> --dataset X
 
 ## Common-sense Reasoning
 
-### [dataset]
+### HellaSwag
 
 [description]
 
@@ -289,7 +331,7 @@ $ scandeval --model <model-id> --dataset X
 
 ## Summarization
 
-### [dataset]
+### CNN/DailyMail
 
 [description]
 

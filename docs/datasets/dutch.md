@@ -71,7 +71,7 @@ $ scandeval --model <model-id> --dataset dutch-social
 
 ## Named Entity Recognition
 
-### CoNLL-2002 Dutch
+### CoNLL-2002-nl
 
 This dataset was published in [this paper](https://aclanthology.org/W02-2024/) and
 consists of named entity recognition annotations of the Belgian newspaper "De Morgen" of

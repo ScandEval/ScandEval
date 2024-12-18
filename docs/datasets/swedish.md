@@ -547,7 +547,7 @@ $ scandeval --model <model-id> --dataset swedn
 ```
 
 
-### Unofficial: Schibsted-Sv
+### Unofficial: Schibsted-sv
 
 This dataset was published
 [here](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries) and

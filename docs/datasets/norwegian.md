@@ -825,7 +825,7 @@ $ scandeval --model <model-id> --dataset norglm-multi-sum
 ```
 
 
-### Unofficial: Schibsted-No
+### Unofficial: Schibsted-no
 
 This dataset was released
 [here](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries) and
