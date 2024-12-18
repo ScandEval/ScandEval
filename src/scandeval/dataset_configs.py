@@ -827,7 +827,7 @@ FOQA_CONFIG = DatasetConfig(
     task=RC,
     languages=[FO],
     prompt_prefix="Hetta eru tekstir saman við spurningum og svar.",
-    prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
+    prompt_template="Tekstur: {text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
     "orðum: {label}",
     instruction_prompt="Tekstur: {text}\n\nSvara hesum spurninginum um tekstin "
     "uppiyvir við í mesta lagi trimum orðum.\n\nSpurningur: {question}",
