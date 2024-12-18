@@ -43,3 +43,9 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 # Set amount of threads per GPU - this is the default and is only set to prevent a
 # warning from showing
 os.environ["OMP_NUM_THREADS"] = "1"
+
+
+# Set the HF_TOKEN env var to copy the HUGGINGFACE_API_KEY env var, as vLLM uses the
+# former and LiteLLM uses the latter
+if os.getenv("HUGGINGFACE_API_KEY"):
+    os.environ["HF_TOKEN"] = os.environ["HUGGINGFACE_API_KEY"]
