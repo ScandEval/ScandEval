@@ -4,6 +4,7 @@ import collections.abc as c
 import itertools as it
 import json
 import logging
+import os
 import random
 import re
 import typing as t
@@ -241,7 +242,9 @@ class LiteLLMModel(BenchmarkModule):
                     repo_info = hf_api.model_info(
                         repo_id=model_id,
                         revision=self.model_config.revision,
-                        token=self.benchmark_config.api_key or True,
+                        token=os.getenv("HUGGINGFACE_API_KEY")
+                        or self.benchmark_config.api_key
+                        or True,
                     )
                 except (
                     RepositoryNotFoundError,

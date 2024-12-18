@@ -2,6 +2,7 @@
 
 import collections.abc as c
 import logging
+import os
 import typing as t
 from functools import cached_property, partial
 from json import JSONDecodeError
@@ -94,13 +95,15 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         Returns:
             The number of parameters in the model.
         """
-        hf_api = HfApi()
+        token = (
+            self.benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True
+        )
+        hf_api = HfApi(token=token)
         try:
             repo_info = hf_api.model_info(
                 repo_id=self.model_config.adapter_base_model_id
                 or self.model_config.model_id,
                 revision=self.model_config.revision,
-                token=self.benchmark_config.api_key or True,
             )
         except (
             RepositoryNotFoundError,
@@ -481,7 +484,9 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             from_flax=from_flax,
             ignore_mismatched_sizes=ignore_mismatched_sizes,
             revision=self.model_config.revision,
-            token=self.benchmark_config.api_key or True,
+            token=self.benchmark_config.api_key
+            or os.getenv("HUGGINGFACE_API_KEY")
+            or True,
             cache_dir=self.model_config.model_cache_dir,
             trust_remote_code=self.benchmark_config.trust_remote_code,
             torch_dtype=get_torch_dtype(
@@ -610,7 +615,8 @@ def get_model_repo_info(
     Returns:
         The information about the model, or None if the model could not be found.
     """
-    hf_api = HfApi(token=benchmark_config.api_key or True)
+    token = benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True
+    hf_api = HfApi(token=token)
     model_id, revision = model_id.split("@") if "@" in model_id else (model_id, "main")
 
     try:
@@ -663,7 +669,9 @@ def get_model_repo_info(
             base_model_info = hf_api.model_info(
                 repo_id=base_model_id,
                 revision=revision,
-                token=benchmark_config.api_key or True,
+                token=benchmark_config.api_key
+                or os.getenv("HUGGINGFACE_API_KEY")
+                or True,
             )
             tags += base_model_info.tags or list()
             tags = list(set(tags))
@@ -796,7 +804,7 @@ def load_hf_model_config(
                 id2label=id2label,
                 label2id=label2id,
                 revision=revision,
-                token=api_key or True,
+                token=api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
                 trust_remote_code=trust_remote_code,
                 cache_dir=model_cache_dir,
             )

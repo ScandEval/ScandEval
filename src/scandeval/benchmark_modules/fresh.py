@@ -1,5 +1,6 @@
 """Freshly initialised encoder models."""
 
+import os
 from functools import cached_property
 from json import JSONDecodeError
 
@@ -179,7 +180,9 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
 
         config = AutoConfig.from_pretrained(
             real_model_id,
-            token=self.benchmark_config.api_key or True,
+            token=self.benchmark_config.api_key
+            or os.getenv("HUGGINGFACE_API_KEY")
+            or True,
             num_labels=self.dataset_config.num_labels,
             id2label=self.dataset_config.id2label,
             label2id=self.dataset_config.label2id,
@@ -198,7 +201,9 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
             tokenizer: "PreTrainedTokenizer" = AutoTokenizer.from_pretrained(
                 real_model_id,
                 revision=self.model_config.revision,
-                token=self.benchmark_config.api_key or True,
+                token=self.benchmark_config.api_key
+                or os.getenv("HUGGINGFACE_API_KEY")
+                or True,
                 add_prefix_space=prefix,
                 cache_dir=self.model_config.model_cache_dir,
                 use_fast=True,
