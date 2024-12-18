@@ -28,28 +28,31 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru yfirferðir ásamt lyndisgildi þeirra, sem getur verið 'jákvætt', 'hlutlaust' eða 'neikvætt'.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Yfirferð: {text}
+  Lyndi: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Texti: {text}
+
+  Flokkaðu tilfinninguna í textanum. Svaraðu með 'jákvætt', 'hlutlaust' eða 'neikvætt'.
   ```
 - Label mapping:
-    - `positive` ➡️ `X`
-    - `neutral` ➡️ `X`
-    - `negative` ➡️ `X`
+    - `positive` ➡️ `jákvætt`
+    - `neutral` ➡️ `hlutlaust`
+    - `negative` ➡️ `neikvætt`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset hotter-and-colder-sentiment
 ```
 
 
@@ -76,33 +79,36 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 8
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru setningar ásamt JSON lyklum með nefndum einingum sem koma fyrir í setningunum.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Setning: {text}
+  Nefndar einingar: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Setning: {text}
+
+  Greinið nefndu einingarnar í setningunni. Þú ættir að skila þessu sem JSON orðabók með lyklunum 'einstaklingur', 'staðsetning', 'stofnun' og 'ýmislegt'. Gildin ættu að vera listi yfir nefndu einingarnar af þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.
   ```
 - Label mapping:
-    - `B-PER` ➡️ `X`
-    - `I-PER` ➡️ `X`
-    - `B-LOC` ➡️ `X`
-    - `I-LOC` ➡️ `X`
-    - `B-ORG` ➡️ `X`
-    - `I-ORG` ➡️ `X`
-    - `B-MISC` ➡️ `X`
-    - `I-MISC` ➡️ `X`
+    - `B-PER` ➡️ `einstaklingur`
+    - `I-PER` ➡️ `einstaklingur`
+    - `B-LOC` ➡️ `staðsetning`
+    - `I-LOC` ➡️ `staðsetning`
+    - `B-ORG` ➡️ `stofnun`
+    - `I-ORG` ➡️ `stofnun`
+    - `B-MISC` ➡️ `ýmislegt`
+    - `I-MISC` ➡️ `ýmislegt`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset mim-gold-ner
 ```
 
 
@@ -129,27 +135,30 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru setningar og hvort þær eru málfræðilega réttar.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Setning: {text}
+  Málfræðilega rétt: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Setning: {text}
+
+  Greinið hvort setningin er málfræðilega rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.
   ```
 - Label mapping:
-    - `correct` ➡️ `X`
-    - `incorrect` ➡️ `X`
+    - `correct` ➡️ `já`
+    - `incorrect` ➡️ `nei`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset scala-is
 ```
 
 
@@ -174,27 +183,30 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru setningar og hvort þær eru málfræðilega réttar.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Setning: {text}
+  Málfræðilega rétt: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Setning: {text}
+
+  Greinið hvort setningin er málfræðilega rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.
   ```
 - Label mapping:
-    - `correct` ➡️ `X`
-    - `incorrect` ➡️ `X`
+    - `correct` ➡️ `já`
+    - `incorrect` ➡️ `nei`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset ice-ec
 ```
 
 
@@ -219,27 +231,30 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru setningar og hvort þær eru málfræðilega réttar.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Setning: {text}
+  Málfræðilega rétt: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Setning: {text}
+
+  Greinið hvort setningin er málfræðilega rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.
   ```
 - Label mapping:
-    - `correct` ➡️ `X`
-    - `incorrect` ➡️ `X`
+    - `correct` ➡️ `já`
+    - `incorrect` ➡️ `nei`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset ice-linguistic
 ```
 
 
@@ -266,26 +281,30 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 4
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru textar með tilheyrandi spurningum og svörum.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Texti: {text}
+  Spurning: {question}
+  Svaraðu með að hámarki 3 orðum: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Texti: {text}
+
+  Svaraðu eftirfarandi spurningu um textann að hámarki í 3 orðum.
+
+  Spurning: {question}
   ```
-- Label mapping:
-    - `X` ➡️ `Y`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset nqii
 ```
 
 
@@ -310,26 +329,30 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 4
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru textar með tilheyrandi spurningum og svörum.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Texti: {text}
+  Spurning: {question}
+  Svaraðu með að hámarki 3 orðum: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Texti: {text}
+
+  Svaraðu eftirfarandi spurningu um textann að hámarki í 3 orðum.
+
+  Spurning: {question}
   ```
-- Label mapping:
-    - `X` ➡️ `Y`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset icelandic-qa
 ```
 
 
@@ -356,24 +379,37 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru fjölvalsspurningar (með svörum).
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svara: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset arc-is
 ```
 
 
@@ -398,24 +434,37 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru fjölvalsspurningar (með svörum).
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svara: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset mmlu-is
 ```
 
 
@@ -442,24 +491,37 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru fjölvalsspurningar (með svörum).
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svara: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset winogrande-is
 ```
 
 
@@ -484,30 +546,43 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru fjölvalsspurningar (með svörum).
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svara: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset hellaswag-is
 ```
 
 
 ## Summarization
 
-### RNN
+### RRN
 
 [description]
 
@@ -528,24 +603,27 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 1
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru fréttagreinar með tilheyrandi samantektum.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Fréttagrein: {text}
+  Samantekt: {target_text}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Fréttagrein: {text}
+
+  Skrifaðu samantekt um ofangreindu grein.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset rrn
 ```
 
 
@@ -570,22 +648,25 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 1
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Eftirfarandi eru fréttagreinar með tilheyrandi samantektum.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Fréttagrein: {text}
+  Samantekt: {target_text}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Fréttagrein: {text}
+
+  Skrifaðu samantekt um ofangreindu grein.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset icesum
 ```
