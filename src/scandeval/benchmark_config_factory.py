@@ -13,6 +13,7 @@ from .enums import Device, Framework
 from .exceptions import InvalidBenchmark
 from .languages import get_all_languages
 from .tasks import get_all_tasks
+from .utils import log_once
 
 if t.TYPE_CHECKING:
     from .data_models import Language, Task
@@ -162,7 +163,7 @@ def build_benchmark_config(
                     message += (
                         "the argument `use_flash_attention=False` in the `Benchmarker`."
                     )
-                logger.info(message)
+                log_once(message=message, level=logging.INFO)
 
     # Set variable with number of iterations
     if hasattr(sys, "_called_from_test"):
