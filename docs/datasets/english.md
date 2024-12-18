@@ -28,28 +28,31 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  The following are texts and their sentiment, which can be 'positive', 'neutral' or 'negative'.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Text: {text}
+  Sentiment: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Text: {text}
+
+  Classify the sentiment in the text. Answer with 'positive', 'neutral' or 'negative'.
   ```
 - Label mapping:
-    - `positive` ➡️ `X`
-    - `neutral` ➡️ `X`
-    - `negative` ➡️ `X`
+    - `positive` ➡️ `positive`
+    - `neutral` ➡️ `neutral`
+    - `negative` ➡️ `negative`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset sst5
 ```
 
 
@@ -76,33 +79,36 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 8
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  Below are sentences and JSON dictionaries with the named entities that occur in the given sentence.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Sentence: {text}
+  Named entities: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Sentence: {text}
+
+  Identify the named entities in the sentence. You should output this as a JSON dictionary with the keys being 'person', 'location', 'organization' and 'miscellaneous'. The values should be lists of the named entities of that type, exactly as they appear in the sentence.
   ```
 - Label mapping:
-    - `B-PER` ➡️ `X`
-    - `I-PER` ➡️ `X`
-    - `B-LOC` ➡️ `X`
-    - `I-LOC` ➡️ `X`
-    - `B-ORG` ➡️ `X`
-    - `I-ORG` ➡️ `X`
-    - `B-MISC` ➡️ `X`
-    - `I-MISC` ➡️ `X`
+    - `B-PER` ➡️ `person`
+    - `I-PER` ➡️ `person`
+    - `B-LOC` ➡️ `location`
+    - `I-LOC` ➡️ `location`
+    - `B-ORG` ➡️ `organization`
+    - `I-ORG` ➡️ `organization`
+    - `B-MISC` ➡️ `miscellaneous`
+    - `I-MISC` ➡️ `miscellaneous`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset conll-en
 ```
 
 
@@ -129,27 +135,30 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  The following are sentences and whether they are grammatically correct.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Sentence: {text}
+  Grammatically correct: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Sentence: {text}
+
+  Determine whether the sentence is grammatically correct or not. Reply with 'yes' if the sentence is correct and 'no' if it is not.
   ```
 - Label mapping:
-    - `correct` ➡️ `X`
-    - `incorrect` ➡️ `X`
+    - `correct` ➡️ `yes`
+    - `incorrect` ➡️ `no`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset scala-en
 ```
 
 
@@ -176,26 +185,30 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 4
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  The following are texts with accompanying questions and answers.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Text: {text}
+  Question: {question}
+  Answer in max 3 words:
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Text: {text}
+
+  Answer the following question about the above text in at most 3 words.
+
+  Question: {question}
   ```
-- Label mapping:
-    - `X` ➡️ `Y`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset squad
 ```
 
 
@@ -222,24 +235,37 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  The following are multiple choice questions (with answers).
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Question: {text}
+  Options:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Answer: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Question: {text}
+  Options:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Answer the above question by replying with 'a', 'b', 'c' or 'd'.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset mmlu
 ```
 
 
@@ -264,24 +290,37 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  The following are multiple choice questions (with answers).
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Question: {text}
+  Options:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Answer: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Question: {text}
+  Options:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Answer the above question by replying with 'a', 'b', 'c' or 'd'.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset arc
 ```
 
 
@@ -308,24 +347,37 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  The following are multiple choice questions (with answers).
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  Question: {text}
+  Options:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Answer: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  Question: {text}
+  Options:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Answer the above question by replying with 'a', 'b', 'c' or 'd'.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset hellaswag
 ```
 
 
@@ -352,22 +404,25 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: XX
+- Number of few-shot examples: 1
 - Prefix prompt:
   ```
-  [prefix-prompt]
+  The following are articles with accompanying summaries.
   ```
 - Base prompt template:
   ```
-  [base-prompt]
+  News article: {text}
+  Summary: {target_text}
   ```
 - Instruction-tuned prompt template:
   ```
-  [instruction-tuned-prompt]
+  News article: {text}
+
+  Write a summary of the above article.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset X
+$ scandeval --model <model-id> --dataset cnn-dailymail
 ```
