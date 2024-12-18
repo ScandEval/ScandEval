@@ -5,6 +5,7 @@ import importlib.util
 import itertools as it
 import json
 import logging
+import os
 import random
 import sys
 import typing as t
@@ -439,10 +440,16 @@ class VLLMModel(HuggingFaceEncoderModel):
             The loaded model and tokenizer.
         """
         try:
+            token = (
+                self.benchmark_config.api_key
+                or os.getenv("HUGGINGFACE_API_KEY")
+                or True
+            )
             hf_model_config = AutoConfig.from_pretrained(
                 self.model_config.adapter_base_model_id or self.model_config.model_id,
                 revision=self.model_config.revision,
                 cache_dir=self.model_config.model_cache_dir,
+                token=token,
             )
         except ValueError as e:
             raise InvalidModel(
@@ -550,6 +557,9 @@ class VLLMModel(HuggingFaceEncoderModel):
             trust_remote_code=self.benchmark_config.trust_remote_code,
             model_max_length=true_max_model_len,
             model_cache_dir=self.model_config.model_cache_dir,
+            token=self.benchmark_config.api_key
+            or os.getenv("HUGGINGFACE_API_KEY")
+            or True,
         )
 
         return model, tokenizer
@@ -874,6 +884,7 @@ def load_tokenizer(
     trust_remote_code: bool,
     model_max_length: int,
     model_cache_dir: str,
+    token: str | bool,
 ) -> "PreTrainedTokenizer":
     """Load the tokenizer.
 
@@ -891,12 +902,17 @@ def load_tokenizer(
             The maximum length of the model.
         model_cache_dir:
             The cache directory for the model.
+        token:
+            The Hugging Face API token.
 
     Returns:
         The loaded tokenizer.
     """
     config = AutoConfig.from_pretrained(
-        adapter_base_model_id or model_id, revision=revision, cache_dir=model_cache_dir
+        adapter_base_model_id or model_id,
+        revision=revision,
+        cache_dir=model_cache_dir,
+        token=token,
     )
     num_retries = 5
     for _ in range(num_retries):
@@ -910,6 +926,7 @@ def load_tokenizer(
                 truncation_side="left",
                 model_max_length=model_max_length,
                 config=config,
+                token=token,
             )
             break
         except (json.JSONDecodeError, OSError, TypeError) as e:
