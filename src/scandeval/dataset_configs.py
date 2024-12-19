@@ -948,21 +948,6 @@ RRN_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
-ICESUM_CONFIG = DatasetConfig(
-    name="icesum",
-    pretty_name="the Icelandic summarisation dataset IceSum",
-    huggingface_id="ScandEval/icesum",
-    task=SUMM,
-    languages=[IS],
-    prompt_prefix="Eftirfarandi eru fréttagreinar með tilheyrandi samantektum.",
-    prompt_template="Fréttagrein: {text}\nSamantekt: {target_text}",
-    instruction_prompt="Fréttagrein: {text}\n\nSkrifaðu samantekt um ofangreindu "
-    "grein.",
-    num_few_shot_examples=1,
-    max_generated_tokens=256,
-    unofficial=True,
-)
-
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
     name="no-sammendrag",
     pretty_name="the truncated version of the Norwegian summarisation dataset "
