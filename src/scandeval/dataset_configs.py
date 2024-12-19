@@ -1411,9 +1411,9 @@ WINOGRANDE_IS = DatasetConfig(
     languages=[IS],
     prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
     prompt_template="Spurningar: {text}\nSvara: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.",
+    prompt_label_mapping=dict(a="a", b="b"),
+    instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a' "
+    "eða 'b'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
