@@ -78,10 +78,10 @@ def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     def make_label(row: pd.Series) -> str:
         # asking if the sentence is incorrect.
         if "incorrect" in row["input"]:
-            return "nei" if row["answer"] == "Yes" else "já"
+            return "incorrect" if row["answer"] == "Yes" else "incorrect"
 
         # ...asking if the sentence is correct
-        return "já" if row["answer"] == "Yes" else "nei"
+        return "correct" if row["answer"] == "Yes" else "incorrect"
 
     df["label"] = df.apply(make_label, axis=1)
 
