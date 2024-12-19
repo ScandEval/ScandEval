@@ -112,4 +112,4 @@ src/upload/
 site/
 
 # Helper files for docs
-docs/datasets/dataset_example_commands.md
+docs/datasets/dataset_example_commands.py
