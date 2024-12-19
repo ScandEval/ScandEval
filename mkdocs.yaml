@@ -1,11 +1,49 @@
 site_name: ScandEval
-theme: material
+repo_url: https://github.com/ScandEval/ScandEval
+repo_name: ScandEval
+theme:
+  name: material
+  features:
+    - navigation.top
+    - navigation.path
+    - navigation.prune
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tracking
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      primary: blue grey
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      primary: blue grey
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  favicon: gfx/favicon.png
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/chart-bar
 plugins:
   - include-markdown
   - search
-  - include_dir_to_nav
+  - include_dir_to_nav:
+      file_name_as_title: true
   - mkapi
 nav:
-  - .
+  - About: README.md
+  - Leaderboards: leaderboards
+  - Tasks: tasks
+  - Datasets: datasets
+  - Methodology: methodology.md
+  - FAQ: faq.md
+  - Python Package: python-package.md
   - API Reference:
     - $api:src/scandeval.***

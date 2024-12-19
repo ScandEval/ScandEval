@@ -82,7 +82,9 @@ def prepare_dataframe(dataset: Dataset) -> Dataset:
     df["text"] = df["sentence"].apply(join_tokens)
 
     # Make the `label` column` such that it is `já` if there are no errors and `nei` if there are errors
-    df["label"] = df.apply(lambda row: "já" if not row["has_error"] else "nei", axis=1)
+    df["label"] = df.apply(
+        lambda row: "correct" if not row["has_error"] else "incorrect", axis=1
+    )
 
     # Keep only relevant features: text and label
     df = df[["text", "label"]]

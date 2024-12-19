@@ -9,7 +9,7 @@ from requests import HTTPError
 def main() -> None:
     """Create the DutchSocial-mini sentiment dataset and upload it to the HF Hub."""
     # Define the base download URL
-    repo_id = "dutch_social"
+    repo_id = "corona-tweet/dutch_social"
 
     # Download the dataset
     dataset = load_dataset(path=repo_id, token=True)
