@@ -122,7 +122,7 @@ class BenchmarkModule(ABC):
             f"{self.__class__.__name__}."
         )
 
-    @cached_property
+    @property
     def is_generative(self) -> bool:
         """Whether the model is generative.
 
@@ -165,7 +165,7 @@ class BenchmarkModule(ABC):
         """
         ...
 
-    @cached_property
+    @property
     @abstractmethod
     def data_collator(self) -> c.Callable[[list[t.Any]], dict[str, t.Any]]:
         """The data collator used to prepare samples during finetuning.
@@ -175,7 +175,7 @@ class BenchmarkModule(ABC):
         """
         ...
 
-    @cached_property
+    @property
     def compute_metrics(self) -> ComputeMetricsFunction:
         """The function used to compute the metrics.
 
@@ -214,7 +214,7 @@ class BenchmarkModule(ABC):
                     f"Unsupported task supertask: {self.dataset_config.task.supertask}."
                 )
 
-    @cached_property
+    @property
     @abstractmethod
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
         """The function used to extract the labels from the generated output.
@@ -224,7 +224,7 @@ class BenchmarkModule(ABC):
         """
         ...
 
-    @cached_property
+    @property
     @abstractmethod
     def trainer_class(self) -> t.Type["Trainer"]:
         """The Trainer class to use for finetuning.
