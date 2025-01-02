@@ -45,7 +45,11 @@ from ..exceptions import (
     NoInternetConnection,
 )
 from ..languages import get_all_languages
-from ..task_utils import question_answering, token_classification
+from ..task_utils import (
+    multiple_choice_classification,
+    question_answering,
+    token_classification,
+)
 from ..types import ExtractLabelsFunction
 from ..utils import (
     block_terminal_output,
@@ -258,7 +262,9 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             case TaskGroup.QUESTION_ANSWERING:
                 return question_answering.QuestionAnsweringTrainer
             case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
-                raise NotImplementedError
+                return (
+                    multiple_choice_classification.MultipleChoiceClassificationTrainer
+                )
             case _:
                 raise NotImplementedError(
                     f"Unsupported task group: {self.dataset_config.task.task_group}."
