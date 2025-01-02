@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Now automatically uses the environment variable `HUGGINGFACE_API_KEY` when loading
   models from the Hugging Face Hub, so that the `--api-key` argument isn't needed in
   that case.
+- Added a `Tekstur: ` prefix to the prompt template of the `foqa` dataset.
+- Changed the instruction template prefix of `danske-talemaader` from `Spørgsmål: ` to
+  `Hvad er betydningen af følgende talemåde: `.
 
 
 ## [v14.0.4] - 2024-12-17
