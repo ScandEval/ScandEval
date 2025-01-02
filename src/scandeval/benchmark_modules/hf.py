@@ -83,9 +83,18 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         self.model_config = model_config
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
+
         model, tokenizer = self._load_model_and_tokenizer()
         self._model: PreTrainedModel = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
+
+        self._model, self._tokenizer = align_model_and_tokenizer(
+            model=self._model,
+            tokenizer=self._tokenizer,
+            model_max_length=self.model_max_length,
+            raise_errors=self.benchmark_config.raise_errors,
+        )
+
         self._log_metadata()
 
     @cached_property
@@ -125,8 +134,17 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             and self._model.config.num_params is not None
         ):
             num_params = self._model.config.num_params
-        else:
+        elif hasattr(self._model, "parameters"):
             num_params = sum(p.numel() for p in self._model.parameters())
+        else:
+            logger.warning(
+                "The number of parameters could not be determined for the model, since "
+                "the model is not stored in the safetensors format. If this is your "
+                "own model, then you can use this Hugging Face Space to convert your "
+                "model to the safetensors format: "
+                "https://huggingface.co/spaces/safetensors/convert."
+            )
+            num_params = -1
         return num_params
 
     @cached_property
@@ -590,12 +608,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             trust_remote_code=self.benchmark_config.trust_remote_code,
         )
 
-        model, tokenizer = align_model_and_tokenizer(
-            model=model,
-            tokenizer=tokenizer,
-            raise_errors=self.benchmark_config.raise_errors,
-        )
-
         return model, tokenizer
 
 
@@ -843,7 +855,10 @@ def load_hf_model_config(
                     script_argument="trust_remote_code=True",
                     run_with_cli=run_with_cli,
                 )
-            raise e
+            raise InvalidModel(
+                f"The config for the model {model_id!r} could not be loaded. The "
+                f"error was {e!r}."
+            )
 
 
 def setup_model_for_question_answering(model: "PreTrainedModel") -> "PreTrainedModel":
@@ -927,6 +942,7 @@ def get_children_of_module(
 def align_model_and_tokenizer(
     model: "PreTrainedModel",
     tokenizer: "PreTrainedTokenizer",
+    model_max_length: int,
     raise_errors: bool = False,
 ) -> tuple["PreTrainedModel", "PreTrainedTokenizer"]:
     """Aligns the model and the tokenizer.
@@ -936,27 +952,21 @@ def align_model_and_tokenizer(
             The model to fix.
         tokenizer:
             The tokenizer to fix.
+        model_max_length:
+            The maximum length of the model.
         raise_errors:
             Whether to raise errors instead of trying to fix them silently.
 
     Returns:
         The fixed model and tokenizer.
     """
-    model_max_length = get_model_max_length(model=model, tokenizer=tokenizer)
-
-    # Ensure that the model max length is at least 5,000, to avoid OOM errors
+    # Ensure that the model max length is at most 5,000, to avoid OOM errors
     model_max_length = min(model_max_length, 5_000)
 
     if model_max_length > 0:
         tokenizer.model_max_length = model_max_length
     else:
         tokenizer.model_max_length = 512
-
-    # If we're not dealing with a generative model then we move it to CPU to avoid OOM
-    # errors
-    device: torch.device = torch.device("cpu")
-    model_device = model.device
-    model.to(device)
 
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
@@ -967,12 +977,11 @@ def align_model_and_tokenizer(
             size=(1, max_length),
             fill_value=DUMMY_FILL_VALUE,
             dtype=torch.long,
-            device=device,
+            device=model.device,
         )
-
         with torch.inference_mode():
             try:
-                model(dummy_inputs)
+                model(dummy_inputs, attention_mask=torch.ones_like(dummy_inputs))
                 break
 
             # This happens if `max_length` is too large
@@ -981,8 +990,8 @@ def align_model_and_tokenizer(
 
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
-    if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
-        if model.config.vocab_size < tokenizer.vocab_size:
+    if hasattr(model.config, "vocab_size"):
+        if model.config.vocab_size < len(tokenizer):
             if raise_errors:
                 raise InvalidModel(
                     "The vocab size of the tokenizer is larger than the vocab size of "
@@ -996,69 +1005,4 @@ def align_model_and_tokenizer(
         tokenizer.bos_token = tokenizer.eos_token
         tokenizer.bos_token_id = tokenizer.eos_token_id
 
-    model.to(model_device)
-
     return model, tokenizer
-
-
-def get_model_max_length(
-    model: "PreTrainedModel", tokenizer: "PreTrainedTokenizer"
-) -> int:
-    """Get the maximum context length of a model.
-
-    Args:
-        model:
-            The model.
-        tokenizer:
-            The tokenizer.
-
-    Returns:
-        The maximum context length.
-    """
-    all_max_lengths: list[int] = list()
-
-    if tokenizer is not None:
-        # Add the registered max length of the tokenizer
-        if hasattr(tokenizer, "model_max_length") and tokenizer.model_max_length < int(
-            1e30
-        ):
-            all_max_lengths.append(tokenizer.model_max_length)
-
-        # Add the max length derived from the model's input sizes
-        if hasattr(tokenizer, "max_model_input_sizes"):
-            all_max_lengths.extend(
-                [
-                    size
-                    for size in tokenizer.max_model_input_sizes.values()
-                    if size is not None
-                ]
-            )
-
-    # Add max length candidates from the model's configuration
-    candidate_config_max_lengths = [
-        "max_position_embeddings",
-        "model_max_length",
-        "max_sequence_length",
-        "sliding_window",
-        "sliding_window_size",
-    ]
-    for candidate_config_max_length in candidate_config_max_lengths:
-        if (
-            hasattr(model.config, candidate_config_max_length)
-            and (value := getattr(model.config, candidate_config_max_length))
-            is not None
-        ):
-            all_max_lengths.append(value)
-
-    # To avoid models having artificially low max lengths, we remove any max lengths
-    # that are less than 128
-    all_max_lengths = [
-        max_length for max_length in all_max_lengths if max_length >= 128
-    ]
-
-    if len(list(all_max_lengths)) > 0:
-        model_max_length = min(list(all_max_lengths))
-    else:
-        model_max_length = -1
-
-    return model_max_length

@@ -145,7 +145,7 @@ class LiteLLMModel(BenchmarkModule):
 
         if self.dataset_config.task.name in TASKS_USING_JSON:
             assert (
-                "json" in messages[0]["content"]
+                "json" in messages[0]["content"].lower()
             ), "Prompt must contain 'json' for JSON tasks."
             generation_kwargs["response_format"] = dict(type="json_object")
 

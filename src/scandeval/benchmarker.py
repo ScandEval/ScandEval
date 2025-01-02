@@ -546,7 +546,7 @@ class Benchmarker:
         Returns:
             The benchmark result, or an error if the benchmark was unsuccessful.
         """
-        if model is not None:
+        if model is None:
             initial_logging(
                 model_config=model_config,
                 dataset_config=dataset_config,

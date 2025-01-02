@@ -8,10 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
-- Now uses `xgrammar` for structured generation instead of `outlines`, as it is more
-  stable and has better performance.
-- Updated `vllm` from `>=0.6.3` to `>=0.6.6`, as this allows the use of `xgrammar` as
-  well as supporting more model architectures.
+- Updated `vllm` from `>=0.6.3` to `>=0.6.6` and `transformers` from `4.45.0` to
+  `4.47.0`, to support more model architectures.
 
 ### Fixed
 - Now automatically uses the environment variable `HUGGINGFACE_API_KEY` when loading
@@ -20,6 +18,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added a `Tekstur: ` prefix to the prompt template of the `foqa` dataset.
 - Changed the instruction template prefix of `danske-talemaader` from `Spørgsmål: ` to
   `Hvad er betydningen af følgende talemåde: `.
+- Add `fbgemm-gpu` to `generative` dependencies, as it is required to load newer Llama
+  models.
+- When a generative model isn't stored as safetensors, we now report an unknown number
+  of parameters, and log a warning to the user on how to fix this.
+- When benchmarking encoder models, we now correctly use the attention mask when
+  checking the model's maximum sequence length.
 
 
 ## [v14.0.4] - 2024-12-17
