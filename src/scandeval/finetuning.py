@@ -23,7 +23,12 @@ from .callbacks import NeverLeaveProgressCallback
 from .enums import DataType
 from .exceptions import InvalidBenchmark, NaNValueInModelOutput
 from .model_loading import load_model
-from .utils import block_terminal_output, clear_memory, enforce_reproducibility
+from .utils import (
+    block_terminal_output,
+    clear_memory,
+    enforce_reproducibility,
+    log_once,
+)
 
 if t.TYPE_CHECKING:
     from .data_models import BenchmarkConfig, DatasetConfig, ModelConfig
@@ -295,8 +300,12 @@ def get_training_args(
         and importlib.util.find_spec("bitsandbytes") is not None
     ):
         optimizer = OptimizerNames.ADAMW_8BIT
+        log_once(message="Using AdamW 8-bit optimizer.", level=logging.DEBUG)
     else:
         optimizer = OptimizerNames.ADAMW_TORCH
+        log_once(message="Using PyTorch AdamW optimizer.", level=logging.DEBUG)
+
+    log_once(message=f"Using {dtype} data type.", level=logging.DEBUG)
 
     training_args = TrainingArguments(
         output_dir=model_config.model_cache_dir,

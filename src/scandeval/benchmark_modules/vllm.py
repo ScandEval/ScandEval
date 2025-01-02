@@ -17,6 +17,7 @@ from types import MethodType
 import torch
 from datasets import DatasetDict
 from huggingface_hub import snapshot_download
+from pydantic import conlist, create_model
 from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
@@ -42,7 +43,6 @@ from ..exceptions import (
     NeedsExtraInstalled,
 )
 from ..languages import get_all_languages
-from ..structured_generation_utils import get_ner_logits_processors
 from ..task_utils import (
     question_answering,
     sequence_classification,
@@ -62,6 +62,7 @@ from .hf import HuggingFaceEncoderModel, get_model_repo_info
 if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, RequestOutput, SamplingParams
     from vllm.lora.request import LoRARequest
+    from vllm.sampling_params import GuidedDecodingParams
 
     try:
         from vllm.model_executor.parallel_utils.parallel_state import (
@@ -276,11 +277,16 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         if self.dataset_config.task.name in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
-            logits_processors = get_ner_logits_processors(
-                ner_tag_names=ner_tag_names, tokenizer=self._tokenizer
-            )
+
+            keys_and_their_types: dict[str, t.Any] = {
+                tag_name: (conlist(str, max_length=5), ...)
+                for tag_name in ner_tag_names
+            }
+            pydantic_class = create_model("AnswerFormat", **keys_and_their_types)
+            schema = pydantic_class.model_json_schema()
+            guided_decoding = GuidedDecodingParams(json=schema)
         else:
-            logits_processors = None
+            guided_decoding = None
 
         # Define the parameters used for vLLM generation
         max_tokens: int = self.dataset_config.max_generated_tokens
@@ -289,7 +295,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             logprobs=MAX_LOGPROBS if self.output_scores else None,
             temperature=0.0,
             stop=[stop_token for stop_token in stop_tokens if stop_token],
-            logits_processors=logits_processors,
+            guided_decoding=guided_decoding,
         )
 
         # If any of the prompts are empty then we need to replace them with a BOS token
