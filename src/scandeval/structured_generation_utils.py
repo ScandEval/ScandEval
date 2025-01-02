@@ -10,6 +10,7 @@ from pydantic import BaseModel, conlist, create_model
 from scandeval.exceptions import NeedsExtraInstalled
 
 if importlib.util.find_spec("xgrammar") is not None:
+    breakpoint()
     import xgrammar as xgr
 
 if t.TYPE_CHECKING:
