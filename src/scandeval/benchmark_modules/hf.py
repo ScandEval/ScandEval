@@ -852,7 +852,10 @@ def load_hf_model_config(
                     script_argument="trust_remote_code=True",
                     run_with_cli=run_with_cli,
                 )
-            raise e
+            raise InvalidModel(
+                f"The config for the model {model_id!r} could not be loaded. The "
+                f"error was {e!r}."
+            )
 
 
 def setup_model_for_question_answering(model: "PreTrainedModel") -> "PreTrainedModel":
