@@ -43,8 +43,8 @@ class BenchmarkModule(ABC):
             The dataset configuration.
         benchmark_config:
             The benchmark configuration.
-        is_generative:
-            Whether the model is generative.
+        buffer:
+            A buffer to store temporary data.
     """
 
     _is_generative: bool | None
@@ -69,6 +69,7 @@ class BenchmarkModule(ABC):
         self.model_config = model_config
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
+        self.buffer: dict[str, t.Any] = dict()
         self._log_metadata()
 
     def _log_metadata(self) -> None:
@@ -200,7 +201,7 @@ class BenchmarkModule(ABC):
             case "token-classification":
                 return partial(
                     token_classification.compute_metrics,
-                    has_misc_tags=self._has_misc_tags,
+                    has_misc_tags=self.buffer.get("has_misc_tags", True),
                     dataset_config=self.dataset_config,
                     benchmark_config=self.benchmark_config,
                 )
@@ -261,7 +262,7 @@ class BenchmarkModule(ABC):
                 labels_in_train: set[str] = {
                     tag for tag_list in dataset["train"]["labels"] for tag in tag_list
                 }
-                self._has_misc_tags = (
+                self.buffer["has_misc_tags"] = (
                     "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
                 )
             datasets[idx] = DatasetDict(
