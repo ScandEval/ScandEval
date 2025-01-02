@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Now uses `xgrammar` for structured generation instead of `outlines`, as it is more
+  stable and has better performance.
+
 ### Fixed
 - Now automatically uses the environment variable `HUGGINGFACE_API_KEY` when loading
   models from the Hugging Face Hub, so that the `--api-key` argument isn't needed in

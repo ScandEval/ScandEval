@@ -274,7 +274,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         if self.dataset_config.task.name in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
             logits_processors = get_ner_logits_processors(
-                ner_tag_names=ner_tag_names, llm=self._model
+                ner_tag_names=ner_tag_names, tokenizer=self._tokenizer
             )
         else:
             logits_processors = None
