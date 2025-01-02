@@ -28,6 +28,7 @@ from ..task_utils import (
     token_classification,
 )
 from ..types import ComputeMetricsFunction, ExtractLabelsFunction
+from ..utils import log_once
 
 logger = logging.getLogger("scandeval")
 
@@ -94,7 +95,7 @@ class BenchmarkModule(ABC):
             logging_msg += "and an unknown maximum sequence length."
         else:
             logging_msg += f"and a maximum context length of {self.model_max_length:,}."
-        logger.info(logging_msg)
+        log_once(message=logging_msg, level=logging.INFO)
 
     def get_pytorch_module(self) -> "nn.Module":
         """Get the underlying PyTorch module.
