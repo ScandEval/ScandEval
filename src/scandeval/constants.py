@@ -32,6 +32,8 @@ GENERATIVE_TAGS = [
     "text-generation-inference",
     "unsloth",
     "text-generation",
+    "gemma",
+    "gemma2",
     "llama",
 ]
 
