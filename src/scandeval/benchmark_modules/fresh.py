@@ -215,6 +215,7 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,
+            model_max_length=self.model_max_length,
             raise_errors=self.benchmark_config.raise_errors,
         )
 

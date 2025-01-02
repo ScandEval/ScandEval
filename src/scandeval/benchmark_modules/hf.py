@@ -602,6 +602,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         model, tokenizer = align_model_and_tokenizer(
             model=model,
             tokenizer=tokenizer,
+            model_max_length=self.model_max_length,
             raise_errors=self.benchmark_config.raise_errors,
         )
 
@@ -939,6 +940,7 @@ def get_children_of_module(
 def align_model_and_tokenizer(
     model: "PreTrainedModel",
     tokenizer: "PreTrainedTokenizer",
+    model_max_length: int,
     raise_errors: bool = False,
 ) -> tuple["PreTrainedModel", "PreTrainedTokenizer"]:
     """Aligns the model and the tokenizer.
@@ -948,6 +950,8 @@ def align_model_and_tokenizer(
             The model to fix.
         tokenizer:
             The tokenizer to fix.
+        model_max_length:
+            The maximum length of the model.
         raise_errors:
             Whether to raise errors instead of trying to fix them silently.
 
@@ -955,7 +959,7 @@ def align_model_and_tokenizer(
         The fixed model and tokenizer.
     """
     # Ensure that the model max length is at most 5,000, to avoid OOM errors
-    model_max_length = min(model.model_max_length, 5_000)
+    model_max_length = min(model_max_length, 5_000)
 
     if model_max_length > 0:
         tokenizer.model_max_length = model_max_length
