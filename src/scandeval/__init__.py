@@ -1,7 +1,7 @@
 """ScandEval - A benchmarking framework for language models."""
 
 ### STAGE 1 ###
-### Block unwanted user warnings and set up logging before external modules do ###
+### Block unwanted terminal output that happens on importing external modules ###
 
 import warnings
 import logging
@@ -34,7 +34,9 @@ from dotenv import load_dotenv
 from .benchmarker import Benchmarker
 from .utils import block_terminal_output
 
-# Block unwanted terminal outputs
+# Block unwanted terminal outputs. This blocks way more than the above, but since it
+# relies on importing from the `utils` module, external modules are already imported
+# before this is run, necessitating the above block as well
 block_terminal_output()
 
 
