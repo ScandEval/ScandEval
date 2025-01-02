@@ -9,7 +9,7 @@ from termcolor import colored
 warnings.filterwarnings("ignore", category=UserWarning)
 
 # Set up logging
-fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
+fmt = colored("%(asctime)s", "light_blue") + " ⋅ %(name)s " + colored("%(message)s", "green")
 logging.basicConfig(
     level=logging.CRITICAL if hasattr(sys, "_called_from_test") else logging.INFO,
     format=fmt,
