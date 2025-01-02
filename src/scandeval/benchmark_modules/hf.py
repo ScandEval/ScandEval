@@ -92,7 +92,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             model=self._model,
             tokenizer=self._tokenizer,
             model_max_length=self.model_max_length,
-            raise_errors=self.benchmark_config.raise_errors,
+            raise_errors=benchmark_config.raise_errors,
         )
 
         super().__init__(
