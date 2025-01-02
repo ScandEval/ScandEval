@@ -1,24 +1,12 @@
 """ScandEval - A benchmarking framework for language models."""
 
 import warnings
-
-warnings.filterwarnings("ignore", category=UserWarning)
-
-
-import importlib.metadata
 import logging
-import os
 import sys
 
-from dotenv import load_dotenv
 from termcolor import colored
 
-from .benchmarker import Benchmarker
-from .utils import block_terminal_output
-
-# Block unwanted terminal outputs
-block_terminal_output()
-
+warnings.filterwarnings("ignore", category=UserWarning)
 
 # Set up logging
 fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
@@ -27,6 +15,18 @@ logging.basicConfig(
     format=fmt,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+
+import importlib.metadata
+import os
+
+from dotenv import load_dotenv
+
+from .benchmarker import Benchmarker
+from .utils import block_terminal_output
+
+# Block unwanted terminal outputs
+block_terminal_output()
 
 
 # Fetches the version of the package as defined in pyproject.toml
