@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.1.0] - 2025-01-02
 ### Changed
 - Updated `vllm` from `>=0.6.3` to `>=0.6.6` and `transformers` from `4.45.0` to
   `4.47.0`, to support more model architectures.
