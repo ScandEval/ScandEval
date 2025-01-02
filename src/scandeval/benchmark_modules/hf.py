@@ -975,10 +975,9 @@ def align_model_and_tokenizer(
             dtype=torch.long,
             device=model.device,
         )
-
         with torch.inference_mode():
             try:
-                model(dummy_inputs)
+                model(dummy_inputs, attention_mask=torch.ones_like(dummy_inputs))
                 break
 
             # This happens if `max_length` is too large
@@ -987,8 +986,8 @@ def align_model_and_tokenizer(
 
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
-    if hasattr(model.config, "vocab_size") and hasattr(tokenizer, "vocab_size"):
-        if model.config.vocab_size < tokenizer.vocab_size:
+    if hasattr(model.config, "vocab_size"):
+        if model.config.vocab_size < len(tokenizer):
             if raise_errors:
                 raise InvalidModel(
                     "The vocab size of the tokenizer is larger than the vocab size of "
