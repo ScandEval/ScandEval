@@ -1022,7 +1022,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
-SCHIBSTED_SV = DatasetConfig(
+SCHIBSTED_SV_CONFIG = DatasetConfig(
     name="schibsted-sv",
     pretty_name="article summaries from Schibsted Media Swedish newsrooms.",
     huggingface_id="ScandEval/schibsted-article-summaries-sv",
@@ -1036,7 +1036,7 @@ SCHIBSTED_SV = DatasetConfig(
     unofficial=True,
 )
 
-SCHIBSTED_NO = DatasetConfig(
+SCHIBSTED_NO_CONFIG = DatasetConfig(
     name="schibsted-no",
     pretty_name="article summaries from Schibsted Medias Norwegian newsrooms.",
     huggingface_id="ScandEval/schibsted-article-summaries-no",
@@ -1387,7 +1387,7 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
-WINOGRANDE_IS = DatasetConfig(
+WINOGRANDE_IS_CONFIG = DatasetConfig(
     name="winogrande-is",
     pretty_name="the Icelandic common-sense reasoning dataset "
     "Winogrande-is, manually translated from the English Winogrande dataset",
