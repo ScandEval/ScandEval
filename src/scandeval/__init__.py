@@ -1,5 +1,10 @@
 """ScandEval - A benchmarking framework for language models."""
 
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
+
+
 import importlib.metadata
 import logging
 import os

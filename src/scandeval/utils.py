@@ -1,6 +1,5 @@
 """Utility functions to be used in other scripts."""
 
-breakpoint()
 import gc
 import importlib
 import importlib.util
