@@ -257,7 +257,6 @@ def extract_labels_from_generation(
                     if prompt_tag == prompt_tag_name
                 ][0]
             except IndexError:
-                breakpoint()
                 logger.debug(
                     "The model produced an invalid prompt tag name, "
                     f"{prompt_tag_name}. Skipping."
