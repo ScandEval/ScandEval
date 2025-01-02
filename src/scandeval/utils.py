@@ -20,7 +20,6 @@ import requests
 import torch
 from datasets.utils import disable_progress_bar
 from requests.exceptions import RequestException
-from termcolor import colored
 from transformers import PreTrainedTokenizer
 from transformers import logging as tf_logging
 
@@ -168,14 +167,6 @@ def block_terminal_output():
 
     # Disable logging from `litellm`
     litellm.suppress_debug_info = True
-
-    # Set up logging
-    fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
-    logging.basicConfig(
-        level=logging.CRITICAL if hasattr(sys, "_called_from_test") else logging.INFO,
-        format=fmt,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
 
 
 def get_class_by_name(

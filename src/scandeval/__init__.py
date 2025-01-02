@@ -1,15 +1,29 @@
 """ScandEval - A benchmarking framework for language models."""
 
+breakpoint()
+
 import importlib.metadata
+import logging
 import os
+import sys
 
 from dotenv import load_dotenv
+from termcolor import colored
 
 from .benchmarker import Benchmarker
 from .utils import block_terminal_output
 
 # Block unwanted terminal outputs
 block_terminal_output()
+
+
+# Set up logging
+fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
+logging.basicConfig(
+    level=logging.CRITICAL if hasattr(sys, "_called_from_test") else logging.INFO,
+    format=fmt,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 # Fetches the version of the package as defined in pyproject.toml
