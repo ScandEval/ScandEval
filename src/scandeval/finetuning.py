@@ -295,8 +295,12 @@ def get_training_args(
         and importlib.util.find_spec("bitsandbytes") is not None
     ):
         optimizer = OptimizerNames.ADAMW_8BIT
+        logger.debug("Using AdamW 8-bit optimizer.")
     else:
         optimizer = OptimizerNames.ADAMW_TORCH
+        logger.debug("Using PyTorch AdamW optimizer.")
+
+    logger.debug(f"Using {dtype} data type.")
 
     training_args = TrainingArguments(
         output_dir=model_config.model_cache_dir,
