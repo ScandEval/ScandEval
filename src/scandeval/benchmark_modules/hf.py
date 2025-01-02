@@ -84,11 +84,11 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             benchmark_config:
                 The benchmark configuration.
         """
-        self.model_config = model_config
-        self.dataset_config = dataset_config
-        self.benchmark_config = benchmark_config
-
-        model, tokenizer = self._load_model_and_tokenizer()
+        model, tokenizer = load_model_and_tokenizer(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
         self._model: PreTrainedModel = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
@@ -96,10 +96,14 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             model=self._model,
             tokenizer=self._tokenizer,
             model_max_length=self.model_max_length,
-            raise_errors=self.benchmark_config.raise_errors,
+            raise_errors=benchmark_config.raise_errors,
         )
 
-        self._log_metadata()
+        super().__init__(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
 
     @cached_property
     def num_params(self) -> int:
@@ -489,148 +493,156 @@ class HuggingFaceEncoderModel(BenchmarkModule):
 
         return model_config
 
-    def _load_model_and_tokenizer(self) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
-        """Load the model and tokenizer.
 
-        Returns:
-            The loaded model and tokenizer.
-        """
-        config: "PretrainedConfig"
-        block_terminal_output()
+def load_model_and_tokenizer(
+    model_config: ModelConfig,
+    dataset_config: DatasetConfig,
+    benchmark_config: BenchmarkConfig,
+) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
+    """Load the model and tokenizer.
 
-        model_id = self.model_config.model_id
-        task_group = self.dataset_config.task.task_group
-        from_flax = self.model_config.framework == Framework.JAX
-        ignore_mismatched_sizes = False
+    Args:
+        model_config:
+            The model configuration.
+        dataset_config:
+            The dataset configuration.
+        benchmark_config:
+            The benchmark configuration
 
-        config = load_hf_model_config(
-            model_id=model_id,
-            num_labels=self.dataset_config.num_labels,
-            id2label=self.dataset_config.id2label,
-            label2id=self.dataset_config.label2id,
-            revision=self.model_config.revision,
-            model_cache_dir=self.model_config.model_cache_dir,
-            api_key=self.benchmark_config.api_key,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-            run_with_cli=self.benchmark_config.run_with_cli,
-        )
+    Returns:
+        The loaded model and tokenizer.
+    """
+    config: "PretrainedConfig"
+    block_terminal_output()
 
-        model_kwargs = dict(
-            config=config,
-            from_flax=from_flax,
-            ignore_mismatched_sizes=ignore_mismatched_sizes,
-            revision=self.model_config.revision,
-            token=self.benchmark_config.api_key
-            or os.getenv("HUGGINGFACE_API_KEY")
-            or True,
-            cache_dir=self.model_config.model_cache_dir,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-            torch_dtype=get_torch_dtype(
-                device=self.benchmark_config.device,
-                torch_dtype_is_set=config.to_dict().get("torch_dtype") is not None,
-                bf16_available=(
-                    torch.cuda.is_available() and torch.cuda.is_bf16_supported()
-                ),
+    model_id = model_config.model_id
+    task_group = dataset_config.task.task_group
+    from_flax = model_config.framework == Framework.JAX
+    ignore_mismatched_sizes = False
+
+    config = load_hf_model_config(
+        model_id=model_id,
+        num_labels=dataset_config.num_labels,
+        id2label=dataset_config.id2label,
+        label2id=dataset_config.label2id,
+        revision=model_config.revision,
+        model_cache_dir=model_config.model_cache_dir,
+        api_key=benchmark_config.api_key,
+        trust_remote_code=benchmark_config.trust_remote_code,
+        run_with_cli=benchmark_config.run_with_cli,
+    )
+
+    model_kwargs = dict(
+        config=config,
+        from_flax=from_flax,
+        ignore_mismatched_sizes=ignore_mismatched_sizes,
+        revision=model_config.revision,
+        token=benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
+        cache_dir=model_config.model_cache_dir,
+        trust_remote_code=benchmark_config.trust_remote_code,
+        torch_dtype=get_torch_dtype(
+            device=benchmark_config.device,
+            torch_dtype_is_set=config.to_dict().get("torch_dtype") is not None,
+            bf16_available=(
+                torch.cuda.is_available() and torch.cuda.is_bf16_supported()
             ),
-        )
+        ),
+    )
 
-        # These are used when a timeout occurs
-        attempts_left = 5
+    # These are used when a timeout occurs
+    attempts_left = 5
 
-        model: PreTrainedModel | None = None
-        while True:
+    model: PreTrainedModel | None = None
+    while True:
+        try:
+            # Get the model class associated with the supertask
+            model_cls_or_none: t.Type["PreTrainedModel"] | None = get_class_by_name(
+                class_name=f"auto-model-for-{task_group}", module_name="transformers"
+            )
+
+            # If the model class could not be found then raise an error
+            if not model_cls_or_none:
+                raise InvalidBenchmark(
+                    f"The supertask {task_group!r} does not correspond to a "
+                    "Hugging Face AutoModel type (such as "
+                    "`AutoModelForSequenceClassification`)."
+                )
+
+            # If the model is a DeBERTaV2 model then we ensure that
+            # `pooler_hidden_size` is the same size as `hidden_size`
+            if config.model_type == "deberta-v2":
+                config.pooler_hidden_size = config.hidden_size
+
             try:
-                # Get the model class associated with the task group
-                model_cls_or_none: t.Type["PreTrainedModel"] | None = get_class_by_name(
-                    class_name=f"auto-model-for-{task_group}",
-                    module_name="transformers",
+                model_or_tuple = model_cls_or_none.from_pretrained(
+                    model_config.model_id, **model_kwargs
                 )
-
-                # If the model class could not be found then raise an error
-                if not model_cls_or_none:
-                    raise InvalidBenchmark(
-                        f"The task group {task_group!r} does not correspond to a "
-                        "Hugging Face AutoModel type (such as "
-                        "`AutoModelForSequenceClassification`)."
+            except (KeyError, RuntimeError) as e:
+                if not model_kwargs["ignore_mismatched_sizes"]:
+                    logger.debug(
+                        f"{type(e).__name__} occurred during the loading "
+                        f"of the {model_id!r} model. Retrying with "
+                        "`ignore_mismatched_sizes` set to True."
                     )
-
-                # If the model is a DeBERTaV2 model then we ensure that
-                # `pooler_hidden_size` is the same size as `hidden_size`
-                if config.model_type == "deberta-v2":
-                    config.pooler_hidden_size = config.hidden_size
-
-                try:
-                    model_or_tuple = model_cls_or_none.from_pretrained(
-                        self.model_config.model_id, **model_kwargs
-                    )
-                except (KeyError, RuntimeError) as e:
-                    if not model_kwargs["ignore_mismatched_sizes"]:
-                        logger.debug(
-                            f"{type(e).__name__} occurred during the loading "
-                            f"of the {model_id!r} model. Retrying with "
-                            "`ignore_mismatched_sizes` set to True."
-                        )
-                        model_kwargs["ignore_mismatched_sizes"] = True
-                        continue
-                    else:
-                        raise InvalidModel(str(e))
-                except (TimeoutError, RequestError):
-                    attempts_left -= 1
-                    if attempts_left == 0:
-                        raise InvalidModel(
-                            "The model could not be loaded after 5 attempts."
-                        )
-                    logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
-                    sleep(5)
+                    model_kwargs["ignore_mismatched_sizes"] = True
                     continue
-
-                if isinstance(model_or_tuple, tuple):
-                    model = model_or_tuple[0]
                 else:
-                    model = model_or_tuple
-                break
-
-            except (OSError, ValueError) as e:
-                # If `from_flax` is False but only Flax models are available then
-                # try again with `from_flax` set to True
-                if not from_flax and "Use `from_flax=True` to load this model" in str(
-                    e
-                ):
-                    from_flax = True
-                    continue
-
-                if "checkpoint seems to be incorrect" in str(e):
+                    raise InvalidModel(str(e))
+            except (TimeoutError, RequestError):
+                attempts_left -= 1
+                if attempts_left == 0:
                     raise InvalidModel(
-                        f"The model {model_id!r} has an incorrect checkpoint."
+                        "The model could not be loaded after 5 attempts."
                     )
-                if "trust_remote_code" in str(e):
-                    raise InvalidModel(
-                        f"Loading the model {model_id!r} needs to trust remote code. "
-                        "If you trust the suppliers of this model, then you can enable "
-                        "this by setting the `--trust-remote-code` flag."
-                    )
+                logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
+                sleep(5)
+                continue
+
+            if isinstance(model_or_tuple, tuple):
+                model = model_or_tuple[0]
+            else:
+                model = model_or_tuple
+            break
+
+        except (OSError, ValueError) as e:
+            # If `from_flax` is False but only Flax models are available then
+            # try again with `from_flax` set to True
+            if not from_flax and "Use `from_flax=True` to load this model" in str(e):
+                from_flax = True
+                continue
+
+            if "checkpoint seems to be incorrect" in str(e):
                 raise InvalidModel(
-                    f"The model {model_id!r} could not be loaded. The error was {e!r}."
+                    f"The model {model_id!r} has an incorrect checkpoint."
                 )
+            if "trust_remote_code" in str(e):
+                raise InvalidModel(
+                    f"Loading the model {model_id!r} needs to trust remote code. "
+                    "If you trust the suppliers of this model, then you can enable "
+                    "this by setting the `--trust-remote-code` flag."
+                )
+            raise InvalidModel(
+                f"The model {model_id!r} could not be loaded. The error was {e!r}."
+            )
 
-        assert model is not None
+    assert model is not None
 
-        model.eval()
-        model.to(self.benchmark_config.device)
+    model.eval()
+    model.to(benchmark_config.device)
 
-        if (
-            isinstance(model, PreTrainedModel)
-            and task_group == TaskGroup.QUESTION_ANSWERING
-        ):
-            model = setup_model_for_question_answering(model=model)
+    if (
+        isinstance(model, PreTrainedModel)
+        and task_group == TaskGroup.QUESTION_ANSWERING
+    ):
+        model = setup_model_for_question_answering(model=model)
 
-        tokenizer = load_tokenizer(
-            model=model,
-            model_id=model_id,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-        )
+    tokenizer = load_tokenizer(
+        model=model,
+        model_id=model_id,
+        trust_remote_code=benchmark_config.trust_remote_code,
+    )
 
-        return model, tokenizer
+    return model, tokenizer
 
 
 def get_model_repo_info(

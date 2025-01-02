@@ -105,30 +105,33 @@ class VLLMModel(HuggingFaceEncoderModel):
         ):
             raise NeedsExtraInstalled(extra="generative")
 
-        self.model_config = model_config
-        self.dataset_config = dataset_config
-        self.benchmark_config = benchmark_config
-        self.output_scores = (
-            self.dataset_config.task.task_group in TASK_GROUPS_USING_LOGPROBS
+        output_scores = dataset_config.task.task_group in TASK_GROUPS_USING_LOGPROBS
+        model, tokenizer = load_model_and_tokenizer(
+            model_config=model_config,
+            benchmark_config=benchmark_config,
+            output_scores=output_scores,
         )
-
-        model, tokenizer = self._load_model_and_tokenizer()
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
-        self.instruction_model = self._tokenizer.chat_template is not None
+        # We specify `HuggingFaceEncoderModel` here instead of `VLLMModel`, as we want
+        # to call the `__init__` method of the `BenchmarkModule` class.
+        super(HuggingFaceEncoderModel, self).__init__(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
 
-        self.lora_request: LoRARequest | None = None
+        self.buffer["output_scores"] = output_scores
+        self.buffer["instruction_model"] = self._tokenizer.chat_template is not None
         if self.model_config.adapter_base_model_id is not None:
             adapter_path = snapshot_download(
                 repo_id=self.model_config.model_id,
                 cache_dir=Path(self.model_config.model_cache_dir),
             )
-            self.lora_request = LoRARequest(
+            self.buffer["lora_request"] = LoRARequest(
                 lora_name="adapter", lora_int_id=1, lora_path=adapter_path
             )
-
-        self._log_metadata()
 
     @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
@@ -292,7 +295,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         max_tokens: int = self.dataset_config.max_generated_tokens
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
-            logprobs=MAX_LOGPROBS if self.output_scores else None,
+            logprobs=MAX_LOGPROBS if self.buffer["output_scores"] else None,
             temperature=0.0,
             stop=[stop_token for stop_token in stop_tokens if stop_token],
             guided_decoding=guided_decoding,
@@ -311,7 +314,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         # Strip the prompts if the model's tokeniser requires it
         labels_to_be_generated = list(self.dataset_config.prompt_label_mapping.values())
         if (
-            not self.instruction_model
+            not self.buffer.get("instruction_model", False)
             and len(labels_to_be_generated) > 0
             and should_prompts_be_stripped(
                 labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
@@ -325,7 +328,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             prompts=prompts,
             sampling_params=sampling_params,
             use_tqdm=(not input_is_a_test),
-            lora_request=self.lora_request,
+            lora_request=self.buffer.get("lora_request"),
         )
         completions = self._tokenizer.batch_decode(
             sequences=[
@@ -336,7 +339,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         completions = [completion.strip() for completion in completions]
 
         # Add logprobs scores to the output
-        if self.output_scores:
+        if self.buffer["output_scores"]:
             scores: list[list[list[tuple[str, float]]]] = [
                 [
                     [
@@ -441,137 +444,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         )
 
         return model_config
-
-    def _load_model_and_tokenizer(self) -> "tuple[LLM, PreTrainedTokenizer]":
-        """Load the model and tokenizer.
-
-        Returns:
-            The loaded model and tokenizer.
-        """
-        try:
-            token = (
-                self.benchmark_config.api_key
-                or os.getenv("HUGGINGFACE_API_KEY")
-                or True
-            )
-            hf_model_config = AutoConfig.from_pretrained(
-                self.model_config.adapter_base_model_id or self.model_config.model_id,
-                revision=self.model_config.revision,
-                cache_dir=self.model_config.model_cache_dir,
-                token=token,
-            )
-        except ValueError as e:
-            raise InvalidModel(
-                "Could not load model configuration for "
-                f"{self.model_config.model_id!r}. The error was: {str(e)}"
-            )
-
-        quantization = None
-        if hasattr(hf_model_config, "quantization_config"):
-            quantization = hf_model_config.quantization_config.get("quant_method")
-
-        # The quantised models require extra dependencies
-        if quantization == "gptq" and (
-            importlib.util.find_spec("auto_gptq") is None
-            or importlib.util.find_spec("optimum") is None
-        ):
-            raise NeedsExtraInstalled(extra="quantization")
-        if quantization == "awq" and importlib.util.find_spec("awq") is None:
-            raise NeedsExtraInstalled(extra="quantization")
-
-        dtype: str | torch.dtype = "auto"
-        if quantization is not None and hf_model_config.torch_dtype != torch.float16:
-            logger.info(
-                "You are loading a quantized model with dtype "
-                f"{hf_model_config.torch_dtype}, which vLLM does not support. Setting "
-                "dtype to float16 instead."
-            )
-            dtype = torch.float16
-
-        if self.model_config.adapter_base_model_id is not None:
-            download_dir = str(Path(self.model_config.model_cache_dir) / "base_model")
-        else:
-            download_dir = str(self.model_config.model_cache_dir)
-
-        potential_max_model_length_config_names = [
-            "max_position_embeddings",
-            "max_sequence_length",
-            "model_max_length",
-            "sliding_window",
-            "sliding_window_size",
-            "n_positions",
-        ]
-        true_max_model_len_candidates: list[int] = list()
-        for config_name in potential_max_model_length_config_names:
-            if hasattr(hf_model_config, config_name):
-                model_len = getattr(hf_model_config, config_name)
-                if model_len is not None:
-                    true_max_model_len_candidates.append(model_len)
-
-        if len(true_max_model_len_candidates) > 0:
-            true_max_model_len = min(true_max_model_len_candidates)
-        else:
-            true_max_model_len = 5_000
-
-        clear_vllm()
-
-        # Prefer base model ID if the model is an adapter - the adapter will be added on
-        # during inference in this case
-        model_id = self.model_config.adapter_base_model_id or self.model_config.model_id
-
-        executor_backend = "ray" if torch.cuda.device_count() > 1 else "mp"
-
-        try:
-            model = LLM(
-                model=model_id,
-                tokenizer=model_id,
-                gpu_memory_utilization=0.95,
-                max_model_len=min(true_max_model_len, 5_000),
-                download_dir=download_dir,
-                trust_remote_code=self.benchmark_config.trust_remote_code,
-                revision=self.model_config.revision,
-                seed=4242,
-                distributed_executor_backend=executor_backend,
-                tensor_parallel_size=torch.cuda.device_count(),
-                disable_custom_all_reduce=True,
-                quantization=quantization,
-                dtype=dtype,
-                enforce_eager=True,
-                max_logprobs=MAX_LOGPROBS if self.output_scores else None,
-                # TEMP: Prefix caching isn't supported with sliding window in vLLM yet,
-                # so we disable it for now
-                enable_prefix_caching=False,
-                enable_lora=self.model_config.adapter_base_model_id is not None,
-                max_lora_rank=256,
-                guided_decoding_backend="outlines",
-            )
-        except ValueError as e:
-            if "trust_remote_code" in str(e):
-                raise InvalidModel(
-                    f"Loading the model {model_id!r} needs to trust remote code. "
-                    "If you trust the suppliers of this model, then you can enable "
-                    "this by setting the `--trust-remote-code` flag."
-                )
-            raise InvalidModel(
-                f"The model {model_id!r} could not be loaded. The error was {e!r}."
-            )
-
-        model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
-        model.config = hf_model_config
-
-        tokenizer = load_tokenizer(
-            model_id=self.model_config.model_id,
-            revision=self.model_config.revision,
-            adapter_base_model_id=self.model_config.adapter_base_model_id,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-            model_max_length=true_max_model_len,
-            model_cache_dir=self.model_config.model_cache_dir,
-            token=self.benchmark_config.api_key
-            or os.getenv("HUGGINGFACE_API_KEY")
-            or True,
-        )
-
-        return model, tokenizer
 
     def _extract_few_shot_examples(
         self, dataset: DatasetDict, task: Task, itr_idx: int
@@ -714,7 +586,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 A pair (prompt, label), where "label" is an empty string if the model is
                 not instruction tuned (as in this case it is included in the prompt).
             """
-            if self.instruction_model:
+            if self.buffer["instruction_model"]:
                 label_key = "label" if "label" in kwargs else "target_text"
                 label = kwargs.pop(label_key)
                 label_mapping = self.dataset_config.prompt_label_mapping
@@ -809,7 +681,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             case _:
                 raise NotImplementedError(f"Unsupported task group: {task.task_group}.")
 
-        if self.instruction_model:
+        if self.buffer["instruction_model"]:
             few_shot_messages = [
                 dict(role=role, content=content)
                 for prompt, label in few_shot_sections
@@ -886,6 +758,142 @@ class VLLMModel(HuggingFaceEncoderModel):
         raise NotImplementedError(
             "The `trainer_class` property has not been implemented for vLLM models."
         )
+
+
+def load_model_and_tokenizer(
+    model_config: ModelConfig, benchmark_config: BenchmarkConfig, output_scores: bool
+) -> "tuple[LLM, PreTrainedTokenizer]":
+    """Load the model and tokenizer.
+
+    Args:
+        model_config:
+            The model configuration.
+        benchmark_config:
+            The benchmark configuration.
+        output_scores:
+            Whether to output scores.
+
+    Returns:
+        The loaded model and tokenizer.
+    """
+    try:
+        token = benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True
+        hf_model_config = AutoConfig.from_pretrained(
+            model_config.adapter_base_model_id or model_config.model_id,
+            revision=model_config.revision,
+            cache_dir=model_config.model_cache_dir,
+            token=token,
+        )
+    except ValueError as e:
+        raise InvalidModel(
+            "Could not load model configuration for "
+            f"{model_config.model_id!r}. The error was: {str(e)}"
+        )
+
+    quantization = None
+    if hasattr(hf_model_config, "quantization_config"):
+        quantization = hf_model_config.quantization_config.get("quant_method")
+
+    # The quantised models require extra dependencies
+    if quantization == "gptq" and (
+        importlib.util.find_spec("auto_gptq") is None
+        or importlib.util.find_spec("optimum") is None
+    ):
+        raise NeedsExtraInstalled(extra="quantization")
+    if quantization == "awq" and importlib.util.find_spec("awq") is None:
+        raise NeedsExtraInstalled(extra="quantization")
+
+    dtype: str | torch.dtype = "auto"
+    if quantization is not None and hf_model_config.torch_dtype != torch.float16:
+        logger.info(
+            "You are loading a quantized model with dtype "
+            f"{hf_model_config.torch_dtype}, which vLLM does not support. Setting "
+            "dtype to float16 instead."
+        )
+        dtype = torch.float16
+
+    if model_config.adapter_base_model_id is not None:
+        download_dir = str(Path(model_config.model_cache_dir) / "base_model")
+    else:
+        download_dir = str(model_config.model_cache_dir)
+
+    potential_max_model_length_config_names = [
+        "max_position_embeddings",
+        "max_sequence_length",
+        "model_max_length",
+        "sliding_window",
+        "sliding_window_size",
+        "n_positions",
+    ]
+    true_max_model_len_candidates: list[int] = list()
+    for config_name in potential_max_model_length_config_names:
+        if hasattr(hf_model_config, config_name):
+            model_len = getattr(hf_model_config, config_name)
+            if model_len is not None:
+                true_max_model_len_candidates.append(model_len)
+
+    if len(true_max_model_len_candidates) > 0:
+        true_max_model_len = min(true_max_model_len_candidates)
+    else:
+        true_max_model_len = 5_000
+
+    clear_vllm()
+
+    # Prefer base model ID if the model is an adapter - the adapter will be added on
+    # during inference in this case
+    model_id = model_config.adapter_base_model_id or model_config.model_id
+
+    executor_backend = "ray" if torch.cuda.device_count() > 1 else "mp"
+
+    try:
+        model = LLM(
+            model=model_id,
+            tokenizer=model_id,
+            gpu_memory_utilization=0.95,
+            max_model_len=min(true_max_model_len, 5_000),
+            download_dir=download_dir,
+            trust_remote_code=benchmark_config.trust_remote_code,
+            revision=model_config.revision,
+            seed=4242,
+            distributed_executor_backend=executor_backend,
+            tensor_parallel_size=torch.cuda.device_count(),
+            disable_custom_all_reduce=True,
+            quantization=quantization,
+            dtype=dtype,
+            enforce_eager=True,
+            max_logprobs=MAX_LOGPROBS if output_scores else None,
+            # TEMP: Prefix caching isn't supported with sliding window in vLLM yet,
+            # so we disable it for now
+            enable_prefix_caching=False,
+            enable_lora=model_config.adapter_base_model_id is not None,
+            max_lora_rank=256,
+            guided_decoding_backend="outlines",
+        )
+    except ValueError as e:
+        if "trust_remote_code" in str(e):
+            raise InvalidModel(
+                f"Loading the model {model_id!r} needs to trust remote code. "
+                "If you trust the suppliers of this model, then you can enable "
+                "this by setting the `--trust-remote-code` flag."
+            )
+        raise InvalidModel(
+            f"The model {model_id!r} could not be loaded. The error was {e!r}."
+        )
+
+    model._run_engine = MethodType(_run_engine_with_fixed_progress_bars, model)
+    model.config = hf_model_config
+
+    tokenizer = load_tokenizer(
+        model_id=model_config.model_id,
+        revision=model_config.revision,
+        adapter_base_model_id=model_config.adapter_base_model_id,
+        trust_remote_code=benchmark_config.trust_remote_code,
+        model_max_length=true_max_model_len,
+        model_cache_dir=model_config.model_cache_dir,
+        token=benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
+    )
+
+    return model, tokenizer
 
 
 def load_tokenizer(
