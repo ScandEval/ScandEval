@@ -9,7 +9,10 @@ import sys
 
 from termcolor import colored
 
+# Block specific warnings before importing anything else, as they can be noisy
 warnings.filterwarnings("ignore", category=UserWarning)
+logging.getLogger("httpx").setLevel(logging.CRITICAL)
+logging.getLogger("datasets").setLevel(logging.CRITICAL)
 
 # Set up logging
 fmt = colored("%(asctime)s", "light_blue") + " ⋅ %(name)s " + colored("%(message)s", "green")
@@ -21,15 +24,6 @@ logging.basicConfig(
 
 
 ### STAGE 2 ###
-### Block unwanted terminal outputs before import anything external ###
-
-from .utils import block_terminal_output
-
-# Block unwanted terminal outputs
-block_terminal_output()
-
-
-### STAGE 3 ###
 ### Set the rest up ###
 
 import importlib.metadata
@@ -38,6 +32,10 @@ import os
 from dotenv import load_dotenv
 
 from .benchmarker import Benchmarker
+from .utils import block_terminal_output
+
+# Block unwanted terminal outputs
+block_terminal_output()
 
 
 # Fetches the version of the package as defined in pyproject.toml
