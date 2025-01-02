@@ -29,6 +29,9 @@ from .exceptions import NaNValueInModelOutput
 if importlib.util.find_spec("ray") is not None:
     import ray
 
+if importlib.util.find_spec("xgrammar") is not None:
+    from xgrammar.support import logging as xgr_logging
+
 if t.TYPE_CHECKING:
     from .types import Predictions
 
@@ -153,6 +156,10 @@ def block_terminal_output():
     # This suppresses vLLM logging
     os.environ["LOG_LEVEL"] = "CRITICAL"
     os.environ["VLLM_CONFIGURE_LOGGING"] = "0"
+
+    # This suppresses xgrammar logging
+    if importlib.util.find_spec("xgrammar") is not None:
+        xgr_logging.enable_logging = lambda: None
 
     if importlib.util.find_spec("ray") is not None:
         ray._private.worker._worker_logs_enabled = False
