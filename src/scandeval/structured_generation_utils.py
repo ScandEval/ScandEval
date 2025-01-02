@@ -51,10 +51,10 @@ def get_ner_logits_processors(
         raise NeedsExtraInstalled(extra="generative")
 
     tokenizer_info = xgr.TokenizerInfo.from_huggingface(
-        tokenizer, vocab_size=len(tokenizer)
+        tokenizer=tokenizer, vocab_size=len(tokenizer)
     )
-    compiler = xgr.GrammarCompiler(tokenizer_info)
+    compiler = xgr.GrammarCompiler(tokenizer_info=tokenizer_info)
     ner_schema = get_ner_schema(ner_tag_names=ner_tag_names)
-    compiled_grammar = compiler.compile_json_schema(ner_schema)
-    logits_processor = xgr.contrib.hf.LogitsProcessor(compiled_grammar)
+    compiled_grammar = compiler.compile_json_schema(schema=ner_schema)
+    logits_processor = xgr.contrib.hf.LogitsProcessor(compiled_grammar=compiled_grammar)
     return [logits_processor]
