@@ -83,9 +83,18 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         self.model_config = model_config
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
+
         model, tokenizer = self._load_model_and_tokenizer()
         self._model: PreTrainedModel = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
+
+        model, tokenizer = align_model_and_tokenizer(
+            model=self._model,
+            tokenizer=self._tokenizer,
+            model_max_length=self.model_max_length,
+            raise_errors=self.benchmark_config.raise_errors,
+        )
+
         self._log_metadata()
 
     @cached_property
@@ -597,13 +606,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             model=model,
             model_id=model_id,
             trust_remote_code=self.benchmark_config.trust_remote_code,
-        )
-
-        model, tokenizer = align_model_and_tokenizer(
-            model=model,
-            tokenizer=tokenizer,
-            model_max_length=self.model_max_length,
-            raise_errors=self.benchmark_config.raise_errors,
         )
 
         return model, tokenizer
