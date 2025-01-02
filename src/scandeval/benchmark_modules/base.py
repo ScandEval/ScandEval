@@ -252,7 +252,6 @@ class BenchmarkModule(ABC):
         Returns:
             The prepared datasets.
         """
-        breakpoint()
         for idx, dataset in enumerate(
             tqdm(iterable=datasets, desc="Preparing datasets")
         ):

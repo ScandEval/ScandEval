@@ -105,30 +105,28 @@ class VLLMModel(HuggingFaceEncoderModel):
         ):
             raise NeedsExtraInstalled(extra="generative")
 
-        self.model_config = model_config
-        self.dataset_config = dataset_config
-        self.benchmark_config = benchmark_config
-        self.output_scores = (
-            self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS
-        )
-
         model, tokenizer = self._load_model_and_tokenizer()
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
-        self.instruction_model = self._tokenizer.chat_template is not None
+        super().__init__(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
 
-        self.lora_request: LoRARequest | None = None
+        self.buffer["output_scores"] = (
+            self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS
+        )
+        self.buffer["instruction_model"] = self._tokenizer.chat_template is not None
         if self.model_config.adapter_base_model_id is not None:
             adapter_path = snapshot_download(
                 repo_id=self.model_config.model_id,
                 cache_dir=Path(self.model_config.model_cache_dir),
             )
-            self.lora_request = LoRARequest(
+            self.buffer["lora_request"] = LoRARequest(
                 lora_name="adapter", lora_int_id=1, lora_path=adapter_path
             )
-
-        self._log_metadata()
 
     @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
@@ -289,7 +287,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         max_tokens: int = self.dataset_config.max_generated_tokens
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
-            logprobs=MAX_LOGPROBS if self.output_scores else None,
+            logprobs=MAX_LOGPROBS if self.buffer["output_scores"] else None,
             temperature=0.0,
             stop=[stop_token for stop_token in stop_tokens if stop_token],
             guided_decoding=guided_decoding,
@@ -308,7 +306,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         # Strip the prompts if the model's tokeniser requires it
         labels_to_be_generated = list(self.dataset_config.prompt_label_mapping.values())
         if (
-            not self.instruction_model
+            not self.buffer.get("instruction_model", False)
             and len(labels_to_be_generated) > 0
             and should_prompts_be_stripped(
                 labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
@@ -322,7 +320,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             prompts=prompts,
             sampling_params=sampling_params,
             use_tqdm=(not input_is_a_test),
-            lora_request=self.lora_request,
+            lora_request=self.buffer.get("lora_request"),
         )
         completions = self._tokenizer.batch_decode(
             sequences=[
@@ -333,7 +331,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         completions = [completion.strip() for completion in completions]
 
         # Add logprobs scores to the output
-        if self.output_scores:
+        if self.buffer["output_scores"]:
             scores: list[list[list[tuple[str, float]]]] = [
                 [
                     [
@@ -534,7 +532,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 quantization=quantization,
                 dtype=dtype,
                 enforce_eager=True,
-                max_logprobs=MAX_LOGPROBS if self.output_scores else None,
+                max_logprobs=MAX_LOGPROBS if self.buffer["output_scores"] else None,
                 # TEMP: Prefix caching isn't supported with sliding window in vLLM yet,
                 # so we disable it for now
                 enable_prefix_caching=False,
@@ -710,7 +708,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 A pair (prompt, label), where "label" is an empty string if the model is
                 not instruction tuned (as in this case it is included in the prompt).
             """
-            if self.instruction_model:
+            if self.buffer["instruction_model"]:
                 label_key = "label" if "label" in kwargs else "target_text"
                 label = kwargs.pop(label_key)
                 label_mapping = self.dataset_config.prompt_label_mapping
@@ -804,7 +802,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     f"Unsupported task supertask: {task.supertask}."
                 )
 
-        if self.instruction_model:
+        if self.buffer["instruction_model"]:
             few_shot_messages = [
                 dict(role=role, content=content)
                 for prompt, label in few_shot_sections
