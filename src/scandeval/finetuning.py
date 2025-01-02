@@ -204,7 +204,7 @@ def finetune_single_iteration(
         compute_metrics=partial(
             model.compute_metrics, id2label=dataset_config.id2label
         ),
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=10)],
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
         data_collator=model.data_collator,
     )
 
