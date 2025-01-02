@@ -125,8 +125,17 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             and self._model.config.num_params is not None
         ):
             num_params = self._model.config.num_params
-        else:
+        elif hasattr(self._model, "parameters"):
             num_params = sum(p.numel() for p in self._model.parameters())
+        else:
+            logger.warning(
+                "The number of parameters could not be determined for the model, since "
+                "the model is not stored in the safetensors format. If this is your "
+                "own model, then you can use this Hugging Face Space to convert your "
+                "model to the safetensors format: "
+                "https://huggingface.co/spaces/safetensors/convert."
+            )
+            num_params = -1
         return num_params
 
     @cached_property
