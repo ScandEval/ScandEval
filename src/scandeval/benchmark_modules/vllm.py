@@ -60,8 +60,9 @@ from ..utils import (
 from .hf import HuggingFaceEncoderModel, get_model_repo_info
 
 if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
-    from vllm import LLM, GuidedDecodingParams, RequestOutput, SamplingParams
+    from vllm import LLM, RequestOutput, SamplingParams
     from vllm.lora.request import LoRARequest
+    from vllm.sampling_params import GuidedDecodingParams
 
     try:
         from vllm.model_executor.parallel_utils.parallel_state import (
