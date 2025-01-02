@@ -863,6 +863,19 @@ wheels = [
 ]
 
 [[package]]
+name = "fbgemm-gpu"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", marker = "sys_platform != 'darwin'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/d6/2e10b1a8c32360255f3126ebe1bea2efc021d18418ecf9e68e8154e2d253/fbgemm_gpu-1.0.0-cp310-cp310-manylinux2014_x86_64.whl", hash = "sha256:b0e0ff449a32618679c696531b4da4ed7c2655a073629e5b4d042bfb7d8cbef8", size = 349978577 },
+    { url = "https://files.pythonhosted.org/packages/11/67/14055b4e77c7aa60a96d510c9aab6d6256bc39b628f4c6adf12e378588a8/fbgemm_gpu-1.0.0-cp311-cp311-manylinux2014_x86_64.whl", hash = "sha256:a2c538dd60bfede87dcc68e81cae8216bb0615d79d7885553a9846abf248c538", size = 349978739 },
+    { url = "https://files.pythonhosted.org/packages/dc/f1/7f9a9a149a611973821f02920e9072bf0e0331842fb8a81e95ff43ef2e88/fbgemm_gpu-1.0.0-cp312-cp312-manylinux2014_x86_64.whl", hash = "sha256:5189fabf06c00b6c98accf61a7ccc4b6d27f8928f2957f9f4a2cb65e4c5f84e9", size = 349979180 },
+]
+
+[[package]]
 name = "ffmpy"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -4091,15 +4104,18 @@ dependencies = [
 all = [
     { name = "bitsandbytes", marker = "sys_platform == 'linux'" },
     { name = "demjson3" },
+    { name = "fbgemm-gpu", marker = "sys_platform == 'linux'" },
     { name = "flax" },
     { name = "gradio" },
     { name = "jax" },
     { name = "jaxlib" },
     { name = "vllm", marker = "sys_platform == 'linux'" },
+    { name = "xgrammar", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
 generative = [
     { name = "bitsandbytes", marker = "sys_platform == 'linux'" },
     { name = "demjson3" },
+    { name = "fbgemm-gpu", marker = "sys_platform == 'linux'" },
     { name = "vllm", marker = "sys_platform == 'linux'" },
     { name = "xgrammar", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
@@ -4150,6 +4166,8 @@ requires-dist = [
     { name = "demjson3", marker = "extra == 'all'", specifier = ">=3.0.6" },
     { name = "demjson3", marker = "extra == 'generative'", specifier = ">=3.0.6" },
     { name = "evaluate", specifier = ">=0.4.1" },
+    { name = "fbgemm-gpu", marker = "sys_platform == 'linux' and extra == 'all'", specifier = ">=1.0.0" },
+    { name = "fbgemm-gpu", marker = "sys_platform == 'linux' and extra == 'generative'", specifier = ">=1.0.0" },
     { name = "flax", marker = "extra == 'all'", specifier = ">=0.8.1" },
     { name = "flax", marker = "extra == 'jax'", specifier = ">=0.8.1" },
     { name = "flax", marker = "extra == 'test'", specifier = ">=0.8.1" },
@@ -4183,6 +4201,7 @@ requires-dist = [
     { name = "transformers", specifier = ">=4.45.0" },
     { name = "vllm", marker = "sys_platform == 'linux' and extra == 'all'", specifier = ">=0.6.6" },
     { name = "vllm", marker = "sys_platform == 'linux' and extra == 'generative'", specifier = ">=0.6.6" },
+    { name = "xgrammar", marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'all'", specifier = ">=0.1.6" },
     { name = "xgrammar", marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'generative'", specifier = ">=0.1.6" },
 ]
 

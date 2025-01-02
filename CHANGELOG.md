@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added a `Tekstur: ` prefix to the prompt template of the `foqa` dataset.
 - Changed the instruction template prefix of `danske-talemaader` from `Spørgsmål: ` to
   `Hvad er betydningen af følgende talemåde: `.
+- Add `fbgemm-gpu` to `generative` dependencies, as it is required to load newer Llama
+  models.
 
 
 ## [v14.0.4] - 2024-12-17
