@@ -1,7 +1,5 @@
 """ScandEval - A benchmarking framework for language models."""
 
-breakpoint()
-
 import importlib.metadata
 import logging
 import os
