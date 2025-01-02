@@ -1,6 +1,5 @@
 """Class that benchmarks Scandinavian language models."""
 
-breakpoint()
 import json
 import logging
 import re
