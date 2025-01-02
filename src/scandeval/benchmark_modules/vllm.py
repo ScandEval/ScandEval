@@ -24,7 +24,7 @@ from urllib3.exceptions import RequestError
 from ..constants import (
     GENERATIVE_MODEL_TASKS,
     MAX_LOGPROBS,
-    SUPERTASKS_USING_LOGPROBS,
+    TASK_GROUPS_USING_LOGPROBS,
     TASKS_USING_JSON,
 )
 from ..data_models import (
@@ -34,7 +34,7 @@ from ..data_models import (
     ModelConfig,
     Task,
 )
-from ..enums import BatchingPreference, Framework, ModelType
+from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
 from ..exceptions import (
     InvalidBenchmark,
     InvalidModel,
@@ -108,7 +108,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         self.dataset_config = dataset_config
         self.benchmark_config = benchmark_config
         self.output_scores = (
-            self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS
+            self.dataset_config.task.task_group in TASK_GROUPS_USING_LOGPROBS
         )
 
         model, tokenizer = self._load_model_and_tokenizer()
@@ -136,24 +136,27 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The function used to extract the labels from the generated output.
         """
-        match self.dataset_config.task.supertask:
-            case "sequence-classification":
+        match self.dataset_config.task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 return partial(
                     sequence_classification.extract_labels_from_generation,
                     dataset_config=self.dataset_config,
                 )
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 return text_to_text.extract_labels_from_generation
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 return partial(
                     token_classification.extract_labels_from_generation,
                     dataset_config=self.dataset_config,
                 )
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 return question_answering.extract_labels_from_generation
             case _:
                 raise NotImplementedError(
-                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                    f"Unsupported task group: {self.dataset_config.task.task_group}."
                 )
 
     def prepare_dataset(
@@ -174,7 +177,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The prepared dataset.
         """
-        if task.supertask == "question-answering":
+        if task.task_group == TaskGroup.QUESTION_ANSWERING:
             dataset = dataset.map(
                 lambda examples: dict(
                     label=[
@@ -589,8 +592,11 @@ class VLLMModel(HuggingFaceEncoderModel):
         few_shot_examples: list[dict[str, t.Any]] = list()
         shuffled_train = dataset["train"].shuffle(seed=random_seed)
 
-        match task.supertask:
-            case "sequence-classification":
+        match task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 labels = it.cycle(self.dataset_config.task.labels)
                 while (
                     len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
@@ -607,7 +613,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                         lambda x: x["text"] != example["text"]
                     )
 
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 while (
                     len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
                 ):
@@ -617,7 +623,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                         lambda x: x["text"] != example["text"]
                     )
 
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 labels = it.cycle(
                     [
                         label.lower()
@@ -640,7 +646,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                         lambda x: x["text"] != example["text"]
                     )
 
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 # Locate the maximum number of tokens that constitutes a short example
                 for max_num_tokens in [512, 1024, 2048, 4096, 8192]:
                     train_with_short_examples = dataset["train"].filter(
@@ -665,9 +671,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     )
 
             case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
+                raise NotImplementedError(f"Unsupported task group: {task.task_group}.")
 
         random.seed(random_seed)
         random.shuffle(few_shot_examples)
@@ -714,8 +718,11 @@ class VLLMModel(HuggingFaceEncoderModel):
             else:
                 return self.dataset_config.prompt_template.format(**kwargs), ""
 
-        match task.supertask:
-            case "sequence-classification":
+        match task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 few_shot_sections = [
                     create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
@@ -728,7 +735,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for text in examples["text"]
                 ]
 
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 few_shot_sections = [
                     create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
@@ -741,7 +748,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for text in examples["text"]
                 ]
 
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
 
                 def create_label(example: dict) -> str:
                     prompt_labels = self.dataset_config.prompt_label_mapping.values()
@@ -773,7 +780,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for tokens in examples["tokens"]
                 ]
 
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 few_shot_sections = [
                     create_prompt(
                         text=example["context"].replace("\n", " ").strip(),
@@ -794,9 +801,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 ]
 
             case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
+                raise NotImplementedError(f"Unsupported task group: {task.task_group}.")
 
         if self.instruction_model:
             few_shot_messages = [

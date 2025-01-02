@@ -10,7 +10,7 @@ from datasets import Dataset, DatasetDict
 from tqdm.auto import tqdm
 
 from .benchmark_modules import BenchmarkModule
-from .enums import BatchingPreference
+from .enums import BatchingPreference, TaskGroup
 from .exceptions import InvalidBenchmark
 from .model_cache import (
     ModelCache,
@@ -231,8 +231,8 @@ def debug_log(
         dataset_config:
             The configuration of the dataset.
     """
-    match dataset_config.task.supertask:
-        case "token-classification":
+    match dataset_config.task.task_group:
+        case TaskGroup.TOKEN_CLASSIFICATION:
             log_msgs = [""]
             for tokens, predictions, labels in zip(
                 batch["tokens"], extracted_labels, batch["labels"]
@@ -262,13 +262,16 @@ def debug_log(
             logger.info("\n\n".join(log_msgs))
             return
 
-        case "sequence-classification":
+        case (
+            TaskGroup.SEQUENCE_CLASSIFICATION
+            | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+        ):
             labels = [
                 dataset_config.prompt_label_mapping.get(label, label).lower()
                 for label in batch["label"]
             ]
 
-        case "question-answering":
+        case TaskGroup.QUESTION_ANSWERING:
             extracted_labels = [
                 prediction["prediction_text"]
                 for prediction in extracted_labels
@@ -276,12 +279,12 @@ def debug_log(
             ]
             labels = [label["answers"]["text"][0] for label in batch["label"]]
 
-        case "text-to-text":
+        case TaskGroup.TEXT_TO_TEXT:
             labels = batch["target_text"]
 
         case _:
             raise InvalidBenchmark(
-                f"The supertask '{dataset_config.task.supertask}' is not supported."
+                f"The task group '{dataset_config.task.task_group}' is not supported."
             )
 
     if "messages" in batch:

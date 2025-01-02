@@ -1,4 +1,4 @@
-"""Utility functions related to the sequence-classification supertask."""
+"""Utility functions related to the sequence-classification task group."""
 
 import logging
 import re

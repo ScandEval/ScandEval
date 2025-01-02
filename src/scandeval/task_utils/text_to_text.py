@@ -1,4 +1,4 @@
-"""Utility functions related to the text-to-text supertask."""
+"""Utility functions related to the text-to-text task group."""
 
 import logging
 import typing as t

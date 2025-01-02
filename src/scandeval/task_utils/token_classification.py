@@ -1,4 +1,4 @@
-"""Utility functions related to the token-classification supertask."""
+"""Utility functions related to the token-classification task group."""
 
 import importlib.util
 import logging

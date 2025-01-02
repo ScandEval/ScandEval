@@ -1,4 +1,4 @@
-"""Utility functions related to the question-answering supertask."""
+"""Utility functions related to the question-answering task group."""
 
 import logging
 import typing as t

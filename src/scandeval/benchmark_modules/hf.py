@@ -34,7 +34,7 @@ from urllib3.exceptions import RequestError
 
 from ..constants import DUMMY_FILL_VALUE, GENERATIVE_MODEL_TASKS, GENERATIVE_TAGS
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
-from ..enums import BatchingPreference, Framework, ModelType
+from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
 from ..exceptions import (
     HuggingFaceHubDown,
     InvalidBenchmark,
@@ -212,16 +212,21 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         Returns:
             The data collator.
         """
-        match self.dataset_config.task.supertask:
-            case "sequence-classification" | "text-to-text" | "question-answering":
+        match self.dataset_config.task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.TEXT_TO_TEXT
+                | TaskGroup.QUESTION_ANSWERING
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 return DataCollatorWithPadding(self._tokenizer, padding="longest")
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 return DataCollatorForTokenClassification(
                     tokenizer=self._tokenizer, label_pad_token_id=-100
                 )
             case _:
                 raise NotImplementedError(
-                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                    f"Unsupported task group: {self.dataset_config.task.task_group}."
                 )
 
     @property
@@ -243,14 +248,20 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         Returns:
             The Trainer class.
         """
-        match self.dataset_config.task.supertask:
-            case "sequence-classification" | "text-to-text" | "token-classification":
+        match self.dataset_config.task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.TEXT_TO_TEXT
+                | TaskGroup.TOKEN_CLASSIFICATION
+            ):
                 return Trainer
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 return question_answering.QuestionAnsweringTrainer
+            case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
+                raise NotImplementedError
             case _:
                 raise NotImplementedError(
-                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                    f"Unsupported task group: {self.dataset_config.task.task_group}."
                 )
 
     def prepare_dataset(
@@ -290,13 +301,16 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         def tokenise(examples: dict):
             return self._tokenizer(text=examples["text"], truncation=True, padding=True)
 
-        match task.supertask:
-            case "sequence-classification":
+        match task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 dataset = dataset.map(
                     numericalise_labels, batched=True, load_from_cache_file=False
                 ).map(tokenise, batched=True, load_from_cache_file=False)
 
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 dataset = dataset.map(
                     tokenise,
                     batched=True,
@@ -304,7 +318,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                     keep_in_memory=True,
                 )
 
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 dataset = dataset.map(
                     partial(
                         token_classification.tokenize_and_align_labels,
@@ -316,7 +330,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                     keep_in_memory=True,
                 )
 
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 dataset = DatasetDict(
                     dict(
                         train=dataset["train"].map(
@@ -364,9 +378,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                     )
 
             case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
+                raise NotImplementedError(f"Unsupported task group: {task.task_group}.")
 
         return dataset
 
@@ -463,7 +475,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         block_terminal_output()
 
         model_id = self.model_config.model_id
-        supertask = self.dataset_config.task.supertask
+        task_group = self.dataset_config.task.task_group
         from_flax = self.model_config.framework == Framework.JAX
         ignore_mismatched_sizes = False
 
@@ -504,15 +516,16 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         model: PreTrainedModel | None = None
         while True:
             try:
-                # Get the model class associated with the supertask
+                # Get the model class associated with the task group
                 model_cls_or_none: t.Type["PreTrainedModel"] | None = get_class_by_name(
-                    class_name=f"auto-model-for-{supertask}", module_name="transformers"
+                    class_name=f"auto-model-for-{task_group}",
+                    module_name="transformers",
                 )
 
                 # If the model class could not be found then raise an error
                 if not model_cls_or_none:
                     raise InvalidBenchmark(
-                        f"The supertask {supertask!r} does not correspond to a "
+                        f"The task group {task_group!r} does not correspond to a "
                         "Hugging Face AutoModel type (such as "
                         "`AutoModelForSequenceClassification`)."
                     )
@@ -581,7 +594,10 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         model.eval()
         model.to(self.benchmark_config.device)
 
-        if isinstance(model, PreTrainedModel) and supertask == "question-answering":
+        if (
+            isinstance(model, PreTrainedModel)
+            and task_group == TaskGroup.QUESTION_ANSWERING
+        ):
             model = setup_model_for_question_answering(model=model)
 
         tokenizer = load_tokenizer(

@@ -16,7 +16,7 @@ from .benchmarker import BenchmarkResult
 from .data_loading import load_data
 from .data_models import GenerativeModelOutput
 from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
-from .enums import Framework
+from .enums import Framework, TaskGroup
 from .exceptions import NeedsExtraInstalled
 from .scores import aggregate_scores
 from .task_utils import (
@@ -342,8 +342,8 @@ class HumanEvaluator:
                     "B-MISC" in labels_in_train or "I-MISC" in labels_in_train
                 )
 
-        match self.dataset_config.task.supertask:
-            case "sequence-classification":
+        match self.dataset_config.task.task_group:
+            case TaskGroup.SEQUENCE_CLASSIFICATION:
                 self.compute_metrics = partial(
                     sequence_classification.compute_metrics,
                     id2label=self.dataset_config.id2label,
@@ -354,7 +354,7 @@ class HumanEvaluator:
                     sequence_classification.extract_labels_from_generation,
                     dataset_config=self.dataset_config,
                 )
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 self.compute_metrics = partial(
                     text_to_text.compute_metrics,
                     dataset_config=self.dataset_config,
@@ -363,7 +363,7 @@ class HumanEvaluator:
                 self.extract_labels_from_generation = (
                     text_to_text.extract_labels_from_generation
                 )
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 self.compute_metrics = partial(
                     token_classification.compute_metrics,
                     has_misc_tags=self.has_misc_tags,
@@ -374,7 +374,7 @@ class HumanEvaluator:
                     token_classification.extract_labels_from_generation,
                     dataset_config=self.dataset_config,
                 )
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 self.compute_metrics = partial(
                     question_answering.compute_metrics,
                     dataset_config=self.dataset_config,
@@ -383,9 +383,12 @@ class HumanEvaluator:
                 self.extract_labels_from_generation = (
                     question_answering.extract_labels_from_generation
                 )
+            case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
+                raise NotImplementedError
             case _:
                 raise NotImplementedError(
-                    f"Supertask {self.dataset_config.task.supertask} is not supported."
+                    f"Task group {self.dataset_config.task.task_group} is not "
+                    "supported."
                 )
 
         task_examples, question = self.example_to_markdown(

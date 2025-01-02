@@ -105,3 +105,29 @@ class BatchingPreference(AutoStrEnum):
     NO_PREFERENCE = auto()
     SINGLE_SAMPLE = auto()
     ALL_AT_ONCE = auto()
+
+
+class TaskGroup(AutoStrEnum):
+    """The overall task group of a task.
+
+    Attributes:
+        SEQUENCE_CLASSIFICATION:
+            Classification of documents.
+        MULTIPLE_CHOICE_CLASSIFICATION:
+            Classification of documents with multiple-choice options.
+        TOKEN_CLASSIFICATION:
+            Token-level classification.
+        QUESTION_ANSWERING:
+            Extractive question answering.
+        TEXT_TO_TEXT:
+            Text-to-text generation.
+        SPEED:
+            Speed benchmark.
+    """
+
+    SEQUENCE_CLASSIFICATION = auto()
+    MULTIPLE_CHOICE_CLASSIFICATION = auto()
+    TOKEN_CLASSIFICATION = auto()
+    QUESTION_ANSWERING = auto()
+    TEXT_TO_TEXT = auto()
+    SPEED = auto()
