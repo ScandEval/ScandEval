@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
-- Updated `vllm` from `>=0.6.3` to `>=0.6.6`, as this supports more model architectures.
+- Updated `vllm` from `>=0.6.3` to `>=0.6.6` and `transformers` from `4.45.0` to
+  `4.47.0`, to support more model architectures.
 
 ### Fixed
 - Now automatically uses the environment variable `HUGGINGFACE_API_KEY` when loading
