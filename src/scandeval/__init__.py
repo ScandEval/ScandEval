@@ -1,27 +1,18 @@
 """ScandEval - A benchmarking framework for language models."""
 
-import importlib.metadata
-import logging
-import os
-import sys
+### STAGE 1 ###
+### Block unwanted terminal output that happens on importing external modules ###
 
-from dotenv import load_dotenv
+import logging
+import sys
+import warnings
+
 from termcolor import colored
 
-from .benchmarker import Benchmarker
-from .utils import block_terminal_output
-
-# Fetches the version of the package as defined in pyproject.toml
-__version__ = importlib.metadata.version("scandeval")
-
-
-# Block unwanted terminal outputs
-block_terminal_output()
-
-
-# Loads environment variables
-load_dotenv()
-
+# Block specific warnings before importing anything else, as they can be noisy
+warnings.filterwarnings("ignore", category=UserWarning)
+logging.getLogger("httpx").setLevel(logging.CRITICAL)
+logging.getLogger("datasets").setLevel(logging.CRITICAL)
 
 # Set up logging
 fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
@@ -30,6 +21,31 @@ logging.basicConfig(
     format=fmt,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+
+### STAGE 2 ###
+### Set the rest up ###
+
+import importlib.metadata  # noqa: E402
+import os  # noqa: E402
+
+from dotenv import load_dotenv  # noqa: E402
+
+from .benchmarker import Benchmarker  # noqa: E402
+from .utils import block_terminal_output  # noqa: E402
+
+# Block unwanted terminal outputs. This blocks way more than the above, but since it
+# relies on importing from the `utils` module, external modules are already imported
+# before this is run, necessitating the above block as well
+block_terminal_output()
+
+
+# Fetches the version of the package as defined in pyproject.toml
+__version__ = importlib.metadata.version("scandeval")
+
+
+# Loads environment variables
+load_dotenv()
 
 
 # Disable parallelisation when tokenizing, as that can lead to errors

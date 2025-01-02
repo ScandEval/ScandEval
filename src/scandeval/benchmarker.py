@@ -417,11 +417,15 @@ class Benchmarker:
                             benchmark_config=benchmark_config,
                         )
                         logger.info("Loading model...")
-                        loaded_model = load_model(
-                            model_config=model_config,
-                            dataset_config=dataset_config,
-                            benchmark_config=benchmark_config,
-                        )
+                        try:
+                            loaded_model = load_model(
+                                model_config=model_config,
+                                dataset_config=dataset_config,
+                                benchmark_config=benchmark_config,
+                            )
+                        except InvalidModel as e:
+                            logger.info(e.message)
+                            break
                     else:
                         loaded_model.dataset_config = dataset_config
 
