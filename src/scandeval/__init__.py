@@ -1,12 +1,9 @@
 """ScandEval - A benchmarking framework for language models."""
 
 import importlib.metadata
-import logging
 import os
-import sys
 
 from dotenv import load_dotenv
-from termcolor import colored
 
 from .benchmarker import Benchmarker
 from .utils import block_terminal_output
@@ -21,15 +18,6 @@ block_terminal_output()
 
 # Loads environment variables
 load_dotenv()
-
-
-# Set up logging
-fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
-logging.basicConfig(
-    level=logging.CRITICAL if hasattr(sys, "_called_from_test") else logging.INFO,
-    format=fmt,
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
 
 
 # Disable parallelisation when tokenizing, as that can lead to errors
