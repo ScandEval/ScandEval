@@ -5,15 +5,16 @@ import os
 
 from dotenv import load_dotenv
 
-from .benchmarker import Benchmarker
 from .utils import block_terminal_output
-
-# Fetches the version of the package as defined in pyproject.toml
-__version__ = importlib.metadata.version("scandeval")
-
 
 # Block unwanted terminal outputs
 block_terminal_output()
+
+
+from .benchmarker import Benchmarker  # noqa: E402
+
+# Fetches the version of the package as defined in pyproject.toml
+__version__ = importlib.metadata.version("scandeval")
 
 
 # Loads environment variables
