@@ -966,6 +966,7 @@ def align_model_and_tokenizer(
 
     # If we're not dealing with a generative model then we move it to CPU to avoid OOM
     # errors
+    breakpoint()
     device: torch.device = torch.device("cpu")
     model_device = model.device
     model.to(device)
@@ -984,6 +985,7 @@ def align_model_and_tokenizer(
 
         with torch.inference_mode():
             try:
+                breakpoint()
                 model(dummy_inputs)
                 break
 
