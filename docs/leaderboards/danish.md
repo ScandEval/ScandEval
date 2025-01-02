@@ -12,7 +12,7 @@ search bar below
 <iframe
     title="🇩🇰 Danish Language Model Leaderboard"
     aria-label="Table" id="datawrapper-chart-RXjjq"
-    src="https://datawrapper.dwcdn.net/RXjjq/2/"
+    src="https://datawrapper.dwcdn.net/RXjjq/"
     scrolling="no"
     frameborder="0"
     style="width: 0; min-width: 100% !important; border: none;"

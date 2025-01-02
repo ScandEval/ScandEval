@@ -12,7 +12,7 @@ search bar below
 <iframe
     title="🇩🇰🇸🇪🇳🇴 Mainland Scandinavian Language Model Leaderboard"
     aria-label="Table" id="datawrapper-chart-RXjjq"
-    src="https://datawrapper.dwcdn.net/oL8gX/1/"
+    src="https://datawrapper.dwcdn.net/oL8gX/"
     scrolling="no"
     frameborder="0"
     style="width: 0; min-width: 100% !important; border: none;"

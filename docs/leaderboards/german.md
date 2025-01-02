@@ -12,7 +12,7 @@ search bar below
 <iframe
     title="🇩🇪 German Language Model Leaderboard"
     aria-label="Table" id="datawrapper-chart-RXjjq"
-    src="https://datawrapper.dwcdn.net/C9ksd/1/"
+    src="https://datawrapper.dwcdn.net/C9ksd/"
     scrolling="no"
     frameborder="0"
     style="width: 0; min-width: 100% !important; border: none;"

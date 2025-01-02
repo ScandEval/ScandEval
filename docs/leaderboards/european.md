@@ -12,7 +12,7 @@ search bar below
 <iframe
     title="🇪🇺 European Language Model Leaderboard"
     aria-label="Table" id="datawrapper-chart-RXjjq"
-    src="https://datawrapper.dwcdn.net/hnHpE/1/"
+    src="https://datawrapper.dwcdn.net/hnHpE/"
     scrolling="no"
     frameborder="0"
     style="width: 0; min-width: 100% !important; border: none;"

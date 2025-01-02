@@ -12,7 +12,7 @@ search bar below
 <iframe
     title="🇫🇴 Faroese Language Model Leaderboard"
     aria-label="Table" id="datawrapper-chart-RXjjq"
-    src="https://datawrapper.dwcdn.net/yVZA2/1/"
+    src="https://datawrapper.dwcdn.net/yVZA2/"
     scrolling="no"
     frameborder="0"
     style="width: 0; min-width: 100% !important; border: none;"
