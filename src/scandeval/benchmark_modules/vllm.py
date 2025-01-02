@@ -114,7 +114,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
-        super().__init__(
+        super(HuggingFaceEncoderModel, self).__init__(
             model_config=model_config,
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
