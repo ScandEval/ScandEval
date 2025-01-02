@@ -775,8 +775,8 @@ NORQUAD_CONFIG = DatasetConfig(
 
 NORGLM_MULTI_QA = DatasetConfig(
     name="norglm-multi-qa",
-    pretty_name="the question answering part of the Norwegian NorGLM multi-task human annotated dataset "
-    "NO-Multi-QA-Sum",
+    pretty_name="the question answering part of the Norwegian NorGLM multi-task human "
+    "annotated dataset NO-Multi-QA-Sum",
     huggingface_id="ScandEval/norglm-multi-qa",
     task=RC,
     languages=[NB, NN, NO],
@@ -827,7 +827,7 @@ FOQA_CONFIG = DatasetConfig(
     task=RC,
     languages=[FO],
     prompt_prefix="Hetta eru tekstir saman við spurningum og svar.",
-    prompt_template="{text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
+    prompt_template="Tekstur: {text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
     "orðum: {label}",
     instruction_prompt="Tekstur: {text}\n\nSvara hesum spurninginum um tekstin "
     "uppiyvir við í mesta lagi trimum orðum.\n\nSpurningur: {question}",
@@ -948,21 +948,6 @@ RRN_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
-ICESUM_CONFIG = DatasetConfig(
-    name="icesum",
-    pretty_name="the Icelandic summarisation dataset IceSum",
-    huggingface_id="ScandEval/icesum",
-    task=SUMM,
-    languages=[IS],
-    prompt_prefix="Eftirfarandi eru fréttagreinar með tilheyrandi samantektum.",
-    prompt_template="Fréttagrein: {text}\nSamantekt: {target_text}",
-    instruction_prompt="Fréttagrein: {text}\n\nSkrifaðu samantekt um ofangreindu "
-    "grein.",
-    num_few_shot_examples=1,
-    max_generated_tokens=256,
-    unofficial=True,
-)
-
 NO_SAMMENDRAG_CONFIG = DatasetConfig(
     name="no-sammendrag",
     pretty_name="the truncated version of the Norwegian summarisation dataset "
@@ -1037,7 +1022,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
-SCHIBSTED_SV = DatasetConfig(
+SCHIBSTED_SV_CONFIG = DatasetConfig(
     name="schibsted-sv",
     pretty_name="article summaries from Schibsted Media Swedish newsrooms.",
     huggingface_id="ScandEval/schibsted-article-summaries-sv",
@@ -1051,7 +1036,7 @@ SCHIBSTED_SV = DatasetConfig(
     unofficial=True,
 )
 
-SCHIBSTED_NO = DatasetConfig(
+SCHIBSTED_NO_CONFIG = DatasetConfig(
     name="schibsted-no",
     pretty_name="article summaries from Schibsted Medias Norwegian newsrooms.",
     huggingface_id="ScandEval/schibsted-article-summaries-no",
@@ -1081,8 +1066,8 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
     prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    instruction_prompt="Hvad er betydningen af følgende talemåde: {text}\n\nBesvar "
+    "ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1402,7 +1387,7 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
-WINOGRANDE_IS = DatasetConfig(
+WINOGRANDE_IS_CONFIG = DatasetConfig(
     name="winogrande-is",
     pretty_name="the Icelandic common-sense reasoning dataset "
     "Winogrande-is, manually translated from the English Winogrande dataset",

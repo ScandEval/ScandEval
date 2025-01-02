@@ -70,17 +70,17 @@ RC = Task(
     supertask="question-answering",
     metrics=[
         MetricConfig(
-            name="em",
-            pretty_name="Exact Match",
-            huggingface_id="squad_v2",
-            results_key="exact",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
-        ),
-        MetricConfig(
             name="f1",
             pretty_name="F1-score",
             huggingface_id="squad_v2",
             results_key="f1",
+            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
+        ),
+        MetricConfig(
+            name="em",
+            pretty_name="Exact Match",
+            huggingface_id="squad_v2",
+            results_key="exact",
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
         ),
     ],
