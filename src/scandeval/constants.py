@@ -17,7 +17,7 @@ GENERATIVE_DATASET_TASKS = [
 GENERATIVE_DATASET_SUPERTASKS = ["text-to-text", "text-modelling"]
 
 
-TASKS_USING_JSON = ["ner"]
+TASKS_USING_JSON = ["named-entity-recognition"]
 
 
 SUPERTASKS_USING_LOGPROBS = ["sequence-classification"]
