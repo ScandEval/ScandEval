@@ -88,7 +88,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         self._model: PreTrainedModel = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
-        model, tokenizer = align_model_and_tokenizer(
+        self._model, self._tokenizer = align_model_and_tokenizer(
             model=self._model,
             tokenizer=self._tokenizer,
             model_max_length=self.model_max_length,
