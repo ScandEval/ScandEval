@@ -114,6 +114,8 @@ class VLLMModel(HuggingFaceEncoderModel):
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
 
+        # We specify `HuggingFaceEncoderModel` here instead of `VLLMModel`, as we want
+        # to call the `__init__` method of the `BenchmarkModule` class.
         super(HuggingFaceEncoderModel, self).__init__(
             model_config=model_config,
             dataset_config=dataset_config,
