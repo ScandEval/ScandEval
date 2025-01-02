@@ -1,5 +1,8 @@
 """ScandEval - A benchmarking framework for language models."""
 
+### STAGE 1 ###
+### Block unwanted user warnings and set up logging before external modules do ###
+
 import warnings
 import logging
 import sys
@@ -17,16 +20,24 @@ logging.basicConfig(
 )
 
 
+### STAGE 2 ###
+### Block unwanted terminal outputs before import anything external ###
+
+from .utils import block_terminal_output
+
+# Block unwanted terminal outputs
+block_terminal_output()
+
+
+### STAGE 3 ###
+### Set the rest up ###
+
 import importlib.metadata
 import os
 
 from dotenv import load_dotenv
 
 from .benchmarker import Benchmarker
-from .utils import block_terminal_output
-
-# Block unwanted terminal outputs
-block_terminal_output()
 
 
 # Fetches the version of the package as defined in pyproject.toml
