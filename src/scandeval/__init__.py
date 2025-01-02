@@ -3,9 +3,9 @@
 ### STAGE 1 ###
 ### Block unwanted terminal output that happens on importing external modules ###
 
-import warnings
 import logging
 import sys
+import warnings
 
 from termcolor import colored
 
@@ -26,13 +26,13 @@ logging.basicConfig(
 ### STAGE 2 ###
 ### Set the rest up ###
 
-import importlib.metadata
-import os
+import importlib.metadata  # noqa: E402
+import os  # noqa: E402
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # noqa: E402
 
-from .benchmarker import Benchmarker
-from .utils import block_terminal_output
+from .benchmarker import Benchmarker  # noqa: E402
+from .utils import block_terminal_output  # noqa: E402
 
 # Block unwanted terminal outputs. This blocks way more than the above, but since it
 # relies on importing from the `utils` module, external modules are already imported
