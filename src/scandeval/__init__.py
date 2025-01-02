@@ -9,6 +9,7 @@ from .utils import block_terminal_output
 
 # Block unwanted terminal outputs
 block_terminal_output()
+breakpoint()
 
 
 from .benchmarker import Benchmarker  # noqa: E402
