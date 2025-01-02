@@ -117,12 +117,12 @@ class HumanEvaluator:
                             choices=[""],
                             interactive=True,
                             visible=False,
-                            scale=0.5,
+                            scale=0.5,  # type: ignore[arg-type]
                         )
                         ner_tag_answer = gr.Textbox(
                             label="Entity", interactive=True, visible=False, scale=1
                         )
-                        with gr.Column(scale=0.2):
+                        with gr.Column(scale=0.2):  # type: ignore[arg-type]
                             ner_tag_add_button = gr.Button("Add entity", visible=False)
                             ner_tag_reset_button = gr.Button(
                                 "Reset entities", visible=False
