@@ -1080,9 +1080,9 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     languages=[DA],
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c"),
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b' eller 'c'.",
+    "svare med 'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1396,9 +1396,9 @@ WINOGRANDE_IS = DatasetConfig(
     languages=[IS],
     prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
     prompt_template="Spurningar: {text}\nSvara: {label}",
-    prompt_label_mapping=dict(a="a", b="b"),
-    instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a' "
-    "eða 'b'.",
+    prompt_label_mapping=dict(a="a", b="b", c="c"),
+    instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
+    "'b' eða 'c'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
