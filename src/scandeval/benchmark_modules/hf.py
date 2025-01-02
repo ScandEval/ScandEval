@@ -964,26 +964,6 @@ def align_model_and_tokenizer(
     else:
         tokenizer.model_max_length = 512
 
-    # If we're not dealing with a generative model then we move it to CPU to avoid OOM
-    # errors
-    device: torch.device = torch.device("cpu")
-    model_device = model.device
-    model.to(device)
-
-    # Check if the model can handle the call
-    dummy_inputs = torch.full(
-        size=(1, 1), fill_value=DUMMY_FILL_VALUE, dtype=torch.long, device=device
-    )
-    try:
-        model(dummy_inputs)
-    except ValueError as e:
-        if "cpu tensor" in str(e).lower():
-            device = model_device
-            model.to(device)
-            dummy_inputs = dummy_inputs.to(device)
-        model(dummy_inputs)
-
-    breakpoint()
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
@@ -993,7 +973,7 @@ def align_model_and_tokenizer(
             size=(1, max_length),
             fill_value=DUMMY_FILL_VALUE,
             dtype=torch.long,
-            device=device,
+            device=model.device,
         )
 
         with torch.inference_mode():
@@ -1021,8 +1001,6 @@ def align_model_and_tokenizer(
     if tokenizer.bos_token is None and tokenizer.eos_token is not None:
         tokenizer.bos_token = tokenizer.eos_token
         tokenizer.bos_token_id = tokenizer.eos_token_id
-
-    model.to(model_device)
 
     return model, tokenizer
 
