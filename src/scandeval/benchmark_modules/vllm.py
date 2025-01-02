@@ -534,7 +534,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 enable_prefix_caching=False,
                 enable_lora=self.model_config.adapter_base_model_id is not None,
                 max_lora_rank=256,
-                guided_decoding_backend="outlines",
+                guided_decoding_backend="xgrammar",
             )
         except ValueError as e:
             if "trust_remote_code" in str(e):
