@@ -1420,12 +1420,7 @@
 <span class="normal">460</span>
 <span class="normal">461</span>
 <span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Data models used in ScandEval.&quot;&quot;&quot;</span>
+<span class="normal">463</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Data models used in ScandEval.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">importlib.metadata</span>
@@ -1561,9 +1556,6 @@
 <span class="sd">            Whether to print verbose output.</span>
 <span class="sd">        trust_remote_code:</span>
 <span class="sd">            Whether to trust remote code when loading models from the Hugging Face Hub.</span>
-<span class="sd">        load_in_4bit:</span>
-<span class="sd">            Whether to load models in 4-bit precision. If None then this will be done</span>
-<span class="sd">            if CUDA is available and the model is a decoder model.</span>
 <span class="sd">        use_flash_attention:</span>
 <span class="sd">            Whether to use Flash Attention. If None then this will be used for</span>
 <span class="sd">            generative models.</span>
@@ -1603,7 +1595,6 @@
     <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">load_in_4bit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">use_flash_attention</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">clear_model_cache</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">evaluate_test_split</span><span class="p">:</span> <span class="nb">bool</span>
@@ -1636,7 +1627,6 @@
     <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">load_in_4bit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">use_flash_attention</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">clear_model_cache</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">evaluate_test_split</span><span class="p">:</span> <span class="nb">bool</span>

@@ -1641,13 +1641,7 @@
 <span class="normal">768</span>
 <span class="normal">769</span>
 <span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span>
-<span class="normal">773</span>
-<span class="normal">774</span>
-<span class="normal">775</span>
-<span class="normal">776</span>
-<span class="normal">777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
+<span class="normal">771</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -1720,7 +1714,6 @@
         <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">load_in_4bit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_flash_attention</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">clear_model_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">evaluate_test_split</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1781,10 +1774,6 @@
 <span class="sd">                `debug` is True. Defaults to False.</span>
 <span class="sd">            trust_remote_code:</span>
 <span class="sd">                Whether to trust remote code when loading models. Defaults to False.</span>
-<span class="sd">            load_in_4bit:</span>
-<span class="sd">                Whether to load models in 4-bit precision. If None then this will be</span>
-<span class="sd">                done if CUDA is available and the model is a decoder model. Defaults to</span>
-<span class="sd">                None.</span>
 <span class="sd">            use_flash_attention:</span>
 <span class="sd">                Whether to use Flash Attention. If None then it will be used if it is</span>
 <span class="sd">                installed and the model is a decoder model. Defaults to None.</span>
@@ -1835,7 +1824,6 @@
             <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">trust_remote_code</span><span class="p">,</span>
-            <span class="n">load_in_4bit</span><span class="o">=</span><span class="n">load_in_4bit</span><span class="p">,</span>
             <span class="n">use_flash_attention</span><span class="o">=</span><span class="n">use_flash_attention</span><span class="p">,</span>
             <span class="n">clear_model_cache</span><span class="o">=</span><span class="n">clear_model_cache</span><span class="p">,</span>
             <span class="n">evaluate_test_split</span><span class="o">=</span><span class="n">evaluate_test_split</span><span class="p">,</span>
@@ -1889,7 +1877,6 @@
         <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">trust_remote_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">load_in_4bit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_flash_attention</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">clear_model_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">evaluate_test_split</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1961,10 +1948,6 @@
 <span class="sd">            trust_remote_code:</span>
 <span class="sd">                Whether to trust remote code when loading models. Defaults to the value</span>
 <span class="sd">                specified when initialising the benchmarker.</span>
-<span class="sd">            load_in_4bit:</span>
-<span class="sd">                Whether to load models in 4-bit precision. If None then this will be done</span>
-<span class="sd">                if CUDA is available and the model is a decoder model. Defaults to the</span>
-<span class="sd">                value specified when initialising the benchmarker.</span>
 <span class="sd">            use_flash_attention:</span>
 <span class="sd">                Whether to use Flash Attention. Defaults to the value specified when</span>
 <span class="sd">                initialising the benchmarker.</span>
@@ -2011,7 +1994,6 @@
             <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">trust_remote_code</span><span class="p">,</span>
-            <span class="n">load_in_4bit</span><span class="o">=</span><span class="n">load_in_4bit</span><span class="p">,</span>
             <span class="n">use_flash_attention</span><span class="o">=</span><span class="n">use_flash_attention</span><span class="p">,</span>
             <span class="n">clear_model_cache</span><span class="o">=</span><span class="n">clear_model_cache</span><span class="p">,</span>
             <span class="n">evaluate_test_split</span><span class="o">=</span><span class="n">evaluate_test_split</span><span class="p">,</span>
@@ -2059,12 +2041,12 @@
                 <span class="c1"># We do not re-initialise generative models as their architecture is not</span>
                 <span class="c1"># customised to specific datasets</span>
                 <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">:</span>
+                    <span class="n">initial_logging</span><span class="p">(</span>
+                        <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
+                        <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
+                        <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="k">if</span> <span class="n">loaded_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">initial_logging</span><span class="p">(</span>
-                            <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
-                            <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
-                            <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
-                        <span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading model...&quot;</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">loaded_model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span>
@@ -2073,6 +2055,8 @@
                                 <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="k">except</span> <span class="n">InvalidModel</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">raise_errors</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="n">e</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                             <span class="k">break</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -2093,6 +2077,8 @@
                     <span class="k">raise</span> <span class="n">benchmark_output_or_err</span>
 
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">benchmark_output_or_err</span><span class="p">,</span> <span class="n">InvalidBenchmark</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">raise_errors</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">benchmark_output_or_err</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">m_id</span><span class="si">}</span><span class="s2"> could not be benchmarked on &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">pretty_name</span><span class="si">}</span><span class="s2">. Skipping. The error message &quot;</span>
@@ -2101,6 +2087,8 @@
                     <span class="k">continue</span>
 
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">benchmark_output_or_err</span><span class="p">,</span> <span class="n">InvalidModel</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">raise_errors</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">benchmark_output_or_err</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">benchmark_output_or_err</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
                     <span class="k">break</span>
 
