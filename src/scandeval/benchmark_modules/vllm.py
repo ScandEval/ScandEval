@@ -17,7 +17,7 @@ from types import MethodType
 import torch
 from datasets import DatasetDict
 from huggingface_hub import snapshot_download
-from pydantic import create_model
+from pydantic import conlist, create_model
 from tqdm.auto import tqdm
 from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
@@ -278,8 +278,13 @@ class VLLMModel(HuggingFaceEncoderModel):
         if self.dataset_config.task.name in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
 
+            # Xgrammar, the guided decoding backend, does not yet support a maximal
+            # amount of items in a list, so the `max_length` parameter will be ignored
+            # in practice. However, they're working on implementing this feature, so
+            # we include it here for future compatibility.
             keys_and_their_types: dict[str, t.Any] = {
-                tag_name: (list[str], ...) for tag_name in ner_tag_names
+                tag_name: (conlist(str, max_length=5), ...)
+                for tag_name in ner_tag_names
             }
             pydantic_class = create_model("AnswerFormat", **keys_and_their_types)
             schema = pydantic_class.model_json_schema()
