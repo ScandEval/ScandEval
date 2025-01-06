@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.1.1] - 2025-01-06
 ### Fixed
 - Downgraded `vllm` down to `>=0.6.3,<0.6.5`, as the later versions of vLLM uses a newer
   version of outlines, which causes memory errors. This will be updated when this is
