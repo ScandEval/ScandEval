@@ -146,6 +146,7 @@ def generate_single_iteration(
 
         # Generate the completions for the non-cached examples
         for batch in itr:
+            breakpoint()
             assert isinstance(batch, dict)
 
             single_sample_batch = (
