@@ -891,6 +891,7 @@ def load_model_and_tokenizer(
         model_cache_dir=model_config.model_cache_dir,
         token=benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
     )
+    breakpoint()
 
     return model, tokenizer
 
