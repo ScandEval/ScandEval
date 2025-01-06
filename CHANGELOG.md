@@ -18,12 +18,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   used when loaded generative models with the `transformers` backend, but we now only
   use vLLM for generative models.
 
-### Removed
-- Removed the limit of 5 named entities for each named entity category, when evaluating
-  generative models. The reason is that this required a lot of RAM with newer version of
-  Outlines (>50GB), and experiments showed that it did not have a significant impact on
-  performance.
-
 
 ## [v14.1.0] - 2025-01-02
 ### Changed
