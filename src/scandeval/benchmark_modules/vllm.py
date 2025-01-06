@@ -288,6 +288,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             }
             pydantic_class = create_model("AnswerFormat", **keys_and_their_types)
             schema = pydantic_class.model_json_schema()
+            breakpoint()
             guided_decoding = GuidedDecodingParams(
                 json=schema, backend="xgrammar", whitespace_pattern=r" ?"
             )
