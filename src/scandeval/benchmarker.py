@@ -424,6 +424,8 @@ class Benchmarker:
                                 benchmark_config=benchmark_config,
                             )
                         except InvalidModel as e:
+                            if benchmark_config.raise_errors:
+                                raise e
                             logger.info(e.message)
                             break
                     else:
@@ -444,6 +446,8 @@ class Benchmarker:
                     raise benchmark_output_or_err
 
                 elif isinstance(benchmark_output_or_err, InvalidBenchmark):
+                    if benchmark_config.raise_errors:
+                        raise benchmark_output_or_err
                     logger.info(
                         f"{m_id} could not be benchmarked on "
                         f"{dataset_config.pretty_name}. Skipping. The error message "
@@ -452,6 +456,8 @@ class Benchmarker:
                     continue
 
                 elif isinstance(benchmark_output_or_err, InvalidModel):
+                    if benchmark_config.raise_errors:
+                        raise benchmark_output_or_err
                     logger.info(benchmark_output_or_err.message)
                     break
 
