@@ -410,12 +410,12 @@ class Benchmarker:
                 # We do not re-initialise generative models as their architecture is not
                 # customised to specific datasets
                 if model_config.task in GENERATIVE_MODEL_TASKS:
+                    initial_logging(
+                        model_config=model_config,
+                        dataset_config=dataset_config,
+                        benchmark_config=benchmark_config,
+                    )
                     if loaded_model is None:
-                        initial_logging(
-                            model_config=model_config,
-                            dataset_config=dataset_config,
-                            benchmark_config=benchmark_config,
-                        )
                         logger.info("Loading model...")
                         try:
                             loaded_model = load_model(

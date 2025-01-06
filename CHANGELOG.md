@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Fixed
+- Display initial "Benchmarking X on Y" logging for all datasets being benchmarked,
+  instead of just the first one.
 
 
 ## [v14.1.0] - 2025-01-02
