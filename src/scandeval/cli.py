@@ -150,13 +150,6 @@ from .tasks import get_all_tasks
     of the model.""",
 )
 @click.option(
-    "--load-in-4bit/--no-load-in-4bit",
-    default=None,
-    show_default=True,
-    help="""Whether to load the model in 4-bit precision. If not specified then the
-    model will be loaded in 4-bit precision if possible.""",
-)
-@click.option(
     "--use-flash-attention/--no-use-flash-attention",
     default=None,
     show_default=True,
@@ -235,7 +228,6 @@ def benchmark(
     framework: str | None,
     device: str | None,
     trust_remote_code: bool,
-    load_in_4bit: bool | None,
     use_flash_attention: bool | None,
     clear_model_cache: bool,
     evaluate_test_split: bool,
@@ -272,7 +264,6 @@ def benchmark(
         framework=framework,
         device=device,
         trust_remote_code=trust_remote_code,
-        load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
         evaluate_test_split=evaluate_test_split,

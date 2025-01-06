@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Display initial "Benchmarking X on Y" logging for all datasets being benchmarked,
   instead of just the first one.
+- Removed the `--load-in-4bit` argument, as it is not used anymore, since it was only
+  used when loaded generative models with the `transformers` backend, but we now only
+  use vLLM for generative models.
 
 
 ## [v14.1.0] - 2025-01-02

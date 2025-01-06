@@ -36,7 +36,6 @@ def test_cli_param_names(params):
         "framework",
         "device",
         "trust_remote_code",
-        "load_in_4bit",
         "use_flash_attention",
         "clear_model_cache",
         "evaluate_test_split",
@@ -68,7 +67,6 @@ def test_cli_param_types(params):
     assert isinstance(params["framework"], Choice)
     assert isinstance(params["device"], Choice)
     assert params["trust_remote_code"] == BOOL
-    assert params["load_in_4bit"] == BOOL
     assert params["use_flash_attention"] == BOOL
     assert params["clear_model_cache"] == BOOL
     assert params["evaluate_test_split"] == BOOL

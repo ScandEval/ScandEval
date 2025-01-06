@@ -79,7 +79,6 @@ def benchmark_config(auth, device) -> Generator[BenchmarkConfig, None, None]:
         device=device,
         verbose=False,
         trust_remote_code=True,
-        load_in_4bit=None,
         use_flash_attention=False,
         clear_model_cache=False,
         evaluate_test_split=False,
