@@ -288,7 +288,9 @@ class VLLMModel(HuggingFaceEncoderModel):
             }
             pydantic_class = create_model("AnswerFormat", **keys_and_their_types)
             schema = pydantic_class.model_json_schema()
-            guided_decoding = GuidedDecodingParams(json=schema)
+            guided_decoding = GuidedDecodingParams(
+                json=schema, backend="outlines", whitespace_pattern=r" ?"
+            )
         else:
             guided_decoding = None
 
@@ -866,7 +868,6 @@ def load_model_and_tokenizer(
             enable_prefix_caching=False,
             enable_lora=model_config.adapter_base_model_id is not None,
             max_lora_rank=256,
-            guided_decoding_backend="outlines",
         )
     except ValueError as e:
         if "trust_remote_code" in str(e):
@@ -891,7 +892,6 @@ def load_model_and_tokenizer(
         model_cache_dir=model_config.model_cache_dir,
         token=benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
     )
-    breakpoint()
 
     return model, tokenizer
 
