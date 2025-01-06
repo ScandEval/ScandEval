@@ -210,7 +210,8 @@ SUC3_CONFIG = DatasetConfig(
     task=NER,
     languages=[SV],
     prompt_prefix="Följande är meningar och JSON-ordböcker med de namngivna enheter "
-    "som förekommer i den givna meningen.",
+    "som förekommer i den givna meningen. Det kan finnas högst 5 namngivna enheter av "
+    "varje typ.",
     prompt_template="Mening: {text}\nNamngivna entiteter: {label}",
     prompt_label_mapping={
         "b-per": "person",
