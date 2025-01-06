@@ -47,7 +47,7 @@ jax = [
 generative = [
     "demjson3>=3.0.6",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
-    "vllm>=0.6.6; platform_system == 'Linux'",
+    "vllm>=0.6.3,<0.6.5; platform_system == 'Linux'",
     "fbgemm-gpu>=1.0.0; platform_system == 'Linux'",
 ]
 human_evaluation = [
@@ -59,7 +59,7 @@ all = [
     "flax>=0.8.1",
     "demjson3>=3.0.6",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
-    "vllm>=0.6.6; platform_system == 'Linux'",
+    "vllm>=0.6.3,<0.6.5; platform_system == 'Linux'",
     "fbgemm-gpu>=1.0.0; platform_system == 'Linux'",
     "gradio>=4.26.0",
 ]
