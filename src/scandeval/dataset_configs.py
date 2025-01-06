@@ -225,7 +225,8 @@ SUC3_CONFIG = DatasetConfig(
     instruction_prompt="Mening: {text}\n\nIdentifiera de namngivna enheterna i "
     "meningen. Du ska outputta detta som en JSON-ordbok med nycklarna 'person', "
     "'plats', 'organisation' och 'diverse'. Värdena ska vara listor över de namngivna "
-    "enheter av den typen, precis som de förekommer i meningen.",
+    "enheter av den typen, precis som de förekommer i meningen. Det kan finnas högst 5 "
+    "namngivna enheter av varje typ.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -253,7 +254,8 @@ DANSK_CONFIG = DatasetConfig(
     instruction_prompt="Sætning: {text}\n\nIdentificér de navngivne enheder i "
     "sætningen. Du skal outputte dette som en JSON-ordbog med nøglerne 'person', "
     "'sted', 'organisation' og 'diverse'. Værdierne skal være lister over de navngivne "
-    "enheder af den type, præcis som de forekommer i sætningen.",
+    "enheder af den type, præcis som de forekommer i sætningen. Der kan højest være "
+    "fem navngivne enheder af hver type.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -281,7 +283,8 @@ NORNE_NB_CONFIG = DatasetConfig(
     instruction_prompt="Frase: {text}\n\nIdentifiser de navngitte enhetene i frasen. "
     "Du bør outputte dette som en JSON-ordbok med nøklene 'person', 'sted', "
     "'organisasjon' og 'diverse'. Verdiene skal være lister over de navngitte enhetene "
-    "av den typen, akkurat som de vises i frasen.",
+    "av den typen, akkurat som de vises i frasen. Det kan være maksimalt fem navngitte "
+    "enheter av hver type.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -309,7 +312,8 @@ NORNE_NN_CONFIG = DatasetConfig(
     instruction_prompt="Frase: {text}\n\nIdentifiser de navngitte enhetene i frasen. "
     "Du bør outputte dette som en JSON-ordbok med nøklene 'person', 'sted', "
     "'organisasjon' og 'diverse'. Verdiene skal være lister over de navngitte enhetene "
-    "av den typen, akkurat som de vises i frasen.",
+    "av den typen, akkurat som de vises i frasen. Det kan være maksimalt fem navngitte "
+    "enheter av hver type.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -337,7 +341,8 @@ MIM_GOLD_NER_CONFIG = DatasetConfig(
     instruction_prompt="Setning: {text}\n\nGreinið nefndu einingarnar í setningunni. "
     "Þú ættir að skila þessu sem JSON orðabók með lyklunum 'einstaklingur', "
     "'staðsetning', 'stofnun' og 'ýmislegt'. Gildin ættu að vera listi yfir nefndu "
-    "einingarnar af þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.",
+    "einingarnar af þeirri gerð, nákvæmlega eins og þær koma fram í setningunni. Það "
+    "geta að hámarki verið 5 nafngreindir aðilar af hverri gerð.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -365,7 +370,8 @@ FONE_CONFIG = DatasetConfig(
     instruction_prompt="Setningur: {text}\n\nGreinið nevndu einingarnar í setningunni. "
     "Þú ættir að skila þessu sem JSON orðabók með lyklunum 'persónur', 'staður', "
     "'felagsskapur' og 'ymiskt'. Gildin ættu að vera listi yfir nevndu einingarnar af "
-    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.",
+    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni. Tað kunnu vera í "
+    "mesta lagi 5 navngivnar eindir av hvørjum slag.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -393,7 +399,8 @@ GERMEVAL_CONFIG = DatasetConfig(
     instruction_prompt="Satz: {text}\n\nIdentifizieren Sie die benannten Entitäten im "
     "Satz. Sie sollten dies als JSON-Wörterbuch mit den Schlüsseln 'person', 'ort', "
     "'organisation' und 'verschiedenes' ausgeben. Die Werte sollten Listen der "
-    "benannten Entitäten dieses Typs sein, genau wie sie im Satz erscheinen.",
+    "benannten Entitäten dieses Typs sein, genau wie sie im Satz erscheinen. Es können "
+    "höchstens 5 benannte Entitäten jedes Typs vorhanden sein.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -421,7 +428,8 @@ CONLL_NL_CONFIG = DatasetConfig(
     instruction_prompt="Zin: {text}\n\nIdentificeer de genoemde entiteiten in de zin. "
     "Je moet dit uitvoeren als een JSON-woordenboek met de sleutels 'persoon', "
     "'locatie', 'organisatie' en 'diversen'. De waarden moeten lijsten zijn van de "
-    "genoemde entiteiten van dat type, precies zoals ze voorkomen in de zin.",
+    "genoemde entiteiten van dat type, precies zoals ze voorkomen in de zin. Er kunnen "
+    "maximaal 5 genoemde entiteiten van elk type zijn.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -449,7 +457,8 @@ CONLL_EN_CONFIG = DatasetConfig(
     instruction_prompt="Sentence: {text}\n\nIdentify the named entities in the "
     "sentence. You should output this as a JSON dictionary with the keys being "
     "'person', 'location', 'organization' and 'miscellaneous'. The values should be "
-    "lists of the named entities of that type, exactly as they appear in the sentence.",
+    "lists of the named entities of that type, exactly as they appear in the sentence. "
+    "There can be at most 5 named entities of each type.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -477,7 +486,8 @@ DANE_CONFIG = DatasetConfig(
     instruction_prompt="Sætning: {text}\n\nIdentificér de navngivne enheder i "
     "sætningen. Du skal outputte dette som en JSON-ordbog med nøglerne 'person', "
     "'sted', 'organisation' og 'diverse'. Værdierne skal være lister over de navngivne "
-    "enheder af den type, præcis som de forekommer i sætningen.",
+    "enheder af den type, præcis som de forekommer i sætningen. Der kan højest være "
+    "5 navngivne enheder af hver type.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
     unofficial=True,
@@ -506,7 +516,8 @@ WIKIANN_FO_CONFIG = DatasetConfig(
     instruction_prompt="Setningur: {text}\n\nGreinið nevndu einingarnar í setningunni. "
     "Þú ættir að skila þessu sem JSON orðabók með lyklunum 'persónur', 'staður', "
     "'felagsskapur' og 'ymiskt'. Gildin ættu að vera listi yfir nevndu einingarnar af "
-    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni.",
+    "þeirri gerð, nákvæmlega eins og þær koma fram í setningunni. Tað kunnu vera í "
+    "mesta lagi 5 navngivnar eindir av hvørjum slag.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
     unofficial=True,
