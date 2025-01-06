@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
+- Downgraded `vllm` down to `>=0.6.3,<0.6.5`, as the later versions of vLLM uses a newer
+  version of outlines, which causes memory errors. This will be updated when this is
+  resolved. [Relevant `outlines`
+  issue](https://github.com/dottxt-ai/outlines/issues/1351).
 - Display initial "Benchmarking X on Y" logging for all datasets being benchmarked,
   instead of just the first one.
 - Removed the `--load-in-4bit` argument, as it is not used anymore, since it was only
