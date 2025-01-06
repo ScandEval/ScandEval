@@ -866,7 +866,7 @@ def load_model_and_tokenizer(
             enable_prefix_caching=False,
             enable_lora=model_config.adapter_base_model_id is not None,
             max_lora_rank=256,
-            guided_decoding_backend="xgrammar",
+            guided_decoding_backend="outlines",
         )
     except ValueError as e:
         if "trust_remote_code" in str(e):
