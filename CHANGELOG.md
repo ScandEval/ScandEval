@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Fixed
+- The labels were not displayed correctly in the few-shot examples for base generative
+  models, when benchmarking text classification tasks, which negatively affected scores
+  of the linguistic acceptability task, and to a lesser extent the sentiment
+  classification task. This has been fixed now. The models benchmarked from v14.0.0 are
+  affected and should be re-benchmarked.
 
 
 ## [v14.1.1] - 2025-01-06

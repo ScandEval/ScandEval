@@ -588,14 +588,18 @@ class VLLMModel(HuggingFaceEncoderModel):
                 A pair (prompt, label), where "label" is an empty string if the model is
                 not instruction tuned (as in this case it is included in the prompt).
             """
+            label_key = "label" if "label" in kwargs else "target_text"
+            label = kwargs.pop(label_key)
+            assert (
+                label is not None
+            ), f"Found a None label for the prompt: {kwargs}. This should not happen."
+            label_mapping = self.dataset_config.prompt_label_mapping
+            label = label_mapping.get(label, label)
             if self.buffer["instruction_model"]:
-                label_key = "label" if "label" in kwargs else "target_text"
-                label = kwargs.pop(label_key)
-                label_mapping = self.dataset_config.prompt_label_mapping
-                label = label_mapping.get(label, label)
                 prompt = self.dataset_config.instruction_prompt.format(**kwargs)
                 return prompt, label
             else:
+                kwargs[label_key] = label
                 return self.dataset_config.prompt_template.format(**kwargs), ""
 
         match task.supertask:
