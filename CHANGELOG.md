@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Fixed
+- Now recognises models withh the `translation` pipeline tag as generative models.
 
 
 ## [v14.1.2] - 2025-01-07
