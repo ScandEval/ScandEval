@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- We now use the `model_type` parameter in the Hugging Face model configuration to
+  determine whether a model is generative or not, as this is more reliable than the
+  previous method of checking the model repository's tags. The downside of this is that
+  the model config must be downloaded, but the overhead is minor.
 
 
 ## [v14.1.2] - 2025-01-07
