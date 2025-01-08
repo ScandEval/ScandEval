@@ -129,8 +129,8 @@ def postprocess_predictions_and_labels(
     """
     mapping = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e"}
 
-    all_predictions: "Predictions" = list()
-    all_labels: "Labels" = list()
+    all_predictions: list[str] = list()
+    all_labels: list[str] = list()
 
     pred_label_dict = defaultdict(list)
     for pred_arr, example in zip(predictions, dataset):
@@ -138,8 +138,8 @@ def postprocess_predictions_and_labels(
 
     # Compute the final predictions and labels
     for id_ in set(dataset["id"]):
-        predictions, labels = zip(*pred_label_dict[id_])
-        prediction: str = mapping[np.argmax(predictions).item()]
+        preds, labels = zip(*pred_label_dict[id_])
+        prediction: str = mapping[np.argmax(preds).item()]
         label: str = mapping[np.argmax(labels).item()]
         all_predictions.append(prediction)
         all_labels.append(label)

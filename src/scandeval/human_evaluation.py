@@ -345,7 +345,6 @@ class HumanEvaluator:
             case TaskGroup.SEQUENCE_CLASSIFICATION:
                 self.compute_metrics = partial(
                     sequence_classification.compute_metrics,
-                    id2label=self.dataset_config.id2label,
                     dataset_config=self.dataset_config,
                     benchmark_config=benchmark_config,
                 )
