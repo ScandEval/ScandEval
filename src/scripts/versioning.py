@@ -92,7 +92,7 @@ def get_current_version() -> Tuple[int, int, int]:
     # Otherwise, extract the version, split it into major, minor and patch parts and
     # return these
     else:
-        version_str = version_candidates.group(0)
+        version_str = version_candidates.group(0).replace(".dev", "")
         major, minor, patch = map(int, version_str.split("."))
         return major, minor, patch
 
