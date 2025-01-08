@@ -30,7 +30,7 @@ from transformers import (
     PreTrainedTokenizer,
     Trainer,
 )
-from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING_NAMES
+from transformers.modelcard import TASK_MAPPING
 from urllib3.exceptions import RequestError
 
 from ..constants import DUMMY_FILL_VALUE, GENERATIVE_MODEL_TASKS
@@ -717,11 +717,13 @@ def get_model_repo_info(
             trust_remote_code=benchmark_config.trust_remote_code,
             run_with_cli=benchmark_config.run_with_cli,
         )
-        model_type = hf_config.model_type
-        generative_model_types = [
-            mtype for mtype, _ in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES.items()
+        class_names = hf_config.architectures
+        generative_class_names = [
+            class_name
+            for model_task in GENERATIVE_MODEL_TASKS
+            for class_name in TASK_MAPPING[model_task].values()
         ]
-        if model_type in generative_model_types:
+        if any(class_name in generative_class_names for class_name in class_names):
             pipeline_tag = "text-generation"
         else:
             pipeline_tag = "fill-mask"
