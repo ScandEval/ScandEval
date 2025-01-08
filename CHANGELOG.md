@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- We now use the `architectures` parameter in the Hugging Face model configuration to
+  determine whether a model is generative or not, as this is more reliable than the
+  previous method of checking the model repository's tags. The downside of this is that
+  the model config must be downloaded, but the overhead is minor.
 
+
+## [v14.1.2] - 2025-01-07
+### Fixed
+- The labels were not displayed correctly in the few-shot examples for base generative
+  models, when benchmarking text classification tasks, which negatively affected scores
+  of the linguistic acceptability task, and to a lesser extent the sentiment
+  classification task. This has been fixed now. The models benchmarked from v14.0.0 are
+  affected and should be re-benchmarked.
+
+
+## [v14.1.1] - 2025-01-06
+### Fixed
+- Downgraded `vllm` down to `>=0.6.3,<0.6.5`, as the later versions of vLLM uses a newer
+  version of outlines, which causes memory errors. This will be updated when this is
+  resolved. [Relevant `outlines`
+  issue](https://github.com/dottxt-ai/outlines/issues/1351).
+- Display initial "Benchmarking X on Y" logging for all datasets being benchmarked,
+  instead of just the first one.
+- Removed the `--load-in-4bit` argument, as it is not used anymore, since it was only
+  used when loaded generative models with the `transformers` backend, but we now only
+  use vLLM for generative models.
 
 
 ## [v14.1.0] - 2025-01-02

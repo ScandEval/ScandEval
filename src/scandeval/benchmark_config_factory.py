@@ -39,7 +39,6 @@ def build_benchmark_config(
     force: bool,
     verbose: bool,
     trust_remote_code: bool,
-    load_in_4bit: bool | None,
     use_flash_attention: bool | None,
     clear_model_cache: bool,
     evaluate_test_split: bool,
@@ -96,8 +95,6 @@ def build_benchmark_config(
             automatically set if `debug` is True.
         trust_remote_code:
             Whether to trust remote code when running the benchmark.
-        load_in_4bit:
-            Whether to load the models in 4-bit precision.
         use_flash_attention:
             Whether to use Flash Attention for the models. If None then it will be used
             if it is available.
@@ -185,7 +182,6 @@ def build_benchmark_config(
         framework=framework_obj,
         device=torch_device,
         trust_remote_code=trust_remote_code,
-        load_in_4bit=load_in_4bit,
         use_flash_attention=use_flash_attention,
         clear_model_cache=clear_model_cache,
         evaluate_test_split=evaluate_test_split,

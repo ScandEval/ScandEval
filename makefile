@@ -107,6 +107,18 @@ bump-patch:
 	@uv run python -m src.scripts.versioning --patch
 	@echo "Bumped patch version!"
 
+add-dev-version:
+	@if [ $$(uname) = "Darwin" ]; then \
+		sed -i '' 's/^version = "\(.*\)"/version = "\1.dev"/' pyproject.toml; \
+	else \
+		sed -i 's/^version = "\(.*\)"/version = "\1.dev"/' pyproject.toml; \
+	fi
+	@uv lock
+	@git add pyproject.toml uv.lock
+	@git commit -m "chore: Add '.dev' suffix to the version number"
+	@git push
+	@echo "Added '.dev' suffix to the version number."
+
 publish:
 	@if [ ${PYPI_API_TOKEN} = "" ]; then \
 		echo "No PyPI API token specified in the '.env' file, so cannot publish."; \
@@ -116,6 +128,7 @@ publish:
 			&& uv build \
 			&& uv publish --username "__token__" --password ${PYPI_API_TOKEN} \
 			&& $(MAKE) --quiet publish-docs \
+			&& $(MAKE) --quiet add-dev-version \
 			&& echo "Published!"; \
 	fi
 

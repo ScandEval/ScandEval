@@ -281,13 +281,19 @@ class VLLMModel(HuggingFaceEncoderModel):
         if self.dataset_config.task.name in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
 
+            # Xgrammar, the guided decoding backend, does not yet support a maximal
+            # amount of items in a list, so the `max_length` parameter will be ignored
+            # in practice. However, they're working on implementing this feature, so
+            # we include it here for future compatibility.
             keys_and_their_types: dict[str, t.Any] = {
                 tag_name: (conlist(str, max_length=5), ...)
                 for tag_name in ner_tag_names
             }
             pydantic_class = create_model("AnswerFormat", **keys_and_their_types)
             schema = pydantic_class.model_json_schema()
-            guided_decoding = GuidedDecodingParams(json=schema)
+            guided_decoding = GuidedDecodingParams(
+                json=schema, backend="outlines", whitespace_pattern=r" ?"
+            )
         else:
             guided_decoding = None
 
@@ -586,14 +592,18 @@ class VLLMModel(HuggingFaceEncoderModel):
                 A pair (prompt, label), where "label" is an empty string if the model is
                 not instruction tuned (as in this case it is included in the prompt).
             """
+            label_key = "label" if "label" in kwargs else "target_text"
+            label = kwargs.pop(label_key)
+            assert (
+                label is not None
+            ), f"Found a None label for the prompt: {kwargs}. This should not happen."
+            label_mapping = self.dataset_config.prompt_label_mapping
+            label = label_mapping.get(label, label)
             if self.buffer["instruction_model"]:
-                label_key = "label" if "label" in kwargs else "target_text"
-                label = kwargs.pop(label_key)
-                label_mapping = self.dataset_config.prompt_label_mapping
-                label = label_mapping.get(label, label)
                 prompt = self.dataset_config.instruction_prompt.format(**kwargs)
                 return prompt, label
             else:
+                kwargs[label_key] = label
                 return self.dataset_config.prompt_template.format(**kwargs), ""
 
         match task.task_group:
@@ -867,7 +877,6 @@ def load_model_and_tokenizer(
             enable_prefix_caching=False,
             enable_lora=model_config.adapter_base_model_id is not None,
             max_lora_rank=256,
-            guided_decoding_backend="outlines",
         )
     except ValueError as e:
         if "trust_remote_code" in str(e):

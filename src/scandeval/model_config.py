@@ -1,6 +1,7 @@
 """Functions related to getting the model configuration."""
 
 import importlib.util
+import logging
 import typing as t
 
 from . import benchmark_modules
@@ -9,6 +10,9 @@ from .exceptions import InvalidModel, NeedsEnvironmentVariable, NeedsExtraInstal
 
 if t.TYPE_CHECKING:
     from .data_models import BenchmarkConfig, ModelConfig
+
+
+logger = logging.getLogger("scandeval")
 
 
 def get_model_config(
@@ -48,6 +52,10 @@ def get_model_config(
         elif isinstance(exists_or_err, NeedsEnvironmentVariable):
             needs_env_vars.append(exists_or_err.env_var)
         elif exists_or_err is True:
+            logger.debug(
+                f"The model {model_id!r} was identified by the "
+                f"{benchmark_module.__name__} benchmark module."
+            )
             model_config = benchmark_module.get_model_config(
                 model_id=model_id, benchmark_config=benchmark_config
             )

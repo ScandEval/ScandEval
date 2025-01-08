@@ -134,9 +134,6 @@ class BenchmarkConfig:
             Whether to print verbose output.
         trust_remote_code:
             Whether to trust remote code when loading models from the Hugging Face Hub.
-        load_in_4bit:
-            Whether to load models in 4-bit precision. If None then this will be done
-            if CUDA is available and the model is a decoder model.
         use_flash_attention:
             Whether to use Flash Attention. If None then this will be used for
             generative models.
@@ -176,7 +173,6 @@ class BenchmarkConfig:
     device: torch.device
     verbose: bool
     trust_remote_code: bool
-    load_in_4bit: bool | None
     use_flash_attention: bool | None
     clear_model_cache: bool
     evaluate_test_split: bool
@@ -209,7 +205,6 @@ class BenchmarkConfigParams(pydantic.BaseModel):
     force: bool
     verbose: bool
     trust_remote_code: bool
-    load_in_4bit: bool | None
     use_flash_attention: bool | None
     clear_model_cache: bool
     evaluate_test_split: bool

@@ -71,7 +71,6 @@ class Benchmarker:
         force: bool = False,
         verbose: bool = False,
         trust_remote_code: bool = False,
-        load_in_4bit: bool | None = None,
         use_flash_attention: bool | None = None,
         clear_model_cache: bool = False,
         evaluate_test_split: bool = False,
@@ -132,10 +131,6 @@ class Benchmarker:
                 `debug` is True. Defaults to False.
             trust_remote_code:
                 Whether to trust remote code when loading models. Defaults to False.
-            load_in_4bit:
-                Whether to load models in 4-bit precision. If None then this will be
-                done if CUDA is available and the model is a decoder model. Defaults to
-                None.
             use_flash_attention:
                 Whether to use Flash Attention. If None then it will be used if it is
                 installed and the model is a decoder model. Defaults to None.
@@ -186,7 +181,6 @@ class Benchmarker:
             force=force,
             verbose=verbose,
             trust_remote_code=trust_remote_code,
-            load_in_4bit=load_in_4bit,
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
             evaluate_test_split=evaluate_test_split,
@@ -240,7 +234,6 @@ class Benchmarker:
         force: bool | None = None,
         verbose: bool | None = None,
         trust_remote_code: bool | None = None,
-        load_in_4bit: bool | None = None,
         use_flash_attention: bool | None = None,
         clear_model_cache: bool | None = None,
         evaluate_test_split: bool | None = None,
@@ -312,10 +305,6 @@ class Benchmarker:
             trust_remote_code:
                 Whether to trust remote code when loading models. Defaults to the value
                 specified when initialising the benchmarker.
-            load_in_4bit:
-                Whether to load models in 4-bit precision. If None then this will be done
-                if CUDA is available and the model is a decoder model. Defaults to the
-                value specified when initialising the benchmarker.
             use_flash_attention:
                 Whether to use Flash Attention. Defaults to the value specified when
                 initialising the benchmarker.
@@ -362,7 +351,6 @@ class Benchmarker:
             force=force,
             verbose=verbose,
             trust_remote_code=trust_remote_code,
-            load_in_4bit=load_in_4bit,
             use_flash_attention=use_flash_attention,
             clear_model_cache=clear_model_cache,
             evaluate_test_split=evaluate_test_split,
@@ -410,12 +398,12 @@ class Benchmarker:
                 # We do not re-initialise generative models as their architecture is not
                 # customised to specific datasets
                 if model_config.task in GENERATIVE_MODEL_TASKS:
+                    initial_logging(
+                        model_config=model_config,
+                        dataset_config=dataset_config,
+                        benchmark_config=benchmark_config,
+                    )
                     if loaded_model is None:
-                        initial_logging(
-                            model_config=model_config,
-                            dataset_config=dataset_config,
-                            benchmark_config=benchmark_config,
-                        )
                         logger.info("Loading model...")
                         try:
                             loaded_model = load_model(
@@ -424,6 +412,8 @@ class Benchmarker:
                                 benchmark_config=benchmark_config,
                             )
                         except InvalidModel as e:
+                            if benchmark_config.raise_errors:
+                                raise e
                             logger.info(e.message)
                             break
                     else:
@@ -444,6 +434,8 @@ class Benchmarker:
                     raise benchmark_output_or_err
 
                 elif isinstance(benchmark_output_or_err, InvalidBenchmark):
+                    if benchmark_config.raise_errors:
+                        raise benchmark_output_or_err
                     logger.info(
                         f"{m_id} could not be benchmarked on "
                         f"{dataset_config.pretty_name}. Skipping. The error message "
@@ -452,6 +444,8 @@ class Benchmarker:
                     continue
 
                 elif isinstance(benchmark_output_or_err, InvalidModel):
+                    if benchmark_config.raise_errors:
+                        raise benchmark_output_or_err
                     logger.info(benchmark_output_or_err.message)
                     break
 
