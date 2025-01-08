@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Now supports evaluation of encoder models on the multiple choice tasks knowledge and
+  common-sense reasoning. This is done by splitting the individual choices into separate
+  inputs during training (framing it as a binary classification task), and then at test
+  time we take the option with the highest probability as the answer. This is the same
+  way that encoders were evaluated in the original HellaSwag paper.
+
 ### Changed
 - We now use the `architectures` parameter in the Hugging Face model configuration to
   determine whether a model is generative or not, as this is more reliable than the
