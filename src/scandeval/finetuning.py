@@ -4,7 +4,6 @@ import importlib.util
 import logging
 import sys
 import typing as t
-from functools import partial
 
 import torch
 from datasets import DatasetDict
@@ -206,9 +205,7 @@ def finetune_single_iteration(
         args=training_args,
         train_dataset=dataset["train"],
         eval_dataset=dataset["val"],
-        compute_metrics=partial(
-            model.compute_metrics, id2label=dataset_config.id2label
-        ),
+        compute_metrics=model.compute_metrics,
         callbacks=[EarlyStoppingCallback(early_stopping_patience=2)],
         data_collator=model.data_collator,
     )

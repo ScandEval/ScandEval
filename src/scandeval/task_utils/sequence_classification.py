@@ -22,7 +22,6 @@ logger = logging.getLogger("scandeval")
 
 def compute_metrics(
     model_outputs_and_labels: tuple["Predictions", "Labels"],
-    id2label: dict[int, str],
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
 ) -> dict[str, float]:
@@ -32,8 +31,6 @@ def compute_metrics(
         model_outputs_and_labels:
             The first sequence contains the model outputs and the second sequence
             contains the true labels.
-        id2label:
-            Conversion of indices to labels.
         dataset_config:
             The configuration of the dataset.
         benchmark_config:
@@ -44,7 +41,7 @@ def compute_metrics(
         values.
     """
     model_outputs, labels = model_outputs_and_labels
-    label2id = {label: idx for idx, label in id2label.items()}
+    label2id = {label: idx for idx, label in dataset_config.id2label.items()}
     raise_if_model_output_contains_nan_values(model_output=model_outputs)
 
     metrics = {

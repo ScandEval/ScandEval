@@ -169,9 +169,7 @@ def block_terminal_output():
     litellm.suppress_debug_info = True
 
 
-def get_class_by_name(
-    class_name: str | list[str], module_name: str | None = None
-) -> t.Type | None:
+def get_class_by_name(class_name: str | list[str], module_name: str) -> t.Type | None:
     """Get a class by its name.
 
     Args:
@@ -181,9 +179,7 @@ def get_class_by_name(
             same name, but written in snake_case. If a list of strings is passed, the
             first class that is found is returned.
         module_name:
-            The name of the module where the class is located. If None then the module
-            name is assumed to be the same as the class name, but written in
-            snake_case. Defaults to None.
+            The name of the module where the class is located.
 
     Returns:
         The class. If the class is not found, None is returned.
@@ -193,25 +189,12 @@ def get_class_by_name(
 
     error_messages = list()
     for name in class_name:
-        name_snake = name.replace("-", "_")
-        name_pascal = kebab_to_pascal(kebab_string=name)
-
-        module_names = (
-            [module_name]
-            if module_name is not None
-            else [
-                f"scandeval.{name_snake}",
-                f"scandeval.benchmark_datasets.{name_snake}",
-                f"scandeval.benchmark_modules.{name_snake}",
-            ]
-        )
-        for m_name in module_names:
-            try:
-                module = importlib.import_module(name=m_name)
-                class_: t.Type = getattr(module, name_pascal)
-                return class_
-            except (ModuleNotFoundError, AttributeError) as e:
-                error_messages.append(str(e))
+        try:
+            module = importlib.import_module(name=module_name)
+            class_: t.Type = getattr(module, name)
+            return class_
+        except (ModuleNotFoundError, AttributeError) as e:
+            error_messages.append(str(e))
 
     if error_messages:
         errors = "\n- " + "\n- ".join(error_messages)

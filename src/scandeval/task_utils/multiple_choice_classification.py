@@ -1,14 +1,16 @@
 """Utility functions related to the multiple-choice classification task group."""
 
+import hashlib
 import logging
 import typing as t
+from collections import defaultdict
 
+import numpy as np
 from datasets import Dataset
 from transformers import BatchEncoding, PreTrainedTokenizer, Trainer
 
 if t.TYPE_CHECKING:
-    pass
-
+    from ..types import Labels, Predictions
 
 logger = logging.getLogger("scandeval")
 
@@ -19,7 +21,6 @@ class MultipleChoiceClassificationTrainer(Trainer):
     def evaluate(
         self,
         eval_dataset: "Dataset | None" = None,
-        orig_eval_dataset: "Dataset | None" = None,
         ignore_keys: list[str] | None = None,
         metric_key_prefix: str = "eval",
     ) -> dict[str, float] | None:
@@ -29,9 +30,6 @@ class MultipleChoiceClassificationTrainer(Trainer):
             eval_dataset:
                 The dataset to evaluate on. If None, then use the stored evaluation
                 dataset.
-            orig_eval_dataset:
-                The original evaluation dataset, before any postprocessing. If None,
-                then use the stored original evaluation dataset.
             ignore_keys:
                 The keys to ignore when computing the metrics.
             metric_key_prefix:
@@ -42,31 +40,22 @@ class MultipleChoiceClassificationTrainer(Trainer):
         """
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
 
-        # Temporarily disable metric computation, we will do it in the loop here.
-        compute_metrics = self.compute_metrics  # type: ignore[has-type]
-        self.compute_metrics = None
         eval_loop = (
             self.prediction_loop
             if self.args.use_legacy_prediction_loop
             else self.evaluation_loop
         )
-        try:
-            output = eval_loop(
-                eval_dataloader,
-                description="Evaluation",
-                prediction_loss_only=True if compute_metrics is None else None,
-                ignore_keys=ignore_keys,
-                metric_key_prefix=metric_key_prefix,
-            )
-        finally:
-            self.compute_metrics = compute_metrics
+        output = eval_loop(
+            eval_dataloader,
+            description="Evaluation",
+            prediction_loss_only=None,
+            ignore_keys=ignore_keys,
+            metric_key_prefix=metric_key_prefix,
+        )
 
-        if orig_eval_dataset is not None:
+        if metric_key_prefix == "test":
             preds_and_labels = postprocess_predictions_and_labels(
-                predictions=output.predictions,
-                dataset=orig_eval_dataset,
-                prepared_dataset=eval_dataset,
-                cls_token_index=self.cls_token_id,
+                predictions=output.predictions, dataset=eval_dataset
             )
             output.metrics.update(self.compute_metrics(preds_and_labels))
 
@@ -90,11 +79,10 @@ class MultipleChoiceClassificationTrainer(Trainer):
         return output.metrics
 
 
-# TODO: Implement this
-def prepare_train_examples(
+def prepare_examples(
     examples: "BatchEncoding", tokenizer: "PreTrainedTokenizer"
 ) -> "BatchEncoding":
-    """Prepare the features for training.
+    """Prepare the features.
 
     Args:
         examples:
@@ -105,29 +93,55 @@ def prepare_train_examples(
     Returns:
         The prepared examples.
     """
-    raise NotImplementedError
+    doc: str = examples["text"][0]
+    sections = doc.split("\n")
+    question = sections[0]
+    choices = sections[2:]
+
+    # Sanity check
+    for letter, choice in zip("abcde", choices):
+        assert choice.startswith(f"{letter}. ")
+
+    new_examples = tokenizer(
+        text=[question] * len(choices), text_pair=[choice[3:] for choice in choices]
+    )
+    new_examples["label"] = [
+        int(choice.startswith(f"{letter}. ") and letter == examples["label"][0])
+        for letter, choice in zip("abcde", choices)
+    ]
+    new_examples["id"] = [hashlib.md5(string=doc.encode()).hexdigest()] * len(choices)
+    return new_examples
 
 
-# TODO: Implement this
 def postprocess_predictions_and_labels(
-    predictions: list,
-    dataset: "Dataset",
-    prepared_dataset: "Dataset",
-    cls_token_index: int,
-) -> tuple[list[dict], list[dict]]:
-    """Postprocess the predictions and labels, to allow easier metric computation.
+    predictions: np.ndarray, dataset: "Dataset"
+) -> tuple["Predictions", "Labels"]:
+    """Postprocess the predictions and labels.
 
     Args:
         predictions:
-            A pair of (start_logits, end_logits) predictions.
+            The model predictions, of shape (num_examples, 2).
         dataset:
             The dataset containing the examples.
-        prepared_dataset:
-            The dataset containing the prepared examples.
-        cls_token_index:
-            The index of the CLS token.
 
     Returns:
         The postprocessed predictions and labels.
     """
-    raise NotImplementedError
+    mapping = {0: "a", 1: "b", 2: "c", 3: "d", 4: "e"}
+
+    all_predictions: "Predictions" = list()
+    all_labels: "Labels" = list()
+
+    pred_label_dict = defaultdict(list)
+    for pred_arr, example in zip(predictions, dataset):
+        pred_label_dict[example["id"]].append((pred_arr[1], example["label"]))
+
+    # Compute the final predictions and labels
+    for id_ in set(dataset["id"]):
+        predictions, labels = zip(*pred_label_dict[id_])
+        prediction: str = mapping[np.argmax(predictions).item()]
+        label: str = mapping[np.argmax(labels).item()]
+        all_predictions.append(prediction)
+        all_labels.append(label)
+
+    return all_predictions, all_labels

@@ -282,12 +282,12 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 | TaskGroup.TOKEN_CLASSIFICATION
             ):
                 return Trainer
-            case TaskGroup.QUESTION_ANSWERING:
-                return question_answering.QuestionAnsweringTrainer
             case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
                 return (
                     multiple_choice_classification.MultipleChoiceClassificationTrainer
                 )
+            case TaskGroup.QUESTION_ANSWERING:
+                return question_answering.QuestionAnsweringTrainer
             case _:
                 raise NotImplementedError(
                     f"Unsupported task group: {self.dataset_config.task.task_group}."
@@ -331,13 +331,47 @@ class HuggingFaceEncoderModel(BenchmarkModule):
             return self._tokenizer(text=examples["text"], truncation=True, padding=True)
 
         match task.task_group:
-            case (
-                TaskGroup.SEQUENCE_CLASSIFICATION
-                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
-            ):
+            case TaskGroup.SEQUENCE_CLASSIFICATION:
                 dataset = dataset.map(
                     numericalise_labels, batched=True, load_from_cache_file=False
                 ).map(tokenise, batched=True, load_from_cache_file=False)
+
+            case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
+                dataset = DatasetDict(
+                    train=dataset["train"].map(
+                        partial(
+                            multiple_choice_classification.prepare_examples,
+                            tokenizer=self._tokenizer,
+                        ),
+                        batched=True,
+                        batch_size=1,
+                        remove_columns=dataset["train"].column_names,
+                        load_from_cache_file=False,
+                        keep_in_memory=True,
+                    ),
+                    val=dataset["val"].map(
+                        partial(
+                            multiple_choice_classification.prepare_examples,
+                            tokenizer=self._tokenizer,
+                        ),
+                        batched=True,
+                        batch_size=1,
+                        remove_columns=dataset["val"].column_names,
+                        load_from_cache_file=False,
+                        keep_in_memory=True,
+                    ),
+                    test=dataset["test"].map(
+                        partial(
+                            multiple_choice_classification.prepare_examples,
+                            tokenizer=self._tokenizer,
+                        ),
+                        batched=True,
+                        batch_size=1,
+                        remove_columns=dataset["test"].column_names,
+                        load_from_cache_file=False,
+                        keep_in_memory=True,
+                    ),
+                )
 
             case TaskGroup.TEXT_TO_TEXT:
                 dataset = dataset.map(
@@ -521,11 +555,18 @@ def load_model_and_tokenizer(
     from_flax = model_config.framework == Framework.JAX
     ignore_mismatched_sizes = False
 
+    # Special case where there is a mismatch between the labels during training and
+    # testing
+    if dataset_config.task.task_group == TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
+        id2label = {0: "0", 1: "1"}
+    else:
+        id2label = dataset_config.id2label
+
     config = load_hf_model_config(
         model_id=model_id,
-        num_labels=dataset_config.num_labels,
-        id2label=dataset_config.id2label,
-        label2id=dataset_config.label2id,
+        num_labels=len(id2label),
+        id2label=id2label,
+        label2id={label: idx for idx, label in id2label.items()},
         revision=model_config.revision,
         model_cache_dir=model_config.model_cache_dir,
         api_key=benchmark_config.api_key,
@@ -558,7 +599,8 @@ def load_model_and_tokenizer(
         try:
             # Get the model class associated with the supertask
             model_cls_or_none: t.Type["PreTrainedModel"] | None = get_class_by_name(
-                class_name=f"auto-model-for-{task_group}", module_name="transformers"
+                class_name=task_group_to_class_name(task_group=task_group),
+                module_name="transformers",
             )
 
             # If the model class could not be found then raise an error
@@ -1060,3 +1102,19 @@ def align_model_and_tokenizer(
         tokenizer.bos_token_id = tokenizer.eos_token_id
 
     return model, tokenizer
+
+
+def task_group_to_class_name(task_group: TaskGroup) -> str:
+    """Convert a task group to a class name.
+
+    Args:
+        task_group:
+            The task group.
+
+    Returns:
+        The class name.
+    """
+    pascal_case = task_group.title().replace("_", "")
+    special_case_mapping = dict(MultipleChoiceClassification="SequenceClassification")
+    pascal_case = special_case_mapping.get(pascal_case, pascal_case)
+    return f"AutoModelFor{pascal_case}"

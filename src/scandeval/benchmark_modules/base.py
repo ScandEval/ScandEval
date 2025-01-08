@@ -185,13 +185,15 @@ class BenchmarkModule(ABC):
             The function used to compute the metrics.
         """
         match self.dataset_config.task.task_group:
-            case (
-                TaskGroup.SEQUENCE_CLASSIFICATION
-                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
-            ):
+            case TaskGroup.SEQUENCE_CLASSIFICATION:
                 return partial(
                     sequence_classification.compute_metrics,
-                    id2label=self.dataset_config.id2label,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=self.benchmark_config,
+                )
+            case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
+                return partial(
+                    sequence_classification.compute_metrics,
                     dataset_config=self.dataset_config,
                     benchmark_config=self.benchmark_config,
                 )
