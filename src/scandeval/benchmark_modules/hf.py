@@ -30,9 +30,10 @@ from transformers import (
     PreTrainedTokenizer,
     Trainer,
 )
+from transformers.modelcard import TASK_MAPPING
 from urllib3.exceptions import RequestError
 
-from ..constants import DUMMY_FILL_VALUE, GENERATIVE_MODEL_TASKS, GENERATIVE_TAGS
+from ..constants import DUMMY_FILL_VALUE, GENERATIVE_MODEL_TASKS
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType
 from ..exceptions import (
@@ -703,7 +704,26 @@ def get_model_repo_info(
 
     pipeline_tag = model_info.pipeline_tag
     if pipeline_tag is None:
-        if any(tag in GENERATIVE_TAGS for tag in tags):
+        hf_config = load_hf_model_config(
+            model_id=model_id,
+            num_labels=0,
+            id2label=dict(),
+            label2id=dict(),
+            revision=revision,
+            model_cache_dir=create_model_cache_dir(
+                cache_dir=benchmark_config.cache_dir, model_id=model_id
+            ),
+            api_key=benchmark_config.api_key,
+            trust_remote_code=benchmark_config.trust_remote_code,
+            run_with_cli=benchmark_config.run_with_cli,
+        )
+        class_names = hf_config.architectures
+        generative_class_names = [
+            class_name
+            for model_task in GENERATIVE_MODEL_TASKS
+            for class_name in TASK_MAPPING[model_task].values()
+        ]
+        if any(class_name in generative_class_names for class_name in class_names):
             pipeline_tag = "text-generation"
         else:
             pipeline_tag = "fill-mask"
