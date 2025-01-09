@@ -209,8 +209,7 @@ def generate_single_iteration(
         )
 
     itr_scores: dict[str, float] = model.compute_metrics(
-        model_outputs_and_labels=(all_preds, ground_truth),
-        id2label=dataset_config.id2label,
+        model_outputs_and_labels=(all_preds, ground_truth)
     )
 
     return itr_scores

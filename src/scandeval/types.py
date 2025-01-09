@@ -21,15 +21,12 @@ class ComputeMetricsFunction(t.Protocol):
         model_outputs_and_labels: tuple[
             NDArray | list[str] | list[list[str]], NDArray | list[str] | list[list[str]]
         ],
-        id2label: dict[int, str],
     ) -> dict[str, float]:
         """Compute the metrics.
 
         Args:
             model_outputs_and_labels:
                 The model outputs and labels.
-            id2label:
-                The mapping from label IDs to labels.
 
         Returns:
             The computed metrics.

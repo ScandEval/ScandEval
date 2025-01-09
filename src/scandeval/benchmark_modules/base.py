@@ -216,8 +216,6 @@ class BenchmarkModule(ABC):
                     dataset_config=self.dataset_config,
                     benchmark_config=self.benchmark_config,
                 )
-            case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
-                raise NotImplementedError
             case _:
                 raise NotImplementedError(
                     f"Unsupported task group: {self.dataset_config.task.task_group}."
