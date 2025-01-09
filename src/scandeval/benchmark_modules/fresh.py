@@ -19,7 +19,7 @@ from transformers import (
 )
 
 from ..data_models import BenchmarkConfig, ModelConfig
-from ..enums import Framework, ModelType
+from ..enums import Framework, ModelType, TaskGroup
 from ..exceptions import (
     InvalidBenchmark,
     InvalidModel,
@@ -155,26 +155,29 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
         )
         real_model_id = fresh_to_real_model_id_mapping[model_id]
 
-        match self.dataset_config.task.supertask:
-            case "sequence-classification":
+        match self.dataset_config.task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 model_cls_mapping = dict(
                     fresh_xlm_roberta_base=XLMRobertaForSequenceClassification,
                     fresh_electra_small=ElectraForSequenceClassification,
                 )
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 model_cls_mapping = dict(
                     fresh_xlm_roberta_base=XLMRobertaForTokenClassification,
                     fresh_electra_small=ElectraForTokenClassification,
                 )
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 model_cls_mapping = dict(
                     fresh_xlm_roberta_base=XLMRobertaForQuestionAnswering,
                     fresh_electra_small=ElectraForQuestionAnswering,
                 )
             case _:
                 raise InvalidBenchmark(
-                    f"Supertask {self.dataset_config.task.supertask} is not supported "
-                    f"for model {self.model_config.model_id}"
+                    f"Task group {self.dataset_config.task.task_group} is not "
+                    f"supported for model {self.model_config.model_id}."
                 )
         model_cls = model_cls_mapping[model_id]
 
@@ -190,7 +193,7 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
         )
         model = model_cls(config)
 
-        if self.dataset_config.task.supertask == "question-answering":
+        if self.dataset_config.task.task_group == TaskGroup.QUESTION_ANSWERING:
             model = setup_model_for_question_answering(model=model)
 
         # Load the tokenizer. If the model is a subclass of a RoBERTa model then we

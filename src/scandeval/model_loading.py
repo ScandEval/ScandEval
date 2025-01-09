@@ -8,7 +8,7 @@ from .benchmark_modules import (
     LiteLLMModel,
     VLLMModel,
 )
-from .constants import GENERATIVE_DATASET_SUPERTASKS, GENERATIVE_DATASET_TASKS
+from .constants import GENERATIVE_DATASET_TASK_GROUPS, GENERATIVE_DATASET_TASKS
 from .enums import ModelType
 from .exceptions import InvalidBenchmark
 
@@ -54,7 +54,7 @@ def load_model(
     # Refuse to benchmark non-generative models on generative tasks
     if (
         (
-            dataset_config.task.supertask in GENERATIVE_DATASET_SUPERTASKS
+            dataset_config.task.task_group in GENERATIVE_DATASET_TASK_GROUPS
             or dataset_config.task.name in GENERATIVE_DATASET_TASKS
         )
         and model is not None

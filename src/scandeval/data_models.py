@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 import pydantic
 import torch
 
-from .enums import Device, Framework, ModelType
+from .enums import Device, Framework, ModelType, TaskGroup
 from .types import ScoreDict
 
 
@@ -60,8 +60,8 @@ class Task:
     Attributes:
         name:
             The name of the task.
-        supertask:
-            The supertask of the task, describing the overall type of task.
+        task_group:
+            The task group of the task.
         metrics:
             The metrics used to evaluate the task.
         labels:
@@ -69,7 +69,7 @@ class Task:
     """
 
     name: str
-    supertask: str
+    task_group: TaskGroup
     metrics: list[MetricConfig]
     labels: list[str]
 

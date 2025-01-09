@@ -30,9 +30,9 @@ from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
 from transformers import Trainer
 
-from ..constants import MAX_LOGPROBS, SUPERTASKS_USING_LOGPROBS, TASKS_USING_JSON
+from ..constants import MAX_LOGPROBS, TASK_GROUPS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
-from ..enums import BatchingPreference, Framework, ModelType
+from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
 from ..exceptions import (
     InvalidBenchmark,
     NeedsAdditionalArgument,
@@ -139,7 +139,7 @@ class LiteLLMModel(BenchmarkModule):
             api_version=self.benchmark_config.api_version,
         )
 
-        if self.dataset_config.task.supertask in SUPERTASKS_USING_LOGPROBS:
+        if self.dataset_config.task.task_group in TASK_GROUPS_USING_LOGPROBS:
             generation_kwargs["logprobs"] = True
             generation_kwargs["top_logprobs"] = MAX_LOGPROBS
 
@@ -417,24 +417,27 @@ class LiteLLMModel(BenchmarkModule):
         Returns:
             The function used to extract the labels from the generated output.
         """
-        match self.dataset_config.task.supertask:
-            case "sequence-classification":
+        match self.dataset_config.task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 return partial(
                     sequence_classification.extract_labels_from_generation,
                     dataset_config=self.dataset_config,
                 )
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 return text_to_text.extract_labels_from_generation
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 return partial(
                     token_classification.extract_labels_from_generation,
                     dataset_config=self.dataset_config,
                 )
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 return question_answering.extract_labels_from_generation
             case _:
                 raise NotImplementedError(
-                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                    f"Unsupported task group: {self.dataset_config.task.task_group}."
                 )
 
     @property
@@ -561,7 +564,7 @@ class LiteLLMModel(BenchmarkModule):
         Returns:
             The prepared dataset.
         """
-        if task.supertask == "question-answering":
+        if task.task_group == TaskGroup.QUESTION_ANSWERING:
             dataset = dataset.map(
                 lambda examples: dict(
                     label=[
@@ -624,8 +627,11 @@ class LiteLLMModel(BenchmarkModule):
         few_shot_examples: list[dict[str, t.Any]] = list()
         shuffled_train = dataset["train"].shuffle(seed=random_seed)
 
-        match task.supertask:
-            case "sequence-classification":
+        match task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 labels = it.cycle(self.dataset_config.task.labels)
                 while (
                     len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
@@ -642,7 +648,7 @@ class LiteLLMModel(BenchmarkModule):
                         lambda x: x["text"] != example["text"]
                     )
 
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 while (
                     len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
                 ):
@@ -652,7 +658,7 @@ class LiteLLMModel(BenchmarkModule):
                         lambda x: x["text"] != example["text"]
                     )
 
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 labels = it.cycle(
                     [
                         label.lower()
@@ -675,7 +681,7 @@ class LiteLLMModel(BenchmarkModule):
                         lambda x: x["text"] != example["text"]
                     )
 
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 # Locate the maximum number of tokens that constitutes a short example
                 for max_num_tokens in [512, 1024, 2048, 4096, 8192]:
                     train_with_short_examples = dataset["train"].filter(
@@ -700,9 +706,7 @@ class LiteLLMModel(BenchmarkModule):
                     )
 
             case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
+                raise NotImplementedError(f"Unsupported task group: {task.task_group}.")
 
         random.seed(random_seed)
         random.shuffle(few_shot_examples)
@@ -746,8 +750,11 @@ class LiteLLMModel(BenchmarkModule):
             prompt = self.dataset_config.instruction_prompt.format(**kwargs)
             return prompt, label
 
-        match task.supertask:
-            case "sequence-classification":
+        match task.task_group:
+            case (
+                TaskGroup.SEQUENCE_CLASSIFICATION
+                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+            ):
                 few_shot_sections = [
                     create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
@@ -760,7 +767,7 @@ class LiteLLMModel(BenchmarkModule):
                     for text in examples["text"]
                 ]
 
-            case "text-to-text":
+            case TaskGroup.TEXT_TO_TEXT:
                 few_shot_sections = [
                     create_prompt(
                         text=example["text"].replace("\n", " ").strip(),
@@ -773,7 +780,7 @@ class LiteLLMModel(BenchmarkModule):
                     for text in examples["text"]
                 ]
 
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
 
                 def create_label(example: dict) -> str:
                     prompt_labels = self.dataset_config.prompt_label_mapping.values()
@@ -805,7 +812,7 @@ class LiteLLMModel(BenchmarkModule):
                     for tokens in examples["tokens"]
                 ]
 
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 few_shot_sections = [
                     create_prompt(
                         text=example["context"].replace("\n", " ").strip(),
@@ -826,9 +833,7 @@ class LiteLLMModel(BenchmarkModule):
                 ]
 
             case _:
-                raise NotImplementedError(
-                    f"Unsupported task supertask: {task.supertask}."
-                )
+                raise NotImplementedError(f"Unsupported task group: {task.task_group}.")
 
         few_shot_messages = [
             dict(role=role, content=content)

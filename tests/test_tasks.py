@@ -35,7 +35,6 @@ class TestGetAllTasks:
             "summarization",
             "knowledge",
             "common-sense-reasoning",
-            "text-modelling",
             "multiple-choice-reading-comprehension",
             "speed",
         ],

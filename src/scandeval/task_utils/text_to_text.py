@@ -1,4 +1,4 @@
-"""Utility functions related to the text-to-text supertask."""
+"""Utility functions related to the text-to-text task group."""
 
 import logging
 import typing as t
@@ -25,7 +25,6 @@ logger = logging.getLogger("scandeval")
 
 def compute_metrics(
     model_outputs_and_labels: tuple["Predictions", "Labels"],
-    id2label: dict[int, str],
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
 ) -> dict[str, float]:
@@ -35,8 +34,6 @@ def compute_metrics(
         model_outputs_and_labels:
             The first sequence contains the model outputs and the second sequence
             contains the true labels.
-        id2label:
-            Conversion of indices to labels.
         dataset_config:
             The configuration of the dataset.
         benchmark_config:

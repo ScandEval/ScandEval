@@ -1,4 +1,4 @@
-"""Utility functions related to the question-answering supertask."""
+"""Utility functions related to the question-answering task group."""
 
 import logging
 import typing as t
@@ -115,7 +115,6 @@ class QuestionAnsweringTrainer(Trainer):
 
 def compute_metrics(
     model_outputs_and_labels: tuple["Predictions", "Labels"],
-    id2label: dict[int, str],
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
 ) -> dict[str, float]:
@@ -125,8 +124,6 @@ def compute_metrics(
         model_outputs_and_labels:
             The first sequence contains the model outputs and the second sequence
             contains the true labels.
-        id2label:
-            Conversion of indices to labels.
         dataset_config:
             The configuration of the dataset.
         benchmark_config:

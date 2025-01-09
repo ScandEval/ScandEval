@@ -1,6 +1,7 @@
 """All benchmarks tasks used in ScandEval."""
 
 from .data_models import MetricConfig, Task
+from .enums import TaskGroup
 
 
 def get_all_tasks() -> dict[str, Task]:
@@ -14,7 +15,7 @@ def get_all_tasks() -> dict[str, Task]:
 
 LA = Task(
     name="linguistic-acceptability",
-    supertask="sequence-classification",
+    task_group=TaskGroup.SEQUENCE_CLASSIFICATION,
     metrics=[
         MetricConfig(
             name="mcc",
@@ -36,7 +37,7 @@ LA = Task(
 
 NER = Task(
     name="named-entity-recognition",
-    supertask="token-classification",
+    task_group=TaskGroup.TOKEN_CLASSIFICATION,
     metrics=[
         MetricConfig(
             name="micro_f1_no_misc",
@@ -67,7 +68,7 @@ NER = Task(
 
 RC = Task(
     name="reading-comprehension",
-    supertask="question-answering",
+    task_group=TaskGroup.QUESTION_ANSWERING,
     metrics=[
         MetricConfig(
             name="f1",
@@ -90,7 +91,7 @@ RC = Task(
 
 SENT = Task(
     name="sentiment-classification",
-    supertask="sequence-classification",
+    task_group=TaskGroup.SEQUENCE_CLASSIFICATION,
     metrics=[
         MetricConfig(
             name="mcc",
@@ -112,7 +113,7 @@ SENT = Task(
 
 SUMM = Task(
     name="summarization",
-    supertask="text-to-text",
+    task_group=TaskGroup.TEXT_TO_TEXT,
     metrics=[
         MetricConfig(
             name="bertscore",
@@ -136,7 +137,7 @@ SUMM = Task(
 
 KNOW = Task(
     name="knowledge",
-    supertask="sequence-classification",
+    task_group=TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION,
     metrics=[
         MetricConfig(
             name="mcc",
@@ -157,7 +158,7 @@ KNOW = Task(
 
 MCRC = Task(
     name="multiple-choice-reading-comprehension",
-    supertask="sequence-classification",
+    task_group=TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION,
     metrics=[
         MetricConfig(
             name="mcc",
@@ -178,7 +179,7 @@ MCRC = Task(
 
 COMMON_SENSE = Task(
     name="common-sense-reasoning",
-    supertask="sequence-classification",
+    task_group=TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION,
     metrics=[
         MetricConfig(
             name="mcc",
@@ -197,24 +198,9 @@ COMMON_SENSE = Task(
 )
 
 
-TEXT_MODELLING = Task(
-    name="text-modelling",
-    supertask="text-modelling",
-    metrics=[
-        MetricConfig(
-            name="perplexity",
-            pretty_name="Perplexity",
-            huggingface_id="perplexity",
-            results_key="mean_perplexity",
-        )
-    ],
-    labels=[],
-)
-
-
 SPEED = Task(
     name="speed",
-    supertask="sequence-classification",
+    task_group=TaskGroup.SPEED,
     metrics=[
         MetricConfig(
             name="speed",

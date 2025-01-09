@@ -19,7 +19,7 @@ from ..data_models import (
     ModelConfig,
     Task,
 )
-from ..enums import BatchingPreference
+from ..enums import BatchingPreference, TaskGroup
 from ..exceptions import NeedsEnvironmentVariable, NeedsExtraInstalled
 from ..task_utils import (
     question_answering,
@@ -184,28 +184,33 @@ class BenchmarkModule(ABC):
         Returns:
             The function used to compute the metrics.
         """
-        match self.dataset_config.task.supertask:
-            case "sequence-classification":
+        match self.dataset_config.task.task_group:
+            case TaskGroup.SEQUENCE_CLASSIFICATION:
                 return partial(
                     sequence_classification.compute_metrics,
-                    id2label=self.dataset_config.id2label,
                     dataset_config=self.dataset_config,
                     benchmark_config=self.benchmark_config,
                 )
-            case "text-to-text":
+            case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
+                return partial(
+                    sequence_classification.compute_metrics,
+                    dataset_config=self.dataset_config,
+                    benchmark_config=self.benchmark_config,
+                )
+            case TaskGroup.TEXT_TO_TEXT:
                 return partial(
                     text_to_text.compute_metrics,
                     dataset_config=self.dataset_config,
                     benchmark_config=self.benchmark_config,
                 )
-            case "token-classification":
+            case TaskGroup.TOKEN_CLASSIFICATION:
                 return partial(
                     token_classification.compute_metrics,
                     has_misc_tags=self.buffer.get("has_misc_tags", True),
                     dataset_config=self.dataset_config,
                     benchmark_config=self.benchmark_config,
                 )
-            case "question-answering":
+            case TaskGroup.QUESTION_ANSWERING:
                 return partial(
                     question_answering.compute_metrics,
                     dataset_config=self.dataset_config,
@@ -213,7 +218,7 @@ class BenchmarkModule(ABC):
                 )
             case _:
                 raise NotImplementedError(
-                    f"Unsupported task supertask: {self.dataset_config.task.supertask}."
+                    f"Unsupported task group: {self.dataset_config.task.task_group}."
                 )
 
     @property
@@ -258,7 +263,7 @@ class BenchmarkModule(ABC):
             prepared_dataset = self.prepare_dataset(
                 dataset=dataset, task=task, itr_idx=idx
             )
-            if self.dataset_config.task.supertask == "token-classification":
+            if self.dataset_config.task.task_group == TaskGroup.TOKEN_CLASSIFICATION:
                 labels_in_train: set[str] = {
                     tag for tag_list in dataset["train"]["labels"] for tag in tag_list
                 }

@@ -1,4 +1,4 @@
-"""Utility functions related to the token-classification supertask."""
+"""Utility functions related to the token-classification task group."""
 
 import importlib.util
 import logging
@@ -29,7 +29,6 @@ logger = logging.getLogger("scandeval")
 
 def compute_metrics(
     model_outputs_and_labels: tuple["Predictions", "Labels"],
-    id2label: dict[int, str],
     has_misc_tags: bool,
     dataset_config: "DatasetConfig",
     benchmark_config: "BenchmarkConfig",
@@ -40,8 +39,6 @@ def compute_metrics(
         model_outputs_and_labels:
             The first array contains the probability predictions and the second
             array contains the true labels.
-        id2label:
-            Conversion of indices to labels.
         has_misc_tags:
             Whether the dataset has MISC tags.
         dataset_config:
@@ -74,7 +71,7 @@ def compute_metrics(
         # Remove ignored index (special tokens)
         predictions = [
             [
-                id2label[pred_id]
+                dataset_config.id2label[pred_id]
                 for pred_id, lbl_id in zip(pred, label)
                 if lbl_id != -100
             ]
@@ -83,7 +80,7 @@ def compute_metrics(
         labels = [
             [
                 (
-                    id2label[int(lbl_id)]
+                    dataset_config.id2label[int(lbl_id)]
                     if isinstance(lbl_id, int) or isinstance(lbl_id, np.int_)
                     else lbl_id
                 )
