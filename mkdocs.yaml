@@ -31,6 +31,9 @@ theme:
   icon:
     repo: fontawesome/brands/github
     logo: material/chart-bar
+markdown_extensions:
+  - pymdownx.blocks.tab:
+      alternate_style: true
 plugins:
   - include-markdown
   - search
