@@ -1,9 +1,9 @@
 """Constants used throughout the project."""
 
-# This is used as input to generative models; it cannot be a special token
 from .enums import TaskGroup
 from .tasks import COMMON_SENSE, KNOW, MCRC, NER
 
+# This is used as input to generative models; it cannot be a special token
 DUMMY_FILL_VALUE = 100
 
 
