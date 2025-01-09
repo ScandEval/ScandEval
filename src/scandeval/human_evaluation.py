@@ -630,8 +630,7 @@ class HumanEvaluator:
         )
         ground_truth = self.active_dataset["label"]
         itr_scores: dict[str, float] = self.compute_metrics(
-            model_outputs_and_labels=(all_preds, ground_truth),
-            id2label=self.dataset_config.id2label,
+            model_outputs_and_labels=(all_preds, ground_truth)
         )
 
         # We reverse the order, as the Info messages are printed in reverse order
