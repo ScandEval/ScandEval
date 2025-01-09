@@ -7,11 +7,22 @@ hide:
 👈 Choose a leaderboard on the left to see the results.
 
 
+## 🏷️ Types of Leaderboards
+
+Each language has two leaderboards:
+
+- **Generative Leaderboard**: This leaderboard shows the performance of models that can
+  generate text. These models have been evaluated on _all_ [tasks](/tasks), both NLU and
+  NLG.
+- **NLU Leaderboard**: This leaderboard shows the performance of models that can only
+  understand text, and not generate text themselves. These models have been evaluated on
+  the NLU tasks only.
+
+
 ## 📊 How to Read the Leaderboards
 
-The main score columns are the `Reading` and `Writing` columns, showing the [mean rank
-score](/methodology) of the model across all [NLU and NLG tasks](/tasks/#overview),
-respectively. The lower the rank, the better the model.
+The main score column is the `Rank`, showing the [mean rank score](/methodology) of the
+model across all the tasks in the leaderboard. The lower the rank, the better the model.
 
 The columns that follow the rank columns are metadata about the model:
 

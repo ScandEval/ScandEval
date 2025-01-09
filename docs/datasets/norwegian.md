@@ -112,8 +112,8 @@ Here are a few examples from the training split:
 ```
 ```json
 {
-  "tokens": array(['«', 'Han', 'grät', 'sina', 'första', 'tårar', 'på', 'Oslo', 'central', '.'], dtype=object),
-  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
+  'tokens': array(['Han', 'tok', 'fram', 'pistolen', 'og', 'dro', 'tilbake', 'til', 'Skaregata', '2', '.'], dtype=object),
+  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'I-LOC', 'O'], dtype=object)
 }
 ```
 

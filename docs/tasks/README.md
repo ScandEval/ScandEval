@@ -10,7 +10,7 @@ hide:
 
 This page covers all the evaluation tasks used in ScandEval. These tasks fall under two
 categories, corresponding to whether the models should merely _understand_ the input
-documents, or rather they are also required to _generate_ new text.
+documents (NLU), or rather they are also required to _generate_ new text (NLG).
 
 
 ### NLU Tasks
