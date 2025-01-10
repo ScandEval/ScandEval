@@ -139,9 +139,23 @@ def postprocess_predictions_and_labels(
     # Compute the final predictions and labels
     for id_ in set(dataset["id"]):
         preds, labels = zip(*pred_label_dict[id_])
-        prediction: str = mapping[np.argmax(preds).item()]
-        label: str = mapping[np.argmax(labels).item()]
-        all_predictions.append(prediction)
-        all_labels.append(label)
+
+        # Some IDs appear multiple times in the dataset, since we are bootstrapping.
+        # Here we separate them into their respective groups.
+        assert (
+            len(labels) % sum(labels) == 0
+        ), "The number of labels is not divisible by the sum of the labels."
+        group_size = len(labels) // sum(labels)
+        preds_groups = [
+            preds[i : i + group_size] for i in range(0, len(preds), group_size)
+        ]
+        labels_groups = [
+            labels[i : i + group_size] for i in range(0, len(labels), group_size)
+        ]
+        for preds_group, labels_group in zip(preds_groups, labels_groups):
+            prediction: str = mapping[np.argmax(preds_group).item()]
+            label: str = mapping[np.argmax(labels_group).item()]
+            all_predictions.append(prediction)
+            all_labels.append(label)
 
     return all_predictions, all_labels
