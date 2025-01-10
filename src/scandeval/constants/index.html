@@ -813,7 +813,12 @@
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Constants used throughout the project.&quot;&quot;&quot;</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Constants used throughout the project.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">TaskGroup</span>
+<span class="kn">from</span> <span class="nn">.tasks</span> <span class="kn">import</span> <span class="n">COMMON_SENSE</span><span class="p">,</span> <span class="n">KNOW</span><span class="p">,</span> <span class="n">MCRC</span><span class="p">,</span> <span class="n">NER</span>
 
 <span class="c1"># This is used as input to generative models; it cannot be a special token</span>
 <span class="n">DUMMY_FILL_VALUE</span> <span class="o">=</span> <span class="mi">100</span>
@@ -822,20 +827,19 @@
 <span class="n">GENERATIVE_MODEL_TASKS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;text-generation&quot;</span><span class="p">,</span> <span class="s2">&quot;text2text-generation&quot;</span><span class="p">]</span>
 
 
-<span class="n">GENERATIVE_DATASET_TASKS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;knowledge&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;common-sense-reasoning&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;multiple-choice-reading-comprehension&quot;</span><span class="p">,</span>
+<span class="n">GENERATIVE_DATASET_TASKS</span> <span class="o">=</span> <span class="p">[</span><span class="n">KNOW</span><span class="p">,</span> <span class="n">COMMON_SENSE</span><span class="p">,</span> <span class="n">MCRC</span><span class="p">]</span>
+
+
+<span class="n">GENERATIVE_DATASET_TASK_GROUPS</span> <span class="o">=</span> <span class="p">[</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span><span class="p">]</span>
+
+
+<span class="n">TASKS_USING_JSON</span> <span class="o">=</span> <span class="p">[</span><span class="n">NER</span><span class="p">]</span>
+
+
+<span class="n">TASK_GROUPS_USING_LOGPROBS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span><span class="p">,</span>
+    <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">,</span>
 <span class="p">]</span>
-
-
-<span class="n">GENERATIVE_DATASET_SUPERTASKS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;text-to-text&quot;</span><span class="p">,</span> <span class="s2">&quot;text-modelling&quot;</span><span class="p">]</span>
-
-
-<span class="n">TASKS_USING_JSON</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;named-entity-recognition&quot;</span><span class="p">]</span>
-
-
-<span class="n">SUPERTASKS_USING_LOGPROBS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sequence-classification&quot;</span><span class="p">]</span>
 
 
 <span class="n">METRIC_ATTRIBUTES_TAKING_UP_MEMORY</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cached_bertscorer&quot;</span><span class="p">]</span>

@@ -821,6 +821,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#scandeval.enums.TaskGroup" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskGroup
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -953,7 +962,33 @@
 <span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
-<span class="normal">107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Enums used in the project.&quot;&quot;&quot;</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Enums used in the project.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
 
@@ -1060,6 +1095,32 @@
     <span class="n">NO_PREFERENCE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">SINGLE_SAMPLE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">ALL_AT_ONCE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">TaskGroup</span><span class="p">(</span><span class="n">AutoStrEnum</span><span class="p">):</span><div class="mkapi-source-link" id="scandeval.enums.TaskGroup"><a href="../../../api/scandeval/enums/#scandeval.enums.TaskGroup" title="Go to docs">docs</a></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The overall task group of a task.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        SEQUENCE_CLASSIFICATION:</span>
+<span class="sd">            Classification of documents.</span>
+<span class="sd">        MULTIPLE_CHOICE_CLASSIFICATION:</span>
+<span class="sd">            Classification of documents with multiple-choice options.</span>
+<span class="sd">        TOKEN_CLASSIFICATION:</span>
+<span class="sd">            Token-level classification.</span>
+<span class="sd">        QUESTION_ANSWERING:</span>
+<span class="sd">            Extractive question answering.</span>
+<span class="sd">        TEXT_TO_TEXT:</span>
+<span class="sd">            Text-to-text generation.</span>
+<span class="sd">        SPEED:</span>
+<span class="sd">            Speed benchmark.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">SEQUENCE_CLASSIFICATION</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">TOKEN_CLASSIFICATION</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">QUESTION_ANSWERING</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">TEXT_TO_TEXT</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">SPEED</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
 
 

@@ -1022,23 +1022,10 @@
 <span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All benchmarks tasks used in ScandEval.&quot;&quot;&quot;</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All benchmarks tasks used in ScandEval.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">MetricConfig</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">TaskGroup</span>
 
 
 <span class="k">def</span> <span class="nf">get_all_tasks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Task</span><span class="p">]:</span><div class="mkapi-source-link" id="scandeval.tasks.get_all_tasks"><a href="../../../api/scandeval/tasks/#scandeval.tasks.get_all_tasks" title="Go to docs">docs</a></div>
@@ -1052,7 +1039,7 @@
 
 <span class="n">LA</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linguistic-acceptability&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;sequence-classification&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mcc&quot;</span><span class="p">,</span>
@@ -1074,7 +1061,7 @@
 
 <span class="n">NER</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;named-entity-recognition&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;token-classification&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;micro_f1_no_misc&quot;</span><span class="p">,</span>
@@ -1105,7 +1092,7 @@
 
 <span class="n">RC</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;reading-comprehension&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;question-answering&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;f1&quot;</span><span class="p">,</span>
@@ -1128,7 +1115,7 @@
 
 <span class="n">SENT</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sentiment-classification&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;sequence-classification&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mcc&quot;</span><span class="p">,</span>
@@ -1150,7 +1137,7 @@
 
 <span class="n">SUMM</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;summarization&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;text-to-text&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;bertscore&quot;</span><span class="p">,</span>
@@ -1174,7 +1161,7 @@
 
 <span class="n">KNOW</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;knowledge&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;sequence-classification&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mcc&quot;</span><span class="p">,</span>
@@ -1195,7 +1182,7 @@
 
 <span class="n">MCRC</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;multiple-choice-reading-comprehension&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;sequence-classification&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mcc&quot;</span><span class="p">,</span>
@@ -1216,7 +1203,7 @@
 
 <span class="n">COMMON_SENSE</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;common-sense-reasoning&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;sequence-classification&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mcc&quot;</span><span class="p">,</span>
@@ -1235,24 +1222,9 @@
 <span class="p">)</span>
 
 
-<span class="n">TEXT_MODELLING</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;text-modelling&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;text-modelling&quot;</span><span class="p">,</span>
-    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
-        <span class="n">MetricConfig</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;perplexity&quot;</span><span class="p">,</span>
-            <span class="n">pretty_name</span><span class="o">=</span><span class="s2">&quot;Perplexity&quot;</span><span class="p">,</span>
-            <span class="n">huggingface_id</span><span class="o">=</span><span class="s2">&quot;perplexity&quot;</span><span class="p">,</span>
-            <span class="n">results_key</span><span class="o">=</span><span class="s2">&quot;mean_perplexity&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="p">],</span>
-    <span class="n">labels</span><span class="o">=</span><span class="p">[],</span>
-<span class="p">)</span>
-
-
 <span class="n">SPEED</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;speed&quot;</span><span class="p">,</span>
-    <span class="n">supertask</span><span class="o">=</span><span class="s2">&quot;sequence-classification&quot;</span><span class="p">,</span>
+    <span class="n">task_group</span><span class="o">=</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">SPEED</span><span class="p">,</span>
     <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
         <span class="n">MetricConfig</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;speed&quot;</span><span class="p">,</span>

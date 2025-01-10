@@ -16,7 +16,7 @@
     
     
       
-        <title>scandeval.task_utils.text_to_text - ScandEval</title>
+        <title>scandeval.task_utils.multiple_choice_classification - ScandEval</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#scandeval.task_utils.text_to_text" class="md-skip">
+        <a href="#scandeval.task_utils.multiple_choice_classification" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              scandeval.task_utils.text_to_text
+              scandeval.task_utils.multiple_choice_classification
             
           </span>
         </div>
@@ -768,18 +768,42 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#scandeval.task_utils.text_to_text.compute_metrics" class="md-nav__link">
+  <a href="#scandeval.task_utils.multiple_choice_classification.MultipleChoiceClassificationTrainer" class="md-nav__link">
     <span class="md-ellipsis">
-      compute_metrics
+      MultipleChoiceClassificationTrainer
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MultipleChoiceClassificationTrainer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scandeval.task_utils.multiple_choice_classification.MultipleChoiceClassificationTrainer.evaluate" class="md-nav__link">
+    <span class="md-ellipsis">
+      evaluate
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.task_utils.multiple_choice_classification.prepare_examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      prepare_examples
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#scandeval.task_utils.text_to_text.extract_labels_from_generation" class="md-nav__link">
+  <a href="#scandeval.task_utils.multiple_choice_classification.postprocess_predictions_and_labels" class="md-nav__link">
     <span class="md-ellipsis">
-      extract_labels_from_generation
+      postprocess_predictions_and_labels
     </span>
   </a>
   
@@ -800,16 +824,16 @@
                   
 
 
-<h1 style="display: none;">scandeval.task_utils.text_to_text</h1><p class="mkapi-object mkapi-page-object" id="scandeval.task_utils.text_to_text">
+<h1 style="display: none;">scandeval.task_utils.multiple_choice_classification</h1><p class="mkapi-object mkapi-page-object" id="scandeval.task_utils.multiple_choice_classification">
 <span class="mkapi-object-link">
 
 
-<a href="../../../../api/scandeval/task_utils/text_to_text/#scandeval.task_utils.text_to_text" title="Go to docs">docs</a>
+<a href="../../../../api/scandeval/task_utils/multiple_choice_classification/#scandeval.task_utils.multiple_choice_classification" title="Go to docs">docs</a>
 <span class="mkapi-document-toggle" title="Toggle all docs">
 <i class="fa-regular fa-square-minus"></i>
 </span>
 </span><span class="mkapi-object-kind">module</span>
-<span class="mkapi-object-name"><a href="./#scandeval.task_utils.text_to_text" title="scandeval.task_utils.text_to_text">scandeval.task_utils.text_to_text</a></span>
+<span class="mkapi-object-name"><a href="./#scandeval.task_utils.multiple_choice_classification" title="scandeval.task_utils.multiple_choice_classification">scandeval.task_utils.multiple_choice_classification</a></span>
 </p>
 <div class="mkapi-source no-copy highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
 <span class="normal">  2</span>
@@ -960,156 +984,178 @@
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Utility functions related to the text-to-text task group.&quot;&quot;&quot;</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Utility functions related to the multiple-choice classification task group.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">t</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
-<span class="kn">import</span> <span class="nn">evaluate</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">evaluate</span> <span class="kn">import</span> <span class="n">EvaluationModule</span>
-
-<span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">METRIC_ATTRIBUTES_TAKING_UP_MEMORY</span>
-<span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfig</span><span class="p">,</span> <span class="n">DatasetConfig</span><span class="p">,</span> <span class="n">GenerativeModelOutput</span>
-<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="n">InvalidBenchmark</span>
-<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">HiddenPrints</span><span class="p">,</span>
-    <span class="n">clear_memory</span><span class="p">,</span>
-    <span class="n">raise_if_model_output_contains_nan_values</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BatchEncoding</span><span class="p">,</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span> <span class="n">Trainer</span>
 
 <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">Labels</span><span class="p">,</span> <span class="n">Predictions</span>
 
-
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;scandeval&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">compute_metrics</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.task_utils.text_to_text.compute_metrics"><a href="../../../../api/scandeval/task_utils/text_to_text/#scandeval.task_utils.text_to_text.compute_metrics" title="Go to docs">docs</a></div>
-    <span class="n">model_outputs_and_labels</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;Predictions&quot;</span><span class="p">,</span> <span class="s2">&quot;Labels&quot;</span><span class="p">],</span>
-    <span class="n">dataset_config</span><span class="p">:</span> <span class="s2">&quot;DatasetConfig&quot;</span><span class="p">,</span>
-    <span class="n">benchmark_config</span><span class="p">:</span> <span class="s2">&quot;BenchmarkConfig&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the metrics needed for evaluation.</span>
+<span class="k">class</span> <span class="nc">MultipleChoiceClassificationTrainer</span><span class="p">(</span><span class="n">Trainer</span><span class="p">):</span><div class="mkapi-source-link" id="scandeval.task_utils.multiple_choice_classification.MultipleChoiceClassificationTrainer"><a href="../../../../api/scandeval/task_utils/multiple_choice_classification/#scandeval.task_utils.multiple_choice_classification.MultipleChoiceClassificationTrainer" title="Go to docs">docs</a></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trainer subclass for question answering tasks.&quot;&quot;&quot;</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        model_outputs_and_labels:</span>
-<span class="sd">            The first sequence contains the model outputs and the second sequence</span>
-<span class="sd">            contains the true labels.</span>
-<span class="sd">        dataset_config:</span>
-<span class="sd">            The configuration of the dataset.</span>
-<span class="sd">        benchmark_config:</span>
-<span class="sd">            The configuration of the benchmark.</span>
+    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.task_utils.multiple_choice_classification.MultipleChoiceClassificationTrainer.evaluate"><a href="../../../../api/scandeval/task_utils/multiple_choice_classification/#scandeval.task_utils.multiple_choice_classification.MultipleChoiceClassificationTrainer.evaluate" title="Go to docs">docs</a></div>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">eval_dataset</span><span class="p">:</span> <span class="s2">&quot;Dataset | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">metric_key_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;eval&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the model on the given dataset.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        A dictionary with the names of the metrics as keys and the metric values as</span>
-<span class="sd">        values.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">model_outputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">model_outputs_and_labels</span>
-    <span class="n">raise_if_model_output_contains_nan_values</span><span class="p">(</span><span class="n">model_output</span><span class="o">=</span><span class="n">model_outputs</span><span class="p">)</span>
+<span class="sd">        Args:</span>
+<span class="sd">            eval_dataset:</span>
+<span class="sd">                The dataset to evaluate on. If None, then use the stored evaluation</span>
+<span class="sd">                dataset.</span>
+<span class="sd">            ignore_keys:</span>
+<span class="sd">                The keys to ignore when computing the metrics.</span>
+<span class="sd">            metric_key_prefix:</span>
+<span class="sd">                The prefix to use for the metric keys.</span>
 
-    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">metric_cfg</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span>
-            <span class="n">evaluate</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-                <span class="n">path</span><span class="o">=</span><span class="n">metric_cfg</span><span class="o">.</span><span class="n">huggingface_id</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">cache_dir</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">metric_cfg</span><span class="o">.</span><span class="n">huggingface_id</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">else</span> <span class="kc">None</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            The metrics computed on the evaluation dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eval_dataloader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_eval_dataloader</span><span class="p">(</span><span class="n">eval_dataset</span><span class="p">)</span>
+
+        <span class="n">eval_loop</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prediction_loop</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">use_legacy_prediction_loop</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluation_loop</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">metric_cfg</span> <span class="ow">in</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">metrics</span>
-    <span class="p">}</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">eval_loop</span><span class="p">(</span>
+            <span class="n">eval_dataloader</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Evaluation&quot;</span><span class="p">,</span>
+            <span class="n">prediction_loss_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">ignore_keys</span><span class="o">=</span><span class="n">ignore_keys</span><span class="p">,</span>
+            <span class="n">metric_key_prefix</span><span class="o">=</span><span class="n">metric_key_prefix</span><span class="p">,</span>
+        <span class="p">)</span>
 
-    <span class="n">model_output_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">model_outputs</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
-    <span class="n">output_is_prob</span> <span class="o">=</span> <span class="n">model_output_dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">output_is_prob</span><span class="p">:</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">model_outputs</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="n">model_outputs</span>
+        <span class="k">if</span> <span class="n">metric_key_prefix</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
+            <span class="n">preds_and_labels</span> <span class="o">=</span> <span class="n">postprocess_predictions_and_labels</span><span class="p">(</span>
+                <span class="n">predictions</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">eval_dataset</span>
+            <span class="p">)</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">(</span><span class="n">preds_and_labels</span><span class="p">))</span>
 
-    <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
-        <span class="n">metric</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">EvaluationModule</span><span class="p">)</span>
-
-        <span class="c1"># Some metrics can be computed on hardware accelerators. In this case we</span>
-        <span class="c1"># start by setting the device to the same device as the model</span>
-        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">type</span>
-
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">with</span> <span class="n">HiddenPrints</span><span class="p">():</span>
-                    <span class="n">score_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span>
-                        <span class="n">predictions</span><span class="o">=</span><span class="n">predictions</span><span class="p">,</span> <span class="n">references</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="o">**</span><span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span>
+            <span class="c1"># Prefix all keys with metric_key_prefix + &#39;_&#39;</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_key_prefix</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">):</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric_key_prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
+                        <span class="n">key</span>
                     <span class="p">)</span>
 
-                <span class="c1"># Clear the cache of the BERTScorer to avoid memory leaks</span>
-                <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">METRIC_ATTRIBUTES_TAKING_UP_MEMORY</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
-                        <span class="nb">delattr</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+        <span class="c1"># Only the main node log the results by default</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">should_log</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">metrics</span><span class="p">)</span>
 
-                <span class="n">clear_memory</span><span class="p">()</span>
-                <span class="k">break</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="c1"># Clear the cache of the BERTScorer to avoid memory leaks</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="s2">&quot;cached_bertscorer&quot;</span><span class="p">):</span>
-                    <span class="k">del</span> <span class="n">metric</span><span class="o">.</span><span class="n">cached_bertscorer</span>
-                    <span class="n">clear_memory</span><span class="p">()</span>
-
-                <span class="n">oom_error</span> <span class="o">=</span> <span class="p">[</span>
-                    <span class="s2">&quot;CUDA out of memory&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;CUDA error&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;MPS backend out of memory&quot;</span><span class="p">,</span>
-                <span class="p">]</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">error</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">oom_error</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-
-                <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;batch_size&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="p">[</span><span class="s2">&quot;batch_size&quot;</span><span class="p">]</span>
-                    <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="p">[</span><span class="s2">&quot;batch_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="o">//</span> <span class="mi">2</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                        <span class="s2">&quot;Out of memory error occurred during the computation of &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;the metric </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">pretty_name</span><span class="si">}</span><span class="s2">. Reducing the batch size to &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
-                    <span class="p">)</span>
-                <span class="k">elif</span> <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;device&quot;</span><span class="p">,</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
-                    <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="p">[</span><span class="s2">&quot;batch_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">32</span>
-                    <span class="n">cfg</span><span class="o">.</span><span class="n">compute_kwargs</span><span class="p">[</span><span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                        <span class="s2">&quot;Out of memory error occurred during the computation of &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;the metric </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">pretty_name</span><span class="si">}</span><span class="s2">. Moving the computation to &quot;</span>
-                        <span class="s2">&quot;the CPU.&quot;</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-
-        <span class="c1"># The metric returns None if we are running on multi-GPU and the current</span>
-        <span class="c1"># process is not the main process</span>
-        <span class="k">if</span> <span class="n">score_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">scores</span> <span class="o">=</span> <span class="n">score_dict</span><span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_key</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">scores</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
-            <span class="n">results</span><span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scores</span>
-
-    <span class="k">return</span> <span class="n">results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback_handler</span><span class="o">.</span><span class="n">on_evaluate</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="p">,</span>  <span class="c1"># type: ignore[has-type]</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">metrics</span>
 
 
-<span class="k">def</span> <span class="nf">extract_labels_from_generation</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.task_utils.text_to_text.extract_labels_from_generation"><a href="../../../../api/scandeval/task_utils/text_to_text/#scandeval.task_utils.text_to_text.extract_labels_from_generation" title="Go to docs">docs</a></div>
-    <span class="n">input_batch</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> <span class="n">model_output</span><span class="p">:</span> <span class="s2">&quot;GenerativeModelOutput&quot;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the predicted labels from the generated output.</span>
+<span class="k">def</span> <span class="nf">prepare_examples</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.task_utils.multiple_choice_classification.prepare_examples"><a href="../../../../api/scandeval/task_utils/multiple_choice_classification/#scandeval.task_utils.multiple_choice_classification.prepare_examples" title="Go to docs">docs</a></div>
+    <span class="n">examples</span><span class="p">:</span> <span class="s2">&quot;BatchEncoding&quot;</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">:</span> <span class="s2">&quot;PreTrainedTokenizer&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BatchEncoding&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare the features.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        input_batch:</span>
-<span class="sd">            The input batch, where the keys are the feature names and the values</span>
-<span class="sd">            are lists with the feature values.</span>
-<span class="sd">        model_output:</span>
-<span class="sd">            The raw generated output of the model.</span>
+<span class="sd">        examples:</span>
+<span class="sd">            The examples to prepare.</span>
+<span class="sd">        tokenizer:</span>
+<span class="sd">            The tokenizer to use to prepare the examples.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The predicted labels.</span>
+<span class="sd">        The prepared examples.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">model_output</span><span class="o">.</span><span class="n">sequences</span>
+    <span class="n">doc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">sections</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">question</span> <span class="o">=</span> <span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="n">sections</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+    <span class="c1"># Sanity check</span>
+    <span class="k">for</span> <span class="n">letter</span><span class="p">,</span> <span class="n">choice</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="s2">&quot;abcde&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">choice</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">letter</span><span class="si">}</span><span class="s2">. &quot;</span><span class="p">)</span>
+
+    <span class="n">new_examples</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span>
+        <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="n">question</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">),</span> <span class="n">text_pair</span><span class="o">=</span><span class="p">[</span><span class="n">choice</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">new_examples</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">choice</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">letter</span><span class="si">}</span><span class="s2">. &quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">letter</span> <span class="o">==</span> <span class="n">examples</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">letter</span><span class="p">,</span> <span class="n">choice</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="s2">&quot;abcde&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">new_examples</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">doc</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_examples</span>
+
+
+<span class="k">def</span> <span class="nf">postprocess_predictions_and_labels</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.task_utils.multiple_choice_classification.postprocess_predictions_and_labels"><a href="../../../../api/scandeval/task_utils/multiple_choice_classification/#scandeval.task_utils.multiple_choice_classification.postprocess_predictions_and_labels" title="Go to docs">docs</a></div>
+    <span class="n">predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="s2">&quot;Dataset&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;Predictions&quot;</span><span class="p">,</span> <span class="s2">&quot;Labels&quot;</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Postprocess the predictions and labels.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        predictions:</span>
+<span class="sd">            The model predictions, of shape (num_examples, 2).</span>
+<span class="sd">        dataset:</span>
+<span class="sd">            The dataset containing the examples.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The postprocessed predictions and labels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">}</span>
+
+    <span class="n">all_predictions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">all_labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="n">pred_label_dict</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">pred_arr</span><span class="p">,</span> <span class="n">example</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+        <span class="n">pred_label_dict</span><span class="p">[</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">pred_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">example</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]))</span>
+
+    <span class="c1"># Compute the final predictions and labels</span>
+    <span class="k">for</span> <span class="n">id_</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]):</span>
+        <span class="n">preds</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">pred_label_dict</span><span class="p">[</span><span class="n">id_</span><span class="p">])</span>
+
+        <span class="c1"># Some IDs appear multiple times in the dataset, since we are bootstrapping.</span>
+        <span class="c1"># Here we separate them into their respective groups.</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">%</span> <span class="nb">sum</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">),</span> <span class="s2">&quot;The number of labels is not divisible by the sum of the labels.&quot;</span>
+        <span class="n">group_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">//</span> <span class="nb">sum</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">preds_groups</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">preds</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">group_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">preds</span><span class="p">),</span> <span class="n">group_size</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">labels_groups</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">labels</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">group_size</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span> <span class="n">group_size</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">preds_group</span><span class="p">,</span> <span class="n">labels_group</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">preds_groups</span><span class="p">,</span> <span class="n">labels_groups</span><span class="p">):</span>
+            <span class="n">prediction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">preds_group</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span>
+            <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">labels_group</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span>
+            <span class="n">all_predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+            <span class="n">all_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">all_predictions</span><span class="p">,</span> <span class="n">all_labels</span>
 </code></pre></div></td></tr></table></div>
 
 

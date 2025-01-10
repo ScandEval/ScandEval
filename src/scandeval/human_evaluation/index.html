@@ -1632,7 +1632,8 @@
 <span class="normal">741</span>
 <span class="normal">742</span>
 <span class="normal">743</span>
-<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Gradio app for conducting human evaluation of the tasks.&quot;&quot;&quot;</span>
+<span class="normal">744</span>
+<span class="normal">745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Gradio app for conducting human evaluation of the tasks.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">importlib.util</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -1650,7 +1651,7 @@
 <span class="kn">from</span> <span class="nn">.data_loading</span> <span class="kn">import</span> <span class="n">load_data</span>
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">GenerativeModelOutput</span>
 <span class="kn">from</span> <span class="nn">.dataset_configs</span> <span class="kn">import</span> <span class="n">SPEED_CONFIG</span><span class="p">,</span> <span class="n">get_all_dataset_configs</span>
-<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">Framework</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">TaskGroup</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">NeedsExtraInstalled</span>
 <span class="kn">from</span> <span class="nn">.scores</span> <span class="kn">import</span> <span class="n">aggregate_scores</span>
 <span class="kn">from</span> <span class="nn">.task_utils</span> <span class="kn">import</span> <span class="p">(</span>
@@ -1975,11 +1976,10 @@
                     <span class="s2">&quot;B-MISC&quot;</span> <span class="ow">in</span> <span class="n">labels_in_train</span> <span class="ow">or</span> <span class="s2">&quot;I-MISC&quot;</span> <span class="ow">in</span> <span class="n">labels_in_train</span>
                 <span class="p">)</span>
 
-        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span><span class="p">:</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_metrics</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">sequence_classification</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
-                    <span class="n">id2label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
                     <span class="n">benchmark_config</span><span class="o">=</span><span class="n">benchmark_config</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -1987,7 +1987,7 @@
                     <span class="n">sequence_classification</span><span class="o">.</span><span class="n">extract_labels_from_generation</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;text-to-text&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_metrics</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">text_to_text</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
@@ -1996,7 +1996,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">extract_labels_from_generation</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">text_to_text</span><span class="o">.</span><span class="n">extract_labels_from_generation</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_metrics</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">token_classification</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
                     <span class="n">has_misc_tags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">has_misc_tags</span><span class="p">,</span>
@@ -2007,7 +2007,7 @@
                     <span class="n">token_classification</span><span class="o">.</span><span class="n">extract_labels_from_generation</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_metrics</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">question_answering</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
@@ -2016,9 +2016,12 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">extract_labels_from_generation</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">question_answering</span><span class="o">.</span><span class="n">extract_labels_from_generation</span>
                 <span class="p">)</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Supertask </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2"> is not supported.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Task group </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2"> is not &quot;</span>
+                    <span class="s2">&quot;supported.&quot;</span>
                 <span class="p">)</span>
 
         <span class="n">task_examples</span><span class="p">,</span> <span class="n">question</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">example_to_markdown</span><span class="p">(</span>
@@ -2262,8 +2265,7 @@
         <span class="p">)</span>
         <span class="n">ground_truth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_dataset</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
         <span class="n">itr_scores</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">(</span>
-            <span class="n">model_outputs_and_labels</span><span class="o">=</span><span class="p">(</span><span class="n">all_preds</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">),</span>
-            <span class="n">id2label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
+            <span class="n">model_outputs_and_labels</span><span class="o">=</span><span class="p">(</span><span class="n">all_preds</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="c1"># We reverse the order, as the Info messages are printed in reverse order</span>

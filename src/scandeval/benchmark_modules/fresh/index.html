@@ -1074,7 +1074,10 @@
 <span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Freshly initialised encoder models.&quot;&quot;&quot;</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Freshly initialised encoder models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
@@ -1095,7 +1098,7 @@
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfig</span><span class="p">,</span> <span class="n">ModelConfig</span>
-<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">ModelType</span>
+<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">ModelType</span><span class="p">,</span> <span class="n">TaskGroup</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">InvalidBenchmark</span><span class="p">,</span>
     <span class="n">InvalidModel</span><span class="p">,</span>
@@ -1231,26 +1234,29 @@
         <span class="p">)</span>
         <span class="n">real_model_id</span> <span class="o">=</span> <span class="n">fresh_to_real_model_id_mapping</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span>
 
-        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span><span class="p">:</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="p">:</span>
+            <span class="k">case</span> <span class="p">(</span>
+                <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span>
+                <span class="o">|</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span>
+            <span class="p">):</span>
                 <span class="n">model_cls_mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                     <span class="n">fresh_xlm_roberta_base</span><span class="o">=</span><span class="n">XLMRobertaForSequenceClassification</span><span class="p">,</span>
                     <span class="n">fresh_electra_small</span><span class="o">=</span><span class="n">ElectraForSequenceClassification</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">:</span>
                 <span class="n">model_cls_mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                     <span class="n">fresh_xlm_roberta_base</span><span class="o">=</span><span class="n">XLMRobertaForTokenClassification</span><span class="p">,</span>
                     <span class="n">fresh_electra_small</span><span class="o">=</span><span class="n">ElectraForTokenClassification</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">:</span>
                 <span class="n">model_cls_mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                     <span class="n">fresh_xlm_roberta_base</span><span class="o">=</span><span class="n">XLMRobertaForQuestionAnswering</span><span class="p">,</span>
                     <span class="n">fresh_electra_small</span><span class="o">=</span><span class="n">ElectraForQuestionAnswering</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Supertask </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2"> is not supported &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;for model </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Task group </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2"> is not &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;supported for model </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
         <span class="n">model_cls</span> <span class="o">=</span> <span class="n">model_cls_mapping</span><span class="p">[</span><span class="n">model_id</span><span class="p">]</span>
 
@@ -1266,7 +1272,7 @@
         <span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">model_cls</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span> <span class="o">==</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span> <span class="o">==</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">:</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">setup_model_for_question_answering</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
 
         <span class="c1"># Load the tokenizer. If the model is a subclass of a RoBERTa model then we</span>

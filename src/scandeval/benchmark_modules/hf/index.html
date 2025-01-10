@@ -935,6 +935,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.task_group_to_class_name" class="md-nav__link">
+    <span class="md-ellipsis">
+      task_group_to_class_name
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2001,7 +2010,89 @@
 <span class="normal">1038</span>
 <span class="normal">1039</span>
 <span class="normal">1040</span>
-<span class="normal">1041</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span>
+<span class="normal">1070</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span>
+<span class="normal">1086</span>
+<span class="normal">1087</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span>
+<span class="normal">1091</span>
+<span class="normal">1092</span>
+<span class="normal">1093</span>
+<span class="normal">1094</span>
+<span class="normal">1095</span>
+<span class="normal">1096</span>
+<span class="normal">1097</span>
+<span class="normal">1098</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
+<span class="normal">1103</span>
+<span class="normal">1104</span>
+<span class="normal">1105</span>
+<span class="normal">1106</span>
+<span class="normal">1107</span>
+<span class="normal">1108</span>
+<span class="normal">1109</span>
+<span class="normal">1110</span>
+<span class="normal">1111</span>
+<span class="normal">1112</span>
+<span class="normal">1113</span>
+<span class="normal">1114</span>
+<span class="normal">1115</span>
+<span class="normal">1116</span>
+<span class="normal">1117</span>
+<span class="normal">1118</span>
+<span class="normal">1119</span>
+<span class="normal">1120</span>
+<span class="normal">1121</span>
+<span class="normal">1122</span>
+<span class="normal">1123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -2038,7 +2129,7 @@
 
 <span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="n">DUMMY_FILL_VALUE</span><span class="p">,</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
 <span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfig</span><span class="p">,</span> <span class="n">DatasetConfig</span><span class="p">,</span> <span class="n">HFModelInfo</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">Task</span>
-<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">ModelType</span>
+<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">ModelType</span><span class="p">,</span> <span class="n">TaskGroup</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">HuggingFaceHubDown</span><span class="p">,</span>
     <span class="n">InvalidBenchmark</span><span class="p">,</span>
@@ -2049,7 +2140,11 @@
     <span class="n">NoInternetConnection</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..languages</span> <span class="kn">import</span> <span class="n">get_all_languages</span>
-<span class="kn">from</span> <span class="nn">..task_utils</span> <span class="kn">import</span> <span class="n">question_answering</span><span class="p">,</span> <span class="n">token_classification</span>
+<span class="kn">from</span> <span class="nn">..task_utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">multiple_choice_classification</span><span class="p">,</span>
+    <span class="n">question_answering</span><span class="p">,</span>
+    <span class="n">token_classification</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..types</span> <span class="kn">import</span> <span class="n">ExtractLabelsFunction</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">block_terminal_output</span><span class="p">,</span>
@@ -2238,16 +2333,21 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The data collator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span> <span class="o">|</span> <span class="s2">&quot;text-to-text&quot;</span> <span class="o">|</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="p">:</span>
+            <span class="k">case</span> <span class="p">(</span>
+                <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span>
+                <span class="o">|</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span>
+                <span class="o">|</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span>
+                <span class="o">|</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span>
+            <span class="p">):</span>
                 <span class="k">return</span> <span class="n">DataCollatorWithPadding</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;longest&quot;</span><span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">DataCollatorForTokenClassification</span><span class="p">(</span>
                     <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">,</span> <span class="n">label_pad_token_id</span><span class="o">=-</span><span class="mi">100</span>
                 <span class="p">)</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unsupported task supertask: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsupported task group: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -2269,14 +2369,22 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The Trainer class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span> <span class="o">|</span> <span class="s2">&quot;text-to-text&quot;</span> <span class="o">|</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="p">:</span>
+            <span class="k">case</span> <span class="p">(</span>
+                <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span>
+                <span class="o">|</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span>
+                <span class="o">|</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span>
+            <span class="p">):</span>
                 <span class="k">return</span> <span class="n">Trainer</span>
-            <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="n">multiple_choice_classification</span><span class="o">.</span><span class="n">MultipleChoiceClassificationTrainer</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">question_answering</span><span class="o">.</span><span class="n">QuestionAnsweringTrainer</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unsupported task supertask: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsupported task group: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">prepare_dataset</span><span class="p">(</span>
@@ -2316,13 +2424,50 @@
         <span class="k">def</span> <span class="nf">tokenise</span><span class="p">(</span><span class="n">examples</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">examples</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">],</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="k">match</span> <span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span><span class="p">:</span>
                 <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
                     <span class="n">numericalise_labels</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tokenise</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-            <span class="k">case</span> <span class="s2">&quot;text-to-text&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">:</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="n">DatasetDict</span><span class="p">(</span>
+                    <span class="n">train</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                        <span class="n">partial</span><span class="p">(</span>
+                            <span class="n">multiple_choice_classification</span><span class="o">.</span><span class="n">prepare_examples</span><span class="p">,</span>
+                            <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">remove_columns</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span>
+                        <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">val</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;val&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                        <span class="n">partial</span><span class="p">(</span>
+                            <span class="n">multiple_choice_classification</span><span class="o">.</span><span class="n">prepare_examples</span><span class="p">,</span>
+                            <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">remove_columns</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;val&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span>
+                        <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">test</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+                        <span class="n">partial</span><span class="p">(</span>
+                            <span class="n">multiple_choice_classification</span><span class="o">.</span><span class="n">prepare_examples</span><span class="p">,</span>
+                            <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">remove_columns</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span>
+                        <span class="n">load_from_cache_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span><span class="p">:</span>
                 <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
                     <span class="n">tokenise</span><span class="p">,</span>
                     <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -2330,7 +2475,7 @@
                     <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
 
-            <span class="k">case</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">:</span>
                 <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
                     <span class="n">partial</span><span class="p">(</span>
                         <span class="n">token_classification</span><span class="o">.</span><span class="n">tokenize_and_align_labels</span><span class="p">,</span>
@@ -2342,7 +2487,7 @@
                     <span class="n">keep_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
 
-            <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">:</span>
                 <span class="n">dataset</span> <span class="o">=</span> <span class="n">DatasetDict</span><span class="p">(</span>
                     <span class="nb">dict</span><span class="p">(</span>
                         <span class="n">train</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
@@ -2390,9 +2535,7 @@
                     <span class="p">)</span>
 
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unsupported task supertask: </span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported task group: </span><span class="si">{</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">dataset</span>
 
@@ -2502,15 +2645,22 @@
     <span class="n">block_terminal_output</span><span class="p">()</span>
 
     <span class="n">model_id</span> <span class="o">=</span> <span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span>
-    <span class="n">supertask</span> <span class="o">=</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span>
+    <span class="n">task_group</span> <span class="o">=</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span>
     <span class="n">from_flax</span> <span class="o">=</span> <span class="n">model_config</span><span class="o">.</span><span class="n">framework</span> <span class="o">==</span> <span class="n">Framework</span><span class="o">.</span><span class="n">JAX</span>
     <span class="n">ignore_mismatched_sizes</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># Special case where there is a mismatch between the labels during training and</span>
+    <span class="c1"># testing</span>
+    <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span> <span class="o">==</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">:</span>
+        <span class="n">id2label</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">id2label</span> <span class="o">=</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span>
+
     <span class="n">config</span> <span class="o">=</span> <span class="n">load_hf_model_config</span><span class="p">(</span>
         <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
-        <span class="n">num_labels</span><span class="o">=</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">num_labels</span><span class="p">,</span>
-        <span class="n">id2label</span><span class="o">=</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
-        <span class="n">label2id</span><span class="o">=</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">label2id</span><span class="p">,</span>
+        <span class="n">num_labels</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">id2label</span><span class="p">),</span>
+        <span class="n">id2label</span><span class="o">=</span><span class="n">id2label</span><span class="p">,</span>
+        <span class="n">label2id</span><span class="o">=</span><span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">id2label</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
         <span class="n">revision</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
         <span class="n">model_cache_dir</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
         <span class="n">api_key</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
@@ -2543,13 +2693,14 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Get the model class associated with the supertask</span>
             <span class="n">model_cls_or_none</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="s2">&quot;PreTrainedModel&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">get_class_by_name</span><span class="p">(</span>
-                <span class="n">class_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;auto-model-for-</span><span class="si">{</span><span class="n">supertask</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="s2">&quot;transformers&quot;</span>
+                <span class="n">class_name</span><span class="o">=</span><span class="n">task_group_to_class_name</span><span class="p">(</span><span class="n">task_group</span><span class="o">=</span><span class="n">task_group</span><span class="p">),</span>
+                <span class="n">module_name</span><span class="o">=</span><span class="s2">&quot;transformers&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># If the model class could not be found then raise an error</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">model_cls_or_none</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The supertask </span><span class="si">{</span><span class="n">supertask</span><span class="si">!r}</span><span class="s2"> does not correspond to a &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;The supertask </span><span class="si">{</span><span class="n">task_group</span><span class="si">!r}</span><span class="s2"> does not correspond to a &quot;</span>
                     <span class="s2">&quot;Hugging Face AutoModel type (such as &quot;</span>
                     <span class="s2">&quot;`AutoModelForSequenceClassification`).&quot;</span>
                 <span class="p">)</span>
@@ -2616,7 +2767,10 @@
     <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
     <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">PreTrainedModel</span><span class="p">)</span> <span class="ow">and</span> <span class="n">supertask</span> <span class="o">==</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">PreTrainedModel</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">task_group</span> <span class="o">==</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span>
+    <span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">setup_model_for_question_answering</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
 
     <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load_tokenizer</span><span class="p">(</span>
@@ -3042,6 +3196,25 @@
         <span class="n">tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span>
 
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span>
+
+
+<span class="k">def</span> <span class="nf">task_group_to_class_name</span><span class="p">(</span><span class="n">task_group</span><span class="p">:</span> <span class="n">TaskGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.hf.task_group_to_class_name"><a href="../../../../api/scandeval/benchmark_modules/hf/#scandeval.benchmark_modules.hf.task_group_to_class_name" title="Go to docs">docs</a></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a task group to a class name.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        task_group:</span>
+<span class="sd">            The task group.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The class name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pascal_case</span> <span class="o">=</span> <span class="n">task_group</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">special_case_mapping</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">MultipleChoiceClassification</span><span class="o">=</span><span class="s2">&quot;SequenceClassification&quot;</span><span class="p">,</span>
+        <span class="n">Speed</span><span class="o">=</span><span class="s2">&quot;SequenceClassification&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">pascal_case</span> <span class="o">=</span> <span class="n">special_case_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pascal_case</span><span class="p">,</span> <span class="n">pascal_case</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;AutoModelFor</span><span class="si">{</span><span class="n">pascal_case</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
 
 

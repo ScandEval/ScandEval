@@ -933,6 +933,8 @@
       
         
       
+        
+      
     
     
       
@@ -2013,7 +2015,7 @@ Defaults to x -&gt; (100 * x, f"{x:.2%}").</p>
 <i class="fa-regular fa-square-minus"></i>
 </span>
 </span><span class="mkapi-object-kind">dataclass</span>
-<span class="mkapi-object-name"><a href="./#scandeval.data_models.Task" title="scandeval.data_models.Task">Task</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">supertask</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">metrics</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[<a href="./#scandeval.data_models.MetricConfig" title="scandeval.data_models.MetricConfig">MetricConfig</a>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">labels</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[str]</span><span class="mkapi-paren">)</span></span>
+<span class="mkapi-object-name"><a href="./#scandeval.data_models.Task" title="scandeval.data_models.Task">Task</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">task_group</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.TaskGroup" title="scandeval.enums.TaskGroup">TaskGroup</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">metrics</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[<a href="./#scandeval.data_models.MetricConfig" title="scandeval.data_models.MetricConfig">MetricConfig</a>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">labels</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[str]</span><span class="mkapi-paren">)</span></span>
 </p>
 <div class="mkapi-document">
 <p>A dataset task.</p>
@@ -2033,9 +2035,9 @@ Defaults to x -&gt; (100 * x, f"{x:.2%}").</p>
 <p>The name of the task.</p>
 </li>
 <li>
-<p><span class="mkapi-item-name">supertask</span> : 
-<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
-<p>The supertask of the task, describing the overall type of task.</p>
+<p><span class="mkapi-item-name">task_group</span> : 
+<span class="mkapi-item-type"><a href="../enums/#scandeval.enums.TaskGroup" title="scandeval.enums.TaskGroup">TaskGroup</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The task group of the task.</p>
 </li>
 <li>
 <p><span class="mkapi-item-name">metrics</span> : 

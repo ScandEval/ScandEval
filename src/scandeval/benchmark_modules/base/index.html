@@ -1293,7 +1293,12 @@
 <span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
-<span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Abstract benchmark module class that the model classes inherit from.&quot;&quot;&quot;</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Abstract benchmark module class that the model classes inherit from.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -1314,7 +1319,7 @@
     <span class="n">ModelConfig</span><span class="p">,</span>
     <span class="n">Task</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span>
+<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">TaskGroup</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="n">NeedsEnvironmentVariable</span><span class="p">,</span> <span class="n">NeedsExtraInstalled</span>
 <span class="kn">from</span> <span class="nn">..task_utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">question_answering</span><span class="p">,</span>
@@ -1479,28 +1484,33 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            The function used to compute the metrics.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-            <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span><span class="p">:</span>
+        <span class="k">match</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">sequence_classification</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
-                    <span class="n">id2label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
                     <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;text-to-text&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">partial</span><span class="p">(</span>
+                    <span class="n">sequence_classification</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
+                    <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
+                    <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">text_to_text</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
                     <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">token_classification</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
                     <span class="n">has_misc_tags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;has_misc_tags&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
                     <span class="n">benchmark_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">benchmark_config</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">partial</span><span class="p">(</span>
                     <span class="n">question_answering</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">,</span>
                     <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
@@ -1508,7 +1518,7 @@
                 <span class="p">)</span>
             <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unsupported task supertask: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsupported task group: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -1553,7 +1563,7 @@
             <span class="n">prepared_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_dataset</span><span class="p">(</span>
                 <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">itr_idx</span><span class="o">=</span><span class="n">idx</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span> <span class="o">==</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span> <span class="o">==</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">:</span>
                 <span class="n">labels_in_train</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="n">tag</span> <span class="k">for</span> <span class="n">tag_list</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">][</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_list</span>
                 <span class="p">}</span>

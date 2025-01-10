@@ -933,6 +933,8 @@
       
         
       
+        
+      
     
     
       
@@ -1238,6 +1240,15 @@
   <a href="#scandeval.enums.BatchingPreference" class="md-nav__link">
     <span class="md-ellipsis">
       BatchingPreference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.enums.TaskGroup" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskGroup
     </span>
   </a>
   
@@ -1620,6 +1631,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#scandeval.enums.TaskGroup" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskGroup
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1687,6 +1707,11 @@ The data type of the model weights.</p>
 <p><span class="mkapi-item-name"><a href="./#scandeval.enums.BatchingPreference" title="scandeval.enums.BatchingPreference">BatchingPreference</a></span>
  <span class="mkapi-dash">&mdash;</span>
 The preference for batching.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.enums.TaskGroup" title="scandeval.enums.TaskGroup">TaskGroup</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+The overall task group of a task.</p>
 </li>
 </ul>
 </div>
@@ -1933,6 +1958,64 @@ The preference for batching.</p>
 <p><span class="mkapi-item-name">ALL_AT_ONCE</span>
  <span class="mkapi-dash">&mdash;</span></p>
 <p>All samples at once batching.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.enums.TaskGroup">
+<span class="mkapi-object-link">
+
+
+<a href="../../../src/scandeval/enums/#scandeval.enums.TaskGroup" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span><span class="mkapi-object-kind">enum</span>
+<span class="mkapi-object-name"><a href="./#scandeval.enums.TaskGroup" title="scandeval.enums.TaskGroup">TaskGroup</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span></span>
+</p>
+<div class="mkapi-document">
+<p><p class="mkapi-bases" markdown="1">Bases :
+<span class="mkapi-base"><a href="./#scandeval.enums.AutoStrEnum" title="scandeval.enums.AutoStrEnum">AutoStrEnum</a></span></p></p>
+<p>The overall task group of a task.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle attributes">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Attributes</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">SEQUENCE_CLASSIFICATION</span>
+ <span class="mkapi-dash">&mdash;</span></p>
+<p>Classification of documents.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">MULTIPLE_CHOICE_CLASSIFICATION</span>
+ <span class="mkapi-dash">&mdash;</span></p>
+<p>Classification of documents with multiple-choice options.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">TOKEN_CLASSIFICATION</span>
+ <span class="mkapi-dash">&mdash;</span></p>
+<p>Token-level classification.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">QUESTION_ANSWERING</span>
+ <span class="mkapi-dash">&mdash;</span></p>
+<p>Extractive question answering.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">TEXT_TO_TEXT</span>
+ <span class="mkapi-dash">&mdash;</span></p>
+<p>Text-to-text generation.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">SPEED</span>
+ <span class="mkapi-dash">&mdash;</span></p>
+<p>Speed benchmark.</p>
 </li>
 </ul>
 </div>

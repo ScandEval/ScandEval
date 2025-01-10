@@ -1114,7 +1114,9 @@
 <span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span>
-<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to text generation of models.&quot;&quot;&quot;</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to text generation of models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -1126,7 +1128,7 @@
 <span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">.benchmark_modules</span> <span class="kn">import</span> <span class="n">BenchmarkModule</span>
-<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">TaskGroup</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">InvalidBenchmark</span>
 <span class="kn">from</span> <span class="nn">.model_cache</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ModelCache</span><span class="p">,</span>
@@ -1325,8 +1327,7 @@
         <span class="p">)</span>
 
     <span class="n">itr_scores</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">(</span>
-        <span class="n">model_outputs_and_labels</span><span class="o">=</span><span class="p">(</span><span class="n">all_preds</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">),</span>
-        <span class="n">id2label</span><span class="o">=</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">id2label</span><span class="p">,</span>
+        <span class="n">model_outputs_and_labels</span><span class="o">=</span><span class="p">(</span><span class="n">all_preds</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">itr_scores</span>
@@ -1347,8 +1348,8 @@
 <span class="sd">        dataset_config:</span>
 <span class="sd">            The configuration of the dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">match</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="p">:</span>
-        <span class="k">case</span> <span class="s2">&quot;token-classification&quot;</span><span class="p">:</span>
+    <span class="k">match</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TOKEN_CLASSIFICATION</span><span class="p">:</span>
             <span class="n">log_msgs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
                 <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;tokens&quot;</span><span class="p">],</span> <span class="n">extracted_labels</span><span class="p">,</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span>
@@ -1378,13 +1379,16 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_msgs</span><span class="p">))</span>
             <span class="k">return</span>
 
-        <span class="k">case</span> <span class="s2">&quot;sequence-classification&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="p">(</span>
+            <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span>
+            <span class="o">|</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span>
+        <span class="p">):</span>
             <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">dataset_config</span><span class="o">.</span><span class="n">prompt_label_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
             <span class="p">]</span>
 
-        <span class="k">case</span> <span class="s2">&quot;question-answering&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">QUESTION_ANSWERING</span><span class="p">:</span>
             <span class="n">extracted_labels</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">prediction</span><span class="p">[</span><span class="s2">&quot;prediction_text&quot;</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="n">extracted_labels</span>
@@ -1392,12 +1396,12 @@
             <span class="p">]</span>
             <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span><span class="p">[</span><span class="s2">&quot;answers&quot;</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]]</span>
 
-        <span class="k">case</span> <span class="s2">&quot;text-to-text&quot;</span><span class="p">:</span>
+        <span class="k">case</span> <span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span><span class="p">:</span>
             <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;target_text&quot;</span><span class="p">]</span>
 
         <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The supertask &#39;</span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">supertask</span><span class="si">}</span><span class="s2">&#39; is not supported.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;The task group &#39;</span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2">&#39; is not supported.&quot;</span>
             <span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;messages&quot;</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>

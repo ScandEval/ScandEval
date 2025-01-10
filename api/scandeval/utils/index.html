@@ -931,6 +931,8 @@
       
         
       
+        
+      
     
     
       
@@ -2131,7 +2133,7 @@ disables most of the logging from the <code>transformers</code> library.</p>
 <i class="fa-regular fa-square-minus"></i>
 </span>
 </span>
-<span class="mkapi-object-name"><a href="./#scandeval.utils.get_class_by_name" title="scandeval.utils.get_class_by_name">get_class_by_name</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">class_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">module_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-equal"> = </span><span class="mkapi-default">None</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span> | None</span></span>
+<span class="mkapi-object-name"><a href="./#scandeval.utils.get_class_by_name" title="scandeval.utils.get_class_by_name">get_class_by_name</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">class_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | list[str]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">module_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing">t</span>.<span class="mkapi-tooltip" title="typing.Type">Type</span> | None</span></span>
 </p>
 <div class="mkapi-document">
 <p>Get a class by its name.</p>
@@ -2155,10 +2157,8 @@ first class that is found is returned.</p>
 </li>
 <li>
 <p><span class="mkapi-item-name">module_name</span> : 
-<span class="mkapi-item-type">str | None</span> <span class="mkapi-dash">&mdash;</span></p>
-<p>The name of the module where the class is located. If None then the module
-name is assumed to be the same as the class name, but written in
-snake_case. Defaults to None.</p>
+<span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The name of the module where the class is located.</p>
 </li>
 </ul>
 </div>
