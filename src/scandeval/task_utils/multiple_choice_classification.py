@@ -109,7 +109,9 @@ def prepare_examples(
         int(choice.startswith(f"{letter}. ") and letter == examples["label"][0])
         for letter, choice in zip("abcde", choices)
     ]
-    new_examples["id"] = [hashlib.md5(string=doc.encode()).hexdigest()] * len(choices)
+    new_examples["id"] = [
+        hashlib.md5(string=(doc + "\n".join(choices)).encode()).hexdigest()
+    ] * len(choices)
     return new_examples
 
 
