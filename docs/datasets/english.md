@@ -83,9 +83,15 @@ $ scandeval --model <model-id> --dataset sst5
 
 ### CoNLL-2003-En
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/W03-0419/) and was
+part of the CoNNL-2003 shared task. The data comes from the [Reuters
+Corpus](http://www.reuters.com/researchandstandards) and consists of news articles
+between August 1996 and August 1997, labelled with named entities.
 
-[size-info]
+The original full dataset consists of 14,041 / 3,250 / 3,453 samples for the training,
+validation and test splits, respectively. We use 1,024 / 256 / 2,048 samples for our
+training, validation and test splits, respectively. All the new splits are subsets of
+the original splits.
 
 Here are a few examples from the training split:
 
@@ -148,9 +154,18 @@ $ scandeval --model <model-id> --dataset conll-en
 
 ### ScaLA-En
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [English Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_English-GUM/) by assuming that the
+documents in the treebank are correct, and corrupting the samples to create
+grammatically incorrect samples. The corruptions were done by either removing a word
+from a sentence, or by swapping two neighbouring words in a sentence. To ensure that
+this does indeed break the grammaticality of the sentence, a set of rules were used on
+the part-of-speech tags of the words in the sentence.
 
-[size-info]
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
 
 Here are a few examples from the training split:
 
@@ -207,9 +222,15 @@ $ scandeval --model <model-id> --dataset scala-en
 
 ### SQuAD
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/D16-1264/), which is
+based on English Wikipedia articles and the questions and answers are written by
+crowdworkers.
 
-[size-info]
+The original full dataset consists of 130,000 / 11,900 samples for training and
+validation, respectively. We use 1,024 / 256 / 2,048 samples for training, validation
+and testing, respectively (so 3,328 samples used in total). The new training split is a
+subset of the original training split, and the new validation and test splits are
+disjoint subsets of the original validation split.
 
 Here are a few examples from the training split:
 
@@ -278,9 +299,15 @@ $ scandeval --model <model-id> --dataset squad
 
 ### MMLU
 
-[description]
+This dataset was published [in this paper](https://doi.org/10.48550/arXiv.2009.03300)
+and features questions within 57 different topics, such as elementary mathematics, US
+history and law.
 
-[size-info]
+The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.
 
 Here are a few examples from the training split:
 
@@ -342,9 +369,13 @@ $ scandeval --model <model-id> --dataset mmlu
 
 ### Unofficial: ARC
 
-[description]
+This dataset was published [in this paper](https://doi.org/10.48550/arXiv.1803.05457)
+and features US grade-school science questions.
 
-[size-info]
+The original full dataset consists of 1,110 / 297 / 1,170 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
+validation and testing, respectively (so 2,304 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
@@ -408,9 +439,12 @@ $ scandeval --model <model-id> --dataset arc
 
 ### HellaSwag
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/P19-1472/) and is
+based on both video descriptions from ActivityNet as well as how-to articles from
+WikiHow.
 
-[size-info]
+The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).
 
 Here are a few examples from the training split:
 
@@ -474,9 +508,14 @@ $ scandeval --model <model-id> --dataset hellaswag
 
 ### CNN/DailyMail
 
-[description]
+This dataset was published in [this paper](https://doi.org/10.48550/arXiv.1506.03340)
+and is based on news articles from CNN and DailyMail, with the summaries derived from
+bullet points written by the authors of the articles.
 
-[size-info]
+The original full dataset consists of 287,113 / 13,368 / 11,490 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
