@@ -9,9 +9,14 @@ information about what these constitute.
 
 ### SST-5
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/D13-1170/) and is
+based on movie reviews from rottentomatoes.com, labelled by crowdsourced workers on
+Amazon Mechanical Turk.
 
-[size-info]
+The original full dataset consists of 8,540 / 1,100 / 2,210 samples for the training,
+validation and test splits, respectively. We use 1,024 / 256 / 2,048 samples for our
+training, validation and test splits, respectively. All the new splits are subsets of
+the original splits.
 
 Here are a few examples from the training split:
 
