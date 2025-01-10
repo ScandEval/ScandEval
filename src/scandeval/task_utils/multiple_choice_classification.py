@@ -137,8 +137,8 @@ def postprocess_predictions_and_labels(
         pred_label_dict[example["id"]].append((pred_arr[1], example["label"]))
 
     # Compute the final predictions and labels
+    breakpoint()
     for id_ in set(dataset["id"]):
-        breakpoint()
         preds, labels = zip(*pred_label_dict[id_])
         prediction: str = mapping[np.argmax(preds).item()]
         label: str = mapping[np.argmax(labels).item()]
