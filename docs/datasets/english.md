@@ -18,6 +18,15 @@ validation and test splits, respectively. We use 1,024 / 256 / 2,048 samples for
 training, validation and test splits, respectively. All the new splits are subsets of
 the original splits.
 
+The original dataset consists of 5 labels instead of our usual 3, but we map them to
+`positive`, `neutral` and `negative` as follows:
+
+- `very negative` ➡️ `negative`
+- `negative` ➡️ `negative`
+- `neutral` ➡️ `neutral`
+- `positive` ➡️ `positive`
+- `very positive` ➡️ `positive`
+
 Here are a few examples from the training split:
 
 ```json
