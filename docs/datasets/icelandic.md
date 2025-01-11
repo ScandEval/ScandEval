@@ -9,9 +9,13 @@ information about what these constitute.
 
 ### Hotter and Colder Sentiment
 
-[description]
+This dataset is being published in an upcoming paper, and consists of texts from
+Icelandic blog post, annotated with sentiment labels (and many others) via a
+crowdsourcing platform.
 
-[size-info]
+The original full dataset consists of 2,901 samples, and we use a 1,024 / 256 / 1,621
+split for training, validation and testing, respectively (so all samples are used in
+total).
 
 Here are a few examples from the training split:
 
@@ -69,9 +73,16 @@ $ scandeval --model <model-id> --dataset hotter-and-colder-sentiment
 
 ### MIM-GOLD-NER
 
-[description]
+This dataset was published in [this paper]() and is based on the [Tagged Icelandic
+Corpus (MIM)](https://clarin.is/en/resources/mim/), which consists of Icelandic books,
+news articles, periodicals, parliament speeches, legal texts, adjudications and
+government websites. It has been annotated with named entities in a semi-automated
+fashion, where each labels has been manually verified. The entity types in the dataset
+is a superset of the CoNLL-2003 tags, with the following additional labels: `DATE`,
+`TIME`, `MONEY`, `PERCENT`. These labels have been removed.
 
-[size-info]
+The original full dataset consists of 1,000,000 tokens. We use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -134,9 +145,18 @@ $ scandeval --model <model-id> --dataset mim-gold-ner
 
 ### ScaLA-is
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [Icelandic Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Icelandic-Modern) by assuming that
+the documents in the treebank are correct, and corrupting the samples to create
+grammatically incorrect samples. The corruptions were done by either removing a word
+from a sentence, or by swapping two neighbouring words in a sentence. To ensure that
+this does indeed break the grammaticality of the sentence, a set of rules were used on
+the part-of-speech tags of the words in the sentence.
 
-[size-info]
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
 
 Here are a few examples from the training split:
 
@@ -191,9 +211,15 @@ $ scandeval --model <model-id> --dataset scala-is
 
 ### Unofficial: IceEC
 
-[description]
+This dataset was published [here](https://github.com/antonkarl/iceErrorCorpus) and
+consists of texts in modern Icelandic from student essays, online news texts and
+Wikipedia articles, annotated for mistakes related to spelling, grammar, and other
+issues.
 
-[size-info]
+The original full dataset consists of 58,200 / 5,270 samples for training and testing,
+respectively. We use a 1,024 / 256 / 2,048 split for training, validation and testing,
+where the training and testing splits are subsets of the original training and testing
+splits, and the validation split is a disjoint subset of the training split.
 
 Here are a few examples from the training split:
 
@@ -248,9 +274,13 @@ $ scandeval --model <model-id> --dataset ice-ec
 
 ### Unofficial: IceLinguistic
 
-[description]
+This dataset was published
+[here](https://github.com/stofnun-arna-magnussonar/ice_linguistic_benchmarks), with the
+source of the documents unknown. It consists of Icelandic sentences annotated with
+whether they are grammatically correct or not (along with other linguistic properties).
 
-[size-info]
+The original full dataset consists of 382 samples, and we use a 94 / 32 / 256 split for
+training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -307,9 +337,15 @@ $ scandeval --model <model-id> --dataset ice-linguistic
 
 ### NQiI
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2022.lrec-1.477/)
+and is based on articles from the Icelandic Wikipedia. Annotators were asked to write
+both questions (only seeing the beginning of the article) as well as answers as they
+appear in the article.
 
-[size-info]
+The original full dataset consists of 2,234 / 259 / 244 samples for training, validation
+and testing, respectively. We use a 1,024 / 256 / 1,024 split for training, validation
+and testing, respectively. Our splits are new, and there can thus be some overlap
+between the new test split and the old training and validation splits.
 
 Here are a few examples from the training split:
 
@@ -376,9 +412,18 @@ $ scandeval --model <model-id> --dataset nqii
 
 ### Unofficial: IcelandicQA
 
-[description]
+This dataset was published
+[here](https://huggingface.co/datasets/mideind/icelandic_qa_scandeval) and consists of
+an automatically created Icelandic question-answering dataset based on the Icelandic
+Wikipedia as well as Icelandic news articles from the RÚV corpus.
 
-[size-info]
+Both questions and answers were generated automatically, meaning that the answers might
+not appear in the context. To remedy this, we used GPT-4o to rephrase the answers to
+ensure that they appear in the context.
+
+The original full dataset consists of 2,000 samples, and we use a 531 / 128 / 1,024
+split for training, validation and testing, respectively. These are all the samples
+where the (rephrased) answer appears in the context.
 
 Here are a few examples from the training split:
 
@@ -447,9 +492,14 @@ $ scandeval --model <model-id> --dataset icelandic-qa
 
 ### ARC-is
 
-[description]
+This dataset is a machine translated version of the English [ARC
+dataset](https://doi.org/10.48550/arXiv.1803.05457) and features US grade-school science
+questions. The dataset was translated by Miðeind using the Claude 3.5 Sonnet model.
 
-[size-info]
+The original full dataset consists of 1,110 / 297 / 1,170 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
+validation and testing, respectively (so 2,304 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
@@ -511,9 +561,16 @@ $ scandeval --model <model-id> --dataset arc-is
 
 ### Unofficial: MMLU-is
 
-[description]
+This dataset is a machine translated version of the English [MMLU
+dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
+different topics, such as elementary mathematics, US history and law. The dataset was
+translated using [Miðeind](https://mideind.is/english.html)'s Greynir translation model.
 
-[size-info]
+The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.
 
 Here are a few examples from the training split:
 
@@ -577,9 +634,14 @@ $ scandeval --model <model-id> --dataset mmlu-is
 
 ### Winogrande-is
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2022.lrec-1.464/)
+and is a manually translated and adapted version of the English [WinoGrande
+dataset](https://arxiv.org/abs/1907.10641). The samples are sentences containing two
+nouns and an ambiguous pronoun, and the task is to determine which of the two nouns the
+pronoun refers to.
 
-[size-info]
+The original full dataset consists of 1,095 samples, and we use a 64 / 128 / 896 split
+for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -641,9 +703,14 @@ $ scandeval --model <model-id> --dataset winogrande-is
 
 ### Unofficial: HellaSwag-is
 
-[description]
+This dataset is a machine translated version of the English [HellaSwag
+dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
+video descriptions from ActivityNet as well as how-to articles from WikiHow. The dataset
+was translated using [Miðeind](https://mideind.is/english.html)'s Greynir translation
+model.
 
-[size-info]
+The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).
 
 Here are a few examples from the training split:
 
@@ -707,9 +774,12 @@ $ scandeval --model <model-id> --dataset hellaswag-is
 
 ### RRN
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.3/)
+and consists of news articles and their summaries from RÚV, the Icelandic National
+Broadcasting Service, from years 2021 and 2022.
 
-[size-info]
+The original full dataset consists of 3,960 samples, and we use a 1,024 / 256 / 1,024
+split for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
