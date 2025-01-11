@@ -9,9 +9,16 @@ information about what these constitute.
 
 ### FoSent
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2024.lrec-main.690/)
+and is based on 170 news articles from the Faroese news sites
+[Portalurin](https://portal.fo) and [Dimmalætting](https://dimma.fo). The sentiment
+labels were manually annotated by two native speakers.
 
-[size-info]
+The original full dataset consists of 245 samples, which consisted of both a news
+article, a chosen sentence from the article, and the sentiment label. We use both the
+news article and the chosen sentence as two separate samples, to increase the size of
+the dataset (keeping them within the same dataset split). In total, we use a 74 / 35 /
+283 split for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -69,9 +76,15 @@ $ scandeval --model <model-id> --dataset fosent
 
 ### FoNE
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.74/)
+and is based on news articles from [Sosialurin](http://www.sosialurin.fo/). The named
+entities were automatically tagged, but verified manually. They use a superset of the
+CoNNL-2003 dataset, with the following additional entity types: `Date`, `Money`,
+`Percent` and `Time`. We remove these additional entity types from our dataset and keep
+only the original CoNNL-2003 entity types (`PER`, `ORG`, `LOC`, `MISC`).
 
-[size-info]
+The original full dataset consists of 6,286 samples, which we split into 1,024 / 256 /
+2,048 samples for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -132,9 +145,13 @@ $ scandeval --model <model-id> --dataset fone
 
 ### Unofficial: WikiANN-fo
 
-[description]
+This dataset was part of the WikiANN dataset (also known as PAN-X), published in [this
+paper](https://aclanthology.org/P17-1178/). It is based on Wikipedia articles, and the
+labels have been automatically annotated using knowledge base mining. There are no
+`MISC` entities in this dataset, so we only keep the `PER`, `LOC` and `ORG` entities.
 
-[size-info]
+The original full dataset consists of an unknown amount of samples, which we split into
+1,024 / 256 / 2,048 samples for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
@@ -197,9 +214,18 @@ $ scandeval --model <model-id> --dataset wikiann-fo
 
 ### ScaLA-fo
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [Faroese Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Faroese-FarPaHC) by assuming that
+the documents in the treebank are correct, and corrupting the samples to create
+grammatically incorrect samples. The corruptions were done by either removing a word
+from a sentence, or by swapping two neighbouring words in a sentence. To ensure that
+this does indeed break the grammaticality of the sentence, a set of rules were used on
+the part-of-speech tags of the words in the sentence.
 
-[size-info]
+The original full dataset consists of 1,024 / 256 / 1,024 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
 
 Here are a few examples from the training split:
 
@@ -256,9 +282,13 @@ $ scandeval --model <model-id> --dataset scala-fo
 
 ### FoQA
 
-[description]
+This dataset will be published in an upcoming paper and is based on the Faroese
+Wikipedia. The questions and answers were automatically generated using GPT-4-turbo,
+which were verified by a native speaker, and some of them were also corrected by the
+same native speaker.
 
-[size-info]
+The original full dataset consists of 2,000 samples, and we split these into 848 / 128 /
+1,024 samples for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
