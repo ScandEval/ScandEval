@@ -1060,7 +1060,7 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     name="danske-talemaader",
     pretty_name="the truncated version of the Danish knowledge dataset Danske "
     "Talemåder",
-    huggingface_id="ScandEval/danske-talemaader-mini",
+    huggingface_id="ScandEval/danske-talemaader",
     task=KNOW,
     languages=[DA],
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
