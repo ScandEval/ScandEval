@@ -1379,8 +1379,12 @@ datasets are grouped by their task - see the <a href="/tasks">task overview</a> 
 information about what these constitute.</p>
 <h2 id="sentiment-classification">Sentiment Classification</h2>
 <h3 id="sb10k">SB10k</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset was published in <a href="https://aclanthology.org/W17-1106/">this paper</a> and is
+based on German tweets, which were manually annotated by three annotators.</p>
+<p>The original full dataset consists of 1,840 / 324 / 870 samples, and we use a 1,024 /
+256 / 1,024 split for training, validation and testing, respectively. The splits are new
+and there can thus be some overlap between the original validation and test sets and our
+validation and test sets.</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALEMANHA (4-5-1): Neuer; Schmelzer, Hummels, Mertesacker, Lahm; Gündogan, Khedira, Özil, Müller, Reus; Klose&quot;</span><span class="p">,</span>
@@ -1425,8 +1429,14 @@ Klassifizieren Sie die Stimmung im Tweet. Antworten Sie mit &#39;positiv&#39;, &
 </code></pre></div>
 <h2 id="named-entity-recognition">Named Entity Recognition</h2>
 <h3 id="germeval">GermEval</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset was published in <a href="https://aclanthology.org/L14-1251/">this paper</a> and is
+based on German Wikipedia as well as news articles, and was manually annotated. It
+roughly follows the CoNLL-2003 format, but also allows overlapping entities and derived
+entities (such as "English" for "England"). We remove the derived entities and convert
+the partially overlapping entities to non-overlapping entities (e.g., <code>B-ORGpart</code> to
+<code>B-ORG</code>).</p>
+<p>The original full dataset consists of 24,000 / 2,200 / 5,100 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="err">&#39;</span><span class="kc">t</span><span class="err">oke</span><span class="kc">ns</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">array(</span><span class="p">[</span><span class="err">&#39;Am&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;E</span><span class="kc">n</span><span class="err">de&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;der&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;Saiso</span><span class="kc">n</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="mi">2006</span><span class="err">/</span><span class="mi">07</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;soll&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;es&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="kc">f</span><span class="err">ür&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;die&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;Löwe</span><span class="kc">n</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;wieder&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;zu&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;ei</span><span class="kc">ne</span><span class="err">m&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;Europapokal</span><span class="mi">-</span><span class="err">Pla</span><span class="kc">t</span><span class="err">z&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;reiche</span><span class="kc">n</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;.&#39;</span><span class="p">],</span><span class="w"> </span><span class="err">d</span><span class="kc">t</span><span class="err">ype=objec</span><span class="kc">t</span><span class="err">)</span><span class="p">,</span>
@@ -1476,8 +1486,17 @@ Identifizieren Sie die benannten Entitäten im Satz. Sie sollten dies als JSON-W
 </code></pre></div>
 <h2 id="linguistic-acceptability">Linguistic Acceptability</h2>
 <h3 id="scala-de">ScaLA-de</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset was published in <a href="https://aclanthology.org/2023.nodalida-1.20/">this paper</a>
+and was automatically created from the <a href="https://raw.githubusercontent.com/UniversalDependencies/UD_German-GSD">German Universal Dependencies
+treebank</a> by
+assuming that the documents in the treebank are correct, and corrupting the samples to
+create grammatically incorrect samples. The corruptions were done by either removing a
+word from a sentence, or by swapping two neighbouring words in a sentence. To ensure
+that this does indeed break the grammaticality of the sentence, a set of rules were used
+on the part-of-speech tags of the words in the sentence.</p>
+<p>The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Im In dem Sommer draußen zu sitzen ist immer wieder eine \&quot;Wonne\&quot;, so man noch einen Platz bekommt&quot;</span><span class="p">,</span>
@@ -1521,8 +1540,13 @@ Bestimmen Sie, ob der Satz grammatikalisch korrekt ist oder nicht. Antworten Sie
 </code></pre></div>
 <h2 id="reading-comprehension">Reading Comprehension</h2>
 <h3 id="germanquad">GermanQuAD</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset was published in <a href="https://aclanthology.org/2021.mrqa-1.4/">this paper</a> and
+is based on German Wikipedia articles, and was manually annotated.</p>
+<p>The original full dataset consists of 11,518 / 2,204 samples for training and testing,
+respectively. We use a 1,024 / 256 / 2,048 split for training, validation and testing,
+respectively (so 3,328 samples used in total). These splits are new and there can thus
+be some overlap between the original validation and test sets and our validation and
+test sets.</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="err">&#39;co</span><span class="kc">nte</span><span class="err">x</span><span class="kc">t</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mali\n\n=== Verwaltungsgliederung ===\nDer Staat gliedert sich in zehn Regionen und den Hauptstadtdistrikt. Diese teilen sich in 49 Kreise &#39;&#39;(cercles)&#39;&#39; und 703 Gemeinden &#39;&#39;(communes)&#39;&#39;. Die Regionen sind nach ihren Hauptstädten benannt. Zwei dieser zehn Regionen, Ménaka und Taoudénit, wurden 2012 per Gesetzesbeschluss gebildet. Die Einrichtung ist seit 2016 im Gange.\nDie Angaben der Regionen Gao und Timbuktu, aus denen die Regionen Ménaka und Taoudénit ausgegliedert wurden, spiegeln noch den Stand vor der Aufspaltung wider.\nUm auch Flüchtlinge und vor allem Nomaden in das Verwaltungssystem eingliedern zu können, entstanden sogenannte &#39;&#39;Fractions&#39;&#39; (&#39;&#39;Fractions Nomades&#39;&#39;, ein Begriff, den schon die Kolonialregierung nutzte), die es dementsprechend vor allem im Norden in der Nähe von Dörfern gibt. Seit den großen Trockenphasen entstanden durch Wanderungsbewegungen solche Verwaltungseinheiten allerdings auch verstärkt im Süden.&quot;</span><span class="p">,</span>
@@ -1576,8 +1600,16 @@ Frage: {question}
 </code></pre></div>
 <h2 id="knowledge">Knowledge</h2>
 <h3 id="mmlu-de">MMLU-de</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset is a machine translated version of the English <a href="https://openreview.net/forum?id=d7KBjmI3GmQ">MMLU
+dataset</a> and features questions within 57
+different topics, such as elementary mathematics, US history and law. The translation to
+German was done by the University of Oregon as part of <a href="https://aclanthology.org/2023.emnlp-demo.28/">this
+paper</a>, using GPT-3.5-turbo.</p>
+<p>The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Teotihuacán wurde im Becken von Mexiko bekannt, nachdem sein Rivale Cuicuilco,\nAntwortmöglichkeiten:\na. von einem Vulkanausbruch gelähmt wurde.\nb. einem Bürgerkrieg unter seinen herrschenden Familien erlag.\nc. unter einer Ernteplage litt.\nd. von einem Hurrikan an der Golfküste überschwemmt wurde.&quot;</span><span class="p">,</span>
@@ -1620,8 +1652,14 @@ Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &#39;c&#39; oder &
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>scandeval<span class="w"> </span>--model<span class="w"> </span>&lt;model-id&gt;<span class="w"> </span>--dataset<span class="w"> </span>mmlu-de
 </code></pre></div>
 <h3 id="unofficial-arc-de">Unofficial: ARC-de</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset is a machine translated version of the English <a href="https://doi.org/10.48550/arXiv.1803.05457">ARC
+dataset</a> and features US grade-school science
+questions. The translation to German was done by the University of Oregon as part of
+<a href="https://aclanthology.org/2023.emnlp-demo.28/">this paper</a>, using GPT-3.5-turbo.</p>
+<p>The original full dataset consists of 1,110 / 297 / 1,170 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
+validation and testing, respectively (so 2,304 samples used in total). All new splits
+are subsets of the original splits.</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Callahan zitiert die Ergebnisse des Oregon Death with Dignity Legal Defense and Education Center, wonach es \&quot;nach vier vollen Jahren keine Missteps, Missbräuche oder Zwangstendenzen\&quot; bezüglich der Gesetze zur Euthanasie gab. Er argumentiert dagegen, dass\nAntwortmöglichkeiten:\na. sie dies ohne eine anonyme Umfrage nicht sicher wissen können.\nb. andere Studien haben widersprüchliche Ergebnisse gefunden.\nc. selbst wenn das Ergebnis wahr ist, ist es irrelevant für den moralischen Status der Euthanasie.\nd. die Ergebnisse sind verdächtig, weil die Studie von Befürwortern der Euthanasie durchgeführt wurde.&quot;</span><span class="p">,</span>
@@ -1664,8 +1702,13 @@ Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &#39;c&#39; oder &
 </code></pre></div>
 <h2 id="common-sense-reasoning">Common-sense Reasoning</h2>
 <h3 id="hellaswag-de">HellaSwag-de</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset is a machine translated version of the English <a href="https://aclanthology.org/P19-1472/">HellaSwag
+dataset</a>. The original dataset was based on both
+video descriptions from ActivityNet as well as how-to articles from WikiHow. The dataset
+was translated by the University of Oregon as part of <a href="https://aclanthology.org/2023.emnlp-demo.28/">this
+paper</a>, using GPT-3.5-turbo.</p>
+<p>The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[header] Wie man sich trennt, wenn Kinder involviert sind [title] Erstellen Sie einen Trennungsplan mit Ihrem Partner. [step] Sie sollten sich auch auf das Gespräch mit Ihren Kindern vorbereiten, indem Sie vorher mit Ihrem Partner einen Plan für die Zukunft erstellen. Sie sollten gemeinsam besprechen, wer wo leben wird, wer für bestimmte tägliche Bedürfnisse und Aktivitäten der Kinder verantwortlich sein wird und wann der offizielle Scheidungsprozess beginnen wird.\nAntwortmöglichkeiten:\na. Indem Sie hierüber klare Vorstellungen haben, können Sie Ihre Kinder besser beruhigen und einheitlich auftreten. [substeps] Zum Beispiel, könnten Sie vereinbaren, dass Ihr Partner auszieht und in einer nahegelegenen Wohnung oder einem anderen Haus lebt.\nb. Sie beide sollten Ihre Aktionen in den Monaten bis zur Eheschließung sowie darüber, wie Sie alles tun werden, planen, sobald das Kind wieder mit seinem Vater vereint ist. [title] Entscheiden Sie, was Sie mit dem Kind machen werden.\nc. Stellen Sie sicher, dass Ihr Partner einverstanden ist und zustimmt, immer Pausen zu machen. [substeps] Sie sollten sich nun auf die Urlaubsdaten und Reisepläne einigen, zu denen Ihre Kinder gehen werden.\nd. Der erste Schritt zu diesem Plan ist, ein Telefongespräch zu vereinbaren, damit Sie mit Ihrem Partner persönlich sprechen können. Sprechen Sie ruhig und deutlich, um den Ton für dieses Gespräch zu setzen.&quot;</span><span class="p">,</span>
@@ -1709,8 +1752,14 @@ Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &#39;c&#39; oder &
 </code></pre></div>
 <h2 id="summarization">Summarization</h2>
 <h3 id="mlsum">MLSum</h3>
-<p>[description]</p>
-<p>[size-info]</p>
+<p>This dataset was published in <a href="https://aclanthology.org/2020.emnlp-main.647/">this
+paper</a> and features news articles and
+their summaries in five languages, including German. The German part of the dataset is
+based on news articles from Süddeutsche Zeitung, with human-written summaries.</p>
+<p>The original full dataset consists of 221,000 / 11,400 / 10,700 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). All new splits
+are subsets of the original splits.</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jede neue Schlagzeile ein Stich ins Herz: Führende Muslime beklagen in einem offenen Brief die wachsende \&quot;Feindseligkeit\&quot; gegen Migranten in Deutschland. Sie fordern Bundespräsident Wulff auf, Stellung zu beziehen. In einem offenen Brief haben 15 namhafte deutsche Muslime Bundespräsident Christian Wulff aufgefordert, in der schwelenden Debatte um Integrationsprobleme Stellung zu beziehen. Auslöser der Kontroverse war das Buch Deutschland schafft sich ab des SPD-Politikers und scheidenden Bundesbankvorstandes Thilo Sarrazin. Detailansicht öffnen In der von SPD-Politiker und Noch-Bundesbanker Thilo Sarrazin ausgelösten Integrationsdebatte fordern namhafte deutsche Muslime nun von Bundespräsident Christian Wulff, Stellung zu beziehen. (Foto: dpa) Intellektuelle wie der Regisseur Fatih Akin und der Schriftsteller Feridun Zaimoglu beklagten in dem in der taz veröffentlichten Brief wachsende \&quot;Feindseligkeit\&quot; gegen Muslime in Deutschland. Wörtlich heißt es: \&quot;Für Musliminnen und Muslime ist derzeit nicht einmal der Gang zum Zeitungshändler leicht, weil sie nie wissen, welche Schlagzeile, welches stereotype Bild sie dort erwartet.\&quot; Die Unterzeichner erinnerten Wulff an seine Antrittsrede, in der er die Chancen der Integration betont hatte. \&quot;Wir bitten Sie, gerade in der derzeitigen angespannten Stimmung für die Leitsätze einer offenen, von gegenseitigem Respekt geprägten demokratischen Kultur einzustehen und öffentlich für sie zu werben\&quot;, heißt es in dem Appell an Wulff. Auslöser für den offenen Brief sei der Aufruf der Bild-Zeitung gewesen, an Präsident Wulff zu schreiben, sagte Shermin Langhoff, Intendantin des Berliner Theaters Ballhaus Naunynstraße. \&quot;Wir dachten uns, das können wir nicht so stehen lassen\&quot;, sagte die Mitunterzeichnerin zur SZ. Sie sprach von \&quot;biologistischen Wahnthesen\&quot; Sarrazins und hofft auf ein \&quot;Wort der Vernunft\&quot; aus Bellevue. Auch andere Unterzeichnerinnen setzen darauf, dass sich das Staatsoberhaupt in die Debatte einschaltet. Aylin Selcuk, Initiatorin des Vereins Deukische Generation, wünscht sich ein starkes Zeichen Wulffs. Der Präsident möge zeigen, dass die Muslime in Deutschland dazugehören. \&quot;Wir bitten Sie: Bekennen Sie sich zu uns.\&quot; Lamya Kaddor vom Liberal-Islamischen Bund sprach von einem \&quot;öffentlichen Bekenntnis\&quot; des Präsidenten. In der laufenden Debatte gehe es nicht nur um Muslime, sondern um den \&quot;Zusammenhalt in der Gesellschaft\&quot;, warnte Selcuk. Die Studentin hatte Sarrazin nach seinen Äußerungen zur vererbten Intelligenz wegen Volksverhetzung angezeigt. Seitdem erreichten sie unzählige E-Mails, in denen sie geschmäht und bedroht werde, sagte Selcuk. Nun hofft sie auf Wulff. \&quot;Wir werden dieses Land nicht aufgeben\&quot;, heißt es in dem Brief an Christian Wulff. \&quot;Dieses Land ist unsere Heimat und Sie sind unser Präsident.\&quot;&quot;</span><span class="p">,</span>
