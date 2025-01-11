@@ -9,9 +9,13 @@ information about what these constitute.
 
 ### SB10k
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/W17-1106/) and is
+based on German tweets, which were manually annotated by three annotators.
 
-[size-info]
+The original full dataset consists of 1,840 / 324 / 870 samples, and we use a 1,024 /
+256 / 1,024 split for training, validation and testing, respectively. The splits are new
+and there can thus be some overlap between the original validation and test sets and our
+validation and test sets.
 
 Here are a few examples from the training split:
 
@@ -69,9 +73,15 @@ $ scandeval --model <model-id> --dataset sb10k
 
 ### GermEval
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/L14-1251/) and is
+based on German Wikipedia as well as news articles, and was manually annotated. It
+roughly follows the CoNLL-2003 format, but also allows overlapping entities and derived
+entities (such as "English" for "England"). We remove the derived entities and convert
+the partially overlapping entities to non-overlapping entities (e.g., `B-ORGpart` to
+`B-ORG`).
 
-[size-info]
+The original full dataset consists of 24,000 / 2,200 / 5,100 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
 
 Here are a few examples from the training split:
 
@@ -134,9 +144,18 @@ $ scandeval --model <model-id> --dataset germeval
 
 ### ScaLA-de
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [German Universal Dependencies
+treebank](https://raw.githubusercontent.com/UniversalDependencies/UD_German-GSD) by
+assuming that the documents in the treebank are correct, and corrupting the samples to
+create grammatically incorrect samples. The corruptions were done by either removing a
+word from a sentence, or by swapping two neighbouring words in a sentence. To ensure
+that this does indeed break the grammaticality of the sentence, a set of rules were used
+on the part-of-speech tags of the words in the sentence.
 
-[size-info]
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
 
 Here are a few examples from the training split:
 
@@ -193,9 +212,14 @@ $ scandeval --model <model-id> --dataset scala-de
 
 ### GermanQuAD
 
-[description]
+This dataset was published in [this paper](https://aclanthology.org/2021.mrqa-1.4/) and
+is based on German Wikipedia articles, and was manually annotated.
 
-[size-info]
+The original full dataset consists of 11,518 / 2,204 samples for training and testing,
+respectively. We use a 1,024 / 256 / 2,048 split for training, validation and testing,
+respectively (so 3,328 samples used in total). These splits are new and there can thus
+be some overlap between the original validation and test sets and our validation and
+test sets.
 
 Here are a few examples from the training split:
 
@@ -264,9 +288,17 @@ $ scandeval --model <model-id> --dataset germanquad
 
 ### MMLU-de
 
-[description]
+This dataset is a machine translated version of the English [MMLU
+dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
+different topics, such as elementary mathematics, US history and law. The translation to
+German was done by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-[size-info]
+The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.
 
 Here are a few examples from the training split:
 
@@ -323,9 +355,15 @@ $ scandeval --model <model-id> --dataset mmlu-de
 
 ### Unofficial: ARC-de
 
-[description]
+This dataset is a machine translated version of the English [ARC
+dataset](https://doi.org/10.48550/arXiv.1803.05457) and features US grade-school science
+questions. The translation to German was done by the University of Oregon as part of
+[this paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-[size-info]
+The original full dataset consists of 1,110 / 297 / 1,170 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 1,024 split for training,
+validation and testing, respectively (so 2,304 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
@@ -383,9 +421,14 @@ $ scandeval --model <model-id> --dataset arc-de
 
 ### HellaSwag-de
 
-[description]
+This dataset is a machine translated version of the English [HellaSwag
+dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
+video descriptions from ActivityNet as well as how-to articles from WikiHow. The dataset
+was translated by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-[size-info]
+The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).
 
 Here are a few examples from the training split:
 
@@ -444,9 +487,15 @@ $ scandeval --model <model-id> --dataset hellaswag-de
 
 ### MLSum
 
-[description]
+This dataset was published in [this
+paper](https://aclanthology.org/2020.emnlp-main.647/) and features news articles and
+their summaries in five languages, including German. The German part of the dataset is
+based on news articles from Süddeutsche Zeitung, with human-written summaries.
 
-[size-info]
+The original full dataset consists of 221,000 / 11,400 / 10,700 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). All new splits
+are subsets of the original splits.
 
 Here are a few examples from the training split:
 
