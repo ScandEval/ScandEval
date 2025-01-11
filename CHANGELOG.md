@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.2.0] - 2025-01-11
 ### Added
 - Now supports evaluation of encoder models on the multiple choice tasks knowledge and
   common-sense reasoning. This is done by splitting the individual choices into separate
