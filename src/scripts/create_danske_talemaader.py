@@ -1,82 +1,59 @@
-"""Create the DanskeTalemaader-mini dataset and upload it to the HF Hub."""
+"""Create the the Danske Talemåder dataset and upload it to the HF Hub."""
 
-from collections import Counter
+import io
+from zipfile import ZipFile
 
 import pandas as pd
-from constants import (
-    MAX_NUM_CHARS_IN_INSTRUCTION,
-    MAX_NUM_CHARS_IN_OPTION,
-    MAX_REPETITIONS,
-    MIN_NUM_CHARS_IN_OPTION,
-)
-from datasets import Dataset, DatasetDict, Split, load_dataset
+import requests as rq
+from datasets import Dataset, DatasetDict, Split
 from huggingface_hub import HfApi
-from requests import HTTPError
 from sklearn.model_selection import train_test_split
 
 
 def main() -> None:
-    """Create the DanskeTalemaader-mini dataset and upload it to the HF Hub."""
-    # Define the base download URL
-    repo_id = "Juunge/danske-talemaader-QA"
+    """Create the Danske Talemåder dataset and upload it to the HF Hub."""
+    # Download the ZIP file
+    url = (
+        "https://sprogtek-ressources.digst.govcloud.dk/1000%20danske%20talemaader"
+        "%20og%20faste%20udtryk/talemaader_csv.zip"
+    )
+    response = rq.get(url=url)
+    response.raise_for_status()
 
-    # Download the dataset
-    dataset = load_dataset(path=repo_id, split="train")
-    assert isinstance(dataset, Dataset)
+    # Get the data from the ZIP file
+    with ZipFile(file=io.BytesIO(initial_bytes=response.content)) as zip_file:
+        no_labels_csv_file = [
+            zip_file.read(name=file_name)
+            for file_name in zip_file.namelist()
+            if file_name == "talemaader_leverance_2_uden_labels.csv"
+        ][0]
+        only_labels_csv_file = [
+            zip_file.read(name=file_name)
+            for file_name in zip_file.namelist()
+            if file_name == "talemaader_leverance_2_kun_labels.csv"
+        ][0]
 
-    # Convert the dataset to a dataframe
-    df = dataset.to_pandas()
-    assert isinstance(df, pd.DataFrame)
+        no_labels_df = pd.read_csv(
+            filepath_or_buffer=io.BytesIO(initial_bytes=no_labels_csv_file),
+            delimiter="\t",
+        )
+        only_labels_df = pd.read_csv(
+            filepath_or_buffer=io.BytesIO(initial_bytes=only_labels_csv_file),
+            delimiter="\t",
+        )
 
-    # Rename the columns
-    df.rename(columns=dict(answer="label"), inplace=True)
-
-    # Remove the prefix prompt from the instruction
-    prefix_prompt = "Hvad er betydningen af følgende talemåde:"
-    df.instruction = df.instruction.str.replace(prefix_prompt, "").str.strip()
-
-    # Remove the samples with overly short or long texts
-    df = df[
-        (df.instruction.str.len() <= MAX_NUM_CHARS_IN_INSTRUCTION)
-        & (df.option_a.str.len() >= MIN_NUM_CHARS_IN_OPTION)
-        & (df.option_a.str.len() <= MAX_NUM_CHARS_IN_OPTION)
-        & (df.option_b.str.len() >= MIN_NUM_CHARS_IN_OPTION)
-        & (df.option_b.str.len() <= MAX_NUM_CHARS_IN_OPTION)
-        & (df.option_c.str.len() >= MIN_NUM_CHARS_IN_OPTION)
-        & (df.option_c.str.len() <= MAX_NUM_CHARS_IN_OPTION)
-        & (df.option_d.str.len() >= MIN_NUM_CHARS_IN_OPTION)
-        & (df.option_d.str.len() <= MAX_NUM_CHARS_IN_OPTION)
-    ]
-
-    def is_repetitive(text: str) -> bool:
-        """Return True if the text is repetitive."""
-        max_repetitions = max(Counter(text.split()).values())
-        return max_repetitions > MAX_REPETITIONS
-
-    # Remove overly repetitive samples
-    df = df[
-        ~df.instruction.apply(is_repetitive)
-        & ~df.option_a.apply(is_repetitive)
-        & ~df.option_b.apply(is_repetitive)
-        & ~df.option_c.apply(is_repetitive)
-        & ~df.option_d.apply(is_repetitive)
-    ]
-
-    # Make a `text` column with all the options in it
+    # Set up the data as a dataframe
+    df = pd.merge(left=no_labels_df, right=only_labels_df)
     df["text"] = [
-        row.instruction.replace("\n", " ").strip() + "\n"
+        row.talemaade_udtryk.replace("\n", " ").strip() + "\n"
         "Svarmuligheder:\n"
-        "a. " + row.option_a.replace("\n", " ").strip() + "\n"
-        "b. " + row.option_b.replace("\n", " ").strip() + "\n"
-        "c. " + row.option_c.replace("\n", " ").strip() + "\n"
-        "d. " + row.option_d.replace("\n", " ").strip()
+        "a. " + row.A.replace("\n", " ").strip() + "\n"
+        "b. " + row.B.replace("\n", " ").strip() + "\n"
+        "c. " + row.C.replace("\n", " ").strip() + "\n"
+        "d. " + row.D.replace("\n", " ").strip()
         for _, row in df.iterrows()
     ]
-
-    # Make the `label` column case-consistent with the `text` column
-    df.label = df.label.str.lower()
-
-    # Only keep the `text` and `label` columns
+    df["label"] = df.korrekt_def.map({0: "a", 1: "b", 2: "c", 3: "d"})
     df = df[["text", "label"]]
 
     # Remove duplicates
@@ -84,22 +61,18 @@ def main() -> None:
     df.reset_index(drop=True, inplace=True)
 
     # Create validation split
-    val_size = 256
+    val_size = 64
     traintest_arr, val_arr = train_test_split(df, test_size=val_size, random_state=4242)
     traintest_df = pd.DataFrame(traintest_arr, columns=df.columns)
     val_df = pd.DataFrame(val_arr, columns=df.columns)
 
-    # Create test split
-    test_size = 1024
+    # Create train and test split
+    train_size = 128
     train_arr, test_arr = train_test_split(
-        traintest_df, test_size=test_size, random_state=4242
+        traintest_df, train_size=train_size, random_state=4242
     )
     train_df = pd.DataFrame(train_arr, columns=df.columns)
     test_df = pd.DataFrame(test_arr, columns=df.columns)
-
-    # Create train split
-    train_size = 256
-    train_df = train_df.sample(train_size, random_state=4242)
 
     # Reset the index
     train_df = train_df.reset_index(drop=True)
@@ -114,13 +87,13 @@ def main() -> None:
     )
 
     # Create dataset ID
-    dataset_id = "ScandEval/danske-talemaader-mini"
+    dataset_id = "ScandEval/danske-talemaader"
 
     # Remove the dataset from Hugging Face Hub if it already exists
     try:
         api = HfApi()
         api.delete_repo(dataset_id, repo_type="dataset")
-    except HTTPError:
+    except rq.HTTPError:
         pass
 
     # Push the dataset to the Hugging Face Hub

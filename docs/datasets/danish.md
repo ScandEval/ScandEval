@@ -372,19 +372,19 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Hård banan\nSvarmuligheder:\na. Barsk person\nb. Sige ja vende tommelfingeren nedad\nc. Fortsat klare sig\nd. Slå sig løs",
+  "text": "tale nogen efter munden\nSvarmuligheder:\na. være føjelig og give nogen ret selvom man ikke nødvendigvis er enig\nb. erklære sig helt enig med en anden person\nc. sige det præcis samme som en anden; efterabe\nd. være egoistisk og snæversynet; kun tænke på sig selv",
   "label": "a"
 }
 ```
 ```json
 {
-  "text": "Få skovlen under nogen\nSvarmuligheder:\na. Ofre en\nb. Kunne bestemme over nogen\nc. Tænke sig om\nd. Anstrenge sig meget",
+  "text": "der falder en sten fra éns hjerte\nSvarmuligheder:\na. en bestemt (kriminel, eftersøgt) person er forsvundet\nb. man bliver fri for en sorg eller bekymring; man bliver lettet\nc. man mister én man har kær\nd. en sten forlader et hjerte man er i besiddelse af",
   "label": "b"
 }
 ```
 ```json
 {
-  "text": "Have nogen i snor\nSvarmuligheder:\na. Ikke lade sig gå på af noget\nb. Klare sig, selvom det er svært\nc. Have kontrol med nogen\nd. Få nogen til at tro på en umulig plan",
+  "text": "have spidse albuer\nSvarmuligheder:\na. person der har det meget dårligt fysisk og psykisk\nb. have ophobet vrede over længere tid\nc. hævde sig på andres bekostning\nd. have knogler der træder tydeligt frem på ens albuer",
   "label": "c"
 }
 ```
