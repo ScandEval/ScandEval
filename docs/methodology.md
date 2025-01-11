@@ -6,12 +6,7 @@ hide:
 
 ## Robust Evaluations
 
-When working with language models, the smallest change in the data can often lead to
-large changes in the model's performance. For this reason, all models in ScandEval are
-evaluated 10 times on bootstrapped (i.e., sampling with replacement) training/prompt
-sets and test sets, and the mean and 95% confidence interval of these 10 runs are
-reported in the leaderboard. This ensures that the reported scores are robust and not
-just a result of random fluctuations in the data.
+Coming soon!
 
 ## Formulating NLU Tasks as Generative Tasks
 
