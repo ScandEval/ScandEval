@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   way that encoders were evaluated in the original HellaSwag paper.
 
 ### Changed
+- Updated the Danish knowledge dataset Danske Talemåder, as a new professional version
+  has been released, made by the Danish Language and Literature Society. This features
+  1,000 examples in total, where we use a 808 samples in the test split. All the false
+  options have been created manually.
 - We now use the `architectures` parameter in the Hugging Face model configuration to
   determine whether a model is generative or not, as this is more reliable than the
   previous method of checking the model repository's tags. The downside of this is that
