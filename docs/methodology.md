@@ -44,11 +44,11 @@ structure:
 ```
 [prefix prompt]
 
-(% for each few-shot example $)
+(% for each few-shot example %)
   [document prefix]: [few-shot example document]
 
   [label prefix]: [few-shot example label]
-($ end for %)
+(% end for %)
 
 [document prefix]: [new document]
 
@@ -58,10 +58,10 @@ structure:
 For the instruction tuned models, we use the following prompt structure:
 
 ```
-(% for each few-shot example $)
+(% for each few-shot example %)
   USER: [instruction with few-shot example]
   ASSISTANT: [label]
-($ end for %)
+(% end for %)
 USER: [instruction with new example]
 ASSISTANT:
 ```
@@ -107,51 +107,51 @@ following criteria:
 Before we introduce our chosen aggregation method, we will briefly discuss some common
 aggregation methods and how they do not satisfy the criteria.
 
-The **mean score** is the most common aggregation method, which would simply be
-the mean of the 10 scores for each dataset, and then the mean of the dataset scores for
-each task. This method does not satisfy the Task Fairness criterion, as it does not
-take into account that metrics have different ranges and variances. The Comparison
-criterion is also not satisfied, as datasets vary from language to language, with some
-datasets being more difficult than others. It _does_, however, satisfy the
-Robustness, Magnitude Preservation and Minimal Change criteria.
+The **mean score** is the most common aggregation method, which would simply be the mean
+of the 10 scores for each dataset, and then the mean of the dataset scores for each
+task. This method does not satisfy the Task Fairness criterion, as it does not take into
+account that metrics have different ranges and variances. The Comparison criterion is
+also not satisfied, as datasets vary from language to language, with some datasets being
+more difficult than others. It _does_, however, satisfy the Robustness, Magnitude
+Preservation and Minimal Change criteria.
 
-The **mean rank** is another common aggregation method, where we compute the rank
-of each model on each dataset, and then take the mean of the ranks. This method
-satisfies the Task Fairness criterion, as it re-casts the scores into a common
-comparable framework, which therefore weights each task equally. For the same reason,
-it also satisfies the Comparison criterion (it is important here that we evaluate all
-the models on all the languages for this to be satisfied). It does not satisfy the
-Robustness and Magnitude Preservation criteria, by definition of rank. It partially
-satisfies the Minimal Change criterion, since it only affects the scores of the models
-which are worse than the new model.
+The **mean rank** is another common aggregation method, where we compute the rank of
+each model on each dataset, and then take the mean of the ranks. This method satisfies
+the Task Fairness criterion, as it re-casts the scores into a common comparable
+framework, which therefore weights each task equally. For the same reason, it also
+satisfies the Comparison criterion (it is important here that we evaluate all the models
+on all the languages for this to be satisfied). It does not satisfy the Robustness and
+Magnitude Preservation criteria, by definition of rank. It partially satisfies the
+Minimal Change criterion, since it only affects the scores of the models which are worse
+than the new model.
 
 We thus see that the mean score and mean rank methods satisfy a disjoint set of the
-criteria, but that they together satisfy all the criteria. Based on this observation,
-we introduce the **mean rank score** method, defined as follows. For each dataset,
-we start by sorting the models by their mean score on the dataset. As with a rank, we
-assign the best model with rank score 1. For the next best model, we conduct a
-one-tailed Welch's t-test to see if the next best model is significantly worse than the
-first model ($p < 0.05$). If so, we compute the absolute difference between the mean
-score of the two models, and divide that by the standard deviation of all the mean
-scores of the models on the dataset.
+criteria, but that they together satisfy all the criteria. Based on this observation, we
+introduce the **mean rank score** method, defined as follows. For each dataset, we start
+by sorting the models by their mean score on the dataset. As with a rank, we assign the
+best model with rank score 1. For the next best model, we conduct a one-tailed Welch's
+t-test to see if the next best model is significantly worse than the first model ($p <
+0.05$). If so, we compute the absolute difference between the mean score of the two
+models, and divide that by the standard deviation of all the mean scores of the models
+on the dataset.
 
 We then add this to the rank score of the first model. We continue this process for all
 the models to get the rank scores for the dataset, and to compute the overall score for
-the model, we take the mean of the rank scores for the datasets. We note that the
-mean rank score has an intuitive interpretation: it is the average number of standard
+the model, we take the mean of the rank scores for the datasets. We note that the mean
+rank score has an intuitive interpretation: it is the average number of standard
 deviations from the best scoring model (+1).
 
-This metric satisfies Task Fairness since we normalise all the scores by dividing by
-the standard deviation of the dataset scores. The Robustness criterion is satisfied due
-to our use of a one-tailed Welch's t-test. The Magnitude Preservation criterion is also
-satisfied, as the magnitude of the difference between the dataset score of two models
-is reflected in the rank score. It also satisfies Comparison, as we compare the models
-on a common scale (same argument as the mean rank method). Finally, the Minimal Change
+This metric satisfies Task Fairness since we normalise all the scores by dividing by the
+standard deviation of the dataset scores. The Robustness criterion is satisfied due to
+our use of a one-tailed Welch's t-test. The Magnitude Preservation criterion is also
+satisfied, as the magnitude of the difference between the dataset score of two models is
+reflected in the rank score. It also satisfies Comparison, as we compare the models on a
+common scale (same argument as the mean rank method). Finally, the Minimal Change
 criterion is partially satisfied, as adding new models only minimally changes the score
 of existing models. Concretely, adding new scores will affect the standard deviation
 normalising factor (this effect tends to zero as the number of models grows, however),
-and if the model beats all the other models then all the scores will be affected, due
-to the relative nature of the metric.
+and if the model beats all the other models then all the scores will be affected, due to
+the relative nature of the metric.
 
 ## Papers
 
