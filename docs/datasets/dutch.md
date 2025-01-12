@@ -246,8 +246,12 @@ Here are a few examples from the training split:
 ### SQuAD-nl
 
 This dataset is published
-[here](https://huggingface.co/datasets/yhavinga/squad_v2_dutch) and is a machine
-translated dataset of the English [SQuAD dataset](https://aclanthology.org/D16-1264/).
+[here](https://huggingface.co/datasets/NetherlandsForensicInstitute/squad-nl-v2.0) and
+is a machine translated dataset of the English
+[SQuAD](https://aclanthology.org/D16-1264/) and
+[XQuAD](https://aclanthology.org/2020.acl-main.421/) datasets. Google Translate was used
+to translate the original datasets to Dutch.
+
 These are based on English Wikipedia articles and the questions and answers are written
 by crowdworkers. It is not clear how the translations were done, this information is
 pending from the authors.
@@ -256,31 +260,31 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "context": 'Zoals in zijn keizerlijke edicten bleek, was de Hongwu-keizer op de hoogte van de boeddhistische band tussen Tibet en China en wilde hij die versterken. Rolpe Dorje, 4de Karmapa Lama (1340-1383), wees de uitnodiging van de Hongwu-keizer af, hoewel hij wel een paar discipelen als afgezanten naar het hof in Nanjing stuurde. De Hongwu-keizer vertrouwde ook zijn goeroe Zongluo, een van de vele boeddhistische monniken aan het hof, toe om in 1378-1382 een religieuze missie naar Tibet te leiden om boeddhistische teksten te bemachtigen.',
-  "question": 'Wie verwierp een uitnodiging van de Hongwu-keizer?',
+  "context": "Windows 8 bevat ook verbeterde ondersteuning voor mobiel breedband; het besturingssysteem kan nu de plaatsing van een simkaart detecteren en automatisch verbindingsinstellingen configureren (inclusief APN's en carrier-branding), en het internetgebruik verminderen om bandbreedte op gemeten netwerken te besparen. Windows 8 voegt ook een geïntegreerde instelling voor vliegtuigmodus toe om ook alle draadloze connectiviteit wereldwijd uit te schakelen. Vervoerders kunnen ook accountbeheersystemen aanbieden via Windows Store-apps, die automatisch kunnen worden geïnstalleerd als onderdeel van het verbindingsproces en gebruiksstatistieken bieden op hun respectievelijke tegel.",
+  "question": 'Wat registreert het plaatsen van een simkaart?',
   "answers": {
-    "answer_start": array([153]),
-    "text": array(['Rolpe Dorje'], dtype=object),
+    "answer_start": array([68]),
+    "text": array(['het besturingssysteem'], dtype=object)
   }
 }
 ```
 ```json
 {
-  "context": "De term Ashkenazi verwijst ook naar de nusach Ashkenaz (Hebreeuwse, 'liturgische traditie', of rite) die de Ashkenazische joden gebruiken in hun Siddur (gebedenboek). Een nusach wordt bepaald door de keuze van gebeden, de volgorde van gebeden, de tekst van gebeden en melodieën die wordt gebruikt bij het zingen van gebeden. Twee andere belangrijke vormen van nusach onder de Ashkenazische joden zijn Nusach Sefard (niet te verwarren met het Sefardische ritueel), de Poolse Hasidische nusach, en Nusach Ari, zoals gebruikt door Lubavitch Hasidim.",
-  "question": 'Nusach Ari wordt door wie gebruikt?',
+  "context": 'Het Duitse systeem van hoger onderwijs omvat twee vormen van academische instellingen: universiteiten en hogescholen (Fachhochschule). De universiteit van Jena is de grootste van de vier universiteiten van Thüringen en biedt bijna elke discipline. Het werd opgericht in 1558 en heeft vandaag 21.000 studenten. De op een na grootste is de Technische Universität Ilmenau met 7.000 studenten, opgericht in 1894, die veel technische disciplines biedt, zoals techniek en wiskunde. De universiteit van Erfurt, gesticht in 1392, heeft tegenwoordig 5.000 studenten en legt de nadruk op geesteswetenschappen en lerarenopleiding. De Bauhaus-universiteit Weimar is met 4.000 studenten de kleinste universiteit van Thüringen en is gespecialiseerd in creatieve vakken zoals architectuur en kunst. Het werd opgericht in 1860 en kreeg tijdens het interbellum bekendheid als de belangrijkste kunstacademie van Duitsland, het Bauhaus.',
+  "question": 'Wat is de grootste school in Thüringen?',
   "answers": {
-    "answer_start": array([528]),
-    "text": array(['Lubavitch Hasidim'], dtype=object),
+    "answer_start": array([135]),
+    "text": array(['De universiteit van Jena'], dtype=object)
   }
 }
 ```
 ```json
 {
-  "context": "Op dit moment bestaat er verwarring over de naam van de oudste Vinaccia-luthier die de winkel voor het eerst beheerde. Zijn naam is genoemd als Gennaro Vinaccia (actief van 1710 tot 1788) en Nic. Vinaccia. Zijn zoon Antonio Vinaccia was actief van 1734 tot 1796. Een van de vroegste exemplaren van een mandoline is die van Antonio Vinaccia, die in 1759 aan de Universiteit van Edinburgh is gebouwd. Een andere is van Giuseppe Vinaccia, gebouwd in 1893, die ook aan de Universiteit van Edinburgh is gebouwd. De oudste nog bestaande mandoline werd in 1744 gebouwd door Antonio's zoon, Gaetano Vinaccia. Hij verblijft in het Conservatoire Royal de Musique in Brussel, België.",
-  "question": 'Waar woont de mandoline waarin Gaetano Vinaccia woont?',
+  "context": 'Door diëten in westerse landen te vergelijken, hebben onderzoekers ontdekt dat hoewel de Fransen meer dierlijk vet eten, de incidentie van hartaandoeningen in Frankrijk laag blijft. Dit fenomeen wordt de Franse paradox genoemd en wordt verondersteld te ontstaan door de beschermende voordelen van het regelmatig consumeren van rode wijn. Afgezien van de mogelijke voordelen van alcohol zelf, waaronder verminderde aggregatie van bloedplaatjes en vasodilatatie, bieden polyfenolen (bijv. Resveratrol), voornamelijk in de druivenschil, andere vermoedelijke gezondheidsvoordelen, zoals:',
+  "question": 'Wat eten mensen in Frankrijk meer van dat in de meeste westerse landen?',
   "answers": {
-    "answer_start": array([622]),
-    "text": array(['Conservatoire Royal de Musique in Brussel, België'], dtype=object),
+    "answer_start": array([102]),
+    "text": array(['dierlijk vet'], dtype=object)
   }
 }
 ```
