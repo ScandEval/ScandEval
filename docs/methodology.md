@@ -130,8 +130,8 @@ criteria, but that they together satisfy all the criteria. Based on this observa
 introduce the **mean rank score** method, defined as follows. For each dataset, we start
 by sorting the models by their mean score on the dataset. As with a rank, we assign the
 best model with rank score 1. For the next best model, we conduct a one-tailed Welch's
-t-test to see if the next best model is significantly worse than the first model ($p <
-0.05$). If so, we compute the absolute difference between the mean score of the two
+t-test to see if the next best model is significantly worse than the first model (p <
+0.05). If so, we compute the absolute difference between the mean score of the two
 models, and divide that by the standard deviation of all the mean scores of the models
 on the dataset.
 
