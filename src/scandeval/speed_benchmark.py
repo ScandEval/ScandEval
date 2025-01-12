@@ -60,7 +60,7 @@ def benchmark_speed_single_iteration(
     Returns:
         A dictionary containing the scores for the current iteration.
     """
-    gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2", trust_remote_code=True)
 
     base_doc = "Document which contains roughly 10 tokens. "
     multiplier = 10 * (1 + itr_idx)

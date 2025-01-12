@@ -793,6 +793,7 @@ def load_model_and_tokenizer(
             revision=model_config.revision,
             cache_dir=model_config.model_cache_dir,
             token=token,
+            trust_remote_code=benchmark_config.trust_remote_code,
         )
     except ValueError as e:
         raise InvalidModel(
@@ -941,6 +942,7 @@ def load_tokenizer(
         revision=revision,
         cache_dir=model_cache_dir,
         token=token,
+        trust_remote_code=trust_remote_code,
     )
     num_retries = 5
     for _ in range(num_retries):

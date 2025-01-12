@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Fixed
+- The `trust_remote_code` argument was not supplied when loading the Hugging Face
+  configuration in some places, which caused an unnecessary dialogue with the user when
+  evaluating models. This correctly now uses the `--trust-remote-code` argument as
+  supplied by the user.
+- If the model cache is corrupted, we now log this and re-initialise it, rather than
+  raising an error.
 
 
 ## [v14.2.0] - 2025-01-11

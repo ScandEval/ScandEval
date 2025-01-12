@@ -190,6 +190,7 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
             id2label=self.dataset_config.id2label,
             label2id=self.dataset_config.label2id,
             cache_dir=self.model_config.model_cache_dir,
+            trust_remote_code=self.benchmark_config.trust_remote_code,
         )
         model = model_cls(config)
 
@@ -211,6 +212,7 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
                 cache_dir=self.model_config.model_cache_dir,
                 use_fast=True,
                 verbose=False,
+                trust_remote_code=self.benchmark_config.trust_remote_code,
             )
         except (JSONDecodeError, OSError):
             raise InvalidModel(f"Could not load tokenizer for model {real_model_id!r}.")
