@@ -800,7 +800,7 @@ def load_model_and_tokenizer(
             token=token,
             trust_remote_code=benchmark_config.trust_remote_code,
         )
-    except ValueError as e:
+    except (ValueError, OSError) as e:
         if "awaiting a review from the repo authors" in str(e):
             raise InvalidModel(
                 f"The model {model_id!r} is awaiting a review from the repository "
@@ -891,7 +891,7 @@ def load_model_and_tokenizer(
             enable_lora=model_config.adapter_base_model_id is not None,
             max_lora_rank=256,
         )
-    except ValueError as e:
+    except (ValueError, OSError) as e:
         if "awaiting a review from the repo authors" in str(e):
             raise InvalidModel(
                 f"The model {model_id!r} is awaiting a review from the repository "
