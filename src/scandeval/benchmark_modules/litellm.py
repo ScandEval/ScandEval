@@ -111,6 +111,7 @@ class LiteLLMModel(BenchmarkModule):
 
     _is_generative = True
     batching_preference = BatchingPreference.SINGLE_SAMPLE
+    high_priority = False
 
     def generate(self, inputs: dict) -> GenerativeModelOutput:
         """Generate outputs from the model.

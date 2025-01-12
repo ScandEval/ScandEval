@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   supplied by the user.
 - If the model cache is corrupted, we now log this and re-initialise it, rather than
   raising an error.
+- Some models were detected as API models when they were not, due to the fact that they
+  _were_ available in LiteLLM. We now default to using vLLM for these models, as this
+  is the default backend for ScandEval.
+- Now correctly displays a message to the user when access to a model is contingent on
+  approval from the repository authors, rather than raising an error.
 
 
 ## [v14.2.0] - 2025-01-11
