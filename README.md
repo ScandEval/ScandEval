@@ -128,6 +128,8 @@ sentiment-classification`.
 
 
 ## Special Thanks :pray:
+- Thanks [@Mikeriess](https://github.com/Mikeriess) for evaluating many of the larger
+  models on the leaderboards.
 - Thanks to [OpenAI](https://openai.com/) for sponsoring OpenAI credits as part of their
   [Researcher Access Program](https://openai.com/form/researcher-access-program/).
 - Thanks to [UWV](https://www.uwv.nl/) and [KU
