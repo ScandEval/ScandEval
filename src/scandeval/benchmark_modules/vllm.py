@@ -382,6 +382,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             benchmark_config.api_base is not None
             or benchmark_config.api_version is not None
         )
+        breakpoint()
         if using_api:
             return False
 
