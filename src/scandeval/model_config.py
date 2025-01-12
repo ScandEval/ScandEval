@@ -43,6 +43,7 @@ def get_model_config(
 
     needs_extras: list[str] = list()
     needs_env_vars: list[str] = list()
+    breakpoint()
     for benchmark_module in all_benchmark_modules:
         exists_or_err = benchmark_module.model_exists(
             model_id=model_id, benchmark_config=benchmark_config
