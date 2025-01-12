@@ -1298,7 +1298,8 @@
 <span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
-<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Abstract benchmark module class that the model classes inherit from.&quot;&quot;&quot;</span>
+<span class="normal">356</span>
+<span class="normal">357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Abstract benchmark module class that the model classes inherit from.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -1349,6 +1350,7 @@
 
     <span class="n">_is_generative</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">batching_preference</span><span class="p">:</span> <span class="n">BatchingPreference</span>
+    <span class="n">high_priority</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

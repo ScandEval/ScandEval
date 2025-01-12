@@ -884,7 +884,8 @@
 <span class="normal">80</span>
 <span class="normal">81</span>
 <span class="normal">82</span>
-<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to getting the model configuration.&quot;&quot;&quot;</span>
+<span class="normal">83</span>
+<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to getting the model configuration.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">importlib.util</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -926,6 +927,7 @@
         <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">benchmark_modules</span><span class="o">.</span><span class="n">BenchmarkModule</span><span class="p">)</span>
         <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">benchmark_modules</span><span class="o">.</span><span class="n">BenchmarkModule</span>
     <span class="p">]</span>
+    <span class="n">all_benchmark_modules</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">high_priority</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">needs_extras</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="n">needs_env_vars</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>

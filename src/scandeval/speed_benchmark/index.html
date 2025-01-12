@@ -996,7 +996,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        A dictionary containing the scores for the current iteration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">gpt2_tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;gpt2&quot;</span><span class="p">)</span>
+    <span class="n">gpt2_tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;gpt2&quot;</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">base_doc</span> <span class="o">=</span> <span class="s2">&quot;Document which contains roughly 10 tokens. &quot;</span>
     <span class="n">multiplier</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">itr_idx</span><span class="p">)</span>
