@@ -9,7 +9,6 @@ from pathlib import Path
 
 import click
 from datasets import Dataset
-from transformers import AutoTokenizer
 
 from .benchmark_config_factory import build_benchmark_config
 from .benchmarker import BenchmarkResult
@@ -612,15 +611,7 @@ class HumanEvaluator:
 
     def compute_and_log_scores(self) -> None:
         """Computes and logs the scores for the dataset."""
-        tokenizer = AutoTokenizer.from_pretrained(self.dummy_model_id)
-        tokenizer.pad_token = tokenizer.eos_token
-        sequences = tokenizer(
-            self.active_dataset["answer"],
-            add_special_tokens=False,
-            padding=True,
-            return_tensors="pt",
-        ).input_ids
-        model_output = GenerativeModelOutput(sequences=sequences)
+        model_output = GenerativeModelOutput(sequences=self.active_dataset["answer"])
 
         active_dataset_dict = self.active_dataset.to_dict()
         assert isinstance(active_dataset_dict, dict)

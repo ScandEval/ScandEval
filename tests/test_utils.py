@@ -131,7 +131,9 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
 )
 def test_get_end_of_chat_token_ids(model_id, expected_token_ids, expected_string, auth):
     """Test ability to get the chat token IDs of a model."""
-    tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id, token=auth, trust_remote_code=True
+    )
     end_of_chat_token_ids = get_end_of_chat_token_ids(tokenizer=tokenizer)
     assert end_of_chat_token_ids == expected_token_ids
     if expected_string is not None:
