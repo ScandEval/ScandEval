@@ -467,6 +467,7 @@ class LiteLLMModel(BenchmarkModule):
             Whether the model exists, or an error describing why we cannot check
             whether the model exists.
         """
+        breakpoint()
         if model_id in litellm.model_list:
             return True
 
