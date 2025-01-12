@@ -787,16 +787,31 @@ def load_model_and_tokenizer(
     Returns:
         The loaded model and tokenizer.
     """
+    # Prefer base model ID if the model is an adapter - the adapter will be added on
+    # during inference in this case
+    model_id = model_config.adapter_base_model_id or model_config.model_id
+
     try:
         token = benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True
         hf_model_config = AutoConfig.from_pretrained(
-            model_config.adapter_base_model_id or model_config.model_id,
+            model_id,
             revision=model_config.revision,
             cache_dir=model_config.model_cache_dir,
             token=token,
             trust_remote_code=benchmark_config.trust_remote_code,
         )
     except ValueError as e:
+        if "awaiting a review from the repo authors" in str(e):
+            raise InvalidModel(
+                f"The model {model_id!r} is awaiting a review from the repository "
+                "authors. Please try again later."
+            )
+        elif "trust_remote_code" in str(e):
+            raise InvalidModel(
+                f"Loading the model {model_id!r} needs to trust remote code. "
+                "If you trust the suppliers of this model, then you can enable "
+                "this by setting the `--trust-remote-code` flag."
+            )
         raise InvalidModel(
             "Could not load model configuration for "
             f"{model_config.model_id!r}. The error was: {str(e)}"
@@ -851,10 +866,6 @@ def load_model_and_tokenizer(
 
     clear_vllm()
 
-    # Prefer base model ID if the model is an adapter - the adapter will be added on
-    # during inference in this case
-    model_id = model_config.adapter_base_model_id or model_config.model_id
-
     executor_backend = "ray" if torch.cuda.device_count() > 1 else "mp"
 
     try:
@@ -881,7 +892,12 @@ def load_model_and_tokenizer(
             max_lora_rank=256,
         )
     except ValueError as e:
-        if "trust_remote_code" in str(e):
+        if "awaiting a review from the repo authors" in str(e):
+            raise InvalidModel(
+                f"The model {model_id!r} is awaiting a review from the repository "
+                "authors. Please try again later."
+            )
+        elif "trust_remote_code" in str(e):
             raise InvalidModel(
                 f"Loading the model {model_id!r} needs to trust remote code. "
                 "If you trust the suppliers of this model, then you can enable "
