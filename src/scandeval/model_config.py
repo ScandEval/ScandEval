@@ -40,10 +40,11 @@ def get_model_config(
         and issubclass(cls, benchmark_modules.BenchmarkModule)
         and cls is not benchmark_modules.BenchmarkModule
     ]
+    all_benchmark_modules.sort(key=lambda cls: cls.high_priority, reverse=True)
+    breakpoint()
 
     needs_extras: list[str] = list()
     needs_env_vars: list[str] = list()
-    breakpoint()
     for benchmark_module in all_benchmark_modules:
         exists_or_err = benchmark_module.model_exists(
             model_id=model_id, benchmark_config=benchmark_config

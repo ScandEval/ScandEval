@@ -68,6 +68,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
 
     _is_generative = False
     batching_preference = BatchingPreference.NO_PREFERENCE
+    high_priority = True
 
     def __init__(
         self,

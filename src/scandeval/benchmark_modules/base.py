@@ -49,6 +49,7 @@ class BenchmarkModule(ABC):
 
     _is_generative: bool | None
     batching_preference: BatchingPreference
+    high_priority: bool
 
     def __init__(
         self,

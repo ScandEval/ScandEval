@@ -82,6 +82,7 @@ class VLLMModel(HuggingFaceEncoderModel):
 
     _is_generative = True
     batching_preference = BatchingPreference.ALL_AT_ONCE
+    high_priority = True
 
     def __init__(
         self,
