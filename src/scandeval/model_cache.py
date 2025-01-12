@@ -59,8 +59,17 @@ class ModelCache:
             with self.cache_path.open("w") as f:
                 json.dump(dict(), f)
 
-        with self.cache_path.open() as f:
-            json_cache = json.load(f)
+        try:
+            with self.cache_path.open() as f:
+                json_cache = json.load(f)
+        except json.JSONDecodeError:
+            logger.warning(
+                f"Failed to load the cache from {self.cache_path}. The cache will be "
+                f"re-initialised."
+            )
+            json_cache = dict()
+            with self.cache_path.open("w") as f:
+                json.dump(dict(), f)
 
         cache: dict[str, SingleGenerativeModelOutput] = dict()
         for key in json_cache:
