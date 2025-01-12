@@ -938,21 +938,21 @@ generate the correct output.</p>
 structure:</p>
 <div class="highlight"><pre><span></span><code>[prefix prompt]
 
-(% for each few-shot example $)
+{% for each few-shot example %}
   [document prefix]: [few-shot example document]
 
   [label prefix]: [few-shot example label]
-($ end for %)
+{% end for %}
 
 [document prefix]: [new document]
 
 [label prefix]:
 </code></pre></div>
 <p>For the instruction tuned models, we use the following prompt structure:</p>
-<div class="highlight"><pre><span></span><code>(% for each few-shot example $)
+<div class="highlight"><pre><span></span><code>{% for each few-shot example %}
   USER: [instruction with few-shot example]
   ASSISTANT: [label]
-($ end for %)
+{% end for %}
 USER: [instruction with new example]
 ASSISTANT:
 </code></pre></div>
