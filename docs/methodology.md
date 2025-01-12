@@ -44,11 +44,11 @@ structure:
 ```
 [prefix prompt]
 
-(% for each few-shot example %)
+{% for each few-shot example %}
   [document prefix]: [few-shot example document]
 
   [label prefix]: [few-shot example label]
-(% end for %)
+{% end for %}
 
 [document prefix]: [new document]
 
@@ -58,10 +58,10 @@ structure:
 For the instruction tuned models, we use the following prompt structure:
 
 ```
-(% for each few-shot example %)
+{% for each few-shot example %}
   USER: [instruction with few-shot example]
   ASSISTANT: [label]
-(% end for %)
+{% end for %}
 USER: [instruction with new example]
 ASSISTANT:
 ```
