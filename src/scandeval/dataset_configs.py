@@ -872,7 +872,7 @@ SQUAD_NL_CONFIG = DatasetConfig(
     name="squad-nl",
     pretty_name="the truncated version of the Dutch question answering dataset "
     "SQuAD-nl, translated from the English SQuAD dataset",
-    huggingface_id="ScandEval/squad-nl-mini",
+    huggingface_id="ScandEval/squad-nl-v2-mini",
     task=RC,
     languages=[NL],
     prompt_prefix="Hieronder volgen teksten met bijbehorende vragen en antwoorden.",
