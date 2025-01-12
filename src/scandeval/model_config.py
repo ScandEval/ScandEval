@@ -41,7 +41,6 @@ def get_model_config(
         and cls is not benchmark_modules.BenchmarkModule
     ]
     all_benchmark_modules.sort(key=lambda cls: cls.high_priority, reverse=True)
-    breakpoint()
 
     needs_extras: list[str] = list()
     needs_env_vars: list[str] = list()
