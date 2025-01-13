@@ -1083,7 +1083,7 @@ def align_model_and_tokenizer(
                 break
 
             # This happens if `max_length` is too large
-            except IndexError:
+            except (IndexError, RuntimeError):
                 continue
 
     # If there is a mismatch between the vocab size according to the tokenizer and
