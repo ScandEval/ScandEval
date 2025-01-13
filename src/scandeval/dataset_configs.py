@@ -895,7 +895,8 @@ ICE_LINGUISTIC_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
-    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
+    "ekki.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
     unofficial=True,
@@ -972,7 +973,7 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
 
 NQII_CONFIG = DatasetConfig(
     name="nqii",
-    pretty_name="the truncated version of the Icelandic question answering dataset "
+    pretty_name="the truncated version of the Icelandic reading comprehension dataset "
     "Natural Questions in Icelandic",
     huggingface_id="ScandEval/nqii-mini",
     task=RC,
@@ -989,14 +990,14 @@ NQII_CONFIG = DatasetConfig(
 
 FOQA_CONFIG = DatasetConfig(
     name="foqa",
-    pretty_name="the Faroese question answering dataset FoQA",
+    pretty_name="the Faroese reading comprehension dataset FoQA",
     huggingface_id="ScandEval/foqa",
     task=RC,
     languages=[FO],
     labels=["start_positions", "end_positions"],
     prompt_prefix="Hetta eru tekstir saman við spurningum og svar.",
-    prompt_template="Tekstur: {text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
-    "orðum: {label}",
+    prompt_template="Tekstur: {text}\nSpurningur: {question}\nSvara við í mesta lagi "
+    "trimum orðum: {label}",
     instruction_prompt="Tekstur: {text}\n\nSvara hesum spurninginum um tekstin "
     "uppiyvir við í mesta lagi trimum orðum.\n\nSpurningur: {question}",
     num_few_shot_examples=4,
@@ -1005,7 +1006,7 @@ FOQA_CONFIG = DatasetConfig(
 
 GERMANQUAD_CONFIG = DatasetConfig(
     name="germanquad",
-    pretty_name="the truncated version of the German question answering dataset "
+    pretty_name="the truncated version of the German reading comprehension dataset "
     "GermanQuAD",
     huggingface_id="ScandEval/germanquad-mini",
     task=RC,
@@ -1040,7 +1041,7 @@ SQUAD_CONFIG = DatasetConfig(
 
 SQUAD_NL_CONFIG = DatasetConfig(
     name="squad-nl",
-    pretty_name="the truncated version of the Dutch question answering dataset "
+    pretty_name="the truncated version of the Dutch reading comprehension dataset "
     "SQuAD-nl, translated from the English SQuAD dataset",
     huggingface_id="ScandEval/squad-nl-v2-mini",
     task=RC,
@@ -1057,8 +1058,8 @@ SQUAD_NL_CONFIG = DatasetConfig(
 
 ICELANDIC_QA_CONFIG = DatasetConfig(
     name="icelandic-qa",
-    pretty_name="the Icelandic question answering dataset about Icelandic culture and "
-    "history",
+    pretty_name="the Icelandic reading comprehension dataset about Icelandic culture "
+    "and history",
     huggingface_id="ScandEval/icelandic-qa",
     task=RC,
     languages=[IS],
