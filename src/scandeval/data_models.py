@@ -64,14 +64,11 @@ class Task:
             The task group of the task.
         metrics:
             The metrics used to evaluate the task.
-        labels:
-            The labels used in the task.
     """
 
     name: str
     task_group: TaskGroup
     metrics: list[MetricConfig]
-    labels: list[str]
 
     def __hash__(self) -> int:
         """Return a hash of the task."""
@@ -312,6 +309,8 @@ class DatasetConfig:
         instruction_prompt:
             The prompt to use when benchmarking the dataset using instruction-based
             evaluation.
+        labels (optional):
+            The labels in the dataset. Defaults to an empty list.
         prompt_label_mapping (optional):
             A mapping from the labels to another phrase which is used as a substitute
             for the label in few-shot evaluation. Defaults to an empty dictionary.
@@ -329,23 +328,24 @@ class DatasetConfig:
     prompt_prefix: str
     num_few_shot_examples: int
     instruction_prompt: str
+    labels: list[str] = field(default_factory=list)
     prompt_label_mapping: dict[str, str] = field(default_factory=dict)
     unofficial: bool = False
 
     @property
     def id2label(self) -> dict[int, str]:
         """The mapping from ID to label."""
-        return {idx: label for idx, label in enumerate(self.task.labels)}
+        return {idx: label for idx, label in enumerate(self.labels)}
 
     @property
     def label2id(self) -> dict[str, int]:
         """The mapping from label to ID."""
-        return {label: i for i, label in enumerate(self.task.labels)}
+        return {label: i for i, label in enumerate(self.labels)}
 
     @property
     def num_labels(self) -> int:
         """The number of labels in the dataset."""
-        return len(self.task.labels)
+        return len(self.labels)
 
     def __hash__(self) -> int:
         """Return a hash of the dataset configuration."""

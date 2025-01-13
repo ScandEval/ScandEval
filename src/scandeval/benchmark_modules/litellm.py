@@ -633,7 +633,7 @@ class LiteLLMModel(BenchmarkModule):
                 TaskGroup.SEQUENCE_CLASSIFICATION
                 | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
             ):
-                labels = it.cycle(self.dataset_config.task.labels)
+                labels = it.cycle(self.dataset_config.labels)
                 while (
                     len(few_shot_examples) < num_few_shots and len(shuffled_train) > 0
                 ):
@@ -663,7 +663,7 @@ class LiteLLMModel(BenchmarkModule):
                 labels = it.cycle(
                     [
                         label.lower()
-                        for label in self.dataset_config.task.labels
+                        for label in self.dataset_config.labels
                         if label.lower().startswith("b-")
                     ]
                 )
