@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .data_models import DatasetConfig
-from .languages import DA, DE, EN, FO, IS, NB, NL, NN, NO, SV, get_all_languages
+from .languages import DA, DE, EN, FO, FR, IS, NB, NL, NN, NO, SV, get_all_languages
 from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
 
 
@@ -1071,6 +1071,23 @@ ICELANDIC_QA_CONFIG = DatasetConfig(
     num_few_shot_examples=4,
     max_generated_tokens=32,
     unofficial=True,
+)
+
+FQUAD_CONFIG = DatasetConfig(
+    name="fquad",
+    pretty_name="the truncated version of the French reading comprehension dataset "
+    "FQuAD",
+    huggingface_id="ScandEval/fquad-mini",
+    task=RC,
+    languages=[FR],
+    labels=["start_positions", "end_positions"],
+    prompt_prefix="Les textes suivants sont accompagnés de questions et de réponses.",
+    prompt_template="Texte: {text}\nQuestion: {question}\nRéponse en 3 mots maximum: "
+    "{label}",
+    instruction_prompt="Texte: {text}\n\nRépondez à la question suivante sur le "
+    "texte ci-dessus en 3 mots maximum.\n\nQuestion: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
 )
 
 ### SUMMARIZATION DATASETS ###
