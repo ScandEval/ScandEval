@@ -168,8 +168,8 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
-DUTCH_SOCIAL_CONFIG = DatasetConfig(
-    name="dutch-social",
+DBRD_CONFIG = DatasetConfig(
+    name="dbrd",
     pretty_name="the truncated version of the Dutch sentiment classification "
     "dataset DBRD",
     huggingface_id="ScandEval/dbrd-mini",
