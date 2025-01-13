@@ -787,10 +787,15 @@ def get_model_repo_info(
             for model_task in GENERATIVE_MODEL_TASKS
             for class_name in TASK_MAPPING[model_task].values()
         ]
-        if any(class_name in generative_class_names for class_name in class_names):
-            pipeline_tag = "text-generation"
-        else:
-            pipeline_tag = "fill-mask"
+        try:
+            if any(class_name in generative_class_names for class_name in class_names):
+                pipeline_tag = "text-generation"
+            else:
+                pipeline_tag = "fill-mask"
+        except TypeError as e:
+            logger.warning(str(e))
+            breakpoint()
+            pass
 
     return HFModelInfo(
         pipeline_tag=pipeline_tag, tags=tags, adapter_base_model_id=base_model_id
