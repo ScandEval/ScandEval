@@ -31,7 +31,6 @@ LA = Task(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=["incorrect", "correct"],
 )
 
 
@@ -51,17 +50,6 @@ NER = Task(
             huggingface_id="seqeval",
             results_key="overall_f1",
         ),
-    ],
-    labels=[
-        "o",
-        "b-loc",
-        "i-loc",
-        "b-org",
-        "i-org",
-        "b-per",
-        "i-per",
-        "b-misc",
-        "i-misc",
     ],
 )
 
@@ -85,7 +73,6 @@ RC = Task(
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:.2f}%"),
         ),
     ],
-    labels=["start_positions", "end_positions"],
 )
 
 
@@ -107,7 +94,6 @@ SENT = Task(
             compute_kwargs=dict(average="macro"),
         ),
     ],
-    labels=["negative", "neutral", "positive"],
 )
 
 
@@ -131,7 +117,6 @@ SUMM = Task(
             results_key="rougeL",
         ),
     ],
-    labels=[],
 )
 
 
@@ -152,7 +137,6 @@ KNOW = Task(
             results_key="accuracy",
         ),
     ],
-    labels=["a", "b", "c", "d"],
 )
 
 
@@ -173,7 +157,6 @@ MCRC = Task(
             results_key="accuracy",
         ),
     ],
-    labels=["a", "b", "c", "d"],
 )
 
 
@@ -194,7 +177,6 @@ COMMON_SENSE = Task(
             results_key="accuracy",
         ),
     ],
-    labels=["a", "b", "c", "d"],
 )
 
 
@@ -217,5 +199,4 @@ SPEED = Task(
             postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:,.0f}"),
         ),
     ],
-    labels=[],
 )

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   version, but this has been changed to `NetherlandsForensicInstitute/squad-nl-v2.0`,
   following [this evaluation showing that the latter is of higher
   quality](https://huggingface.co/datasets/yhavinga/squad_v2_dutch/discussions/2#6763ed4c42436c7f7005f4b4).
+- Moved the label definition from the task-level to dataset-level, which now allows
+  specifying dataset-specific labels that differ from other datasets in the same task.
 
 ### Fixed
 - The `trust_remote_code` argument was not supplied when loading the Hugging Face
