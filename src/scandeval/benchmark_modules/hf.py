@@ -787,7 +787,9 @@ def get_model_repo_info(
             for model_task in GENERATIVE_MODEL_TASKS
             for class_name in TASK_MAPPING[model_task].values()
         ]
-        if any(class_name in generative_class_names for class_name in class_names):
+        if class_names is not None and any(
+            class_name in generative_class_names for class_name in class_names
+        ):
             pipeline_tag = "text-generation"
         else:
             pipeline_tag = "fill-mask"

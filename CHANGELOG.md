@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed issue while determining the maximal sequence length of encoder models on CUDA
   devices, which caused an error when evaluating some models. We now move the model to
   CPU temporarily to determine the maximal sequence length.
+- If a model configuration does not specify `architectures` then we assume that it is an
+  older architecture and that it is an encoder model.
 
 
 ## [v14.2.0] - 2025-01-11
