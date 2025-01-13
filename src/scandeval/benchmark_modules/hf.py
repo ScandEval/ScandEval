@@ -1081,7 +1081,6 @@ def align_model_and_tokenizer(
         )
         with torch.inference_mode():
             try:
-                breakpoint()
                 model(dummy_inputs, attention_mask=torch.ones_like(dummy_inputs))
                 break
 
