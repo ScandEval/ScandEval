@@ -168,6 +168,25 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+DUTCH_SOCIAL_CONFIG = DatasetConfig(
+    name="dutch-social",
+    pretty_name="the truncated version of the Dutch sentiment classification "
+    "dataset DBRD",
+    huggingface_id="ScandEval/dbrd-mini",
+    task=SENT,
+    languages=[NL],
+    labels=["negative", "positive"],
+    prompt_prefix="Hieronder staan tweets en hun sentiment, dat 'positief' of "
+    "'negatief' kan zijn.",
+    prompt_template="Tweet: {text}\nSentiment: {label}",
+    prompt_label_mapping=dict(positive="positief", negative="negatief"),
+    instruction_prompt="Tweet: {text}\n\nClassificeer het sentiment in de tweet. "
+    "Antwoord met 'positief' of 'negatief'.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+    unofficial=True,
+)
+
 SST5_CONFIG = DatasetConfig(
     name="sst5",
     pretty_name="the truncated version of the English sentiment classification "
