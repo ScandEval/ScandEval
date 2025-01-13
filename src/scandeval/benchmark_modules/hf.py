@@ -1085,7 +1085,7 @@ def align_model_and_tokenizer(
                 break
 
             # This happens if `max_length` is too large
-            except (IndexError, RuntimeError):
+            except IndexError:
                 continue
 
     model.to(model_device)
