@@ -68,6 +68,68 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset dutch-social
 ```
 
+### Unofficial: DBRD
+
+This dataset was published in [this paper](https://doi.org/10.48550/arXiv.1910.00896)
+and features Dutch book reviews from [Hebban.nl](https://www.hebban.nl), annotated with
+sentiment labels, written by the users of the website.
+
+The original full dataset consists of 20,000 / 2,200 samples for training and testing,
+respectively. We use a 1,024 / 256 / 2,048 split for training, validation and testing,
+respectively (so 3,328 samples used in total). The training and testing splits are
+subsets of the original splits, and the validation split is a disjoint subset of the
+original training split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Het boek geeft uitleg in de basis technieken en heeft handige tips, hoe je de klassieke recepten ook gewoon zelf kan maken, ze zijn geschreven in een soort leermodus, dit alles ondersteunt door stap voor stap foto’s.",
+  "label": "positive"
+}
+```
+```json
+{
+  "text": "Dit boek is het debuut van de Zuid-Afrikaanse schrijver S J Naudé , het heeft diverse prijzen gewonnen waaronder de UJ Debutprys 2012.\nHet is een verhalenbundel, met verhalen over personages, die metaforisch rondtrekkende vogels genoemd worden. Ze vliegen letterlijk rusteloos over de wereld. De een is een muzikante die drie continenten over reist om haar broers en zussen te ontmoeten, een man volgt zijn minnaar via Londen en Berlijn naar een kasteel , in Milaan is een futuristisch lawaaimachine te zien en een andere vrouw wil er voor zorgen dat er geen hiv meer voorkomt in Afrika. Zo zijn er nog een paar verhalen. Het ene verhaal heeft me meer geraakt dan het andere, het beste verhaal vind ik het verhaal waarin een man voor zijn doodzieke moeder zorgt, samen met een Japanse man.\nDe thema’s die in dit boek voorkomen zijn liefde, troost, acceptatie en succes. Leven en dood, reizen, gevoel en verstand komen steeds weer aan bod in de verhalen. Iedereen zoekt naar antwoorden die niet gegeven worden.\nHet is een boek dat je niet even snel leest, het zijn allemaal op zich zelf staande verhalen, hoewel sommige personen in andere verhalen weer naar voren komen. Wat precies het verband daar tussen is, heb ik niet kunnen ontdekken.\nHet is een boek dat niet echt vrolijk is, veel verhalen zijn somber. Doordat er veel Afrikaanse namen in voorkomen raak je af en toe de draad kwijt.\nIk ben niet erg gecharmeerd van dit boek en geef het 2 sterren .",
+  "label": "negative"
+}
+```
+```json
+{
+  "text": "Voor mij het zwakste boek van Coben tot nu toe.\nHet was alsof ik naar een slechte B-film aan het kijken was. Bordkartonnen personages die me totaal onverschillig lieten. Deus ex machina's die de plot ongeloofwaardig maken.\nVerloren is als een slecht, onevenwichtig James Bond verhaal. Veel actie zonder context, background en motivatie.",
+  "label": "negative"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 12
+- Prefix prompt:
+  ```
+  Hieronder staan tweets en hun sentiment, dat 'positief', 'neutraal' of 'negatief' kan zijn.
+  ```
+- Base prompt template:
+  ```
+  Tweet: {text}
+  Sentiment: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Tweet: {text}
+
+  Classificeer het sentiment in de tweet. Antwoord met 'positief', 'neutraal' of 'negatief'.
+  ```
+- Label mapping:
+    - `positive` ➡️ `positief`
+    - `negative` ➡️ `negatief`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset dbrd
+```
+
 
 ## Named Entity Recognition
 
