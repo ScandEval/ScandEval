@@ -37,8 +37,10 @@ def main(data_dir: str):
             for paragraph_dict in article_dict["paragraphs"]:
                 context = paragraph_dict["context"]
                 for qa_dict in paragraph_dict["qas"]:
+                    id_ = qa_dict["id"]
                     question = qa_dict["question"]
                     answer_dict = qa_dict["answers"]
+                    data_dict["id"].append(id_)
                     data_dict["context"].append(context)
                     data_dict["question"].append(question)
                     data_dict["answers"].append(
@@ -53,6 +55,10 @@ def main(data_dir: str):
 
     train_df = set_up_dataframe(df=train_df)
     valtest_df = set_up_dataframe(df=valtest_df)
+
+    # Remove duplicates
+    train_df = train_df.drop_duplicates(subset="id")
+    valtest_df = valtest_df.drop_duplicates(subset="id")
 
     # Only work with samples where the context is not very large or small
     train_lengths = train_df.context.str.len()
