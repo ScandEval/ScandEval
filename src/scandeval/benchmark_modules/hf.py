@@ -1065,6 +1065,11 @@ def align_model_and_tokenizer(
     else:
         tokenizer.model_max_length = 512
 
+    # Move the model to the CPU, since otherwise we can't catch the IndexErrors when
+    # finding the maximum sequence length of the model
+    model_device = model.device
+    model.to(torch.device("cpu"))
+
     # Manually check that this model max length is valid for the model, and adjust
     # otherwise
     initial_max_length = tokenizer.model_max_length
@@ -1084,6 +1089,9 @@ def align_model_and_tokenizer(
             # This happens if `max_length` is too large
             except IndexError:
                 continue
+
+    # Move the model back to the original device
+    model.to(model_device)
 
     # If there is a mismatch between the vocab size according to the tokenizer and
     # the vocab size according to the model, we raise an error
