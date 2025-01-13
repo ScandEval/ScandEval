@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added the Dutch sentiment classification dataset DBRD. This dataset only has positive
+  and negative samples, but has a better quality than the existing Dutch Social dataset.
+  We set it to unofficial for now, but it might eventually replace the Dutch Social
+  dataset as the official Dutch sentiment classification dataset.
+
 ### Changed
 - Updated the Dutch reading comprehension dataset SQuAD-nl, being a machine translated
   version of the English SQuAD dataset. Previously we used the `yhavinga/squad_v2_dutch`
