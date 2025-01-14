@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.3.0] - 2025-01-14
 ### Added
 - Added the Dutch sentiment classification dataset DBRD. This dataset only has positive
   and negative samples, but has a better quality than the existing Dutch Social dataset.
