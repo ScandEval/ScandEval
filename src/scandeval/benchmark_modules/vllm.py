@@ -327,6 +327,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         ) and should_prompts_be_stripped(
             labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
         ):
+            log_once(message="Stripping prompts.", level=logging.DEBUG)
             prompts = [prompt.strip() for prompt in prompts]
 
         # Generate sequences using vLLM
