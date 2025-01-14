@@ -16,8 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Updated the Dutch reading comprehension dataset SQuAD-nl, being a machine translated
   version of the English SQuAD dataset. Previously we used the `yhavinga/squad_v2_dutch`
-  version, but this has been changed to `NetherlandsForensicInstitute/squad-nl-v2.0`,
-  following [this evaluation showing that the latter is of higher
+  version, but this has been changed to `GroNLP/squad-nl-v2.0`, following [this
+  evaluation showing that the latter is of higher
   quality](https://huggingface.co/datasets/yhavinga/squad_v2_dutch/discussions/2#6763ed4c42436c7f7005f4b4).
 - Moved the label definition from the task-level to dataset-level, which now allows
   specifying dataset-specific labels that differ from other datasets in the same task.
