@@ -2093,7 +2093,17 @@
 <span class="normal">1121</span>
 <span class="normal">1122</span>
 <span class="normal">1123</span>
-<span class="normal">1124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
+<span class="normal">1124</span>
+<span class="normal">1125</span>
+<span class="normal">1126</span>
+<span class="normal">1127</span>
+<span class="normal">1128</span>
+<span class="normal">1129</span>
+<span class="normal">1130</span>
+<span class="normal">1131</span>
+<span class="normal">1132</span>
+<span class="normal">1133</span>
+<span class="normal">1134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -2882,7 +2892,9 @@
             <span class="k">for</span> <span class="n">model_task</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
             <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">TASK_MAPPING</span><span class="p">[</span><span class="n">model_task</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
         <span class="p">]</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">class_name</span> <span class="ow">in</span> <span class="n">generative_class_names</span> <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">class_names</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">class_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">class_name</span> <span class="ow">in</span> <span class="n">generative_class_names</span> <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">class_names</span>
+        <span class="p">):</span>
             <span class="n">pipeline_tag</span> <span class="o">=</span> <span class="s2">&quot;text-generation&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pipeline_tag</span> <span class="o">=</span> <span class="s2">&quot;fill-mask&quot;</span>
@@ -3160,6 +3172,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span> <span class="o">=</span> <span class="mi">512</span>
 
+    <span class="c1"># Move the model to the CPU, since otherwise we can&#39;t catch the IndexErrors when</span>
+    <span class="c1"># finding the maximum sequence length of the model</span>
+    <span class="n">model_device</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">))</span>
+
     <span class="c1"># Manually check that this model max length is valid for the model, and adjust</span>
     <span class="c1"># otherwise</span>
     <span class="n">initial_max_length</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span>
@@ -3179,6 +3196,9 @@
             <span class="c1"># This happens if `max_length` is too large</span>
             <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
                 <span class="k">continue</span>
+
+    <span class="c1"># Move the model back to the original device</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">model_device</span><span class="p">)</span>
 
     <span class="c1"># If there is a mismatch between the vocab size according to the tokenizer and</span>
     <span class="c1"># the vocab size according to the model, we raise an error</span>

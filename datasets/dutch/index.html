@@ -741,6 +741,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#unofficial-dbrd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unofficial: DBRD
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1206,6 +1215,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#unofficial-dbrd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unofficial: DBRD
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1444,6 +1462,56 @@ Classificeer het sentiment in de tweet. Antwoord met &#39;positief&#39;, &#39;ne
 </ul>
 <p>You can evaluate this dataset directly as follows:</p>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>scandeval<span class="w"> </span>--model<span class="w"> </span>&lt;model-id&gt;<span class="w"> </span>--dataset<span class="w"> </span>dutch-social
+</code></pre></div>
+<h3 id="unofficial-dbrd">Unofficial: DBRD</h3>
+<p>This dataset was published in <a href="https://doi.org/10.48550/arXiv.1910.00896">this paper</a>
+and features Dutch book reviews from <a href="https://www.hebban.nl">Hebban.nl</a>, annotated with
+sentiment labels, written by the users of the website.</p>
+<p>The original full dataset consists of 20,000 / 2,200 samples for training and testing,
+respectively. We use a 1,024 / 256 / 2,048 split for training, validation and testing,
+respectively (so 3,328 samples used in total). The training and testing splits are
+subsets of the original splits, and the validation split is a disjoint subset of the
+original training split.</p>
+<p>Here are a few examples from the training split:</p>
+<p><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Het boek geeft uitleg in de basis technieken en heeft handige tips, hoe je de klassieke recepten ook gewoon zelf kan maken, ze zijn geschreven in een soort leermodus, dit alles ondersteunt door stap voor stap foto’s.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;positive&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dit boek is het debuut van de Zuid-Afrikaanse schrijver S J Naudé , het heeft diverse prijzen gewonnen waaronder de UJ Debutprys 2012.\nHet is een verhalenbundel, met verhalen over personages, die metaforisch rondtrekkende vogels genoemd worden. Ze vliegen letterlijk rusteloos over de wereld. De een is een muzikante die drie continenten over reist om haar broers en zussen te ontmoeten, een man volgt zijn minnaar via Londen en Berlijn naar een kasteel , in Milaan is een futuristisch lawaaimachine te zien en een andere vrouw wil er voor zorgen dat er geen hiv meer voorkomt in Afrika. Zo zijn er nog een paar verhalen. Het ene verhaal heeft me meer geraakt dan het andere, het beste verhaal vind ik het verhaal waarin een man voor zijn doodzieke moeder zorgt, samen met een Japanse man.\nDe thema’s die in dit boek voorkomen zijn liefde, troost, acceptatie en succes. Leven en dood, reizen, gevoel en verstand komen steeds weer aan bod in de verhalen. Iedereen zoekt naar antwoorden die niet gegeven worden.\nHet is een boek dat je niet even snel leest, het zijn allemaal op zich zelf staande verhalen, hoewel sommige personen in andere verhalen weer naar voren komen. Wat precies het verband daar tussen is, heb ik niet kunnen ontdekken.\nHet is een boek dat niet echt vrolijk is, veel verhalen zijn somber. Doordat er veel Afrikaanse namen in voorkomen raak je af en toe de draad kwijt.\nIk ben niet erg gecharmeerd van dit boek en geef het 2 sterren .&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;negative&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Voor mij het zwakste boek van Coben tot nu toe.\nHet was alsof ik naar een slechte B-film aan het kijken was. Bordkartonnen personages die me totaal onverschillig lieten. Deus ex machina&#39;s die de plot ongeloofwaardig maken.\nVerloren is als een slecht, onevenwichtig James Bond verhaal. Veel actie zonder context, background en motivatie.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;negative&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>When evaluating generative models, we use the following setup (see the
+<a href="/methodology">methodology</a> for more information on how these are used):</p>
+<ul>
+<li>Number of few-shot examples: 12</li>
+<li>Prefix prompt:
+  <div class="highlight"><pre><span></span><code>Hieronder staan tweets en hun sentiment, dat &#39;positief&#39;, &#39;neutraal&#39; of &#39;negatief&#39; kan zijn.
+</code></pre></div></li>
+<li>Base prompt template:
+  <div class="highlight"><pre><span></span><code>Tweet: {text}
+Sentiment: {label}
+</code></pre></div></li>
+<li>Instruction-tuned prompt template:
+  <div class="highlight"><pre><span></span><code>Tweet: {text}
+
+Classificeer het sentiment in de tweet. Antwoord met &#39;positief&#39;, &#39;neutraal&#39; of &#39;negatief&#39;.
+</code></pre></div></li>
+<li>Label mapping:<ul>
+<li><code>positive</code> ➡️ <code>positief</code></li>
+<li><code>negative</code> ➡️ <code>negatief</code></li>
+</ul>
+</li>
+</ul>
+<p>You can evaluate this dataset directly as follows:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>scandeval<span class="w"> </span>--model<span class="w"> </span>&lt;model-id&gt;<span class="w"> </span>--dataset<span class="w"> </span>dbrd
 </code></pre></div>
 <h2 id="named-entity-recognition">Named Entity Recognition</h2>
 <h3 id="conll-2002-nl">CoNLL-2002-nl</h3>
