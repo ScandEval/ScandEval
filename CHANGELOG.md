@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   specifying dataset-specific labels that differ from other datasets in the same task.
 
 ### Fixed
+- Fixed a bug when benchmarking base decoder models on reading comprehension tasks,
+  where it was not checked if the prompts should be stripped or not. This caused a
+  severe performance degradation on these tasks. This affects base decoder models
+  benchmarked on reading comprehension tasks from v14.0.0.
 - The `trust_remote_code` argument was not supplied when loading the Hugging Face
   configuration in some places, which caused an unnecessary dialogue with the user when
   evaluating models. This correctly now uses the `--trust-remote-code` argument as
