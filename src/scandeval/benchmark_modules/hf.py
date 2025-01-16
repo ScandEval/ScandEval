@@ -598,7 +598,7 @@ def load_model_and_tokenizer(
     model: PreTrainedModel | None = None
     while True:
         try:
-            # Get the model class associated with the supertask
+            # Get the model class associated with the task group
             model_cls_or_none: t.Type["PreTrainedModel"] | None = get_class_by_name(
                 class_name=task_group_to_class_name(task_group=task_group),
                 module_name="transformers",
@@ -607,7 +607,7 @@ def load_model_and_tokenizer(
             # If the model class could not be found then raise an error
             if not model_cls_or_none:
                 raise InvalidBenchmark(
-                    f"The supertask {task_group!r} does not correspond to a "
+                    f"The task group {task_group.value!r} does not correspond to a "
                     "Hugging Face AutoModel type (such as "
                     "`AutoModelForSequenceClassification`)."
                 )
