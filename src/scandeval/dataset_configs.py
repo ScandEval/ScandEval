@@ -1316,6 +1316,21 @@ SCHIBSTED_NO_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+ORANGE_SUM_CONFIG = DatasetConfig(
+    name="orange-sum",
+    pretty_name="the truncated version of the English summarisation dataset "
+    "CNN-DailyMail",
+    huggingface_id="ScandEval/orange-sum-mini",
+    task=SUMM,
+    languages=[FR],
+    prompt_prefix="Les articles suivants sont accompagnés d'un résumé.",
+    prompt_template="Article de presse: {text}\nRésumé: {target_text}",
+    instruction_prompt="Article de presse: {text}\n\nRédigez un résumé de l'article "
+    "ci-dessus.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+)
+
 # TODO: Faroese summarization
 
 
