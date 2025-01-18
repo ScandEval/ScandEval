@@ -600,7 +600,7 @@ CONLL_EN_CONFIG = DatasetConfig(
 ELTEC_CONFIG = DatasetConfig(
     name="eltec",
     pretty_name="the truncated version of the French named entity recognition "
-    "dataset ELTEC",
+    "dataset ELTeC",
     huggingface_id="ScandEval/eltec-mini",
     task=NER,
     languages=[FR],
