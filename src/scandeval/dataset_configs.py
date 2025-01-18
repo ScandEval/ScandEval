@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .data_models import DatasetConfig
-from .languages import DA, DE, EN, FO, IS, NB, NL, NN, NO, SV, get_all_languages
+from .languages import DA, DE, EN, FO, FR, IS, NB, NL, NN, NO, SV, get_all_languages
 from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
 
 
@@ -223,6 +223,24 @@ FOSENT_CONFIG = DatasetConfig(
     instruction_prompt="Tekstur: {text}\n\nFlokka lyndið í tekstinum. Svara við "
     "'positivt', 'neutralt' ella 'negativt'.",
     num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
+ALLOCINE_CONFIG = DatasetConfig(
+    name="allocine",
+    pretty_name="the truncated version of the French sentiment classification "
+    "dataset Allocine",
+    huggingface_id="ScandEval/allocine-mini",
+    task=SENT,
+    languages=[FR],
+    labels=["negative", "positive"],
+    prompt_prefix="Voici des textes et leur sentiment, qui peut être 'positif' ou "
+    "'négatif'.",
+    prompt_template="Texte: {text}\nSentiment: {label}",
+    prompt_label_mapping=dict(positive="positif", negative="négatif"),
+    instruction_prompt="Texte : {text}\nClassez le sentiment dans le texte. Répondez "
+    "par ‘positif' ou ‘négatif'.",
+    num_few_shot_examples=12,
     max_generated_tokens=5,
 )
 
@@ -559,8 +577,7 @@ CONLL_EN_CONFIG = DatasetConfig(
         "b-misc",
         "i-misc",
     ],
-    prompt_prefix="Below are sentences and JSON dictionaries with the named "
-    "entities that occur in the given sentence.",
+    prompt_prefix="Below are sentences and JSON dictionaries with the named entities that occur in the given sentence.",
     prompt_template="Sentence: {text}\nNamed entities: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -576,6 +593,46 @@ CONLL_EN_CONFIG = DatasetConfig(
     "sentence. You should output this as a JSON dictionary with the keys being "
     "'person', 'location', 'organization' and 'miscellaneous'. The values should be "
     "lists of the named entities of that type, exactly as they appear in the sentence.",
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
+ELTEC_CONFIG = DatasetConfig(
+    name="eltec",
+    pretty_name="the truncated version of the French named entity recognition "
+    "dataset ELTeC",
+    huggingface_id="ScandEval/eltec-mini",
+    task=NER,
+    languages=[FR],
+    labels=[
+        "o",
+        "b-per",
+        "i-per",
+        "b-loc",
+        "i-loc",
+        "b-org",
+        "i-org",
+        "b-misc",
+        "i-misc",
+    ],
+    prompt_prefix="Vous trouverez ci-dessous des phrases et des dictionnaires JSON "
+    "avec les entités nommées qui apparaissent dans la phrase donnée.",
+    prompt_template="Sentence: {text}\nEntités nommées: {label}",
+    prompt_label_mapping={
+        "b-per": "personne",
+        "i-per": "personne",
+        "b-loc": "lieu",
+        "i-loc": "lieu",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "divers",
+        "i-misc": "divers",
+    },
+    instruction_prompt="Sentence: {text}\n\nIdentifiez les entités nommées dans la "
+    "phrase. Vous devez produire ceci sous forme de dictionnaire JSON avec les clés "
+    "'personne', 'lieu', 'organisation', et 'divers'. Les valeurs doivent être des "
+    "listes des entités nommées de ce type, exactement comme elles apparaissent dans "
+    "la phrase.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
@@ -812,6 +869,24 @@ SCALA_EN_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+SCALA_FR_CONFIG = DatasetConfig(
+    name="scala-fr",
+    pretty_name="the French part of the linguistic acceptability dataset ScaLA",
+    huggingface_id="ScandEval/scala-fr",
+    task=LA,
+    languages=[FR],
+    labels=["incorrect", "correct"],
+    prompt_prefix="The following are sentences and whether they are grammatically "
+    "correct.",
+    prompt_template="Phrase : {text}\nCorrect du point de vue grammatical : {label}",
+    prompt_label_mapping=dict(correct="oui", incorrect="non"),
+    instruction_prompt="Phrase: {text}\n\nDéterminez si la phrase est grammaticalement "
+    "correcte ou non. Répondez par 'oui' si la phrase est correcte et par 'non' si "
+    "elle ne l'est pas.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
 DUTCH_COLA_CONFIG = DatasetConfig(
     name="dutch-cola",
     pretty_name="the truncated version of the Dutch linguistic acceptability dataset "
@@ -895,7 +970,8 @@ ICE_LINGUISTIC_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
-    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
+    "ekki.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
     unofficial=True,
@@ -972,7 +1048,7 @@ SCANDIQA_SV_CONFIG = DatasetConfig(
 
 NQII_CONFIG = DatasetConfig(
     name="nqii",
-    pretty_name="the truncated version of the Icelandic question answering dataset "
+    pretty_name="the truncated version of the Icelandic reading comprehension dataset "
     "Natural Questions in Icelandic",
     huggingface_id="ScandEval/nqii-mini",
     task=RC,
@@ -989,14 +1065,14 @@ NQII_CONFIG = DatasetConfig(
 
 FOQA_CONFIG = DatasetConfig(
     name="foqa",
-    pretty_name="the Faroese question answering dataset FoQA",
+    pretty_name="the Faroese reading comprehension dataset FoQA",
     huggingface_id="ScandEval/foqa",
     task=RC,
     languages=[FO],
     labels=["start_positions", "end_positions"],
     prompt_prefix="Hetta eru tekstir saman við spurningum og svar.",
-    prompt_template="Tekstur: {text}\nSpurningur: {question}\nSvara við í mesta lagi trimum "
-    "orðum: {label}",
+    prompt_template="Tekstur: {text}\nSpurningur: {question}\nSvara við í mesta lagi "
+    "trimum orðum: {label}",
     instruction_prompt="Tekstur: {text}\n\nSvara hesum spurninginum um tekstin "
     "uppiyvir við í mesta lagi trimum orðum.\n\nSpurningur: {question}",
     num_few_shot_examples=4,
@@ -1005,7 +1081,7 @@ FOQA_CONFIG = DatasetConfig(
 
 GERMANQUAD_CONFIG = DatasetConfig(
     name="germanquad",
-    pretty_name="the truncated version of the German question answering dataset "
+    pretty_name="the truncated version of the German reading comprehension dataset "
     "GermanQuAD",
     huggingface_id="ScandEval/germanquad-mini",
     task=RC,
@@ -1040,7 +1116,7 @@ SQUAD_CONFIG = DatasetConfig(
 
 SQUAD_NL_CONFIG = DatasetConfig(
     name="squad-nl",
-    pretty_name="the truncated version of the Dutch question answering dataset "
+    pretty_name="the truncated version of the Dutch reading comprehension dataset "
     "SQuAD-nl, translated from the English SQuAD dataset",
     huggingface_id="ScandEval/squad-nl-v2-mini",
     task=RC,
@@ -1057,8 +1133,8 @@ SQUAD_NL_CONFIG = DatasetConfig(
 
 ICELANDIC_QA_CONFIG = DatasetConfig(
     name="icelandic-qa",
-    pretty_name="the Icelandic question answering dataset about Icelandic culture and "
-    "history",
+    pretty_name="the Icelandic reading comprehension dataset about Icelandic culture "
+    "and history",
     huggingface_id="ScandEval/icelandic-qa",
     task=RC,
     languages=[IS],
@@ -1071,6 +1147,23 @@ ICELANDIC_QA_CONFIG = DatasetConfig(
     num_few_shot_examples=4,
     max_generated_tokens=32,
     unofficial=True,
+)
+
+FQUAD_CONFIG = DatasetConfig(
+    name="fquad",
+    pretty_name="the truncated version of the French reading comprehension dataset "
+    "FQuAD",
+    huggingface_id="ScandEval/fquad-mini",
+    task=RC,
+    languages=[FR],
+    labels=["start_positions", "end_positions"],
+    prompt_prefix="Les textes suivants sont accompagnés de questions et de réponses.",
+    prompt_template="Texte: {text}\nQuestion: {question}\nRéponse en 3 mots maximum: "
+    "{label}",
+    instruction_prompt="Texte: {text}\n\nRépondez à la question suivante sur le "
+    "texte ci-dessus en 3 mots maximum.\n\nQuestion: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
 )
 
 ### SUMMARIZATION DATASETS ###
@@ -1221,6 +1314,21 @@ SCHIBSTED_NO_CONFIG = DatasetConfig(
     num_few_shot_examples=1,
     max_generated_tokens=256,
     unofficial=True,
+)
+
+ORANGE_SUM_CONFIG = DatasetConfig(
+    name="orange-sum",
+    pretty_name="the truncated version of the English summarisation dataset "
+    "CNN-DailyMail",
+    huggingface_id="ScandEval/orange-sum-mini",
+    task=SUMM,
+    languages=[FR],
+    prompt_prefix="Les articles suivants sont accompagnés d'un résumé.",
+    prompt_template="Article de presse: {text}\nRésumé: {target_text}",
+    instruction_prompt="Article de presse: {text}\n\nRédigez un résumé de l'article "
+    "ci-dessus.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
 )
 
 # TODO: Faroese summarization
@@ -1379,6 +1487,24 @@ MMLU_DA_CONFIG = DatasetConfig(
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
+)
+
+MMLU_FR_CONFIG = DatasetConfig(
+    name="mmlu-fr",
+    pretty_name="the truncated version of the French knowledge dataset MMLU-fr, "
+    "translated from the English MMLU dataset",
+    huggingface_id="ScandEval/mmlu-fr-mini",
+    task=KNOW,
+    languages=[FR],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Les questions suivantes sont des questions à choix multiples "
+    "(avec réponses).",
+    prompt_template="Question: {text}\nRéponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
+    "'b', 'c' ou 'd'.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
 )
 
 ARC_DA_CONFIG = DatasetConfig(
@@ -1643,6 +1769,24 @@ HELLASWAG_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
     "replying with 'a', 'b', 'c' or 'd'.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
+HELLASWAG_FR_CONFIG = DatasetConfig(
+    name="hellaswag-fr",
+    pretty_name="the truncated version of the French common-sense reasoning dataset "
+    "HellaSwag-nl, translated from the English HellaSwag dataset",
+    huggingface_id="ScandEval/hellaswag-fr-mini",
+    task=COMMON_SENSE,
+    languages=[FR],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Les questions suivantes sont des questions à choix multiples "
+    "(avec réponses).",
+    prompt_template="Question: {text}\nRéponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
+    "'b', 'c' ou 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
