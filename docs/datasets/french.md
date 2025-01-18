@@ -7,7 +7,65 @@ information about what these constitute.
 
 ## Sentiment Classification
 
-Missing!
+### Allocine
+
+This dataset was published in [this Github
+repository](https://github.com/TheophileBlard/french-sentiment-analysis-with-bert) and
+features reviews from the French movie review website Allocine. The reviews range from
+0.5 to 5 (inclusive), with steps of 0.5. The negative samples are reviews with a rating
+of at most 2, and the positive ones are reviews with a rating of at least 4. The reviews
+in between were discarded.
+
+The original full dataset consists of 160,000 / 20,000 / 20,000 samples for training,
+validation, and testing, respectively. We use 1,024 / 256 / 2,048 samples for training,
+validation, and testing, respectively. All our splits are subsets of the original ones.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Ce 7ème volet ne mérite pas de notre part une grande attention, au vu du précédent New Police Story. À la limite du huis clos, Jackie évolue dans une boîte de nuit, sorte de piège du méchant cherchant à se venger, ou du moins à découvrir la vérité sur la mort de sa sœur. Notre cascadeur acteur ne bénéficie pas d'un décors à la hauteur de son potentiel acrobatique et le film d'un scénario à la hauteur d'une production, et cette production d'une large distribution, ce qui explique son arrivée direct tout étagère.",
+  "label": "negative"
+}
+```
+```json
+{
+  "text": "Meme pour ceux qui n'aime pas les Chevaliers du Fiel allez voir. 1 il est meilleur que le 1 et cela est rare de voir une suite qui est meilleur que le 1. Des scènes qui peuvent faire rire les petit et les grands. On ne s'ennuie pas. Super film allez le voir. L'interpretation des acteurs sont super. Bonne journée",
+  "label": "positive"
+}
+```
+```json
+{
+  "text": "Une ambiance envoûtante, un récit où se mélangent sorcellerie, croyances indiennes, enquête policière sur fond de trafic de drogue, tout est conforme au livre de Tony Hillerman, même si ce dernier a \"renié\" le film. Personnellement j'adore. Hélas introuvable en France et diffusé seulement sur canal , il y a ..... un certain temps.",
+  "label": "positive"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Voici des textes et leur sentiment, qui peut être 'positif' ou 'négatif'.
+  ```
+- Base prompt template:
+  ```
+  Texte: {text}
+  Sentiment: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Texte: {text}
+
+  Classez le sentiment dans le texte. Répondez par ‘positif' ou ‘négatif'.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset allocine
+```
 
 
 ## Named Entity Recognition

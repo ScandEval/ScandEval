@@ -226,6 +226,24 @@ FOSENT_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+ALLOCINE_CONFIG = DatasetConfig(
+    name="allocine",
+    pretty_name="the truncated version of the French sentiment classification "
+    "dataset Allocine",
+    huggingface_id="ScandEval/allocine-mini",
+    task=SENT,
+    languages=[FR],
+    labels=["negative", "positive"],
+    prompt_prefix="Voici des textes et leur sentiment, qui peut être 'positif' ou "
+    "'négatif'.",
+    prompt_template="Texte: {text}\nSentiment: {label}",
+    prompt_label_mapping=dict(positive="positif", negative="négatif"),
+    instruction_prompt="Texte : {text}\nClassez le sentiment dans le texte. Répondez "
+    "par ‘positif' ou ‘négatif'.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
 
 ### NAMED ENTITY RECOGNITION DATASETS ###
 
