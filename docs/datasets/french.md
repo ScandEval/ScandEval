@@ -82,7 +82,16 @@ Missing!
 
 ### FQuAD
 
-[description]
+This dataset was published in [this
+paper](https://aclanthology.org/2020.findings-emnlp.107/), and is a manually annotated
+dataset of questions and answers from the French Wikipedia.
+
+The original full dataset consists of 20,731 / 3,188 / 2,189 samples for training,
+validation and testing, respectively. Note that the testing split is not publicly
+accessible, however, so we only use the training and validation split. We use 1,024 /
+256 / 2,048 samples for training, validation, and testing, respectively. Our training
+split is a subset of the original training split, and our validation and testing splits
+are subsets of the original validation split.
 
 Here are a few examples from the training split:
 
