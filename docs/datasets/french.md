@@ -75,7 +75,70 @@ Missing!
 
 ## Linguistic Acceptability
 
-Missing!
+### ScaLA-fr
+
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
+and was automatically created from the [French Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_French-GSD/tree/master) by
+assuming that the documents in the treebank are correct, and corrupting the samples to
+create grammatically incorrect samples. The corruptions were done by either removing a
+word from a sentence, or by swapping two neighbouring words in a sentence. To ensure
+that this does indeed break the grammaticality of the sentence, a set of rules were used
+on the part-of-speech tags of the words in the sentence.
+
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Le dessert est une part minuscule de gâteau.",
+  "label": "correct"
+}
+```
+```json
+{
+  "text": "Le trafic international sera normal vendredi sur Eurostar, Thalys, et sur les trains à grande vitesse à destination de l', a indiqué la SNCF dans un communiqué.",
+  "label": "incorrect"
+}
+```
+```json
+{
+  "text": "Certains craignent qu' un avantage compétitif trop net et trop durable favorise les positions dominantes, monopoles et oligopoles, qui limitent la et concurrence finissent par peser sur le consommateur.",
+  "label": "incorrect"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 12
+- Prefix prompt:
+  ```
+  Følgende er sætninger og om de er grammatisk korrekte.
+  ```
+- Base prompt template:
+  ```
+  Sætning: {text}
+  Grammatisk korrekt: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Sætning: {text}
+
+  Bestem om sætningen er grammatisk korrekt eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er.
+  ```
+- Label mapping:
+    - `correct` ➡️ `ja`
+    - `incorrect` ➡️ `nej`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset scala-da
+```
 
 
 ## Reading Comprehension

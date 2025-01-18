@@ -830,6 +830,24 @@ SCALA_EN_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+SCALA_FR_CONFIG = DatasetConfig(
+    name="scala-fr",
+    pretty_name="the French part of the linguistic acceptability dataset ScaLA",
+    huggingface_id="ScandEval/scala-fr",
+    task=LA,
+    languages=[FR],
+    labels=["incorrect", "correct"],
+    prompt_prefix="The following are sentences and whether they are grammatically "
+    "correct.",
+    prompt_template="Phrase : {text}\nCorrect du point de vue grammatical : {label}",
+    prompt_label_mapping=dict(correct="oui", incorrect="non"),
+    instruction_prompt="Phrase: {text}\n\nDéterminez si la phrase est grammaticalement "
+    "correcte ou non. Répondez par 'oui' si la phrase est correcte et par 'non' si "
+    "elle ne l'est pas.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
 DUTCH_COLA_CONFIG = DatasetConfig(
     name="dutch-cola",
     pretty_name="the truncated version of the Dutch linguistic acceptability dataset "
