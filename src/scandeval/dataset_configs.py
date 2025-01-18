@@ -1482,7 +1482,8 @@ MMLU_FR_CONFIG = DatasetConfig(
     task=KNOW,
     languages=[FR],
     labels=["a", "b", "c", "d"],
-    prompt_prefix="Les questions suivantes sont des questions à choix multiples (avec réponses).",
+    prompt_prefix="Les questions suivantes sont des questions à choix multiples "
+    "(avec réponses).",
     prompt_template="Question: {text}\nRéponse: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
@@ -1753,6 +1754,24 @@ HELLASWAG_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nAnswer the above question by "
     "replying with 'a', 'b', 'c' or 'd'.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
+HELLASWAG_FR_CONFIG = DatasetConfig(
+    name="hellaswag-fr",
+    pretty_name="the truncated version of the French common-sense reasoning dataset "
+    "HellaSwag-nl, translated from the English HellaSwag dataset",
+    huggingface_id="ScandEval/hellaswag-fr-mini",
+    task=COMMON_SENSE,
+    languages=[FR],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Les questions suivantes sont des questions à choix multiples "
+    "(avec réponses).",
+    prompt_template="Question: {text}\nRéponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
+    "'b', 'c' ou 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
