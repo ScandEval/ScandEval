@@ -310,23 +310,24 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         # If any of the prompts are empty then we need to replace them with a BOS token
         # so that the vLLM model can generate from them
-        prompts = inputs["text"]
+        prompts: list[str] = inputs["text"]
         if any(len(prompt) == 0 for prompt in prompts):
             logger.debug("Found empty prompts, replacing with BOS token.")
             prompts = [
-                prompt if len(prompt) > 0 else self._tokenizer.bos_token
+                prompt if len(prompt) > 0 else str(self._tokenizer.bos_token)
                 for prompt in prompts
             ]
 
         # Strip the prompts if the model's tokeniser requires it
         labels_to_be_generated = list(self.dataset_config.prompt_label_mapping.values())
-        if (
-            not self.buffer.get("instruction_model", False)
-            and len(labels_to_be_generated) > 0
-            and should_prompts_be_stripped(
-                labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
-            )
+        if len(labels_to_be_generated) == 0:
+            labels_to_be_generated = ["negative", "positive"]
+        if not self.buffer.get(
+            "instruction_model", False
+        ) and should_prompts_be_stripped(
+            labels_to_be_generated=labels_to_be_generated, tokenizer=self._tokenizer
         ):
+            log_once(message="Stripping prompts.", level=logging.DEBUG)
             prompts = [prompt.strip() for prompt in prompts]
 
         # Generate sequences using vLLM

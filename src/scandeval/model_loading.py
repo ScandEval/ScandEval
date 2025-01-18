@@ -45,24 +45,20 @@ def load_model(
     }
     model_class = model_type_to_module_mapping[model_config.model_type]
 
+    # Refuse to benchmark non-generative models on generative tasks
+    if (
+        dataset_config.task.task_group in GENERATIVE_DATASET_TASK_GROUPS
+        or dataset_config.task.name in GENERATIVE_DATASET_TASKS
+    ) and not model_class._is_generative:
+        raise InvalidBenchmark(
+            f"Cannot benchmark non-generative model {model_config.model_id!r} on "
+            f"generative task {dataset_config.task.name!r}."
+        )
+
     model = model_class(
         model_config=model_config,
         dataset_config=dataset_config,
         benchmark_config=benchmark_config,
     )
-
-    # Refuse to benchmark non-generative models on generative tasks
-    if (
-        (
-            dataset_config.task.task_group in GENERATIVE_DATASET_TASK_GROUPS
-            or dataset_config.task.name in GENERATIVE_DATASET_TASKS
-        )
-        and model is not None
-        and not model.is_generative
-    ):
-        raise InvalidBenchmark(
-            f"Cannot benchmark non-generative model {model_config.model_id!r} on "
-            f"generative task {dataset_config.task.name!r}."
-        )
 
     return model

@@ -293,5 +293,5 @@ def debug_log(
 
     for input_text, prediction, label in zip(input_texts, extracted_labels, labels):
         logger.info(
-            f"Input: {input_text!r}\nPrediction: {prediction!r}\nLabel: {label!r}"
+            f"Input: '{input_text}'\nPrediction: '{prediction}'\nLabel: '{label}'"
         )

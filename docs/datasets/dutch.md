@@ -308,9 +308,8 @@ Here are a few examples from the training split:
 ### SQuAD-nl
 
 This dataset is published
-[here](https://huggingface.co/datasets/NetherlandsForensicInstitute/squad-nl-v2.0) and
-is a machine translated dataset of the English
-[SQuAD](https://aclanthology.org/D16-1264/) and
+[here](https://huggingface.co/datasets/GroNLP/squad-nl-v2.0) and is a machine translated
+dataset of the English [SQuAD](https://aclanthology.org/D16-1264/) and
 [XQuAD](https://aclanthology.org/2020.acl-main.421/) datasets. Google Translate was used
 to translate the original datasets to Dutch.
 

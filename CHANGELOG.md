@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Fixed
+- Better error message when trying to benchmark a non-generative model on a generative
+  task.
+
+
+## [v14.3.0] - 2025-01-14
 ### Added
 - Added the Dutch sentiment classification dataset DBRD. This dataset only has positive
   and negative samples, but has a better quality than the existing Dutch Social dataset.
@@ -16,13 +22,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Updated the Dutch reading comprehension dataset SQuAD-nl, being a machine translated
   version of the English SQuAD dataset. Previously we used the `yhavinga/squad_v2_dutch`
-  version, but this has been changed to `NetherlandsForensicInstitute/squad-nl-v2.0`,
-  following [this evaluation showing that the latter is of higher
+  version, but this has been changed to `GroNLP/squad-nl-v2.0`, following [this
+  evaluation showing that the latter is of higher
   quality](https://huggingface.co/datasets/yhavinga/squad_v2_dutch/discussions/2#6763ed4c42436c7f7005f4b4).
 - Moved the label definition from the task-level to dataset-level, which now allows
   specifying dataset-specific labels that differ from other datasets in the same task.
 
 ### Fixed
+- Fixed a bug when benchmarking base decoder models on reading comprehension tasks,
+  where it was not checked if the prompts should be stripped or not. This caused a
+  severe performance degradation on these tasks. This affects base decoder models
+  benchmarked on reading comprehension tasks from v14.0.0.
 - The `trust_remote_code` argument was not supplied when loading the Hugging Face
   configuration in some places, which caused an unnecessary dialogue with the user when
   evaluating models. This correctly now uses the `--trust-remote-code` argument as
@@ -39,6 +49,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   CPU temporarily to determine the maximal sequence length.
 - If a model configuration does not specify `architectures` then we assume that it is an
   older architecture and that it is an encoder model.
+- Block unnecessary logging from `huggingface_hub`.
 
 
 ## [v14.2.0] - 2025-01-11
