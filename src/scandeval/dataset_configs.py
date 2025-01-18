@@ -1474,6 +1474,23 @@ MMLU_DA_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+MMLU_FR_CONFIG = DatasetConfig(
+    name="mmlu-fr",
+    pretty_name="the truncated version of the French knowledge dataset MMLU-fr, "
+    "translated from the English MMLU dataset",
+    huggingface_id="ScandEval/mmlu-fr-mini",
+    task=KNOW,
+    languages=[FR],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Les questions suivantes sont des questions à choix multiples (avec réponses).",
+    prompt_template="Question: {text}\nRéponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
+    "'b', 'c' ou 'd'.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
 ARC_DA_CONFIG = DatasetConfig(
     name="arc-da",
     pretty_name="the truncated version of the Danish knowledge dataset ARC-da, "
