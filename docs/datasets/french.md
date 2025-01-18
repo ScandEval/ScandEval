@@ -70,7 +70,65 @@ $ scandeval --model <model-id> --dataset allocine
 
 ## Named Entity Recognition
 
-Missing!
+### ELTEC
+
+[description]
+
+We have furthermore converted the OntoNotes 5.0 labelling scheme to the CoNLL-2003
+labelling scheme, which is more common in the NER literature. The mapping is as follows:
+
+- `PERS` ➡️ `PER`
+- `LOC` ➡️ `LOC`
+- `ORG` ➡️ `ORG`
+- `OTHER` ➡️ `MISC`
+- `DEMO` ➡️ `O`
+- `ROLE` ➡️ `O`
+- `EVENT` ➡️ `O`
+
+Here are a few examples from the training split:
+
+```json
+```
+```json
+```
+```json
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 8
+- Prefix prompt:
+  ```
+  Vous trouverez ci-dessous des phrases et des dictionnaires JSON avec les entités nommées qui apparaissent dans la phrase donnée.
+  ```
+- Base prompt template:
+  ```
+  Sentence: {text}
+  Entités nommées: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Sentence: {text}
+
+  Identifiez les entités nommées dans la phrase. Vous devez produire ceci sous forme de dictionnaire JSON avec les clés 'personne', 'lieu', 'organisation' et 'divers'. Les valeurs doivent être des listes des entités nommées de ce type, exactement comme elles apparaissent dans la phrase.
+  ```
+
+- Label mapping:
+    - `B-PER` ➡️ `personne`
+    - `I-PER` ➡️ `personne`
+    - `B-LOC` ➡️ `lieu`
+    - `I-LOC` ➡️ `lieu`
+    - `B-ORG` ➡️ `organisation`
+    - `I-ORG` ➡️ `organisation`
+    - `B-MISC` ➡️ `divers`
+    - `I-MISC` ➡️ `divers`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset eltec
+```
 
 
 ## Linguistic Acceptability

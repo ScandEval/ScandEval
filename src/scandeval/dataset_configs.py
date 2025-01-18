@@ -577,8 +577,7 @@ CONLL_EN_CONFIG = DatasetConfig(
         "b-misc",
         "i-misc",
     ],
-    prompt_prefix="Below are sentences and JSON dictionaries with the named "
-    "entities that occur in the given sentence.",
+    prompt_prefix="Below are sentences and JSON dictionaries with the named entities that occur in the given sentence.",
     prompt_template="Sentence: {text}\nNamed entities: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -594,6 +593,46 @@ CONLL_EN_CONFIG = DatasetConfig(
     "sentence. You should output this as a JSON dictionary with the keys being "
     "'person', 'location', 'organization' and 'miscellaneous'. The values should be "
     "lists of the named entities of that type, exactly as they appear in the sentence.",
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+)
+
+ELTEC_CONFIG = DatasetConfig(
+    name="eltec",
+    pretty_name="the truncated version of the French named entity recognition "
+    "dataset ELTEC",
+    huggingface_id="ScandEval/eltec-mini",
+    task=NER,
+    languages=[FR],
+    labels=[
+        "o",
+        "b-per",
+        "i-per",
+        "b-loc",
+        "i-loc",
+        "b-org",
+        "i-org",
+        "b-misc",
+        "i-misc",
+    ],
+    prompt_prefix="Vous trouverez ci-dessous des phrases et des dictionnaires JSON "
+    "avec les entités nommées qui apparaissent dans la phrase donnée.",
+    prompt_template="Sentence: {text}\nEntités nommées: {label}",
+    prompt_label_mapping={
+        "b-per": "personne",
+        "i-per": "personne",
+        "b-loc": "lieu",
+        "i-loc": "lieu",
+        "b-org": "organisation",
+        "i-org": "organisation",
+        "b-misc": "divers",
+        "i-misc": "divers",
+    },
+    instruction_prompt="Sentence: {text}\n\nIdentifiez les entités nommées dans la "
+    "phrase. Vous devez produire ceci sous forme de dictionnaire JSON avec les clés "
+    "'personne', 'lieu', 'organisation', et 'divers'. Les valeurs doivent être des "
+    "listes des entités nommées de ce type, exactement comme elles apparaissent dans "
+    "la phrase.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
 )
