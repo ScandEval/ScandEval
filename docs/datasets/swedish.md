@@ -408,11 +408,21 @@ When evaluating generative models, we use the following setup (see the
 - Base prompt template:
   ```
   Fråga: {text}
+  Svarsalternativ:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
   Svar: {label}
   ```
 - Instruction-tuned prompt template:
   ```
   Fråga: {text}
+  Svarsalternativ:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
 
   Besvara följande fråga med 'a', 'b', 'c' eller 'd'.
   ```
@@ -469,11 +479,21 @@ When evaluating generative models, we use the following setup (see the
 - Base prompt template:
   ```
   Fråga: {text}
+  Svarsalternativ:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
   Svar: {label}
   ```
 - Instruction-tuned prompt template:
   ```
   Fråga: {text}
+  Svarsalternativ:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
 
   Besvara följande fråga med 'a', 'b', 'c' eller 'd'.
   ```
