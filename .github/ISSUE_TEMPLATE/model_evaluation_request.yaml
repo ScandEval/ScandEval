@@ -28,13 +28,14 @@ body:
       model is multilingual (e.g., Mistral, Llama), then tick all the languages.
     options:
       - label: Danish
-      - label: Swedish
-      - label: Norwegian (Bokmål or Nynorsk)
-      - label: Icelandic
-      - label: Faroese
-      - label: German
       - label: Dutch
       - label: English
+      - label: Faroese
+      - label: French
+      - label: German
+      - label: Icelandic
+      - label: Norwegian (Bokmål or Nynorsk)
+      - label: Swedish
   validations:
     required: true
 - type: dropdown
