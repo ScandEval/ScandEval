@@ -1289,7 +1289,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
 
 SCHIBSTED_SV_CONFIG = DatasetConfig(
     name="schibsted-sv",
-    pretty_name="article summaries from Schibsted Media Swedish newsrooms.",
+    pretty_name="the Swedish summarisation dataset Schibsted-sv",
     huggingface_id="ScandEval/schibsted-article-summaries-sv",
     task=SUMM,
     languages=[SV],
@@ -1303,7 +1303,7 @@ SCHIBSTED_SV_CONFIG = DatasetConfig(
 
 SCHIBSTED_NO_CONFIG = DatasetConfig(
     name="schibsted-no",
-    pretty_name="article summaries from Schibsted Medias Norwegian newsrooms.",
+    pretty_name="the Norwegian summarisation dataset Schibsted-no",
     huggingface_id="ScandEval/schibsted-article-summaries-no",
     task=SUMM,
     languages=[NB, NN, NO],
@@ -1318,8 +1318,8 @@ SCHIBSTED_NO_CONFIG = DatasetConfig(
 
 ORANGE_SUM_CONFIG = DatasetConfig(
     name="orange-sum",
-    pretty_name="the truncated version of the English summarisation dataset "
-    "CNN-DailyMail",
+    pretty_name="the truncated version of the French summarisation dataset "
+    "OrangeSum",
     huggingface_id="ScandEval/orange-sum-mini",
     task=SUMM,
     languages=[FR],
