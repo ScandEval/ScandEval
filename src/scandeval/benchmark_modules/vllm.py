@@ -529,7 +529,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                     example = possible_examples.select(range(1))[0]
                     few_shot_examples.append(example)
                     shuffled_train = shuffled_train.filter(
-                        lambda x: x["text"] != example["text"]
+                        lambda x: x["tokens"] != example["tokens"]
                     )
 
             case TaskGroup.QUESTION_ANSWERING:

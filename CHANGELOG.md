@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Better error message when trying to benchmark a non-generative model on a generative
   task.
 - Fixed an issue where NER datasets without `text` features could not be evaluated with
-  API models.
+  generative models.
 
 
 ## [v14.3.0] - 2025-01-14
