@@ -9,7 +9,7 @@ import torch
 
 from .data_models import BenchmarkConfig
 from .dataset_configs import get_all_dataset_configs
-from .enums import Device, Framework
+from .enums import Device
 from .exceptions import InvalidBenchmark
 from .languages import get_all_languages
 from .tasks import get_all_tasks
@@ -30,7 +30,6 @@ def build_benchmark_config(
     language: str | list[str],
     model_language: str | list[str] | None,
     dataset_language: str | list[str] | None,
-    framework: Framework | str | None,
     device: Device | None,
     batch_size: int,
     raise_errors: bool,
@@ -73,9 +72,6 @@ def build_benchmark_config(
         dataset_language:
             The language codes of the languages to include for datasets. If None then
             the `language` parameter will be used.
-        framework:
-            The framework to use for running the models. If None then the framework
-            will be set automatically.
         device:
             The device to use for running the models. If None then the device will be
             set automatically.
@@ -136,8 +132,6 @@ def build_benchmark_config(
 
     torch_device = prepare_device(device=device)
 
-    framework_obj = Framework(framework) if framework is not None else None
-
     if use_flash_attention is None:
         if torch_device.type != "cuda":
             use_flash_attention = False
@@ -179,7 +173,6 @@ def build_benchmark_config(
         progress_bar=progress_bar,
         save_results=save_results,
         verbose=verbose or debug,
-        framework=framework_obj,
         device=torch_device,
         trust_remote_code=trust_remote_code,
         use_flash_attention=use_flash_attention,
