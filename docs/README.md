@@ -27,9 +27,15 @@ all models on the [Hugging Face Hub](https://huggingface.co/models), as well as 
 accessible through 100+ different APIs, including models you are hosting yourself via,
 e.g., [Ollama](https://ollama.com/) or [LM Studio](https://lmstudio.ai/).
 
-ScandEval is maintained by researchers at [Alexandra
-Institute](https://alexandra.dk) and [Aarhus University](https://au.dk), and is funded
-by the EU project [TrustLLM](https://trustllm.eu/).
+The idea of ScandEval grew out of the development of Danish language model RøBÆRTa in
+2021, when we realised that there was no standard way to evaluate Danish language
+models. It started as a hobby project including Danish, Swedish and Norwegian, but has
+since grown to include 8+ European languages.
+
+ScandEval is maintained by Dan Saattrup Nielsen from the [Alexandra
+Institute](https://alexandra.dk) and Kenneth Enevoldsen from [Aarhus
+University](https://au.dk), and is funded by the EU project
+[TrustLLM](https://trustllm.eu/).
 
 _The image used in the logo has been created by the amazing [Scandinavia and the
 World](https://satwcomic.com/) team. Go check them out!_
