@@ -1,7 +1,6 @@
 """Command-line interface for benchmarking."""
 
 import click
-from transformers.pipelines import SUPPORTED_TASKS
 
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
