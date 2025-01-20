@@ -109,7 +109,7 @@ def prepare_examples(
     breakpoint()
     assert all(
         choice_idx == len(sections) - i
-        for i, choice_idx in enumerate(sorted(choice_idxs, reverse=True))
+        for i, choice_idx in enumerate(sorted(choice_idxs, reverse=True), start=1)
     ), "Choices are not at the end of the document."
 
     question_idx = min(choice_idxs) - 1
