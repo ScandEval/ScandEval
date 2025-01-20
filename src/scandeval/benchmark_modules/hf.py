@@ -705,6 +705,11 @@ def get_model_repo_info(
     Returns:
         The information about the model, or None if the model could not be found.
     """
+    if benchmark_config.pipeline_tag is not None:
+        # If the pipeline tag is set then we can assume that the model is local.
+        return HFModelInfo(
+            pipeline_tag=benchmark_config.pipeline_tag, tags=list(), adapter_base_model_id=None
+        )
     token = benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True
     hf_api = HfApi(token=token)
     model_id, revision = model_id.split("@") if "@" in model_id else (model_id, "main")

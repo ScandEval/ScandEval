@@ -79,6 +79,7 @@ class Benchmarker:
         api_base: str | None = None,
         api_version: str | None = None,
         debug: bool = False,
+        pipeline_tag: str | None = None,
         run_with_cli: bool = False,
     ) -> None:
         """Initialise the benchmarker.
@@ -189,6 +190,7 @@ class Benchmarker:
             api_base=api_base,
             api_version=api_version,
             debug=debug,
+            pipeline_tag=pipeline_tag,
             run_with_cli=run_with_cli,
         )
 

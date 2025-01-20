@@ -178,6 +178,7 @@ class BenchmarkConfig:
     api_base: str | None
     api_version: str | None
     debug: bool
+    pipeline_tag: str | None
     run_with_cli: bool
 
 
@@ -210,6 +211,7 @@ class BenchmarkConfigParams(pydantic.BaseModel):
     api_base: str | None
     api_version: str | None
     debug: bool
+    pipeline_tag: str | None
     run_with_cli: bool
 
 

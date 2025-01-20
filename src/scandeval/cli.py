@@ -1,6 +1,7 @@
 """Command-line interface for benchmarking."""
 
 import click
+from transformers.pipelines import SUPPORTED_TASKS
 
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
@@ -210,6 +211,13 @@ from .tasks import get_all_tasks
     "and stores all outputs to the current working directory. Only relevant if the "
     "model is generative.",
 )
+@click.option(
+    "--pipeline-tag",
+    default=None,
+    show_default=True,
+    type=click.Choice([k for k, v in SUPPORTED_TASKS.items() if v["type"] == "text"]),
+    help="The pipeline tag to use. Only relevant if the model is local.",
+)
 def benchmark(
     model: tuple[str],
     dataset: tuple[str],
@@ -236,6 +244,7 @@ def benchmark(
     api_base: str | None,
     api_version: str | None,
     debug: bool,
+    pipeline_tag: str | None,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
     models = list(model)
@@ -272,6 +281,7 @@ def benchmark(
         api_base=api_base,
         api_version=api_version,
         debug=debug,
+        pipeline_tag=pipeline_tag,
         run_with_cli=True,
     )
 
