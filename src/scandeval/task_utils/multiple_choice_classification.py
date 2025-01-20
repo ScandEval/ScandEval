@@ -106,6 +106,7 @@ def prepare_examples(
 
     # Check that the choices are present, and that all of them are at the end
     assert len(choices) > 0, "No choices found in the document."
+    breakpoint()
     assert all(
         choice_idx == len(sections) - i
         for i, choice_idx in enumerate(sorted(choice_idxs, reverse=True))
