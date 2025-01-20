@@ -37,7 +37,11 @@ from transformers import (
 from transformers.modelcard import TASK_MAPPING
 from urllib3.exceptions import RequestError
 
-from ..constants import DUMMY_FILL_VALUE, GENERATIVE_MODEL_TASKS, LOCAL_MODELS_REQUIRED_FILES
+from ..constants import (
+    DUMMY_FILL_VALUE,
+    GENERATIVE_MODEL_TASKS,
+    LOCAL_MODELS_REQUIRED_FILES,
+)
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
 from ..exceptions import (
