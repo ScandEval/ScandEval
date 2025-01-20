@@ -150,7 +150,7 @@ def main() -> None:
         traintest_df = pd.DataFrame(traintest_arr, columns=df.columns)
         val_df = pd.DataFrame(val_arr, columns=df.columns)
 
-        # Create test split
+        # Create train and test split
         train_size = 64
         train_arr, test_arr = train_test_split(
             traintest_df, train_size=train_size, random_state=4242

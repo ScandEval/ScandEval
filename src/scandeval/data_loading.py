@@ -59,6 +59,14 @@ def load_data(
 
     dataset = DatasetDict({key: dataset[key] for key in ["train", "val", "test"]})
 
+    # TEMP
+    train = dataset["train"]
+    val = dataset["val"]
+    test = dataset["test"]
+    dataset["train"] = test
+    dataset["val"] = train
+    dataset["test"] = val
+
     if not benchmark_config.evaluate_test_split:
         dataset["test"] = dataset["val"]
 
