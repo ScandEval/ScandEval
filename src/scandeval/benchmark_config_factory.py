@@ -47,7 +47,6 @@ def build_benchmark_config(
     api_base: str | None,
     api_version: str | None,
     debug: bool,
-    pipeline_tag: str | None,
     run_with_cli: bool,
     first_time: bool = False,
 ) -> BenchmarkConfig:
@@ -191,7 +190,6 @@ def build_benchmark_config(
         api_base=api_base,
         api_version=api_version,
         debug=debug,
-        pipeline_tag=pipeline_tag,
         run_with_cli=run_with_cli,
     )
 
