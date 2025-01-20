@@ -107,7 +107,8 @@ def prepare_examples(
     # Check that the choices are present, and that all of them are at the end
     assert len(choices) > 0, "No choices found in the document."
     assert all(
-        choice_idx == len(sections) - i for i, choice_idx in enumerate(choice_idxs)
+        choice_idx == len(sections) - i
+        for i, choice_idx in enumerate(sorted(choice_idxs, reverse=True))
     ), "Choices are not at the end of the document."
 
     question_idx = min(choice_idxs) - 1
