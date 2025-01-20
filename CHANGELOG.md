@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   task.
 - Fixed an issue where NER datasets without `text` features could not be evaluated with
   generative models.
+- Encoder models were not able to be evaluated on multiple choice classification tasks,
+  such as Belebele, as it differs from other multiple choice datasets by having both a
+  context and a question. This has been fixed now.
 
 
 ## [v14.3.0] - 2025-01-14
