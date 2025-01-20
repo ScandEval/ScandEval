@@ -254,7 +254,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             self._tokenizer.pad_token_id = self._tokenizer.eos_token_id
             self._tokenizer.pad_token = self._tokenizer.eos_token
         elif self._tokenizer.pad_token_id is None:
-            pad_token_candidates = ["<pad>", "[pad]", "<|endoftext|>", "<|im_end|>"]
+            pad_token_candidates = ["<pad>", "[pad]", "<|endoftext|>", "<|im_end|>", "<eos>"]
             pad_token_candidates.extend([c.upper() for c in pad_token_candidates])
             for candidate in pad_token_candidates:
                 if candidate in self._tokenizer.get_vocab():
@@ -380,6 +380,11 @@ class VLLMModel(HuggingFaceEncoderModel):
             Whether the model exists, or an error describing why we cannot check
             whether the model exists.
         """
+        if os.path.isdir(model_id):  # Check if it's a local path
+            # Verify essential files exist
+            required_files = ["config.json"]  # Add/modify as needed
+            return all(os.path.exists(os.path.join(model_id, f)) for f in required_files)
+
         using_api = (
             benchmark_config.api_base is not None
             or benchmark_config.api_version is not None
@@ -412,6 +417,22 @@ class VLLMModel(HuggingFaceEncoderModel):
         Returns:
             The model configuration.
         """
+        if os.path.isdir(model_id):
+            framework = Framework.PYTORCH  # Assuming PyTorch model
+            
+            return ModelConfig(
+                model_id=model_id,
+                revision="local",  # or some other appropriate indicator
+                framework=framework,
+                task="text-generation",
+                languages=[],
+                model_type=ModelType.HF_HUB_GENERATIVE,
+                model_cache_dir=create_model_cache_dir(
+                    cache_dir=benchmark_config.cache_dir, model_id=model_id
+                ),
+                adapter_base_model_id=None,
+            )
+
         model_id, revision = (
             model_id.split("@") if "@" in model_id else (model_id, "main")
         )
