@@ -97,6 +97,7 @@ def prepare_examples(
     sections = doc.split("\n")
     question = sections[0]
     choices = sections[2:]
+    breakpoint()
 
     # Sanity check
     for letter, choice in zip("abcde", choices):
