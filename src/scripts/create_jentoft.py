@@ -31,31 +31,6 @@ def main():
     test_size = 2048
     train_size = 1024
 
-    def sample_dataset(full_df: pd.DataFrame, size: int) -> pd.DataFrame:
-        """Sample a dataset with an equal number of 'correct' and 'incorrect' samples.
-
-        Args:
-            full_df:
-                The full dataset.
-            size:
-                The size of the sampled dataset.
-
-        Returns:
-            The sampled dataset.
-        """
-        half_size = size // 2
-        assert (
-            full_df["label"] == "correct"
-        ).sum() >= half_size, "Not enough 'correct' samples"
-
-        correct_df = full_df[full_df["label"] == "correct"].sample(
-            n=half_size, random_state=4242
-        )
-        incorrect_df = full_df[full_df["label"] == "incorrect"].sample(
-            n=half_size, random_state=4242
-        )
-        return pd.concat([correct_df, incorrect_df])
-
     val_df = sample_dataset(full_df=full_val_df, size=val_size)
     test_df = sample_dataset(full_df=full_test_df, size=test_size)
     train_df = sample_dataset(full_df=full_train_df, size=train_size)
@@ -119,6 +94,32 @@ def prepare_dataset(dataset_url: str) -> pd.DataFrame:
     # Remove samples with with 5 or fewer words
     df = df[df["text"].str.split().apply(len) > 5]
     return df
+
+
+def sample_dataset(full_df: pd.DataFrame, size: int) -> pd.DataFrame:
+    """Sample a dataset with an equal number of 'correct' and 'incorrect' samples.
+
+    Args:
+        full_df:
+            The full dataset.
+        size:
+            The size of the sampled dataset.
+
+    Returns:
+        The sampled dataset.
+    """
+    half_size = size // 2
+    assert (
+        full_df["label"] == "correct"
+    ).sum() >= half_size, "Not enough 'correct' samples"
+
+    correct_df = full_df[full_df["label"] == "correct"].sample(
+        n=half_size, random_state=4242
+    )
+    incorrect_df = full_df[full_df["label"] == "incorrect"].sample(
+        n=half_size, random_state=4242
+    )
+    return pd.concat([correct_df, incorrect_df])
 
 
 def remove_overlapping_samples(
