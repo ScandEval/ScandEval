@@ -951,7 +951,7 @@ def load_hf_model_config(
                 f"The model config for the model {model_id!r} could not be "
                 f"loaded, as the key {key!r} was not found in the config."
             )
-        except OSError as e:
+        except (OSError, GatedRepoError) as e:
             # TEMP: When the model is gated then we cannot set cache dir, for some
             # reason (transformers==4.38.2). This should be included back in when
             # this is fixed.
