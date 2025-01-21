@@ -4,7 +4,7 @@ import click
 
 from .benchmarker import Benchmarker
 from .dataset_configs import get_all_dataset_configs
-from .enums import Device, Framework
+from .enums import Device
 from .languages import get_all_languages
 from .tasks import get_all_tasks
 
@@ -127,14 +127,6 @@ from .tasks import get_all_tasks
     with scores lying in the 'scandeval_benchmark_results.jsonl' file.""",
 )
 @click.option(
-    "--framework",
-    default=None,
-    show_default=True,
-    type=click.Choice([framework.lower() for framework in Framework.__members__]),
-    help="""The model framework to use. Only relevant if `model` refers to a local
-    path. Otherwise, the framework will be set automatically.""",
-)
-@click.option(
     "--device",
     default=None,
     show_default=True,
@@ -225,7 +217,6 @@ def benchmark(
     api_key: str | None,
     force: bool,
     verbose: bool,
-    framework: str | None,
     device: str | None,
     trust_remote_code: bool,
     use_flash_attention: bool | None,
@@ -261,7 +252,6 @@ def benchmark(
         api_key=api_key,
         force=force,
         cache_dir=cache_dir,
-        framework=framework,
         device=device,
         trust_remote_code=trust_remote_code,
         use_flash_attention=use_flash_attention,

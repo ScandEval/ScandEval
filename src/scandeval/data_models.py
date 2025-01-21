@@ -107,9 +107,6 @@ class BenchmarkConfig:
             The tasks benchmark the model(s) on.
         datasets:
             The datasets to benchmark on.
-        framework:
-            The framework of the models to benchmark. If None then the framework will be
-            inferred.
         batch_size:
             The batch size to use.
         raise_errors:
@@ -159,7 +156,6 @@ class BenchmarkConfig:
     dataset_languages: list[Language]
     tasks: list[Task]
     datasets: list[str]
-    framework: Framework | None
     batch_size: int
     raise_errors: bool
     cache_dir: str
@@ -193,7 +189,6 @@ class BenchmarkConfigParams(pydantic.BaseModel):
     language: str | list[str]
     model_language: str | list[str] | None
     dataset_language: str | list[str] | None
-    framework: Framework | str | None
     device: Device | None
     batch_size: int
     raise_errors: bool
