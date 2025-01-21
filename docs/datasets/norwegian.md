@@ -367,6 +367,59 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset scala-nn
 ```
 
+### Jentoft
+
+This dataset was published [here](https://github.com/matias-jjj/matias_master) by Matias Jentoft as part of his master's thesis about grammatical error correction. The original dataset consists of 85,771 / 10,827 / 10487 samples for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training, validation and test, respectively. In each split, the distribution of `correct` and `incorrect` is 50/50. The original full datasets are also included by the feature names: "full_train", "full_val" and "full_test".
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "For to uker siden var jeg på en fotoutstilling om Erytrea.",
+  "label": "incorrect"
+}
+```
+```json
+{
+  "text": "Det viser seg at folk ikke kan leve uten mobiltelefonen.",
+  "label": "correct"
+}
+```
+```json
+{
+  "text": "Mobiltelefoner dominerer mange av oss, og vi bruker dem over alt, på gatene 'hvert hjørne', i gatene, holdeplasser, kaffeteriaene og i parken, der folk burde tilbringe koselig tid sammen i naturen.",
+  "label": "incorrect"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 12
+- Prefix prompt:
+  ```
+  Følgende er setninger og hvorvidt de er grammatisk korrekte.
+  ```
+- Base prompt template:
+  ```
+  Setning: {text}
+  Grammatisk korrekt: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Setning: {text}
+
+  Bestem om setningen er grammatisk korrekt eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.
+  ```
+- Label mapping:
+    - `correct` ➡️ `ja`
+    - `incorrect` ➡️ `nei`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset jentoft-la
+```
 
 ## Reading Comprehension
 

@@ -784,6 +784,23 @@ SCALA_NN_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+JENTOFT_CONFIG = DatasetConfig(
+    name="jentoft",
+    pretty_name="the Jentoft linguistic acceptability dataset",
+    huggingface_id="ScandEval/jentoft-la",
+    task=LA,
+    languages=[NN],
+    labels=["incorrect", "correct"],
+    prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
+    prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
+    prompt_label_mapping=dict(correct="ja", incorrect="nei"),
+    instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
+    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+    unofficial=True,
+)
+
 SCALA_IS_CONFIG = DatasetConfig(
     name="scala-is",
     pretty_name="the Icelandic part of the linguistic acceptability dataset ScaLA",
