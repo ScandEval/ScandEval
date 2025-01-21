@@ -12,6 +12,7 @@ import torch
 from datasets import DatasetDict
 from huggingface_hub import HfApi
 from huggingface_hub import whoami as hf_whoami
+from huggingface_hub.hf_api import ModelInfo as HfApiModelInfo
 from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
 from huggingface_hub.utils import (
     GatedRepoError,
@@ -33,7 +34,11 @@ from transformers import (
 from transformers.modelcard import TASK_MAPPING
 from urllib3.exceptions import RequestError
 
-from ..constants import DUMMY_FILL_VALUE, GENERATIVE_MODEL_TASKS
+from ..constants import (
+    DUMMY_FILL_VALUE,
+    GENERATIVE_MODEL_TASKS,
+    LOCAL_MODELS_REQUIRED_FILES,
+)
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
 from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
 from ..exceptions import (
@@ -692,7 +697,7 @@ def load_model_and_tokenizer(
 def get_model_repo_info(
     model_id: str, revision: str, benchmark_config: BenchmarkConfig
 ) -> HFModelInfo | None:
-    """Get the information about the model from the Hugging Face Hub.
+    """Get the information about the model from the Hugging Face Hub or a local directory.
 
     Args:
         model_id:
@@ -709,8 +714,20 @@ def get_model_repo_info(
     hf_api = HfApi(token=token)
     model_id, revision = model_id.split("@") if "@" in model_id else (model_id, "main")
 
+    # Check for local model directory
+    model_info = None
+    if os.path.isdir(model_id):
+        logger.debug(f"Checking for local model in {model_id}.")
+        if all(
+            os.path.exists(os.path.join(model_id, f))
+            for f in LOCAL_MODELS_REQUIRED_FILES
+        ):
+            model_info = HfApiModelInfo(id=model_id, tags=None, pipeline_tag=None)
+
+    # Check for model on Hugging Face Hub if no local model was found
     try:
-        model_info = hf_api.model_info(repo_id=model_id, revision=revision)
+        if model_info is None:
+            model_info = hf_api.model_info(repo_id=model_id, revision=revision)
 
     # Case where the model is gated; note this to the user
     except (GatedRepoError, LocalTokenNotFoundError) as e:

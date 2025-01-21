@@ -256,7 +256,6 @@ class HumanEvaluator:
             ],
             model_language=None,
             dataset_language=None,
-            framework=None,
             device=None,
             batch_size=1,
             raise_errors=False,
