@@ -953,8 +953,8 @@ def load_hf_model_config(
             )
         except (OSError, GatedRepoError) as e:
             # TEMP: When the model is gated then we cannot set cache dir, for some
-            # reason (transformers==4.38.2). This should be included back in when
-            # this is fixed.
+            # reason (since transformers v4.38.2, still a problem in v4.48.0). This
+            # should be included back in when this is fixed.
             if "gated repo" in str(e):
                 model_cache_dir = None
                 continue
