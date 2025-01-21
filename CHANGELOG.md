@@ -13,8 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [Allocine](https://hf.co/datasets/tblard/allocine), the linguistic acceptability
   dataset ScaLA with the [French Universal
   Dependencies](https://github.com/UniversalDependencies/UD_French-GSD), the reading
-  comprehension dataset [FQuAD](https://hf.co/datasets/illuin/fquad), the named entity
-  recognition dataset
+  comprehension dataset [FQuAD](https://hf.co/datasets/illuin/fquad) (and unofficially
+  [Belebele-fr](https://hf.co/datasets/facebook/belebele)), the named entity recognition
+  dataset
   [ELTeC](https://dspace-clarin-it.ilc.cnr.it/repository/xmlui/handle/20.500.11752/OPEN-986),
   the knowledge dataset [MMLU-fr](https://hf.co/datasets/alexandrainst/m_mmlu), the
   common-sense reasoning dataset
@@ -29,6 +30,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Changed the Belebele splits, as there were too few training splits for evaluation on
   encoder models to make sense. We now use 256 samples for training, 64 for validation
   and the rest (580) for testing.
+- Changed the prompting of Danske Talemåder dataset slightly, to only use the word
+  "expression" (da. "udtryk") in the prompt, rather than mention idiom (da. "talemåde")
+  directly.
 
 ### Fixed
 - Better error message when trying to benchmark a non-generative model on a generative
