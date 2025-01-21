@@ -731,7 +731,9 @@ def get_model_repo_info(
     # Face Hub
     if model_info is None:
         try:
-            model_info = hf_api.model_info(repo_id=model_id, revision=revision)
+            model_info = hf_api.model_info(
+                repo_id=model_id, revision=revision, token=token
+            )
         except (GatedRepoError, LocalTokenNotFoundError) as e:
             try:
                 hf_whoami(token=token)
