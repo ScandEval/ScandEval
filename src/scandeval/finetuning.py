@@ -1,6 +1,5 @@
 """Functions related to the finetuning of models."""
 
-import importlib.util
 import logging
 import sys
 import typing as t
@@ -187,10 +186,8 @@ def finetune_single_iteration(
     Returns:
         The scores for the test dataset.
     """
-    # Set random seeds to enforce reproducibility of the randomly initialised
-    # weights
-    seed = 4242 + iteration_idx
-    enforce_reproducibility(framework=model_config.framework, seed=seed)
+    # Set random seeds to enforce reproducibility of the randomly initialised weights
+    enforce_reproducibility(framework=model_config.framework, seed=training_args.seed)
 
     if model is None:
         model = load_model(
@@ -280,29 +277,15 @@ def get_training_args(
     Returns:
         The training arguments for the current iteration.
     """
-    # Set the logging strategy
+    log_once(message=f"Using {dtype} data type.", level=logging.DEBUG)
+
     if benchmark_config.verbose:
         logging_strategy = IntervalStrategy.STEPS
     else:
         logging_strategy = IntervalStrategy.NO
 
-    # Set seed variable
-    seed = 4242 + iteration_idx
-
     if batch_size is None:
         batch_size = benchmark_config.batch_size
-
-    if (
-        benchmark_config.device == torch.device("cuda")
-        and importlib.util.find_spec("bitsandbytes") is not None
-    ):
-        optimizer = OptimizerNames.ADAMW_8BIT
-        log_once(message="Using AdamW 8-bit optimizer.", level=logging.DEBUG)
-    else:
-        optimizer = OptimizerNames.ADAMW_TORCH
-        log_once(message="Using PyTorch AdamW optimizer.", level=logging.DEBUG)
-
-    log_once(message=f"Using {dtype} data type.", level=logging.DEBUG)
 
     training_args = TrainingArguments(
         output_dir=model_config.model_cache_dir,
@@ -322,8 +305,8 @@ def get_training_args(
         warmup_ratio=0.01,
         gradient_accumulation_steps=32 // batch_size,
         load_best_model_at_end=True,
-        optim=optimizer,
-        seed=seed,
+        optim=OptimizerNames.ADAMW_TORCH,
+        seed=4242 + iteration_idx,
         fp16=dtype == DataType.FP16,
         bf16=dtype == DataType.BF16,
         disable_tqdm=not benchmark_config.progress_bar,

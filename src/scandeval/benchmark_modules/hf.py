@@ -12,7 +12,7 @@ import torch
 from datasets import DatasetDict
 from huggingface_hub import HfApi
 from huggingface_hub import whoami as hf_whoami
-from huggingface_hub.hf_api import ModelInfo as HfApiModelInfo,
+from huggingface_hub.hf_api import ModelInfo as HfApiModelInfo
 from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
 from huggingface_hub.utils import (
     GatedRepoError,
