@@ -111,8 +111,8 @@ def prepare_examples(
         for i, choice_idx in enumerate(sorted(choice_idxs, reverse=True), start=1)
     ), "Choices are not at the end of the document."
 
-    question_idx = min(choice_idxs) - 1
-    context_and_question = "\n".join(sections[:question_idx])
+    question_idx = min(choice_idxs) - 2  # -2 to remove the 'Choices:' line
+    context_and_question = "\n".join(sections[: question_idx + 1])
 
     new_examples = tokenizer(
         text=[context_and_question] * len(choices),
