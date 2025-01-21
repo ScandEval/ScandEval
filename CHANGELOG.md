@@ -22,7 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   dataset [OrangeSum](https://hf.co/datasets/EdinburghNLP/orange_sum).
 - Added support for evaluating local models again, which supports models stored in the
   Hugging Face format with a Hugging Face model configuration file (`config.json`) in
-  the model directory.
+  the model directory. This was contributed by [@rlrs](https://github.com/rlrs) and
+  [@peter-sk](https://github.com/peter-sk) ✨
 
 ### Changed
 - Changed the Belebele splits, as there were too few training splits for evaluation on
