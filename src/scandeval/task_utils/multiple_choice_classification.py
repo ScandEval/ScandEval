@@ -112,7 +112,7 @@ def prepare_examples(
     ), "Choices are not at the end of the document."
 
     question_idx = min(choice_idxs) - 1
-    context_and_question = "\n".join(sections[: question_idx + 1])
+    context_and_question = "\n".join(sections[:question_idx])
 
     new_examples = tokenizer(
         text=[context_and_question] * len(choices),
