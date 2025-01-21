@@ -744,15 +744,18 @@ def initial_logging(
         benchmark_config:
             The general benchmark configuration.
     """
-    logger.info(f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}")
-    
-    # Log evaluation split and type
     split_type = "validation" if not benchmark_config.evaluate_test_split else "test"
-    logger.info(f"Evaluating on {split_type} split")
-
-    if model_config.is_generative:
-        eval_type = "few-shot" if benchmark_config.few_shot else "zero-shot"
-        logger.info(f"Using {eval_type} evaluation for generative model")
+    if model_config.task in GENERATIVE_MODEL_TASKS:
+        if benchmark_config.few_shot:
+            eval_type = "Few-shot benchmarking"
+        else:
+            eval_type = "Zero-shot benchmarking"
+    else:
+        eval_type = "Benchmarking"
+    logger.info(
+        f"{eval_type} {model_config.model_id} on the {split_type} of "
+        f"{dataset_config.pretty_name}"
+    )
 
     if dataset_config.unofficial:
         logger.info(
