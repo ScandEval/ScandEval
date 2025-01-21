@@ -718,7 +718,7 @@ def get_model_repo_info(
     # Get information on the model.
     # The first case is when the model is a local model, in which case we create a dummy
     # model info object.
-    model_info = None
+    model_info: HfApiModelInfo | None = None
     if Path(model_id).is_dir():
         logger.debug(f"Checking for local model in {model_id}.")
         if all(
