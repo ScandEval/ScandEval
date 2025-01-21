@@ -6,6 +6,7 @@ import os
 import typing as t
 from functools import cached_property, partial
 from json import JSONDecodeError
+from pathlib import Path
 from time import sleep
 
 import torch
@@ -714,50 +715,50 @@ def get_model_repo_info(
     hf_api = HfApi(token=token)
     model_id, revision = model_id.split("@") if "@" in model_id else (model_id, "main")
 
-    # Check for local model directory
+    # Get information on the model.
+    # The first case is when the model is a local model, in which case we create a dummy
+    # model info object.
     model_info = None
-    if os.path.isdir(model_id):
+    if Path(model_id).is_dir():
         logger.debug(f"Checking for local model in {model_id}.")
         if all(
-            os.path.exists(os.path.join(model_id, f))
-            for f in LOCAL_MODELS_REQUIRED_FILES
+            (Path(model_id) / required_file).exists()
+            for required_file in LOCAL_MODELS_REQUIRED_FILES
         ):
             model_info = HfApiModelInfo(id=model_id, tags=None, pipeline_tag=None)
 
-    # Check for model on Hugging Face Hub if no local model was found
-    try:
-        if model_info is None:
-            model_info = hf_api.model_info(repo_id=model_id, revision=revision)
-
-    # Case where the model is gated; note this to the user
-    except (GatedRepoError, LocalTokenNotFoundError) as e:
+    # If the model does not exist locally, then we get the model info from the Hugging
+    # Face Hub
+    if model_info is not None:
         try:
-            hf_whoami()
-            logger.warning(
-                f"Could not access the model {model_id} with the revision "
-                f"{revision}. The error was {str(e)!r}."
-            )
+            model_info = hf_api.model_info(repo_id=model_id, revision=revision)
+        except (GatedRepoError, LocalTokenNotFoundError) as e:
+            try:
+                hf_whoami()
+                logger.warning(
+                    f"Could not access the model {model_id} with the revision "
+                    f"{revision}. The error was {str(e)!r}."
+                )
+                return None
+            except LocalTokenNotFoundError:
+                raise NeedsAdditionalArgument(
+                    cli_argument="--api-key",
+                    script_argument="api_key=<your-api-key>",
+                    run_with_cli=benchmark_config.run_with_cli,
+                )
+        except (RepositoryNotFoundError, HFValidationError):
             return None
-        except LocalTokenNotFoundError:
-            raise NeedsAdditionalArgument(
-                cli_argument="--api-key",
-                script_argument="api_key=<your-api-key>",
-                run_with_cli=benchmark_config.run_with_cli,
-            )
+        except (OSError, RequestException):
+            if internet_connection_available():
+                raise HuggingFaceHubDown()
+            else:
+                raise NoInternetConnection()
 
-    # Case where the model could not be found
-    except (RepositoryNotFoundError, HFValidationError):
-        return None
+    assert model_info is not None, "The model info should not be None."
 
-    # Other internet-related errors
-    except (OSError, RequestException):
-        if internet_connection_available():
-            raise HuggingFaceHubDown()
-        else:
-            raise NoInternetConnection()
-
+    # Get all the Hugging Face repository tags for the model. If the model is an adapter
+    # model, then we also get the tags for the base model
     tags = model_info.tags or list()
-
     has_base_model_tag = any(
         tag.startswith("base_model:") and tag.count(":") == 1 for tag in tags
     )
@@ -783,6 +784,8 @@ def get_model_repo_info(
             tags += base_model_info.tags or list()
             tags = list(set(tags))
 
+    # Get the pipeline tag for the model. If it is not specified, then we determine it
+    # by checking the model's architecture as written in the model's Hugging Face config
     pipeline_tag = model_info.pipeline_tag
     if pipeline_tag is None:
         hf_config = load_hf_model_config(
