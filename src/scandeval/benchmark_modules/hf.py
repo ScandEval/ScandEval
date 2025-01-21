@@ -12,11 +12,8 @@ import torch
 from datasets import DatasetDict
 from huggingface_hub import HfApi
 from huggingface_hub import whoami as hf_whoami
-from huggingface_hub.hf_api import (
-    ModelInfo as HfApiModelInfo,
-    RepositoryNotFoundError,
-    RevisionNotFoundError,
-)
+from huggingface_hub.hf_api import ModelInfo as HfApiModelInfo
+from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
 from huggingface_hub.utils import (
     GatedRepoError,
     HFValidationError,
@@ -721,12 +718,11 @@ def get_model_repo_info(
     model_info = None
     if os.path.isdir(model_id):
         logger.debug(f"Checking for local model in {model_id}.")
-        if all(os.path.exists(os.path.join(model_id, f)) for f in LOCAL_MODELS_REQUIRED_FILES):
-            model_info = HfApiModelInfo(
-                id=model_id,
-                tags=None,
-                pipeline_tag=None,
-            )
+        if all(
+            os.path.exists(os.path.join(model_id, f))
+            for f in LOCAL_MODELS_REQUIRED_FILES
+        ):
+            model_info = HfApiModelInfo(id=model_id, tags=None, pipeline_tag=None)
 
     # Check for model on Hugging Face Hub if no local model was found
     try:
