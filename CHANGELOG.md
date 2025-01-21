@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   common-sense reasoning dataset
   [HellaSwag-fr](https://hf.co/datasets/alexandrainst/m_hellaswag) and the summarization
   dataset [OrangeSum](https://hf.co/datasets/EdinburghNLP/orange_sum).
+- Added support for evaluating local models again, which supports models stored in the
+  Hugging Face format with a Hugging Face model configuration file (`config.json`) in
+  the model directory.
 
 ### Changed
 - Changed the Belebele splits, as there were too few training splits for evaluation on
