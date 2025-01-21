@@ -794,6 +794,7 @@ def load_model_and_tokenizer(
 
     try:
         token = benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True
+        breakpoint()
         hf_model_config = AutoConfig.from_pretrained(
             model_id,
             revision=model_config.revision,
