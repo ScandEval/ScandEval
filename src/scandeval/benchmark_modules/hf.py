@@ -734,7 +734,7 @@ def get_model_repo_info(
             model_info = hf_api.model_info(repo_id=model_id, revision=revision)
         except (GatedRepoError, LocalTokenNotFoundError) as e:
             try:
-                hf_whoami()
+                hf_whoami(token=token)
                 logger.warning(
                     f"Could not access the model {model_id} with the revision "
                     f"{revision}. The error was {str(e)!r}."
