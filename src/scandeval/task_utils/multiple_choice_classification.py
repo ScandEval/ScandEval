@@ -123,6 +123,7 @@ def prepare_examples(
         for letter, choice in zip("abcde", choices)
     ]
     new_examples["id"] = [hashlib.md5(string=doc.encode()).hexdigest()] * len(choices)
+    breakpoint()
     return new_examples
 
 
