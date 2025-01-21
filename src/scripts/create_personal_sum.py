@@ -23,6 +23,11 @@ def main():
     df["text"] = df["text"].str.strip()
     df["target_text"] = df["target_text"].str.strip()
 
+    # Remove "Oppsummering: " from the start of the target_text
+    df["target_text"] = df["target_text"].str.replace(
+        r"^Oppsummering: ", "", regex=True
+    )
+
     # Add length columns
     df["text_len"] = df["text"].str.len()
     df["summary_len"] = df["target_text"].str.len()
@@ -46,6 +51,8 @@ def main():
     assert (
         train_df.iloc[-1]["text"] != test_df.iloc[0]["text"]
     ), "The last article in the training set is the same as the first article in the test set. There should be no overlap between the splits."
+
+    assert len(test_df) > 450, "The test set should have at least 450 samples."
 
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
