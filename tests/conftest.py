@@ -68,7 +68,6 @@ def benchmark_config(auth, device) -> Generator[BenchmarkConfig, None, None]:
         dataset_languages=[DA],
         tasks=[SENT],
         datasets=list(get_all_dataset_configs().keys()),
-        framework=None,
         batch_size=1,
         raise_errors=False,
         cache_dir=".scandeval_cache",

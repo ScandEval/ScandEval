@@ -33,7 +33,6 @@ def test_cli_param_names(params):
         "cache_dir",
         "api_key",
         "force",
-        "framework",
         "device",
         "trust_remote_code",
         "use_flash_attention",
@@ -64,7 +63,6 @@ def test_cli_param_types(params):
     assert params["cache_dir"] == STRING
     assert params["api_key"] == STRING
     assert params["force"] == BOOL
-    assert isinstance(params["framework"], Choice)
     assert isinstance(params["device"], Choice)
     assert params["trust_remote_code"] == BOOL
     assert params["use_flash_attention"] == BOOL

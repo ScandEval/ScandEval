@@ -17,7 +17,7 @@ from .constants import GENERATIVE_MODEL_TASKS
 from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
-from .enums import Device, Framework
+from .enums import Device
 from .exceptions import InvalidBenchmark, InvalidModel
 from .finetuning import finetune
 from .generation import generate
@@ -62,7 +62,6 @@ class Benchmarker:
         language: str | list[str] = "all",
         model_language: str | list[str] | None = None,
         dataset_language: str | list[str] | None = None,
-        framework: Framework | str | None = None,
         device: Device | None = None,
         batch_size: int = 32,
         raise_errors: bool = False,
@@ -108,10 +107,6 @@ class Benchmarker:
                 The language codes of the languages to include for datasets. If
                 specified then this overrides the `language` parameter for dataset
                 languages. Defaults to None.
-            framework:
-                The model framework to use. Only relevant if `model-id` refers to a
-                local path. Otherwise, the framework will be set automatically.
-                Defaults to None.
             device:
                 The device to use for benchmarking. Defaults to None.
             batch_size:
@@ -172,7 +167,6 @@ class Benchmarker:
             language=language,
             model_language=model_language,
             dataset_language=dataset_language,
-            framework=framework,
             device=device,
             batch_size=batch_size,
             raise_errors=raise_errors,
@@ -225,7 +219,6 @@ class Benchmarker:
         language: str | list[str] | None = None,
         model_language: str | list[str] | None = None,
         dataset_language: str | list[str] | None = None,
-        framework: Framework | str | None = None,
         device: Device | None = None,
         batch_size: int | None = None,
         raise_errors: bool | None = None,
@@ -277,10 +270,6 @@ class Benchmarker:
                 specified then this overrides the `language` parameter for dataset
                 languages. Defaults to the value specified when initialising the
                 benchmarker.
-            framework:
-                The model framework to use. Only relevant if `model-id` refers to a
-                local path. Otherwise, the framework will be set automatically.
-                Defaults to the value specified when initialising the benchmarker.
             device:
                 The device to use for benchmarking. Defaults to the value specified when
                 initialising the benchmarker.
@@ -342,7 +331,6 @@ class Benchmarker:
             language=language,
             model_language=model_language,
             dataset_language=dataset_language,
-            framework=framework,
             device=device,
             batch_size=batch_size,
             raise_errors=raise_errors,
