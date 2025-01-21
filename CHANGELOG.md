@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Encoder models were not able to be evaluated on multiple choice classification tasks,
   such as Belebele, as it differs from other multiple choice datasets by having both a
   context and a question. This has been fixed now.
+- Fixed an issue when generative models in gated repos caused an error message when both
+  of the environment variables `HUGGINGFACE_API_KEY` and `HF_TOKEN` were not set.
 
 
 ## [v14.3.0] - 2025-01-14
