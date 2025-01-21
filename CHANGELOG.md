@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   and the rest (580) for testing.
 - Changed the prompting of Danske Talemåder dataset slightly, to only use the word
   "expression" (da. "udtryk") in the prompt, rather than mention idiom (da. "talemåde")
-  directly. This did not affect the performance significantly, however.
+  directly.
 
 ### Fixed
 - Better error message when trying to benchmark a non-generative model on a generative
