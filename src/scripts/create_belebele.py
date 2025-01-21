@@ -29,6 +29,7 @@ def main() -> None:
         "de": "deu_Latn",
         "nl": "nld_Latn",
         "en": "eng_Latn",
+        "fr": "fra_Latn",
     }
     text_mapping = {
         "da": "Tekst",
@@ -38,6 +39,7 @@ def main() -> None:
         "de": "Text",
         "nl": "Tekst",
         "en": "Text",
+        "fr": "Texte",
     }
     question_mapping = {
         "da": "Spørgsmål",
@@ -47,6 +49,7 @@ def main() -> None:
         "de": "Fragen",
         "nl": "Vraag",
         "en": "Question",
+        "fr": "Question",
     }
     choices_mapping = {
         "da": "Svarmuligheder",
@@ -56,12 +59,13 @@ def main() -> None:
         "de": "Antwortmöglichkeiten",
         "nl": "Antwoordopties",
         "en": "Choices",
+        "fr": "Choix",
     }
 
     for language in choices_mapping.keys():
         # Download the dataset
         dataset = load_dataset(
-            path=repo_id, split=language_mapping[language], token=True
+            path=repo_id, name=language_mapping[language], split="test", token=True
         )
         assert isinstance(dataset, Dataset)
 
@@ -143,7 +147,7 @@ def main() -> None:
         df.reset_index(drop=True, inplace=True)
 
         # Create validation split
-        val_size = 128
+        val_size = 64
         traintest_arr, val_arr = train_test_split(
             df, test_size=val_size, random_state=4242
         )
@@ -151,7 +155,7 @@ def main() -> None:
         val_df = pd.DataFrame(val_arr, columns=df.columns)
 
         # Create train and test split
-        train_size = 64
+        train_size = 256
         train_arr, test_arr = train_test_split(
             traintest_df, train_size=train_size, random_state=4242
         )

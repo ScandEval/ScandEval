@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [HellaSwag-fr](https://hf.co/datasets/alexandrainst/m_hellaswag) and the summarization
   dataset [OrangeSum](https://hf.co/datasets/EdinburghNLP/orange_sum).
 
+### Changed
+- Changed the Belebele splits, as there were too few training splits for evaluation on
+  encoder models to make sense. We now use 256 samples for training, 64 for validation
+  and the rest (580) for testing.
+
 ### Fixed
 - Better error message when trying to benchmark a non-generative model on a generative
   task.

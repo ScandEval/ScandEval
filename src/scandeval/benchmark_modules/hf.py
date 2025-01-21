@@ -338,7 +338,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 ).map(tokenise, batched=True, load_from_cache_file=False)
 
             case TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION:
-                breakpoint()
                 dataset = DatasetDict(
                     train=dataset["train"].map(
                         partial(
@@ -374,7 +373,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                         keep_in_memory=True,
                     ),
                 )
-                breakpoint()
 
             case TaskGroup.TEXT_TO_TEXT:
                 dataset = dataset.map(
