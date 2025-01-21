@@ -556,6 +556,14 @@ class Benchmarker:
                     )
 
                 else:
+                    # Log evaluation details
+                    split_type = "validation" if not benchmark_config.evaluate_test_split else "test"
+                    logger.info(f"Evaluating on {split_type} split")
+                    
+                    if model.is_generative:
+                        eval_type = "few-shot" if benchmark_config.few_shot else "zero-shot"
+                        logger.info(f"Using {eval_type} evaluation for generative model")
+
                     bootstrapped_datasets = load_data(
                         rng=rng,
                         dataset_config=dataset_config,
