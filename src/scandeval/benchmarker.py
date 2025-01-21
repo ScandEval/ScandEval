@@ -556,14 +556,6 @@ class Benchmarker:
                     )
 
                 else:
-                    # Log evaluation details
-                    split_type = "validation" if not benchmark_config.evaluate_test_split else "test"
-                    logger.info(f"Evaluating on {split_type} split")
-                    
-                    if model.is_generative:
-                        eval_type = "few-shot" if benchmark_config.few_shot else "zero-shot"
-                        logger.info(f"Using {eval_type} evaluation for generative model")
-
                     bootstrapped_datasets = load_data(
                         rng=rng,
                         dataset_config=dataset_config,
@@ -753,6 +745,15 @@ def initial_logging(
             The general benchmark configuration.
     """
     logger.info(f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}")
+    
+    # Log evaluation split and type
+    split_type = "validation" if not benchmark_config.evaluate_test_split else "test"
+    logger.info(f"Evaluating on {split_type} split")
+
+    if model_config.is_generative:
+        eval_type = "few-shot" if benchmark_config.few_shot else "zero-shot"
+        logger.info(f"Using {eval_type} evaluation for generative model")
+
     if dataset_config.unofficial:
         logger.info(
             f"Note that the {dataset_config.name!r} dataset is unofficial, "
