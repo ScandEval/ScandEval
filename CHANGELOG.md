@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added the summarization dataset [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into 459 / 512 / 128 samples for train / validation / test, respectively, and is set to `unofficial` for now.
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
   [Allocine](https://hf.co/datasets/tblard/allocine), the linguistic acceptability
   dataset ScaLA with the [French Universal
