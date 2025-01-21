@@ -754,8 +754,6 @@ def get_model_repo_info(
             else:
                 raise NoInternetConnection()
 
-    assert model_info is not None, "The model info should not be None."
-
     # Get all the Hugging Face repository tags for the model. If the model is an adapter
     # model, then we also get the tags for the base model
     tags = model_info.tags or list()
