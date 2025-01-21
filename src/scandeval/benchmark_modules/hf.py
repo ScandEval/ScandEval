@@ -373,6 +373,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                         keep_in_memory=True,
                     ),
                 )
+                breakpoint()
 
             case TaskGroup.TEXT_TO_TEXT:
                 dataset = dataset.map(
