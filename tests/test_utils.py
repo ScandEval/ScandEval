@@ -77,6 +77,8 @@ def test_module_is_installed(module_name, expected):
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
     argvalues=[
+        ("mistralai/Mistral-7B-v0.1", True),
+        ("meta-llama/Meta-Llama-3-8B", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
         ("01-ai/Yi-6B", True),
         ("google-bert/bert-base-uncased", False),
@@ -94,7 +96,12 @@ def test_should_prompts_be_stripped(model_id, expected, auth):
 
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
-    argvalues=[("AI-Sweden-Models/gpt-sw3-6.7b-v2", False), ("01-ai/Yi-6B", True)],
+    argvalues=[
+        ("mistralai/Mistral-7B-v0.1", False),
+        ("meta-llama/Meta-Llama-3-8B", False),
+        ("AI-Sweden-Models/gpt-sw3-6.7b-v2", False),
+        ("01-ai/Yi-6B", True),
+    ],
 )
 def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
     """Test that a model ID is a generative model."""
