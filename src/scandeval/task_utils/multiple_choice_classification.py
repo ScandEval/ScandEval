@@ -112,7 +112,7 @@ def prepare_examples(
     ), "Choices are not at the end of the document."
 
     question_idx = min(choice_idxs) - 2  # -2 to remove the 'Choices:' line
-    context_and_question = "\n".join(sections[: question_idx + 1])
+    context_and_question = "\n".join(sections[: question_idx + 1]).strip()
 
     new_examples = tokenizer(
         text=[context_and_question] * len(choices),
@@ -123,7 +123,6 @@ def prepare_examples(
         for letter, choice in zip("abcde", choices)
     ]
     new_examples["id"] = [hashlib.md5(string=doc.encode()).hexdigest()] * len(choices)
-    breakpoint()
     return new_examples
 
 
