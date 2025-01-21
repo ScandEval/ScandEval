@@ -2,6 +2,7 @@
 
 import hashlib
 import logging
+import re
 import typing as t
 from collections import defaultdict
 
@@ -95,15 +96,27 @@ def prepare_examples(
     """
     doc: str = examples["text"][0]
     sections = doc.split("\n")
-    question = sections[0]
-    choices = sections[2:]
 
-    # Sanity check
-    for letter, choice in zip("abcde", choices):
-        assert choice.startswith(f"{letter}. ")
+    choice_idxs = [
+        idx
+        for idx, section in enumerate(sections)
+        if re.match(pattern=r"^[a-e]\. ", string=section) is not None
+    ]
+    choices = [sections[idx] for idx in choice_idxs]
+
+    # Check that the choices are present, and that all of them are at the end
+    assert len(choices) > 0, "No choices found in the document."
+    assert all(
+        choice_idx == len(sections) - i
+        for i, choice_idx in enumerate(sorted(choice_idxs, reverse=True), start=1)
+    ), "Choices are not at the end of the document."
+
+    question_idx = min(choice_idxs) - 2  # -2 to remove the 'Choices:' line
+    context_and_question = "\n".join(sections[: question_idx + 1]).strip()
 
     new_examples = tokenizer(
-        text=[question] * len(choices), text_pair=[choice[3:] for choice in choices]
+        text=[context_and_question] * len(choices),
+        text_pair=[choice[3:] for choice in choices],
     )
     new_examples["label"] = [
         int(choice.startswith(f"{letter}. ") and letter == examples["label"][0])
