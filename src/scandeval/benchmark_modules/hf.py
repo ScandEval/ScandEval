@@ -729,7 +729,7 @@ def get_model_repo_info(
 
     # If the model does not exist locally, then we get the model info from the Hugging
     # Face Hub
-    if model_info is not None:
+    if model_info is None:
         try:
             model_info = hf_api.model_info(repo_id=model_id, revision=revision)
         except (GatedRepoError, LocalTokenNotFoundError) as e:
