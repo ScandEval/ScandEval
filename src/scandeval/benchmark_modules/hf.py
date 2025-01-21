@@ -951,10 +951,10 @@ def load_hf_model_config(
                 f"The model config for the model {model_id!r} could not be "
                 f"loaded, as the key {key!r} was not found in the config."
             )
-        except OSError as e:
+        except (OSError, GatedRepoError) as e:
             # TEMP: When the model is gated then we cannot set cache dir, for some
-            # reason (transformers==4.38.2). This should be included back in when
-            # this is fixed.
+            # reason (since transformers v4.38.2, still a problem in v4.48.0). This
+            # should be included back in when this is fixed.
             if "gated repo" in str(e):
                 model_cache_dir = None
                 continue
@@ -967,8 +967,12 @@ def load_hf_model_config(
             sleep(5)
             continue
         except ValueError as e:
-            requires_trust_remote_code = "trust_remote_code" in str(e)
-            if requires_trust_remote_code:
+            if "awaiting a review from the repo authors" in str(e):
+                raise InvalidModel(
+                    f"The model {model_id!r} is awaiting a review from the repository "
+                    "authors. Please try again later."
+                )
+            if "trust_remote_code" in str(e):
                 raise NeedsAdditionalArgument(
                     cli_argument="--trust-remote-code",
                     script_argument="trust_remote_code=True",

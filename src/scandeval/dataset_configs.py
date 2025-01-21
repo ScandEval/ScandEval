@@ -1925,6 +1925,7 @@ BELEBELE_FR_CONFIG = DatasetConfig(
     "'b', 'c' ou 'd', et rien d'autre.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 BELEBELE_CONFIG = DatasetConfig(
