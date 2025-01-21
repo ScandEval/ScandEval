@@ -1345,10 +1345,10 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     languages=[DA],
     labels=["a", "b", "c", "d"],
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
-    prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
+    prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Hvad er betydningen af følgende talemåde: {text}\n\nBesvar "
-    "ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.",
+    instruction_prompt="{text}\n\nBesvar ovenstående spørgsmål ved at svare med "
+    "'a', 'b', 'c' eller 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
