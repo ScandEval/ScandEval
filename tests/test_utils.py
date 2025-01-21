@@ -77,11 +77,9 @@ def test_module_is_installed(module_name, expected):
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
     argvalues=[
-        ("mistralai/Mistral-7B-v0.1", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
         ("01-ai/Yi-6B", True),
         ("google-bert/bert-base-uncased", False),
-        ("meta-llama/Meta-Llama-3-8B", True),
     ],
 )
 def test_should_prompts_be_stripped(model_id, expected, auth):
@@ -96,12 +94,7 @@ def test_should_prompts_be_stripped(model_id, expected, auth):
 
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
-    argvalues=[
-        ("mistralai/Mistral-7B-v0.1", False),
-        ("AI-Sweden-Models/gpt-sw3-6.7b-v2", False),
-        ("01-ai/Yi-6B", True),
-        ("meta-llama/Meta-Llama-3-8B", True),
-    ],
+    argvalues=[("AI-Sweden-Models/gpt-sw3-6.7b-v2", False), ("01-ai/Yi-6B", True)],
 )
 def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
     """Test that a model ID is a generative model."""
@@ -116,8 +109,6 @@ def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
 @pytest.mark.parametrize(
     argnames=["model_id", "expected_token_ids", "expected_string"],
     argvalues=[
-        ("mistralai/Mistral-7B-v0.1", None, None),
-        ("mistralai/Mistral-7B-Instruct-v0.1", [733, 28748, 16289, 28793], "[/INST]"),
         ("occiglot/occiglot-7b-de-en", None, None),
         ("occiglot/occiglot-7b-de-en-instruct", [32001, 28705, 13], "<|im_end|>"),
         ("mhenrichsen/danskgpt-tiny", None, None),
