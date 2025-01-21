@@ -967,8 +967,12 @@ def load_hf_model_config(
             sleep(5)
             continue
         except ValueError as e:
-            requires_trust_remote_code = "trust_remote_code" in str(e)
-            if requires_trust_remote_code:
+            if "awaiting a review from the repo authors" in str(e):
+                raise InvalidModel(
+                    f"The model {model_id!r} is awaiting a review from the repository "
+                    "authors. Please try again later."
+                )
+            if "trust_remote_code" in str(e):
                 raise NeedsAdditionalArgument(
                     cli_argument="--trust-remote-code",
                     script_argument="trust_remote_code=True",

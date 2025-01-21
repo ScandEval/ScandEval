@@ -57,7 +57,7 @@ from ..utils import (
     log_once,
     should_prompts_be_stripped,
 )
-from .hf import HuggingFaceEncoderModel, get_model_repo_info
+from .hf import HuggingFaceEncoderModel, get_model_repo_info, load_hf_model_config
 
 if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
     from vllm import LLM, RequestOutput, SamplingParams
@@ -792,32 +792,17 @@ def load_model_and_tokenizer(
     # during inference in this case
     model_id = model_config.adapter_base_model_id or model_config.model_id
 
-    try:
-        token = benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True
-        breakpoint()
-        hf_model_config = AutoConfig.from_pretrained(
-            model_id,
-            revision=model_config.revision,
-            cache_dir=model_config.model_cache_dir,
-            token=token,
-            trust_remote_code=benchmark_config.trust_remote_code,
-        )
-    except (ValueError, OSError) as e:
-        if "awaiting a review from the repo authors" in str(e):
-            raise InvalidModel(
-                f"The model {model_id!r} is awaiting a review from the repository "
-                "authors. Please try again later."
-            )
-        elif "trust_remote_code" in str(e):
-            raise InvalidModel(
-                f"Loading the model {model_id!r} needs to trust remote code. "
-                "If you trust the suppliers of this model, then you can enable "
-                "this by setting the `--trust-remote-code` flag."
-            )
-        raise InvalidModel(
-            "Could not load model configuration for "
-            f"{model_config.model_id!r}. The error was: {str(e)}"
-        )
+    hf_model_config = load_hf_model_config(
+        model_id=model_id,
+        num_labels=0,
+        id2label=dict(),
+        label2id=dict(),
+        revision=model_config.revision,
+        model_cache_dir=model_config.model_cache_dir,
+        api_key=benchmark_config.api_key,
+        trust_remote_code=benchmark_config.trust_remote_code,
+        run_with_cli=benchmark_config.run_with_cli,
+    )
 
     quantization = None
     if hasattr(hf_model_config, "quantization_config"):
