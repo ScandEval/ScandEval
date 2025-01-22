@@ -446,7 +446,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Beantwoord de bovenstaande vraag met 'a', 'b', 'c' of 'd'.
+  Beantwoord de bovenstaande vraag met 'a', 'b', 'c' of 'd', en niets anders.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -516,7 +516,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Beantwoord de bovenstaande vraag met 'a', 'b', 'c' of 'd'.
+  Beantwoord de bovenstaande vraag met 'a', 'b', 'c' of 'd', en niets anders.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -587,7 +587,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Beantwoord de bovenstaande vraag met 'a', 'b', 'c' of 'd'.
+  Beantwoord de bovenstaande vraag met 'a', 'b', 'c' of 'd', en niets anders.
   ```
 
 You can evaluate this dataset directly as follows:

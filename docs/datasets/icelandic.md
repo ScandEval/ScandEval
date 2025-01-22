@@ -549,7 +549,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -620,7 +620,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -691,7 +691,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -760,7 +760,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd'.
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
