@@ -46,6 +46,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   context and a question. This has been fixed now.
 - Fixed an issue when generative models in gated repos caused an error message when both
   of the environment variables `HUGGINGFACE_API_KEY` and `HF_TOKEN` were not set.
+- Sometimes the generative model cache becomes corrupt and cannot be stored to disk.
+  Rather than raising an error we now reset the model cache and carry on.
 
 
 ## [v14.3.0] - 2025-01-14
