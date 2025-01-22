@@ -354,7 +354,7 @@ When evaluating generative models, we use the following setup (see the
   ```
   Fråga: {text}
 
-  Besvara följande fråga med 'a', 'b', 'c' eller 'd'.
+  Besvara följande fråga med 'a', 'b', 'c' eller 'd', och inget annat.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -424,7 +424,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvara följande fråga med 'a', 'b', 'c' eller 'd'.
+  Besvara följande fråga med 'a', 'b', 'c' eller 'd', och inget annat.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -495,7 +495,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvara följande fråga med 'a', 'b', 'c' eller 'd'.
+  Besvara följande fråga med 'a', 'b', 'c' eller 'd', och inget annat.
   ```
 
 You can evaluate this dataset directly as follows:

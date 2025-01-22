@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.4.0] - 2025-01-22
 ### Added
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
   [Allocine](https://hf.co/datasets/tblard/allocine), the linguistic acceptability
@@ -32,6 +36,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Changed the prompting of Danske Talemåder dataset slightly, to only use the word
   "expression" (da. "udtryk") in the prompt, rather than mention idiom (da. "talemåde")
   directly.
+- Changed the instruction prompts to multiple choice tasks by specifying that only 'a',
+  'b', 'c' or 'd' should be used. This caused a mix-up with Claude models, since they do
+  not support logprobs.
 
 ### Fixed
 - Better error message when trying to benchmark a non-generative model on a generative
@@ -43,6 +50,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   context and a question. This has been fixed now.
 - Fixed an issue when generative models in gated repos caused an error message when both
   of the environment variables `HUGGINGFACE_API_KEY` and `HF_TOKEN` were not set.
+- Sometimes the generative model cache becomes corrupt and cannot be stored to disk.
+  Rather than raising an error we now reset the model cache and carry on.
 
 
 ## [v14.3.0] - 2025-01-14

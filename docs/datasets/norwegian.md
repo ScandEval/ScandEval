@@ -637,7 +637,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd'.
+  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -707,7 +707,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd'.
+  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -778,7 +778,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd'.
+  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
