@@ -1939,6 +1939,7 @@ BELEBELE_FR_CONFIG = DatasetConfig(
     "ou 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 BELEBELE_CONFIG = DatasetConfig(
