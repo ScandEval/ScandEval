@@ -110,7 +110,7 @@ def test_should_prompts_be_stripped(model_id, expected, auth):
     argnames=["model_id", "expected"],
     argvalues=[
         ("mistralai/Mistral-7B-v0.1", False),
-        ("meta-llama/Meta-Llama-3-8B", False),
+        ("meta-llama/Meta-Llama-3-8B", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", False),
         ("01-ai/Yi-6B", True),
     ],
