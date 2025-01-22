@@ -467,6 +467,8 @@
       
         
       
+        
+      
     
     
       
@@ -1142,26 +1144,8 @@
 <span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to the finetuning of models.&quot;&quot;&quot;</span>
+<span class="normal">321</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Functions related to the finetuning of models.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">importlib.util</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">t</span>
@@ -1348,10 +1332,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        The scores for the test dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Set random seeds to enforce reproducibility of the randomly initialised</span>
-    <span class="c1"># weights</span>
-    <span class="n">seed</span> <span class="o">=</span> <span class="mi">4242</span> <span class="o">+</span> <span class="n">iteration_idx</span>
-    <span class="n">enforce_reproducibility</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">framework</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="c1"># Set random seeds to enforce reproducibility of the randomly initialised weights</span>
+    <span class="n">enforce_reproducibility</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">framework</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">training_args</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span>
@@ -1441,29 +1423,15 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        The training arguments for the current iteration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Set the logging strategy</span>
+    <span class="n">log_once</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Using </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> data type.&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
         <span class="n">logging_strategy</span> <span class="o">=</span> <span class="n">IntervalStrategy</span><span class="o">.</span><span class="n">STEPS</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logging_strategy</span> <span class="o">=</span> <span class="n">IntervalStrategy</span><span class="o">.</span><span class="n">NO</span>
 
-    <span class="c1"># Set seed variable</span>
-    <span class="n">seed</span> <span class="o">=</span> <span class="mi">4242</span> <span class="o">+</span> <span class="n">iteration_idx</span>
-
     <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">batch_size</span>
-
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">benchmark_config</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;bitsandbytes&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">OptimizerNames</span><span class="o">.</span><span class="n">ADAMW_8BIT</span>
-        <span class="n">log_once</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;Using AdamW 8-bit optimizer.&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">OptimizerNames</span><span class="o">.</span><span class="n">ADAMW_TORCH</span>
-        <span class="n">log_once</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;Using PyTorch AdamW optimizer.&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-
-    <span class="n">log_once</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Using </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> data type.&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
     <span class="n">training_args</span> <span class="o">=</span> <span class="n">TrainingArguments</span><span class="p">(</span>
         <span class="n">output_dir</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_cache_dir</span><span class="p">,</span>
@@ -1483,8 +1451,8 @@
         <span class="n">warmup_ratio</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
         <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">32</span> <span class="o">//</span> <span class="n">batch_size</span><span class="p">,</span>
         <span class="n">load_best_model_at_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">optim</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
-        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">optim</span><span class="o">=</span><span class="n">OptimizerNames</span><span class="o">.</span><span class="n">ADAMW_TORCH</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="mi">4242</span> <span class="o">+</span> <span class="n">iteration_idx</span><span class="p">,</span>
         <span class="n">fp16</span><span class="o">=</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">DataType</span><span class="o">.</span><span class="n">FP16</span><span class="p">,</span>
         <span class="n">bf16</span><span class="o">=</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">DataType</span><span class="o">.</span><span class="n">BF16</span><span class="p">,</span>
         <span class="n">disable_tqdm</span><span class="o">=</span><span class="ow">not</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">,</span>

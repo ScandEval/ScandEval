@@ -467,6 +467,8 @@
       
         
       
+        
+      
     
     
       
@@ -2756,7 +2758,26 @@
 <span class="normal">1941</span>
 <span class="normal">1942</span>
 <span class="normal">1943</span>
-<span class="normal">1944</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All dataset configurations used in ScandEval.&quot;&quot;&quot;</span>
+<span class="normal">1944</span>
+<span class="normal">1945</span>
+<span class="normal">1946</span>
+<span class="normal">1947</span>
+<span class="normal">1948</span>
+<span class="normal">1949</span>
+<span class="normal">1950</span>
+<span class="normal">1951</span>
+<span class="normal">1952</span>
+<span class="normal">1953</span>
+<span class="normal">1954</span>
+<span class="normal">1955</span>
+<span class="normal">1956</span>
+<span class="normal">1957</span>
+<span class="normal">1958</span>
+<span class="normal">1959</span>
+<span class="normal">1960</span>
+<span class="normal">1961</span>
+<span class="normal">1962</span>
+<span class="normal">1963</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All dataset configurations used in ScandEval.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">DatasetConfig</span>
 <span class="kn">from</span> <span class="nn">.languages</span> <span class="kn">import</span> <span class="n">DA</span><span class="p">,</span> <span class="n">DE</span><span class="p">,</span> <span class="n">EN</span><span class="p">,</span> <span class="n">FO</span><span class="p">,</span> <span class="n">FR</span><span class="p">,</span> <span class="n">IS</span><span class="p">,</span> <span class="n">NB</span><span class="p">,</span> <span class="n">NL</span><span class="p">,</span> <span class="n">NN</span><span class="p">,</span> <span class="n">NO</span><span class="p">,</span> <span class="n">SV</span><span class="p">,</span> <span class="n">get_all_languages</span>
@@ -4103,10 +4124,10 @@
     <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">DA</span><span class="p">],</span>
     <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">],</span>
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Følgende er multiple choice spørgsmål (med svar).&quot;</span><span class="p">,</span>
-    <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Hvad er betydningen af følgende talemåde: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Hvad er betydningen af følgende talemåde: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar &quot;</span>
-    <span class="s2">&quot;ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar ovenstående spørgsmål ved at &quot;</span>
+    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4122,7 +4143,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar ovenstående spørgsmål ved at &quot;</span>
-    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4139,7 +4160,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spørsmål: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar følgende spørsmål med &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;, og ikke noe annet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4156,7 +4177,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Fråga: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Fråga: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvara följande fråga med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; &quot;</span>
-    <span class="s2">&quot;eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eller &#39;d&#39;, och inget annat.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4173,7 +4194,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svara: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4191,7 +4212,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Frage: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwort: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Frage: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;, und nichts anderes.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4208,7 +4229,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwoord: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantwoord de bovenstaande vraag met &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; of &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; of &#39;d&#39;, en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4223,8 +4244,8 @@
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;The following are multiple choice questions (with answers).&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Answer: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by &quot;</span>
-    <span class="s2">&quot;replying with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by replying &quot;</span>
+    <span class="s2">&quot;with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;, and nothing else.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4241,7 +4262,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar ovenstående spørgsmål ved at &quot;</span>
-    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4260,7 +4281,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Réponse: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Répondez à la question ci-dessus par &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; ou &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; ou &#39;d&#39;, et rien d&#39;autre.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4277,7 +4298,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar ovenstående spørgsmål ved at &quot;</span>
-    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4295,7 +4316,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spørsmål: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar følgende spørsmål med &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;, og ikke noe annet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4313,7 +4334,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Fråga: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Fråga: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvara följande fråga med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; &quot;</span>
-    <span class="s2">&quot;eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eller &#39;d&#39;, och inget annat.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4331,7 +4352,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svara: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4348,7 +4369,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Frage: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwort: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Frage: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;, und nichts anderes.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4365,8 +4386,8 @@
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Hieronder staan meerkeuzevragen (met antwoorden).&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwoord: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantwoord de bovenstaande vraag met &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; of &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantwoord de bovenstaande vraag met &#39;a&#39;, &#39;b&#39;, &quot;</span>
+    <span class="s2">&quot;&#39;c&#39; of &#39;d&#39;, en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4382,8 +4403,8 @@
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;The following are multiple choice questions (with answers).&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Answer: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by &quot;</span>
-    <span class="s2">&quot;replying with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by replying &quot;</span>
+    <span class="s2">&quot;with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;, and nothing else.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4406,7 +4427,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar ovenstående spørgsmål ved at &quot;</span>
-    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4423,7 +4444,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spørsmål: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar følgende spørsmål med &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;, og ikke noe annet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4440,7 +4461,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Fråga: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Fråga: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvara följande fråga med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; &quot;</span>
-    <span class="s2">&quot;eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eller &#39;d&#39;, och inget annat.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4457,7 +4478,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svara: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4475,7 +4496,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svara: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4492,7 +4513,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Frage: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwort: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Frage: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;, und nichts anderes.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4509,7 +4530,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwoord: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantwoord de bovenstaande vraag met &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; of &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;c&#39; of &#39;d&#39;, en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4525,8 +4546,8 @@
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;The following are multiple choice questions (with answers).&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Answer: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by &quot;</span>
-    <span class="s2">&quot;replying with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by replying &quot;</span>
+    <span class="s2">&quot;with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;, and nothing else.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4544,7 +4565,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Réponse: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Répondez à la question ci-dessus par &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; ou &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; ou &#39;d&#39;, et rien d&#39;autre.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -4566,8 +4587,8 @@
     <span class="s2">&quot;svar.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørgsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar ovenstående spørgsmål ved at &quot;</span>
-    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar ovenstående spørgsmål ved at &quot;</span>
+    <span class="s2">&quot;svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4585,8 +4606,8 @@
     <span class="s2">&quot;svar.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Fråga: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvara följande fråga med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; &quot;</span>
-    <span class="s2">&quot;eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvara följande fråga med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; &quot;</span>
+    <span class="s2">&quot;eller &#39;d&#39;, och inget annat.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4603,8 +4624,8 @@
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Her følger tekster med tilhørende multiple choice spørsmål og svar.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svar: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spørsmål: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar følgende spørsmål med &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Besvar følgende spørsmål med &#39;a&#39;, &#39;b&#39;, &quot;</span>
+    <span class="s2">&quot;&#39;c&#39; eller &#39;d&#39;, og ikke noe annet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4621,8 +4642,8 @@
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Eftirfarandi eru textar með tilheyrandi fjölvalsspurningum og &quot;</span>
     <span class="s2">&quot;svörum.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svara: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -4641,8 +4662,8 @@
     <span class="s2">&quot;und Antworten.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwort: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Frage: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantworten Sie die obige Frage mit &#39;a&#39;, &#39;b&#39;, &quot;</span>
+    <span class="s2">&quot;&#39;c&#39; oder &#39;d&#39;, und nichts anderes.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4660,8 +4681,27 @@
     <span class="s2">&quot;antwoorden.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Antwoord: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Vraag: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantwoord de bovenstaande vraag met &#39;a&#39;, &quot;</span>
-    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; of &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Beantwoord de bovenstaande vraag met &#39;a&#39;, &#39;b&#39;, &quot;</span>
+    <span class="s2">&quot;&#39;c&#39; of &#39;d&#39;, en niets anders.&quot;</span><span class="p">,</span>
+    <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">BELEBELE_FR_CONFIG</span> <span class="o">=</span> <span class="n">DatasetConfig</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;belebele-fr&quot;</span><span class="p">,</span>
+    <span class="n">pretty_name</span><span class="o">=</span><span class="s2">&quot;the French multiple choice reading comprehension dataset BeleBele-fr, &quot;</span>
+    <span class="s2">&quot;translated from the English BeleBele dataset&quot;</span><span class="p">,</span>
+    <span class="n">huggingface_id</span><span class="o">=</span><span class="s2">&quot;ScandEval/belebele-fr-mini&quot;</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">MCRC</span><span class="p">,</span>
+    <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">FR</span><span class="p">],</span>
+    <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">],</span>
+    <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Les textes suivants sont accompagnés de questions à choix &quot;</span>
+    <span class="s2">&quot;multiples et de réponses.&quot;</span><span class="p">,</span>
+    <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Réponse: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Répondez à la question ci-dessus par &#39;a&#39;, &quot;</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; ou &#39;d&#39;, et rien d&#39;autre.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4678,8 +4718,8 @@
     <span class="s2">&quot;and answers.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Answer: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
-    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Question: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by &quot;</span>
-    <span class="s2">&quot;replying with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;.&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Answer the above question by replying &quot;</span>
+    <span class="s2">&quot;with &#39;a&#39;, &#39;b&#39;, &#39;c&#39; or &#39;d&#39;, and nothing else.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>

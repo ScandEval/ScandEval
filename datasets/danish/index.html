@@ -473,6 +473,8 @@
       
         
       
+        
+      
     
     
       
@@ -1748,17 +1750,17 @@ models to understand Danish idioms.</p>
 training, validation and testing, respectively (so 1,000 samples used in total).</p>
 <p>Here are a few examples from the training split:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tale nogen efter munden\nSvarmuligheder:\na. være føjelig og give nogen ret selvom man ikke nødvendigvis er enig\nb. erklære sig helt enig med en anden person\nc. sige det præcis samme som en anden; efterabe\nd. være egoistisk og snæversynet; kun tænke på sig selv&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hvad betyder udtrykket &#39;tale nogen efter munden&#39;?\nSvarmuligheder:\na. være føjelig og give nogen ret selvom man ikke nødvendigvis er enig\nb. erklære sig helt enig med en anden person\nc. sige det præcis samme som en anden; efterabe\nd. være egoistisk og snæversynet; kun tænke på sig selv&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;a&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;der falder en sten fra éns hjerte\nSvarmuligheder:\na. en bestemt (kriminel, eftersøgt) person er forsvundet\nb. man bliver fri for en sorg eller bekymring; man bliver lettet\nc. man mister én man har kær\nd. en sten forlader et hjerte man er i besiddelse af&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hvad betyder udtrykket &#39;der falder en sten fra éns hjerte&#39;?\nSvarmuligheder:\na. en bestemt (kriminel, eftersøgt) person er forsvundet\nb. man bliver fri for en sorg eller bekymring; man bliver lettet\nc. man mister én man har kær\nd. en sten forlader et hjerte man er i besiddelse af&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;b&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;have spidse albuer\nSvarmuligheder:\na. person der har det meget dårligt fysisk og psykisk\nb. have ophobet vrede over længere tid\nc. hævde sig på andres bekostning\nd. have knogler der træder tydeligt frem på ens albuer&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hvad betyder udtrykket &#39;have spidse albuer&#39;?\nSvarmuligheder:\na. person der har det meget dårligt fysisk og psykisk\nb. have ophobet vrede over længere tid\nc. hævde sig på andres bekostning\nd. have knogler der træder tydeligt frem på ens albuer&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c&quot;</span>
 <span class="p">}</span>
 </code></pre></div></p>
@@ -1786,7 +1788,7 @@ b. {option_b}
 c. {option_c}
 d. {option_d}
 
-Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.
+Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.
 </code></pre></div></li>
 </ul>
 <p>You can evaluate this dataset directly as follows:</p>
@@ -1837,7 +1839,7 @@ a. {option_a}
 b. {option_b}
 c. {option_c}
 
-Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39; eller &#39;c&#39;.
+Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.
 </code></pre></div></li>
 </ul>
 <p>You can evaluate this dataset directly as follows:</p>
@@ -1894,7 +1896,7 @@ b. {option_b}
 c. {option_c}
 d. {option_d}
 
-Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.
+Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.
 </code></pre></div></li>
 </ul>
 <h3 id="unofficial-arc-da">Unofficial: ARC-da</h3>
@@ -1946,7 +1948,7 @@ b. {option_b}
 c. {option_c}
 d. {option_d}
 
-Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.
+Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.
 </code></pre></div></li>
 </ul>
 <h2 id="common-sense-reasoning">Common-sense Reasoning</h2>
@@ -1998,7 +2000,7 @@ b. {option_b}
 c. {option_c}
 d. {option_d}
 
-Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;.
+Besvar ovenstående spørgsmål ved at svare med &#39;a&#39;, &#39;b&#39;, &#39;c&#39; eller &#39;d&#39;, og intet andet.
 </code></pre></div></li>
 </ul>
 <p>You can evaluate this dataset directly as follows:</p>

@@ -467,6 +467,8 @@
       
         
       
+        
+      
     
     
       
@@ -1662,7 +1664,7 @@
 <span class="kn">from</span> <span class="nn">.data_loading</span> <span class="kn">import</span> <span class="n">load_data</span>
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfigParams</span><span class="p">,</span> <span class="n">BenchmarkResult</span>
 <span class="kn">from</span> <span class="nn">.dataset_configs</span> <span class="kn">import</span> <span class="n">get_all_dataset_configs</span>
-<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">Device</span><span class="p">,</span> <span class="n">Framework</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">Device</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">InvalidBenchmark</span><span class="p">,</span> <span class="n">InvalidModel</span>
 <span class="kn">from</span> <span class="nn">.finetuning</span> <span class="kn">import</span> <span class="n">finetune</span>
 <span class="kn">from</span> <span class="nn">.generation</span> <span class="kn">import</span> <span class="n">generate</span>
@@ -1707,7 +1709,6 @@
         <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
         <span class="n">model_language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset_language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">framework</span><span class="p">:</span> <span class="n">Framework</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">device</span><span class="p">:</span> <span class="n">Device</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
         <span class="n">raise_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1753,10 +1754,6 @@
 <span class="sd">                The language codes of the languages to include for datasets. If</span>
 <span class="sd">                specified then this overrides the `language` parameter for dataset</span>
 <span class="sd">                languages. Defaults to None.</span>
-<span class="sd">            framework:</span>
-<span class="sd">                The model framework to use. Only relevant if `model-id` refers to a</span>
-<span class="sd">                local path. Otherwise, the framework will be set automatically.</span>
-<span class="sd">                Defaults to None.</span>
 <span class="sd">            device:</span>
 <span class="sd">                The device to use for benchmarking. Defaults to None.</span>
 <span class="sd">            batch_size:</span>
@@ -1817,7 +1814,6 @@
             <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
             <span class="n">model_language</span><span class="o">=</span><span class="n">model_language</span><span class="p">,</span>
             <span class="n">dataset_language</span><span class="o">=</span><span class="n">dataset_language</span><span class="p">,</span>
-            <span class="n">framework</span><span class="o">=</span><span class="n">framework</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="n">raise_errors</span><span class="o">=</span><span class="n">raise_errors</span><span class="p">,</span>
@@ -1870,7 +1866,6 @@
         <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model_language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset_language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">framework</span><span class="p">:</span> <span class="n">Framework</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">device</span><span class="p">:</span> <span class="n">Device</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">raise_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1922,10 +1917,6 @@
 <span class="sd">                specified then this overrides the `language` parameter for dataset</span>
 <span class="sd">                languages. Defaults to the value specified when initialising the</span>
 <span class="sd">                benchmarker.</span>
-<span class="sd">            framework:</span>
-<span class="sd">                The model framework to use. Only relevant if `model-id` refers to a</span>
-<span class="sd">                local path. Otherwise, the framework will be set automatically.</span>
-<span class="sd">                Defaults to the value specified when initialising the benchmarker.</span>
 <span class="sd">            device:</span>
 <span class="sd">                The device to use for benchmarking. Defaults to the value specified when</span>
 <span class="sd">                initialising the benchmarker.</span>
@@ -1987,7 +1978,6 @@
             <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
             <span class="n">model_language</span><span class="o">=</span><span class="n">model_language</span><span class="p">,</span>
             <span class="n">dataset_language</span><span class="o">=</span><span class="n">dataset_language</span><span class="p">,</span>
-            <span class="n">framework</span><span class="o">=</span><span class="n">framework</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="n">raise_errors</span><span class="o">=</span><span class="n">raise_errors</span><span class="p">,</span>
@@ -2401,7 +2391,19 @@
 <span class="sd">        benchmark_config:</span>
 <span class="sd">            The general benchmark configuration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Benchmarking </span><span class="si">{</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">pretty_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">split_type</span> <span class="o">=</span> <span class="s2">&quot;validation&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">evaluate_test_split</span> <span class="k">else</span> <span class="s2">&quot;test&quot;</span>
+    <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">few_shot</span><span class="p">:</span>
+            <span class="n">eval_type</span> <span class="o">=</span> <span class="s2">&quot;Few-shot benchmarking&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eval_type</span> <span class="o">=</span> <span class="s2">&quot;Zero-shot benchmarking&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">eval_type</span> <span class="o">=</span> <span class="s2">&quot;Benchmarking&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">eval_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="si">}</span><span class="s2"> on the </span><span class="si">{</span><span class="n">split_type</span><span class="si">}</span><span class="s2"> split of &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">pretty_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
     <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">unofficial</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Note that the </span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> dataset is unofficial, &quot;</span>
