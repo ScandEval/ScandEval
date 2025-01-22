@@ -36,6 +36,9 @@ jobs:
 
       - name: Install uv and set up Python
         uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Dependencies
         run: uv sync --no-dev --extra test
@@ -59,6 +62,9 @@ jobs:
 
       - name: Install uv and set up Python
         uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Dependencies
         run: uv sync --no-dev --extra test
