@@ -357,7 +357,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Answer the above question by replying with 'a', 'b', 'c' or 'd'.
+  Answer the above question by replying with 'a', 'b', 'c' or 'd', and nothing else.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -425,7 +425,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Answer the above question by replying with 'a', 'b', 'c' or 'd'.
+  Answer the above question by replying with 'a', 'b', 'c' or 'd', and nothing else.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -494,7 +494,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Answer the above question by replying with 'a', 'b', 'c' or 'd'.
+  Answer the above question by replying with 'a', 'b', 'c' or 'd', and nothing else.
   ```
 
 You can evaluate this dataset directly as follows:
