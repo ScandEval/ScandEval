@@ -13,6 +13,9 @@ on:
 jobs:
   code-check:
     if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +28,9 @@ jobs:
 
   pytest-linux:
     if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
         matrix:
             python-version: ["3.10", "3.11", "3.12"]
@@ -56,6 +62,9 @@ jobs:
 
   pytest-macos:
     if: github.event.pull_request.draft == false && contains(github.event.pull_request.labels.*.name, 'macos')
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
