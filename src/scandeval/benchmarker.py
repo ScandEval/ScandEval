@@ -753,7 +753,7 @@ def initial_logging(
     else:
         eval_type = "Benchmarking"
     logger.info(
-        f"{eval_type} {model_config.model_id} on the {split_type} of "
+        f"{eval_type} {model_config.model_id} on the {split_type} split of "
         f"{dataset_config.pretty_name}"
     )
 
