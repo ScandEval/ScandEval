@@ -744,7 +744,19 @@ def initial_logging(
         benchmark_config:
             The general benchmark configuration.
     """
-    logger.info(f"Benchmarking {model_config.model_id} on {dataset_config.pretty_name}")
+    split_type = "validation" if not benchmark_config.evaluate_test_split else "test"
+    if model_config.task in GENERATIVE_MODEL_TASKS:
+        if benchmark_config.few_shot:
+            eval_type = "Few-shot benchmarking"
+        else:
+            eval_type = "Zero-shot benchmarking"
+    else:
+        eval_type = "Benchmarking"
+    logger.info(
+        f"{eval_type} {model_config.model_id} on the {split_type} split of "
+        f"{dataset_config.pretty_name}"
+    )
+
     if dataset_config.unofficial:
         logger.info(
             f"Note that the {dataset_config.name!r} dataset is unofficial, "
