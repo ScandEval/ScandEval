@@ -916,7 +916,7 @@ $ scandeval --model <model-id> --dataset schibsted-no
 
 This dataset was released [here](https://github.com/SmartmediaAI/PersonalSum) and contains human annotated summaries that reflect individual user preferences.
 
-The original dataset contains 1,099 summaries based on 441 unique articles. The dataset has been split such that we have 459 / 128 / 512 samples for training, validation and testing, respectively. The splits has been made such that there is no overlap between the articles in the training, validation and testing splits.
+The original dataset contains 1,099 summaries based on 441 unique articles. The dataset has been restructured into 441 samples, where each sample represents a unique article paired with all of its corresponding summaries (1 or more). The dataset has been split such that we have 121 / 64 / 256 samples for training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 

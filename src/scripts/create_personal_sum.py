@@ -1,10 +1,14 @@
 """Create the Personal Sum summarisation dataset."""
 
+from logging import getLogger
+
 import pandas as pd
 from constants import MAX_NUM_CHARS_IN_ARTICLE, MIN_NUM_CHARS_IN_ARTICLE
 from datasets import Dataset, DatasetDict, Split
 from huggingface_hub import HfApi
 from requests import HTTPError
+
+logger = getLogger(__name__)
 
 
 def main():
@@ -16,9 +20,6 @@ def main():
     df = df[["Article", "Worker_summary"]]
     df = df.rename(columns={"Article": "text", "Worker_summary": "target_text"})
 
-    # Sort based on text, such that we can avoid having the same article in multiple splits
-    df = df.sort_values("text")
-
     # Strip leading and trailing whitespace
     df["text"] = df["text"].str.strip()
     df["target_text"] = df["target_text"].str.strip()
@@ -28,31 +29,27 @@ def main():
         r"^Oppsummering: ", "", regex=True
     )
 
-    # Add length columns
-    df["text_len"] = df["text"].str.len()
-    df["summary_len"] = df["target_text"].str.len()
-
     # Check bounds
+    text_lengths = df["text"].str.len()
     lower_bound = MIN_NUM_CHARS_IN_ARTICLE
     upper_bound = MAX_NUM_CHARS_IN_ARTICLE
 
-    df = df[df["text_len"].between(lower_bound, upper_bound)]
+    df = df[text_lengths.between(lower_bound, upper_bound)]
+
+    # Group by article: each article will now have 1 or more summaries
+    df = df.groupby("text")["target_text"].apply(list).reset_index()
+
+    logger.info(f"Total length of dataset: {len(df)}")
 
     # Make splits
-    val_size = 128
-    test_size = 512
+    val_size = 64
+    test_size = 256
 
-    val_df = df.iloc[:val_size]
-    test_df = df.iloc[val_size : val_size + test_size]
-    assert (
-        val_df.iloc[-1]["text"] != test_df.iloc[0]["text"]
-    ), "The last article in the validation set is the same as the first article in the test set. There should be no overlap between the splits."
-    train_df = df.iloc[val_size + test_size :]
-    assert (
-        train_df.iloc[-1]["text"] != test_df.iloc[0]["text"]
-    ), "The last article in the training set is the same as the first article in the test set. There should be no overlap between the splits."
-
-    assert len(train_df) > 450, "The training set should have at least 450 samples."
+    val_df = df.sample(val_size, random_state=42)
+    df = df.drop(val_df.index)
+    test_df = df.sample(test_size, random_state=42)
+    train_df = df.drop(test_df.index)
+    assert len(train_df) > 100, "The training set should have at least 100 samples."
 
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
