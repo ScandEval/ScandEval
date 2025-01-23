@@ -1359,10 +1359,10 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
     languages=[DA],
     labels=["a", "b", "c", "d"],
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
-    prompt_template="Hvad er betydningen af følgende talemåde: {text}\nSvar: {label}",
+    prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Hvad er betydningen af følgende talemåde: {text}\n\nBesvar "
-    "ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd'.",
+    instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
+    "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1378,7 +1378,7 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1395,7 +1395,7 @@ MMLU_NO_CONFIG = DatasetConfig(
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.",
+    "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1412,7 +1412,7 @@ MMLU_SV_CONFIG = DatasetConfig(
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.",
+    "eller 'd', och inget annat.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1429,7 +1429,7 @@ MMLU_IS_CONFIG = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.",
+    "'b', 'c' eða 'd', og engu öðru.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1447,7 +1447,7 @@ MMLU_DE_CONFIG = DatasetConfig(
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.",
+    "'c' oder 'd', und nichts anderes.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1464,7 +1464,7 @@ MMLU_NL_CONFIG = DatasetConfig(
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.",
+    "'c' of 'd', en niets anders.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1479,8 +1479,8 @@ MMLU_CONFIG = DatasetConfig(
     prompt_prefix="The following are multiple choice questions (with answers).",
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.",
+    instruction_prompt="Question: {text}\n\nAnswer the above question by replying "
+    "with 'a', 'b', 'c' or 'd', and nothing else.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1497,7 +1497,7 @@ MMLU_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1516,7 +1516,7 @@ MMLU_FR_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nRéponse: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
-    "'b', 'c' ou 'd'.",
+    "'b', 'c' ou 'd', et rien d'autre.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1533,7 +1533,7 @@ ARC_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1551,7 +1551,7 @@ ARC_NO_CONFIG = DatasetConfig(
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.",
+    "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1569,7 +1569,7 @@ ARC_SV_CONFIG = DatasetConfig(
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.",
+    "eller 'd', och inget annat.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1587,7 +1587,7 @@ ARC_IS_CONFIG = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.",
+    "'b', 'c' eða 'd', og engu öðru.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1604,7 +1604,7 @@ ARC_DE_CONFIG = DatasetConfig(
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.",
+    "'c' oder 'd', und nichts anderes.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1621,8 +1621,8 @@ ARC_NL_CONFIG = DatasetConfig(
     prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
-    "'b', 'c' of 'd'.",
+    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
+    "'c' of 'd', en niets anders.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1638,8 +1638,8 @@ ARC_CONFIG = DatasetConfig(
     prompt_prefix="The following are multiple choice questions (with answers).",
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.",
+    instruction_prompt="Question: {text}\n\nAnswer the above question by replying "
+    "with 'a', 'b', 'c' or 'd', and nothing else.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1662,7 +1662,7 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1679,7 +1679,7 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
     prompt_template="Spørsmål: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.",
+    "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1696,7 +1696,7 @@ HELLASWAG_SV_CONFIG = DatasetConfig(
     prompt_template="Fråga: {text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.",
+    "eller 'd', och inget annat.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1713,7 +1713,7 @@ HELLASWAG_IS_CONFIG = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.",
+    "'b', 'c' eða 'd', og engu öðru.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1731,7 +1731,7 @@ WINOGRANDE_IS_CONFIG = DatasetConfig(
     prompt_template="Spurningar: {text}\nSvara: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.",
+    "'b', 'c' eða 'd', og engu öðru.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1748,7 +1748,7 @@ HELLASWAG_DE_CONFIG = DatasetConfig(
     prompt_template="Frage: {text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.",
+    "'c' oder 'd', und nichts anderes.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1765,7 +1765,7 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd'.",
+    "'c' of 'd', en niets anders.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1781,8 +1781,8 @@ HELLASWAG_CONFIG = DatasetConfig(
     prompt_prefix="The following are multiple choice questions (with answers).",
     prompt_template="Question: {text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.",
+    instruction_prompt="Question: {text}\n\nAnswer the above question by replying "
+    "with 'a', 'b', 'c' or 'd', and nothing else.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1800,7 +1800,7 @@ HELLASWAG_FR_CONFIG = DatasetConfig(
     prompt_template="Question: {text}\nRéponse: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
-    "'b', 'c' ou 'd'.",
+    "'b', 'c' ou 'd', et rien d'autre.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1822,8 +1822,8 @@ BELEBELE_DA_CONFIG = DatasetConfig(
     "svar.",
     prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd'.",
+    instruction_prompt="{text}\n\nBesvar ovenstående spørgsmål ved at "
+    "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1841,8 +1841,8 @@ BELEBELE_SV_CONFIG = DatasetConfig(
     "svar.",
     prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Fråga: {text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
-    "eller 'd'.",
+    instruction_prompt="{text}\n\nBesvara följande fråga med 'a', 'b', 'c' "
+    "eller 'd', och inget annat.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1859,8 +1859,8 @@ BELEBELE_NO_CONFIG = DatasetConfig(
     prompt_prefix="Her følger tekster med tilhørende multiple choice spørsmål og svar.",
     prompt_template="{text}\nSvar: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c' eller 'd'.",
+    instruction_prompt="{text}\n\nBesvar følgende spørsmål med 'a', 'b', "
+    "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1877,8 +1877,8 @@ BELEBELE_IS_CONFIG = DatasetConfig(
     prompt_prefix="Eftirfarandi eru textar með tilheyrandi fjölvalsspurningum og "
     "svörum.",
     prompt_template="{text}\nSvara: {label}",
-    instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
-    "'b', 'c' eða 'd'.",
+    instruction_prompt="{text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
+    "'b', 'c' eða 'd', og engu öðru.",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     num_few_shot_examples=5,
     max_generated_tokens=5,
@@ -1897,8 +1897,8 @@ BELEBELE_DE_CONFIG = DatasetConfig(
     "und Antworten.",
     prompt_template="{text}\nAntwort: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Frage: {text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
-    "'c' oder 'd'.",
+    instruction_prompt="{text}\n\nBeantworten Sie die obige Frage mit 'a', 'b', "
+    "'c' oder 'd', und nichts anderes.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1916,8 +1916,27 @@ BELEBELE_NL_CONFIG = DatasetConfig(
     "antwoorden.",
     prompt_template="{text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
-    "'b', 'c' of 'd'.",
+    instruction_prompt="{text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
+    "'c' of 'd', en niets anders.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+    unofficial=True,
+)
+
+BELEBELE_FR_CONFIG = DatasetConfig(
+    name="belebele-fr",
+    pretty_name="the French multiple choice reading comprehension dataset BeleBele-fr, "
+    "translated from the English BeleBele dataset",
+    huggingface_id="ScandEval/belebele-fr-mini",
+    task=MCRC,
+    languages=[FR],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Les textes suivants sont accompagnés de questions à choix "
+    "multiples et de réponses.",
+    prompt_template="{text}\nRéponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="{text}\n\nRépondez à la question ci-dessus par 'a', "
+    "'b', 'c' ou 'd', et rien d'autre.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1934,8 +1953,8 @@ BELEBELE_CONFIG = DatasetConfig(
     "and answers.",
     prompt_template="{text}\nAnswer: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Question: {text}\n\nAnswer the above question by "
-    "replying with 'a', 'b', 'c' or 'd'.",
+    instruction_prompt="{text}\n\nAnswer the above question by replying "
+    "with 'a', 'b', 'c' or 'd', and nothing else.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,

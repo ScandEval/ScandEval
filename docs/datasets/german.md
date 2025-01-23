@@ -343,7 +343,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd'.
+  Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd', und nichts anderes.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -407,7 +407,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd'.
+  Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd', und nichts anderes.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -473,7 +473,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd'.
+  Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd', und nichts anderes.
   ```
 
 You can evaluate this dataset directly as follows:
