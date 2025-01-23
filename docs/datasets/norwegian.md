@@ -367,9 +367,10 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset scala-nn
 ```
 
-### Jentoft
+### Unofficial: Jentoft
+This dataset was published in [this Master's thesis](https://www.duo.uio.no/handle/10852/103885) by Matias Jentoft.
 
-This dataset was published [here](https://github.com/matias-jjj/matias_master) by Matias Jentoft as part of his master's thesis about grammatical error correction. The original dataset consists of 85,771 / 10,827 / 10487 samples for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training, validation and test, respectively. In each split, the distribution of `correct` and `incorrect` is 50/50. The original full datasets are also included by the feature names: "full_train", "full_val" and "full_test".
+The original dataset consists of 85,771 / 10,827 / 10487 samples for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training, validation and test, respectively. In each split, the distribution of `correct` and `incorrect` is 50/50.
 
 Here are a few examples from the training split:
 
@@ -418,7 +419,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset jentoft-la
+$ scandeval --model <model-id> --dataset jentoft
 ```
 
 ## Reading Comprehension

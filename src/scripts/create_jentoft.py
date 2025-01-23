@@ -1,9 +1,13 @@
 """Create the Jentoft linguistic acceptability dataset."""
 
+from logging import getLogger
+
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split
 from huggingface_hub import HfApi
 from requests import HTTPError
+
+logger = getLogger(__name__)
 
 
 def main():
@@ -20,7 +24,7 @@ def main():
 
     # Remove overlapping texts between splits
     full_train_df, full_val_df, full_test_df = remove_overlapping_samples(
-        full_train_df, full_val_df, full_test_df
+        full_train_df=full_train_df, full_val_df=full_val_df, full_test_df=full_test_df
     )
 
     assert isinstance(full_train_df, pd.DataFrame)
@@ -40,19 +44,10 @@ def main():
         train=Dataset.from_pandas(train_df, split=Split.TRAIN, preserve_index=False),
         val=Dataset.from_pandas(val_df, split=Split.VALIDATION, preserve_index=False),
         test=Dataset.from_pandas(test_df, split=Split.TEST, preserve_index=False),
-        full_train=Dataset.from_pandas(
-            full_train_df, split=Split.TRAIN, preserve_index=False
-        ),
-        full_val=Dataset.from_pandas(
-            full_val_df, split=Split.VALIDATION, preserve_index=False
-        ),
-        full_test=Dataset.from_pandas(
-            full_test_df, split=Split.TEST, preserve_index=False
-        ),
     )
 
     # Create dataset ID
-    dataset_id = "ScandEval/jentoft-la"
+    dataset_id = "ScandEval/jentoft-mini"
 
     # Remove the dataset from Hugging Face Hub if it already exists
     try:
@@ -148,9 +143,13 @@ def remove_overlapping_samples(
     val_test_overlap = val_texts.intersection(test_texts)
 
     # Print overlap statistics
-    print(f"Overlapping texts between train and validation: {len(train_val_overlap)}")
-    print(f"Overlapping texts between train and test: {len(train_test_overlap)}")
-    print(f"Overlapping texts between validation and test: {len(val_test_overlap)}")
+    logger.info(
+        f"Overlapping texts between train and validation: {len(train_val_overlap)}"
+    )
+    logger.info(f"Overlapping texts between train and test: {len(train_test_overlap)}")
+    logger.info(
+        f"Overlapping texts between validation and test: {len(val_test_overlap)}"
+    )
 
     # Remove overlapping texts from validation and test sets, prioritize train > validation > test
     clean_val_df = full_val_df[~full_val_df["text"].isin(train_texts)]
@@ -168,11 +167,6 @@ def remove_overlapping_samples(
     )
     assert len(set(clean_val_df["text"]).intersection(set(clean_test_df["text"]))) == 0
 
-    # Print final dataset sizes
-    print("\nDataset sizes after removing overlapping texts:")
-    print(f"Train: {len(clean_train_df)} (originally {len(full_train_df)})")
-    print(f"Validation: {len(clean_val_df)} (originally {len(full_val_df)})")
-    print(f"Test: {len(clean_test_df)} (originally {len(full_test_df)})")
     return clean_train_df, clean_val_df, clean_test_df
 
 
