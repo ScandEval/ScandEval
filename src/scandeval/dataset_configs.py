@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .data_models import DatasetConfig
-from .languages import DA, DE, EN, FO, FR, IS, NB, NL, NN, NO, SV, get_all_languages
+from .languages import DA, DE, EN, ES, FO, FR, IS, NB, NL, NN, NO, SV, get_all_languages
 from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
 
 
@@ -1162,6 +1162,20 @@ FQUAD_CONFIG = DatasetConfig(
     "{label}",
     instruction_prompt="Texte: {text}\n\nRépondez à la question suivante sur le "
     "texte ci-dessus en 3 mots maximum.\n\nQuestion: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
+
+XQUAD_ES_CONFIG = DatasetConfig(
+    name="xquad-es",
+    pretty_name="the Spanish version of the XQuAD reading comprehension dataset.",
+    huggingface_id="ScandEval/xquad-es",
+    task=RC,
+    languages=[ES],
+    labels=["start_positions", "end_positions"],
+    prompt_prefix="A continuación se presentan textos con sus preguntas y respuestas correspondientes.",
+    prompt_template="Texto: {text}\nPregunta: {question}\nRespuesta en máximo 3 palabras: {label}",
+    instruction_prompt="Texto: {text}\n\nResponda la siguiente pregunta sobre el texto anterior en máximo 3 palabras.\n\nPregunta: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )

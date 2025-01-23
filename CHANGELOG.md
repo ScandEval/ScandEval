@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added support for Spanish! 🇪🇸This includes the Spanish part of the reading comprehension
+  dataset [XQuAD](https://huggingface.co/datasets/google/xquad/viewer/xquad.es).
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
   [Allocine](https://hf.co/datasets/tblard/allocine), the linguistic acceptability
   dataset ScaLA with the [French Universal
