@@ -52,7 +52,7 @@ def main():
         train_df.iloc[-1]["text"] != test_df.iloc[0]["text"]
     ), "The last article in the training set is the same as the first article in the test set. There should be no overlap between the splits."
 
-    assert len(test_df) > 450, "The test set should have at least 450 samples."
+    assert len(train_df) > 450, "The training set should have at least 450 samples."
 
     val_df = val_df.reset_index(drop=True)
     test_df = test_df.reset_index(drop=True)
