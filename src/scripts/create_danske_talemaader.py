@@ -45,7 +45,9 @@ def main() -> None:
     # Set up the data as a dataframe
     df = pd.merge(left=no_labels_df, right=only_labels_df)
     df["text"] = [
-        row.talemaade_udtryk.replace("\n", " ").strip() + "\n"
+        "Hvad betyder udtrykket '"
+        + row.talemaade_udtryk.replace("\n", " ").strip()
+        + "'?\n"
         "Svarmuligheder:\n"
         "a. " + row.A.replace("\n", " ").strip() + "\n"
         "b. " + row.B.replace("\n", " ").strip() + "\n"

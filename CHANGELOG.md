@@ -7,23 +7,38 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v14.4.0] - 2025-01-22
 ### Added
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
   [Allocine](https://hf.co/datasets/tblard/allocine), the linguistic acceptability
   dataset ScaLA with the [French Universal
   Dependencies](https://github.com/UniversalDependencies/UD_French-GSD), the reading
-  comprehension dataset [FQuAD](https://hf.co/datasets/illuin/fquad), the named entity
-  recognition dataset
+  comprehension dataset [FQuAD](https://hf.co/datasets/illuin/fquad) (and unofficially
+  [Belebele-fr](https://hf.co/datasets/facebook/belebele)), the named entity recognition
+  dataset
   [ELTeC](https://dspace-clarin-it.ilc.cnr.it/repository/xmlui/handle/20.500.11752/OPEN-986),
   the knowledge dataset [MMLU-fr](https://hf.co/datasets/alexandrainst/m_mmlu), the
   common-sense reasoning dataset
   [HellaSwag-fr](https://hf.co/datasets/alexandrainst/m_hellaswag) and the summarization
   dataset [OrangeSum](https://hf.co/datasets/EdinburghNLP/orange_sum).
+- Added support for evaluating local models again, which supports models stored in the
+  Hugging Face format with a Hugging Face model configuration file (`config.json`) in
+  the model directory. This was contributed by [@rlrs](https://github.com/rlrs) and
+  [@peter-sk](https://github.com/peter-sk) ✨
 
 ### Changed
 - Changed the Belebele splits, as there were too few training splits for evaluation on
   encoder models to make sense. We now use 256 samples for training, 64 for validation
   and the rest (580) for testing.
+- Changed the prompting of Danske Talemåder dataset slightly, to only use the word
+  "expression" (da. "udtryk") in the prompt, rather than mention idiom (da. "talemåde")
+  directly.
+- Changed the instruction prompts to multiple choice tasks by specifying that only 'a',
+  'b', 'c' or 'd' should be used. This caused a mix-up with Claude models, since they do
+  not support logprobs.
 
 ### Fixed
 - Better error message when trying to benchmark a non-generative model on a generative
@@ -33,6 +48,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Encoder models were not able to be evaluated on multiple choice classification tasks,
   such as Belebele, as it differs from other multiple choice datasets by having both a
   context and a question. This has been fixed now.
+- Fixed an issue when generative models in gated repos caused an error message when both
+  of the environment variables `HUGGINGFACE_API_KEY` and `HF_TOKEN` were not set.
+- Sometimes the generative model cache becomes corrupt and cannot be stored to disk.
+  Rather than raising an error we now reset the model cache and carry on.
 
 
 ## [v14.3.0] - 2025-01-14

@@ -7,6 +7,7 @@ import pytest
 import torch
 from transformers import AutoTokenizer
 
+from scandeval.benchmark_modules.hf import load_hf_model_config
 from scandeval.utils import (
     enforce_reproducibility,
     get_end_of_chat_token_ids,
@@ -77,6 +78,8 @@ def test_module_is_installed(module_name, expected):
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
     argvalues=[
+        ("mistralai/Mistral-7B-v0.1", True),
+        ("meta-llama/Meta-Llama-3-8B", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
         ("01-ai/Yi-6B", True),
         ("google-bert/bert-base-uncased", False),
@@ -84,7 +87,18 @@ def test_module_is_installed(module_name, expected):
 )
 def test_should_prompts_be_stripped(model_id, expected, auth):
     """Test that a model ID is a generative model."""
-    tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
+    config = load_hf_model_config(
+        model_id=model_id,
+        num_labels=0,
+        id2label=dict(),
+        label2id=dict(),
+        revision="main",
+        model_cache_dir=None,
+        api_key=auth,
+        trust_remote_code=True,
+        run_with_cli=True,
+    )
+    tokenizer = AutoTokenizer.from_pretrained(model_id, config=config)
     labels = ["positiv", "negativ"]
     strip_prompts = should_prompts_be_stripped(
         labels_to_be_generated=labels, tokenizer=tokenizer
@@ -94,10 +108,15 @@ def test_should_prompts_be_stripped(model_id, expected, auth):
 
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
-    argvalues=[("AI-Sweden-Models/gpt-sw3-6.7b-v2", False), ("01-ai/Yi-6B", True)],
+    argvalues=[
+        ("mistralai/Mistral-7B-v0.1", False),
+        ("meta-llama/Meta-Llama-3-8B", True),
+        ("AI-Sweden-Models/gpt-sw3-6.7b-v2", False),
+        ("01-ai/Yi-6B", True),
+    ],
 )
 def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
-    """Test that a model ID is a generative model."""
+    """Test whether a prefix space should be added to labels."""
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=auth)
     labels = ["positiv", "negativ"]
     strip_prompts = should_prefix_space_be_added_to_labels(

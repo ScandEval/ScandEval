@@ -83,8 +83,17 @@ class ModelCache:
         for key, value in self.cache.items():
             dumpable_cache[key] = asdict(value)
 
-        with self.cache_path.open("w") as f:
-            json.dump(dumpable_cache, f)
+        try:
+            with self.cache_path.open("w") as f:
+                json.dump(dumpable_cache, f)
+        except KeyError:
+            logger.warning(
+                f"Failed to load the cache from {self.cache_path}. The cache will be "
+                f"re-initialised."
+            )
+            self.cache = dict()
+            with self.cache_path.open("w") as f:
+                json.dump(dict(), f)
 
     def _hash_key(self, key: str | list[dict[str, str]]) -> str:
         """Hash the key to use as an index in the cache.
