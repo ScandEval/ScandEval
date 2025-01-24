@@ -381,23 +381,25 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset squad-nl
 ```
 
-### Belebele
+### Belebele-nl
 
 This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
 
-The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles. In our implementation we use 256 samples for training, 64 for validation, and the remainder for testing.
 
 When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: 4
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  Hieronder volgen teksten met bijbehorende vragen en antwoorden.
+  Hieronder staan teksten met bijbehorende multiple choice vragen en antwoorden.
   ```
 - Base prompt template:
   ```
   Tekst: {text}
+
   Vraag: {question}
+
   Antwoord: {label}
   ```
 - Instruction-tuned prompt template:
