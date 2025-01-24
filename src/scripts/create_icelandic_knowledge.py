@@ -18,9 +18,9 @@ logger = getLogger(__name__)
 class CandidateAnswers(BaseModel):
     """Candidate answers from the OpenAI API."""
 
-    option1: str
-    option2: str
-    option3: str
+    first: str
+    second: str
+    third: str
 
 
 LABELS = ["a", "b", "c", "d"]
@@ -155,9 +155,9 @@ def build_dataset_with_llm(dataset: Dataset) -> pd.DataFrame:
 
         random.shuffle(LABELS)
         options = {
-            LABELS[0]: options["option1"],
-            LABELS[1]: options["option2"],
-            LABELS[2]: options["option3"],
+            LABELS[0]: options["first"],
+            LABELS[1]: options["second"],
+            LABELS[2]: options["third"],
             LABELS[3]: row.answer,
         }
         assert (
