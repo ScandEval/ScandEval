@@ -636,7 +636,24 @@ The original dataset has 2,000 samples, but only 1,997 unique questions, and the
 
 Here are a few examples from the training split:
 
-TODO: Insert examples
+```json
+{
+    "text": "Hvaða gamla verðeining var jafngildi einnar kýr að verðmæti?\nSvarmöguleikar:\na. Sauðfé\nb. Kúgildi\nc. Mjólkurtollur\nd. Hrossgildi",
+    "label": "b"
+}
+```
+```json
+{
+    "text": "Hvenær komu Íslendingar fyrst til Gimli í Manitoba?\nSvarmöguleikar:\na. 15. september 1875\nb. 25. október 1874\nc. 10. október 1876\nd. 21. október 1875",
+    "label": "d"
+}
+```
+```json
+{
+    "text": "Hvaða ár var byggingin sem gaf Barónsstíg í Reykjavík nafn reist?\nSvarmöguleikar:\na. 1901\nb. 1897\nc. 1899\nd. 1898",
+    "label": "c"
+}
+```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
