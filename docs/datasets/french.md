@@ -58,7 +58,7 @@ When evaluating generative models, we use the following setup (see the
   ```
   Texte: {text}
 
-  Classez le sentiment dans le texte. Répondez par ‘positif' ou ‘négatif'.
+  Classez le sentiment dans le texte. Répondez par 'positif' ou 'négatif'.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -97,13 +97,13 @@ Here are a few examples from the training split:
 ```json
 {
   'tokens': array(['Jamais', 'ils', 'ne', 'firent', 'de', 'provisions', ',', 'excepté', 'quelques', 'bottes', "d'ail", 'ou', "d'oignons", 'qui', 'ne', 'craignaient', 'rien', 'et', 'ne', 'coûtaient', 'pas', "grand'chose", ';', 'le', 'peu', 'de', 'bois', "qu'ils", 'consommaient', 'en', 'hiver', ',', 'la', 'Sauviat', "l'achetait", 'aux', 'fagotteurs', 'qui', 'passaient', ',', 'et', 'au', 'jour', 'le', 'jour', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
   'tokens': array(['I', 'Il', 'y', 'avait', 'plus', 'de', 'soixante', 'ans', 'que', "l'empereur", 'Napoléon', ',', 'pressé', "d'argent", ',', 'avait', 'vendu', 'les', 'provinces', 'de', 'la', 'Louisiane', 'à', 'la', 'République', 'des', 'États-Unis', ';', 'mais', ',', 'en', 'dépit', 'de', "l'infiltration", 'yankee', ',', 'les', 'traditions', 'des', 'créoles', 'français', 'se', 'perpétuaient', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'B-ORG', 'I-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'B-ORG', 'I-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
@@ -295,6 +295,39 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset fquad
 ```
 
+### Belebele
+
+This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
+
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+
+When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Voici des textes avec leurs questions et réponses associées.
+  ```
+- Base prompt template:
+  ```
+  Texte: {text}
+  Question: {question}
+  Réponse: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Texte: {text}
+
+  Répondez à la question suivante sur le texte ci-dessus.
+
+  Question: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset belebele-fr
+```
 
 ## Knowledge
 

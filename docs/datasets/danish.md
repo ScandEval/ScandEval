@@ -305,7 +305,7 @@ Here are a few examples from the training split:
 ```
 ```json
 {
-  "context": "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne links\n\n\nWebsted\npbskids.org/catinthehat/",
+  "context": "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne link\n\n\nWebsted\npbskids.org/catinthehat/",
   "question": 'Hvem synger titelmelodien til the cat in the hat?',
   "answers": {
     "answer_start": array([269]),
@@ -353,6 +353,40 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset scandiqa-da
 ```
 
+### Belebele
+
+This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
+
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+
+When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Nedenfor følger tekster med tilhørende spørgsmål og svar.
+  ```
+- Base prompt template:
+  ```
+  Tekst: {text}
+  Spørgsmål: {question}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Tekst: {text}
+
+  Besvar følgende spørgsmål om teksten ovenfor.
+
+  Spørgsmål: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset belebele-da
+```
+
 
 ## Knowledge
 
@@ -372,19 +406,19 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Hvad betyder udtrykket 'tale nogen efter munden'?\nSvarmuligheder:\na. være føjelig og give nogen ret selvom man ikke nødvendigvis er enig\nb. erklære sig helt enig med en anden person\nc. sige det præcis samme som en anden; efterabe\nd. være egoistisk og snæversynet; kun tænke på sig selv",
+  "text": "Hvilket af følgende udtryk betyder 'tale nogen efter munden'?\nSvarmuligheder:\na. være føjelig og give nogen ret selvom man ikke nødvendigvis er enig\nb. erklære sig helt enig med en anden person\nc. sige det præcis samme som en anden; efterabe\nd. være egoistisk og snæversynet; kun tænke på sig selv",
   "label": "a"
 }
 ```
 ```json
 {
-  "text": "Hvad betyder udtrykket 'der falder en sten fra éns hjerte'?\nSvarmuligheder:\na. en bestemt (kriminel, eftersøgt) person er forsvundet\nb. man bliver fri for en sorg eller bekymring; man bliver lettet\nc. man mister én man har kær\nd. en sten forlader et hjerte man er i besiddelse af",
+  "text": "Hvilket af følgende udtryk betyder 'der falder en sten fra éns hjerte'?\nSvarmuligheder:\na. en bestemt (kriminel, eftersøgt) person er forsvundet\nb. man bliver fri for en sorg eller bekymring; man bliver lettet\nc. man mister én man har kær\nd. en sten forlader et hjerte man er i besiddelse af",
   "label": "b"
 }
 ```
 ```json
 {
-  "text": "Hvad betyder udtrykket 'have spidse albuer'?\nSvarmuligheder:\na. person der har det meget dårligt fysisk og psykisk\nb. have ophobet vrede over længere tid\nc. hævde sig på andres bekostning\nd. have knogler der træder tydeligt frem på ens albuer",
+  "text": "Hvilket af følgende udtryk betyder 'have spidse albuer'?\nSvarmuligheder:\na. person der har det meget dårligt fysisk og psykisk\nb. have ophobet vrede over længere tid\nc. hævde sig på andres bekostning\nd. have knogler der træder tydeligt frem på ens albuer",
   "label": "c"
 }
 ```
@@ -709,19 +743,19 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Jacob Emil Andersen viste søndag rundt på Halvorsminde Efterskole ved Hjørring. Skolen har ligget på samme sted siden 1903. Han er selv elev, da en IT-linje på skolen fangede hans interesse. - Det betyder meget for mig, jeg ville ikke have været lige så interesseret i den her skole, hvis der ikke havde været IT, fortæller Jacob Emil Andersen, der oprindeligt stammer fra Aalborg, til TV2 Nord. En af dem, han viser rundt til Efterskolernes dag, er Isabella Kristensen, der går i skole i Hune. Hun er på jagt efter noget helt specielt. - Helt sikkert dans, springgymnastik og fitness med noget puls, forklarer Isabella Kristensen til TV2 Nord. Netop efterskolernes specialisering er en af grundene til, at rekordmange vælger at bruge et år væk fra familien i 8.-, 9.- eller 10.-klasse. De særlige linjefag har man flere af på Halvorsminde Efterskole. Jern og metal, arbejde med træ og vinterbadning er blot nogle af de aktiviteter, eleverne kan støde ind i på de forskellige linjefag, som skolen tilbyder. Men efterskolerne skal også huske at have fokus på den faglighe kvalitet, lyder det fra forstanderen. - Vi skal være skarpe på nogle nicheprodukter og nogle linjer med noget god kvalitet. Så skal vi også lave god skole, fortæller forstander på Halvorsminde Efterskole, Jens Beermann, til TV2 Nord. Han bliver bakket op af sin kollega fra Hørby Efterskole ved Sæby omkring 30 kilometer fra Halvorsminde. - Når man laver sit valgfagsudbud, skal det ikke være tilfældigt. Man skal ikke tænke, at ’det er smart! Det må trække elever, det her!’ Der skal være en velovervejet refleksion i forhold til, om det passer ind i det, vi gerne vil som skole,, siger forstander på Hørby Efterskole, Mogens Vestergård, til TV2 Nord. Alene i Nordjylland gik mere end 2.000 elever på efterskole i skoleåret 2018-2019. Både Halvorsminde Efterskole og Hørby Skole har plads til 130 elever. Og noget tyder på, at der i hvert fald er sikret en ny elev til næste skoleår efter dagens åbent hus. - Jeg synes at det ser spændende ud, og jeg har endnu mere lyst til at gå her nu, siger Isabella Kristensen.",
+  "text": "Jacob Emil Andersen viste søndag rundt på Halvorsminde Efterskole ved Hjørring. Skolen har ligget på samme sted siden 1903. Han er selv elev, da en IT-linje på skolen fangede hans interesse. - Det betyder meget for mig, jeg ville ikke have været lige så interesseret i den her skole, hvis der ikke havde været IT, fortæller Jacob Emil Andersen, der oprindeligt stammer fra Aalborg, til TV2 Nord. En af dem, han viser rundt til Efterskolernes dag, er Isabella Kristensen, der går i skole i Hune. Hun er på jagt efter noget helt specielt. - Helt sikkert dans, springgymnastik og fitness med noget puls, forklarer Isabella Kristensen til TV2 Nord. Netop efterskolernes specialisering er en af grundene til, at rekordmange vælger at bruge et år væk fra familien i 8.-, 9.- eller 10.-klasse. De særlige linjefag har man flere af på Halvorsminde Efterskole. Jern og metal, arbejde med træ og vinterbadning er blot nogle af de aktiviteter, eleverne kan støde ind i på de forskellige linjefag, som skolen tilbyder. Men efterskolerne skal også huske at have fokus på den faglighe kvalitet, lyder det fra forstanderen. - Vi skal være skarpe på nogle nicheprodukter og nogle linjer med noget god kvalitet. Så skal vi også lave god skole, fortæller forstander på Halvorsminde Efterskole, Jens Beermann, til TV2 Nord. Han bliver bakket op af sin kollega fra Hørby Efterskole ved Sæby omkring 30 kilometer fra Halvorsminde. - Når man laver sit valgfagsudbud, skal det ikke være tilfældigt. Man skal ikke tænke, at 'det er smart! Det må trække elever, det her!' Der skal være en velovervejet refleksion i forhold til, om det passer ind i det, vi gerne vil som skole,, siger forstander på Hørby Efterskole, Mogens Vestergård, til TV2 Nord. Alene i Nordjylland gik mere end 2.000 elever på efterskole i skoleåret 2018-2019. Både Halvorsminde Efterskole og Hørby Skole har plads til 130 elever. Og noget tyder på, at der i hvert fald er sikret en ny elev til næste skoleår efter dagens åbent hus. - Jeg synes at det ser spændende ud, og jeg har endnu mere lyst til at gå her nu, siger Isabella Kristensen.",
   "target_text": "Søndag inviterede efterskoler landet over potentielle nye elever inden for. Efterskolerne specialiserer sig for at tiltrække elever, men den gode faglighed må ikke blive glemt, lyder det fra nordjyske forstandere."
 }
 ```
 ```json
 {
-  "text": "Efter en nat med spejl glatte veje i Nordjylland melder Nordjyllands Politi om en helt problemfri morgen. Selvom politikredse i TV2 Nords sendeområde melder om en rolig nat uden større uheld, så kan de bilister, der skal af sted lørdag morgen godt forvente lidt længere rejsetid. Der er nemlig stadig glatte veje, og der er faldet en del sne i Nordjylland. Saltvogne og sneplove har allerede været på vejene, og Politiet opfordre forsat bilisterne til at køre forsigtigt ude på de snefyldte veje.",
+  "text": "Efter en nat med spejl glatte veje i Nordjylland melder Nordjyllands Politi om en helt problemfri morgen. Selvom politikredse i TV2 Nords sendeområde melder om en rolig nat uden større uheld, så kan de bilister, der skal af sted lørdag morgen godt forvente lidt længere rejsetid. Der er nemlig stadig glatte veje, og der er faldet en del sne i Nordjylland. Saltvogne og sneplove har allerede været på vejene, og Politiet opfordre forsat bilisterne til at køre forsigtigt ude på de snefyldte veje.",
   "target_text": "Nordjyllands Politi melder om en stille morgen trods glatte veje og stort snefald i nat."
 }
 ```
 ```json
 {
-  "text": "Det var meget tæt på at gå galt for en 10-årig tysk dreng onsdag eftermiddag. Klokken 15:55 modtog alarmcentralen et opkald om en drengen, der var begravet i sand ved Vorupør Strand. - Nogle børn legede på stranden, og her har de så gravet et hul ind i klitten. Det er så det, der er kollapset omkring drengen, fortæller vagtchef Carsten Henriksen ved Midt- og Vestjyllands Politi. Det vides ikke præcist, hvor meget sand der væltede ned over barnet, men det var nok til, at drengen ikke selv kunne komme fri. De tilstedeværende på stranden måtte grave ham fri. Han var helt begravet i sand i omkring fem minutter. - Der var en tysk læge på stranden, der kunne give førstehjælp, indtil ambulancen kunne komme frem, fortæller vagtchefen. Drengen kom sig hurtigt og har det godt, men blev alligevel kørt til tjek på Aalborg Sygehus.",
+  "text": "Det var meget tæt på at gå galt for en 10-årig tysk dreng onsdag eftermiddag. Klokken 15:55 modtog alarmcentralen et opkald om en drengen, der var begravet i sand ved Vorupør Strand. - Nogle børn legede på stranden, og her har de så gravet et hul ind i klitten. Det er så det, der er kollapset omkring drengen, fortæller vagtchef Carsten Henriksen ved Midt- og Vestjyllands Politi. Det vides ikke præcist, hvor meget sand der væltede ned over barnet, men det var nok til, at drengen ikke selv kunne komme fri. De tilstedeværende på stranden måtte grave ham fri. Han var helt begravet i sand i omkring fem minutter. - Der var en tysk læge på stranden, der kunne give førstehjælp, indtil ambulancen kunne komme frem, fortæller vagtchefen. Drengen kom sig hurtigt og har det godt, men blev alligevel kørt til tjek på Aalborg Sygehus.",
   "target_text": "Børn på Vorupør Strand havde gravet et hul ind i klitterne, som kollapsede omkring en 10-årig dreng."
 }
 ```

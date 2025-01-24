@@ -520,6 +520,41 @@ $ scandeval --model <model-id> --dataset norglm-multi-qa
 ```
 
 
+### Belebele
+
+This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
+
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+
+When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Nedenfor følger tekster med tilhørende spørsmål og svar.
+  ```
+- Base prompt template:
+  ```
+  Tekst: {text}
+  Spørsmål: {question}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Tekst: {text}
+
+  Besvar følgende spørsmål om teksten ovenfor.
+
+  Spørsmål: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset belebele-no
+```
+
+
 ## Knowledge
 
 ### MMLU-no
@@ -696,217 +731,3 @@ Here are a few examples from the training split:
   "text": "[header] Slik vet du om hunden din liker deg best [title] Legg merke til at hunden din følger mye etter deg. [En måte å bevise at en hund liker deg best, er når den er mye sammen med deg. Så hold øye med om hunden din liker å være i nærheten av deg.\nSvaralternativer:\na. [Hold øye med eventuell fysisk atferd. [Et godt eksempel på denne atferden er hvis den presser rumpa opp mot låret ditt og sjekker hva du har på deg.\nb. [Se etter tegn på at hunden din kan være flørtende. [Et godt tegn på at hunden din liker deg er at den klapper deg mye eller stirrer på deg i intime øyeblikk.\nc. [Finn ut om hunden din liker å leke med deg. [Hvis det er en hund som elsker leker, kan du leke med dem, og hvis den er veldig glad i å leke, så liker den at du leker med den.\nd. Legg merke til at hunden din følger deg rundt i huset hver dag når du er ute og går. Selv om du kanskje ikke har lyst til det, kan det å tilbringe mye tid sammen med en hund få den til å føle seg komfortabel med deg.",
   "label": "c"
 }
-```
-
-When evaluating generative models, we use the following setup (see the
-[methodology](/methodology) for more information on how these are used):
-
-- Number of few-shot examples: 5
-- Prefix prompt:
-  ```
-  Følgende er flervalgsspørsmål (med svar).
-  ```
-- Base prompt template:
-  ```
-  Spørsmål: {text}
-  Svaralternativer:
-  a. {option_a}
-  b. {option_b}
-  c. {option_c}
-  d. {option_d}
-  Svar: {label}
-  ```
-- Instruction-tuned prompt template:
-  ```
-  Spørsmål: {text}
-  Svaralternativer:
-  a. {option_a}
-  b. {option_b}
-  c. {option_c}
-  d. {option_d}
-
-  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og engu öðru.
-  ```
-
-You can evaluate this dataset directly as follows:
-
-```bash
-$ scandeval --model <model-id> --dataset hellaswag-no
-```
-
-
-## Summarization
-
-### NoSammendrag
-
-This dataset is a combination of [the SNL and VG summarisation
-datasets](https://nmbu.brage.unit.no/nmbu-xmlui/handle/11250/3079868) as well as a
-translated version of the English [XSum dataset](https://aclanthology.org/D18-1206/),
-based on British BBC news articles. The SNL dataset is based on the Norwegian
-encyclopedia Store Norske Leksikon, while the VG dataset is based on the Norwegian
-articles from the newspaper VG. The translation of the XSum dataset was done using
-the [NLLB model](https://doi.org/10.48550/arXiv.2207.04672).
-
-The original full dataset consists of 472,000 samples, and we use a 1,024 / 256 / 2,048
-split for training, validation and testing, respectively (so 3,328 samples used in
-total).
-
-Here are a few examples from the training split:
-
-```json
-{
-  "text": "På Akvariet i Bergen har pingvinene fått et ekstra fristende sommertilbud denne uken. – Vi fikk en litt artig idé, og bestemte oss for å gi pingvinene våre en slags «slush-is» i går. Det ble til en morsom aktivisering for pingvinene, og det falt virkelig i god smak hos dem, sier dyrepasser Jannicke Johannessen. Hun forteller at de eldre pingvinene først var litt skeptiske, og at det var de yngste som ledet an i isleken. – Ett- og toåringene var veldig interesserte da vi kom ut med isen, og hoppet opp på den og storkoste seg. En av pingvinene ble faktisk liggende oppå isen helt til den smeltet, ler hun. Hun forteller at isen falt i så god smak, at de skal gjenta suksessen lørdag, slik at flere gjester i parken også kan få med seg aktiviteten.Selv om sommeren har satt flere varmerekorder i hele landet, forteller Johannessen at dyrene i Akvariet slettes ikke har lidd noen nød. – Vi har California-sjøløver, som overhodet ikke har hatt noen problemer med varmen. Tvert imot, de elsker å ligge å sole seg. Vi har også europeiske otere, som takler klimaet godt, da det er dyr man finner naturlig i sørlige deler av Europa. Dessuten er vi ekstremt heldige her på Akvariet, og pumper opp nytt saltvann hele tiden, og dyrene har mange muligheter til å kjøle seg ned på. Hun gir imidlertid et viktig råd til dyreeiere som vil kjøle ned dyrene sine: – Jeg har fått med meg at folk gir is som hundene kan spise for eksempel, og det er ikke akkurat et sjakktrekk. Når man kjøler ned dyrene fra innsiden samtidig som det er veldig varmt ute, tuller det med kroppstemperaturen. Kroppen jobber for å varme opp innsiden samtidig som de får varme utenfra. Du gir dem egentlig et heteslag, sier hun. – Det beste er å kjøle dem ned på utsiden. Dusj dem under «armhulene», eller generelt der de har tynn hud.Også i Tyskland har det vært høye temperaturer i sommer, og dyrepassere har måttet ta grep for å avkjøle dyrene i varmen. I Osnabrück, nord i landet, ble det registrert rundt 35 varmegrader onsdag. For tapirene i dyrehagen ble maten strategisk servert i skyggen, slik at dyrene ikke blir solbrent. Dyrepasser Daniel Chirico bestemte seg dessuten for å spyle tapirene med en hageslange, for å kjøle dem ned ytterligere. – Spesielt de nordiske artene i dyreparken har merket hetebølgen, og tilbringer mesteparten av dagen i skyggen, sier Tobias Klumpe, biolog i Osnabrück Zoo til den tyske avisen Osnabrücker Zeitung . Svartbjørnene tar mer enn gjerne en kald dukkert i sola, samtidig som de nyter kalde forfriskninger med frukt og bær.I Finland har også sommervarmen slått inn for fullt. I Korkeasaari Zoo i Helsinki ble det torsdag registrert 30 varmegrader. Løsningen har blant annet vært å installere en «regnskog» for kenguruene, mens papegøyene har fått egne dusjer de kan bruke. Bjørnene har fått iskald vannmelon, som de nyter i det kalde vannet, og tigerne får frosne kaniner – såfremt de faktisk ønsker å spise. – Appetitten deres blir mindre i varmen. For eksempel spiser hunnene i snitt bare annenhver dag, sier dyrepasser Jonne Stenroth til den finske avisen MTV . Ellers tilbringer tigrene mesteparten av dagen i skyggen mens de slapper av i bassenget, skriver avisen.",
-  "target_text": "Mens solen skinner og temperaturene er som høyest, tar dyreparker rundt om i Europa i bruk kreative løsninger for å holde dyrene avkjølte."
-}
-```
-```json
-{
-  "text": "Nick Corsellis, advokat for Carl Wood, sa at en \"innendørs mann\" må ha vært involvert i razzia, men hans klient manglet ekspertise til å være den personen. Mr Wood og tre andre menn nekter å ha deltatt i £ 14m røveriet. Fire andre har allerede erklært seg skyldig for deres roller i røveriet. \"Og dette er en av grunnene til at Mr. Wood ikke er skyldig. Hva tok han med seg til bordet?\" sa han. Mr. Corsellis sa at det ikke fulgte at hans klient var mannen som ble identifisert av anklagemyndigheten som \"Man F\" i CCTV-opptak av razzia. \"Male F var faktisk en spiller. En innsider, eller knyttet til innsiden, som var fullt kjent med det indre arbeidet i Hatton Garden Safe Deposit\". Mr. Wood manglet slik kunnskap og ville bare ha vært i stand til å fungere som en \"generell hundekrop\", sa advokaten. Corsellis spurte juryen om profesjonelle kriminelle ville vært forberedt på å gi opp en del av sine millioner til en person som bare ville ha vært et \"ekstrapar hender (EPH)\". Han kalte det \"ilogisk\" og \"utrolig\" at en slik person var involvert da \"kriminelle ikke er veldedig folk\". \"Men hvem ville spille Carl Wood - EPH? Tror du at Mr. Tom Hardy eller Mr. Vinnie Jones vil haste å ta rollen som... EPH?\" spurte han.",
-  "target_text": "En av mennene som er anklaget for å være en del av Hatton Garden-raiden, kunne ikke ha vært involvert fordi han manglet noen ferdigheter å tilby gjengen, har en domstol hørt."
-}
-```
-```json
-{
-  "text": "Verdenshjelpen forlot klubben i fjor på grunn av arbeids- og studietilbud, pluss behovet for å komme seg fra en ryggskade. Manager Jamie Sherwood sa til klubbens nettside: \"Jeg er virkelig glad for å ha brakt Natalie tilbake til klubben. \"Hennes erfaring, lederskap og åpenbare evne blir et utmerket tillegg til vår tropp for 2017\". Haigh la til: \"Etter skaden jeg fikk på ryggen for nesten 15 måneder siden, trodde jeg aldri at jeg ville spille igjen, enn si på dette nivået. \"Det er flott å være tilbake i og rundt klubben - det er en ekte buzz etter den suksessen de oppnådde i fjor\".",
-  "target_text": "Yeovil Town Ladies har gjenforenet tidligere kaptein Natalie Haigh før damer Super League One klubbens første sesong i toppklassen."
-}
-```
-
-When evaluating generative models, we use the following setup (see the
-[methodology](/methodology) for more information on how these are used):
-
-- Number of few-shot examples: 1
-- Prefix prompt:
-  ```
-  Her følger nyhetsartikler med tilhørende sammendrag.
-  ```
-- Base prompt template:
-  ```
-  Nyhetsartikkel: {text}
-  Sammendrag: {target_text}
-  ```
-- Instruction-tuned prompt template:
-  ```
-  Nyhetsartikkel: {text}
-
-  Skriv et sammendrag av den ovennevnte artikkelen.
-  ```
-
-You can evaluate this dataset directly as follows:
-
-```bash
-$ scandeval --model <model-id> --dataset no-sammendrag
-```
-
-
-### Unofficial: NorGLM Multi Sum
-
-This dataset was released in [this paper](https://doi.org/10.48550/arXiv.2312.01314) and
-features a manually annotated summarisation dataset based on Norwegian news articles.
-
-The original dataset contains 467 samples, which we split into 147 / 64 / 256 samples
-for training, validation and test, respectively.
-
-Here are a few examples from the training split:
-
-```json
-{
-  "text": " En sel i England ble fanget i plast. Det kunne gått galt. Hver dag blir også dyr i Norge fanget i plast. Et vondt syn møtte nylig dyrevernere på en strand i England. Der lå en sel som hadde tuklet seg inn i plast. Det kunne gått veldig galt.– Det var tydelig at selen hadde det vondt, forteller en kvinne som så selen på stranden, til kanalen BBC.Men dyrlegene fra den britiske dyrevernsorganisasjonen BDMLR kom heldigvis i tide. De klarte å fri selen fra plasten. Selen ble sluppet tilbake i sjøen.Heldigvis ble ikke selen skadet denne gangen, forklarte dyrevernsorganisasjonen til BBC.Men mange dyr er ikke så heldige når de blir fanget i plast. Dyr setter seg fast i plast over hele verden. Norske sjødyr setter seg fast i plast hver eneste dag, forteller Per-Erik Schulze. Han jobber i Naturvernforbundet og er ekspert på plast og forurensing i havet. – Mange av dyrene står fast i mange dager eller måneder uten å slippe løs. Det er helt grusomt, sier Schulze.Han forteller at disse dyrene ofte setter seg fast i plast: SjøfuglerFiskSelerSmåhvalerHummerSkilpadderDet er også dyr på land som setter seg fast i plast, for eksempel sauer og reinsdyr. Hvert år havner over åtte millioner tonn plast i havet, ifølge Verdens naturfond (WWF). Det meste synker til havbunnen, resten skyller inn på strender eller flyter på havoverflaten.Det er farlig for dyr som lever i og rundt havet, fordi de kan sette seg fast i plasten eller få den i magen.Hva skjer med dyrene som setter seg fast i plast?– Det er det største dyreplageriet i verden. Det er veldig vondt å hekte seg fast. Mange dør kanskje ikke av plasten, men av sult, fordi de ikke kommer seg løs så de kan dra og spise, sier han.Derfor er det viktig ikke å kaste plast som forsøpler naturen, mener Schulze.– En fin tanke er at hver plastbit vi rydder opp, kanskje kan redde et dyr. For det finnes også en god nyhet: De siste årene har mange ryddet søppel i naturen og langs kysten i Norge. Har det hjulpet? – Ja, det har vært en kjempe-ryddedugnad i Norge de siste fem årene. Noen steder er det så rent nå at det er vanskelig å finne noe plast. Det er et godt tegn, sier Schulze.",
-  "target_text": " En sel i England som var fanget i plast ble reddet av dyrevernere. Dette er en vanlig situasjon, både i Norge og andre steder i verden, da mange dyr setter seg fast og lider lenge fordi de ikke kan komme seg løs. Per-Erik Schulze, en ekspert fra Naturvernforbundet, oppfordrer folk til å fortsette ryddearbeidet for å minimere risikoen for dyr å komme til skade assosiert med plastforsøpling. Han bekrefter at ryddedugnadene i Norge har vært en suksess."
-}
-```
-```json
-{
-  "text": " Det drar seg til mot sommer, ferietid, og ikke minst helg. Usikker på hva du skal vie den til? Her har du et lite knippe velmente tips.Denne guiden gjelder fra fredag 10. juni til søndag 12. juni.Fredag og lørdag er det duket for folkefest og musikkbonanza på Viking stadion i Jåttåvågen.Anledningen er to konserter fra det folkekjære Stavangerbandet Mods, som er tilbake igjen på arenaen hvor de i 2012 og i 2017 spilte foran flere titalls tusen elleville fans. Også Kvelertak er med på å innramme en meget sterk musikkhelg i regionen. På fredag går de nemlig opp på scenen på Folken i Stavanger, og skal by på de herligste toner med både hardrock og metall. Også i utelivets verden skjer det ting i helgen. Fredag kveld gjør et nytt nattklubb- og cocktailbar-konsept sitt inntog i Stavanger når LouLou åpner dørene i de gamle Hot-lokalene i Skagen. – Vi har sett at Stavanger manglet en annen og kanskje litt mer eksklusiv plass, hvor man kan feire bursdager og andre store begivenheter, sa daglig leder i Rekom, Frederik Mygind til Byas i forrige uke.Også på Show Bar, nysatsingen til duoen Dennis Poppe og Øyvind Sørensen, blir det åpning til helgen. «Ein liden (ein) pre-opening i morgen (lørdag) og søndag på Show Bar! Sees kl. 20:00», skriver Poppe på sin Instagram-konto. Etter seieren borte mot Sverige sist søndag, er det en revansjelysten «söta bror» som gjester Ullevaal kommende søndag. Flere rogalendinger figurerer i viktige roller på landslaget, med Erling Braut Haaland, Veton Berisha, Kristian Thorstvedt og Birger Meling som navnene. Kampen kan sees på flere utesteder i Stavanger, men kan også nytes fra sofaen fra klokken 20:45. I det Aftenbladet omtaler som «superdagene», med en hel rekke arrangementer den kommende uken, finner flere av de sted denne helgen. Det 91 kilometer lange sykkelløpet, Nordsjørittet, fra Egersund til Sandnes går av stabelen lørdag, og kan la svettekjertlene få fri utfoldelse. Rittet så dagens lys tilbake i 1998 og er et samarbeid mellom flere lokale sykkelklubber. Og på Sola blir det moro for både store og små når Sola Airshow 2022, flystevnet som har vist fram gamle og nye luftmaskiner i en årrekke, holdes på lørdagen og søndagen. Er du derimot mer opptatt av folkelivet, så kan enten Tanangerdagene, eller Solafestivalen være for deg. I Sola kulturhus er det på fredag og lørdag duket for ungdomsfestival.Arrangementet er gratis, for de mellom 13 og 20 år, og byr blant annet på musikk fra den norske rapperen Hkeem, samt Stavanger-bandet Kriminell Kunst. Og et lite stykke unna, fra onsdag denne uken og fram til og med søndag, blir det folkeliv i Tananger, når Tanagerdagene går av stabelen. Arrangementet holdes i regi av Lions Club Tananger, og lover fem dager fulle av aktiviteter for familier, barn, ungdom og voksne. – Her er noe for alle og mye for mange. Hjertelig velkommen, skriver arrangøren på Facebook-arrangementet sitt. Fra 10. til 12. juni holder fem kunstnere pop up-utstilling i Pedersgata.Kunstnerne det er snakk om er ragnhild.kristine, pryl.art, hwks.art, corneliussen.art og Rosa Ottestad.Det hele finner sted i Pedersgata 43, og det er ventet flere besøkende til arrangementet. Utstillingen åpner kl. 18 på fredag, og holder åpent gjennom helga. Vet du bedre enn oss hva skjer neste helg? Send en e-post til helga@byas.no!",
-  "target_text": " Artikkelen handler om hvilke arrangementer som skal holdes i perioden fra 10. juni til 12. juni. Blant arrangementene er konserter med bandene Mods og Kvelertak, landskamp i fotball på Ullevaal, og flystevnet Sola Airshow 2022 på Sola der det skal vises fram gamle og nye luftmaskiner. I tillegg arrangeres Tanangerdagene og Solafestivalen."
-}
-```
-```json
-{
-  "text": " Regjeringen foreslår å åpne nye områder for oppdrettsnæringen, men med strenge miljøkrav. – Gir betydelige muligheter for å øke produksjonen, sier fiskeriministeren.Nærings- og fiskeridepartementet foreslår nå en ny tillatelsesordning for oppdrett med miljøkrav.Det første året kan det tildeles tillatelser på maksimalt 15.000 tonn biomasse (fisk). Hver enkelt søker kan maksimalt få tildelt ti tillatelser, og det vil stilles strenge miljøkrav til søkerne, heter det i meldingen fra departementet.– Dagens produksjon i åpne merder vil fortsatt være grunnstammen i norsk oppdrett. I tillegg har vi lagt til rette for landbasert oppdrett og havbruk til havs. Med denne ordningen peker vi ut en ny retning som gir oppdrettsnæringen mulighet til å ta i bruk nye arealer langs kysten, sier fiskeri- og sjømatminister Odd Emil Ingebrigtsen (H).Til sammenligning ble det produsert rundt 1,4 millioner tonn laks i Norge i 2019, ifølge SSB.Tillatelsene i den nye miljøteknologiordningen kommer i tillegg til veksten som blir tilbudt på ordinær måte gjennom trafikklyssystemet.– Samlet sett gir dette norsk havbruksnæring betydelige muligheter for å øke produksjonen fremover, sier ministeren.Forslaget innebærer følgende miljøkrav: Null utslipp av egg og frittsvømmende stadier av lakselus, minimum 60 prosent oppsamling av slam, samt krav til rømningssikkerhet.Prisen for tillatelsene vil bli satt med utgangspunkt i auksjonsprisene som er oppnådd i forbindelse med ordinære kapasitetsjusteringer, men med et rimelig fradrag.– Havbruksnæringen skaper store verdier for Norge. Men videre vekst må skje innenfor bærekraftige rammer. Hensynet til natur generelt, og villaksen spesielt, er av avgjørende betydning, sier klima- og miljøminister Sveinung Rotevatn (V).Til tross for bedring på viktige områder, er antallet norsk laks i havet mer enn halvert siden 1980-tallet, ifølge Vitenskapelig råd for lakseforvaltning.Det er flere grunner til det, også overfiske, men rådet slår fast at rømt oppdrettslaks og lakselus nå er de største truslene mot villaks.Forslaget skal på kort tid ut på høring.E24 skrev tidligere at siste sitat i saken var fra Ingebrigtsen, mens det egentlig var fra Rotevatn. E24 beklager og har nå rettet feilen.",
-  "target_text": " Regjeringen foreslår en ny tillatelsesordning for oppdrett med strenge miljøkrav for å muliggjøre bærekraftig vekst i havbruksnæringen. Denne ordningen vil åpne nye områder for oppdrett, tillate hver søker å få maksimalt ti tillatelser, og krever null utslipp av egg og frittsvømmende stadier av lakselus, minimum 60 prosent oppsamling av slam, samt krav til rømningssikkerhet. Dette skal gi næringen mulighet til å øke produksjonen på bærekraftig måte."
-}
-```
-
-When evaluating generative models, we use the following setup (see the
-[methodology](/methodology) for more information on how these are used):
-
-- Number of few-shot examples: 1
-- Prefix prompt:
-  ```
-  Her følger nyhetsartikler med tilhørende sammendrag.
-  ```
-- Base prompt template:
-  ```
-  Nyhetsartikkel: {text}
-  Sammendrag: {target_text}
-  ```
-- Instruction-tuned prompt template:
-  ```
-  Nyhetsartikkel: {text}
-
-  Skriv et sammendrag av den ovennevnte artikkelen.
-  ```
-
-You can evaluate this dataset directly as follows:
-
-```bash
-$ scandeval --model <model-id> --dataset norglm-multi-sum
-```
-
-
-### Unofficial: Schibsted-no
-
-This dataset was released
-[here](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries) and
-features summaries of news articles from Schibsted Medias Norwegian newsrooms.
-
-The original dataset contains 1,240 / 347 / 374 samples for training, validation and
-testing, respectively. We use these splits as-is.
-
-Here are a few examples from the training split:
-
-```json
-{
-  "text": "Klubblegenden med innrømmelse under VAR-debatten: – Vanskelig å stå her : VAR-opprøret tok en knusende seier i Trondheim. Til og med styremedlem Ola By Rise måtte innrømme at det var mange gode argumenter imot videodømmingen.  Den gamle keeperhelten talte RBK-styrets sak for VAR sammen med medstyremedlem Tore Reginiussen:  – Det er en veldig vanskelig sak. Det er ikke to VAR-tilhengere som står her, sa en engasjert By Rise fra talerstolen.  VAR-debatten hadde kommet til Rosenborgs medlemmer torsdag, som skulle stemme for at Rosenborg aktivt skulle arbeide for å fjerne VAR eller ikke.  489 stemte for å avvikle VAR. 157 stemte for å beholde VAR. Stemmene ble lest opp til enorm applaus fra salen.  Forslaget om at RBK-styret skulle få «utrede ulike modeller for å få kapital inn i klubben» ble også stemt ned med god margin. – Medlemmene har definitivt makta i Rosenborg og de bruker den. Dette er et gedigent nederlag for det sittende styret og leder Cecilie Gotaas Johnsen, sier Adresseavisens kommentator Birger Løfaldli til VG.  – Særlig investorsaken tror jeg er tung å svelge, der det foreløpig kun var snakk om en utredning. Jeg er spent på hvordan Gotaas Johnsen vil reagere på dette og hvordan hun vurderer arbeidsbetingelsene det kommende året, sier Løfaldli.  VAR-debatten var den som tok lengst tid:  – Jeg har forståelse for klubbens posisjon og forstår at måten oppleves som uvanlig detaljstyrende. Men for mange er dette en ekstraordinær sak. Det er viktig at styret forstår: VAR må ikke forbedres, VAR må fjernes! sa forslagsstiller Ole Christian Gullvåg.  – Talelista begynner å bli lang, var meldingen fra ordstyrer etter at et par stykker hadde snakket sin side i VAR-saken.  Styremedlem By Rise argumenterte med at det ville bli vanskelig å «sette tannkremen tilbake på tuben». Forslagsstiller Gullvåg svarte:  – For oss oppleves det som at noen har sprøytet tannkrem på stua midt under fredagstacoen. Vi har ikke bedt om det, vil ikke ha det.  Ola By Rise har tidligere vært ute på Twitter og vært kritisk til VAR. Han innrømmet også sin tvil rundt temaet.  – Det er vanskelig å stå her. Man må ikke stå hver kamp på Øvre Øst for å reagere på hvordan VAR praktiseres i dag. Så er det ikke sikkert den blir god nok. Involveringen av supporterne burde definitivt blitt bedre. Men det er ikke sikkert det er verktøyet som er problemet, men gjennomføringen, sa By Rise.  Han og Reginiussen listet opp både negative og positive sider ved VAR, og pekte som flere andre klubber på det potensielle økonomiske tapet ved å fjerne VAR.  Styret argumenterte for at Rosenborg skulle være en kritisk meningsbærer rundt videodømming. Et titalls medlemmer tok ordet og sa seg svært uenige, og til slutt var det forslaget fra medlemmene som vant frem.  RBK-medlem Emil Almås var forslagsstiller sammen med Gullvårg. Han sier følgende til VG: – Det vi har fått til i norsk toppfotball de siste dagene er en seier for fotballen og en seier for medlemsdemokratiet. Ved å takke nei til VAR, har norske supportere startet et jordskred, som kommer til å rase gjennom fotballeuropa i årene som kommer! Den dagen VAR er historie, skal jeg med stolthet si at jeg, og mange andre norske fotballsupportere var med på å trille de første steinene nedover dalsiden, sier Almås.  PS. En rørt Rune Bratseth mottok tittelen som æresmedlem i Rosenborg, etter en lang karriere som spiller, sportssjef og styremedlem. - Det er veldig spesielt for meg, sa Bratseth. ",
-  "target_text": "489 RBK-medlemmer stemte for å avvikle VAR ved et møte torsdag, med 157 mot Styremedlem Ola By Rise innrømmet gode argumenter mot videodømming, men argumenterte for at Rosenborg skulle være en kritisk stemme imot. RBK-medlem Emil Almås hevder \"norske supportere starter et jordskred\" mot VAR i Europa Medlemmene ga også sitt nei til at RBK-styret skulle få «utrede ulike modeller for å få kapital inn i klubben».  – Et gedigent nederlag for det sittende styret, mener Adresseavisens kommentator Birger Løfaldli "
-}
-```
-```json
-{
-  "text": "Gazas befolkning sultes med vilje, sier FN-ekspert: Krigen har ødelagt matproduksjonen. Samtidig slippes det ikke inn nok nødhjelp. Israel driver en aktiv politikk for å sulte ut Gazas befolkning, mener FNs spesialrapportør. Israel har som mål å begrense Gazas sivilbefolkning tilgang til mat. Det hevder FNs spesialrapportør for retten til mat, Michael Fakhri, til The Guardian. – Det finnes ingen grunn til å med vilje stoppe leveringen av humanitær hjelp eller ødelegger små fiskebåter, drivhus og fruktåkere, bortsett fra å nekte folk tilgang til mat, sier Fakhri til den britiske avisen. Han mener at Israel med dette gjør seg skyldig i både krigsforbrytelser og folkemord. Jan Egeland: – Fullstendig galskap Sentrale israelske politikere er flere ganger blitt anklaget for å ha brukt retorikk som oppfordrer til folkemord. Dette ble blant annet lagt til grunn da Sør-Afrika klaget Israel inn til ICJ. – Som en menneskerettighetsekspert ved FN mener jeg at dette nå er en folkemord-situasjon, understreker Fakhri. Fakhri er ikke den eneste som har advart om konsekvensene av hungersnøden i Gaza. En FN-rapport konkluderte nylig: Flyktninghjelpens generalsekretær, Jan Egeland, reiste tirsdag inn i Gaza. Han beskriver rystende scener med desperate mennesker som gjør alt i sin makt for å kare til seg mat. – Jeg er fullstendig sjokkert over forholdene her. Folk slåss som ville og gale over madrasser og sekker med mat, sier Egeland til VG. – Det er fullstendig galskap at verden har latt en befolkning bestående av stort sett helt uskyldige kvinner og barn bli utsatt for bombardement og utsulting siden midten av oktober. Hevder Israel trosser FN-domstol Situasjonen er ikke blitt bedre de siste ukene. Det sier bistandsorganisasjoner. Det til tross for at Den internasjonale domstolen (ICJ), FNs viktigste domstol, for én måned siden bestemte at Israel må gjøre alt i sin makt for å sørge for å stoppe et folkemord og sørge for at palestinere har tilgang til bistand. Human Rights Watch (HRW) og Amnesty International påpeker at det slippes inn 30 prosent færre lastebiler med nødhjelp hver dag nå sammenlignet med før ICJs pålegg 26. januar. I februar slapp det inn halvparten så mye nødhjelp i Gaza som måneden før, ifølge FNs organisasjon for palestinske flyktninger (Unrwa). – Den israelske regjeringen sulter 2,4 millioner palestinere i Gaza.  Det sier Omar Shakir, som er lederen for HRWs virksomhet i Israel og Palestina. – Den israelske regjeringen har ganske enkelt oversett domstolens pålegg, føyer han til. Tirsdag redegjorde Ramesh Rajasingham ved FNs kontor for koordinering av humanitær innsats (UNOCHA) om situasjonen for FNs sikkerhetsråd. Han advarte om at jordbruket i Gaza vil kollapse innen mai hvis situasjonen ikke blir bedre, og hvis det ikke blir pause i krigshandlingene. – Vi understreker derfor nok en gang vårt krav om en våpenhvile, sa han. USA blokkerte i februar enda en gang en resolusjon i Sikkerhetsrådet om våpenhvile. Begrunnelsen var at resolusjonen kunne ødelegge forhandlinger om våpenhvile og fangeutveksling som pågår mellom Egypt, Israel og Qatar. – Hvis ingenting skjer, frykter vi at storskala sult i Gaza nesten er uunngåelig, og det vil føre til mange flere ofre, sa Rajasingham til Sikkerhetsrådet.",
-  "target_text": "FN mener Israel prøver å sulte ut befolkningen på Gazastripen. Målrettede angrep hindrer matproduksjon og levering av nødhjelp.  Akutt underernæring truer hele befolkningen. Barn og kvinner i Nord-Gaza og Rafah er mest utsatt.  Israel overser FN-domstolens pålegg om å gi palestinere tilgang til bistand. Hjelpeorganisasjoner ser mindre nødhjelp komme inn."
-}
-```
-```json
-{
-  "text": "Marokkanske og albanske mafianettverk dominerer. Svenskene blir en stadig større trussel.: Flere er bygd på lojalitet til familie og klan, ifølge ny rapport fra Kripos. Om kort tid legger politiet frem sin trusselvurdering. Der vil Politi-Norge peke på de største truslene mot det norske samfunnet. En av truslene som vil bli viet mye plass, er organiserte kriminelle nettverk. I Norge er det rundt hundre slike nettverk. Kripos mener politiet har kapasitet til å følge med på 40 av dem. Nettverkene smugler og selger enorme mengder narkotika. De står bak skyteepisoder, eksplosjoner, menneskesmugling og bedragerier. Målet er profitt. Midlene er vold og hard indre justis. Noen av de mektigste nettverkene er bygd på lojalitet til familie og klan. Nå letter Kripos på sløret. For første gang går politiet ut med en egen rapport om nettverkene som dominerer i den kriminelle underverdenen: I rapporten trekker Kripos frem fem store trusler: 1. Marokkanske narkonettverk En av de aller største truslene er marokkanske narkonettverk. – De er utrolig sentrale, ikke bare i Norge og Norden, sier Eivind Borge fra Kripos. Norskmarokkanere dukker også opp i etterforskninger i andre europeiske land. Aftenposten har tidligere omtalt Zakariya Rahali, som har vært på rømmen siden 2017. Rahali er pekt ut som lederen av Norges største narkonettverk. 2. Albanske narkonettverk Etter marokkanerne, er det albanske nettverk som utgjør den største trusselen. Disse regnes for å være blant de største nettverkene som driver med kokain i hele Europa.  3. Svenske narkonettverk Borges skrekkscenario er at Norge kommer dit Sverige er i dag. Der har gjengkrigen herjet og deler av samfunnet er i ferd med å bli infiltrert av kriminelle. I Norge har samtlige politidistrikt støtt på svenske kriminelle nettverk. Og trusselen er økende, vurderer Kripos. 4. Litauiske kriminelle nettverk For å frakte narkotika, trengs det logistikk. For å gjøre dette, tar mange kriminelle i bruk litauiske nettverk.  5. Norge som transittland I fjor opplevde Europa en «kokaintsunami». Enorme mengder kokain ble tatt av politi og tollere, også i Norge. Men prisene gikk ikke opp. Et tegn på at store mengder kokain er i omløp.  I flere år har havnene i Rotterdam og Antwerpen vært stedet hvor kokain er blitt smuglet inn til Europa. Men der har myndighetene kastet seg rundt. Dermed må de kriminelle se seg om etter nye havner for å få det hvite pulveret til kundene. De store beslagene i fjor, kan peke mot at Norge i større grad er i ferd med å bli et av disse stedene. Enn så lenge er det for tidlig å konkludere om Norge er blitt en del av kokainruten til Europa, mener Borge og Ole Jørgen Arvesen, avdelingsleder med ansvar for etterretning i Kripos. Går sammen med kartellene Hvordan kan Kripos være så sikre i sin sak? Mye kommer fra pågående etterforskninger, men de siste årene har de også fått et unikt innblikk i hvordan de kriminelle jobber og samarbeider. De har fått meldinger og bilder fra Encrochat, Sky ECC og Anom. Det har ledet til flere store saker, men likevel er trusselen fra de kriminelle nettverkene blitt større. – Den er betydelig og økende for hele Europa, også Norge, sier Arvesen. Nettverkene er blitt mer profesjonelle og samarbeider mer med kriminelle i andre land.  – Vi ser tydelig at norske nettverk har direkte kontakt med karteller i Sør-Amerika, sier Eivind Borge fra Kripos. Han sier bakmennene de jobber for å ta, ikke lar seg stoppe med forebygging. Det krever mye etterforskning og samarbeid med politi i andre land.",
-  "target_text": "For første gang går politiet ut med en egen rapport om kriminelle nettverk. Rapporten peker på fem store trusler: marokkanske og albanske narkonettverk, svenske narkonettverk, litauiske kriminelle nettverk og at Norge blir et transittland for kokain. Nettverkene i Norge er blitt mer profesjonelle, har direkte kontakt med karteller i Sør-Amerika. Dette krever mer etterforskning og internasjonalt samarbeid."
-}
-```
-
-When evaluating generative models, we use the following setup (see the
-[methodology](/methodology) for more information on how these are used):
-
-- Number of few-shot examples: 1
-- Prefix prompt:
-  ```
-  Her følger nyhetsartikler med tilhørende sammendrag.
-  ```
-- Base prompt template:
-  ```
-  Nyhetsartikkel: {text}
-  Sammendrag: {target_text}
-  ```
-- Instruction-tuned prompt template:
-  ```
-  Nyhetsartikkel: {text}
-
-  Skriv et sammendrag av den ovennevnte artikkelen.
-  ```
-
-You can evaluate this dataset directly as follows:
-
-```bash
-$ scandeval --model <model-id> --dataset schibsted-no
-```

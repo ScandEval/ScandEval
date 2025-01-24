@@ -235,7 +235,7 @@ Here are a few examples from the training split:
 ```
 ```json
 {
-  'context': 'Iran\n\n=== Automobilindustrie ===\nIn der Automobilindustrie waren 2010 rund 500.000 Menschen beschäftigt, damit ist die Branche der zweitgrößte Arbeitgeber nach der Ölindustrie und der Iran der größte Automobilproduzent im Mittleren Osten. 2012 ist die Automobilproduktion des Iran jedoch scharf eingebrochen; es wurden nur noch 989.110 Fahrzeuge produziert – 40 Prozent weniger als 2011. Darunter fallen 848.000 PKW und 141.110 Nutzfahrzeuge.\nDie beiden größten Automobilhersteller sind die staatliche SAIPA – derzeit im Privatisierungsprozess – und Iran Khodro (IKCO). Die IKCO produziert neben einheimischen Modellen wie Dena und Runna in Lizenz Modelle u.\xa0a. von Peugeot. SAIPA hat die IKCO im Jahr 2010 das erste Mal in der Rangfolge überholt. Nach Ansicht des Business Monitor International’s Iran Autos Report wird sich die Belastbarkeit der iranischen Automobilindustrie erst in den nächsten Jahren zeigen, wenn der einheimische Markt gesättigt ist und der Iran zunehmend auf dem internationalen Markt agiert, denn bisher ist der Produktionsanstieg noch überwiegend auf die Unterstützung der Regierung zurückzuführen. 12,64 % der zugelassenen Kraftfahrzeuge werden mit Gas betrieben. Der Iran liegt damit weltweit an fünfter Stelle der Nutzung von gasbetriebenen Kraftfahrzeugen.\nDer schwedische LKW-Produzent Scania eröffnete 2011 eine neue Produktionslinie in Qazvin und löst damit Daimler-Chrysler ab, das seine Geschäftskontakte mit dem Iran abgebrochen hat.',
+  'context': 'Iran\n\n=== Automobilindustrie ===\nIn der Automobilindustrie waren 2010 rund 500.000 Menschen beschäftigt, damit ist die Branche der zweitgrößte Arbeitgeber nach der Ölindustrie und der Iran der größte Automobilproduzent im Mittleren Osten. 2012 ist die Automobilproduktion des Iran jedoch scharf eingebrochen; es wurden nur noch 989.110 Fahrzeuge produziert – 40 Prozent weniger als 2011. Darunter fallen 848.000 PKW und 141.110 Nutzfahrzeuge.\nDie beiden größten Automobilhersteller sind die staatliche SAIPA – derzeit im Privatisierungsprozess – und Iran Khodro (IKCO). Die IKCO produziert neben einheimischen Modellen wie Dena und Runna in Lizenz Modelle u.\xa0a. von Peugeot. SAIPA hat die IKCO im Jahr 2010 das erste Mal in der Rangfolge überholt. Nach Ansicht des Business Monitor International's Iran Autos Report wird sich die Belastbarkeit der iranischen Automobilindustrie erst in den nächsten Jahren zeigen, wenn der einheimische Markt gesättigt ist und der Iran zunehmend auf dem internationalen Markt agiert, denn bisher ist der Produktionsanstieg noch überwiegend auf die Unterstützung der Regierung zurückzuführen. 12,64 % der zugelassenen Kraftfahrzeuge werden mit Gas betrieben. Der Iran liegt damit weltweit an fünfter Stelle der Nutzung von gasbetriebenen Kraftfahrzeugen.\nDer schwedische LKW-Produzent Scania eröffnete 2011 eine neue Produktionslinie in Qazvin und löst damit Daimler-Chrysler ab, das seine Geschäftskontakte mit dem Iran abgebrochen hat.',
   'question': 'Wie heißen die Automodelle von Iran Khodro?',
   'answers': {
     'answer_start': array([622], dtype=int32),
@@ -245,7 +245,7 @@ Here are a few examples from the training split:
 ```
 ```json
 {
-  'context': 'Griechenland\n\n=== Klima ===\nGriechenland hat überwiegend ein mediterranes Klima mit feucht-milden Wintern und trocken-heißen Sommern. An der Küste ist es im Winter sehr mild und es regnet häufig; Schnee fällt nur selten. Die Sommer sind relativ heiß und es gibt nur gelegentlich Sommergewitter. Mit 48° wurde 1977 in Griechenland der kontinentaleuropäische Hitzerekord gemessen.\nIm Landesinneren ist es vor allem im Winter deutlich kühler und es gibt häufig Nachtfrost, manchmal auch starke Schneefälle. Der Frühling ist kurz, verwöhnt aber „mit einem Feuerwerk aus Lavendel und Anemonen, Klatschmohn und Kamille“. Im Sommer ist es ähnlich wie an der Küste heiß und trocken. Die jährlichen Niederschläge schwanken zwischen 400 und 1000\xa0mm. Da Griechenland sehr gebirgig ist, ist Wintersport durchaus möglich, es existieren 19 Wintersportgebiete unterschiedlicher Größe. Ein kleiner Teil im Nordwesten des Festlandes liegt in der gemäßigten Klimazone.',
+  'context': 'Griechenland\n\n=== Klima ===\nGriechenland hat überwiegend ein mediterranes Klima mit feucht-milden Wintern und trocken-heißen Sommern. An der Küste ist es im Winter sehr mild und es regnet häufig; Schnee fällt nur selten. Die Sommer sind relativ heiß und es gibt nur gelegentlich Sommergewitter. Mit 48° wurde 1977 in Griechenland der kontinentaleuropäische Hitzerekord gemessen.\nIm Landesinneren ist es vor allem im Winter deutlich kühler und es gibt häufig Nachtfrost, manchmal auch starke Schneefälle. Der Frühling ist kurz, verwöhnt aber "mit einem Feuerwerk aus Lavendel und Anemonen, Klatschmohn und Kamille". Im Sommer ist es ähnlich wie an der Küste heiß und trocken. Die jährlichen Niederschläge schwanken zwischen 400 und 1000\xa0mm. Da Griechenland sehr gebirgig ist, ist Wintersport durchaus möglich, es existieren 19 Wintersportgebiete unterschiedlicher Größe. Ein kleiner Teil im Nordwesten des Festlandes liegt in der gemäßigten Klimazone.',
   'question': 'Wie oft schneit es in Griechenland?',
   'answers': {
     'answer_start': array([209], dtype=int32),
@@ -283,6 +283,39 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset germanquad
 ```
 
+### Belebele
+
+This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
+
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+
+When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Im Folgenden sind Texte mit zugehörigen Fragen und Antworten aufgeführt.
+  ```
+- Base prompt template:
+  ```
+  Text: {text}
+  Frage: {question}
+  Antwort: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Text: {text}
+
+  Beantworte die folgende Frage zum obigen Text.
+
+  Frage: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset belebele-de
+```
 
 ## Knowledge
 
@@ -374,7 +407,7 @@ Here are a few examples from the training split:
 }
 ```
 ```json
-  "text": "Eine Frau besaß ein Land im absoluten Besitz. Die Frau übertrug das Land an einen Freund “auf Lebenszeit” und als der Freund starb, sollte das Land an den Nachbarn der Frau \"und ihre Erben\" weitergegeben werden. Der Nachbar starb und in ihrem ordnungsgemäß beglaubigten Testament vermachte sie ihre gesamte Hinterlassenschaft an eine örtliche Wohltätigkeitsorganisation. Wenn sie intestat gestorben wäre, wäre ihre Tochter ihre einzige Erbin gewesen. Ein Jahr nach dem Tod des Nachbarn übertrug dessen Tochter durch eine Quitclaims-Erklärung jegliches Interesse, das sie an dem Land haben könnte, an die Freundin der Frau. Das Common Law Rule Against Perpetuities ist in der Gerichtsbarkeit unverändert. Es gibt keine weiteren anwendbaren Gesetze. Wer hat welches Interesse an dem Land?\nAntwortmöglichkeiten:\na. Der Freund hat einen absoluten Besitz, weil sein Lebensbesitz mit dem verbleibenden Teil verschmolzen ist, den ihm die Tochter übertragen hat.\nb. Der Freund hat einen Lebensbesitz und die Wohltätigkeitsorganisation hat einen unverfallbaren Rest, weil das Interesse des Nachbarn übertragbar war.\nc. Der Freund hat einen Lebensbesitz und die Tochter hat einen unverfallbaren Rest, weil die Erklärung der Frau ein Interesse an den Erben des Nachbarn schuf.\nd. Der Freund hat einen Lebensbesitz und die Frau hat einen Rückfall, weil das Restinteresse des Nachbarn gemäß dem Rule Against Perpetuities ungültig war.",
+  "text": "Eine Frau besaß ein Land im absoluten Besitz. Die Frau übertrug das Land an einen Freund "auf Lebenszeit" und als der Freund starb, sollte das Land an den Nachbarn der Frau "und seine Erben" weitergegeben werden. Der Nachbar starb und in ihrem ordnungsgemäß beglaubigten Testament vermachte sie ihre gesamte Hinterlassenschaft an eine örtliche Wohltätigkeitsorganisation. Wenn sie intestat gestorben wäre, wäre ihre Tochter ihre einzige Erbin gewesen. Ein Jahr nach dem Tod des Nachbarn übertrug dessen Tochter durch eine Quitclaims-Erklärung jegliches Interesse, das sie an dem Land haben könnte, an die Freundin der Frau. Das Common Law Rule Against Perpetuities ist in der Gerichtsbarkeit unverändert. Es gibt keine weiteren anwendbaren Gesetze. Wer hat welches Interesse an dem Land?\nAntwortmöglichkeiten:\na. Der Freund hat einen absoluten Besitz, weil sein Lebensbesitz mit dem verbleibenden Teil verschmolzen ist, den ihm die Tochter übertragen hat.\nb. Der Freund hat einen Lebensbesitz und die Wohltätigkeitsorganisation hat einen unverfallbaren Rest, weil das Interesse des Nachbarn übertragbar war.\nc. Der Freund hat einen Lebensbesitz und die Tochter hat einen unverfallbaren Rest, weil die Erklärung der Frau ein Interesse an den Erben des Nachbarn schuf.\nd. Der Freund hat einen Lebensbesitz und die Frau hat einen Rückfall, weil das Restinteresse des Nachbarn gemäß dem Rule Against Perpetuities ungültig war.",
   "label": "b"
 }
 ```

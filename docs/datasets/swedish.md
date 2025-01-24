@@ -241,7 +241,7 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "context": "I Freedom Cry får spelaren ta rollen som Adéwalé, en frigiven slav från Trinidad som blev Edward Kenways kvartermästare och senare medlem i Assassin Order. Berättelseläget utspelar sig 15 år efter händelserna i Assassin's Creed IV: Black Flag där Adéwalé har blivit en tränad lönnmördare och finner sig själv skeppsbruten i Saint-Domingue, där han ställs öga mot öga med något av det mest brutala slaveriet i Västindien. DLC:n är skriven av Jill Murray, som skrev Liberation och Aveline-innehållet för Black Flag. I februari 2014 meddelades att Freedom Cry skulle släppas som en fristående titel till PlayStation 4 och PlayStation 3 den 18 februari 2014 för Nordamerika och den 19 februari 2014 för Europa. Det släpptes för PC den 25 februari 2014.",
+  "context": "I Freedom Cry får spelaren ta rollen som Adéwalé, en frigiven slav från Trinidad som blev Edward Kenways kvartermästare och senare medlem av Assassin Order. Berättelseläget utspelar sig 15 år efter händelserna i Assassin's Creed IV: Black Flag där Adéwalé har blivit en tränad lönnmördare och finner sig själv skeppsbruten i Saint-Domingue, där han ställs öga mot öga med något av det mest brutala slaveriet i Västindien. DLC:n är skriven av Jill Murray, som skrev Liberation och Aveline-innehållet för Black Flag. I februari 2014 meddelades att Freedom Cry skulle släppas som en fristående titel till PlayStation 4 och PlayStation 3 den 18 februari 2014 för Nordamerika och den 19 februari 2014 för Europa. Det släpptes för PC den 25 februari 2014.",
   "question": "När släpptes assassin's creed freedom cry?",
   "answers": {
     "answer_start": array([637]),
@@ -261,7 +261,7 @@ Here are a few examples from the training split:
 ```
 ```json
 {
-  "context": 'Data link layer\nOSI-modellen\nper skikt\n\n\n\n\n7.  Applikationslager[visa]\n\n\nNNTP\nSIP\nSSI\nDNS\nFTP\nGopher\nHTTP\nNFS\nNTP\nSMPP\nSMTP\nSNMP\nTelnet\nDHCP\nNetconf\nmer....\n\n\n\n\n\n\n\n\n6.  Presentationslager[visa]\n\n\nMIME\nXDR\n\n\n\n\n\n\n\n\n5.  Sessionsskikt[visa]\n\n\nNamngiven pipe\nNetBIOS\nSAP\nPPTP\nRTP\nSOCKS\nSPDY\n\n\n\n\n\n\n\n\n4.  Transportlager[visa]\n\n\nTCP\nUDP\nSCTP\nDCCP\nSPX\n\n\n\n\n\n\n\n\n3.  Nätverksskikt[visa]\n\n\nIP\n\nIPv4\nIPv6\n\n\nICMP\nIPsec\nIGMP\nIPX\nAppleTalk\nX.25 PLP\n\n\n\n\n\n\n\n\n2.  Datalänkskiktet[visa]\n\n\nATM\nARP\nIS-IS\nSDLC\nHDLC\nCSLIP\nSLIP\nGFP\nPLIP\nIEEE 802.2\nLLC\nMAC\nL2TP\nIEEE 802.3\nFrame Relay\nITU-T G.hn DLL\nPPP\nX.25 LAPB\nQ.921 LAPD\nQ.922 LAPF\n\n\n\n\n\n\n\n\n1.  Fysiskt lager[visa]\n\n\nEIA/TIA-232\nEIA/TIA-449\nITU-T V-serien\nI.430\nI.431\nPDH\nSONET/SDH\nPON\nOTN\nDSL\nIEEE 802.3\nIEEE 802.11\nIEEE 802.15\nIEEE 802.16\nIEEE 1394\nITU-T G.hn PHY\nUSB\nBluetooth\nRS-232\nRS-449\n\n\n\n\n\n\n\n\n\nv\nt\ne',
+  "context": 'Data link layer\nOSI-modellen\nper skikt\n\n\n\n\n7.  Applikationslager[visa]\n\n\nNNTP\nSIP\nSSI\nDNS\nFTP\nGopher\nHTTP\nNFS\nNTP\nSMPP\nSMTP\nSNMP\nTelnet\nDHCP\nNetconf\nmer....\n\n\n\n\n\n\n\n\n6.  Presentationslager[visa]\n\n\nMIME\nXDR\n\n\n\n\n\n\n\n\n5.  Sessionsskikt[visa]\n\n\nNamngiven pipe\nNetBIOS\nSAP\nPPTP\nRTP\nSOCKS\nSPDY\n\n\n\n\n\n\n\n\n4.  Transportlager[visa]\n\n\nTCP\nUDP\nSCTP\nDCCP\nSPX\n\n\n\n\n\n\n\n\n3.  Nätverksskikt[visa]\n\n\nIP\n\nIPv4\nIPv6\n\n\nICMP\nIPsec\nIGMP\nIPX\nAppleTalk\nX.25 PLP\n\n\n\n\n\n\n\n\n2.  Datalänkskiktet[visa]\n\n\nATM\nARP\nIS-IS\nSDLC\nHDLC\nCSLIP\nSLIP\nGFP\nPLIP\nIEEE 802.2\nLLC\nMAC\nL2TP\nIEEE 802.3\nFrame Relay\nITU-T G.hn DLL\nPPP\nX.25 LAPB\nQ.921 LAPD\nQ.922 LAPF\n\n\n\n\n\n\n\n\n1.  Fysiskt lager[visa]\n\n\nEIA/TIA-232\nEIA/TIA-449\nITU-T V-serien\nI.430\nI.431\nPDH\nSONET/SDH\nPON\nOTN\nDSL\nIEEE 802.3\nIEEE 802.11\nIEEE 802.15\nIEEE 1394\nITU-T G.hn PHY\nUSB\nBluetooth\nRS-232\nRS-449\n\n\n\n\n\n\n\n\n\nv\nt\ne',
   "question": 'Vilket lager av osi-modellen är uppdelad i två delskikt?',
   "answers": {
     "answer_start": array([0]),
@@ -297,6 +297,41 @@ You can evaluate this dataset directly as follows:
 
 ```bash
 $ scandeval --model <model-id> --dataset scandiqa-sv
+```
+
+
+### Belebele
+
+This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
+
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+
+When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Nedan följer texter med tillhörande frågor och svar.
+  ```
+- Base prompt template:
+  ```
+  Text: {text}
+  Fråga: {question}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Text: {text}
+
+  Besvara följande fråga om texten ovan.
+
+  Fråga: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset belebele-sv
 ```
 
 
@@ -501,125 +536,5 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset hellaswag-sv
-```
-
-
-## Summarization
-
-### SweDN
-
-This dataset was published in [this
-paper](https://aclanthology.org/2023.emnlp-main.506/) and are based on news articles
-from the Swedish newspaper Dagens Nyheter, with the summaries being the first paragraph
-of the article (and that paragraph being removed from the article).
-
-The original dataset consists of 29,800 / 4,530 / 3,750 samples for training, validation
-and testing, respectively. We use a 1,024 / 256 / 2,048 split for training, validation
-and testing, respectively (so 3,328 samples used in total). All the new splits are
-subsets of the original splits.
-
-Here are a few examples from the training split:
-
-```json
-{
-  "text": "Ett överraskande ras på den ryska lastbilsmarknaden har gjort att Scania blivit frånsprunget av konkurrenten Volvo som ökat sina leveranser, skriver Dagens Industri. Bakom Scanias tapp på 24 procent ligger bland annat problem med tillstånden för att producera Euro-3 lastbilar i fabriken i S:t Petersburg. Men det räknar Scanias Rysslandschef Hans Tardell med att ta tillbaka under året. Konkurrenten Volvo, som ökat leveranserna med 40 procent och orderingången med 68 procent jämfört mot första kvartalet 2011, hoppas kunna växa ytterligare.  ",
-  "target_text": "Ett överraskande ras på den ryska lastbilsmarknaden har gjort att Scania blivit frånsprunget av konkurrenten Volvo som ökat sina leveranser, skriver Dagens Industri."
-}
-```
-```json
-{
-  "text": "Scenen som beskrivs i åtalet kunde vara hämtad ur en skräckfilm. Den då tolvåriga flickan har berättat hur hon försågs med handbojor och kedjades vid en krok i taket. Enligt åtalet ska hon även ha fått ett koppel kring halsen och piskats. Åklagaren menar att det handlar om ett utdraget förlopp. – En tolvårig flicka ska inte sitta fastsatt i en krok i taket, säger åklagare Daniel Veivo Pettersson, som nu har åtalat en 25-årig man för grov våldtäkt mot barn. I veckan berättade TT att sju män dömts för att vid olika tillfällen ha utsatt samma flicka för sexuella övergrepp. Männen fick kontakt med flickan via forum på nätet och tjatade sig till träffar med henne. En av männen band och våldtog henne i en skog. 25-åringen blir nu den åttonde mannen som åtalas för övergrepp. – Man häpnar när man hör hennes berättelse. Hon är mycket trovärdig och vi har även kunnat styrka åtalen mot männen genom teknisk bevisning som chattkonversationer och i något fall fanns dna på en kondom och på en bh, säger Daniel Veivo Pettersson. Vid en husrannsakan i 25-åringens hem i Stockholm, där våldtäkten ska ha begåtts under hösten 2013, hittades kedjor, handbojor, koppel och en piska. Enligt flickan hade delar av övergreppen filmats. Polisen misstänkte att filmerna kunde ha sparats i en så kallad molntjänst, och åklagaren fick ta hjälp av Microsoft i USA. – Det drog ut på tiden, men tyvärr hittade vi inte det vi letade efter. Han har raderat en hel del information i sin dator, säger Daniel Veivo Pettersson. 25-åringen åtalas dessutom för ytterligare en våldtäkt på flickan, eftersom han misstänks ha våldtagit henne på en toalett. Mannen är tidigare dömd för övergrepp på en annan minderårig flicka, och åklagaren har nu begärt honom häktad i sin frånvaro. – Han kan vara hemma, men han kan även vara utomlands. Om han häktas i sin utevaro kommer han att efterlysas, säger Daniel Veivo Pettersson. 25-åringen försvaras av advokat Thomas Bodström. Han vill inte berätta om 25-åringen kommer närvara vid häktningsförhandlingen, men han säger: – Han nekar till samtliga brott, är helt oskyldig och det finns ingen grund för häktning. Enligt åklagaren misstänks flickan ha utsatts av ytterligare minst en man som polisen inte har lyckats identifiera. Männen i härvan 37-åring, Östergötland: Våldtäkt mot barn och barnpornografibrott – fem års fängelse. 26-åring, Dalarna: Sexuellt ofredande – skyddstillsyn. 29-åring, Stockholmstrakten: Våldtäkt mot barn (två tillfällen) – tre års fängelse. 26-åring, Stockholmstrakten: Våldtäkt mot barn – två och ett halvt års fängelse. 27-åring, Stockholmstrakten: Grov våldtäkt mot barn och våldtäkt mot barn (fyra tillfällen) – sju års fängelse. 55-åring, Östergötland: Utnyttjande av barn för sexuell posering (elva tillfällen) och sexuellt ofredande (två tillfällen) – åtta månaders fängelse. 19-åring, Västra Götaland: Våldtäkt mot barn – åtta månaders fängelse (domen är överklagad). 25-åring, Stockholmstrakten: Åtalad för grov våldtäkt mot barn och våldtäkt mot barn. ",
-  "target_text": "Den tolvåriga flickan kedjades vid en krok i taket och våldtogs. En 25-årig man har nu åtalats för grov våldtäkt mot barn, men det är oklart var han är. Sju män dömdes nyss för övergrepp på samma flicka."
-}
-```
-```json
-{
-  "text": "Det är Gröna partiets ledare Jill Stein som har uppmanat valkommissionen i delstaten Wisconsin att räkna om rösterna, det skriver Reuters och Wisconsins valkommission. Valkommissionen skriver att man ”räknar med att omräkningen börjar inom en vecka efter det att Steins kampanj har betalat avgiften omräkningen, som vi fortfarande håller på att beräkna”. En omräkning ska vara genomförd före den 13 december. Delstaten vanns av Donald Trump med 47,9 procent av rösterna mot Hillary Clintons 46,9 procent och gav honom 10 elektorsröster. Skillnaden mellan de två kandidaterna var 23.000 röster. Jill Stein har tidigare sagt att hon är beredd att även försöka få rösterna i Michigan och Pennsylvania omräknade. Om hon ska begära en omräkning också i dessa två delstater måste den begäran inkomma under nästa vecka, skriver NBC News. Jill Stein. Foto: AP För att få till stånd en omräkning måste Gröna partiet ha pengar nog att driva en sådan. Enligt Washington Post har partiet lyckats samla in 4,5 miljoner dollar som ska täcka juridiska omkostnader och annat som har med en eventuell omräkning att göra i de tre delstaterna. Enligt tidningen kommer det sannolikt att behövas sammanlagt mellan 6 och 7 miljoner för att genomföra en omräkning. Om Clinton skulle gå segrande ur en omräkning i Wisconsin skulle detta ändå inte innebära någon skillnad när det gäller utgången av presidentvalet. Skulle Clinton vinna även i Michigan och Pennsylvania skulle det däremot betyda en annan utgång av valet. Även om få tror att en omräkning skulle betyda något i praktiken, Hillary Clinton har redan erkänt sig besegrad, så skulle en omräkning i hennes favör i Wisconsin och Pennsylvania ge henne 30 elektorsröster medan Trump förlorar lika många. Om så, rent hypotetiskt, skulle bli fallet, skiljer bara 10 elektorsröster till Trumps fördel – och då återstår ännu Michigans röster att sluträknas. Skulle Clinton vinna även dem så har hon flest antal elektorsröster. Jill Stein har i en intervju själv sagt att hon inte begär en omräkning för att gynna någon av kandidaterna utan för att ”amerikanerna inte blev särskilt glada över utgången av valet”. Sett till enbart rösterna, och inte till elektorerna, leder just nu Hillary Clinton med 48,1 procent av rösterna mot Donald Trumps 46,6 procent. I antal röster leder Clinton med 2.012.331 röster. ",
-  "target_text": "Valkommissionen i Wisconsin i har fått en uppmaning om att rösterna i presidentvalet ska räknas om. Wisconsin har nu börjat förbereda en omräkning. Och det kan bli fler."
-}
-```
-
-When evaluating generative models, we use the following setup (see the
-[methodology](/methodology) for more information on how these are used):
-
-- Number of few-shot examples: 1
-- Prefix prompt:
-  ```
-  Nedan följer artiklar med tillhörande sammanfattningar.
-  ```
-- Base prompt template:
-  ```
-  Artikel: {text}
-  Sammanfattning: {target_text}
-  ```
-- Instruction-tuned prompt template:
-  ```
-  Artikel: {text}
-
-  Skriv en sammanfattning av artikeln ovan.
-  ```
-
-You can evaluate this dataset directly as follows:
-
-```bash
 $ scandeval --model <model-id> --dataset swedn
-```
-
-
-### Unofficial: Schibsted-sv
-
-This dataset was published
-[here](https://huggingface.co/datasets/Schibsted/schibsted-article-summaries) and
-features summaries of news articles from Schibsted Medias Swedish newsroom, from
-Aftonbladet.
-
-The original dataset has 528 / 96 / 89 samples for training, validation and testing,
-respectively. We use these splits as-is.
-
-Here are a few examples from the training split:
-
-```json
-{
-  "text": "Richard Jomshof blir upprörd och vägrar svara på frågor: SD-toppen Richard Jomshof vägrar kommentera kritiken efter påhoppet på Daniel Riazat (V).  När Aftonbladet möter honom i riksdagen blir han upprörd och går iväg. – Jag uppskattar inte skjutjärnsjournalistik, det är ett oseriöst sätt att jobba, säger han.  Justitieutskottets ordförande Richard Jomshof (SD) får hård kritik för sitt uttalande att V-ledamoten Daniel Riazat borde flytta från Sverige.  Flera i den politiska oppositionen dömer ut det som rasistiskt. Även i Tidöpartierna hörs protester.  ”Är man svensk medborgare så är man. Skamligt var ordet!” skriver L-politikern Jan Jönsson i ett uttalande på X.  ”Ta det med pressavdelningen” Aftonbladet var på plats utanför justitieutskottets möte i riksdagen vid lunchtid på tisdagen. Jomshof anlände först av alla ledamöter, tio minuter innan mötet inleddes, men ville inte svara på frågor.  – Du får ta det med pressavdelningen. Varför vill du inte svara, det är ju du som har skrivit de här tweetsen? – Du får ta det med pressavdelningen. Du kan läsa min senaste tweet förresten, så kan vi utgå från den. Varför tycker du att han borde lämna Sverige? – Börja med att läsa min tweet, det framgår väldigt tydligt där. ”Uppskattar inte skjutjärnsjournalistik” Inlägget som Jomshof syftar på lades upp kort innan justitieutskottets möte. Jomshof går där till nytt angrepp mot Riazat. Han anklagar honom för att ha ett ”sunkigt” beteende, att vara oförskämd och komma med aggressiva påhopp på politiska motståndare.  Mötet med justitieutskottet varade en timme, när Richard Jomshof kom ut från salen var upprörd över Aftonbladets närvaro. Detta trots att media brukar bevaka mötena och att ledamöterna i utskottet ofta tar tillfälle att ge intervjuer efteråt.  – För det första, vill ni prata med mig så går ni till pressavdelningen. Jag uppskattar inte skjutjärnsjournalistik, det är ett oseriöst sätt att jobba. Två, jag har inget mer att tillägga än det jag lagt ut på plattformen X. Där framgår det tydligt vad det här handlar om. Tre, ett tips i all vänlighet, ni kan ju prata med Riazat själv, om hans oförskämdheter och aggressiva beteende, om varför han inte vill ta politiska motståndare och kvinnor i hand. Nu tänker jag gå och äta lunch, säger Jomshof.  Busch: Jag är ganska osugen Daniel Riazat kallade igår Richard Jomshofs uttalande för rasistiskt och uppmanar statsminister Ulf Kristersson (M) att ta avstånd. Aftonbladet har sökt Kristersson, hans pressekreterare ber att få återkomma om statsministern har möjlighet att uttala sig. Vice statsminister Ebba Busch (KD) var fåordig när hon fick frågor om det på tisdagen.  – Jag är ganska osugen på att bidra till det rubrikspelet, sa hon i samband med en utfrågning i riksdagen.  Vice ordförande i justitieutskottet, Ardalan Shekarabi (S), har tidigare krävt Jomshofs avgång. Han uppmanar företrädare för regeringen att sluta ge Jomshof stöd.  – Tyvärr är det ett konsekvent beteende han har. Han verkar för splittring, motsättningar och i vissa fall hat mot folkgrupper. Han använder den plattform som ordförande i justitieutskottet medför till att bedriva den typen av agitation, säger han.  Aftonbladet har sökt Sverigedemokraternas pressavdelning. De ber om att få frågorna till Richard Jomshof på mejl och att få återkomma senare. Aftonbladet har sökt Daniel Riazat. Vänsterpartiets pressavdelning ber att få återkomma. ",
-  "target_text": "SD-toppen Richard Jomshof vägrar kommentera kritiken för sitt påstående att Vänsterpartiets riksdagsledamot Daniel Riazat borde lämna Sverige. Många inom den politiska oppositionen kallar uttalandet rasistiskt När Jomshof konfronteras med frågor från Aftonbladet vid ett utskottsmöte i riksdagen, blir han upprörd och går iväg utan att svara på frågorna. Han hänvisar till SD:s pressavdelning."
-}
-```
-```json
-{
-  "text": "Fredrik Bolanders uttalande i ”Robinson” får kritik: ”Skriver att jag är en mansgris”: Kvinnor är bra på att städa, laga mat och hålla ordning.  Killar vill äta mat, är starkare och bättre. Fredrik Bolanders uttalande i ”Robinson” har fått många att reagera. – Jag vet att folk stör sig på sådana uttalanden, det är ju ett sådan samhälle vi lever vi, säger han. – Om jag hade fått bestämma hade det varit en kvinna i laget för de är ju bra på att laga mat, de är bra på att hålla ordning och städa. Där har vi det negativa med att inte ha en kvinna i laget. Vi män vill ju äta såklart. Uttalandet från ”Robinson”-deltagaren Fredrik Bolander, 40, har fått många att reagera, bland annat på ”Robinsons” sociala medier.  Ändringen i ”Robinson” 2024 I årets säsong delas kvinnor och män upp i olika lag.  När programledaren Anders Lundin, 65, frågar Bolander om han tror att det ger kvinnorna en större chans att vinna i år får han ett snabbt svar.  – Nej, det blir en kille som vinner i år. Killar är ofta lite starkare och bättre än tjejer. Flera deltagare reagerar på uttalandet i programmet. Tjejerna protesterar högljutt och Gustav Jacobson, 27, gör en förskräckt min.  Bolander säger även i programmet att han inte går så bra ihop med kvinnor och feminister. – Jag är väldigt manlig i mig själv, och jag har en väldigt manlig jargong, och tycker att det ska vara jämlikt men man ska också förstå vem som är mannen i huset. ”Skriver att jag är en mansgris” När Aftonbladet pratar med Bolander samma dag som ”Robinson” har premiär berättar han att han redan fått reaktioner och meddelanden från tittare.  – De skriver att jag är en mansgris och att jag har fel kvinnosyn. Samtidigt är han medveten om att det han säger om kvinnor triggar folk.  – Jag älskar att provocera. Det är klart att jag gillar att se reaktioner, det vill jag ju, säger Bolander.  Han fortsätter:  – Jag vet att folk stör sig på sådana uttalanden, det är ju ett sådan samhälle vi lever vi. Så det var roligt att köra lite tvärtom tänkte jag. Fredrik Bolander om reaktionerna Just uttalandet om att det behövs en kvinna för att städa och laga mat i killarnas lag är det han fått mest reaktioner på.  – Många som skrivit är ju inte jätteglada. Vad skriver folk? – Att vi lever i 2024 och man ska inte vara så och alla ska vara lika och allt det där. Men samtidigt så, man gör ju det man är bra på? Men män kan väl också vara bra på att laga mat och städa? – Jo men vi har ju mycket annat att göra? Som att träna med stenar? – Exakt. Pumpa muskler och träna, vi måste tänka på hur vi ser ut, vi måste se solbrända ut och det tar tid. Det här är ju ett uttalande som upprör många. Känner du att du kan stå för det uttalandet? – Det där är en svår fråga. Jag säger så här; man får se lite under programmets gång om det är något jag står för eller inte. Så kan jag säga. Många undrar också om du är seriös eller skojar? – Det är det som är frågan, skojar jag eller är jag seriös? Det svarar jag inte på. Varför inte? – Antingen kanske jag står för det senare eller så gör jag inte det. Det får ni se. ”Robinson” sänds söndagar klockan 21.00 samt måndag till torsdag klockan 19.30 på TV4 och på TV4 play. ",
-  "target_text": "\"Robinson\"-deltagaren Fredrik Bolander har hamnat i blåsväder efter sina uttalanden om kvinnor och män, och får kritik på sociala medier. Han påstår att kvinnor är bra på att laga mat och städning medan män är starkare och bättre, och detta upprörde andra deltagare och tittare. Bolander säger att han älskar att provocera, men vägrar svara på frågan om han skämtar eller är seriös."
-}
-```
-```json
-{
-  "text": "Polisen om den övergivna diplomatbilen: ”Vi undersöker immunitetsfrågan”: En diplomatbil lämnades övergiven på ett tågspår i centrala Stockholm i helgen. Fordonet tillhör Etiopiens ambassad som har bett om ursäkt för vansinnesfärden. Men när Aftonbladet knackar på är de fåordiga.  – Vi återkommer så fort det går, säger en anställd på ambassaden. Det var natten till söndag som minibussen krockade på tvärbanans spår vid Alviks strand i Stockholm. ”Vår ambassad ber om ursäkt för olyckan och besvären den orsakat. Vi har startat en internutredning för att ta reda på hur olyckan ska ha skett”, skriver Etiopiens ambassad i Stockholm i ett mail till Aftonbladet. I övrigt har de inte kommenterat händelsen och när Aftonbladet knackar på hos ambassaden är svaret kort. – Vi håller på att jobba med det. Vi återkommer så fort det går, säger en anställd på ambassaden. Men när vill de inte svara på. 17 300 kronor i obetalda böter Tågtrafiken var tillfälligt avstängd under söndagsmorgonen och bilen fick bärgas med hjälp av en spårtraktor. Den har troligtvis kört upp på spåret vid Gröndal, enligt SL. Där kör bilar och spårvagnar på gatan innan rälsen viker av på en egen banvall. – Därefter ska den i så fall ha kört två kilometer på kross och makadam innan den krockat med en stolpe, säger Claes Keisu, pressansvarig på SL. Minibussen har också obetalda böter på 17 300 kronor, enligt Transportstyrelsen.  ”Har skett en gång tidigare” Den här typen av felkörning sker cirka tio gånger om året. Under februari skedde det två gånger, just vid Gröndal. Vanligtvis upptäcks misstaget tidigt och då brukar föraren kunna backa tillbaka på vägen. – Det här fordonet har lite högre markfrigång så det kan förklara att den kunnat ta sig längre, säger Claes Keisu. Men att bilen lyckats ta sig så långt är väldigt ovanligt. – Vad vi vet har det bara skett en gång tidigare. 2012 var det en Ålänning med sin familj som kom upp på banan i Hammarby sjöstad och körde hela vägen till Gullmarsplan, säger Keisu. Föraren ska då ha kört uppemot en kilometer på spåret. ”Vi undersöker immunitetsfrågan” Polisen har inlett en förundersökning om vårdslöshet i trafik. Det är fortfarande oklart om någon kan åtalas.  – Vi undersöker immunitetsfrågan, säger Nadya Norton, presstalesperson vid Stockholmspolisen. ”Utredningen får visa om personen som körde bilen hade immunitet eller inte. Om en person har immunitet kan denne inte lagföras i Sverige”, skriver förundersökningsledaren, Timmy Malmgren, i ett mail till Aftonbladet. Diplomater får inte straffas i landet de arbetar i, enligt internationella överrenskommelser. – Jag har inga uppgifter om någon är misstänkt i ärendet, säger Nadya Norton. Hade fest under kvällen Kvällen innan bilen hittades på tågspåret ska Ambassaden anordnat en fest i sina lokaler. ”Vi på Ambassaden för Demokratiska förbundsrepubliken Etiopien på våning 3 kommer att ha ett event på lördag den 2. Observera att vi kommer ha gäster. Vi hoppas att vi inte stör er, kära grannar. Tack för er förståelse”, skriver de på en lapp som sitter i fastighetens hiss.",
-  "target_text": "En bil från Etiopiens ambassad lämnades övergiven på ett tågspår i centrala Stockholm under helgen, vilket ledde till tillfälligt avstängd tågtrafik. Ambassaden har bett om ursäkt och påbörjat en intern utredning för att ta reda på händelseförloppet. En polisutredning är igång för vårdslöshet i trafik, men det är oklart om någon kan åtalas på grund av diplomatisk immunitet."
-}
-```
-
-When evaluating generative models, we use the following setup (see the
-[methodology](/methodology) for more information on how these are used):
-
-- Number of few-shot examples: 1
-- Prefix prompt:
-  ```
-  Nedan följer artiklar med tillhörande sammanfattningar.
-  ```
-- Base prompt template:
-  ```
-  Artikel: {text}
-  Sammanfattning: {target_text}
-  ```
-- Instruction-tuned prompt template:
-  ```
-  Artikel: {text}
-
-  Skriv en sammanfattning av artikeln ovan.
-  ```
-
-You can evaluate this dataset directly as follows:
-
-```bash
-$ scandeval --model <model-id> --dataset schibsted-sv
 ```

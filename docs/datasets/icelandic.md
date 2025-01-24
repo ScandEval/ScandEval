@@ -21,13 +21,13 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Til hamingju með gott framtak. Þetta eru góðir útgangspunktar með stjórnarskrána, þó margt fleira þurfi að laga svo hún þjóni vel  nýju lýðveldi framtíðarinnar.Ég styð heils hugar þetta framtak ykkar.",
+  "text": "Til hamingju með gott framtak. Þetta eru góðir útgangspunktar með stjórnarskrána, þó margt fleira þurfi að laga svo hún þjóni vel nýju lýðveldi framtíðarinnar.Ég styð heils hugar þetta framtak ykkar.",
   "label": "positive"
 }
 ```
 ```json
 {
-  "text": "Jú, jú, auðvita á hann ekki að vera samstarfsmaður eða einu sinni í sama húsi og sérstakir ríkissaksóknarar í þessu máli. Sérstakir ríkissaksóknarar fyrir þetta mál eiga að liggja liggja beint undir ráðuneytinu og vera algerlega sjálfstæðir, \"untouchables\". Ég hef ekki enn séð nein rök fyrir því að Valtýr þurfi að víkja úr sínu starfi ef þessi leið verður valin? Best væri ef sérstakir ríkissaksóknarar í þessu máli væri þrepinu hærri í valdastiganum en Valtýr, ef það er hægt að koma því í gegn með snöggum lagabreytingum? Varla er þetta Stjórnarskrármál?",
+  "text": "Jú, jú, auðvita á hann ekki að vera samstarfsmaður eða einu sinni í sama húsi og sérstakir ríkissaksóknarar í þessu máli. Sérstakir ríkissaksóknarar fyrir þetta mál eiga að liggja liggja beint undir ráðuneytinu og vera algerlega sjálfstæðir, \"untouchables\". Ég hef ekki enn séð nein rök fyrir því að Valtýr þurfi að víkja úr sínu starfi ef þessi leið verður valin? Best væri ef sérstakir ríkissaksóknarar í þessu máli væri þrepinu hærri í valdastiganum en Valtýr, ef það er hægt að koma því í gegn með snöggum lagabreytingum? Varla er þetta Stjórnarskrármál?",
   "label": "neutral"
 }
 ```
@@ -225,7 +225,7 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Kannski erum við með meiri sölu í öðrum skrokkhlutum en síðum t.d., “ segir Steinþór.",
+  "text": "Kannski erum við með meiri sölu í öðrum skrokkhlutum en síðum t.d., " segir Steinþór.",
   "label": "correct"
 }
 ```
@@ -410,6 +410,41 @@ $ scandeval --model <model-id> --dataset nqii
 ```
 
 
+### Belebele
+
+This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
+
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+
+When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Hér á eftir fylgja textar með tilheyrandi spurningum og svörum.
+  ```
+- Base prompt template:
+  ```
+  Texti: {text}
+  Spurning: {question}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Texti: {text}
+
+  Svaraðu eftirfarandi spurningu um textann hér að ofan.
+
+  Spurning: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset belebele-is
+```
+
+
 ### Unofficial: IcelandicQA
 
 This dataset was published
@@ -430,7 +465,7 @@ Here are a few examples from the training split:
 ```json
 {
   'context': 'Ómar Ragnarsson - Syngur fyrir börnin  er 33 snúninga LP hljómplata gefin út af SG - hljómplötum árið 1981. Á henni syngur Ómar Ragnarsson þrettán barnalög. Platan er safnplata af áður útgefnum "hit" lögum af 45 snúninga plötum.\n\nLagalisti \n Ég er að baka - Lag - texti: E. Shuman/B. Bower - Ómar Ragnarsson\n Bróðir minn - Lag - texti: W. Holt -Ómar Ragnarsson\n Eitthvað út í loftið - Lag - texti: P. McCartney - Ómar Ragnarsson \n Lok, lok og læs - Lag - texti: Brezkt þjóðlag - Ómar Ragnarsson\n Aha, sei-sei, já-já - Lag - texti: Ómar Ragnarsson\n Ligga, ligga lá - Lag - texti: Ómar Ragnarsson \n Hláturinn lengir lífið - Lag - texti: Ortega - Ómar Ragnarsson\n Sumar og sól - Lag - texti: Ómar Ragnarsson\n Jói útherji - Lag - texti: Ástralskt þjóðlag - Ómar Ragnarsson\n Óli drjóli - Lag - texti: Ómar Ragnarsson)\n Minkurinn í hænsnakofanum - Lag - texti: Norskt þjóðlag - Ómar Ragnarsson \n Kennið mér krakkar - Lag - texti: A. Johansen - Ómar Ragnarsson\n Hí á þig - Lag - texti: Amerískt þjóðlag - Ómar Ragnarsson\n\nSG-hljómplötur\nHljómplötur gefnar út árið 1981\nÓmar Ragnarsson',
-  'question': 'Hvaða ár var LP-hljómplatan „Ómar Ragnarsson - Syngur fyrir börnin“ gefin út?',
+  'question': 'Hvaða ár var LP-hljómplatan "Ómar Ragnarsson - Syngur fyrir börnin" gefin út?',
   'answers': {
     'answer_start': 102,
     'text': array(['1981'], dtype=object)
