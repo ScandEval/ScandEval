@@ -3,13 +3,25 @@
 import json
 import os
 import random
-import re
+from logging import getLogger
 
 import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from openai import OpenAI
+from pydantic import BaseModel
 from requests import HTTPError
+
+logger = getLogger(__name__)
+
+
+class CandidateAnswers(BaseModel):
+    """Candidate answers from the OpenAI API."""
+
+    option1: str
+    option2: str
+    option3: str
+
 
 LABELS = ["a", "b", "c", "d"]
 
@@ -115,35 +127,37 @@ def build_dataset_with_llm(dataset: Dataset) -> pd.DataFrame:
 
     texts: list[str] = []
     correct_labels: list[str] = []
+    df_len = len(df)
     for i, row in df.iterrows():
         id_ = str(i)
+
         if id_ not in cache:
+            logger.info(f"Processing id: {id_}/{df_len}")
             messages = [
                 {
                     "role": "user",
-                    "content": f"For the question: {row.question} where the correct answer is: {row.answer}, please provide 3 plausible alternatives in Icelandic. Format your response using XML tags: <option1>first</option1> <option2>second</option2> <option3>third</option3>",
+                    "content": f"For the question: {row.question} where the correct answer is: {row.answer}, please provide 3 plausible alternatives in Icelandic.",
                 }
             ]
 
-            response = client.chat.completions.create(model="gpt-4", messages=messages)
+            completion = client.beta.chat.completions.parse(
+                model="gpt-4o", messages=messages, response_format=CandidateAnswers
+            )
 
             # Store response
-            cache[id_] = response.choices[0].message.content
+            event = completion.choices[0].message.parsed
+            cache[id_] = dict(event)
             with open(cache_file, "w") as f:
                 json.dump(cache, f)
 
-        # Extract options
-        content = cache[id_]
-
-        option1 = _extract_option(option="option1", content=content)
-        option2 = _extract_option(option="option2", content=content)
-        option3 = _extract_option(option="option3", content=content)
+        # Make text value: question + options
+        options = cache[id_]
 
         random.shuffle(LABELS)
         options = {
-            LABELS[0]: option1,
-            LABELS[1]: option2,
-            LABELS[2]: option3,
+            LABELS[0]: options["option1"],
+            LABELS[1]: options["option2"],
+            LABELS[2]: options["option3"],
             LABELS[3]: row.answer,
         }
         assert (
@@ -158,23 +172,6 @@ def build_dataset_with_llm(dataset: Dataset) -> pd.DataFrame:
 
     df_llm = pd.DataFrame({"text": texts, "label": correct_labels})
     return df_llm
-
-
-def _extract_option(option: str, content: str) -> str:
-    """Extract an option from the LLM generated content.
-
-    Args:
-        option:
-            The option to extract.
-        content:
-            The content to extract the option from.
-
-    Returns:
-        The extracted option.
-    """
-    if match := re.search(rf"<{option}>(.*?)</{option}>", content):
-        return match.group(1)
-    raise ValueError(f"Option {option} not found in response: {content}")
 
 
 if __name__ == "__main__":
