@@ -444,6 +444,41 @@ $ scandeval --model <model-id> --dataset norquad
 ```
 
 
+### Belebele
+
+This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
+
+The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+
+When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Her følger tekster med tilhørende spørsmål og svar.
+  ```
+- Base prompt template:
+  ```
+  Tekst: {text}
+  Spørsmål: {question}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Tekst: {text}
+
+  Besvar følgende spørsmål om teksten ovenfor.
+
+  Spørsmål: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset belebele-no
+```
+
+
 ### Unofficial: NorGLM Multi QA
 
 This dataset was released in [this paper](https://doi.org/10.48550/arXiv.2312.01314) and
@@ -517,41 +552,6 @@ You can evaluate this dataset directly as follows:
 
 ```bash
 $ scandeval --model <model-id> --dataset norglm-multi-qa
-```
-
-
-### Belebele
-
-This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
-
-The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
-
-When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
-
-- Number of few-shot examples: 4
-- Prefix prompt:
-  ```
-  Nedenfor følger tekster med tilhørende spørsmål og svar.
-  ```
-- Base prompt template:
-  ```
-  Tekst: {text}
-  Spørsmål: {question}
-  Svar: {label}
-  ```
-- Instruction-tuned prompt template:
-  ```
-  Tekst: {text}
-
-  Besvar følgende spørsmål om teksten ovenfor.
-
-  Spørsmål: {question}
-  ```
-
-You can evaluate this dataset directly as follows:
-
-```bash
-$ scandeval --model <model-id> --dataset belebele-no
 ```
 
 

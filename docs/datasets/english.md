@@ -305,7 +305,7 @@ When evaluating generative models, we use the following setup (see the [methodol
 - Number of few-shot examples: 4
 - Prefix prompt:
   ```
-  Below are texts with their associated questions and answers.
+  The following are texts with accompanying questions and answers.
   ```
 - Base prompt template:
   ```
@@ -317,7 +317,7 @@ When evaluating generative models, we use the following setup (see the [methodol
   ```
   Text: {text}
 
-  Answer the following question about the text above.
+  Answer the following question about the above text.
 
   Question: {question}
   ```

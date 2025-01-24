@@ -421,7 +421,7 @@ When evaluating generative models, we use the following setup (see the [methodol
 - Number of few-shot examples: 4
 - Prefix prompt:
   ```
-  Hér á eftir fylgja textar með tilheyrandi spurningum og svörum.
+  Eftirfarandi eru textar með tilheyrandi spurningum og svörum.
   ```
 - Base prompt template:
   ```
