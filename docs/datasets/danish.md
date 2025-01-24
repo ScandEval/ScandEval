@@ -305,7 +305,7 @@ Here are a few examples from the training split:
 ```
 ```json
 {
-  "context": "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne link\n\n\nWebsted\npbskids.org/catinthehat/",
+  "context": "The Cat in the Hat Knows a Lot About That!\nKatten i hatten ved meget om det!\n\n\n\nKatten i hatten pilot\n\n\n\nGenre\nBørne-tv/undervisning/komedie\n\n\nInstrueret af\nTony Collingwood\n\n\nStemmer fra\nMartin Short\nJacob Ewaniuk\nAlexa Torrington\nRob Tinkler\n\n\nKomponist af temamusik\nDavid Schweitzer\n\n\nKomponist(er)\nDavid Schweitzer\n\n\nOprindelsesland\nCanada\nDet Forenede Kongerige\nUSA\n\n\nOprindelige sprog\nEngelsk\n\n\nAntal sæsoner\n2\n\n\nAntal episoder\n60 (liste over episoder)\n\n\nProduktion\n\n\nLøbetid\n30 minutter\n\n\nProduktionsselskab(er)\nCollingwood O'Hare Productions\nPortfolio Entertainment\nRandom House Children's Entertainment\nTreehouse TV\n\n\nDistributør\nTreehouse TV\n\n\nUdgivelse\n\n\nOprindelige netværk\nTreehouse TV (Canada)\nPBS Kids (USA)\nCITV og Tiny Pop (UK)\n\n\nBilledformat\n480i (SDTV)\n1080i (HDTV)\n\n\nOriginaludgivelse\n7. august 2010 (2010-08-07) - nu\n\n\nEksterne links\n\n\nWebsted\npbskids.org/catinthehat/",
   "question": 'Hvem synger titelmelodien til the cat in the hat?',
   "answers": {
     "answer_start": array([269]),
@@ -354,32 +354,29 @@ $ scandeval --model <model-id> --dataset scandiqa-da
 ```
 
 
-### Belebele
+### Belebele-da
 
 This dataset was published in [this paper](https://aclanthology.org/2024.acl-long.44/) and is a large-scale multilingual reading comprehension dataset covering 122 languages. The questions are generated from Wikipedia articles and are designed to test various aspects of reading comprehension, including factual understanding, inference, and numerical reasoning.
 
-The dataset provides training, validation, and test splits with human-verified question-answer pairs. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
+The original dataset provides test splits with human-verified question-answer pairs. We use a 256 / 64 / test_size split for training, validation and testing, respectively, where test_size is the remaining samples after filtering for length and repetitiveness. The questions are generated to be answerable from the given context and cover diverse topics from Wikipedia articles.
 
 When evaluating generative models, we use the following setup (see the [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: 4
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  Nedenfor følger tekster med tilhørende spørgsmål og svar.
+  Følgende er tekster med tilhørende multiple choice spørgsmål og svar.
   ```
 - Base prompt template:
   ```
-  Tekst: {text}
-  Spørgsmål: {question}
+  {text}
   Svar: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Tekst: {text}
+  {text}
 
-  Besvar følgende spørgsmål om teksten ovenfor.
-
-  Spørgsmål: {question}
+  Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd', og intet andet.
   ```
 
 You can evaluate this dataset directly as follows:
