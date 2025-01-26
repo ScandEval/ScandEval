@@ -467,8 +467,6 @@
       
         
       
-        
-      
     
     
       
@@ -2777,7 +2775,22 @@
 <span class="normal">1960</span>
 <span class="normal">1961</span>
 <span class="normal">1962</span>
-<span class="normal">1963</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All dataset configurations used in ScandEval.&quot;&quot;&quot;</span>
+<span class="normal">1963</span>
+<span class="normal">1964</span>
+<span class="normal">1965</span>
+<span class="normal">1966</span>
+<span class="normal">1967</span>
+<span class="normal">1968</span>
+<span class="normal">1969</span>
+<span class="normal">1970</span>
+<span class="normal">1971</span>
+<span class="normal">1972</span>
+<span class="normal">1973</span>
+<span class="normal">1974</span>
+<span class="normal">1975</span>
+<span class="normal">1976</span>
+<span class="normal">1977</span>
+<span class="normal">1978</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All dataset configurations used in ScandEval.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">DatasetConfig</span>
 <span class="kn">from</span> <span class="nn">.languages</span> <span class="kn">import</span> <span class="n">DA</span><span class="p">,</span> <span class="n">DE</span><span class="p">,</span> <span class="n">EN</span><span class="p">,</span> <span class="n">FO</span><span class="p">,</span> <span class="n">FR</span><span class="p">,</span> <span class="n">IS</span><span class="p">,</span> <span class="n">NB</span><span class="p">,</span> <span class="n">NL</span><span class="p">,</span> <span class="n">NN</span><span class="p">,</span> <span class="n">NO</span><span class="p">,</span> <span class="n">SV</span><span class="p">,</span> <span class="n">get_all_languages</span>
@@ -4084,6 +4097,21 @@
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;schibsted-no&quot;</span><span class="p">,</span>
     <span class="n">pretty_name</span><span class="o">=</span><span class="s2">&quot;the Norwegian summarisation dataset Schibsted-no&quot;</span><span class="p">,</span>
     <span class="n">huggingface_id</span><span class="o">=</span><span class="s2">&quot;ScandEval/schibsted-article-summaries-no&quot;</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">SUMM</span><span class="p">,</span>
+    <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">NB</span><span class="p">,</span> <span class="n">NN</span><span class="p">,</span> <span class="n">NO</span><span class="p">],</span>
+    <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Her følger nyhetsartikler med tilhørende sammendrag.&quot;</span><span class="p">,</span>
+    <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Nyhetsartikkel: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Sammendrag: </span><span class="si">{target_text}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Nyhetsartikkel: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Skriv et sammendrag av den &quot;</span>
+    <span class="s2">&quot;ovennevnte artikkelen.&quot;</span><span class="p">,</span>
+    <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">PERSONAL_SUM_CONFIG</span> <span class="o">=</span> <span class="n">DatasetConfig</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;personal-sum&quot;</span><span class="p">,</span>
+    <span class="n">pretty_name</span><span class="o">=</span><span class="s2">&quot;the Norwegian summarisation dataset personal-sum&quot;</span><span class="p">,</span>
+    <span class="n">huggingface_id</span><span class="o">=</span><span class="s2">&quot;ScandEval/personal-sum&quot;</span><span class="p">,</span>
     <span class="n">task</span><span class="o">=</span><span class="n">SUMM</span><span class="p">,</span>
     <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">NB</span><span class="p">,</span> <span class="n">NN</span><span class="p">,</span> <span class="n">NO</span><span class="p">],</span>
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Her følger nyhetsartikler med tilhørende sammendrag.&quot;</span><span class="p">,</span>
