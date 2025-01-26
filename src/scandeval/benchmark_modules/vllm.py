@@ -377,10 +377,13 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for raw_output in raw_outputs
             ]
             scores = [
-                score_list[token_ids.index(end_of_reasoning_token_id) + 1 :]
-                if end_of_reasoning_token_id in token_ids
+                score_list[
+                    raw_output.outputs[0].token_ids.index(end_of_reasoning_token_id)
+                    + 1 :
+                ]
+                if end_of_reasoning_token_id in raw_output.outputs[0].token_ids
                 else score_list
-                for token_ids, score_list in zip(completion_ids, scores)
+                for raw_output, score_list in zip(raw_outputs, scores)
             ]
             output = GenerativeModelOutput(sequences=completions, scores=scores)
         else:
