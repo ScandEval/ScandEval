@@ -284,11 +284,6 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         if self.dataset_config.task in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
-
-            # Xgrammar, the guided decoding backend, does not yet support a maximal
-            # amount of items in a list, so the `max_length` parameter will be ignored
-            # in practice. However, they're working on implementing this feature, so
-            # we include it here for future compatibility.
             keys_and_their_types: dict[str, t.Any] = {
                 tag_name: (conlist(str, max_length=5), ...)
                 for tag_name in ner_tag_names
