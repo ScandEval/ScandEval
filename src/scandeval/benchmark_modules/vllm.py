@@ -333,6 +333,11 @@ class VLLMModel(HuggingFaceEncoderModel):
             log_once(message="Stripping prompts.", level=logging.DEBUG)
             prompts = [prompt.strip() for prompt in prompts]
 
+        # TEMP: Define end of reasoning token
+        end_of_reasoning_token_id = self._tokenizer.encode(
+            text="</think>", add_special_tokens=False
+        )[0]
+
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
         raw_outputs = self._model.generate(
@@ -341,14 +346,18 @@ class VLLMModel(HuggingFaceEncoderModel):
             use_tqdm=(not input_is_a_test),
             lora_request=self.buffer.get("lora_request"),
         )
-        breakpoint()
+        completion_ids = [output.outputs[0].token_ids for output in raw_outputs]
+        completion_ids = completion_ids[
+            completion_ids.index(end_of_reasoning_token_id) + 1 :
+        ]
         completions = self._tokenizer.batch_decode(
             sequences=[
-                torch.LongTensor(output.outputs[0].token_ids) for output in raw_outputs
+                torch.LongTensor(completion_id) for completion_id in completion_ids
             ],
             skip_special_tokens=True,
         )
         completions = [completion.strip() for completion in completions]
+        breakpoint()
 
         # Add logprobs scores to the output
         if self.buffer["output_scores"]:
