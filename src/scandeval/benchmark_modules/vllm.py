@@ -334,7 +334,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             text="</think>", add_special_tokens=False
         )[0]
         if has_reasoning_token:
-            logger.debug("Detected reasoning token '<think>'.")
+            log_once(message="Detected reasoning token '<think>'.", level=logging.DEBUG)
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
