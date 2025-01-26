@@ -65,7 +65,7 @@ SWEREC_CONFIG = DatasetConfig(
     instruction_prompt="Recension: {text}\n\nKlassificera sentimentet i recensionen. "
     "Svara med 'positiv', 'neutral' eller 'negativ'.",
     num_few_shot_examples=12,
-    max_generated_tokens=5,
+    max_generated_tokens=8_192,  # TEMP
 )
 
 ANGRY_TWEETS_CONFIG = DatasetConfig(
