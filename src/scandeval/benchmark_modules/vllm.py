@@ -346,9 +346,11 @@ class VLLMModel(HuggingFaceEncoderModel):
             use_tqdm=(not input_is_a_test),
             lora_request=self.buffer.get("lora_request"),
         )
-        completion_ids = [output.outputs[0].token_ids for output in raw_outputs]
+        completion_ids: list[list[int]] = [
+            output.outputs[0].token_ids for output in raw_outputs
+        ]
         completion_ids = [
-            token_ids[completion_ids.index(end_of_reasoning_token_id) + 1 :]
+            token_ids[token_ids.index(end_of_reasoning_token_id) + 1 :]
             for token_ids in completion_ids
         ]
         completions = self._tokenizer.batch_decode(
@@ -372,8 +374,8 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for raw_output in raw_outputs
             ]
             scores = [
-                score_list[completion_ids.index(end_of_reasoning_token_id) + 1 :]
-                for score_list in scores
+                score_list[token_ids.index(end_of_reasoning_token_id) + 1 :]
+                for token_ids, score_list in zip(completion_ids, scores)
             ]
             output = GenerativeModelOutput(sequences=completions, scores=scores)
         else:
