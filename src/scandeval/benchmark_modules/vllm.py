@@ -351,7 +351,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         ]
         if end_of_reasoning_token_id in completion_ids[0]:
             completion_ids = [
-                token_ids[token_ids.index(end_of_reasoning_token_id) + 1 :]
+                token_ids[token_ids.index(end_of_reasoning_token_id) + 2 :]
                 if end_of_reasoning_token_id in token_ids
                 else token_ids
                 for token_ids in completion_ids
@@ -379,7 +379,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             scores = [
                 score_list[
                     raw_output.outputs[0].token_ids.index(end_of_reasoning_token_id)
-                    + 1 :
+                    + 2 :
                 ]
                 if end_of_reasoning_token_id in raw_output.outputs[0].token_ids
                 else score_list
