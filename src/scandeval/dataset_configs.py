@@ -1333,6 +1333,21 @@ SCHIBSTED_NO_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+PERSONAL_SUM_CONFIG = DatasetConfig(
+    name="personal-sum",
+    pretty_name="the Norwegian summarisation dataset personal-sum",
+    huggingface_id="ScandEval/personal-sum",
+    task=SUMM,
+    languages=[NB, NN, NO],
+    prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
+    prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
+    instruction_prompt="Nyhetsartikkel: {text}\n\nSkriv et sammendrag av den "
+    "ovennevnte artikkelen.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+    unofficial=True,
+)
+
 ORANGE_SUM_CONFIG = DatasetConfig(
     name="orange-sum",
     pretty_name="the truncated version of the French summarisation dataset "
