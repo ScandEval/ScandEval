@@ -37,8 +37,7 @@ markdown_extensions:
 plugins:
   - include-markdown
   - search
-  - include_dir_to_nav:
-      file_name_as_title: true
+  - include_dir_to_nav
   - mkapi
 nav:
   - About: README.md
