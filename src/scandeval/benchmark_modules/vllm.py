@@ -306,7 +306,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
             logprobs=MAX_LOGPROBS if self.buffer["output_scores"] else None,
-            temperature=0.6,  # TEMP: previously 0.0
+            temperature=0.0,
             stop=[stop_token for stop_token in stop_tokens if stop_token],
             guided_decoding=guided_decoding,
         )
