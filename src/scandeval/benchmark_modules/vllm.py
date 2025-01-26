@@ -329,9 +329,12 @@ class VLLMModel(HuggingFaceEncoderModel):
             prompts = [prompt.strip() for prompt in prompts]
 
         # TEMP: Define end of reasoning token
+        has_reasoning_token = "</think>" in self._tokenizer.get_vocab()
         end_of_reasoning_token_id = self._tokenizer.encode(
             text="</think>", add_special_tokens=False
         )[0]
+        if has_reasoning_token:
+            logger.debug("Detected reasoning token '<think>'.")
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
@@ -347,7 +350,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         if end_of_reasoning_token_id in completion_ids[0]:
             completion_ids = [
                 token_ids[token_ids.index(end_of_reasoning_token_id) + 2 :]
-                if end_of_reasoning_token_id in token_ids
+                if has_reasoning_token and end_of_reasoning_token_id in token_ids
                 else token_ids
                 for token_ids in completion_ids
             ]
@@ -376,7 +379,8 @@ class VLLMModel(HuggingFaceEncoderModel):
                     raw_output.outputs[0].token_ids.index(end_of_reasoning_token_id)
                     + 2 :
                 ]
-                if end_of_reasoning_token_id in raw_output.outputs[0].token_ids
+                if has_reasoning_token
+                and end_of_reasoning_token_id in raw_output.outputs[0].token_ids
                 else score_list
                 for raw_output, score_list in zip(raw_outputs, scores)
             ]
