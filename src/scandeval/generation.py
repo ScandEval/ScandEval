@@ -168,7 +168,6 @@ def generate_single_iteration(
             extracted_labels = model.extract_labels_from_generation(
                 input_batch=batch, model_output=model_output
             )
-            breakpoint()
 
             # Extended logging if we are running in debug mode
             if benchmark_config.debug:
