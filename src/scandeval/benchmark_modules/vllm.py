@@ -389,7 +389,6 @@ class VLLMModel(HuggingFaceEncoderModel):
         else:
             output = GenerativeModelOutput(sequences=completions)
 
-        breakpoint()
         return output
 
     @classmethod
