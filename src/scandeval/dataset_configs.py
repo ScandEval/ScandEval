@@ -65,7 +65,7 @@ SWEREC_CONFIG = DatasetConfig(
     instruction_prompt="Recension: {text}\n\nKlassificera sentimentet i recensionen. "
     "Svara med 'positiv', 'neutral' eller 'negativ'.",
     num_few_shot_examples=12,
-    max_generated_tokens=8_192,  # TEMP
+    max_generated_tokens=5,
 )
 
 ANGRY_TWEETS_CONFIG = DatasetConfig(
@@ -204,7 +204,7 @@ SST5_CONFIG = DatasetConfig(
     instruction_prompt="Text: {text}\n\nClassify the sentiment in the text. Answer "
     "with 'positive', 'neutral' or 'negative'.",
     num_few_shot_examples=12,
-    max_generated_tokens=5,
+    max_generated_tokens=8_192,  # TEMP: previously 5
 )
 
 FOSENT_CONFIG = DatasetConfig(
@@ -594,7 +594,7 @@ CONLL_EN_CONFIG = DatasetConfig(
     "'person', 'location', 'organization' and 'miscellaneous'. The values should be "
     "lists of the named entities of that type, exactly as they appear in the sentence.",
     num_few_shot_examples=8,
-    max_generated_tokens=128,
+    max_generated_tokens=8_192,  # TEMP: previously 128
 )
 
 ELTEC_CONFIG = DatasetConfig(
@@ -782,23 +782,6 @@ SCALA_NN_CONFIG = DatasetConfig(
     "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
-)
-
-JENTOFT_CONFIG = DatasetConfig(
-    name="jentoft",
-    pretty_name="the Jentoft linguistic acceptability dataset",
-    huggingface_id="ScandEval/jentoft-mini",
-    task=LA,
-    languages=[NN, NB, NO],
-    labels=["incorrect", "correct"],
-    prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
-    prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
-    prompt_label_mapping=dict(correct="ja", incorrect="nei"),
-    instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
-    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
-    num_few_shot_examples=12,
-    max_generated_tokens=5,
-    unofficial=True,
 )
 
 SCALA_IS_CONFIG = DatasetConfig(
