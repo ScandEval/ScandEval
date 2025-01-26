@@ -347,8 +347,9 @@ class VLLMModel(HuggingFaceEncoderModel):
             lora_request=self.buffer.get("lora_request"),
         )
         completion_ids = [output.outputs[0].token_ids for output in raw_outputs]
-        completion_ids = completion_ids[
-            completion_ids.index(end_of_reasoning_token_id) + 1 :
+        completion_ids = [
+            token_ids[completion_ids.index(end_of_reasoning_token_id) + 1 :]
+            for token_ids in completion_ids
         ]
         completions = self._tokenizer.batch_decode(
             sequences=[
@@ -357,7 +358,6 @@ class VLLMModel(HuggingFaceEncoderModel):
             skip_special_tokens=True,
         )
         completions = [completion.strip() for completion in completions]
-        breakpoint()
 
         # Add logprobs scores to the output
         if self.buffer["output_scores"]:
@@ -371,10 +371,15 @@ class VLLMModel(HuggingFaceEncoderModel):
                 ]
                 for raw_output in raw_outputs
             ]
+            scores = [
+                score_list[completion_ids.index(end_of_reasoning_token_id) + 1 :]
+                for score_list in scores
+            ]
             output = GenerativeModelOutput(sequences=completions, scores=scores)
         else:
             output = GenerativeModelOutput(sequences=completions)
 
+        breakpoint()
         return output
 
     @classmethod
