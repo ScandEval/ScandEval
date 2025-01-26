@@ -202,7 +202,7 @@ SST5_CONFIG = DatasetConfig(
         positive="positive", neutral="neutral", negative="negative"
     ),
     instruction_prompt="Text: {text}\n\nClassify the sentiment in the text. Answer "
-    "with 'positive', 'neutral' or 'negative'.",
+    "with 'positive', 'neutral' or 'negative', and nothing else.",
     num_few_shot_examples=12,
     max_generated_tokens=8_192,  # TEMP: previously 5
 )
