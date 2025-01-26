@@ -8,10 +8,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Added the summarization dataset
+- Added the summarisation dataset
   [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into
   121 / 64 / 256 samples for train / validation / test, respectively, and is set to
-  `unofficial` for now.
+  `unofficial` for now. This was contributed by
+  [@oliverkinch](https://github.com/oliverkinch) ✨
+- Added the Jentoft dataset - a linguistic acceptability dataset which was published in
+  [this Master's thesis](https://www.duo.uio.no/handle/10852/103885) by Matias Jentoft.
+  The original dataset consists of 85,771 / 10,827 / 10487 samples for training,
+  validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for
+  training, validation and test, respectively. In each split, the distribution of
+  `correct` and `incorrect` is 50/50. This dataset has been set to `unofficial` for now.
+  This was contributed by [@oliverkinch](https://github.com/oliverkinch) ✨
 
 ### Fixed
 - Only use double newlines as stop tokens for base decoder models, and not instruction
