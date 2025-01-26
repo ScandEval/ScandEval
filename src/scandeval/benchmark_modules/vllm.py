@@ -349,10 +349,13 @@ class VLLMModel(HuggingFaceEncoderModel):
         completion_ids: list[list[int]] = [
             output.outputs[0].token_ids for output in raw_outputs
         ]
-        completion_ids = [
-            token_ids[token_ids.index(end_of_reasoning_token_id) + 1 :]
-            for token_ids in completion_ids
-        ]
+        if end_of_reasoning_token_id in completion_ids[0]:
+            completion_ids = [
+                token_ids[token_ids.index(end_of_reasoning_token_id) + 1 :]
+                if end_of_reasoning_token_id in token_ids
+                else token_ids
+                for token_ids in completion_ids
+            ]
         completions = self._tokenizer.batch_decode(
             sequences=[
                 torch.LongTensor(completion_id) for completion_id in completion_ids
@@ -375,6 +378,8 @@ class VLLMModel(HuggingFaceEncoderModel):
             ]
             scores = [
                 score_list[token_ids.index(end_of_reasoning_token_id) + 1 :]
+                if end_of_reasoning_token_id in token_ids
+                else score_list
                 for token_ids, score_list in zip(completion_ids, scores)
             ]
             output = GenerativeModelOutput(sequences=completions, scores=scores)
