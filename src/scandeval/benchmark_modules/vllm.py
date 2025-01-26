@@ -282,7 +282,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             if end_of_chat_token:
                 stop_tokens.append(end_of_chat_token)
 
-        if self.dataset_config.task.name in TASKS_USING_JSON:
+        if self.dataset_config.task in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
 
             # Xgrammar, the guided decoding backend, does not yet support a maximal

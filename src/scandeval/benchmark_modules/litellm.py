@@ -144,7 +144,7 @@ class LiteLLMModel(BenchmarkModule):
             generation_kwargs["logprobs"] = True
             generation_kwargs["top_logprobs"] = MAX_LOGPROBS
 
-        if self.dataset_config.task.name in TASKS_USING_JSON:
+        if self.dataset_config.task in TASKS_USING_JSON:
             assert (
                 "json" in messages[0]["content"].lower()
             ), "Prompt must contain 'json' for JSON tasks."

@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Only use double newlines as stop tokens for base decoder models, and not instruction
   tuned models, as we only use the double newlines to separate the few-shot examples in
   the base case.
+- A bug caused structured generation to not be used for generative models on named
+  entity recognition tasks. This affects models evaluated from v14.2.0.
 
 
 ## [v14.4.0] - 2025-01-22
