@@ -341,6 +341,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             use_tqdm=(not input_is_a_test),
             lora_request=self.buffer.get("lora_request"),
         )
+        breakpoint()
         completions = self._tokenizer.batch_decode(
             sequences=[
                 torch.LongTensor(output.outputs[0].token_ids) for output in raw_outputs
