@@ -8,7 +8,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Added the summarization dataset [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into 121 / 64 / 256 samples for train / validation / test, respectively, and is set to `unofficial` for now.
+- Added the summarization dataset
+  [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into
+  121 / 64 / 256 samples for train / validation / test, respectively, and is set to
+  `unofficial` for now.
+
+### Fixed
+- Only use double newlines as stop tokens for base decoder models, and not instruction
+  tuned models, as we only use the double newlines to separate the few-shot examples in
+  the base case.
 
 
 ## [v14.4.0] - 2025-01-22

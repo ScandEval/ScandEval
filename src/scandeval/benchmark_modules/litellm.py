@@ -132,7 +132,7 @@ class LiteLLMModel(BenchmarkModule):
         generation_kwargs: dict[str, t.Any] = dict(
             model=self.model_config.model_id,
             max_tokens=self.dataset_config.max_generated_tokens,
-            stop=["\n\n"],
+            stop=[],
             temperature=0.0,
             seed=4242,
             api_key=self.benchmark_config.api_key,

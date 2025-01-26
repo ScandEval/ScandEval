@@ -231,9 +231,12 @@ class VLLMModel(HuggingFaceEncoderModel):
             The generated model outputs.
         """
         # Define which tokens to use as stopping criteria. We want to use the padding
-        # token, end-of-sentence token, and a double newline (since these separate the
-        # few-shot examples in the input)
-        stop_tokens: list[str] = ["\n\n"]
+        # token, end-of-sentence token, and a double newline if the model isn't
+        # instruction tuned (since these separate the few-shot examples in the input in
+        # this case)
+        stop_tokens: list[str] = list()
+        if self.buffer["instruction_model"] is False:
+            stop_tokens.append("\n\n")
         if self._tokenizer.pad_token_id is not None:
             stop_tokens.append(self._tokenizer.pad_token)
         if self._tokenizer.eos_token_id is not None:
