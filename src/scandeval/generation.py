@@ -156,6 +156,7 @@ def generate_single_iteration(
                 batch = {key: [value] for key, value in batch.items()}
 
             model_output = model.generate(inputs=batch)
+            breakpoint()
 
             # Remove reasoning steps from output, if relevant
             model_output.sequences = [
@@ -168,6 +169,7 @@ def generate_single_iteration(
             extracted_labels = model.extract_labels_from_generation(
                 input_batch=batch, model_output=model_output
             )
+            breakpoint()
 
             # Extended logging if we are running in debug mode
             if benchmark_config.debug:
