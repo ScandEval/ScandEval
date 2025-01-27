@@ -23,7 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the dataset icelandic-knowledge, which is derived from the IcelandicQA dataset,
   reformatted as a knowledge dataset with GPT-4o generated candidate answers. The split
   is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as
-  `unofficial` for now.
+  `unofficial` for now. This was contributed by
+  [@oliverkinch](https://github.com/oliverkinch) ✨
 
 ### Fixed
 - Only use double newlines as stop tokens for base decoder models, and not instruction
