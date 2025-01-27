@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   training, validation and test, respectively. In each split, the distribution of
   `correct` and `incorrect` is 50/50. This dataset has been set to `unofficial` for now.
   This was contributed by [@oliverkinch](https://github.com/oliverkinch) ✨
+- Added the dataset icelandic-knowledge, which is derived from the IcelandicQA dataset,
+  reformatted as a knowledge dataset with GPT-4o generated candidate answers. The split
+  is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as
+  `unofficial` for now.
 
 ### Fixed
 - Only use double newlines as stop tokens for base decoder models, and not instruction
