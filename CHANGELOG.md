@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Added the dataset icelandic-knowledge, which is derived from the IcelandicQA dataset, reformatted as a knowledge dataset with GPT-4 generated candidate answers. The split is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as `unofficial` for now.
+- Added the dataset icelandic-knowledge, which is derived from the IcelandicQA dataset, reformatted as a knowledge dataset with GPT-4o generated candidate answers. The split is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as `unofficial` for now.
 
 ## [v14.4.0] - 2025-01-22
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
