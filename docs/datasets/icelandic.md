@@ -672,24 +672,31 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: 4
+- Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  Eftirfarandi eru textar með tilheyrandi spurningum og svörum.
+  Eftirfarandi eru fjölvalsspurningar (með svörum).
   ```
 - Base prompt template:
   ```
-  Texti: {text}
-  Spurning: {question}
-  Svaraðu með að hámarki 3 orðum: {label}
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svara: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Texti: {text}
+  Spurningar: {text}
+  Svarmöguleikar:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
 
-  Svaraðu eftirfarandi spurningu um textann að hámarki í 3 orðum.
-
-  Spurning: {question}
+  Svaraðu eftirfarandi spurningum með 'a', 'b', 'c' eða 'd', og engu öðru.
   ```
 
 You can evaluate this dataset directly as follows:
