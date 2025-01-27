@@ -1453,6 +1453,23 @@ MMLU_IS_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+ICELANDIC_KNOWLEDGE_CONFIG = DatasetConfig(
+    name="icelandic-knowledge",
+    pretty_name="the IcelandicQA dataset phrased as a knowledge dataset",
+    huggingface_id="ScandEval/icelandic-knowledge",
+    task=KNOW,
+    languages=[IS],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
+    prompt_template="Spurningar: {text}\nSvara: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
+    "'b', 'c' eða 'd'.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+    unofficial=True,
+)
+
 MMLU_DE_CONFIG = DatasetConfig(
     name="mmlu-de",
     pretty_name="the truncated version of the German knowledge dataset MMLU-de, "
