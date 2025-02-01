@@ -202,9 +202,9 @@ SST5_CONFIG = DatasetConfig(
         positive="positive", neutral="neutral", negative="negative"
     ),
     instruction_prompt="Text: {text}\n\nClassify the sentiment in the text. Answer "
-    "with 'positive', 'neutral' or 'negative', and nothing else.",  # TEMP: previously without the "and nothing else."
+    "with 'positive', 'neutral' or 'negative'.",  # TEMP: previously without the "and nothing else."
     num_few_shot_examples=12,
-    max_generated_tokens=8_192,  # TEMP: previously 5
+    max_generated_tokens=5,
 )
 
 FOSENT_CONFIG = DatasetConfig(
@@ -594,7 +594,7 @@ CONLL_EN_CONFIG = DatasetConfig(
     "'person', 'location', 'organization' and 'miscellaneous'. The values should be "
     "lists of the named entities of that type, exactly as they appear in the sentence.",
     num_few_shot_examples=8,
-    max_generated_tokens=8_192,  # TEMP: previously 128
+    max_generated_tokens=128,
 )
 
 ELTEC_CONFIG = DatasetConfig(
