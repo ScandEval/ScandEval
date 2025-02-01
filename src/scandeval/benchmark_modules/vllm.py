@@ -301,7 +301,11 @@ class VLLMModel(HuggingFaceEncoderModel):
             guided_decoding = None
 
         # Define the parameters used for vLLM generation
-        max_tokens: int = self.dataset_config.max_generated_tokens
+        max_tokens: int = (
+            self.dataset_config.max_generated_tokens
+            if self.end_of_reasoning_token_id is None
+            else 8_192
+        )
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
             logprobs=MAX_LOGPROBS if self.buffer["output_scores"] else None,
