@@ -1082,9 +1082,14 @@ def get_end_of_reasoning_token(
     Returns:
         The end of reasoning token, or None if it could not be found.
     """
-    prompt = tokenizer.apply_chat_template(
-        conversation=[dict(role="user", content="What is your name?")], tokenize=False
-    )
+    if tokenizer.chat_template is None:
+        prompt = "What is your name?"
+    else:
+        prompt = tokenizer.apply_chat_template(
+            conversation=[dict(role="user", content="What is your name?")],
+            add_generation_prompt=True,
+            tokenize=False,
+        )
     completion = (
         model.generate(
             prompts=[prompt],
