@@ -1082,9 +1082,6 @@ def get_end_of_reasoning_token(
     Returns:
         The end of reasoning token, or None if it could not be found.
     """
-    if not model._is_generative:
-        return None
-
     completion_ids = (
         model.generate(
             prompts=["What is your name?"],
