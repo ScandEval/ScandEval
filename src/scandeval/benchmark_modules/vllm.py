@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import random
+import re
 import sys
 import typing as t
 from functools import partial
@@ -1090,15 +1091,43 @@ def get_end_of_reasoning_token(
             add_generation_prompt=True,
             tokenize=False,
         )
+
+    # Generate a completion and remove the BOS token from it, to not confuse it with the
+    # potential reasoning token
     completion = (
         model.generate(
             prompts=[prompt],
-            sampling_params=SamplingParams(max_tokens=5, temperature=0.6),
+            sampling_params=SamplingParams(max_tokens=3, temperature=0.0),
             use_tqdm=False,
         )[0]
         .outputs[0]
         .text
     )
-    logger.debug(f"Detected completion: {completion!r}.")
-    breakpoint()
-    return None
+    completion = completion.replace(tokenizer.bos_token, "").strip()
+
+    # If it doesn't contain a reasoning token, we can't find the end of reasoning token
+    match = re.search(pattern=r"<\w+>", string=completion)
+    if match is None:
+        return None
+
+    # Check that the found reasoning token and its associated end-of-reasoning tokens
+    # are both special tokens
+    reasoning_token = match.group()
+    end_of_reasoning_token = f"</{reasoning_token[1:-1]}>"
+    special_tokens = [
+        decoder_token.content
+        for decoder_token in tokenizer.added_tokens_decoder.values()
+    ]
+    special_tokens.extend(
+        [encoder_token for encoder_token in tokenizer.added_tokens_encoder.keys()]
+    )
+    special_tokens.extend(tokenizer.all_special_tokens)
+    if (
+        reasoning_token not in special_tokens
+        or end_of_reasoning_token not in special_tokens
+    ):
+        return None
+
+    logger.debug(f"Detected reasoning token {reasoning_token!r}.")
+
+    return end_of_reasoning_token
