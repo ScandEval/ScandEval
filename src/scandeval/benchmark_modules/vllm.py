@@ -115,6 +115,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         )
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
+        self.end_of_reasoning_token_id = get_end_of_reasoning_token_id(
+            model=self._model, tokenizer=self._tokenizer
+        )
 
         # We specify `HuggingFaceEncoderModel` here instead of `VLLMModel`, as we want
         # to call the `__init__` method of the `BenchmarkModule` class.
@@ -329,21 +332,6 @@ class VLLMModel(HuggingFaceEncoderModel):
             log_once(message="Stripping prompts.", level=logging.DEBUG)
             prompts = [prompt.strip() for prompt in prompts]
 
-        # TEMP: Define end of reasoning token
-        end_of_reasoning_token = get_end_of_reasoning_token(
-            model=self._model, tokenizer=self._tokenizer
-        )
-        end_of_reasoning_token_id: int | None = None
-        has_reasoning_token = end_of_reasoning_token is not None
-        if has_reasoning_token:
-            end_of_reasoning_token_id = self._tokenizer.encode(
-                text=end_of_reasoning_token, add_special_tokens=False
-            )[0]
-            log_once(
-                message=f"Detected reasoning token {end_of_reasoning_token!r}.",
-                level=logging.DEBUG,
-            )
-
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
         raw_outputs = self._model.generate(
@@ -355,10 +343,10 @@ class VLLMModel(HuggingFaceEncoderModel):
         completion_ids: list[list[int]] = [
             output.outputs[0].token_ids for output in raw_outputs
         ]
-        if has_reasoning_token and end_of_reasoning_token_id in completion_ids[0]:
+        if self.end_of_reasoning_token_id in completion_ids[0]:
             completion_ids = [
-                token_ids[token_ids.index(end_of_reasoning_token_id) + 2 :]
-                if has_reasoning_token and end_of_reasoning_token_id in token_ids
+                token_ids[token_ids.index(self.end_of_reasoning_token_id) + 2 :]
+                if self.end_of_reasoning_token_id in token_ids
                 else token_ids
                 for token_ids in completion_ids
             ]
@@ -384,11 +372,12 @@ class VLLMModel(HuggingFaceEncoderModel):
             ]
             scores = [
                 score_list[
-                    raw_output.outputs[0].token_ids.index(end_of_reasoning_token_id)
+                    raw_output.outputs[0].token_ids.index(
+                        self.end_of_reasoning_token_id
+                    )
                     + 2 :
                 ]
-                if has_reasoning_token
-                and end_of_reasoning_token_id in raw_output.outputs[0].token_ids
+                if self.end_of_reasoning_token_id in raw_output.outputs[0].token_ids
                 else score_list
                 for raw_output, score_list in zip(raw_outputs, scores)
             ]
@@ -1066,10 +1055,10 @@ def clear_vllm() -> None:
         ray.shutdown()
 
 
-def get_end_of_reasoning_token(
+def get_end_of_reasoning_token_id(
     model: "LLM", tokenizer: "PreTrainedTokenizer"
-) -> str | None:
-    """Get the end of reasoning token for a generative model.
+) -> int | None:
+    """Get the end of reasoning token ID for a generative model.
 
     This assumes that the reasoning token is of the form <X> and that the end of
     reasoning token is </X> (for X being any string without spaces).
@@ -1081,7 +1070,7 @@ def get_end_of_reasoning_token(
             The tokenizer.
 
     Returns:
-        The end of reasoning token, or None if it could not be found.
+        The end of reasoning token ID, or None if it could not be found.
     """
     if tokenizer.chat_template is None:
         prompt = "What is your name?"
@@ -1128,6 +1117,13 @@ def get_end_of_reasoning_token(
     ):
         return None
 
-    logger.debug(f"Detected reasoning token {reasoning_token!r}.")
+    log_once(
+        message=f"Detected reasoning token {reasoning_token!r}.", level=logging.DEBUG
+    )
 
-    return end_of_reasoning_token
+    # Encode the end of reasoning token and return its ID
+    end_of_reasoning_token_id = tokenizer.encode(
+        text=end_of_reasoning_token, add_special_tokens=False
+    )[0]
+
+    return end_of_reasoning_token_id
