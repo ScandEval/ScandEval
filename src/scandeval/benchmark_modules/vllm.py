@@ -329,12 +329,19 @@ class VLLMModel(HuggingFaceEncoderModel):
             prompts = [prompt.strip() for prompt in prompts]
 
         # TEMP: Define end of reasoning token
-        has_reasoning_token = "</think>" in self._tokenizer.get_vocab()
-        end_of_reasoning_token_id = self._tokenizer.encode(
-            text="</think>", add_special_tokens=False
-        )[0]
+        end_of_reasoning_token = get_end_of_reasoning_token(
+            model=self._model, tokenizer=self._tokenizer
+        )
+        end_of_reasoning_token_id: int | None = None
+        has_reasoning_token = end_of_reasoning_token is not None
         if has_reasoning_token:
-            log_once(message="Detected reasoning token '<think>'.", level=logging.DEBUG)
+            end_of_reasoning_token_id = self._tokenizer.encode(
+                text=end_of_reasoning_token, add_special_tokens=False
+            )[0]
+            log_once(
+                message=f"Detected reasoning token {end_of_reasoning_token!r}.",
+                level=logging.DEBUG,
+            )
 
         # Generate sequences using vLLM
         input_is_a_test = len(prompts) == 1 and len(set(prompts[0])) == 1
@@ -347,7 +354,7 @@ class VLLMModel(HuggingFaceEncoderModel):
         completion_ids: list[list[int]] = [
             output.outputs[0].token_ids for output in raw_outputs
         ]
-        if end_of_reasoning_token_id in completion_ids[0]:
+        if has_reasoning_token and end_of_reasoning_token_id in completion_ids[0]:
             completion_ids = [
                 token_ids[token_ids.index(end_of_reasoning_token_id) + 2 :]
                 if has_reasoning_token and end_of_reasoning_token_id in token_ids
@@ -1056,3 +1063,38 @@ def clear_vllm() -> None:
     clear_memory()
     if ray.is_initialized():
         ray.shutdown()
+
+
+def get_end_of_reasoning_token(
+    model: "LLM", tokenizer: "PreTrainedTokenizer"
+) -> str | None:
+    """Get the end of reasoning token for a generative model.
+
+    This assumes that the reasoning token is of the form <X> and that the end of
+    reasoning token is </X> (for X being any string without spaces).
+
+    Args:
+        model:
+            The vLLM model.
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The end of reasoning token, or None if it could not be found.
+    """
+    if not model._is_generative:
+        return None
+
+    completion_ids = (
+        model.generate(
+            prompts=["What is your name?"],
+            sampling_params=SamplingParams(max_tokens=5, temperature=0.0),
+            use_tqdm=False,
+        )[0]
+        .outputs[0]
+        .token_ids
+    )
+    completion = tokenizer.decode(token_ids=completion_ids).strip()
+    logger.debug(f"Detected completion: {completion!r}.")
+    breakpoint()
+    return None
