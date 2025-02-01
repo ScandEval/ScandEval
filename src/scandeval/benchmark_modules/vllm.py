@@ -329,6 +329,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             prompts = [prompt.strip() for prompt in prompts]
 
         # TEMP: Define end of reasoning token
+        breakpoint()
         end_of_reasoning_token = get_end_of_reasoning_token(
             model=self._model, tokenizer=self._tokenizer
         )
@@ -1082,16 +1083,15 @@ def get_end_of_reasoning_token(
     Returns:
         The end of reasoning token, or None if it could not be found.
     """
-    completion_ids = (
+    completion = (
         model.generate(
             prompts=["What is your name?"],
-            sampling_params=SamplingParams(max_tokens=5, temperature=0.0),
+            sampling_params=SamplingParams(max_tokens=5, temperature=0.6),
             use_tqdm=False,
         )[0]
         .outputs[0]
-        .token_ids
+        .text
     )
-    completion = tokenizer.decode(token_ids=completion_ids).strip()
     logger.debug(f"Detected completion: {completion!r}.")
     breakpoint()
     return None
