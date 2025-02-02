@@ -7,6 +7,9 @@ from .tasks import COMMON_SENSE, KNOW, MCRC, NER
 DUMMY_FILL_VALUE = 100
 
 
+REASONING_MAX_TOKENS = 8_192
+
+
 GENERATIVE_MODEL_TASKS = ["text-generation", "text2text-generation"]
 
 

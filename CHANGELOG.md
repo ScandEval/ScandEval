@@ -8,9 +8,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Added the dataset icelandic-knowledge, which is derived from the IcelandicQA dataset, reformatted as a knowledge dataset with GPT-4o generated candidate answers. The split is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as `unofficial` for now.
-- Added the Jentoft dataset - a linguistic acceptability dataset which was published in [this Master's thesis](https://www.duo.uio.no/handle/10852/103885) by Matias Jentoft. The original dataset consists of 85,771 / 10,827 / 10487 samples for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training, validation and test, respectively. In each split, the distribution of `correct` and `incorrect` is 50/50.
-- Added the summarization dataset [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into 121 / 64 / 256 samples for train / validation / test, respectively, and is set to `unofficial` for now.
+- Added the dataset icelandic-knowledge, which is derived from the IcelandicQA
+  dataset, reformatted as a knowledge dataset with GPT-4o generated candidate answers.
+  The split is given by 845 / 128 / 1024 for train, val, and test, respectively.
+  It is marked as `unofficial` for now.
+- Added the Jentoft dataset - a linguistic acceptability dataset which was
+  published in [this Master's thesis](https://www.duo.uio.no/handle/10852/103885) by
+  Matias Jentoft. The original dataset consists of 85,771 / 10,827 / 10487 samples
+  for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048
+  samples for training, validation and test, respectively. In each split, the
+  distribution of `correct` and `incorrect` is 50/50.
+- Added the summarization dataset
+  [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into
+  121 / 64 / 256 samples for train / validation / test, respectively, and is set to
+  `unofficial` for now.
+- Added `generative_type` to the output dictionaries, which can currently be either
+  'base' or 'instruction-tuned'. This is now used in the leaderboards.
+
+### Removed
+- Removed support for JAX/Flax models to simplify the code, as they are incredibly rare,
+  and they usually have a PyTorch/Safetensors version available.
+
+### Fixed
+- Fixed an issue where some API models did not allow `logprobs`, `top_logprobs`,
+  `max_tokens` and/or `temperature`.
 
 
 ## [v14.4.0] - 2025-01-22
