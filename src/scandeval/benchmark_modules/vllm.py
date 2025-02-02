@@ -25,6 +25,7 @@ from urllib3.exceptions import RequestError
 from ..constants import (
     GENERATIVE_MODEL_TASKS,
     MAX_LOGPROBS,
+    REASONING_MAX_TOKENS,
     TASK_GROUPS_USING_LOGPROBS,
     TASKS_USING_JSON,
 )
@@ -319,7 +320,11 @@ class VLLMModel(HuggingFaceEncoderModel):
             guided_decoding = None
 
         # Define the parameters used for vLLM generation
-        max_tokens: int = self.dataset_config.max_generated_tokens
+        max_tokens: int = (
+            REASONING_MAX_TOKENS
+            if self.generative_type == GenerativeType.REASONING
+            else self.dataset_config.max_generated_tokens
+        )
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
             logprobs=MAX_LOGPROBS if self.buffer["output_scores"] else None,

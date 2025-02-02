@@ -30,7 +30,12 @@ from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
 from transformers import Trainer
 
-from ..constants import MAX_LOGPROBS, TASK_GROUPS_USING_LOGPROBS, TASKS_USING_JSON
+from ..constants import (
+    MAX_LOGPROBS,
+    REASONING_MAX_TOKENS,
+    TASK_GROUPS_USING_LOGPROBS,
+    TASKS_USING_JSON,
+)
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
 from ..enums import (
     BatchingPreference,
@@ -146,7 +151,11 @@ class LiteLLMModel(BenchmarkModule):
 
         generation_kwargs: dict[str, t.Any] = dict(
             model=self.model_config.model_id,
-            max_tokens=8192,  # self.dataset_config.max_generated_tokens,
+            max_completion_tokens=(
+                REASONING_MAX_TOKENS
+                if self.generative_type == GenerativeType.REASONING
+                else self.dataset_config.max_generated_tokens
+            ),
             stop=["\n\n"],
             temperature=0.0,
             seed=4242,
@@ -178,11 +187,19 @@ class LiteLLMModel(BenchmarkModule):
                 )
                 break
             except BadRequestError as e:
-                if "stop_sequences" not in str(e).lower():
+                if "stop_sequences" in str(e).lower():
+                    generation_kwargs["stop"] = None
+                elif "you are not allowed to request logprobs" in str(e).lower():
+                    generation_kwargs.pop("logprobs")
+                    generation_kwargs.pop("top_logprobs")
+                elif (
+                    "'temperature' is not supported with this model." in str(e).lower()
+                ):
+                    generation_kwargs.pop("temperature")
+                else:
                     raise InvalidBenchmark(
                         f"Failed to generate text. The error message was: {e}"
                     )
-                generation_kwargs["stop"] = None
             except (
                 Timeout,
                 ServiceUnavailableError,

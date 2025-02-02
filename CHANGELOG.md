@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed support for JAX/Flax models to simplify the code, as they are incredibly rare,
   and they usually have a PyTorch/Safetensors version available.
 
+### Fixed
+- Fixed an issue where some API models did not allow `logprobs`, `top_logprobs`,
+  `max_tokens` and/or `temperature`.
+
 
 ## [v14.4.0] - 2025-01-22
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
