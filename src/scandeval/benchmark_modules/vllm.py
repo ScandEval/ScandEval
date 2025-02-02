@@ -35,7 +35,7 @@ from ..data_models import (
     ModelConfig,
     Task,
 )
-from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
+from ..enums import BatchingPreference, InferenceBackend, ModelType, TaskGroup
 from ..exceptions import (
     InvalidBenchmark,
     InvalidModel,
@@ -80,7 +80,7 @@ logger = logging.getLogger("scandeval")
 class VLLMModel(HuggingFaceEncoderModel):
     """A generative model using the vLLM inference framework."""
 
-    _is_generative = True
+    fresh_model = False
     batching_preference = BatchingPreference.ALL_AT_ONCE
     high_priority = True
 
@@ -421,30 +421,21 @@ class VLLMModel(HuggingFaceEncoderModel):
         if model_info is None:
             raise InvalidModel(f"The model {model_id!r} could not be found.")
 
-        framework = Framework.PYTORCH
-        if "pytorch" in model_info.tags:
-            pass
-        elif "jax" in model_info.tags:
-            framework = Framework.JAX
-        elif "spacy" in model_info.tags:
-            raise InvalidModel("SpaCy models are not supported.")
-        elif any(tag in model_info.tags for tag in {"tf", "tensorflow", "keras"}):
-            raise InvalidModel("TensorFlow/Keras models are not supported.")
-
         language_mapping = get_all_languages()
         language_codes = list(language_mapping.keys())
 
         model_config = ModelConfig(
             model_id=model_id,
             revision=revision,
-            framework=framework,
             task=model_info.pipeline_tag,
             languages=[
                 language_mapping[tag]
                 for tag in model_info.tags
                 if tag in language_codes
             ],
-            model_type=ModelType.HF_HUB_GENERATIVE,
+            inference_backend=InferenceBackend.VLLM,
+            model_type=ModelType.GENERATIVE,
+            fresh=False,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),

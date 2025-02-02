@@ -15,7 +15,7 @@ from .benchmarker import BenchmarkResult
 from .data_loading import load_data
 from .data_models import GenerativeModelOutput
 from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
-from .enums import Framework, TaskGroup
+from .enums import TaskGroup
 from .exceptions import NeedsExtraInstalled
 from .scores import aggregate_scores
 from .task_utils import (
@@ -281,7 +281,6 @@ class HumanEvaluator:
         # model_config = ModelConfig(
         #     model_id=model_id,
         #     revision="main",
-        #     framework=Framework.HUMAN,
         #     task="text-generation",
         #     languages=dataset_config.languages,
         #     model_type=ModelType.HUMAN,
@@ -310,7 +309,7 @@ class HumanEvaluator:
                 self.compute_and_log_scores()
                 return blank_answer
         else:
-            rng = enforce_reproducibility(framework=Framework.PYTORCH)
+            rng = enforce_reproducibility()
             datasets = load_data(
                 rng=rng,
                 dataset_config=self.dataset_config,

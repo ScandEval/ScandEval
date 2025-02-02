@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 import pydantic
 import torch
 
-from .enums import Device, Framework, ModelType, TaskGroup
+from .enums import Device, InferenceBackend, ModelType, TaskGroup
 from .types import ScoreDict
 
 
@@ -356,14 +356,16 @@ class ModelConfig:
             The ID of the model.
         revision:
             The revision of the model.
-        framework:
-            The framework of the model.
         task:
             The task that the model was trained on.
         languages:
             The languages of the model.
+        inference_backend:
+            The backend used to perform inference with the model.
         model_type:
-            The type of the model.
+            The type of the model (e.g., encoder, base decoder, instruction tuned).
+        fresh:
+            Whether the model is freshly initialised.
         model_cache_dir:
             The directory to cache the model in.
         adapter_base_model_id:
@@ -373,10 +375,11 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: Framework
     task: str
     languages: list[Language]
+    inference_backend: InferenceBackend
     model_type: ModelType
+    fresh: bool
     model_cache_dir: str
     adapter_base_model_id: str | None
 

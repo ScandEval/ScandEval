@@ -19,7 +19,7 @@ from transformers import (
 )
 
 from ..data_models import BenchmarkConfig, ModelConfig
-from ..enums import Framework, ModelType, TaskGroup
+from ..enums import InferenceBackend, ModelType, TaskGroup
 from ..exceptions import (
     InvalidBenchmark,
     InvalidModel,
@@ -36,6 +36,8 @@ from .hf import (
 
 class FreshEncoderModel(HuggingFaceEncoderModel):
     """A freshly initialised encoder model."""
+
+    fresh_model = True
 
     @cached_property
     def num_params(self) -> int:
@@ -127,11 +129,12 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
         """
         return ModelConfig(
             model_id=model_id,
-            framework=Framework.PYTORCH,
             task="fill-mask",
             languages=list(),
             revision="main",
-            model_type=ModelType.FRESH,
+            inference_backend=InferenceBackend.TRANSFORMERS,
+            model_type=ModelType.ENCODER,
+            fresh=True,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),

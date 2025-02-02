@@ -19,7 +19,7 @@ from ..data_models import (
     ModelConfig,
     Task,
 )
-from ..enums import BatchingPreference, TaskGroup
+from ..enums import BatchingPreference, GenerativeType, TaskGroup
 from ..exceptions import NeedsEnvironmentVariable, NeedsExtraInstalled
 from ..task_utils import (
     question_answering,
@@ -47,7 +47,8 @@ class BenchmarkModule(ABC):
             A buffer to store temporary data.
     """
 
-    _is_generative: bool | None
+    fresh_model: bool
+    generative_type: GenerativeType | None = None
     batching_preference: BatchingPreference
     high_priority: bool
 
@@ -123,19 +124,6 @@ class BenchmarkModule(ABC):
         raise NotImplementedError(
             "The `get_tokenizer` method has not been implemented for "
             f"{self.__class__.__name__}."
-        )
-
-    @property
-    def is_generative(self) -> bool:
-        """Whether the model is generative.
-
-        Returns:
-            Whether the model is generative.
-        """
-        if self._is_generative is not None:
-            return self._is_generative
-        raise NotImplementedError(
-            "The model type must define whether it is generative or not."
         )
 
     @cached_property

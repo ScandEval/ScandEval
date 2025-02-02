@@ -32,7 +32,7 @@ from transformers import Trainer
 
 from ..constants import MAX_LOGPROBS, TASK_GROUPS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
-from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
+from ..enums import BatchingPreference, InferenceBackend, ModelType, TaskGroup
 from ..exceptions import (
     InvalidBenchmark,
     NeedsAdditionalArgument,
@@ -109,7 +109,7 @@ NUM_PARAMS_MAPPING = {
 class LiteLLMModel(BenchmarkModule):
     """A generative model from LiteLLM."""
 
-    _is_generative = True
+    fresh_model = False
     batching_preference = BatchingPreference.SINGLE_SAMPLE
     high_priority = False
 
@@ -131,7 +131,7 @@ class LiteLLMModel(BenchmarkModule):
 
         generation_kwargs: dict[str, t.Any] = dict(
             model=self.model_config.model_id,
-            max_tokens=self.dataset_config.max_generated_tokens,
+            max_tokens=8192,  # self.dataset_config.max_generated_tokens,
             stop=["\n\n"],
             temperature=0.0,
             seed=4242,
@@ -537,13 +537,14 @@ class LiteLLMModel(BenchmarkModule):
         return ModelConfig(
             model_id=model_id,
             revision="main",
-            framework=Framework.API,
             task="text-generation",
             languages=list(),
+            inference_backend=InferenceBackend.LITELLM,
+            model_type=ModelType.GENERATIVE,
+            fresh=False,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),
-            model_type=ModelType.API,
             adapter_base_model_id=None,
         )
 
