@@ -788,9 +788,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#scandeval.enums.Framework" class="md-nav__link">
+  <a href="#scandeval.enums.InferenceBackend" class="md-nav__link">
     <span class="md-ellipsis">
-      Framework
+      InferenceBackend
     </span>
   </a>
   
@@ -800,6 +800,15 @@
   <a href="#scandeval.enums.ModelType" class="md-nav__link">
     <span class="md-ellipsis">
       ModelType
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scandeval.enums.GenerativeType" class="md-nav__link">
+    <span class="md-ellipsis">
+      GenerativeType
     </span>
   </a>
   
@@ -990,7 +999,18 @@
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
-<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Enums used in the project.&quot;&quot;&quot;</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Enums used in the project.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
 
@@ -1022,47 +1042,58 @@
     <span class="n">CUDA</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 
 
-<span class="k">class</span> <span class="nc">Framework</span><span class="p">(</span><span class="n">AutoStrEnum</span><span class="p">):</span><div class="mkapi-source-link" id="scandeval.enums.Framework"><a href="../../../api/scandeval/enums/#scandeval.enums.Framework" title="Go to docs">docs</a></div>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The framework of a model.</span>
+<span class="k">class</span> <span class="nc">InferenceBackend</span><span class="p">(</span><span class="n">AutoStrEnum</span><span class="p">):</span><div class="mkapi-source-link" id="scandeval.enums.InferenceBackend"><a href="../../../api/scandeval/enums/#scandeval.enums.InferenceBackend" title="Go to docs">docs</a></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The backend used for model inference.</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        PYTORCH:</span>
-<span class="sd">            PyTorch framework.</span>
-<span class="sd">        JAX:</span>
-<span class="sd">            JAX framework.</span>
-<span class="sd">        API:</span>
-<span class="sd">            Accessible via an API.</span>
-<span class="sd">        HUMAN:</span>
-<span class="sd">            Human evaluator.</span>
+<span class="sd">        TRANSFORMERS:</span>
+<span class="sd">            Hugging Face `transformers` library.</span>
+<span class="sd">        VLLM:</span>
+<span class="sd">            VLLM library.</span>
+<span class="sd">        LITELLM:</span>
+<span class="sd">            LiteLLM library.</span>
+<span class="sd">        NONE:</span>
+<span class="sd">            No inference backend used (e.g., for human evaluation).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">PYTORCH</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
-    <span class="n">JAX</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
-    <span class="n">API</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
-    <span class="n">HUMAN</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">TRANSFORMERS</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">VLLM</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">LITELLM</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 
 
 <span class="k">class</span> <span class="nc">ModelType</span><span class="p">(</span><span class="n">AutoStrEnum</span><span class="p">):</span><div class="mkapi-source-link" id="scandeval.enums.ModelType"><a href="../../../api/scandeval/enums/#scandeval.enums.ModelType" title="Go to docs">docs</a></div>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of a model.</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        FRESH:</span>
-<span class="sd">            Randomly initialised Hugging Face model.</span>
-<span class="sd">        HF_HUB_ENCODER:</span>
-<span class="sd">            Hugging Face encoder model from the Hub.</span>
-<span class="sd">        HF_HUB_GENERATIVE:</span>
-<span class="sd">            Hugging Face generative model from the Hub.</span>
-<span class="sd">        API:</span>
-<span class="sd">            Model accessed through an API.</span>
+<span class="sd">        ENCODER:</span>
+<span class="sd">            An encoder (i.e., BERT-style) model.</span>
+<span class="sd">        GENERATIVE:</span>
+<span class="sd">            A generative model. Can be either decoder or encoder-decoder (aka seq2seq).</span>
 <span class="sd">        HUMAN:</span>
 <span class="sd">            Human evaluator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">FRESH</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
-    <span class="n">HF_HUB_ENCODER</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
-    <span class="n">HF_HUB_GENERATIVE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
-    <span class="n">API</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">ENCODER</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">GENERATIVE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">HUMAN</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">GenerativeType</span><span class="p">(</span><span class="n">AutoStrEnum</span><span class="p">):</span><div class="mkapi-source-link" id="scandeval.enums.GenerativeType"><a href="../../../api/scandeval/enums/#scandeval.enums.GenerativeType" title="Go to docs">docs</a></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of a generative model.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        BASE:</span>
+<span class="sd">            A base (i.e., pretrained) generative model.</span>
+<span class="sd">        INSTRUCTION_TUNED:</span>
+<span class="sd">            An instruction-tuned generative model.</span>
+<span class="sd">        REASONING:</span>
+<span class="sd">            A generative reasoning model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">BASE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">INSTRUCTION_TUNED</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">REASONING</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 
 
 <span class="k">class</span> <span class="nc">DataType</span><span class="p">(</span><span class="n">AutoStrEnum</span><span class="p">):</span><div class="mkapi-source-link" id="scandeval.enums.DataType"><a href="../../../api/scandeval/enums/#scandeval.enums.DataType" title="Go to docs">docs</a></div>

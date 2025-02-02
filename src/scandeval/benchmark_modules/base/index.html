@@ -798,18 +798,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#scandeval.benchmark_modules.base.BenchmarkModule.is_generative" class="md-nav__link">
+  <a href="#scandeval.benchmark_modules.base.BenchmarkModule.num_params" class="md-nav__link">
     <span class="md-ellipsis">
-      is_generative
+      num_params
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#scandeval.benchmark_modules.base.BenchmarkModule.num_params" class="md-nav__link">
+  <a href="#scandeval.benchmark_modules.base.BenchmarkModule.generative_type" class="md-nav__link">
     <span class="md-ellipsis">
-      num_params
+      generative_type
     </span>
   </a>
   
@@ -1298,10 +1298,7 @@
 <span class="normal">351</span>
 <span class="normal">352</span>
 <span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Abstract benchmark module class that the model classes inherit from.&quot;&quot;&quot;</span>
+<span class="normal">354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Abstract benchmark module class that the model classes inherit from.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -1322,7 +1319,7 @@
     <span class="n">ModelConfig</span><span class="p">,</span>
     <span class="n">Task</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">TaskGroup</span>
+<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">GenerativeType</span><span class="p">,</span> <span class="n">TaskGroup</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="n">NeedsEnvironmentVariable</span><span class="p">,</span> <span class="n">NeedsExtraInstalled</span>
 <span class="kn">from</span> <span class="nn">..task_utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">question_answering</span><span class="p">,</span>
@@ -1350,7 +1347,7 @@
 <span class="sd">            A buffer to store temporary data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_is_generative</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">fresh_model</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">batching_preference</span><span class="p">:</span> <span class="n">BatchingPreference</span>
     <span class="n">high_priority</span><span class="p">:</span> <span class="nb">bool</span>
 
@@ -1428,19 +1425,6 @@
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_generative</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.base.BenchmarkModule.is_generative"><a href="../../../../api/scandeval/benchmark_modules/base/#scandeval.benchmark_modules.base.BenchmarkModule.is_generative" title="Go to docs">docs</a></div>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the model is generative.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Whether the model is generative.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_generative</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_generative</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;The model type must define whether it is generative or not.&quot;</span>
-        <span class="p">)</span>
-
     <span class="nd">@cached_property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">num_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.base.BenchmarkModule.num_params"><a href="../../../../api/scandeval/benchmark_modules/base/#scandeval.benchmark_modules.base.BenchmarkModule.num_params" title="Go to docs">docs</a></div>
@@ -1448,6 +1432,16 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The number of parameters in the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">generative_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GenerativeType</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span><div class="mkapi-source-link" id="scandeval.benchmark_modules.base.BenchmarkModule.generative_type"><a href="../../../../api/scandeval/benchmark_modules/base/#scandeval.benchmark_modules.base.BenchmarkModule.generative_type" title="Go to docs">docs</a></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the generative type of the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The generative type of the model, or None if the model is not generative.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span>
 

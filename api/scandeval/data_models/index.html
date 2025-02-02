@@ -2591,7 +2591,7 @@ for the label in few-shot evaluation. Defaults to an empty dictionary.</p>
 <i class="fa-regular fa-square-minus"></i>
 </span>
 </span><span class="mkapi-object-kind">dataclass</span>
-<span class="mkapi-object-name"><a href="./#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">revision</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">framework</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.Framework" title="scandeval.enums.Framework">Framework</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">task</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">languages</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[<a href="./#scandeval.data_models.Language" title="scandeval.data_models.Language">Language</a>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_type</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.ModelType" title="scandeval.enums.ModelType">ModelType</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_cache_dir</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">adapter_base_model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-paren">)</span></span>
+<span class="mkapi-object-name"><a href="./#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">revision</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">task</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">languages</span><span class="mkapi-colon">: </span><span class="mkapi-ann">list[<a href="./#scandeval.data_models.Language" title="scandeval.data_models.Language">Language</a>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">inference_backend</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.InferenceBackend" title="scandeval.enums.InferenceBackend">InferenceBackend</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">merge</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_type</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../enums/#scandeval.enums.ModelType" title="scandeval.enums.ModelType">ModelType</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">fresh</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_cache_dir</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">adapter_base_model_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str | None</span><span class="mkapi-paren">)</span></span>
 </p>
 <div class="mkapi-document">
 <p>Configuration for a model.</p>
@@ -2616,11 +2616,6 @@ for the label in few-shot evaluation. Defaults to an empty dictionary.</p>
 <p>The revision of the model.</p>
 </li>
 <li>
-<p><span class="mkapi-item-name">framework</span> : 
-<span class="mkapi-item-type"><a href="../enums/#scandeval.enums.Framework" title="scandeval.enums.Framework">Framework</a></span> <span class="mkapi-dash">&mdash;</span></p>
-<p>The framework of the model.</p>
-</li>
-<li>
 <p><span class="mkapi-item-name">task</span> : 
 <span class="mkapi-item-type">str</span> <span class="mkapi-dash">&mdash;</span></p>
 <p>The task that the model was trained on.</p>
@@ -2631,9 +2626,24 @@ for the label in few-shot evaluation. Defaults to an empty dictionary.</p>
 <p>The languages of the model.</p>
 </li>
 <li>
+<p><span class="mkapi-item-name">inference_backend</span> : 
+<span class="mkapi-item-type"><a href="../enums/#scandeval.enums.InferenceBackend" title="scandeval.enums.InferenceBackend">InferenceBackend</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The backend used to perform inference with the model.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">merge</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether the model is a merged model.</p>
+</li>
+<li>
 <p><span class="mkapi-item-name">model_type</span> : 
 <span class="mkapi-item-type"><a href="../enums/#scandeval.enums.ModelType" title="scandeval.enums.ModelType">ModelType</a></span> <span class="mkapi-dash">&mdash;</span></p>
-<p>The type of the model.</p>
+<p>The type of the model (e.g., encoder, base decoder, instruction tuned).</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">fresh</span> : 
+<span class="mkapi-item-type">bool</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>Whether the model is freshly initialised.</p>
 </li>
 <li>
 <p><span class="mkapi-item-name">model_cache_dir</span> : 

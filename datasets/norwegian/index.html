@@ -935,6 +935,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#unofficial-jentoft" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unofficial: Jentoft
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1335,6 +1344,15 @@
   <a href="#scala-nn" class="md-nav__link">
     <span class="md-ellipsis">
       ScaLA-nn
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unofficial-jentoft" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unofficial: Jentoft
     </span>
   </a>
   
@@ -1802,6 +1820,50 @@ Bestem om setningen er grammatisk korrekt eller ikke. Svar med &#39;ja&#39; hvis
 </ul>
 <p>You can evaluate this dataset directly as follows:</p>
 <div class="highlight"><pre><span></span><code>$<span class="w"> </span>scandeval<span class="w"> </span>--model<span class="w"> </span>&lt;model-id&gt;<span class="w"> </span>--dataset<span class="w"> </span>scala-nn
+</code></pre></div>
+<h3 id="unofficial-jentoft">Unofficial: Jentoft</h3>
+<p>This dataset was published in <a href="https://www.duo.uio.no/handle/10852/103885">this Master's thesis</a> by Matias Jentoft.</p>
+<p>The original dataset consists of 85,771 / 10,827 / 10487 samples for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training, validation and test, respectively. In each split, the distribution of <code>correct</code> and <code>incorrect</code> is 50/50.</p>
+<p>Here are a few examples from the training split:</p>
+<p><div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;For to uker siden var jeg på en fotoutstilling om Erytrea.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;incorrect&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Det viser seg at folk ikke kan leve uten mobiltelefonen.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;correct&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mobiltelefoner dominerer mange av oss, og vi bruker dem over alt, på gatene &#39;hvert hjørne&#39;, i gatene, holdeplasser, kaffeteriaene og i parken, der folk burde tilbringe koselig tid sammen i naturen.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;incorrect&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>When evaluating generative models, we use the following setup (see the
+<a href="/methodology">methodology</a> for more information on how these are used):</p>
+<ul>
+<li>Number of few-shot examples: 12</li>
+<li>Prefix prompt:
+  <div class="highlight"><pre><span></span><code>Følgende er setninger og hvorvidt de er grammatisk korrekte.
+</code></pre></div></li>
+<li>Base prompt template:
+  <div class="highlight"><pre><span></span><code>Setning: {text}
+Grammatisk korrekt: {label}
+</code></pre></div></li>
+<li>Instruction-tuned prompt template:
+  <div class="highlight"><pre><span></span><code>Setning: {text}
+
+Bestem om setningen er grammatisk korrekt eller ikke. Svar med &#39;ja&#39; hvis setningen er korrekt og &#39;nei&#39; hvis den ikke er.
+</code></pre></div></li>
+<li>Label mapping:<ul>
+<li><code>correct</code> ➡️ <code>ja</code></li>
+<li><code>incorrect</code> ➡️ <code>nei</code></li>
+</ul>
+</li>
+</ul>
+<p>You can evaluate this dataset directly as follows:</p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>scandeval<span class="w"> </span>--model<span class="w"> </span>&lt;model-id&gt;<span class="w"> </span>--dataset<span class="w"> </span>jentoft
 </code></pre></div>
 <h2 id="reading-comprehension">Reading Comprehension</h2>
 <h3 id="norquad">NorQuAD</h3>

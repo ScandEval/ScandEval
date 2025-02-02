@@ -1331,7 +1331,7 @@
 <span class="sd">        The scores for the test dataset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Set random seeds to enforce reproducibility of the randomly initialised weights</span>
-    <span class="n">enforce_reproducibility</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">framework</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">training_args</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">enforce_reproducibility</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">training_args</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span>

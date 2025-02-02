@@ -2790,7 +2790,32 @@
 <span class="normal">1975</span>
 <span class="normal">1976</span>
 <span class="normal">1977</span>
-<span class="normal">1978</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All dataset configurations used in ScandEval.&quot;&quot;&quot;</span>
+<span class="normal">1978</span>
+<span class="normal">1979</span>
+<span class="normal">1980</span>
+<span class="normal">1981</span>
+<span class="normal">1982</span>
+<span class="normal">1983</span>
+<span class="normal">1984</span>
+<span class="normal">1985</span>
+<span class="normal">1986</span>
+<span class="normal">1987</span>
+<span class="normal">1988</span>
+<span class="normal">1989</span>
+<span class="normal">1990</span>
+<span class="normal">1991</span>
+<span class="normal">1992</span>
+<span class="normal">1993</span>
+<span class="normal">1994</span>
+<span class="normal">1995</span>
+<span class="normal">1996</span>
+<span class="normal">1997</span>
+<span class="normal">1998</span>
+<span class="normal">1999</span>
+<span class="normal">2000</span>
+<span class="normal">2001</span>
+<span class="normal">2002</span>
+<span class="normal">2003</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;All dataset configurations used in ScandEval.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">DatasetConfig</span>
 <span class="kn">from</span> <span class="nn">.languages</span> <span class="kn">import</span> <span class="n">DA</span><span class="p">,</span> <span class="n">DE</span><span class="p">,</span> <span class="n">EN</span><span class="p">,</span> <span class="n">FO</span><span class="p">,</span> <span class="n">FR</span><span class="p">,</span> <span class="n">IS</span><span class="p">,</span> <span class="n">NB</span><span class="p">,</span> <span class="n">NL</span><span class="p">,</span> <span class="n">NN</span><span class="p">,</span> <span class="n">NO</span><span class="p">,</span> <span class="n">SV</span><span class="p">,</span> <span class="n">get_all_languages</span>
@@ -2855,7 +2880,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positiv&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;neutral&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negativ&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Recension: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Klassificera sentimentet i recensionen. &quot;</span>
-    <span class="s2">&quot;Svara med &#39;positiv&#39;, &#39;neutral&#39; eller &#39;negativ&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Svara med &#39;positiv&#39;, &#39;neutral&#39; eller &#39;negativ&#39;, och inget annat.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -2875,7 +2900,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positiv&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;neutral&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negativ&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Tweet: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Klassificer sentimentet i tweetet. Svar kun &quot;</span>
-    <span class="s2">&quot;med &#39;positiv&#39;, &#39;neutral&#39; eller &#39;negativ&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;med &#39;positiv&#39;, &#39;neutral&#39; eller &#39;negativ&#39;, og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -2895,7 +2920,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positiv&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;nøytral&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negativ&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Anmeldelse: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Klassifiser sentimentet i anmeldelsen. &quot;</span>
-    <span class="s2">&quot;Svar med &#39;positiv&#39;, &#39;nøytral&#39; eller &#39;negativ&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Svar med &#39;positiv&#39;, &#39;nøytral&#39; eller &#39;negativ&#39;, og ikke noe annet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -2915,7 +2940,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;jákvætt&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;hlutlaust&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;neikvætt&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Texti: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Flokkaðu tilfinninguna í textanum. &quot;</span>
-    <span class="s2">&quot;Svaraðu með &#39;jákvætt&#39;, &#39;hlutlaust&#39; eða &#39;neikvætt&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Svaraðu með &#39;jákvætt&#39;, &#39;hlutlaust&#39; eða &#39;neikvætt&#39;, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -2935,7 +2960,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positiv&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;neutral&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negativ&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Tweet: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Klassifizieren Sie die Stimmung im Tweet. &quot;</span>
-    <span class="s2">&quot;Antworten Sie mit &#39;positiv&#39;, &#39;neutral&#39; oder &#39;negativ&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Antworten Sie mit &#39;positiv&#39;, &#39;neutral&#39; oder &#39;negativ&#39;, und nichts anderes.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -2955,7 +2980,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positief&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;neutraal&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negatief&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Tweet: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Classificeer het sentiment in de tweet. &quot;</span>
-    <span class="s2">&quot;Antwoord met &#39;positief&#39;, &#39;neutraal&#39; of &#39;negatief&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Antwoord met &#39;positief&#39;, &#39;neutraal&#39; of &#39;negatief&#39;, en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -2973,7 +2998,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Tweet: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Sentiment: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positief&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negatief&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Tweet: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Classificeer het sentiment in de tweet. &quot;</span>
-    <span class="s2">&quot;Antwoord met &#39;positief&#39; of &#39;negatief&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Antwoord met &#39;positief&#39; of &#39;negatief&#39;, en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -2994,7 +3019,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;neutral&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negative&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Text: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Classify the sentiment in the text. Answer &quot;</span>
-    <span class="s2">&quot;with &#39;positive&#39;, &#39;neutral&#39; or &#39;negative&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;with &#39;positive&#39;, &#39;neutral&#39; or &#39;negative&#39;, and nothing else.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3013,7 +3038,7 @@
         <span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positivt&quot;</span><span class="p">,</span> <span class="n">neutral</span><span class="o">=</span><span class="s2">&quot;neutralt&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;negativt&quot;</span>
     <span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Tekstur: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Flokka lyndið í tekstinum. Svara við &quot;</span>
-    <span class="s2">&quot;&#39;positivt&#39;, &#39;neutralt&#39; ella &#39;negativt&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;positivt&#39;, &#39;neutralt&#39; ella &#39;negativt&#39;, og einki annað.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3031,7 +3056,7 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Texte: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Sentiment: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">positive</span><span class="o">=</span><span class="s2">&quot;positif&quot;</span><span class="p">,</span> <span class="n">negative</span><span class="o">=</span><span class="s2">&quot;négatif&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Texte : </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Classez le sentiment dans le texte. Répondez &quot;</span>
-    <span class="s2">&quot;par ‘positif&#39; ou ‘négatif&#39;.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;par ‘positif&#39; ou ‘négatif&#39;, et rien d&#39;autre.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3523,7 +3548,8 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Mening: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Grammatisk korrekt: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nej&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Mening: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bestäm om meningen är grammatiskt korrekt &quot;</span>
-    <span class="s2">&quot;eller inte. Svara med &#39;ja&#39; om meningen är korrekt och &#39;nej&#39; om den inte är.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eller inte. Svara med &#39;ja&#39; om meningen är korrekt och &#39;nej&#39; om den inte är, &quot;</span>
+    <span class="s2">&quot;och inget annat.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3539,7 +3565,8 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Sætning: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Grammatisk korrekt: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nej&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Sætning: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bestem om sætningen er grammatisk korrekt &quot;</span>
-    <span class="s2">&quot;eller ej. Svar med &#39;ja&#39;, hvis sætningen er korrekt, og &#39;nej&#39;, hvis den ikke er.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eller ej. Svar med &#39;ja&#39;, hvis sætningen er korrekt, og &#39;nej&#39;, hvis den ikke er, &quot;</span>
+    <span class="s2">&quot;og intet andet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3554,7 +3581,8 @@
     <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Følgende er setninger og hvorvidt de er grammatisk korrekte.&quot;</span><span class="p">,</span>
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Grammatisk korrekt: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bestem om setningen er grammatisk korrekt &quot;</span>
-    <span class="s2">&quot;eller ikke. Svar med &#39;ja&#39; hvis setningen er korrekt og &#39;nei&#39; hvis den ikke er.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eller ikke. Svar med &#39;ja&#39; hvis setningen er korrekt og &#39;nei&#39; hvis den ikke er, &quot;</span>
+    <span class="s2">&quot;og ikke noe annet.&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nei&quot;</span><span class="p">),</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -3571,7 +3599,8 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Grammatisk korrekt: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nei&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bestem om setningen er grammatisk korrekt &quot;</span>
-    <span class="s2">&quot;eller ikke. Svar med &#39;ja&#39; hvis setningen er korrekt og &#39;nei&#39; hvis den ikke er.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eller ikke. Svar med &#39;ja&#39; hvis setningen er korrekt og &#39;nei&#39; hvis den ikke er, &quot;</span>
+    <span class="s2">&quot;og ikke noe annet.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3588,7 +3617,7 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;já&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nei&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Greinið hvort setningin er málfræðilega &quot;</span>
     <span class="s2">&quot;rétt eða ekki. Svarið skal vera &#39;já&#39; ef setningin er rétt og &#39;nei&#39; ef hún er &quot;</span>
-    <span class="s2">&quot;ekki.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ekki, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3605,7 +3634,7 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nei&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Setningur: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Greinið hvort setningurin er mállæruliga &quot;</span>
     <span class="s2">&quot;rættur ella ikki. Svarið skal vera &#39;ja&#39; um setningurin er rættur og &#39;nei&#39; um &quot;</span>
-    <span class="s2">&quot;hann ikki er.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hann ikki er, og einki annað.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3622,7 +3651,7 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nein&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Satz: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bestimmen Sie, ob der Satz grammatikalisch &quot;</span>
     <span class="s2">&quot;korrekt ist oder nicht. Antworten Sie mit &#39;ja&#39;, wenn der Satz korrekt ist und &quot;</span>
-    <span class="s2">&quot;&#39;nein&#39;, wenn er es nicht ist.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;nein&#39;, wenn er es nicht ist, und nichts anderes.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3638,7 +3667,8 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Zin: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Grammaticaal correct: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nee&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Zin: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bepaal of de zin grammaticaal correct is of &quot;</span>
-    <span class="s2">&quot;niet. Antwoord met &#39;ja&#39; als de zin correct is en &#39;nee&#39; als dat niet het geval is.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;niet. Antwoord met &#39;ja&#39; als de zin correct is en &#39;nee&#39; als dat niet het geval is, &quot;</span>
+    <span class="s2">&quot;en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3656,7 +3686,7 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;no&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Sentence: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Determine whether the sentence is &quot;</span>
     <span class="s2">&quot;grammatically correct or not. Reply with &#39;yes&#39; if the sentence is correct and &quot;</span>
-    <span class="s2">&quot;&#39;no&#39; if it is not.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;&#39;no&#39; if it is not, and nothing else.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3674,7 +3704,7 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;oui&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;non&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Phrase: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Déterminez si la phrase est grammaticalement &quot;</span>
     <span class="s2">&quot;correcte ou non. Répondez par &#39;oui&#39; si la phrase est correcte et par &#39;non&#39; si &quot;</span>
-    <span class="s2">&quot;elle ne l&#39;est pas.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;elle ne l&#39;est pas, et rien d&#39;autre.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <span class="p">)</span>
@@ -3692,7 +3722,8 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Zin: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Grammaticaal correct: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nee&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Zin: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bepaal of de zin grammaticaal correct is of &quot;</span>
-    <span class="s2">&quot;niet. Antwoord met &#39;ja&#39; als de zin correct is en &#39;nee&#39; als dat niet het geval is.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;niet. Antwoord met &#39;ja&#39; als de zin correct is en &#39;nee&#39; als dat niet het geval is, &quot;</span>
+    <span class="s2">&quot;en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -3710,7 +3741,8 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Zin: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Grammaticaal correct: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nee&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Zin: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Bepaal of de zin grammaticaal correct is of &quot;</span>
-    <span class="s2">&quot;niet. Antwoord met &#39;ja&#39; als de zin correct is en &#39;nee&#39; als dat niet het geval is.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;niet. Antwoord met &#39;ja&#39; als de zin correct is en &#39;nee&#39; als dat niet het geval is, &quot;</span>
+    <span class="s2">&quot;en niets anders.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -3728,7 +3760,7 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;já&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nei&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Greinið hvort setningin er málfræðilega &quot;</span>
     <span class="s2">&quot;rétt eða ekki. Svarið skal vera &#39;já&#39; ef setningin er rétt og &#39;nei&#39; ef hún er &quot;</span>
-    <span class="s2">&quot;ekki.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ekki, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -3745,7 +3777,8 @@
     <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Málfræðilega rétt: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;já&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nei&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Greinið hvort setningin er málfræðilega &quot;</span>
-    <span class="s2">&quot;rétt eða ekki. Svarið skal vera &#39;já&#39; ef setningin er rétt og &#39;nei&#39; ef hún er ekki.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rétt eða ekki. Svarið skal vera &#39;já&#39; ef setningin er rétt og &#39;nei&#39; ef hún er ekki, &quot;</span>
+    <span class="s2">&quot;og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -3763,7 +3796,7 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">correct</span><span class="o">=</span><span class="s2">&quot;já&quot;</span><span class="p">,</span> <span class="n">incorrect</span><span class="o">=</span><span class="s2">&quot;nei&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Setning: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Greinið hvort setningin er málfræðilega &quot;</span>
     <span class="s2">&quot;rétt eða ekki. Svarið skal vera &#39;já&#39; ef setningin er rétt og &#39;nei&#39; ef hún er &quot;</span>
-    <span class="s2">&quot;ekki.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ekki, og engu öðru.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -4223,6 +4256,23 @@
     <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
     <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
     <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;, og engu öðru.&quot;</span><span class="p">,</span>
+    <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ICELANDIC_KNOWLEDGE_CONFIG</span> <span class="o">=</span> <span class="n">DatasetConfig</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;icelandic-knowledge&quot;</span><span class="p">,</span>
+    <span class="n">pretty_name</span><span class="o">=</span><span class="s2">&quot;the IcelandicQA dataset phrased as a knowledge dataset&quot;</span><span class="p">,</span>
+    <span class="n">huggingface_id</span><span class="o">=</span><span class="s2">&quot;ScandEval/icelandic-knowledge&quot;</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">KNOW</span><span class="p">,</span>
+    <span class="n">languages</span><span class="o">=</span><span class="p">[</span><span class="n">IS</span><span class="p">],</span>
+    <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">],</span>
+    <span class="n">prompt_prefix</span><span class="o">=</span><span class="s2">&quot;Eftirfarandi eru fjölvalsspurningar (með svörum).&quot;</span><span class="p">,</span>
+    <span class="n">prompt_template</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n</span><span class="s2">Svara: </span><span class="si">{label}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">prompt_label_mapping</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="s2">&quot;d&quot;</span><span class="p">),</span>
+    <span class="n">instruction_prompt</span><span class="o">=</span><span class="s2">&quot;Spurningar: </span><span class="si">{text}</span><span class="se">\n\n</span><span class="s2">Svaraðu eftirfarandi spurningum með &#39;a&#39;, &quot;</span>
+    <span class="s2">&quot;&#39;b&#39;, &#39;c&#39; eða &#39;d&#39;.&quot;</span><span class="p">,</span>
     <span class="n">num_few_shot_examples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_generated_tokens</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">unofficial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>

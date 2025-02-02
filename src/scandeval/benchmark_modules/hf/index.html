@@ -816,6 +816,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.generative_type" class="md-nav__link">
+    <span class="md-ellipsis">
+      generative_type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel.extract_labels_from_generation" class="md-nav__link">
     <span class="md-ellipsis">
       extract_labels_from_generation
@@ -2125,11 +2134,7 @@
 <span class="normal">1151</span>
 <span class="normal">1152</span>
 <span class="normal">1153</span>
-<span class="normal">1154</span>
-<span class="normal">1155</span>
-<span class="normal">1156</span>
-<span class="normal">1157</span>
-<span class="normal">1158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
+<span class="normal">1154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -2168,11 +2173,18 @@
 
 <span class="kn">from</span> <span class="nn">..constants</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DUMMY_FILL_VALUE</span><span class="p">,</span>
-    <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">,</span>
+    <span class="n">GENERATIVE_PIPELINE_TAGS</span><span class="p">,</span>
     <span class="n">LOCAL_MODELS_REQUIRED_FILES</span><span class="p">,</span>
+    <span class="n">MERGE_TAGS</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfig</span><span class="p">,</span> <span class="n">DatasetConfig</span><span class="p">,</span> <span class="n">HFModelInfo</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">Task</span>
-<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">BatchingPreference</span><span class="p">,</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">ModelType</span><span class="p">,</span> <span class="n">TaskGroup</span>
+<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BatchingPreference</span><span class="p">,</span>
+    <span class="n">GenerativeType</span><span class="p">,</span>
+    <span class="n">InferenceBackend</span><span class="p">,</span>
+    <span class="n">ModelType</span><span class="p">,</span>
+    <span class="n">TaskGroup</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">HuggingFaceHubDown</span><span class="p">,</span>
     <span class="n">InvalidBenchmark</span><span class="p">,</span>
@@ -2203,7 +2215,7 @@
 <span class="k">class</span> <span class="nc">HuggingFaceEncoderModel</span><span class="p">(</span><span class="n">BenchmarkModule</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An encoder model from the Hugging Face Hub.&quot;&quot;&quot;</span>
 
-    <span class="n">_is_generative</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fresh_model</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">batching_preference</span> <span class="o">=</span> <span class="n">BatchingPreference</span><span class="o">.</span><span class="n">NO_PREFERENCE</span>
     <span class="n">high_priority</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -2393,6 +2405,15 @@
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Unsupported task group: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">generative_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GenerativeType</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the generative type of the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The generative type of the model, or None if it has not been set yet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">extract_labels_from_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractLabelsFunction</span><span class="p">:</span>
@@ -2607,7 +2628,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">model_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
+            <span class="ow">and</span> <span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">GENERATIVE_PIPELINE_TAGS</span>
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
@@ -2634,30 +2655,22 @@
         <span class="k">if</span> <span class="n">model_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> could not be found.&quot;</span><span class="p">)</span>
 
-        <span class="n">framework</span> <span class="o">=</span> <span class="n">Framework</span><span class="o">.</span><span class="n">PYTORCH</span>
-        <span class="k">if</span> <span class="s2">&quot;pytorch&quot;</span> <span class="ow">in</span> <span class="n">model_info</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
-            <span class="k">pass</span>
-        <span class="k">elif</span> <span class="s2">&quot;jax&quot;</span> <span class="ow">in</span> <span class="n">model_info</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
-            <span class="n">framework</span> <span class="o">=</span> <span class="n">Framework</span><span class="o">.</span><span class="n">JAX</span>
-        <span class="k">elif</span> <span class="s2">&quot;spacy&quot;</span> <span class="ow">in</span> <span class="n">model_info</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="s2">&quot;SpaCy models are not supported.&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">tag</span> <span class="ow">in</span> <span class="n">model_info</span><span class="o">.</span><span class="n">tags</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;tf&quot;</span><span class="p">,</span> <span class="s2">&quot;tensorflow&quot;</span><span class="p">,</span> <span class="s2">&quot;keras&quot;</span><span class="p">}):</span>
-            <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="s2">&quot;TensorFlow/Keras models are not supported.&quot;</span><span class="p">)</span>
-
         <span class="n">language_mapping</span> <span class="o">=</span> <span class="n">get_all_languages</span><span class="p">()</span>
         <span class="n">language_codes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">language_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
         <span class="n">model_config</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span>
             <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span>
             <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">,</span>
-            <span class="n">framework</span><span class="o">=</span><span class="n">framework</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="n">model_info</span><span class="o">.</span><span class="n">pipeline_tag</span><span class="p">,</span>
             <span class="n">languages</span><span class="o">=</span><span class="p">[</span>
                 <span class="n">language_mapping</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">model_info</span><span class="o">.</span><span class="n">tags</span>
                 <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">language_codes</span>
             <span class="p">],</span>
-            <span class="n">model_type</span><span class="o">=</span><span class="n">ModelType</span><span class="o">.</span><span class="n">HF_HUB_ENCODER</span><span class="p">,</span>
+            <span class="n">merge</span><span class="o">=</span><span class="nb">any</span><span class="p">(</span><span class="n">tag</span> <span class="ow">in</span> <span class="n">model_info</span><span class="o">.</span><span class="n">tags</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">MERGE_TAGS</span><span class="p">),</span>
+            <span class="n">inference_backend</span><span class="o">=</span><span class="n">InferenceBackend</span><span class="o">.</span><span class="n">TRANSFORMERS</span><span class="p">,</span>
+            <span class="n">model_type</span><span class="o">=</span><span class="n">ModelType</span><span class="o">.</span><span class="n">ENCODER</span><span class="p">,</span>
+            <span class="n">fresh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">model_cache_dir</span><span class="o">=</span><span class="n">create_model_cache_dir</span><span class="p">(</span>
                 <span class="n">cache_dir</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span>
             <span class="p">),</span>
@@ -2690,7 +2703,6 @@
 
     <span class="n">model_id</span> <span class="o">=</span> <span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span>
     <span class="n">task_group</span> <span class="o">=</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">task_group</span>
-    <span class="n">from_flax</span> <span class="o">=</span> <span class="n">model_config</span><span class="o">.</span><span class="n">framework</span> <span class="o">==</span> <span class="n">Framework</span><span class="o">.</span><span class="n">JAX</span>
     <span class="n">ignore_mismatched_sizes</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Special case where there is a mismatch between the labels during training and</span>
@@ -2714,7 +2726,6 @@
 
     <span class="n">model_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
         <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
-        <span class="n">from_flax</span><span class="o">=</span><span class="n">from_flax</span><span class="p">,</span>
         <span class="n">ignore_mismatched_sizes</span><span class="o">=</span><span class="n">ignore_mismatched_sizes</span><span class="p">,</span>
         <span class="n">revision</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
         <span class="n">token</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;HUGGINGFACE_API_KEY&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">True</span><span class="p">,</span>
@@ -2734,64 +2745,49 @@
 
     <span class="n">model</span><span class="p">:</span> <span class="n">PreTrainedModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Get the model class associated with the task group</span>
-            <span class="n">model_cls_or_none</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="s2">&quot;PreTrainedModel&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">get_class_by_name</span><span class="p">(</span>
-                <span class="n">class_name</span><span class="o">=</span><span class="n">task_group_to_class_name</span><span class="p">(</span><span class="n">task_group</span><span class="o">=</span><span class="n">task_group</span><span class="p">),</span>
-                <span class="n">module_name</span><span class="o">=</span><span class="s2">&quot;transformers&quot;</span><span class="p">,</span>
+        <span class="c1"># Get the model class associated with the task group</span>
+        <span class="n">model_cls_or_none</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">Type</span><span class="p">[</span><span class="s2">&quot;PreTrainedModel&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">get_class_by_name</span><span class="p">(</span>
+            <span class="n">class_name</span><span class="o">=</span><span class="n">task_group_to_class_name</span><span class="p">(</span><span class="n">task_group</span><span class="o">=</span><span class="n">task_group</span><span class="p">),</span>
+            <span class="n">module_name</span><span class="o">=</span><span class="s2">&quot;transformers&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If the model class could not be found then raise an error</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model_cls_or_none</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The task group </span><span class="si">{</span><span class="n">task_group</span><span class="o">.</span><span class="n">value</span><span class="si">!r}</span><span class="s2"> does not correspond to a &quot;</span>
+                <span class="s2">&quot;Hugging Face AutoModel type (such as &quot;</span>
+                <span class="s2">&quot;`AutoModelForSequenceClassification`).&quot;</span>
             <span class="p">)</span>
 
-            <span class="c1"># If the model class could not be found then raise an error</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">model_cls_or_none</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">InvalidBenchmark</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The task group </span><span class="si">{</span><span class="n">task_group</span><span class="o">.</span><span class="n">value</span><span class="si">!r}</span><span class="s2"> does not correspond to a &quot;</span>
-                    <span class="s2">&quot;Hugging Face AutoModel type (such as &quot;</span>
-                    <span class="s2">&quot;`AutoModelForSequenceClassification`).&quot;</span>
-                <span class="p">)</span>
+        <span class="c1"># If the model is a DeBERTaV2 model then we ensure that</span>
+        <span class="c1"># `pooler_hidden_size` is the same size as `hidden_size`</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;deberta-v2&quot;</span><span class="p">:</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">pooler_hidden_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">hidden_size</span>
 
-            <span class="c1"># If the model is a DeBERTaV2 model then we ensure that</span>
-            <span class="c1"># `pooler_hidden_size` is the same size as `hidden_size`</span>
-            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="s2">&quot;deberta-v2&quot;</span><span class="p">:</span>
-                <span class="n">config</span><span class="o">.</span><span class="n">pooler_hidden_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">hidden_size</span>
-
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">model_or_tuple</span> <span class="o">=</span> <span class="n">model_cls_or_none</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
-                    <span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span>
-                <span class="p">)</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;ignore_mismatched_sizes&quot;</span><span class="p">]:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> occurred during the loading &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;of the </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> model. Retrying with &quot;</span>
-                        <span class="s2">&quot;`ignore_mismatched_sizes` set to True.&quot;</span>
-                    <span class="p">)</span>
-                    <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;ignore_mismatched_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">continue</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">TimeoutError</span><span class="p">,</span> <span class="n">RequestError</span><span class="p">):</span>
-                <span class="n">attempts_left</span> <span class="o">-=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">attempts_left</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
-                        <span class="s2">&quot;The model could not be loaded after 5 attempts.&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Couldn&#39;t load the model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Retrying.&quot;</span><span class="p">)</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_tuple</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                <span class="n">model</span> <span class="o">=</span> <span class="n">model_or_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">model</span> <span class="o">=</span> <span class="n">model_or_tuple</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model_or_tuple</span> <span class="o">=</span> <span class="n">model_cls_or_none</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+                <span class="n">model_config</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span>
+            <span class="p">)</span>
             <span class="k">break</span>
-
-        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="c1"># If `from_flax` is False but only Flax models are available then</span>
-            <span class="c1"># try again with `from_flax` set to True</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">from_flax</span> <span class="ow">and</span> <span class="s2">&quot;Use `from_flax=True` to load this model&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
-                <span class="n">from_flax</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;ignore_mismatched_sizes&quot;</span><span class="p">]:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> occurred during the loading &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;of the </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> model. Retrying with &quot;</span>
+                    <span class="s2">&quot;`ignore_mismatched_sizes` set to True.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;ignore_mismatched_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">continue</span>
-
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TimeoutError</span><span class="p">,</span> <span class="n">RequestError</span><span class="p">):</span>
+            <span class="n">attempts_left</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">attempts_left</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="s2">&quot;The model could not be loaded after 5 attempts.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Couldn&#39;t load the model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2">. Retrying.&quot;</span><span class="p">)</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;checkpoint seems to be incorrect&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;The model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> has an incorrect checkpoint.&quot;</span>
@@ -2806,7 +2802,12 @@
                 <span class="sa">f</span><span class="s2">&quot;The model </span><span class="si">{</span><span class="n">model_id</span><span class="si">!r}</span><span class="s2"> could not be loaded. The error was </span><span class="si">{</span><span class="n">e</span><span class="si">!r}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_tuple</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_or_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_or_tuple</span>
+
+    <span class="k">assert</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;The model should not be None.&quot;</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
     <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
@@ -2935,8 +2936,8 @@
         <span class="n">class_names</span> <span class="o">=</span> <span class="n">hf_config</span><span class="o">.</span><span class="n">architectures</span>
         <span class="n">generative_class_names</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">class_name</span>
-            <span class="k">for</span> <span class="n">model_task</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
-            <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">TASK_MAPPING</span><span class="p">[</span><span class="n">model_task</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">GENERATIVE_PIPELINE_TAGS</span>
+            <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">TASK_MAPPING</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
         <span class="p">]</span>
         <span class="k">if</span> <span class="n">class_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
             <span class="n">class_name</span> <span class="ow">in</span> <span class="n">generative_class_names</span> <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">class_names</span>

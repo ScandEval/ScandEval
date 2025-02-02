@@ -1638,11 +1638,10 @@
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="kn">from</span> <span class="nn">.benchmark_config_factory</span> <span class="kn">import</span> <span class="n">build_benchmark_config</span>
-<span class="kn">from</span> <span class="nn">.benchmarker</span> <span class="kn">import</span> <span class="n">BenchmarkResult</span>
 <span class="kn">from</span> <span class="nn">.data_loading</span> <span class="kn">import</span> <span class="n">load_data</span>
-<span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">GenerativeModelOutput</span>
+<span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">BenchmarkResult</span><span class="p">,</span> <span class="n">GenerativeModelOutput</span>
 <span class="kn">from</span> <span class="nn">.dataset_configs</span> <span class="kn">import</span> <span class="n">SPEED_CONFIG</span><span class="p">,</span> <span class="n">get_all_dataset_configs</span>
-<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">Framework</span><span class="p">,</span> <span class="n">TaskGroup</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">GenerativeType</span><span class="p">,</span> <span class="n">TaskGroup</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">NeedsExtraInstalled</span>
 <span class="kn">from</span> <span class="nn">.scores</span> <span class="kn">import</span> <span class="n">aggregate_scores</span>
 <span class="kn">from</span> <span class="nn">.task_utils</span> <span class="kn">import</span> <span class="p">(</span>
@@ -1908,7 +1907,6 @@
         <span class="c1"># model_config = ModelConfig(</span>
         <span class="c1">#     model_id=model_id,</span>
         <span class="c1">#     revision=&quot;main&quot;,</span>
-        <span class="c1">#     framework=Framework.HUMAN,</span>
         <span class="c1">#     task=&quot;text-generation&quot;,</span>
         <span class="c1">#     languages=dataset_config.languages,</span>
         <span class="c1">#     model_type=ModelType.HUMAN,</span>
@@ -1937,7 +1935,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">compute_and_log_scores</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">blank_answer</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">rng</span> <span class="o">=</span> <span class="n">enforce_reproducibility</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="n">Framework</span><span class="o">.</span><span class="n">PYTORCH</span><span class="p">)</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">enforce_reproducibility</span><span class="p">()</span>
             <span class="n">datasets</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span>
                 <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
                 <span class="n">dataset_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_config</span><span class="p">,</span>
@@ -2314,7 +2312,9 @@
             <span class="n">num_model_parameters</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">max_sequence_length</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">vocabulary_size</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">merge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">generative</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">generative_type</span><span class="o">=</span><span class="n">GenerativeType</span><span class="o">.</span><span class="n">INSTRUCTION_TUNED</span><span class="p">,</span>
             <span class="n">few_shot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">validation_split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>

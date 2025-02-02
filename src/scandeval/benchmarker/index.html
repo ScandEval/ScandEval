@@ -1643,7 +1643,13 @@
 <span class="normal">768</span>
 <span class="normal">769</span>
 <span class="normal">770</span>
-<span class="normal">771</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Class that benchmarks Scandinavian language models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -1658,11 +1664,11 @@
 <span class="kn">from</span> <span class="nn">torch.distributed</span> <span class="kn">import</span> <span class="n">destroy_process_group</span>
 
 <span class="kn">from</span> <span class="nn">.benchmark_config_factory</span> <span class="kn">import</span> <span class="n">build_benchmark_config</span>
-<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">GENERATIVE_MODEL_TASKS</span>
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">GENERATIVE_PIPELINE_TAGS</span>
 <span class="kn">from</span> <span class="nn">.data_loading</span> <span class="kn">import</span> <span class="n">load_data</span>
 <span class="kn">from</span> <span class="nn">.data_models</span> <span class="kn">import</span> <span class="n">BenchmarkConfigParams</span><span class="p">,</span> <span class="n">BenchmarkResult</span>
 <span class="kn">from</span> <span class="nn">.dataset_configs</span> <span class="kn">import</span> <span class="n">get_all_dataset_configs</span>
-<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">Device</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">Device</span><span class="p">,</span> <span class="n">ModelType</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">InvalidBenchmark</span><span class="p">,</span> <span class="n">InvalidModel</span>
 <span class="kn">from</span> <span class="nn">.finetuning</span> <span class="kn">import</span> <span class="n">finetune</span>
 <span class="kn">from</span> <span class="nn">.generation</span> <span class="kn">import</span> <span class="n">generate</span>
@@ -2030,7 +2036,7 @@
 
                 <span class="c1"># We do not re-initialise generative models as their architecture is not</span>
                 <span class="c1"># customised to specific datasets</span>
-                <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="n">GENERATIVE_PIPELINE_TAGS</span><span class="p">:</span>
                     <span class="n">initial_logging</span><span class="p">(</span>
                         <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
                         <span class="n">dataset_config</span><span class="o">=</span><span class="n">dataset_config</span><span class="p">,</span>
@@ -2184,9 +2190,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Set random seeds to enforce reproducibility of the randomly</span>
                 <span class="c1"># initialised weights</span>
-                <span class="n">rng</span> <span class="o">=</span> <span class="n">enforce_reproducibility</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">framework</span><span class="p">)</span>
+                <span class="n">rng</span> <span class="o">=</span> <span class="n">enforce_reproducibility</span><span class="p">()</span>
 
-                <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">is_generative</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">model_config</span><span class="o">.</span><span class="n">model_type</span> <span class="o">!=</span> <span class="n">ModelType</span><span class="o">.</span><span class="n">GENERATIVE</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading model...&quot;</span><span class="p">)</span>
                     <span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span>
                         <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
@@ -2209,7 +2215,7 @@
                     <span class="n">prepared_datasets</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">prepare_datasets</span><span class="p">(</span>
                         <span class="n">datasets</span><span class="o">=</span><span class="n">bootstrapped_datasets</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">task</span>
                     <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">is_generative</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="n">ModelType</span><span class="o">.</span><span class="n">GENERATIVE</span><span class="p">:</span>
                         <span class="n">scores</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span>
                             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
                             <span class="n">datasets</span><span class="o">=</span><span class="n">prepared_datasets</span><span class="p">,</span>
@@ -2244,7 +2250,13 @@
                     <span class="n">num_model_parameters</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">num_params</span><span class="p">,</span>
                     <span class="n">max_sequence_length</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">model_max_length</span><span class="p">,</span>
                     <span class="n">vocabulary_size</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span>
-                    <span class="n">generative</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">is_generative</span><span class="p">,</span>
+                    <span class="n">merge</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">merge</span><span class="p">,</span>
+                    <span class="n">generative</span><span class="o">=</span><span class="n">model_config</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="n">ModelType</span><span class="o">.</span><span class="n">GENERATIVE</span><span class="p">,</span>
+                    <span class="n">generative_type</span><span class="o">=</span><span class="p">(</span>
+                        <span class="n">model</span><span class="o">.</span><span class="n">generative_type</span><span class="o">.</span><span class="n">value</span>
+                        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">generative_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="kc">None</span>
+                    <span class="p">),</span>
                     <span class="n">few_shot</span><span class="o">=</span><span class="n">benchmark_config</span><span class="o">.</span><span class="n">few_shot</span><span class="p">,</span>
                     <span class="n">validation_split</span><span class="o">=</span><span class="ow">not</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">evaluate_test_split</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -2390,7 +2402,7 @@
 <span class="sd">            The general benchmark configuration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">split_type</span> <span class="o">=</span> <span class="s2">&quot;validation&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">evaluate_test_split</span> <span class="k">else</span> <span class="s2">&quot;test&quot;</span>
-    <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="n">GENERATIVE_MODEL_TASKS</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">task</span> <span class="ow">in</span> <span class="n">GENERATIVE_PIPELINE_TAGS</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">few_shot</span><span class="p">:</span>
             <span class="n">eval_type</span> <span class="o">=</span> <span class="s2">&quot;Few-shot benchmarking&quot;</span>
         <span class="k">else</span><span class="p">:</span>

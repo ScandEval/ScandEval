@@ -820,40 +820,72 @@
 <span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
-<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Constants used throughout the project.&quot;&quot;&quot;</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Constants used throughout the project.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">TaskGroup</span>
-<span class="kn">from</span> <span class="nn">.tasks</span> <span class="kn">import</span> <span class="n">COMMON_SENSE</span><span class="p">,</span> <span class="n">KNOW</span><span class="p">,</span> <span class="n">MCRC</span><span class="p">,</span> <span class="n">NER</span>
+<span class="kn">from</span> <span class="nn">.tasks</span> <span class="kn">import</span> <span class="n">NER</span>
 
 <span class="c1"># This is used as input to generative models; it cannot be a special token</span>
 <span class="n">DUMMY_FILL_VALUE</span> <span class="o">=</span> <span class="mi">100</span>
 
 
-<span class="n">GENERATIVE_MODEL_TASKS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;text-generation&quot;</span><span class="p">,</span> <span class="s2">&quot;text2text-generation&quot;</span><span class="p">]</span>
+<span class="c1"># We need to raise the amount of tokens generated for reasoning models, to give them</span>
+<span class="c1"># time to think</span>
+<span class="n">REASONING_MAX_TOKENS</span> <span class="o">=</span> <span class="mi">8_192</span>
 
 
-<span class="n">GENERATIVE_DATASET_TASKS</span> <span class="o">=</span> <span class="p">[</span><span class="n">KNOW</span><span class="p">,</span> <span class="n">COMMON_SENSE</span><span class="p">,</span> <span class="n">MCRC</span><span class="p">]</span>
+<span class="c1"># The Hugging Face Hub pipeline tags used to classify models as generative</span>
+<span class="n">GENERATIVE_PIPELINE_TAGS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;text-generation&quot;</span><span class="p">,</span> <span class="s2">&quot;text2text-generation&quot;</span><span class="p">]</span>
 
 
+<span class="c1"># Used to disallow non-generative models to be evaluated on these task groups</span>
 <span class="n">GENERATIVE_DATASET_TASK_GROUPS</span> <span class="o">=</span> <span class="p">[</span><span class="n">TaskGroup</span><span class="o">.</span><span class="n">TEXT_TO_TEXT</span><span class="p">]</span>
 
 
+<span class="c1"># Local models are required to have these files in their directory</span>
 <span class="n">LOCAL_MODELS_REQUIRED_FILES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;config.json&quot;</span><span class="p">]</span>
 
 
+<span class="c1"># Tasks where we use structured generation for generative models</span>
 <span class="n">TASKS_USING_JSON</span> <span class="o">=</span> <span class="p">[</span><span class="n">NER</span><span class="p">]</span>
 
 
+<span class="c1"># Tasks where we use log probabilities for generative models, rather than the raw</span>
+<span class="c1"># completion</span>
 <span class="n">TASK_GROUPS_USING_LOGPROBS</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">TaskGroup</span><span class="o">.</span><span class="n">SEQUENCE_CLASSIFICATION</span><span class="p">,</span>
     <span class="n">TaskGroup</span><span class="o">.</span><span class="n">MULTIPLE_CHOICE_CLASSIFICATION</span><span class="p">,</span>
 <span class="p">]</span>
 
 
+<span class="c1"># The number of top log probabilities to return for generative models. For several APIs</span>
+<span class="c1"># this is the maximum number of log probabilities that can be returned</span>
+<span class="n">MAX_LOGPROBS</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+<span class="c1"># We make sure to remove these metric attributed after each iteration, to avoid memory</span>
+<span class="c1"># leaks</span>
 <span class="n">METRIC_ATTRIBUTES_TAKING_UP_MEMORY</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cached_bertscorer&quot;</span><span class="p">]</span>
 
 
-<span class="n">MAX_LOGPROBS</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="c1"># Hugging Face Hub tags used to classify models as merge models</span>
+<span class="n">MERGE_TAGS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;merge&quot;</span><span class="p">,</span> <span class="s2">&quot;mergekit&quot;</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
 
 
