@@ -24,7 +24,7 @@ from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
 
 from ..constants import (
-    GENERATIVE_MODEL_TASKS,
+    GENERATIVE_PIPELINE_TAGS,
     MAX_LOGPROBS,
     REASONING_MAX_TOKENS,
     TASK_GROUPS_USING_LOGPROBS,
@@ -444,7 +444,8 @@ class VLLMModel(HuggingFaceEncoderModel):
             model_id=model_id, revision=revision, benchmark_config=benchmark_config
         )
         return (
-            model_info is not None and model_info.pipeline_tag in GENERATIVE_MODEL_TASKS
+            model_info is not None
+            and model_info.pipeline_tag in GENERATIVE_PIPELINE_TAGS
         )
 
     @classmethod
