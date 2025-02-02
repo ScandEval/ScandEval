@@ -154,7 +154,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         """
         if not hasattr(self, "_tokenizer"):
             return None
-        if self._tokenizer.chat_template is not None:
+        elif self.end_of_reasoning_token_id is not None:
+            return GenerativeType.REASONING
+        elif self._tokenizer.chat_template is not None:
             return GenerativeType.INSTRUCTION_TUNED
         else:
             return GenerativeType.BASE
