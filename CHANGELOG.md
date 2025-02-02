@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Deepseek R1. This is done by upping the maximal sequence length to 8,192 tokens, and
   removing the reasoning part afterwards, to get the final answer.
 - Added `generative_type` to the output dictionaries, which can currently be either
-  'base', 'instruction-tuned' or 'reasoning'. This is now used in the leaderboards.
+  'base', 'instruction_tuned' or 'reasoning'. This is now used in the leaderboards.
 - Added `merge` to the output dictionaries, on whether the model is the result of a
   merge with other models.
 - Added the summarisation dataset
