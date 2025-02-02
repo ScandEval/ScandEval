@@ -37,8 +37,9 @@ from urllib3.exceptions import RequestError
 
 from ..constants import (
     DUMMY_FILL_VALUE,
-    GENERATIVE_MODEL_TASKS,
+    GENERATIVE_PIPELINE_TAGS,
     LOCAL_MODELS_REQUIRED_FILES,
+    MERGE_TAGS,
 )
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
 from ..enums import (
@@ -491,7 +492,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         )
         return (
             model_info is not None
-            and model_info.pipeline_tag not in GENERATIVE_MODEL_TASKS
+            and model_info.pipeline_tag not in GENERATIVE_PIPELINE_TAGS
         )
 
     @classmethod
@@ -530,6 +531,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 for tag in model_info.tags
                 if tag in language_codes
             ],
+            merge=any(tag in model_info.tags for tag in MERGE_TAGS),
             inference_backend=InferenceBackend.TRANSFORMERS,
             model_type=ModelType.ENCODER,
             fresh=False,
@@ -798,8 +800,8 @@ def get_model_repo_info(
         class_names = hf_config.architectures
         generative_class_names = [
             class_name
-            for model_task in GENERATIVE_MODEL_TASKS
-            for class_name in TASK_MAPPING[model_task].values()
+            for tag in GENERATIVE_PIPELINE_TAGS
+            for class_name in TASK_MAPPING[tag].values()
         ]
         if class_names is not None and any(
             class_name in generative_class_names for class_name in class_names

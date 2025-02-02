@@ -81,6 +81,7 @@ class TestBenchmarkResult:
         yield BenchmarkResult(
             dataset="dataset",
             model="model",
+            merge=False,
             generative=False,
             generative_type=None,
             few_shot=True,
@@ -104,6 +105,7 @@ class TestBenchmarkResult:
         """Test that the `BenchmarkResult` parameters are correct."""
         assert benchmark_result.dataset == "dataset"
         assert benchmark_result.model == "model"
+        assert benchmark_result.merge is False
         assert benchmark_result.generative is False
         assert benchmark_result.generative_type is None
         assert benchmark_result.few_shot is True
@@ -135,6 +137,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=False,
                     generative_type=None,
                     few_shot=True,
@@ -162,6 +165,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=True,
                     generative_type=None,
                     few_shot=True,
@@ -189,6 +193,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=False,
                     generative_type=None,
                     few_shot=True,
@@ -215,6 +220,7 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=True,
                     generative_type=None,
                     few_shot=True,

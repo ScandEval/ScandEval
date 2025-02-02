@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import random
+import re
 import sys
 import typing as t
 from functools import partial
@@ -23,8 +24,9 @@ from transformers import AutoConfig, AutoTokenizer, PreTrainedTokenizer, Trainer
 from urllib3.exceptions import RequestError
 
 from ..constants import (
-    GENERATIVE_MODEL_TASKS,
+    GENERATIVE_PIPELINE_TAGS,
     MAX_LOGPROBS,
+    MERGE_TAGS,
     REASONING_MAX_TOKENS,
     TASK_GROUPS_USING_LOGPROBS,
     TASKS_USING_JSON,
@@ -121,6 +123,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         )
         self._model: LLM = model
         self._tokenizer: PreTrainedTokenizer = tokenizer
+        self.end_of_reasoning_token_id = get_end_of_reasoning_token_id(
+            model=self._model, tokenizer=self._tokenizer
+        )
 
         # We specify `HuggingFaceEncoderModel` here instead of `VLLMModel`, as we want
         # to call the `__init__` method of the `BenchmarkModule` class.
@@ -150,7 +155,9 @@ class VLLMModel(HuggingFaceEncoderModel):
         """
         if not hasattr(self, "_tokenizer"):
             return None
-        if self._tokenizer.chat_template is not None:
+        elif self.end_of_reasoning_token_id is not None:
+            return GenerativeType.REASONING
+        elif self._tokenizer.chat_template is not None:
             return GenerativeType.INSTRUCTION_TUNED
         else:
             return GenerativeType.BASE
@@ -252,9 +259,12 @@ class VLLMModel(HuggingFaceEncoderModel):
             The generated model outputs.
         """
         # Define which tokens to use as stopping criteria. We want to use the padding
-        # token, end-of-sentence token, and a double newline (since these separate the
-        # few-shot examples in the input)
-        stop_tokens: list[str] = ["\n\n"]
+        # token, end-of-sentence token, and a double newline if the model isn't
+        # instruction tuned (since these separate the few-shot examples in the input in
+        # this case)
+        stop_tokens: list[str] = list()
+        if self.buffer["instruction_model"] is False:
+            stop_tokens.append("\n\n")
         if self._tokenizer.pad_token_id is not None:
             stop_tokens.append(self._tokenizer.pad_token)
         if self._tokenizer.eos_token_id is not None:
@@ -300,13 +310,8 @@ class VLLMModel(HuggingFaceEncoderModel):
             if end_of_chat_token:
                 stop_tokens.append(end_of_chat_token)
 
-        if self.dataset_config.task.name in TASKS_USING_JSON:
+        if self.dataset_config.task in TASKS_USING_JSON:
             ner_tag_names = list(self.dataset_config.prompt_label_mapping.values())
-
-            # Xgrammar, the guided decoding backend, does not yet support a maximal
-            # amount of items in a list, so the `max_length` parameter will be ignored
-            # in practice. However, they're working on implementing this feature, so
-            # we include it here for future compatibility.
             keys_and_their_types: dict[str, t.Any] = {
                 tag_name: (conlist(str, max_length=5), ...)
                 for tag_name in ner_tag_names
@@ -363,9 +368,19 @@ class VLLMModel(HuggingFaceEncoderModel):
             use_tqdm=(not input_is_a_test),
             lora_request=self.buffer.get("lora_request"),
         )
+        completion_ids: list[list[int]] = [
+            output.outputs[0].token_ids for output in raw_outputs
+        ]
+        if self.end_of_reasoning_token_id in completion_ids[0]:
+            completion_ids = [
+                token_ids[token_ids.index(self.end_of_reasoning_token_id) + 2 :]
+                if self.end_of_reasoning_token_id in token_ids
+                else token_ids
+                for token_ids in completion_ids
+            ]
         completions = self._tokenizer.batch_decode(
             sequences=[
-                torch.LongTensor(output.outputs[0].token_ids) for output in raw_outputs
+                torch.LongTensor(completion_id) for completion_id in completion_ids
             ],
             skip_special_tokens=True,
         )
@@ -382,6 +397,17 @@ class VLLMModel(HuggingFaceEncoderModel):
                     for token_logprobs_dict in raw_output.outputs[0].logprobs
                 ]
                 for raw_output in raw_outputs
+            ]
+            scores = [
+                score_list[
+                    raw_output.outputs[0].token_ids.index(
+                        self.end_of_reasoning_token_id
+                    )
+                    + 2 :
+                ]
+                if self.end_of_reasoning_token_id in raw_output.outputs[0].token_ids
+                else score_list
+                for raw_output, score_list in zip(raw_outputs, scores)
             ]
             output = GenerativeModelOutput(sequences=completions, scores=scores)
         else:
@@ -419,7 +445,8 @@ class VLLMModel(HuggingFaceEncoderModel):
             model_id=model_id, revision=revision, benchmark_config=benchmark_config
         )
         return (
-            model_info is not None and model_info.pipeline_tag in GENERATIVE_MODEL_TASKS
+            model_info is not None
+            and model_info.pipeline_tag in GENERATIVE_PIPELINE_TAGS
         )
 
     @classmethod
@@ -458,6 +485,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for tag in model_info.tags
                 if tag in language_codes
             ],
+            merge=any(tag in model_info.tags for tag in MERGE_TAGS),
             inference_backend=InferenceBackend.VLLM,
             model_type=ModelType.GENERATIVE,
             fresh=False,
@@ -1046,3 +1074,92 @@ def clear_vllm() -> None:
     clear_memory()
     if ray.is_initialized():
         ray.shutdown()
+
+
+def get_end_of_reasoning_token_id(
+    model: "LLM", tokenizer: "PreTrainedTokenizer"
+) -> int | None:
+    """Get the end of reasoning token ID for a generative model.
+
+    This assumes that the reasoning token is of the form <X> and that the end of
+    reasoning token is </X> (for X being any string without spaces).
+
+    Args:
+        model:
+            The vLLM model.
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The end of reasoning token ID, or None if it could not be found.
+    """
+    if tokenizer.chat_template is None:
+        prompt = "What is your name?"
+    else:
+        prompt = tokenizer.apply_chat_template(
+            conversation=[dict(role="user", content="What is your name?")],
+            add_generation_prompt=True,
+            tokenize=False,
+        )
+
+    # Generate a completion and remove the BOS token from it, to not confuse it with the
+    # potential reasoning token
+    completion = (
+        model.generate(
+            prompts=[prompt],
+            sampling_params=SamplingParams(max_tokens=3, temperature=0.0),
+            use_tqdm=False,
+        )[0]
+        .outputs[0]
+        .text
+    )
+    completion = completion.replace(tokenizer.bos_token, "").strip()
+
+    # If it doesn't contain a reasoning token, we can't find the end of reasoning token
+    match = re.search(pattern=r"<\w+>", string=completion)
+    if match is None:
+        log_once(
+            message=(
+                "Could not find a reasoning token, so assuming the model is not a "
+                "reasoning model."
+            ),
+            level=logging.DEBUG,
+        )
+        return None
+
+    # Check that the found reasoning token and its associated end-of-reasoning tokens
+    # are both special tokens
+    reasoning_token = match.group()
+    end_of_reasoning_token = f"</{reasoning_token[1:-1]}>"
+    special_tokens = [
+        decoder_token.content
+        for decoder_token in tokenizer.added_tokens_decoder.values()
+    ]
+    special_tokens.extend(
+        [encoder_token for encoder_token in tokenizer.added_tokens_encoder.keys()]
+    )
+    special_tokens.extend(tokenizer.all_special_tokens)
+    if (
+        reasoning_token not in special_tokens
+        or end_of_reasoning_token not in special_tokens
+    ):
+        log_once(
+            message=(
+                f"Detected reasoning token {reasoning_token!r} and end of reasoning "
+                f"token {end_of_reasoning_token!r}, but one of them is not registered "
+                "as a special token, so assuming it is not a real reasoning token."
+            ),
+            level=logging.DEBUG,
+        )
+        return None
+
+    log_once(
+        message=f"Detected reasoning token {reasoning_token!r}.", level=logging.DEBUG
+    )
+
+    # Encode the end of reasoning token and return its ID
+    end_of_reasoning_token_id = tokenizer.encode(
+        text=end_of_reasoning_token, add_special_tokens=False
+    )[0]
+
+    return end_of_reasoning_token_id

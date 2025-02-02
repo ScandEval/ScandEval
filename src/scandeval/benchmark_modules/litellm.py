@@ -75,6 +75,7 @@ VOCAB_SIZE_MAPPING = {
     "gpt-4-(vision|turbo)(-preview)?": 100_256,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": 100_256,
     "gpt-4o(-mini)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 200_019,
+    "o[1-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
     # Anthropic models
     "claude-[1-9](-[1-9])?-(opus|sonnet|haiku)-[0-9]{8}": -1,
 }
@@ -95,12 +96,16 @@ MODEL_MAX_LENGTH_MAPPING = {
     "gpt-4-(vision|turbo)(-preview)?": 128_000,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": 4_095,
     "gpt-4o(-mini)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 128_000,
+    "o1-(mini|preview)(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 128_000,
+    "o1(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 200_000,
+    "o[2-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 200_000,
     # Anthropic models
     "claude-[1-9](-[1-9])?-(opus|sonnet|haiku)-[0-9]{8}": 200_000,
 }
 
 
 NUM_PARAMS_MAPPING = {
+    # OpenAI models
     "(text-)?ada(-001)?": 350_000_000,
     "(text-)?babbage(-001)?": 3_000_000_000,
     "(text-)?curie(-001)?": 13_000_000_000,
@@ -112,9 +117,13 @@ NUM_PARAMS_MAPPING = {
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": -1,
     "gpt-4o(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
     "gpt-4o-mini(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
+    "o[1-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
     # Anthropic models
     "claude-[1-9](-[1-9])?-(opus|sonnet|haiku)-[0-9]{8}": -1,
 }
+
+
+REASONING_MODELS = ["o[1-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?"]
 
 
 class LiteLLMModel(BenchmarkModule):
@@ -131,7 +140,12 @@ class LiteLLMModel(BenchmarkModule):
         Returns:
             The generative type of the model, or None if it has not been set yet.
         """
-        return GenerativeType.INSTRUCTION_TUNED
+        if re.match(
+            pattern="|".join(REASONING_MODELS), string=self.model_config.model_id
+        ):
+            return GenerativeType.REASONING
+        else:
+            return GenerativeType.INSTRUCTION_TUNED
 
     def generate(self, inputs: dict) -> GenerativeModelOutput:
         """Generate outputs from the model.
@@ -156,7 +170,7 @@ class LiteLLMModel(BenchmarkModule):
                 if self.generative_type == GenerativeType.REASONING
                 else self.dataset_config.max_generated_tokens
             ),
-            stop=["\n\n"],
+            stop=[],
             temperature=0.0,
             seed=4242,
             api_key=self.benchmark_config.api_key,
@@ -168,7 +182,7 @@ class LiteLLMModel(BenchmarkModule):
             generation_kwargs["logprobs"] = True
             generation_kwargs["top_logprobs"] = MAX_LOGPROBS
 
-        if self.dataset_config.task.name in TASKS_USING_JSON:
+        if self.dataset_config.task in TASKS_USING_JSON:
             assert (
                 "json" in messages[0]["content"].lower()
             ), "Prompt must contain 'json' for JSON tasks."
@@ -571,6 +585,7 @@ class LiteLLMModel(BenchmarkModule):
             revision="main",
             task="text-generation",
             languages=list(),
+            merge=False,
             inference_backend=InferenceBackend.LITELLM,
             model_type=ModelType.GENERATIVE,
             fresh=False,

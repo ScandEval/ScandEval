@@ -13,7 +13,7 @@ from time import sleep
 from torch.distributed import destroy_process_group
 
 from .benchmark_config_factory import build_benchmark_config
-from .constants import GENERATIVE_MODEL_TASKS
+from .constants import GENERATIVE_PIPELINE_TAGS
 from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
@@ -385,7 +385,7 @@ class Benchmarker:
 
                 # We do not re-initialise generative models as their architecture is not
                 # customised to specific datasets
-                if model_config.task in GENERATIVE_MODEL_TASKS:
+                if model_config.task in GENERATIVE_PIPELINE_TAGS:
                     initial_logging(
                         model_config=model_config,
                         dataset_config=dataset_config,
@@ -599,6 +599,7 @@ class Benchmarker:
                     num_model_parameters=model.num_params,
                     max_sequence_length=model.model_max_length,
                     vocabulary_size=model.vocab_size,
+                    merge=model_config.merge,
                     generative=model_config.model_type == ModelType.GENERATIVE,
                     generative_type=(
                         model.generative_type.value
@@ -750,7 +751,7 @@ def initial_logging(
             The general benchmark configuration.
     """
     split_type = "validation" if not benchmark_config.evaluate_test_split else "test"
-    if model_config.task in GENERATIVE_MODEL_TASKS:
+    if model_config.task in GENERATIVE_PIPELINE_TAGS:
         if benchmark_config.few_shot:
             eval_type = "Few-shot benchmarking"
         else:
