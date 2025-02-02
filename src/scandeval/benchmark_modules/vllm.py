@@ -35,7 +35,13 @@ from ..data_models import (
     ModelConfig,
     Task,
 )
-from ..enums import BatchingPreference, InferenceBackend, ModelType, TaskGroup
+from ..enums import (
+    BatchingPreference,
+    GenerativeType,
+    InferenceBackend,
+    ModelType,
+    TaskGroup,
+)
 from ..exceptions import (
     InvalidBenchmark,
     InvalidModel,
@@ -133,6 +139,20 @@ class VLLMModel(HuggingFaceEncoderModel):
             self.buffer["lora_request"] = LoRARequest(
                 lora_name="adapter", lora_int_id=1, lora_path=adapter_path
             )
+
+    @property
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if it has not been set yet.
+        """
+        if not hasattr(self, "_tokenizer"):
+            return None
+        if self._tokenizer.chat_template is not None:
+            return GenerativeType.INSTRUCTION_TUNED
+        else:
+            return GenerativeType.BASE
 
     @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:

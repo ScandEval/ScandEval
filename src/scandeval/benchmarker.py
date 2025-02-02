@@ -600,7 +600,11 @@ class Benchmarker:
                     max_sequence_length=model.model_max_length,
                     vocabulary_size=model.vocab_size,
                     generative=model_config.model_type == ModelType.GENERATIVE,
-                    generative_type=model.generative_type,
+                    generative_type=(
+                        model.generative_type.value
+                        if model.generative_type is not None
+                        else None
+                    ),
                     few_shot=benchmark_config.few_shot,
                     validation_split=not benchmark_config.evaluate_test_split,
                 )

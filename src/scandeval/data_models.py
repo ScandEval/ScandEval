@@ -220,6 +220,7 @@ class BenchmarkResult(pydantic.BaseModel):
     max_sequence_length: int
     vocabulary_size: int
     generative: bool
+    generative_type: str | None
     few_shot: bool
     validation_split: bool
     scandeval_version: str = importlib.metadata.version("scandeval")
@@ -239,17 +240,19 @@ class BenchmarkResult(pydantic.BaseModel):
         # name with parameters rather than adding them as explicit parameters
         val_matches = re.search(r"\(.*val.*\)$", config["model"])
         few_shot_matches = re.search(r"\(.*few-shot.*\)$", config["model"])
+        zero_shot_matches = re.search(r"\(.*zero-shot.*\)$", config["model"])
         config["model"] = re.sub(
             r"\(.*(few-shot|val).*\)$", "", config["model"]
         ).strip()
 
-        # The default value for `few_shot` is True. It won't do anything if the model
-        # is not generative, so this is fine
         if "generative" not in config:
-            config["generative"] = few_shot_matches is not None
+            config["generative"] = (
+                few_shot_matches is not None or zero_shot_matches is not None
+            )
+        if "generative_type" not in config:
+            config["generative_type"] = None
         if "few_shot" not in config:
-            config["few_shot"] = True
-
+            config["few_shot"] = zero_shot_matches is None
         if "validation_split" not in config:
             config["validation_split"] = val_matches is not None
 

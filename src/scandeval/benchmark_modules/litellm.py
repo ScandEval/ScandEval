@@ -32,7 +32,13 @@ from transformers import Trainer
 
 from ..constants import MAX_LOGPROBS, TASK_GROUPS_USING_LOGPROBS, TASKS_USING_JSON
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
-from ..enums import BatchingPreference, InferenceBackend, ModelType, TaskGroup
+from ..enums import (
+    BatchingPreference,
+    GenerativeType,
+    InferenceBackend,
+    ModelType,
+    TaskGroup,
+)
 from ..exceptions import (
     InvalidBenchmark,
     NeedsAdditionalArgument,
@@ -112,6 +118,15 @@ class LiteLLMModel(BenchmarkModule):
     fresh_model = False
     batching_preference = BatchingPreference.SINGLE_SAMPLE
     high_priority = False
+
+    @property
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if it has not been set yet.
+        """
+        return GenerativeType.INSTRUCTION_TUNED
 
     def generate(self, inputs: dict) -> GenerativeModelOutput:
         """Generate outputs from the model.

@@ -48,7 +48,6 @@ class BenchmarkModule(ABC):
     """
 
     fresh_model: bool
-    generative_type: GenerativeType | None = None
     batching_preference: BatchingPreference
     high_priority: bool
 
@@ -133,6 +132,16 @@ class BenchmarkModule(ABC):
 
         Returns:
             The number of parameters in the model.
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if the model is not generative.
         """
         ...
 

@@ -41,7 +41,13 @@ from ..constants import (
     LOCAL_MODELS_REQUIRED_FILES,
 )
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
-from ..enums import BatchingPreference, InferenceBackend, ModelType, TaskGroup
+from ..enums import (
+    BatchingPreference,
+    GenerativeType,
+    InferenceBackend,
+    ModelType,
+    TaskGroup,
+)
 from ..exceptions import (
     HuggingFaceHubDown,
     InvalidBenchmark,
@@ -262,6 +268,15 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 raise NotImplementedError(
                     f"Unsupported task group: {self.dataset_config.task.task_group}."
                 )
+
+    @property
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if it has not been set yet.
+        """
+        return None
 
     @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:

@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into
   121 / 64 / 256 samples for train / validation / test, respectively, and is set to
   `unofficial` for now.
+- Added `generative_type` to the output dictionaries, which can currently be either
+  'base' or 'instruction-tuned'. This is now used in the leaderboards.
 
 
 ## [v14.4.0] - 2025-01-22
