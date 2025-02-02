@@ -7,9 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-### Changed
-- Changed `vllm` to `>=0.7.1`, as the slow NER evaluation has been fixed now.
-
 
 
 ## [v15.0.0] - 2025-02-02
