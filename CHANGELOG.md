@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `unofficial` for now. This was contributed by
   [@oliverkinch](https://github.com/oliverkinch) ✨
 
+### Changed
+- Changed the instruction prompts to all text classification tasks by specifying
+  that only the labels are allowed to be generated. This caused an issue with some of
+  the reasoning models, as they tended to output a more verbose answer.
+
 ### Fixed
 - Only use double newlines as stop tokens for base decoder models, and not instruction
   tuned models, as we only use the double newlines to separate the few-shot examples in
