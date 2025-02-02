@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added support for evaluating generative reasoning models, such as OpenAI o1 and
+  Deepseek R1. This is done by upping the maximal sequence length to 8,192 tokens, and
+  removing the reasoning part afterwards, to get the final answer.
+- Added `generative_type` to the output dictionaries, which can currently be either
+  'base', 'instruction-tuned' or 'reasoning'. This is now used in the leaderboards.
 - Added the summarisation dataset
   [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into
   121 / 64 / 256 samples for train / validation / test, respectively, and is set to
@@ -25,8 +30,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as
   `unofficial` for now. This was contributed by
   [@oliverkinch](https://github.com/oliverkinch) ✨
-- Added `generative_type` to the output dictionaries, which can currently be either
-  'base' or 'instruction-tuned'. This is now used in the leaderboards.
 
 ### Fixed
 - Only use double newlines as stop tokens for base decoder models, and not instruction
