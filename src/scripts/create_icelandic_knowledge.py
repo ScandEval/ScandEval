@@ -9,6 +9,7 @@ import pandas as pd
 from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from openai import OpenAI
+from openai.types.chat import ChatCompletionUserMessageParam
 from pydantic import BaseModel
 from requests import HTTPError
 
@@ -133,12 +134,12 @@ def build_dataset_with_llm(dataset: Dataset) -> pd.DataFrame:
 
         if id_ not in cache:
             logger.info(f"Processing id: {id_}/{df_len}")
-            messages = [
-                {
-                    "role": "user",
-                    "content": f"For the question: {row.question} where the correct answer is: {row.answer}, please provide 3 plausible alternatives in Icelandic.",
-                }
-            ]
+            messages: list[ChatCompletionUserMessageParam] = list()
+            user_message = ChatCompletionUserMessageParam(
+                role="user",
+                content=f"For the question: {row.question} where the correct answer is: {row.answer}, please provide 3 plausible alternatives in Icelandic.",
+            )
+            messages.append(user_message)
 
             completion = client.beta.chat.completions.parse(
                 model="gpt-4o", messages=messages, response_format=CandidateAnswers
@@ -146,6 +147,7 @@ def build_dataset_with_llm(dataset: Dataset) -> pd.DataFrame:
 
             # Store response
             event = completion.choices[0].message.parsed
+            assert event is not None, f"Expected a response, but got {event}."
             cache[id_] = dict(event)
             with open(cache_file, "w") as f:
                 json.dump(cache, f)
