@@ -26,6 +26,7 @@ from urllib3.exceptions import RequestError
 from ..constants import (
     GENERATIVE_MODEL_TASKS,
     MAX_LOGPROBS,
+    REASONING_MAX_TOKENS,
     TASK_GROUPS_USING_LOGPROBS,
     TASKS_USING_JSON,
 )
@@ -36,7 +37,13 @@ from ..data_models import (
     ModelConfig,
     Task,
 )
-from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
+from ..enums import (
+    BatchingPreference,
+    GenerativeType,
+    InferenceBackend,
+    ModelType,
+    TaskGroup,
+)
 from ..exceptions import (
     InvalidBenchmark,
     InvalidModel,
@@ -81,7 +88,7 @@ logger = logging.getLogger("scandeval")
 class VLLMModel(HuggingFaceEncoderModel):
     """A generative model using the vLLM inference framework."""
 
-    _is_generative = True
+    fresh_model = False
     batching_preference = BatchingPreference.ALL_AT_ONCE
     high_priority = True
 
@@ -137,6 +144,20 @@ class VLLMModel(HuggingFaceEncoderModel):
             self.buffer["lora_request"] = LoRARequest(
                 lora_name="adapter", lora_int_id=1, lora_path=adapter_path
             )
+
+    @property
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if it has not been set yet.
+        """
+        if not hasattr(self, "_tokenizer"):
+            return None
+        if self._tokenizer.chat_template is not None:
+            return GenerativeType.INSTRUCTION_TUNED
+        else:
+            return GenerativeType.BASE
 
     @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
@@ -302,9 +323,9 @@ class VLLMModel(HuggingFaceEncoderModel):
 
         # Define the parameters used for vLLM generation
         max_tokens: int = (
-            self.dataset_config.max_generated_tokens
-            if self.end_of_reasoning_token_id is None
-            else 8_192
+            REASONING_MAX_TOKENS
+            if self.generative_type == GenerativeType.REASONING
+            else self.dataset_config.max_generated_tokens
         )
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
@@ -448,30 +469,21 @@ class VLLMModel(HuggingFaceEncoderModel):
         if model_info is None:
             raise InvalidModel(f"The model {model_id!r} could not be found.")
 
-        framework = Framework.PYTORCH
-        if "pytorch" in model_info.tags:
-            pass
-        elif "jax" in model_info.tags:
-            framework = Framework.JAX
-        elif "spacy" in model_info.tags:
-            raise InvalidModel("SpaCy models are not supported.")
-        elif any(tag in model_info.tags for tag in {"tf", "tensorflow", "keras"}):
-            raise InvalidModel("TensorFlow/Keras models are not supported.")
-
         language_mapping = get_all_languages()
         language_codes = list(language_mapping.keys())
 
         model_config = ModelConfig(
             model_id=model_id,
             revision=revision,
-            framework=framework,
             task=model_info.pipeline_tag,
             languages=[
                 language_mapping[tag]
                 for tag in model_info.tags
                 if tag in language_codes
             ],
-            model_type=ModelType.HF_HUB_GENERATIVE,
+            inference_backend=InferenceBackend.VLLM,
+            model_type=ModelType.GENERATIVE,
+            fresh=False,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),

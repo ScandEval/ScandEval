@@ -1,11 +1,9 @@
 """Functions related to getting the model configuration."""
 
-import importlib.util
 import logging
 import typing as t
 
 from . import benchmark_modules
-from .enums import Framework
 from .exceptions import InvalidModel, NeedsEnvironmentVariable, NeedsExtraInstalled
 
 if t.TYPE_CHECKING:
@@ -60,11 +58,6 @@ def get_model_config(
             model_config = benchmark_module.get_model_config(
                 model_id=model_id, benchmark_config=benchmark_config
             )
-            if (
-                model_config.framework == Framework.JAX
-                and importlib.util.find_spec("jax") is None
-            ):
-                raise NeedsExtraInstalled(extra="jax")
             return model_config
     else:
         msg = f"Model {model_id} not found."

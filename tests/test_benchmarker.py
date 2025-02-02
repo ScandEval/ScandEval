@@ -43,7 +43,7 @@ def test_benchmark_encoder(benchmarker, task, language, encoder_model_id):
         except HuggingFaceHubDown:
             time.sleep(5)
     else:
-        raise HuggingFaceHubDown()
+        pytest.skip(reason="Hugging Face Hub is down, so we skip this test.")
     assert isinstance(benchmark_result, list)
     assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
@@ -65,7 +65,7 @@ def test_benchmark_generative(benchmarker, task, language, generative_model_id):
         except HuggingFaceHubDown:
             time.sleep(5)
     else:
-        raise HuggingFaceHubDown()
+        pytest.skip(reason="Hugging Face Hub is down, so we skip this test.")
     assert isinstance(benchmark_result, list)
     assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
@@ -91,7 +91,7 @@ def test_benchmark_generative_adapter(
         except HuggingFaceHubDown:
             time.sleep(5)
     else:
-        raise HuggingFaceHubDown()
+        pytest.skip(reason="Hugging Face Hub is down, so we skip this test.")
     assert isinstance(benchmark_result, list)
     assert all(isinstance(result, BenchmarkResult) for result in benchmark_result)
 
@@ -143,6 +143,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=False,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=False,
                     num_model_parameters=100,
@@ -165,6 +166,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="another-dataset",
                     generative=False,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=False,
                     num_model_parameters=100,
@@ -187,6 +189,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=True,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=False,
                     num_model_parameters=100,
@@ -209,6 +212,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=True,
+                    generative_type=None,
                     few_shot=True,
                     validation_split=False,
                     num_model_parameters=100,
@@ -231,6 +235,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=False,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=False,
                     num_model_parameters=100,
@@ -253,6 +258,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=False,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=False,
                     num_model_parameters=100,
@@ -275,6 +281,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=False,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=True,
                     num_model_parameters=100,
@@ -297,6 +304,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=False,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=False,
                     num_model_parameters=100,
@@ -310,6 +318,7 @@ def test_benchmark_anthropic(benchmarker, task, language):
                     model="model",
                     dataset="dataset",
                     generative=False,
+                    generative_type=None,
                     few_shot=False,
                     validation_split=False,
                     num_model_parameters=100,

@@ -30,9 +30,20 @@ from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
 from transformers import Trainer
 
-from ..constants import MAX_LOGPROBS, TASK_GROUPS_USING_LOGPROBS, TASKS_USING_JSON
+from ..constants import (
+    MAX_LOGPROBS,
+    REASONING_MAX_TOKENS,
+    TASK_GROUPS_USING_LOGPROBS,
+    TASKS_USING_JSON,
+)
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
-from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
+from ..enums import (
+    BatchingPreference,
+    GenerativeType,
+    InferenceBackend,
+    ModelType,
+    TaskGroup,
+)
 from ..exceptions import (
     InvalidBenchmark,
     NeedsAdditionalArgument,
@@ -109,9 +120,18 @@ NUM_PARAMS_MAPPING = {
 class LiteLLMModel(BenchmarkModule):
     """A generative model from LiteLLM."""
 
-    _is_generative = True
+    fresh_model = False
     batching_preference = BatchingPreference.SINGLE_SAMPLE
     high_priority = False
+
+    @property
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if it has not been set yet.
+        """
+        return GenerativeType.INSTRUCTION_TUNED
 
     def generate(self, inputs: dict) -> GenerativeModelOutput:
         """Generate outputs from the model.
@@ -131,7 +151,11 @@ class LiteLLMModel(BenchmarkModule):
 
         generation_kwargs: dict[str, t.Any] = dict(
             model=self.model_config.model_id,
-            max_tokens=self.dataset_config.max_generated_tokens,
+            max_completion_tokens=(
+                REASONING_MAX_TOKENS
+                if self.generative_type == GenerativeType.REASONING
+                else self.dataset_config.max_generated_tokens
+            ),
             stop=[],
             temperature=0.0,
             seed=4242,
@@ -163,11 +187,19 @@ class LiteLLMModel(BenchmarkModule):
                 )
                 break
             except BadRequestError as e:
-                if "stop_sequences" not in str(e).lower():
+                if "stop_sequences" in str(e).lower():
+                    generation_kwargs["stop"] = None
+                elif "you are not allowed to request logprobs" in str(e).lower():
+                    generation_kwargs.pop("logprobs")
+                    generation_kwargs.pop("top_logprobs")
+                elif (
+                    "'temperature' is not supported with this model." in str(e).lower()
+                ):
+                    generation_kwargs.pop("temperature")
+                else:
                     raise InvalidBenchmark(
                         f"Failed to generate text. The error message was: {e}"
                     )
-                generation_kwargs["stop"] = None
             except (
                 Timeout,
                 ServiceUnavailableError,
@@ -537,13 +569,14 @@ class LiteLLMModel(BenchmarkModule):
         return ModelConfig(
             model_id=model_id,
             revision="main",
-            framework=Framework.API,
             task="text-generation",
             languages=list(),
+            inference_backend=InferenceBackend.LITELLM,
+            model_type=ModelType.GENERATIVE,
+            fresh=False,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),
-            model_type=ModelType.API,
             adapter_base_model_id=None,
         )
 

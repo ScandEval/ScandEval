@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 import pydantic
 import torch
 
-from .enums import Device, Framework, ModelType, TaskGroup
+from .enums import Device, InferenceBackend, ModelType, TaskGroup
 from .types import ScoreDict
 
 
@@ -220,6 +220,7 @@ class BenchmarkResult(pydantic.BaseModel):
     max_sequence_length: int
     vocabulary_size: int
     generative: bool
+    generative_type: str | None
     few_shot: bool
     validation_split: bool
     scandeval_version: str = importlib.metadata.version("scandeval")
@@ -239,17 +240,19 @@ class BenchmarkResult(pydantic.BaseModel):
         # name with parameters rather than adding them as explicit parameters
         val_matches = re.search(r"\(.*val.*\)$", config["model"])
         few_shot_matches = re.search(r"\(.*few-shot.*\)$", config["model"])
+        zero_shot_matches = re.search(r"\(.*zero-shot.*\)$", config["model"])
         config["model"] = re.sub(
             r"\(.*(few-shot|val).*\)$", "", config["model"]
         ).strip()
 
-        # The default value for `few_shot` is True. It won't do anything if the model
-        # is not generative, so this is fine
         if "generative" not in config:
-            config["generative"] = few_shot_matches is not None
+            config["generative"] = (
+                few_shot_matches is not None or zero_shot_matches is not None
+            )
+        if "generative_type" not in config:
+            config["generative_type"] = None
         if "few_shot" not in config:
-            config["few_shot"] = True
-
+            config["few_shot"] = zero_shot_matches is None
         if "validation_split" not in config:
             config["validation_split"] = val_matches is not None
 
@@ -356,14 +359,16 @@ class ModelConfig:
             The ID of the model.
         revision:
             The revision of the model.
-        framework:
-            The framework of the model.
         task:
             The task that the model was trained on.
         languages:
             The languages of the model.
+        inference_backend:
+            The backend used to perform inference with the model.
         model_type:
-            The type of the model.
+            The type of the model (e.g., encoder, base decoder, instruction tuned).
+        fresh:
+            Whether the model is freshly initialised.
         model_cache_dir:
             The directory to cache the model in.
         adapter_base_model_id:
@@ -373,10 +378,11 @@ class ModelConfig:
 
     model_id: str
     revision: str
-    framework: Framework
     task: str
     languages: list[Language]
+    inference_backend: InferenceBackend
     model_type: ModelType
+    fresh: bool
     model_cache_dir: str
     adapter_base_model_id: str | None
 

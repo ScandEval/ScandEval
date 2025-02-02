@@ -23,7 +23,6 @@ from requests.exceptions import RequestException
 from transformers import PreTrainedTokenizer
 from transformers import logging as tf_logging
 
-from .enums import Framework
 from .exceptions import NaNValueInModelOutput
 
 if importlib.util.find_spec("ray") is not None:
@@ -64,26 +63,23 @@ def clear_memory():
         torch.mps.empty_cache()
 
 
-def enforce_reproducibility(framework: Framework | str, seed: int = 4242):
+def enforce_reproducibility(seed: int = 4242):
     """Ensures reproducibility of experiments.
 
     Args:
-        framework:
-            The framework used for the benchmarking.
         seed:
             Seed for the random number generator.
     """
     random.seed(seed)
     np.random.seed(seed)
     rng = np.random.default_rng(seed)
-    if framework in (Framework.PYTORCH, Framework.JAX):
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
-        os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-        os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
-        torch.use_deterministic_algorithms(True, warn_only=True)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
     return rng
 
 

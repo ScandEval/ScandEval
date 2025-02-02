@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as
   `unofficial` for now. This was contributed by
   [@oliverkinch](https://github.com/oliverkinch) ✨
+- Added `generative_type` to the output dictionaries, which can currently be either
+  'base' or 'instruction-tuned'. This is now used in the leaderboards.
 
 ### Fixed
 - Only use double newlines as stop tokens for base decoder models, and not instruction
@@ -32,6 +34,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the base case.
 - A bug caused structured generation to not be used for generative models on named
   entity recognition tasks. This affects models evaluated from v14.2.0.
+- Fixed an issue where some API models did not allow `logprobs`, `top_logprobs`,
+  `max_tokens` and/or `temperature`.
+
+### Removed
+- Removed support for JAX/Flax models to simplify the code, as they are incredibly rare,
+  and they usually have a PyTorch/Safetensors version available.
 
 
 ## [v14.4.0] - 2025-01-22
