@@ -219,6 +219,7 @@ class BenchmarkResult(pydantic.BaseModel):
     num_model_parameters: int
     max_sequence_length: int
     vocabulary_size: int
+    merge: bool
     generative: bool
     generative_type: str | None
     few_shot: bool
@@ -245,6 +246,8 @@ class BenchmarkResult(pydantic.BaseModel):
             r"\(.*(few-shot|val).*\)$", "", config["model"]
         ).strip()
 
+        if "merge" not in config:
+            config["merge"] = False
         if "generative" not in config:
             config["generative"] = (
                 few_shot_matches is not None or zero_shot_matches is not None
@@ -365,6 +368,8 @@ class ModelConfig:
             The languages of the model.
         inference_backend:
             The backend used to perform inference with the model.
+        merge:
+            Whether the model is a merged model.
         model_type:
             The type of the model (e.g., encoder, base decoder, instruction tuned).
         fresh:
@@ -381,6 +386,7 @@ class ModelConfig:
     task: str
     languages: list[Language]
     inference_backend: InferenceBackend
+    merge: bool
     model_type: ModelType
     fresh: bool
     model_cache_dir: str

@@ -599,6 +599,7 @@ class Benchmarker:
                     num_model_parameters=model.num_params,
                     max_sequence_length=model.model_max_length,
                     vocabulary_size=model.vocab_size,
+                    merge=model_config.merge,
                     generative=model_config.model_type == ModelType.GENERATIVE,
                     generative_type=(
                         model.generative_type.value

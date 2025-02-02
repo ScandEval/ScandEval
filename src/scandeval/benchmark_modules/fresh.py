@@ -132,6 +132,7 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
             task="fill-mask",
             languages=list(),
             revision="main",
+            merge=False,
             inference_backend=InferenceBackend.TRANSFORMERS,
             model_type=ModelType.ENCODER,
             fresh=True,

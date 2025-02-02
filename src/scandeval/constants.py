@@ -44,3 +44,7 @@ MAX_LOGPROBS = 10
 # We make sure to remove these metric attributed after each iteration, to avoid memory
 # leaks
 METRIC_ATTRIBUTES_TAKING_UP_MEMORY = ["cached_bertscorer"]
+
+
+# Hugging Face Hub tags used to classify models as merge models
+MERGE_TAGS = ["merge", "mergekit"]

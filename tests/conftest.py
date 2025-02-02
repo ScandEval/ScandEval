@@ -159,6 +159,7 @@ def model_config() -> Generator[ModelConfig, None, None]:
         revision="revision",
         task="task",
         languages=[DA],
+        merge=False,
         inference_backend=InferenceBackend.TRANSFORMERS,
         model_type=ModelType.ENCODER,
         fresh=True,

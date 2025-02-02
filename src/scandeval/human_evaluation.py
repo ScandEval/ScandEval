@@ -11,9 +11,8 @@ import click
 from datasets import Dataset
 
 from .benchmark_config_factory import build_benchmark_config
-from .benchmarker import BenchmarkResult
 from .data_loading import load_data
-from .data_models import GenerativeModelOutput
+from .data_models import BenchmarkResult, GenerativeModelOutput
 from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
 from .enums import GenerativeType, TaskGroup
 from .exceptions import NeedsExtraInstalled
@@ -686,6 +685,7 @@ class HumanEvaluator:
             num_model_parameters=-1,
             max_sequence_length=-1,
             vocabulary_size=-1,
+            merge=False,
             generative=True,
             generative_type=GenerativeType.INSTRUCTION_TUNED,
             few_shot=True,

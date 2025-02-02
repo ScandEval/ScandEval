@@ -26,6 +26,7 @@ from urllib3.exceptions import RequestError
 from ..constants import (
     GENERATIVE_PIPELINE_TAGS,
     MAX_LOGPROBS,
+    MERGE_TAGS,
     REASONING_MAX_TOKENS,
     TASK_GROUPS_USING_LOGPROBS,
     TASKS_USING_JSON,
@@ -484,6 +485,7 @@ class VLLMModel(HuggingFaceEncoderModel):
                 for tag in model_info.tags
                 if tag in language_codes
             ],
+            merge=any(tag in model_info.tags for tag in MERGE_TAGS),
             inference_backend=InferenceBackend.VLLM,
             model_type=ModelType.GENERATIVE,
             fresh=False,

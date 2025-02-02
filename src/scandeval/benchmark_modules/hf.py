@@ -39,6 +39,7 @@ from ..constants import (
     DUMMY_FILL_VALUE,
     GENERATIVE_PIPELINE_TAGS,
     LOCAL_MODELS_REQUIRED_FILES,
+    MERGE_TAGS,
 )
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
 from ..enums import (
@@ -530,6 +531,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 for tag in model_info.tags
                 if tag in language_codes
             ],
+            merge=any(tag in model_info.tags for tag in MERGE_TAGS),
             inference_backend=InferenceBackend.TRANSFORMERS,
             model_type=ModelType.ENCODER,
             fresh=False,

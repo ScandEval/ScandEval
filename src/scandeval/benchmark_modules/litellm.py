@@ -585,6 +585,7 @@ class LiteLLMModel(BenchmarkModule):
             revision="main",
             task="text-generation",
             languages=list(),
+            merge=False,
             inference_backend=InferenceBackend.LITELLM,
             model_type=ModelType.GENERATIVE,
             fresh=False,
