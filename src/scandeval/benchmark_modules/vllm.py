@@ -1115,6 +1115,13 @@ def get_end_of_reasoning_token_id(
     # If it doesn't contain a reasoning token, we can't find the end of reasoning token
     match = re.search(pattern=r"<\w+>", string=completion)
     if match is None:
+        log_once(
+            message=(
+                "Could not find a reasoning token, so assuming the model is not a "
+                "reasoning model."
+            ),
+            level=logging.DEBUG,
+        )
         return None
 
     # Check that the found reasoning token and its associated end-of-reasoning tokens
@@ -1133,6 +1140,14 @@ def get_end_of_reasoning_token_id(
         reasoning_token not in special_tokens
         or end_of_reasoning_token not in special_tokens
     ):
+        log_once(
+            message=(
+                f"Detected reasoning token {reasoning_token!r} and end of reasoning "
+                f"token {end_of_reasoning_token!r}, but one of them is not registered "
+                "as a special token, so assuming it is not a real reasoning token."
+            ),
+            level=logging.DEBUG,
+        )
         return None
 
     log_once(
