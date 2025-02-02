@@ -39,11 +39,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-jax = [
-    "jax>=0.4.24",
-    "jaxlib>=0.4.24",
-    "flax>=0.8.1",
-]
 generative = [
     "demjson3>=3.0.6",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
@@ -54,9 +49,6 @@ human_evaluation = [
     "gradio>=4.26.0",
 ]
 all = [
-    "jax>=0.4.24",
-    "jaxlib>=0.4.24",
-    "flax>=0.8.1",
     "demjson3>=3.0.6",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
     "vllm>=0.6.3,<0.6.5; platform_system == 'Linux'",
@@ -64,9 +56,6 @@ all = [
     "gradio>=4.26.0",
 ]
 test = [
-    "jax>=0.4.24",
-    "jaxlib>=0.4.24",
-    "flax>=0.8.1",
     "gradio>=4.26.0",
 ]
 

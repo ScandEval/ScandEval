@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added `generative_type` to the output dictionaries, which can currently be either
   'base' or 'instruction-tuned'. This is now used in the leaderboards.
 
+### Removed
+- Removed support for JAX/Flax models to simplify the code, as they are incredibly rare,
+  and they usually have a PyTorch/Safetensors version available.
+
 
 ## [v14.4.0] - 2025-01-22
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
