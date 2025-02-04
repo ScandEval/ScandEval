@@ -81,7 +81,6 @@ class TestBenchmarkResult:
         yield BenchmarkResult(
             dataset="dataset",
             model="model",
-            merge=False,
             generative=False,
             generative_type=None,
             few_shot=True,
@@ -89,6 +88,7 @@ class TestBenchmarkResult:
             num_model_parameters=100,
             max_sequence_length=100,
             vocabulary_size=100,
+            merge=False,
             dataset_languages=["da"],
             task="task",
             results=dict(),
@@ -105,7 +105,6 @@ class TestBenchmarkResult:
         """Test that the `BenchmarkResult` parameters are correct."""
         assert benchmark_result.dataset == "dataset"
         assert benchmark_result.model == "model"
-        assert benchmark_result.merge is False
         assert benchmark_result.generative is False
         assert benchmark_result.generative_type is None
         assert benchmark_result.few_shot is True
@@ -113,6 +112,7 @@ class TestBenchmarkResult:
         assert benchmark_result.num_model_parameters == 100
         assert benchmark_result.max_sequence_length == 100
         assert benchmark_result.vocabulary_size == 100
+        assert benchmark_result.merge is False
         assert benchmark_result.dataset_languages == ["da"]
         assert benchmark_result.task == "task"
         assert benchmark_result.results == dict()
@@ -261,6 +261,7 @@ class TestBenchmarkResult:
                 num_model_parameters=benchmark_result.num_model_parameters,
                 max_sequence_length=benchmark_result.max_sequence_length,
                 vocabulary_size=benchmark_result.vocabulary_size,
+                merge=benchmark_result.merge,
                 generative=benchmark_result.generative,
                 generative_type=benchmark_result.generative_type,
                 few_shot=benchmark_result.few_shot,
