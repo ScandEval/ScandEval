@@ -2,7 +2,7 @@
 hide:
     - toc
 ---
-# Germanic
+# 🇩🇰🇳🇱🇬🇧🇫🇴🇩🇪🇮🇸🇳🇴🇸🇪 Germanic
 
 See the [leaderboard page](/leaderboards) for more information about all the columns.
 
