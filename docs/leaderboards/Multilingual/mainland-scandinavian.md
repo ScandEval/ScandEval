@@ -2,7 +2,7 @@
 hide:
     - toc
 ---
-# 🇩🇰🇳🇴🇸🇪 Mainland Scandinavian
+# Mainland Scandinavian
 
 See the [leaderboard page](/leaderboards) for more information about all the columns.
 

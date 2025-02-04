@@ -43,18 +43,9 @@ plugins:
 nav:
   - About: README.md
   - Leaderboards:
-      - leaderboards/README.md
-      - leaderboards/danish.md
-      - leaderboards/dutch.md
-      - leaderboards/english.md
-      - leaderboards/faroese.md
-      - leaderboards/french.md
-      - leaderboards/german.md
-      - leaderboards/icelandic.md
-      - leaderboards/norwegian.md
-      - leaderboards/swedish.md
+      - leaderboards
       - Compare Models:
-          - leaderboards/radial_plotter.md
+          - extras/radial_plotter.md
   - Tasks: tasks
   - Datasets: datasets
   - Methodology: methodology.md

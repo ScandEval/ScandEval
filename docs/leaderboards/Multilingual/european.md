@@ -2,7 +2,7 @@
 hide:
     - toc
 ---
-# 🇪🇺 European
+# European
 
 See the [leaderboard page](/leaderboards) for more information about all the columns.
 
