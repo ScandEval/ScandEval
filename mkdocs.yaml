@@ -14,6 +14,7 @@ theme:
     - navigation.instant.prefetch
     - navigation.instant.progress
     - navigation.tracking
+    - navigation.sections
   palette:
     - media: "(prefers-color-scheme: light)"
       primary: blue grey
@@ -41,11 +42,23 @@ plugins:
   - mkapi
 nav:
   - About: README.md
-  - Leaderboards: leaderboards
+  - Leaderboards:
+      - leaderboards/README.md
+      - leaderboards/danish.md
+      - leaderboards/dutch.md
+      - leaderboards/english.md
+      - leaderboards/faroese.md
+      - leaderboards/french.md
+      - leaderboards/german.md
+      - leaderboards/icelandic.md
+      - leaderboards/norwegian.md
+      - leaderboards/swedish.md
+      - Compare Models:
+          - leaderboards/radial_plotter.md
   - Tasks: tasks
   - Datasets: datasets
   - Methodology: methodology.md
   - FAQ: faq.md
   - Python Package: python-package.md
   - API Reference:
-    - $api:src/scandeval.***
+      - $api:src/scandeval.***
