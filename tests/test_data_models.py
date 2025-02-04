@@ -261,6 +261,7 @@ class TestBenchmarkResult:
                 num_model_parameters=benchmark_result.num_model_parameters,
                 max_sequence_length=benchmark_result.max_sequence_length,
                 vocabulary_size=benchmark_result.vocabulary_size,
+                merge=benchmark_result.merge,
                 generative=benchmark_result.generative,
                 generative_type=benchmark_result.generative_type,
                 few_shot=benchmark_result.few_shot,
