@@ -4,7 +4,9 @@ hide:
 ---
 # Radial Plot
 
-The section embeds a Huggingface Space for comparing models using a radial chart. This might take a bit to load. You can go to the original app [here](https://huggingface.co/spaces/alexandrainst/radial-plot-generator).
+This tool can be used to compare individual models across each task in the benchmark,
+using a so-called radial plot (also known as a spider plot). You can access the
+underlying Hugging Face Space [here](https://huggingface.co/spaces/alexandrainst/radial-plot-generator).
 
 <script
 	type="module"
@@ -12,4 +14,3 @@ The section embeds a Huggingface Space for comparing models using a radial chart
 ></script>
 
 <gradio-app src="https://alexandrainst-radial-plot-generator.hf.space"></gradio-app>
-
