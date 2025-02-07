@@ -7,6 +7,65 @@ information about what these constitute.
 
 ## Sentiment Classification
 
+### Sentiment headlines
+This dataset was published in [this paper](https://arxiv.org/abs/2208.13947) and features political news headlines.
+
+The original full dataset consists of 1,371 /  609 / 459 samples for training, validation, and testing, respectively. We use 861/  256 / 1024 samples for training, validation, and testing, respectively. All our splits are subsets of the original ones. The label distribution for the splits are as follows:
+
+| Split | positive | negative | neutral | Total |
+|-------|----------|----------|---------|--------|
+| Train | 368      | 248      | 245     | 861    |
+| Val   | 88       | 90       | 78      | 256    |
+| Test  | 417      | 293      | 314     | 1,024  |
+| Total | 873      | 631      | 637     | 2,141  |
+
+Here are a few examples from the training split:
+
+```json
+{
+    "text": "Mauricio Macri, en el cierre de campaña: “Esta marcha no termina hoy acá, sino en noviembre”",
+    "label": "neutral"
+}
+```
+```json
+{
+    "text": "Lavagna reforzó su discurso económico y pidió más consumo", "label": "positive"
+}
+```
+```json
+{
+    "text": "Sin la aprobación del Fondo, Macri quema reservas para la fuga",
+    "label": "negative"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  Aquí hay textos y su sentimiento, que puede ser 'positivo' o 'negativo'.
+  ```
+- Base prompt template:
+  ```
+  Texto: {text}
+  Sentimiento: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Texto: {text}
+
+  Clasifica el sentimiento del texto. Responde con 'positivo' o 'negativo'.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset sentiment-headlines-es
+```
+
+
 ## Named Entity Recognition
 
 ## Linguistic Acceptability

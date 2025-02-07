@@ -244,6 +244,25 @@ ALLOCINE_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+SENTIMENT_HEADLINES_CONFIG = DatasetConfig(
+    name="sentiment-headlines-es",
+    pretty_name="the truncated version of the Spanish sentiment headlines dataset",
+    huggingface_id="ScandEval/sentiment-headlines-es",
+    task=SENT,
+    languages=[ES],
+    labels=["negative", "neutral", "positive"],
+    prompt_prefix="Lo siguiente son reseñas y su sentimiento, que puede ser  "
+    "'positiv', 'neutral' eller 'negativ'.",
+    prompt_template="Texto: {text}\Sentimiento: {label}",
+    prompt_label_mapping=dict(
+        positive="positiv", neutral="neutral", negative="negativ"
+    ),
+    instruction_prompt="Reseña: {text}\n\nClasifica el sentimiento de la reseña. "
+    "Responde con 'positivo', 'neutral' o 'negativo', y nada más.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
 
 ### NAMED ENTITY RECOGNITION DATASETS ###
 
