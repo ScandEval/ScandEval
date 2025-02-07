@@ -70,6 +70,72 @@ $ scandeval --model <model-id> --dataset sentiment-headlines-es
 
 ## Linguistic Acceptability
 
+### ScaLA-es
+
+This dataset was published in [this paper](https://aclanthology.org/L08-1222/) and was automatically created from the [Spanish Universal Dependencies](https://github.com/UniversalDependencies/UD_Spanish-AnCora) by
+assuming that the documents in the treebank are correct, and corrupting the samples to
+create grammatically incorrect samples. The corruptions were done by either removing a
+word from a sentence, or by swapping two neighbouring words in a sentence. To ensure
+that this does indeed break the grammaticality of the sentence, a set of rules were used
+on the part-of-speech tags of the words in the sentence.
+
+The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+used as-is in the framework.
+
+Here are a few examples from the training split:
+
+```json
+{
+    "text": "El fuego obligó al a el desalojo preventivo de algunas casas y del de el observatorio del de el Roque de los Muchachos, del de el Instituto de Astrofísica de Canarias.",
+    "corruption_type": None,
+    "label": "correct"
+}
+```
+```json
+{
+    "text": "El libro que leemos intenta explicarlo explicar, pero sin exagerar las posturas de tirios y troyanos.",
+    "corruption_type": "delete",
+    "label": "incorrect"
+}
+```
+```json
+{
+    "text": "Por su parte, el Consejo de Ministros dio ayer otra vuelta de tuerca al a el control urbanístico de las ciudades autónomas de Ceuta y de Melilla para evitar la urbanística por parte del de el Grupo Independiente Liberal (GIL), que gobierna en Ceuta.",
+    "corruption_type": "delete",
+    "label": "incorrect"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 12
+- Prefix prompt:
+  ```
+  Lo siguiente son oraciones y si son gramaticalmente correctas.
+  ```
+- Base prompt template:
+  ```
+    Oración: {text}
+    Gramaticalmente correcta: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+    Oración: {text}
+
+    Determina si la oración es gramaticalmente correcta o no. Responde con 'sí' si la oración es correcta, y 'no' si no lo es.
+  ```
+- Label mapping:
+    - `correct` ➡️ `sí`
+    - `incorrect` ➡️ `no`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset scala-es
+```
+
 ## Reading Comprehension
 
 ### XQuAD-es
