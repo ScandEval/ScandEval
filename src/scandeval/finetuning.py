@@ -187,7 +187,7 @@ def finetune_single_iteration(
         The scores for the test dataset.
     """
     # Set random seeds to enforce reproducibility of the randomly initialised weights
-    enforce_reproducibility(framework=model_config.framework, seed=training_args.seed)
+    enforce_reproducibility(seed=training_args.seed)
 
     if model is None:
         model = load_model(

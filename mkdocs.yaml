@@ -14,6 +14,7 @@ theme:
     - navigation.instant.prefetch
     - navigation.instant.progress
     - navigation.tracking
+    - navigation.sections
   palette:
     - media: "(prefers-color-scheme: light)"
       primary: blue grey
@@ -37,16 +38,18 @@ markdown_extensions:
 plugins:
   - include-markdown
   - search
-  - include_dir_to_nav:
-      file_name_as_title: true
+  - include_dir_to_nav
   - mkapi
 nav:
   - About: README.md
-  - Leaderboards: leaderboards
+  - Leaderboards:
+      - leaderboards
+      - Compare Models:
+          - extras/radial_plotter.md
   - Tasks: tasks
   - Datasets: datasets
   - Methodology: methodology.md
   - FAQ: faq.md
   - Python Package: python-package.md
   - API Reference:
-    - $api:src/scandeval.***
+      - $api:src/scandeval.***

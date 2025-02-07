@@ -82,11 +82,13 @@ class TestBenchmarkResult:
             dataset="dataset",
             model="model",
             generative=False,
+            generative_type=None,
             few_shot=True,
             validation_split=False,
             num_model_parameters=100,
             max_sequence_length=100,
             vocabulary_size=100,
+            merge=False,
             dataset_languages=["da"],
             task="task",
             results=dict(),
@@ -104,11 +106,13 @@ class TestBenchmarkResult:
         assert benchmark_result.dataset == "dataset"
         assert benchmark_result.model == "model"
         assert benchmark_result.generative is False
+        assert benchmark_result.generative_type is None
         assert benchmark_result.few_shot is True
         assert benchmark_result.validation_split is False
         assert benchmark_result.num_model_parameters == 100
         assert benchmark_result.max_sequence_length == 100
         assert benchmark_result.vocabulary_size == 100
+        assert benchmark_result.merge is False
         assert benchmark_result.dataset_languages == ["da"]
         assert benchmark_result.task == "task"
         assert benchmark_result.results == dict()
@@ -133,7 +137,9 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=False,
+                    generative_type=None,
                     few_shot=True,
                     validation_split=False,
                     num_model_parameters=100,
@@ -159,7 +165,9 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=True,
+                    generative_type=None,
                     few_shot=True,
                     validation_split=False,
                     num_model_parameters=100,
@@ -185,7 +193,9 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=False,
+                    generative_type=None,
                     few_shot=True,
                     validation_split=True,
                     num_model_parameters=100,
@@ -210,7 +220,9 @@ class TestBenchmarkResult:
                 BenchmarkResult(
                     dataset="dataset",
                     model="model",
+                    merge=False,
                     generative=True,
+                    generative_type=None,
                     few_shot=True,
                     validation_split=True,
                     num_model_parameters=100,
@@ -249,7 +261,9 @@ class TestBenchmarkResult:
                 num_model_parameters=benchmark_result.num_model_parameters,
                 max_sequence_length=benchmark_result.max_sequence_length,
                 vocabulary_size=benchmark_result.vocabulary_size,
+                merge=benchmark_result.merge,
                 generative=benchmark_result.generative,
+                generative_type=benchmark_result.generative_type,
                 few_shot=benchmark_result.few_shot,
                 validation_split=benchmark_result.validation_split,
                 scandeval_version=benchmark_result.scandeval_version,

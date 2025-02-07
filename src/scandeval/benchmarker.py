@@ -13,11 +13,11 @@ from time import sleep
 from torch.distributed import destroy_process_group
 
 from .benchmark_config_factory import build_benchmark_config
-from .constants import GENERATIVE_MODEL_TASKS
+from .constants import GENERATIVE_PIPELINE_TAGS
 from .data_loading import load_data
 from .data_models import BenchmarkConfigParams, BenchmarkResult
 from .dataset_configs import get_all_dataset_configs
-from .enums import Device
+from .enums import Device, ModelType
 from .exceptions import InvalidBenchmark, InvalidModel
 from .finetuning import finetune
 from .generation import generate
@@ -385,7 +385,7 @@ class Benchmarker:
 
                 # We do not re-initialise generative models as their architecture is not
                 # customised to specific datasets
-                if model_config.task in GENERATIVE_MODEL_TASKS:
+                if model_config.task in GENERATIVE_PIPELINE_TAGS:
                     initial_logging(
                         model_config=model_config,
                         dataset_config=dataset_config,
@@ -539,9 +539,9 @@ class Benchmarker:
             try:
                 # Set random seeds to enforce reproducibility of the randomly
                 # initialised weights
-                rng = enforce_reproducibility(framework=model_config.framework)
+                rng = enforce_reproducibility()
 
-                if model is None or not model.is_generative:
+                if model is None or model_config.model_type != ModelType.GENERATIVE:
                     logger.info("Loading model...")
                     model = load_model(
                         model_config=model_config,
@@ -564,7 +564,7 @@ class Benchmarker:
                     prepared_datasets = model.prepare_datasets(
                         datasets=bootstrapped_datasets, task=dataset_config.task
                     )
-                    if model.is_generative:
+                    if model_config.model_type == ModelType.GENERATIVE:
                         scores = generate(
                             model=model,
                             datasets=prepared_datasets,
@@ -599,7 +599,13 @@ class Benchmarker:
                     num_model_parameters=model.num_params,
                     max_sequence_length=model.model_max_length,
                     vocabulary_size=model.vocab_size,
-                    generative=model.is_generative,
+                    merge=model_config.merge,
+                    generative=model_config.model_type == ModelType.GENERATIVE,
+                    generative_type=(
+                        model.generative_type.value
+                        if model.generative_type is not None
+                        else None
+                    ),
                     few_shot=benchmark_config.few_shot,
                     validation_split=not benchmark_config.evaluate_test_split,
                 )
@@ -745,7 +751,7 @@ def initial_logging(
             The general benchmark configuration.
     """
     split_type = "validation" if not benchmark_config.evaluate_test_split else "test"
-    if model_config.task in GENERATIVE_MODEL_TASKS:
+    if model_config.task in GENERATIVE_PIPELINE_TAGS:
         if benchmark_config.few_shot:
             eval_type = "Few-shot benchmarking"
         else:

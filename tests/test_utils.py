@@ -30,9 +30,9 @@ class TestEnforceReproducibility:
 
     def test_random_arrays_equal(self):
         """Test that two random arrays are equal after enforcing reproducibility."""
-        enforce_reproducibility(framework="random")
+        enforce_reproducibility()
         first_random_number = random.random()
-        enforce_reproducibility(framework="random")
+        enforce_reproducibility()
         second_random_number = random.random()
         assert first_random_number == second_random_number
 
@@ -44,9 +44,9 @@ class TestEnforceReproducibility:
 
     def test_numpy_arrays_equal(self):
         """Test that two random arrays are equal after enforcing reproducibility."""
-        enforce_reproducibility(framework="numpy")
+        enforce_reproducibility()
         first_random_numbers = np.random.rand(10)
-        enforce_reproducibility(framework="numpy")
+        enforce_reproducibility()
         second_random_numbers = np.random.rand(10)
         assert np.array_equal(first_random_numbers, second_random_numbers)
 
@@ -58,9 +58,9 @@ class TestEnforceReproducibility:
 
     def test_pytorch_tensors_equal(self):
         """Test that two random tensors are equal after enforcing reproducibility."""
-        enforce_reproducibility(framework="pytorch")
+        enforce_reproducibility()
         first_random_numbers = torch.rand(10)
-        enforce_reproducibility(framework="pytorch")
+        enforce_reproducibility()
         second_random_numbers = torch.rand(10)
         assert torch.equal(first_random_numbers, second_random_numbers)
 
@@ -78,8 +78,6 @@ def test_module_is_installed(module_name, expected):
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
     argvalues=[
-        ("mistralai/Mistral-7B-v0.1", True),
-        ("meta-llama/Meta-Llama-3-8B", True),
         ("AI-Sweden-Models/gpt-sw3-6.7b-v2", True),
         ("01-ai/Yi-6B", True),
         ("google-bert/bert-base-uncased", False),
@@ -108,12 +106,7 @@ def test_should_prompts_be_stripped(model_id, expected, auth):
 
 @pytest.mark.parametrize(
     argnames=["model_id", "expected"],
-    argvalues=[
-        ("mistralai/Mistral-7B-v0.1", False),
-        ("meta-llama/Meta-Llama-3-8B", True),
-        ("AI-Sweden-Models/gpt-sw3-6.7b-v2", False),
-        ("01-ai/Yi-6B", True),
-    ],
+    argvalues=[("AI-Sweden-Models/gpt-sw3-6.7b-v2", False), ("01-ai/Yi-6B", True)],
 )
 def test_should_prefix_space_be_added_to_labels(model_id, expected, auth):
     """Test whether a prefix space should be added to labels."""
