@@ -140,7 +140,7 @@ class LiteLLMModel(BenchmarkModule):
         Returns:
             The generative type of the model, or None if it has not been set yet.
         """
-        if re.match(
+        if re.fullmatch(
             pattern="|".join(REASONING_MODELS), string=self.model_config.model_id
         ):
             return GenerativeType.REASONING
@@ -264,7 +264,7 @@ class LiteLLMModel(BenchmarkModule):
             The number of parameters in the model.
         """
         for key, value in NUM_PARAMS_MAPPING.items():
-            if re.match(pattern=key, string=self.model_config.model_id) is not None:
+            if re.fullmatch(pattern=key, string=self.model_config.model_id) is not None:
                 return value
 
         if self.model_config.model_id.startswith("huggingface/"):
@@ -324,7 +324,7 @@ class LiteLLMModel(BenchmarkModule):
             The vocabulary size of the model.
         """
         for key, value in VOCAB_SIZE_MAPPING.items():
-            if re.match(pattern=key, string=self.model_config.model_id) is not None:
+            if re.fullmatch(pattern=key, string=self.model_config.model_id) is not None:
                 return value
 
         if self.model_config.model_id.startswith("huggingface/"):
@@ -374,7 +374,7 @@ class LiteLLMModel(BenchmarkModule):
             The maximum length of the model.
         """
         for key, value in MODEL_MAX_LENGTH_MAPPING.items():
-            if re.match(pattern=key, string=self.model_config.model_id) is not None:
+            if re.fullmatch(pattern=key, string=self.model_config.model_id) is not None:
                 return value
 
         if self.model_config.model_id.startswith("huggingface/"):
