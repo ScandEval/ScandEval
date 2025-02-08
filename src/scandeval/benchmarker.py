@@ -27,8 +27,6 @@ from .scores import log_scores
 from .speed_benchmark import benchmark_speed
 from .tasks import SPEED
 from .utils import enforce_reproducibility
-import requests
-from huggingface_hub import list_repo_files
 
 if t.TYPE_CHECKING:
     from .benchmark_modules import BenchmarkModule
@@ -211,38 +209,6 @@ class Benchmarker:
         else:
             return list()
 
-    def _check_safetensors_available(self, model_id: str) -> bool:
-        """Check if the model has safetensors weights available.
-        
-        Args:
-            model_id: The Hugging Face model ID to check
-            
-        Returns:
-            bool: True if safetensors available, False otherwise
-        """
-        try:
-            # List files in the repo
-            files = list_repo_files(model_id)
-            # Check if any file ends with .safetensors
-            return any(f.endswith('.safetensors') for f in files)
-        except Exception:
-            # If we can't check (e.g. API error), assume it's fine
-            return True
-
-    def _prompt_safetensors_warning(self, model_id: str) -> bool:
-        """Prompt user about missing safetensors if running from CLI.
-        
-        Args:
-            model_id: The model ID being checked
-            
-        Returns:
-            bool: True to continue, False to abort
-        """
-        print(f"\nWarning: Model {model_id} does not have safetensors weights available.")
-        print("This may pose security risks when loading the model.")
-        response = input("Do you want to continue anyway? [y/N]: ").lower()
-        return response in ['y', 'yes']
-
     def benchmark(
         self,
         model: list[str] | str,
@@ -384,16 +350,6 @@ class Benchmarker:
 
         if benchmark_config.clear_model_cache:
             clear_model_cache_fn(cache_dir=benchmark_config.cache_dir)
-
-        # Only do safetensors check if running from CLI
-        if hasattr(sys, 'ps1') is False:  # Check if running from CLI
-            for model_id in model:
-                # Skip check for non-HF models
-                if not (model_id.startswith('http') or '/' not in model_id):
-                    if not self._check_safetensors_available(model_id):
-                        if not self._prompt_safetensors_warning(model_id):
-                            print("Aborting benchmark.")
-                            sys.exit(1)
 
         model_ids = self._prepare_model_ids(model_id=model)
         dataset_configs = prepare_dataset_configs(
