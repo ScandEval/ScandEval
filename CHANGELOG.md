@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Regex mismatch caused the wrong sequence length for GPT-4o models. This has been fixed
   now.
 - A bug occurred when locating a model's end of reasoning token (e.g., `</think>`) if
-the model's tokenizer had no BOS token. This has been fixed now.
+  the model's tokenizer had no BOS token. This has been fixed now.
+- Fixed an issue with the loading of freshly initialised models, caused by attempting to
+  load the Hugging Face model configuration from the Hugging Face Hub instead of
+  manually creating it.
 
 
 ## [v15.0.0] - 2025-02-02
