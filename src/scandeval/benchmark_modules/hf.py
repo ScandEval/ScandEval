@@ -260,9 +260,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 | TaskGroup.QUESTION_ANSWERING
                 | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
             ):
-                return DataCollatorWithPadding(
-                    self._tokenizer, padding="longest", max_length=self.model_max_length
-                )
+                return DataCollatorWithPadding(self._tokenizer, padding="longest")
             case TaskGroup.TOKEN_CLASSIFICATION:
                 return DataCollatorForTokenClassification(
                     tokenizer=self._tokenizer, label_pad_token_id=-100
@@ -351,8 +349,6 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                         f"label2id dictionary {self._model.config.label2id}."
                     )
             return examples
-
-        breakpoint()
 
         def tokenise(examples: dict):
             return self._tokenizer(text=examples["text"], truncation=True, padding=True)

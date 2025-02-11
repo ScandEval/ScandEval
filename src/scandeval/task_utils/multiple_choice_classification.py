@@ -117,6 +117,8 @@ def prepare_examples(
     new_examples = tokenizer(
         text=[context_and_question] * len(choices),
         text_pair=[choice[3:] for choice in choices],
+        padding=True,
+        truncation=True,
     )
     new_examples["label"] = [
         int(choice.startswith(f"{letter}. ") and letter == examples["label"][0])
