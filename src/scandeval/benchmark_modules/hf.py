@@ -260,7 +260,9 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 | TaskGroup.QUESTION_ANSWERING
                 | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
             ):
-                return DataCollatorWithPadding(self._tokenizer, padding="longest")
+                return DataCollatorWithPadding(
+                    self._tokenizer, padding="longest", max_length=self.model_max_length
+                )
             case TaskGroup.TOKEN_CLASSIFICATION:
                 return DataCollatorForTokenClassification(
                     tokenizer=self._tokenizer, label_pad_token_id=-100
