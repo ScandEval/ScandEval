@@ -206,7 +206,7 @@ class BenchmarkConfigParams(pydantic.BaseModel):
     api_version: str | None
     debug: bool
     run_with_cli: bool
-    only_allow_safetensors: bool = False
+    only_allow_safetensors: bool
 
 
 class BenchmarkResult(pydantic.BaseModel):
