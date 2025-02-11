@@ -75,7 +75,9 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
             raise_errors=benchmark_config.raise_errors,
         )
 
-        super().__init__(
+        # We specify `HuggingFaceEncoderModel` here instead of `VLLMModel`, as we want
+        # to call the `__init__` method of the `BenchmarkModule` class.
+        super(HuggingFaceEncoderModel, self).__init__(
             model_config=model_config,
             dataset_config=dataset_config,
             benchmark_config=benchmark_config,
