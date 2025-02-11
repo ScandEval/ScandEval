@@ -87,6 +87,7 @@ def benchmark_config(auth, device) -> Generator[BenchmarkConfig, None, None]:
         api_version=None,
         debug=False,
         run_with_cli=True,
+        only_allow_safetensors=False,
     )
 
 

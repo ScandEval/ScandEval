@@ -44,6 +44,7 @@ def test_cli_param_names(params):
         "api_version",
         "debug",
         "help",
+        "only_allow_safetensors",
     }
 
 
@@ -74,3 +75,4 @@ def test_cli_param_types(params):
     assert params["api_version"] == STRING
     assert params["debug"] == BOOL
     assert params["help"] == BOOL
+    assert params["only_allow_safetensors"] == BOOL
