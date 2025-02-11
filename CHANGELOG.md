@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added now `--only-allow-safetensors` flag, which disallows evaluating models from the
+  Hugging Face Hub if they are not stored as safetensors. This ensures a high level of
+  security on the system running the evaluations, if this is necessary. This was
+  contributed by [@Mikeriess](https://github.com/Mikeriess) ✨
+
 ### Fixed
 - Regex mismatch caused the wrong sequence length for GPT-4o models. This has been fixed
   now.
