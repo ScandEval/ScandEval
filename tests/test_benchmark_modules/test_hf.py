@@ -37,16 +37,9 @@ def test_get_torch_dtype(test_device, torch_dtype_is_set, bf16_available, expect
         == expected
     )
 
-def test_safetensors_check():
+def test_safetensors_check(benchmark_config):
     """Test the safetensors availability check functionality."""
-    
-    # Mock benchmark config with safetensors check enabled
-    benchmark_config = MagicMock(spec=BenchmarkConfig)
     benchmark_config.only_allow_safetensors = True
-    benchmark_config.cache_dir = ".cache"
-    benchmark_config.api_key = None
-    benchmark_config.trust_remote_code = False
-    benchmark_config.run_with_cli = True
 
     # Mock HfApi and its list_files method
     with patch.object(HfApi, 'list_repo_files') as mock_list_files, \
