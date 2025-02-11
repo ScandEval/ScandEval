@@ -62,6 +62,10 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 os.environ["OMP_NUM_THREADS"] = "1"
 
 
+# Disable a warning from Ray regarding the detection of the number of CPUs
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
+
+
 # Set the HF_TOKEN env var to copy the HUGGINGFACE_API_KEY env var, as vLLM uses the
 # former and LiteLLM uses the latter
 if os.getenv("HUGGINGFACE_API_KEY"):
