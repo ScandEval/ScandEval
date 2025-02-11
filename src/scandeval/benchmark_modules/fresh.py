@@ -55,6 +55,10 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
             benchmark_config:
                 The benchmark configuration.
         """
+        # This is already set when calling `super.__init__`, but we need it to get a
+        # value from `self.model_max_length`, so we set it here as well.
+        self.model_config = model_config
+
         model, tokenizer = load_model_and_tokenizer(
             model_config=model_config,
             dataset_config=dataset_config,
