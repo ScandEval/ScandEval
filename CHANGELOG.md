@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Regex mismatch caused the wrong sequence length for GPT-4o models. This has been fixed
   now.
+- A bug occurred when locating a model's end of reasoning token (e.g., `</think>`) if
+the model's tokenizer had no BOS token. This has been fixed now.
 
 
 ## [v15.0.0] - 2025-02-02
