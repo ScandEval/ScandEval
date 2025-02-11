@@ -352,6 +352,8 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                     )
             return examples
 
+        breakpoint()
+
         def tokenise(examples: dict):
             return self._tokenizer(text=examples["text"], truncation=True, padding=True)
 
