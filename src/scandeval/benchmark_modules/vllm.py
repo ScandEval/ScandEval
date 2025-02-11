@@ -1113,7 +1113,8 @@ def get_end_of_reasoning_token_id(
         .outputs[0]
         .text
     )
-    completion = completion.replace(tokenizer.bos_token, "").strip()
+    if tokenizer.bos_token is not None:
+        completion = completion.replace(tokenizer.bos_token, "").strip()
 
     # If it doesn't contain a reasoning token, we can't find the end of reasoning token
     match = re.search(pattern=r"<\w+>", string=completion)
