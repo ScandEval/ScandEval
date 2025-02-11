@@ -1,11 +1,12 @@
 """Unit tests for the `hf` module."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 import torch
-from unittest.mock import patch, MagicMock
 from huggingface_hub.hf_api import HfApi
-from scandeval.benchmark_modules.hf import get_torch_dtype, get_model_repo_info
-from scandeval.data_models import BenchmarkConfig
+
+from scandeval.benchmark_modules.hf import get_model_repo_info, get_torch_dtype
 from scandeval.exceptions import InvalidModel
 
 
@@ -37,35 +38,29 @@ def test_get_torch_dtype(test_device, torch_dtype_is_set, bf16_available, expect
         == expected
     )
 
+
 def test_safetensors_check(benchmark_config):
     """Test the safetensors availability check functionality."""
     benchmark_config.only_allow_safetensors = True
 
     # Mock HfApi and its list_files method
-    with patch.object(HfApi, 'list_repo_files') as mock_list_files, \
-         patch.object(HfApi, 'model_info') as mock_model_info:
-        
+    with (
+        patch.object(HfApi, "list_repo_files") as mock_list_files,
+        patch.object(HfApi, "model_info") as mock_model_info,
+    ):
         # Test case 1: Model with safetensors
-        mock_list_files.return_value = [
-            "model.safetensors",
-            "config.json"
-        ]
+        mock_list_files.return_value = ["model.safetensors", "config.json"]
         mock_model_info.return_value = MagicMock(
-            id="test-model",
-            tags=["test"],
-            pipeline_tag="fill-mask"
+            id="test-model", tags=["test"], pipeline_tag="fill-mask"
         )
-        
+
         # Should not raise an exception
         result = get_model_repo_info("test-model", "main", benchmark_config)
         assert result is not None
 
         # Test case 2: Model without safetensors
-        mock_list_files.return_value = [
-            "pytorch_model.bin",
-            "config.json"
-        ]
-        
+        mock_list_files.return_value = ["pytorch_model.bin", "config.json"]
+
         # Should raise InvalidModel
         with pytest.raises(InvalidModel) as exc_info:
             get_model_repo_info("test-model", "main", benchmark_config)
@@ -73,11 +68,8 @@ def test_safetensors_check(benchmark_config):
 
         # Test case 3: Safetensors check disabled
         benchmark_config.only_allow_safetensors = False
-        mock_list_files.return_value = [
-            "pytorch_model.bin",
-            "config.json"
-        ]
-        
+        mock_list_files.return_value = ["pytorch_model.bin", "config.json"]
+
         # Should not raise an exception when check is disabled
         result = get_model_repo_info("test-model", "main", benchmark_config)
         assert result is not None

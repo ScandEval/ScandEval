@@ -813,7 +813,7 @@ def get_model_repo_info(
     if benchmark_config.only_allow_safetensors:
         # Check if any file ends with .safetensors
         repo_files = hf_api.list_repo_files(repo_id=model_id, revision=revision)
-        has_safetensors = any(f.endswith('.safetensors') for f in repo_files)
+        has_safetensors = any(f.endswith(".safetensors") for f in repo_files)
         if not has_safetensors:
             msg = f"Model {model_id} does not have safetensors weights available. "
             if benchmark_config.run_with_cli:
