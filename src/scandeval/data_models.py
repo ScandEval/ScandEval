@@ -150,6 +150,8 @@ class BenchmarkConfig:
             Whether to run the benchmark in debug mode.
         run_with_cli:
             Whether the benchmark is being run with the CLI.
+        only_allow_safetensors:
+            Whether to only allow models that use the safetensors format.
     """
 
     model_languages: list[Language]

@@ -79,6 +79,7 @@ class Benchmarker:
         api_version: str | None = None,
         debug: bool = False,
         run_with_cli: bool = False,
+        only_allow_safetensors: bool = False,
     ) -> None:
         """Initialise the benchmarker.
 
@@ -151,6 +152,9 @@ class Benchmarker:
             run_with_cli:
                 Whether the benchmarker is being run from the command-line interface.
                 Defaults to False.
+            only_allow_safetensors:
+                Whether to only allow models that use the safetensors format. Defaults to
+                False.
 
         Raises:
             ValueError:
@@ -184,6 +188,7 @@ class Benchmarker:
             api_version=api_version,
             debug=debug,
             run_with_cli=run_with_cli,
+            only_allow_safetensors=only_allow_safetensors,
         )
 
         self.benchmark_config = build_benchmark_config(
@@ -232,6 +237,7 @@ class Benchmarker:
         evaluate_test_split: bool | None = None,
         few_shot: bool | None = None,
         num_iterations: int | None = None,
+        only_allow_safetensors: bool | None = None,
     ) -> list[BenchmarkResult]:
         """Benchmarks models on datasets.
 
@@ -312,6 +318,9 @@ class Benchmarker:
                 to be used for power users, and scores will not be allowed on the
                 leaderboards if this is changed. Defaults to the value specified when
                 initialising the benchmarker.
+            only_allow_safetensors:
+                Whether to only allow models that use the safetensors format. Defaults
+                to the value specified when initialising the benchmarker.
 
         Returns:
             A list of benchmark results.
@@ -344,6 +353,7 @@ class Benchmarker:
             evaluate_test_split=evaluate_test_split,
             few_shot=few_shot,
             num_iterations=num_iterations,
+            only_allow_safetensors=only_allow_safetensors,
         )
 
         adjust_logging_level(verbose=benchmark_config.verbose)
