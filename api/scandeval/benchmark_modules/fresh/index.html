@@ -1057,6 +1057,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.fresh.load_model_and_tokenizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_model_and_tokenizer
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1761,6 +1770,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#scandeval.benchmark_modules.fresh.load_model_and_tokenizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_model_and_tokenizer
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1806,6 +1824,23 @@ A freshly initialised encoder model.</p>
 </li>
 </ul>
 </div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle functions">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Functions</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name"><a href="./#scandeval.benchmark_modules.fresh.load_model_and_tokenizer" title="scandeval.benchmark_modules.fresh.load_model_and_tokenizer">load_model_and_tokenizer</a></span>
+ <span class="mkapi-dash">&mdash;</span>
+Load the model and tokenizer.</p>
+</li>
+</ul>
+</div>
 </div>
 <p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.fresh.FreshEncoderModel">
 <span class="mkapi-object-link">
@@ -1816,12 +1851,40 @@ A freshly initialised encoder model.</p>
 <i class="fa-regular fa-square-minus"></i>
 </span>
 </span><span class="mkapi-object-kind">class</span>
-<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.fresh.FreshEncoderModel" title="scandeval.benchmark_modules.fresh.FreshEncoderModel">FreshEncoderModel</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span></span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.fresh.FreshEncoderModel" title="scandeval.benchmark_modules.fresh.FreshEncoderModel">FreshEncoderModel</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">dataset_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.DatasetConfig" title="scandeval.data_models.DatasetConfig">DatasetConfig</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">benchmark_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span><span class="mkapi-paren">)</span></span>
 </p>
 <div class="mkapi-document">
 <p><p class="mkapi-bases" markdown="1">Bases :
 <span class="mkapi-base"><a href="../hf/#scandeval.benchmark_modules.hf.HuggingFaceEncoderModel" title="scandeval.benchmark_modules.hf.HuggingFaceEncoderModel">HuggingFaceEncoderModel</a></span></p></p>
 <p>A freshly initialised encoder model.</p>
+<p>Initialise the model.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dataset_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.DatasetConfig" title="scandeval.data_models.DatasetConfig">DatasetConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The dataset configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">benchmark_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The benchmark configuration.</p>
+</li>
+</ul>
+</div>
 <p class="mkapi-section">
 <span class="mkapi-object-link">
 <span class="mkapi-section-toggle" title="Toggle attributes">
@@ -2148,6 +2211,86 @@ whether the model exists.</p>
 <li>
 <p><span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span> <span class="mkapi-dash">&mdash;</span>
 The model configuration.</p>
+</li>
+</ul>
+</div>
+</div>
+<p class="mkapi-object mkapi-page-source" id="scandeval.benchmark_modules.fresh.load_model_and_tokenizer">
+<span class="mkapi-object-link">
+
+
+<a href="../../../../src/scandeval/benchmark_modules/fresh/#scandeval.benchmark_modules.fresh.load_model_and_tokenizer" title="Go to source">source</a>
+<span class="mkapi-document-toggle" title="Toggle all docs">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-object-name"><a href="./#scandeval.benchmark_modules.fresh.load_model_and_tokenizer" title="scandeval.benchmark_modules.fresh.load_model_and_tokenizer">load_model_and_tokenizer</a></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">model_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">dataset_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.DatasetConfig" title="scandeval.data_models.DatasetConfig">DatasetConfig</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">benchmark_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_max_length</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">tuple[<span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span>, <span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span>]</span></span>
+</p>
+<div class="mkapi-document">
+<p>Load the model and tokenizer.</p>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle parameters">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Parameters</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-name">model_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.ModelConfig" title="scandeval.data_models.ModelConfig">ModelConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The model configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dataset_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.DatasetConfig" title="scandeval.data_models.DatasetConfig">DatasetConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The dataset configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">benchmark_config</span> : 
+<span class="mkapi-item-type"><a href="../../data_models/#scandeval.data_models.BenchmarkConfig" title="scandeval.data_models.BenchmarkConfig">BenchmarkConfig</a></span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The benchmark configuration.</p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_max_length</span> : 
+<span class="mkapi-item-type">int</span> <span class="mkapi-dash">&mdash;</span></p>
+<p>The maximum context length of the model.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle returns">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Returns</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type">tuple[<span class="mkapi-tooltip" title="transformers.modeling_utils.PreTrainedModel">PreTrainedModel</span>, <span class="mkapi-tooltip" title="transformers.tokenization_utils.PreTrainedTokenizer">PreTrainedTokenizer</span>]</span> <span class="mkapi-dash">&mdash;</span>
+The loaded model and tokenizer.</p>
+</li>
+</ul>
+</div>
+<p class="mkapi-section">
+<span class="mkapi-object-link">
+<span class="mkapi-section-toggle" title="Toggle raises">
+<i class="fa-regular fa-square-minus"></i>
+</span>
+</span>
+<span class="mkapi-section-name">Raises</span>
+</p>
+<div class="mkapi-section-content">
+<ul class="mkapi-item-list">
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.InvalidBenchmark" title="scandeval.exceptions.InvalidBenchmark">InvalidBenchmark</a></span></p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><a href="../../exceptions/#scandeval.exceptions.InvalidModel" title="scandeval.exceptions.InvalidModel">InvalidModel</a></span></p>
 </li>
 </ul>
 </div>

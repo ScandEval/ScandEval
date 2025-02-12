@@ -2128,7 +2128,19 @@
 <span class="normal">1151</span>
 <span class="normal">1152</span>
 <span class="normal">1153</span>
-<span class="normal">1154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
+<span class="normal">1154</span>
+<span class="normal">1155</span>
+<span class="normal">1156</span>
+<span class="normal">1157</span>
+<span class="normal">1158</span>
+<span class="normal">1159</span>
+<span class="normal">1160</span>
+<span class="normal">1161</span>
+<span class="normal">1162</span>
+<span class="normal">1163</span>
+<span class="normal">1164</span>
+<span class="normal">1165</span>
+<span class="normal">1166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Encoder models from the Hugging Face Hub.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -2939,6 +2951,18 @@
             <span class="n">pipeline_tag</span> <span class="o">=</span> <span class="s2">&quot;text-generation&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pipeline_tag</span> <span class="o">=</span> <span class="s2">&quot;fill-mask&quot;</span>
+
+    <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">only_allow_safetensors</span><span class="p">:</span>
+        <span class="c1"># Check if any file ends with .safetensors</span>
+        <span class="n">repo_files</span> <span class="o">=</span> <span class="n">hf_api</span><span class="o">.</span><span class="n">list_repo_files</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">)</span>
+        <span class="n">has_safetensors</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.safetensors&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">repo_files</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_safetensors</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Model </span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2"> does not have safetensors weights available. &quot;</span>
+            <span class="k">if</span> <span class="n">benchmark_config</span><span class="o">.</span><span class="n">run_with_cli</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Skipping since the `--only-allow-safetensors` flag is set.&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Skipping since the `only_allow_safetensors` argument is set to `True`.&quot;</span>
+            <span class="k">raise</span> <span class="n">InvalidModel</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">HFModelInfo</span><span class="p">(</span>
         <span class="n">pipeline_tag</span><span class="o">=</span><span class="n">pipeline_tag</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">,</span> <span class="n">adapter_base_model_id</span><span class="o">=</span><span class="n">base_model_id</span>

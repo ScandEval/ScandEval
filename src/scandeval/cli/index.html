@@ -1070,7 +1070,15 @@
 <span class="normal">270</span>
 <span class="normal">271</span>
 <span class="normal">272</span>
-<span class="normal">273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Command-line interface for benchmarking.&quot;&quot;&quot;</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="sd">&quot;&quot;&quot;Command-line interface for benchmarking.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">click</span>
 
@@ -1274,6 +1282,12 @@
     <span class="s2">&quot;and stores all outputs to the current working directory. Only relevant if the &quot;</span>
     <span class="s2">&quot;model is generative.&quot;</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--only-allow-safetensors&quot;</span><span class="p">,</span>
+    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only allow loading models that have safetensors weights available&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="k">def</span> <span class="nf">benchmark</span><span class="p">(</span><div class="mkapi-source-link" id="scandeval.cli.benchmark"><a href="../../../api/scandeval/cli/#scandeval.cli.benchmark" title="Go to docs">docs</a></div>
     <span class="n">model</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">dataset</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -1299,6 +1313,7 @@
     <span class="n">api_base</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">api_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">only_allow_safetensors</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Benchmark pretrained language models on language tasks.&quot;&quot;&quot;</span>
     <span class="n">models</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -1335,6 +1350,7 @@
         <span class="n">api_version</span><span class="o">=</span><span class="n">api_version</span><span class="p">,</span>
         <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
         <span class="n">run_with_cli</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">only_allow_safetensors</span><span class="o">=</span><span class="n">only_allow_safetensors</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># Perform the benchmark evaluation</span>
