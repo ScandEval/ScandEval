@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [v15.1.0] - 2025-02-12
 ### Added
-- Added now `--only-allow-safetensors` flag, which disallows evaluating models from the
+- Added new `--only-allow-safetensors` flag, which disallows evaluating models from the
   Hugging Face Hub if they are not stored as safetensors. This ensures a high level of
   security on the system running the evaluations, if this is necessary. This was
   contributed by [@Mikeriess](https://github.com/Mikeriess) ✨
