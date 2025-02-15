@@ -9,7 +9,19 @@ import pandas as pd
 from datasets.arrow_dataset import Dataset
 from datasets.dataset_dict import DatasetDict
 from huggingface_hub.hf_api import HfApi
-from load_ud_pos import load_esdt_pos
+from load_ud_pos import (
+    load_dadt_pos,
+    load_dedt_pos,
+    load_endt_pos,
+    load_esdt_pos,
+    load_fodt_pos,
+    load_frdt_pos,
+    load_isdt_pos,
+    load_nldt_pos,
+    load_nodt_nb_pos,
+    load_nodt_nn_pos,
+    load_svdt_pos,
+)
 from pandas.errors import SettingWithCopyWarning
 from requests.exceptions import HTTPError
 from tqdm.auto import tqdm
@@ -24,17 +36,17 @@ def main():
 
     # Set up the POS dataset loaders
     pos_datasets = {
-        # "da": load_dadt_pos,
-        # "nb": load_nodt_nb_pos,
-        # "nn": load_nodt_nn_pos,
-        # "sv": load_svdt_pos,
-        # "is": load_isdt_pos,
-        # "fo": load_fodt_pos,
-        # "de": load_dedt_pos,
-        # "nl": load_nldt_pos,
-        # "en": load_endt_pos,
-        # "fr": load_frdt_pos,
-        "es": load_esdt_pos
+        "da": load_dadt_pos,
+        "nb": load_nodt_nb_pos,
+        "nn": load_nodt_nn_pos,
+        "sv": load_svdt_pos,
+        "is": load_isdt_pos,
+        "fo": load_fodt_pos,
+        "de": load_dedt_pos,
+        "nl": load_nldt_pos,
+        "en": load_endt_pos,
+        "fr": load_frdt_pos,
+        "es": load_esdt_pos,
     }
 
     # Set up the progress bar and iterate over the languages
