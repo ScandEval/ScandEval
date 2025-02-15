@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added support for Spanish! 🇪🇸This includes the Spanish part of the reading comprehension
   dataset [XQuAD](https://huggingface.co/datasets/google/xquad/viewer/xquad.es),
   [sentiment-headlines dataset](https://huggingface.co/datasets/pysentimiento/spanish-targeted-sentiment-headlines), the linguistic acceptability dataset ScaLA with the [Spanish Universal
-  Dependencies](https://github.com/UniversalDependencies/UD_Spanish-AnCora), the Spanish part of [mlsum](https://huggingface.co/datasets/reciTAL/mlsum), the knowledge dataset [MMLU-es](https://huggingface.co/datasets/ScandEval/mmlu-es-mini)
+  Dependencies](https://github.com/UniversalDependencies/UD_Spanish-AnCora), the Spanish part of [mlsum](https://huggingface.co/datasets/reciTAL/mlsum), the knowledge dataset [MMLU-es](https://huggingface.co/datasets/ScandEval/mmlu-es-mini), and the common-sense reasoning dataset [HellaSwag-es](https://huggingface.co/datasets/ScandEval/hellaswag-es-mini).
 - Added support for evaluating generative reasoning models, such as OpenAI o1 and
   Deepseek R1. This is done by upping the maximal sequence length to 8,192 tokens, and
   removing the reasoning part afterwards, to get the final answer.

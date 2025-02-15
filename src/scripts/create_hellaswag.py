@@ -31,6 +31,7 @@ def main() -> None:
         "nl": "Antwoordopties",
         "en": "Choices",
         "fr": "Choix",
+        "es": "Opciones",
     }
 
     for language in choices_mapping.keys():
