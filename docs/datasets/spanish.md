@@ -171,6 +171,74 @@ Here are a few examples from the training split:
 
 ## Knowledge
 
+### MMLU-es
+
+This dataset is a machine translated version of the English [MMLU
+dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
+different topics, such as elementary mathematics, US history and law.
+
+The original full dataset consists of 272 / 1,465 / 13,334 samples for training,
+validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
+validation and testing, respectively (so 3,328 samples used in total). These splits are
+new and there can thus be some overlap between the original validation and test sets and
+our validation and test sets.
+
+Here are a few examples from the training split:
+
+```json
+{
+    "text": "¿Qué método de los siguientes utiliza el método de loci como ayuda para la memoria?\nOpciones:\na. Codificación semántica\nb. Imaginería visual\nc. Señales auditivas\nd. Memoria ecoica",
+    "label": "b",
+    "category": "high_school_psychology"
+}
+```
+```json
+{
+    "text": "Cuando una medida realmente cuantifica lo que afirma medir, decimos que tiene buena\nOpciones:\na. precisión\nb. validez\nc. confiabilidad\nd. valor asociativo",
+    "label": "b",
+    "category": "human_aging"
+}
+```
+```json
+{
+    "text": "Un ranchero, siendo el propietario en un simple título, transfirió la propiedad mediante una escritura de garantía a una mujer. La mujer opignoró la finca a favor de su sobrina para asegurar un préstamo de la sobrina a la mujer por la cantidad de $500,000. La hipoteca fue inmediatamente registrada. Dos años después, la mujer transfirió la finca a un granjero mediante una escritura de renuncia. La mujer, entonces, incumplió con la hipoteca, y la sobrina entabló una acción in personam contra el granjero para recuperar la cantidad adeudada por la hipoteca. Se presume que la escritura de renuncia de la mujer al granjero no hacía referencia a la hipoteca. Es probable que el acreedor hipotecario\nOpciones:\na. tenga éxito, porque la transferencia de la propiedad de la mujer al granjero resultó en una delegación implícita de responsabilidades.\nb. tenga éxito, porque la sobrina era una beneficiaria de tercera parte en la transferencia entre la mujer y el granjero.\nc. no tenga éxito, porque el granjero no prometió pagar la deuda hipotecaria.\nd. no tenga éxito, a menos que el granjero tuviera conocimiento constructivo de la existencia de la hipoteca.",
+    "label": "c",
+    "category": "professional_law"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Las siguientes son preguntas de opción múltiple (con respuestas).
+  ```
+- Base prompt template:
+  ```
+  Pregunta: {text}
+  Opciones:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Respuesta: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Pregunta: {text}
+  Opciones:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Responda la pregunta anterior usando solo 'a', 'b', 'c' o 'd', y nada más.
+  ```
+
+
+
 ## Common-sense Reasoning
 
 ## Summarization

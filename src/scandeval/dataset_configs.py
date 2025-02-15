@@ -1610,6 +1610,25 @@ MMLU_FR_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+MMLU_ES_CONFIG = DatasetConfig(
+    name="mmlu-es",
+    pretty_name="the truncated version of the Spanish knowledge dataset MMLU-es, "
+    "translated from the English MMLU dataset",
+    huggingface_id="ScandEval/mmlu-es-mini",
+    task=KNOW,
+    languages=[ES],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Las siguientes son preguntas de opción múltiple (con respuestas).",
+    prompt_template="Pregunta: {text}\nOpciones:\na. {option_a}\nb. {option_b}\n"
+    "c. {option_c}\nd. {option_d}\nRespuesta: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Pregunta: {text}\nOpciones:\na. {option_a}\nb. {option_b}\n"
+    "c. {option_c}\nd. {option_d}\n\nResponda la pregunta anterior usando solo 'a', "
+    "'b', 'c' o 'd', y nada más.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
 ARC_DA_CONFIG = DatasetConfig(
     name="arc-da",
     pretty_name="the truncated version of the Danish knowledge dataset ARC-da, "
