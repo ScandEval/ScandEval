@@ -7,9 +7,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v15.1.0] - 2025-02-12
+### Added
+- Added new `--only-allow-safetensors` flag, which disallows evaluating models from the
+  Hugging Face Hub if they are not stored as safetensors. This ensures a high level of
+  security on the system running the evaluations, if this is necessary. This was
+  contributed by [@Mikeriess](https://github.com/Mikeriess) ✨
+
 ### Fixed
 - Regex mismatch caused the wrong sequence length for GPT-4o models. This has been fixed
   now.
+- Fixed a truncation issue when evaluating encoder models on some knowledge datasets,
+  which caused the evaluation to fail. This has been fixed now.
+- A bug occurred when locating a model's end of reasoning token (e.g., `</think>`) if
+  the model's tokenizer had no BOS token. This has been fixed now.
+- Fixed an issue with the loading of freshly initialised models, caused by attempting to
+  load the Hugging Face model configuration from the Hugging Face Hub instead of
+  manually creating it.
 
 
 ## [v15.0.0] - 2025-02-02

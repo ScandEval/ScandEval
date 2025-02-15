@@ -202,6 +202,12 @@ from .tasks import get_all_tasks
     "and stores all outputs to the current working directory. Only relevant if the "
     "model is generative.",
 )
+@click.option(
+    "--only-allow-safetensors",
+    is_flag=True,
+    help="Only allow loading models that have safetensors weights available",
+    default=False,
+)
 def benchmark(
     model: tuple[str],
     dataset: tuple[str],
@@ -227,6 +233,7 @@ def benchmark(
     api_base: str | None,
     api_version: str | None,
     debug: bool,
+    only_allow_safetensors: bool,
 ) -> None:
     """Benchmark pretrained language models on language tasks."""
     models = list(model)
@@ -263,6 +270,7 @@ def benchmark(
         api_version=api_version,
         debug=debug,
         run_with_cli=True,
+        only_allow_safetensors=only_allow_safetensors,
     )
 
     # Perform the benchmark evaluation

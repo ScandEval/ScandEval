@@ -810,6 +810,18 @@ def get_model_repo_info(
         else:
             pipeline_tag = "fill-mask"
 
+    if benchmark_config.only_allow_safetensors:
+        # Check if any file ends with .safetensors
+        repo_files = hf_api.list_repo_files(repo_id=model_id, revision=revision)
+        has_safetensors = any(f.endswith(".safetensors") for f in repo_files)
+        if not has_safetensors:
+            msg = f"Model {model_id} does not have safetensors weights available. "
+            if benchmark_config.run_with_cli:
+                msg += "Skipping since the `--only-allow-safetensors` flag is set."
+            else:
+                msg += "Skipping since the `only_allow_safetensors` argument is set to `True`."
+            raise InvalidModel(msg)
+
     return HFModelInfo(
         pipeline_tag=pipeline_tag, tags=tags, adapter_base_model_id=base_model_id
     )

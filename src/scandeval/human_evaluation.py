@@ -272,6 +272,7 @@ class HumanEvaluator:
             api_version=None,
             debug=False,
             run_with_cli=True,
+            only_allow_safetensors=False,
         )
         self.dataset_config = get_all_dataset_configs()[dataset_name]
 
