@@ -175,7 +175,9 @@ Here are a few examples from the training split:
 
 This dataset is a machine translated version of the English [MMLU
 dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
-different topics, such as elementary mathematics, US history and law.
+different topics, such as elementary mathematics, US history and law. The translation to
+French was done by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
 The original full dataset consists of 272 / 1,465 / 13,334 samples for training,
 validation and testing, respectively. We use a 1,024 / 256 / 2,048 split for training,
@@ -240,6 +242,17 @@ When evaluating generative models, we use the following setup (see the
 
 
 ## Common-sense Reasoning
+
+### HellaSwag-es
+
+This dataset is a machine translated version of the English [HellaSwag
+dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
+video descriptions from ActivityNet as well as how-to articles from WikiHow. The dataset
+was translated by the University of Oregon as part of [this
+paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
+
+The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+for training, validation and testing, respectively (so 3,328 samples used in total).
 
 ## Summarization
 
