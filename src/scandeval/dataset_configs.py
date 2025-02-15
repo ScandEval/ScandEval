@@ -1256,6 +1256,19 @@ MLSUM_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
+MLSUM_ES_CONFIG = DatasetConfig(
+    name="mlsum-es",
+    pretty_name="the truncated version of the Spanish summarisation dataset MLSum",
+    huggingface_id="ScandEval/mlsum-es-mini",
+    task=SUMM,
+    languages=[ES],
+    prompt_prefix="Los siguientes son artículos de noticias con sus resúmenes.",
+    prompt_template="Artículo: {text}\nResumen: {target_text}",
+    instruction_prompt="Artículo: {text}\n\nEscribe un resumen del artículo anterior.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+)
+
 RRN_CONFIG = DatasetConfig(
     name="rrn",
     pretty_name="the truncated version of the Icelandic summarisation dataset "

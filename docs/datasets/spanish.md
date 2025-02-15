@@ -174,3 +174,56 @@ Here are a few examples from the training split:
 ## Common-sense Reasoning
 
 ## Summarization
+
+### MLSum-es-mini
+
+The dataset was published in [this paper](https://aclanthology.org/2020.emnlp-main.647/) and is obtained from online newspapers.
+
+The original full dataset consists of 266,367 / 10,358 / 13,920 samples for training, validation, and testing, respectively. We use 1,024 / 256 / 1,024 samples for training, validation, and testing, respectively.
+
+Here are a few examples from the training split:
+
+```json
+{
+    "text": "El todopoderoso secretario general de los populares bajo la presidencia de José María Aznar, Francisco Álvarez-Cascos, ha desencadenado en su partido una tormenta en un vaso de agua. Amparándose en una retórica de servicio a Asturias que apenas alcanza a disimular la frustración de sus ambiciones personales, Álvarez-Cascos ha anunciado su baja en el partido de Mariano Rajoy y ha insinuado la creación de una nueva fuerza política para concurrir como candidato a la presidencia de Asturias en las elecciones autonómicas de mayo. Nada tiene de extraño que quien fuera uno de los máximos adalides del 'todo vale' desde la oposición y también desde el Gobierno, aplique ahora esta máxima a su propio partido. Álvarez-Cascos, durante sus años de protagonismo, tensó la vida política española hasta bordear los límites de la estabilidad institucional, arremetiendo contra sus adversarios con instrumentos que despreciaban normas elementales del juego democrático. Su intento de regresar a la política activa, rechazado por la dirección nacional de su partido, no responde al deseo de ofrecer un programa diferente a los asturianos, sino al de saciar su sed de poder tras años de obligada abstinencia. En la comparecencia para explicar las razones de su marcha dejó entrever ajustes de cuentas y venganzas, pero ni una sola idea sobre la que articular el proyecto político que defiende. Es cierto que la democracia interna que Álvarez-Cascos reclama ahora en el PP fue abolida mientras fue él quien tuvo las riendas. Pero no porque sea Álvarez-Cascos su repentino y paradójico abanderado deja de ser una reclamación justa: el PP ha recurrido a la cooptación para decidir la candidatura a la presidencia de Asturias, reafirmándose en un método que aplica a todos los niveles, tanto municipal como autonómico. E, incluso, nacional, como lo atestigua la presidencia de Mariano Rajoy por una decisión personal de su antecesor en el cargo. La aventura de Álvarez-Cascos no solo tendrá dificultades para prosperar por las mezquinas razones que la impulsan, sino por el momento elegido para emprenderla. Un partido que se ve en la antesala del poder cierra filas con su dirección y no destruye sus expectativas desangrándose en luchas internas. Si el PP se encuentra en esta tesitura es por la forma de entender la política de Álvarez-Cascos, pero también por la fragilidad del liderazgo de Rajoy. Dirigentes regionales como la presidenta de la Comunidad de Madrid no dudan en aprovechar cualquier circunstancia para desafiarlo. Álvarez-Cascos ha conseguido mostrar con un único movimiento cuál es la realidad interna de un partido que se considera en vísperas de alcanzar el Gobierno. El vaso de agua donde se desarrolla la ruidosa tormenta que ha desencadenado tiene el valor de un síntoma. Estas son las fuerzas que conviven en el PP y estas son las formas con las que los populares dirimen sus diferencias. * Este artículo apareció en la edición impresa del Martes, 4 de enero de 2011",
+    "target_text": "El histórico dirigente del PP se revuelve contra Rajoy al ver frustrada su ambición en Asturias"
+}
+```
+```json
+{
+    "text": "Eladio Loizaga tiene un bigote fino y un hablar pausado. El Ministro de Relaciones Exteriores de Paraguay, de 66 años, ha estado en Madrid para preparar la visita del presidente de su país, Horacio Cartes, el próximo junio. Después de una charla en Casa de América, Loizaga reflexiona sobre las relaciones diplomáticas en América Latina, la actualidad en Venezuela y Cuba, y los lazos de la región con Estados Unidos, Europa y China. Pregunta. ¿Qué tipo de relación hay entre los países de América Latina? Respuesta. Las relaciones diplomáticas, comerciales y políticas son óptimas. Se basan en respetar el principio de pluralidad y no injerencia en los asuntos internos de cada Estado, a menos que sea una decisión tan grosera que choque con los principios democráticos y las normas constitucionales. En América Latina hemos aprendido a convivir dentro de esa pluralidad, sin que esa pluralidad se uniforme. Cada uno tiene su filosofía y eso tiene que ser respetado. No hay conflictos que pongan en peligro las relaciones entre nosotros. Hemos entendido que podemos convivir con esas diferencias ideológicas. La no inferencia es una piedra angular. P. ¿Incluso en Venezuela con la situación de los presos políticos? R. Paraguay tiene una consolidación democrática plena. En nuestro país ya no hay presos por expresar una idea política distinta a la del Gobierno. Somos miembro del Consejo de Derechos Humanos de Naciones Unidas. En ese sentido, pensamos que acallar voces no contribuye a la libertad de la nación. P. ¿Condena pues las decisiones de Nicolás Maduro? R. Tenemos una posición expresada a través de Unasur. Constituyó una decisión de tres cancilleres, Colombia, Brasil y Ecuador, para cooperar en el diálogo con todos los sectores políticos democráticos de Venezuela. Queremos que Venezuela encuentre una salida conforme a sus propias reglas constitucionales. Hay una línea muy fina en lo que es una injerencia interna, y nosotros somos muy celosos porque la hemos sufrido. Estados Unidos tuvo por mucho tiempo, no un abandono, sino una negligencia benigna hacia América Latina. Como Europa. P. ¿Por qué la mayoría de gobiernos latinoamericanos guardaron silencio? R. Varios gobiernos han mostrado su preocupación y ratificado su posición de que las partes dialoguen, que el Gobierno y la oposición se sienten para encontrar una salida democrática. Tenemos que evitar una salida traumática. Queremos apoyar al pueblo venezolano, porque sabemos las necesidades que están pasando. Estamos en contacto con el Gobierno para ayudar y proveer alimentos y otros productos que se necesitan. P. ¿Apoya la labor que pretende hacer Felipe González? R. No me puedo referir a eso. Hay situaciones en las que, sin desconocer los derechos fundamentales de la persona, hay que tener cierto respeto por el marco interno de cada país. P. ¿Cuál es la salud de los derechos humanos en América Latina? R. Los derechos humanos no se definen hoy solo como derechos políticos. América Latina estaba gobernada por dictaduras, por posiciones extremas, de izquierda y de derecha. Hoy tenemos un adelanto político en toda la región y también la necesidad de ir dando respuesta a los derechos humanos de cuarta generación, la vivienda, la salud, el agua potable... Avanzamos en la lucha contra la pobreza. Y en que los chicos vayan a la escuela. Sin educación no vamos a desarrollarnos. P. ¿Puede América Latina tener una voz única en cuanto a política exterior? R. Hoy no va a ser posible. Sabemos muy bien las posiciones ideológicas de cada uno. En lo posible tratamos de consensuar en la educación, el desarrollo social, pero tener una sola voz política es difícil. Tenemos visiones distintas de cómo vemos el mundo y las relaciones con otros Estados. P. Colombia está en un proceso de paz. ¿Qué es más importante, justicia o paz? R. No es fácil. Hay muchas aristas que deben tenerse en cuenta en el campo penal. El Gobierno busca las medidas jurídicas que den garantía al proceso. P. En otra mesa se sientan Cuba y EE UU. ¿Normalizarán plenamente sus relaciones? R. Era la última rémora de la guerra fría. Obama ha tomado una decisión de mucho coraje, en un momento político interno difícil, y con un sentido pragmático. Señaló que las conductas hacia Cuba no daban resultado y que había que buscar otro camino. La Cumbre de las Américas en Panamá fue histórica. El presidente Castro se expresó con mucha honestidad. Y Obama reconoció que no son perfectos, que tienen problemas. Ojalá se restablezcan las embajadas y el pueblo cubano camine por la senda de la democracia. P. ¿Cuál es el papel del papa Francisco en la política exterior en Latinoamérica? R. El Papa ha tenido un rol muy activo en asuntos de interés general en el mundo, como los problemas de la mujer, el cambio climático, Cuba y Estados Unidos... su presencia en el mundo social es importante. Nos recuerda que existe gente, gente marginada, necesitada. Los países más ricos tienen que contribuir a que tengamos un mundo más equilibrado. P. ¿Qué tipo de relación hay entre EE UU y América Latina? R. Estados Unidos tuvo por mucho tiempo, no un abandono, sino una negligencia benigna hacia América Latina. Como Europa. ¿Quién ocupó ese espacio? China. Con Europa tenemos valores compartidos, y la independencia paraguaya está inspirada en la revolución francesa. De España, como puente, necesitábamos más acompañamiento. China ocupó ese espacio. A Estados Unidos se le mira con diversos cristales. Para Paraguay es un país amigo. P. ¿La relación con Argentina? R. Es un socio comercial importante. Pero hay cuestiones del día a día que pueden enturbiar nuestras relaciones. Queremos hacer un Mercosur más abierto, sin trabas.",
+    "target_text": "El ministro paraguayo reflexiona sobre las relaciones diplomáticas en América Latina y la actualidad en Venezuela y Cuba"
+}
+```
+```json
+{
+    "text": "La Audiencia Nacional ha aprobado extraditar al empresario egipcio Husein Salem a Egipto, donde está siendo juzgado por su supuesta implicación en el caso de corrupción que se sigue contra el expresidente Hosni Mubarak, según informó el Ministerio de Exteriores egipcio. El tribunal también aprobó la entrega de Jaled, hijo de Salem, mientras se estudia si su hija Magda será extraditada. La fiscalía acusa a Salem de haber obtenido favores políticos a cambio de la donación a la familia Mubarak de cinco mansiones, camuflada como una venta ficticia. Esos favores se tradujeron en la asignación de terrenos a su favor y la adquisición fraudulenta de contratos públicos de venta y exportación de gas a Israel, en la localidad de Sharm El Sheik. Esta venta hizo perder al Estado egipcio 536 millones. El empresario, detenido en España el 16 junio de 2011, fue condenado el jueves a 15 años de cárcel por otro caso de corrupción. Y en octubre ya fue sentenciado a siete años, al igual que sus hijos Jaled y Magda, por blanquear 1,7 millones.",
+    "target_text": "La fiscalía acusa a Salem de haber obtenido favores políticos a cambio de la donación al exdictador de cinco mansiones, como una venta ficticia",
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 1
+- Prefix prompt:
+  ```
+  Los siguientes son artículos de noticias con sus resúmenes.
+  ```
+- Base prompt template:
+  ```
+  Artículo: {text}
+  Resumen: {target_text}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Artículo: {text}
+
+  Escribe un resumen del artículo anterior.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset mlsum-es-mini
+```
