@@ -345,7 +345,7 @@ $ scandeval --model <model-id> --dataset hellaswag-es
 
 The dataset was published in [this paper](https://aclanthology.org/2020.emnlp-main.647/) and is obtained from online newspapers.
 
-The original full dataset consists of 266,367 / 10,358 / 13,920 samples for training, validation, and testing, respectively. We use 1,024 / 256 / 2,024 samples for training, validation, and testing, respectively.
+The original full dataset consists of 266,367 / 10,358 / 13,920 samples for training, validation, and testing, respectively. We use 1,024 / 256 / 2,024 samples for training, validation, and testing, respectively. All our splits are subsets of the original ones.
 
 Here are a few examples from the training split:
 
