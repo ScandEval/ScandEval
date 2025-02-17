@@ -169,6 +169,36 @@ Here are a few examples from the training split:
 }
 ```
 
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 4
+- Prefix prompt:
+  ```
+  A continuación se presentan textos con sus preguntas y respuestas correspondientes.
+  ```
+- Base prompt template:
+  ```
+  Texto: {text}
+  Pregunta: {question}
+  Respuesta en máximo 3 palabras: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Texto: {text}
+
+  Responda la siguiente pregunta sobre el texto anterior en máximo 3 palabras.
+
+  Pregunta: {question}
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset xquad-es
+```
+
+
 ## Knowledge
 
 ### MMLU-es
