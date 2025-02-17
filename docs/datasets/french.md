@@ -163,7 +163,7 @@ word from a sentence, or by swapping two neighbouring words in a sentence. To en
 that this does indeed break the grammaticality of the sentence, a set of rules were used
 on the part-of-speech tags of the words in the sentence.
 
-The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
+The original dataset consists of 16,342 samples, from which we use 1,024 / 256 / 2,048 samples for training,
 validation and testing, respectively (so 3,328 samples used in total). These splits are
 used as-is in the framework.
 
