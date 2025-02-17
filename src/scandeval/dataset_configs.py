@@ -251,13 +251,13 @@ SENTIMENT_HEADLINES_CONFIG = DatasetConfig(
     task=SENT,
     languages=[ES],
     labels=["negative", "neutral", "positive"],
-    prompt_prefix="Lo siguiente son reseñas y su sentimiento, que puede ser  "
-    "'positiv', 'neutral' eller 'negativ'.",
-    prompt_template="Texto: {text}\Sentimiento: {label}",
+    prompt_prefix="Lo siguiente son reseñas y su sentimiento, que puede ser 'positivo', "
+    "'neutral' o 'negativo'.",
+    prompt_template="Texto: {text}\nSentimiento: {label}",
     prompt_label_mapping=dict(
-        positive="positiv", neutral="neutral", negative="negativ"
+        positive="positivo", neutral="neutral", negative="negativo"
     ),
-    instruction_prompt="Reseña: {text}\n\nClasifica el sentimiento de la reseña. "
+    instruction_prompt="Texto: {text}\n\nClasifica el sentimiento de la reseña. "
     "Responde con 'positivo', 'neutral' o 'negativo', y nada más.",
     num_few_shot_examples=12,
     max_generated_tokens=5,

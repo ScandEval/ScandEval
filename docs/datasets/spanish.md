@@ -113,18 +113,18 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  Lo siguiente son oraciones y si son gramaticalmente correctas.
+  Lo siguiente son textos y si son gramaticalmente correctos.
   ```
 - Base prompt template:
   ```
-    Oración: {text}
-    Gramaticalmente correcta: {label}
+    Texto: {text}
+    Gramaticalmente correcto: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-    Oración: {text}
+    Texto: {text}
 
-    Determina si la oración es gramaticalmente correcta o no. Responde con 'sí' si la oración es correcta, y 'no' si no lo es.
+    Determina si el texto es gramaticalmente correcto o no. Responde con 'sí' si el texto es correcto, y 'no' si no lo es.
   ```
 - Label mapping:
     - `correct` ➡️ `sí`
