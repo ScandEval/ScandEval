@@ -7,7 +7,7 @@ information about what these constitute.
 
 ## Sentiment Classification
 
-### Sentiment headlines
+### Sentiment Headlines
 This dataset was published in [this paper](https://arxiv.org/abs/2208.13947) and features political news headlines.
 
 The original full dataset consists of 1,371 /  609 / 459 samples for training, validation, and testing, respectively. We use 861 /  256 / 1,024 samples for training, validation, and testing, respectively. All our splits are subsets of the original ones. The label distribution for the splits are as follows:
