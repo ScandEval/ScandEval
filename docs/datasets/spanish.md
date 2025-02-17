@@ -42,10 +42,10 @@ Here are a few examples from the training split:
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
 
-- Number of few-shot examples: 4
+- Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  Aquí hay textos y su sentimiento, que puede ser 'positivo' o 'negativo'.
+  Lo siguiente son reseñas y su sentimiento, que puede ser 'positivo', 'neutral' o 'negativo'.
   ```
 - Base prompt template:
   ```
@@ -56,7 +56,7 @@ When evaluating generative models, we use the following setup (see the
   ```
   Texto: {text}
 
-  Clasifica el sentimiento del texto. Responde con 'positivo' o 'negativo'.
+  Clasifica el sentimiento de la reseña. Responde con 'positivo', 'neutral' o 'negativo', y nada más.
   ```
 
 You can evaluate this dataset directly as follows:

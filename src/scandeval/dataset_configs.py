@@ -918,12 +918,11 @@ SCALA_ES_CONFIG = DatasetConfig(
     task=LA,
     languages=[ES],
     labels=["incorrect", "correct"],
-    prompt_prefix="Lo siguiente son oraciones y si son gramaticalmente correctas.",
-    prompt_template="Oración: {text}\nGramaticalmente correcta: {label}",
+    prompt_prefix="Lo siguiente son textos y si son gramaticalmente correctos.",
+    prompt_template="Texto: {text}\nGramaticalmente correcto: {label}",
     prompt_label_mapping=dict(correct="sí", incorrect="no"),
-    instruction_prompt="Oración: {text}\n\nDetermina si la oración es gramaticalmente correcta "
-    "o no. Responde con 'sí' si la oración es correcta, y 'no' si no lo es, "
-    "y nada más.",
+    instruction_prompt="Texto: {text}\n\nDetermina si el texto es gramaticalmente correcto "
+    "o no. Responde con 'sí' si el texto es correcto, y 'no' si no lo es.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
