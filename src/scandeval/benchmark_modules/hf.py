@@ -37,11 +37,18 @@ from urllib3.exceptions import RequestError
 
 from ..constants import (
     DUMMY_FILL_VALUE,
-    GENERATIVE_MODEL_TASKS,
+    GENERATIVE_PIPELINE_TAGS,
     LOCAL_MODELS_REQUIRED_FILES,
+    MERGE_TAGS,
 )
 from ..data_models import BenchmarkConfig, DatasetConfig, HFModelInfo, ModelConfig, Task
-from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
+from ..enums import (
+    BatchingPreference,
+    GenerativeType,
+    InferenceBackend,
+    ModelType,
+    TaskGroup,
+)
 from ..exceptions import (
     HuggingFaceHubDown,
     InvalidBenchmark,
@@ -72,7 +79,7 @@ logger = logging.getLogger("scandeval")
 class HuggingFaceEncoderModel(BenchmarkModule):
     """An encoder model from the Hugging Face Hub."""
 
-    _is_generative = False
+    fresh_model = False
     batching_preference = BatchingPreference.NO_PREFERENCE
     high_priority = True
 
@@ -262,6 +269,15 @@ class HuggingFaceEncoderModel(BenchmarkModule):
                 raise NotImplementedError(
                     f"Unsupported task group: {self.dataset_config.task.task_group}."
                 )
+
+    @property
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if it has not been set yet.
+        """
+        return None
 
     @property
     def extract_labels_from_generation(self) -> ExtractLabelsFunction:
@@ -476,7 +492,7 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         )
         return (
             model_info is not None
-            and model_info.pipeline_tag not in GENERATIVE_MODEL_TASKS
+            and model_info.pipeline_tag not in GENERATIVE_PIPELINE_TAGS
         )
 
     @classmethod
@@ -503,30 +519,22 @@ class HuggingFaceEncoderModel(BenchmarkModule):
         if model_info is None:
             raise InvalidModel(f"The model {model_id!r} could not be found.")
 
-        framework = Framework.PYTORCH
-        if "pytorch" in model_info.tags:
-            pass
-        elif "jax" in model_info.tags:
-            framework = Framework.JAX
-        elif "spacy" in model_info.tags:
-            raise InvalidModel("SpaCy models are not supported.")
-        elif any(tag in model_info.tags for tag in {"tf", "tensorflow", "keras"}):
-            raise InvalidModel("TensorFlow/Keras models are not supported.")
-
         language_mapping = get_all_languages()
         language_codes = list(language_mapping.keys())
 
         model_config = ModelConfig(
             model_id=model_id,
             revision=revision,
-            framework=framework,
             task=model_info.pipeline_tag,
             languages=[
                 language_mapping[tag]
                 for tag in model_info.tags
                 if tag in language_codes
             ],
-            model_type=ModelType.HF_HUB_ENCODER,
+            merge=any(tag in model_info.tags for tag in MERGE_TAGS),
+            inference_backend=InferenceBackend.TRANSFORMERS,
+            model_type=ModelType.ENCODER,
+            fresh=False,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),
@@ -559,7 +567,6 @@ def load_model_and_tokenizer(
 
     model_id = model_config.model_id
     task_group = dataset_config.task.task_group
-    from_flax = model_config.framework == Framework.JAX
     ignore_mismatched_sizes = False
 
     # Special case where there is a mismatch between the labels during training and
@@ -583,7 +590,6 @@ def load_model_and_tokenizer(
 
     model_kwargs = dict(
         config=config,
-        from_flax=from_flax,
         ignore_mismatched_sizes=ignore_mismatched_sizes,
         revision=model_config.revision,
         token=benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
@@ -603,64 +609,49 @@ def load_model_and_tokenizer(
 
     model: PreTrainedModel | None = None
     while True:
-        try:
-            # Get the model class associated with the task group
-            model_cls_or_none: t.Type["PreTrainedModel"] | None = get_class_by_name(
-                class_name=task_group_to_class_name(task_group=task_group),
-                module_name="transformers",
+        # Get the model class associated with the task group
+        model_cls_or_none: t.Type["PreTrainedModel"] | None = get_class_by_name(
+            class_name=task_group_to_class_name(task_group=task_group),
+            module_name="transformers",
+        )
+
+        # If the model class could not be found then raise an error
+        if not model_cls_or_none:
+            raise InvalidBenchmark(
+                f"The task group {task_group.value!r} does not correspond to a "
+                "Hugging Face AutoModel type (such as "
+                "`AutoModelForSequenceClassification`)."
             )
 
-            # If the model class could not be found then raise an error
-            if not model_cls_or_none:
-                raise InvalidBenchmark(
-                    f"The task group {task_group.value!r} does not correspond to a "
-                    "Hugging Face AutoModel type (such as "
-                    "`AutoModelForSequenceClassification`)."
-                )
+        # If the model is a DeBERTaV2 model then we ensure that
+        # `pooler_hidden_size` is the same size as `hidden_size`
+        if config.model_type == "deberta-v2":
+            config.pooler_hidden_size = config.hidden_size
 
-            # If the model is a DeBERTaV2 model then we ensure that
-            # `pooler_hidden_size` is the same size as `hidden_size`
-            if config.model_type == "deberta-v2":
-                config.pooler_hidden_size = config.hidden_size
-
-            try:
-                model_or_tuple = model_cls_or_none.from_pretrained(
-                    model_config.model_id, **model_kwargs
-                )
-            except (KeyError, RuntimeError) as e:
-                if not model_kwargs["ignore_mismatched_sizes"]:
-                    logger.debug(
-                        f"{type(e).__name__} occurred during the loading "
-                        f"of the {model_id!r} model. Retrying with "
-                        "`ignore_mismatched_sizes` set to True."
-                    )
-                    model_kwargs["ignore_mismatched_sizes"] = True
-                    continue
-                else:
-                    raise InvalidModel(str(e))
-            except (TimeoutError, RequestError):
-                attempts_left -= 1
-                if attempts_left == 0:
-                    raise InvalidModel(
-                        "The model could not be loaded after 5 attempts."
-                    )
-                logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
-                sleep(5)
-                continue
-
-            if isinstance(model_or_tuple, tuple):
-                model = model_or_tuple[0]
-            else:
-                model = model_or_tuple
+        try:
+            model_or_tuple = model_cls_or_none.from_pretrained(
+                model_config.model_id, **model_kwargs
+            )
             break
-
-        except (OSError, ValueError) as e:
-            # If `from_flax` is False but only Flax models are available then
-            # try again with `from_flax` set to True
-            if not from_flax and "Use `from_flax=True` to load this model" in str(e):
-                from_flax = True
+        except (KeyError, RuntimeError) as e:
+            if not model_kwargs["ignore_mismatched_sizes"]:
+                logger.debug(
+                    f"{type(e).__name__} occurred during the loading "
+                    f"of the {model_id!r} model. Retrying with "
+                    "`ignore_mismatched_sizes` set to True."
+                )
+                model_kwargs["ignore_mismatched_sizes"] = True
                 continue
-
+            else:
+                raise InvalidModel(str(e))
+        except (TimeoutError, RequestError):
+            attempts_left -= 1
+            if attempts_left == 0:
+                raise InvalidModel("The model could not be loaded after 5 attempts.")
+            logger.info(f"Couldn't load the model {model_id!r}. Retrying.")
+            sleep(5)
+            continue
+        except (OSError, ValueError) as e:
             if "checkpoint seems to be incorrect" in str(e):
                 raise InvalidModel(
                     f"The model {model_id!r} has an incorrect checkpoint."
@@ -675,7 +666,12 @@ def load_model_and_tokenizer(
                 f"The model {model_id!r} could not be loaded. The error was {e!r}."
             )
 
-    assert model is not None
+    if isinstance(model_or_tuple, tuple):
+        model = model_or_tuple[0]
+    else:
+        model = model_or_tuple
+
+    assert model is not None, "The model should not be None."
 
     model.eval()
     model.to(benchmark_config.device)
@@ -804,8 +800,8 @@ def get_model_repo_info(
         class_names = hf_config.architectures
         generative_class_names = [
             class_name
-            for model_task in GENERATIVE_MODEL_TASKS
-            for class_name in TASK_MAPPING[model_task].values()
+            for tag in GENERATIVE_PIPELINE_TAGS
+            for class_name in TASK_MAPPING[tag].values()
         ]
         if class_names is not None and any(
             class_name in generative_class_names for class_name in class_names
@@ -813,6 +809,18 @@ def get_model_repo_info(
             pipeline_tag = "text-generation"
         else:
             pipeline_tag = "fill-mask"
+
+    if benchmark_config.only_allow_safetensors:
+        # Check if any file ends with .safetensors
+        repo_files = hf_api.list_repo_files(repo_id=model_id, revision=revision)
+        has_safetensors = any(f.endswith(".safetensors") for f in repo_files)
+        if not has_safetensors:
+            msg = f"Model {model_id} does not have safetensors weights available. "
+            if benchmark_config.run_with_cli:
+                msg += "Skipping since the `--only-allow-safetensors` flag is set."
+            else:
+                msg += "Skipping since the `only_allow_safetensors` argument is set to `True`."
+            raise InvalidModel(msg)
 
     return HFModelInfo(
         pipeline_tag=pipeline_tag, tags=tags, adapter_base_model_id=base_model_id

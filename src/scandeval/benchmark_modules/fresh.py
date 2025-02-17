@@ -18,8 +18,8 @@ from transformers import (
     XLMRobertaForTokenClassification,
 )
 
-from ..data_models import BenchmarkConfig, ModelConfig
-from ..enums import Framework, ModelType, TaskGroup
+from ..data_models import BenchmarkConfig, DatasetConfig, ModelConfig
+from ..enums import InferenceBackend, ModelType, TaskGroup
 from ..exceptions import (
     InvalidBenchmark,
     InvalidModel,
@@ -36,6 +36,52 @@ from .hf import (
 
 class FreshEncoderModel(HuggingFaceEncoderModel):
     """A freshly initialised encoder model."""
+
+    fresh_model = True
+
+    def __init__(
+        self,
+        model_config: ModelConfig,
+        dataset_config: DatasetConfig,
+        benchmark_config: BenchmarkConfig,
+    ) -> None:
+        """Initialise the model.
+
+        Args:
+            model_config:
+                The model configuration.
+            dataset_config:
+                The dataset configuration.
+            benchmark_config:
+                The benchmark configuration.
+        """
+        # This is already set when calling `super.__init__`, but we need it to get a
+        # value from `self.model_max_length`, so we set it here as well.
+        self.model_config = model_config
+
+        model, tokenizer = load_model_and_tokenizer(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+            model_max_length=self.model_max_length,
+        )
+        self._model: PreTrainedModel = model
+        self._tokenizer: PreTrainedTokenizer = tokenizer
+
+        self._model, self._tokenizer = align_model_and_tokenizer(
+            model=self._model,
+            tokenizer=self._tokenizer,
+            model_max_length=self.model_max_length,
+            raise_errors=benchmark_config.raise_errors,
+        )
+
+        # We specify `HuggingFaceEncoderModel` here instead of `VLLMModel`, as we want
+        # to call the `__init__` method of the `BenchmarkModule` class.
+        super(HuggingFaceEncoderModel, self).__init__(
+            model_config=model_config,
+            dataset_config=dataset_config,
+            benchmark_config=benchmark_config,
+        )
 
     @cached_property
     def num_params(self) -> int:
@@ -127,101 +173,115 @@ class FreshEncoderModel(HuggingFaceEncoderModel):
         """
         return ModelConfig(
             model_id=model_id,
-            framework=Framework.PYTORCH,
             task="fill-mask",
             languages=list(),
             revision="main",
-            model_type=ModelType.FRESH,
+            merge=False,
+            inference_backend=InferenceBackend.TRANSFORMERS,
+            model_type=ModelType.ENCODER,
+            fresh=True,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),
             adapter_base_model_id=None,
         )
 
-    def _load_model_and_tokenizer(self) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
-        """Load the model and tokenizer.
 
-        Returns:
-            The loaded model and tokenizer.
-        """
-        config: "PretrainedConfig"
-        block_terminal_output()
+def load_model_and_tokenizer(
+    model_config: ModelConfig,
+    dataset_config: DatasetConfig,
+    benchmark_config: BenchmarkConfig,
+    model_max_length: int,
+) -> tuple[PreTrainedModel, PreTrainedTokenizer]:
+    """Load the model and tokenizer.
 
-        # Get the fresh model ID and the corresponding real model ID
-        model_id = self.model_config.model_id.replace("-", "_")
-        fresh_to_real_model_id_mapping = dict(
-            fresh_xlm_roberta_base="FacebookAI/xlm-roberta-base",
-            fresh_electra_small="google/electra-small-discriminator",
-        )
-        real_model_id = fresh_to_real_model_id_mapping[model_id]
+    Args:
+        model_config:
+            The model configuration.
+        dataset_config:
+            The dataset configuration.
+        benchmark_config:
+            The benchmark configuration.
+        model_max_length:
+            The maximum context length of the model.
 
-        match self.dataset_config.task.task_group:
-            case (
-                TaskGroup.SEQUENCE_CLASSIFICATION
-                | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
-            ):
-                model_cls_mapping = dict(
-                    fresh_xlm_roberta_base=XLMRobertaForSequenceClassification,
-                    fresh_electra_small=ElectraForSequenceClassification,
-                )
-            case TaskGroup.TOKEN_CLASSIFICATION:
-                model_cls_mapping = dict(
-                    fresh_xlm_roberta_base=XLMRobertaForTokenClassification,
-                    fresh_electra_small=ElectraForTokenClassification,
-                )
-            case TaskGroup.QUESTION_ANSWERING:
-                model_cls_mapping = dict(
-                    fresh_xlm_roberta_base=XLMRobertaForQuestionAnswering,
-                    fresh_electra_small=ElectraForQuestionAnswering,
-                )
-            case _:
-                raise InvalidBenchmark(
-                    f"Task group {self.dataset_config.task.task_group} is not "
-                    f"supported for model {self.model_config.model_id}."
-                )
-        model_cls = model_cls_mapping[model_id]
+    Returns:
+        The loaded model and tokenizer.
+    """
+    config: "PretrainedConfig"
+    block_terminal_output()
 
-        config = AutoConfig.from_pretrained(
-            real_model_id,
-            token=self.benchmark_config.api_key
-            or os.getenv("HUGGINGFACE_API_KEY")
-            or True,
-            num_labels=self.dataset_config.num_labels,
-            id2label=self.dataset_config.id2label,
-            label2id=self.dataset_config.label2id,
-            cache_dir=self.model_config.model_cache_dir,
-            trust_remote_code=self.benchmark_config.trust_remote_code,
-        )
-        model = model_cls(config)
+    # Get the fresh model ID and the corresponding real model ID
+    model_id = model_config.model_id.replace("-", "_")
+    fresh_to_real_model_id_mapping = dict(
+        fresh_xlm_roberta_base="FacebookAI/xlm-roberta-base",
+        fresh_electra_small="google/electra-small-discriminator",
+    )
+    real_model_id = fresh_to_real_model_id_mapping[model_id]
 
-        if self.dataset_config.task.task_group == TaskGroup.QUESTION_ANSWERING:
-            model = setup_model_for_question_answering(model=model)
-
-        # Load the tokenizer. If the model is a subclass of a RoBERTa model then we
-        # have to add a prefix space to the tokens, by the way the model is constructed
-        prefix_models = ["Roberta", "GPT", "Deberta"]
-        prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
-        try:
-            tokenizer: "PreTrainedTokenizer" = AutoTokenizer.from_pretrained(
-                real_model_id,
-                revision=self.model_config.revision,
-                token=self.benchmark_config.api_key
-                or os.getenv("HUGGINGFACE_API_KEY")
-                or True,
-                add_prefix_space=prefix,
-                cache_dir=self.model_config.model_cache_dir,
-                use_fast=True,
-                verbose=False,
-                trust_remote_code=self.benchmark_config.trust_remote_code,
+    match dataset_config.task.task_group:
+        case (
+            TaskGroup.SEQUENCE_CLASSIFICATION
+            | TaskGroup.MULTIPLE_CHOICE_CLASSIFICATION
+        ):
+            model_cls_mapping = dict(
+                fresh_xlm_roberta_base=XLMRobertaForSequenceClassification,
+                fresh_electra_small=ElectraForSequenceClassification,
             )
-        except (JSONDecodeError, OSError):
-            raise InvalidModel(f"Could not load tokenizer for model {real_model_id!r}.")
+        case TaskGroup.TOKEN_CLASSIFICATION:
+            model_cls_mapping = dict(
+                fresh_xlm_roberta_base=XLMRobertaForTokenClassification,
+                fresh_electra_small=ElectraForTokenClassification,
+            )
+        case TaskGroup.QUESTION_ANSWERING:
+            model_cls_mapping = dict(
+                fresh_xlm_roberta_base=XLMRobertaForQuestionAnswering,
+                fresh_electra_small=ElectraForQuestionAnswering,
+            )
+        case _:
+            raise InvalidBenchmark(
+                f"Task group {dataset_config.task.task_group} is not "
+                f"supported for model {model_config.model_id}."
+            )
+    model_cls = model_cls_mapping[model_id]
 
-        model, tokenizer = align_model_and_tokenizer(
-            model=model,
-            tokenizer=tokenizer,
-            model_max_length=self.model_max_length,
-            raise_errors=self.benchmark_config.raise_errors,
+    config = AutoConfig.from_pretrained(
+        real_model_id,
+        token=benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
+        num_labels=dataset_config.num_labels,
+        id2label=dataset_config.id2label,
+        label2id=dataset_config.label2id,
+        cache_dir=model_config.model_cache_dir,
+        trust_remote_code=benchmark_config.trust_remote_code,
+    )
+    model = model_cls(config)
+
+    if dataset_config.task.task_group == TaskGroup.QUESTION_ANSWERING:
+        model = setup_model_for_question_answering(model=model)
+
+    # Load the tokenizer. If the model is a subclass of a RoBERTa model then we
+    # have to add a prefix space to the tokens, by the way the model is constructed
+    prefix_models = ["Roberta", "GPT", "Deberta"]
+    prefix = any(model_type in type(model).__name__ for model_type in prefix_models)
+    try:
+        tokenizer: "PreTrainedTokenizer" = AutoTokenizer.from_pretrained(
+            real_model_id,
+            revision=model_config.revision,
+            token=benchmark_config.api_key or os.getenv("HUGGINGFACE_API_KEY") or True,
+            add_prefix_space=prefix,
+            cache_dir=model_config.model_cache_dir,
+            use_fast=True,
+            verbose=False,
+            trust_remote_code=benchmark_config.trust_remote_code,
         )
+    except (JSONDecodeError, OSError):
+        raise InvalidModel(f"Could not load tokenizer for model {real_model_id!r}.")
 
-        return model, tokenizer
+    model, tokenizer = align_model_and_tokenizer(
+        model=model,
+        tokenizer=tokenizer,
+        model_max_length=model_max_length,
+        raise_errors=benchmark_config.raise_errors,
+    )
+
+    return model, tokenizer

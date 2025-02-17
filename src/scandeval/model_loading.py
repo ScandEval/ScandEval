@@ -8,9 +8,9 @@ from .benchmark_modules import (
     LiteLLMModel,
     VLLMModel,
 )
-from .constants import GENERATIVE_DATASET_TASK_GROUPS, GENERATIVE_DATASET_TASKS
-from .enums import ModelType
-from .exceptions import InvalidBenchmark
+from .constants import GENERATIVE_DATASET_TASK_GROUPS
+from .enums import InferenceBackend, ModelType
+from .exceptions import InvalidBenchmark, InvalidModel
 
 if t.TYPE_CHECKING:
     from .benchmark_modules import BenchmarkModule
@@ -37,19 +37,33 @@ def load_model(
     """
     # The order matters; the first model type that matches will be used. For this
     # reason, they have been ordered in terms of the most common model types.
-    model_type_to_module_mapping: dict[ModelType, t.Type[BenchmarkModule]] = {
-        ModelType.HF_HUB_GENERATIVE: VLLMModel,
-        ModelType.HF_HUB_ENCODER: HuggingFaceEncoderModel,
-        ModelType.API: LiteLLMModel,
-        ModelType.FRESH: FreshEncoderModel,
-    }
-    model_class = model_type_to_module_mapping[model_config.model_type]
+    model_class: t.Type[BenchmarkModule]
+    match (model_config.model_type, model_config.inference_backend, model_config.fresh):
+        case (ModelType.GENERATIVE, InferenceBackend.VLLM, False):
+            model_class = VLLMModel
+        case (ModelType.ENCODER, InferenceBackend.TRANSFORMERS, False):
+            model_class = HuggingFaceEncoderModel
+        case (ModelType.GENERATIVE, InferenceBackend.LITELLM, False):
+            model_class = LiteLLMModel
+        case (ModelType.ENCODER, InferenceBackend.TRANSFORMERS, True):
+            model_class = FreshEncoderModel
+        case (_, _, True):
+            raise InvalidModel(
+                "Cannot load a freshly initialised model with the model type "
+                f"{model_config.model_type!r} and inference backend "
+                f"{model_config.inference_backend!r}."
+            )
+        case _:
+            raise InvalidModel(
+                f"Cannot load model with model type {model_config.model_type!r} and "
+                f"inference backend {model_config.inference_backend!r}."
+            )
 
     # Refuse to benchmark non-generative models on generative tasks
     if (
         dataset_config.task.task_group in GENERATIVE_DATASET_TASK_GROUPS
-        or dataset_config.task.name in GENERATIVE_DATASET_TASKS
-    ) and not model_class._is_generative:
+        and not model_config.model_type == ModelType.GENERATIVE
+    ):
         raise InvalidBenchmark(
             f"Cannot benchmark non-generative model {model_config.model_id!r} on "
             f"generative task {dataset_config.task.name!r}."

@@ -30,47 +30,58 @@ class Device(AutoStrEnum):
     CUDA = auto()
 
 
-class Framework(AutoStrEnum):
-    """The framework of a model.
+class InferenceBackend(AutoStrEnum):
+    """The backend used for model inference.
 
     Attributes:
-        PYTORCH:
-            PyTorch framework.
-        JAX:
-            JAX framework.
-        API:
-            Accessible via an API.
-        HUMAN:
-            Human evaluator.
+        TRANSFORMERS:
+            Hugging Face `transformers` library.
+        VLLM:
+            VLLM library.
+        LITELLM:
+            LiteLLM library.
+        NONE:
+            No inference backend used (e.g., for human evaluation).
     """
 
-    PYTORCH = auto()
-    JAX = auto()
-    API = auto()
-    HUMAN = auto()
+    TRANSFORMERS = auto()
+    VLLM = auto()
+    LITELLM = auto()
+    NONE = auto()
 
 
 class ModelType(AutoStrEnum):
     """The type of a model.
 
     Attributes:
-        FRESH:
-            Randomly initialised Hugging Face model.
-        HF_HUB_ENCODER:
-            Hugging Face encoder model from the Hub.
-        HF_HUB_GENERATIVE:
-            Hugging Face generative model from the Hub.
-        API:
-            Model accessed through an API.
+        ENCODER:
+            An encoder (i.e., BERT-style) model.
+        GENERATIVE:
+            A generative model. Can be either decoder or encoder-decoder (aka seq2seq).
         HUMAN:
             Human evaluator.
     """
 
-    FRESH = auto()
-    HF_HUB_ENCODER = auto()
-    HF_HUB_GENERATIVE = auto()
-    API = auto()
+    ENCODER = auto()
+    GENERATIVE = auto()
     HUMAN = auto()
+
+
+class GenerativeType(AutoStrEnum):
+    """The type of a generative model.
+
+    Attributes:
+        BASE:
+            A base (i.e., pretrained) generative model.
+        INSTRUCTION_TUNED:
+            An instruction-tuned generative model.
+        REASONING:
+            A generative reasoning model.
+    """
+
+    BASE = auto()
+    INSTRUCTION_TUNED = auto()
+    REASONING = auto()
 
 
 class DataType(AutoStrEnum):

@@ -367,6 +367,60 @@ You can evaluate this dataset directly as follows:
 $ scandeval --model <model-id> --dataset scala-nn
 ```
 
+### Unofficial: Jentoft
+This dataset was published in [this Master's thesis](https://www.duo.uio.no/handle/10852/103885) by Matias Jentoft.
+
+The original dataset consists of 85,771 / 10,827 / 10487 samples for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training, validation and test, respectively. In each split, the distribution of `correct` and `incorrect` is 50/50.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "For to uker siden var jeg på en fotoutstilling om Erytrea.",
+  "label": "incorrect"
+}
+```
+```json
+{
+  "text": "Det viser seg at folk ikke kan leve uten mobiltelefonen.",
+  "label": "correct"
+}
+```
+```json
+{
+  "text": "Mobiltelefoner dominerer mange av oss, og vi bruker dem over alt, på gatene 'hvert hjørne', i gatene, holdeplasser, kaffeteriaene og i parken, der folk burde tilbringe koselig tid sammen i naturen.",
+  "label": "incorrect"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 12
+- Prefix prompt:
+  ```
+  Følgende er setninger og hvorvidt de er grammatisk korrekte.
+  ```
+- Base prompt template:
+  ```
+  Setning: {text}
+  Grammatisk korrekt: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Setning: {text}
+
+  Bestem om setningen er grammatisk korrekt eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.
+  ```
+- Label mapping:
+    - `correct` ➡️ `ja`
+    - `incorrect` ➡️ `nei`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset jentoft
+```
 
 ## Reading Comprehension
 
@@ -909,4 +963,61 @@ You can evaluate this dataset directly as follows:
 
 ```bash
 $ scandeval --model <model-id> --dataset schibsted-no
+```
+
+
+### Unofficial: Personal Sum
+
+This dataset was released [here](https://github.com/SmartmediaAI/PersonalSum) and contains human annotated summaries that reflect individual user preferences.
+
+The original dataset contains 1,099 summaries based on 441 unique articles. The dataset has been restructured into 441 samples, where each sample represents a unique article paired with all of its corresponding summaries (1 or more). The dataset has been split such that we have 121 / 64 / 256 samples for training, validation and testing, respectively.
+
+Here are a few examples from the training split:
+
+```json
+{
+    "text": "I en ny bok forteller Abid Rajas søster Abida Raja (49) at hun over lengre tid levde i et voldelig forhold. I en pressemelding avviser eksmannen anklagene. – Min klient ønsker å påpeke at han nekter straffeskyld for partnervold og\nvoldtektsanklager. Han vedkjenner at ekteskapet har hatt sine utfordringer, og at de derfor skilte seg i 2015, skriver eksmannens advokat Javeed H. Shah i en pressemelding. I boken «Frihetens Øyeblikk», beskriver Raja at eksmannen hennes var voldelig, og at hun flere ganger forsøkte å unnslippe mannen. I boken skriver forfatter Håkon F. Høydal:«De siste tjue årene hadde vært en kamp mot seg selv: Hun ønsket å gå fra mannen. Men hun måtte bli. På grunn av barna, og på grunn av familien, på grunn av frykten for fattigdom og skam. Nå hadde hun verken barna, penger eller hus.»VG har tidligere vært i kontakt med Abida Rajas eksmann i forbindelse med bokutgivelsen, som tirsdag ikke hadde lest boken.– Jeg er i utlandet og har ikke lest boken, så kan ikke kommentere uten å lese det, skriver han i en SMS til VG.I boka skriver forfatteren at Abida etter stort press fra familien, skal ha møtt én av ektemannkandidatene, en 23 år gammel inngiftet onkel i Pakistan. Hun var 18 år og skulle gått i andre klasse på videregående hjemme i Norge.«Abida husker ikke om hun sa ja. Men hun sa heller ikke nei. Hun ville bare bort», heter det i boken.Onsdag svarer eksmannen via sin advokat, at han har levd i god tro om at Abida giftet seg av fri vilje slik hun selv uttrykte ovenfor han. – Derfor er opplysningene om tvangsekteskap noe han ble kjent med først i 2020. Boken kommer ett år etter at venstrepolitiker og tidligere statsråd Abid Raja kom med sin bok\xa0«Min skyld». Boken er skrevet av VG-journalist Håkon F. Høydal og ble lansert tirsdag morgen\xa0etter mye hemmelighold. VG har ikke hatt noe med utgivelsen å gjøre.",
+    "target_text": ["I en ny bok forteller Abid Rajas søster Abida Raja om hennes erfaringer med et voldelig ekteskap, hvor hun beskriver flere forsøk på å unnslippe. Eksmannen avviser anklagene og hevder at han levde i god tro om at ekteskapet var av fri vilje, noe han først ble klar over i 2020.",
+    "Abida Raja beskriver i en ny bok et voldelig forhold med sin eksmann, som avviser anklagene om partnervold og voldtektsanklager. Boken avslører også at Abida ble presset til å møte en ektemannkandidat i en tvangssituasjon, noe eksmannen hevder han ikke var klar over før i 2020.",
+    "I boken «Frihetens øyeblikk» forteller forfatteren Håkon F. Høydal at Rajas eksmann var voldelig og hun ønsket å forlate ham. Hun ble værende fordi hun var redd for barnas lidelser, redd for fattigdom og hun skammet seg."]
+}
+```
+```json
+{
+    "text": "Flere lakseaksjer falt igjen tungt, dagen etter at skatteforslag ga børsras for sjømatselskaper. Samtidig steg Norwegian etter anbefaling fra storbank.Det Ble en noe vinglete dag på Oslo Børs torsdag.Etter en positiv start vendte Børsen snuten nedover i tidlig handel, før den hentet seg inn igjen til forsiktig oppgang omtrent halvveis ut i handelsdagen. Utover ettermiddagen snudde Børsen så nedover igjen.Hovedindeksen endte til slutt dagen ned 1,58 prosent.Nedgangen tiltok den siste timen med handel, samtidig som Wall Street falt kraftig.Oljeprisen steg solid gjennom gårsdagen, og handles rundt én dollar høyere enn da Børsen stengte onsdag. Et fat Nordsjøolje (brent spot) koster ved stengetid torsdag 88,4 dollar, ned rundt 0,9 prosentsiden midnatt.Oljeselskapene Equinor og Aker BP falt i overkant av én prosent, mens Vår Energi endte ned 3,82 prosent.Onsdag falt Hovedindeksen 2,76 prosent etter at lakseselskapene fikk gjennomgå etter regjeringens foreslåtte grunnrenteskatt på havbruk. Verst gikk det for Salmar som stupte 30 prosent, samtidig som Lerøy Seafood falt 27,5 prosent. Torsdag fortsetter nedgangen for lakseaksjene. Sjømatindeksen endte ned 5,05 prosent.Slik så det ut for lakseaksjene ved stengetid (utvikling onsdag i parentes): Salmar falt 1,05 prosent (stupte 30,3 prosent)Grieg Seafood falt 2,75 prosent (falt 26,6 prosent)Mowi falt 3,15 prosent (falt 18,9 prosent) Lerøy Seafood falt 8,10 prosent (raste 27,5 prosent)Austevoll Seafood falt 6,28 prosent (falt 21,7 prosentNorway Royal Salmon falt 8,94 prosent (endte ned 22,9 prosent)Bakkafrost-aksjen falt samtidig 12,83 prosent.Selskapet har virksomhet på Færøyene og understreket onsdag at de ikke påvirkes av det nye norske skatteforslaget. Samtidig understreket de at det arbeides med et forslag om justeringer av skattesatsen på Færøyene.I USA peker pilene solid nedover på børsene torsdag ettermiddag.Det er kraftig nedgang på Wall Street, der den brede S&P 500-indeksen faller godt over to prosent. Teknologiindeksen Nasdaq faller samtidig mer enn tre prosent.I Europa er det også bred, kraftig nedgang på de viktigste børsene. London-børsen, Frankfurt-børsen og Paris-børsen er alle ned i overkant av to prosent rundt stengetid i Oslo.Storbanken HSBC har gjenopptatt dekning på flyselskapet Norwegian, ifølge Bloomberg. Banken anbefaler kjøp og har satt et kursmål på 14,50 kroner. Dermed ser banken for seg en oppside på hele 119 prosent i aksjen, skriver nyhetsbyrået. Norwegian-aksjen steg 6,81 prosent.– Nye Norwegian er en annen forretning enn den før pandemien, som har omstrukturert operasjonelt og økonomisk, skriver HSBC i analysen.– Den nye ledelsen har en solid strategi, en enkel og kostnadseffektiv\nforretningsmodell med en enkelt type fly, et sterkt fokus på sine nøkkelmarkeder i Norden og en solid balanse og likviditet, alt innenfor et gunstig konkurranselandskap som bør tillate ny NAS å ta markedsandeler fra sine konkurrenter, heter det videre i analysen.Storbanken begrunner også sin nye dekning på flyselskapet ved at dets konkurrenter venter mye motvind og ny etterspørsel for Norwegian kan komme ut av det. I tillegg nevnes Norges sikkerhetsnett rundt høye energi- og strømpriser.- Mens Europa står overfor høy inflasjon og lav forbrukertillit, har Norge betydelig lysere utsikter med sine omfattende energiressurser, statlig finansiering og høy inntekt per innbygger.HSBC viser også til høy reiseetterspørsel blant nordmenn.Fornybarselskapet Scatec er i fokus i forbindelse med at selskapet har kommet med nye målsetninger. Selskapet vil investere 10 milliarder kroner av egenkapitalen i nye kraftverk frem mot 2027. Investeringene har som mål å utvide kapasiteten med 1,5 gigawatt hvert år i perioden. Scatec-aksjen endte dagen ned 2,93 prosentXXL er samtidig blant børstaperne torsdag. Aksjen til sportsbutikk-kjeden falt 11,66 prosent.",
+    "target_text": ["Lakseaksjer opplever fortsatt betydelig nedgang på Oslo Børs etter regjeringens foreslåtte grunnrenteskatt på havbruk. Hovedindeksen endte ned 1,58 prosent, og sjømatindeksen falt ytterligere 5,05 prosent. Samtidig steg Norwegian-aksjen etter anbefaling fra HSBC, som gjenopptok dekning på selskapet og anbefalte kjøp med et kursmål på 14,50 kroner, med en forventet oppside på 119 prosent."]
+}
+```
+```json
+{
+    "text": "(Minnesota Wild – St. Louis Blues 4–6) Mats Zuccarello (34) var svært kritisk til seg selv og lagkameratene i Minnesota Wild etter nattens tap mot St. Louis Blues i 23 minusgrader foran 38.000 tilskuere.– Jeg har egentlig ikke ord. Det er pinlig når du har 40.000 mennesker som kommer og fryser ræva av seg, og så spiller vi sånn, sa Zuccarello på pressekonferansen etter «Winter Classic»-oppgjøret på Target Field – et baseballstadion i Minneapolis. Før siste periode ledet Blues 6–2, og Zuccarello beskriver de to første periodene som at de ble «lett utspilt» av Blues. Zuccarello hadde én assist – da Ryan Hartman scoret lagets tredje mål . Wild reduserte to ganger i siste periode og fastsatte sluttresultatet til 4–6. 34-åringen mener det ikke nytter å forklare tapet med kulden, vanskelige forhold og det faktum at de ikke har spilt kamp siden 20. desember: – Det er ingen unnskyldninger ... Det er kaldt for begge lag, isen er humpete for begge lag. Vi spilte ikke smart hockey som vi har gjort i store deler av sesongen. Det var Wilds femte strake tap i en sesong der Zuccarello og laget jevnt over har levert meget bra. – Dessverre skjedde det på en stor kveld som dette. Folk forlater hjemmene sine i kulden for å støtte oss, og så serverer vi dem dette. Vi har skuffet oss selv og alle andre. Det var på forhånd varslet sprengkulde, og målingene viste 23 minusgrader. Zuccarello beskriver opplevelsen slik:– Jeg var skikkelig kald under oppvarmingen, men når kampen starter slår adrenalinet inn. Men jeg tror aldri jeg har vært så kald i hele mitt liv før sisteperioden da vi lå under 6–2, eller hva det var. Det var ingen god følelse. – Det store bildet nå er at vi har fem strake tap, og vi må finne tilbake til måten å vinne på og hvordan vi skal spille som et lag, sier Zuccarello. Zuccarello har scoret åtte mål og lagt 17 målgivende pasninger i løpet av 25 kamper denne sesongen. Det vil si ett målpoeng per kamp i snitt. I sine beste målpoengsesonger for New York Rangers – 2013/14, 2015/16 og 2016/17 – oppnådde han henholdsvis 59 målpoeng på 77 kamper, 61 målpoeng på 81 kamper og 59 på 80 kamper.PS! Natt til fredag spiller Minnesota Wild borte mot Boston Bruins. To dager senere er det hjemmekamp mot Washington Capitals.",
+    "target_text": ["Minnesota Wild led et nederlag mot St. Louis Blues under ekstreme værforhold på Target Field. Mats Zuccarello uttrykte sin skuffelse over lagets ytelse foran 38 000 tilskuere, og tilskrev tapet til dårlig spill heller enn kulden. Til tross for Zuccarellos bidrag med en assist, endte Wild med sitt femte strake tap, noe som førte til et press for å finne tilbake til seiersformen før kommende kamper mot Boston Bruins og Washington Capitals.",
+    "Det er ingen unnskyldninger for Wilds femte strake tap, til tross for at både Zuccarello og resten av laget generelt har spilt bra denne sesongen. Forholdene var like for begge lag, men laget spilte ikke smart hockey slik de har gjort tidligere i sesongen."]
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 1
+- Prefix prompt:
+  ```
+  Her følger nyhetsartikler med tilhørende sammendrag.
+  ```
+- Base prompt template:
+  ```
+  Nyhetsartikkel: {text}
+  Sammendrag: {target_text}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Nyhetsartikkel: {text}
+
+  Skriv et sammendrag av den ovennevnte artikkelen.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ scandeval --model <model-id> --dataset personal-sum
 ```

@@ -63,7 +63,7 @@ SWEREC_CONFIG = DatasetConfig(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
     instruction_prompt="Recension: {text}\n\nKlassificera sentimentet i recensionen. "
-    "Svara med 'positiv', 'neutral' eller 'negativ'.",
+    "Svara med 'positiv', 'neutral' eller 'negativ', och inget annat.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -83,7 +83,7 @@ ANGRY_TWEETS_CONFIG = DatasetConfig(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
     instruction_prompt="Tweet: {text}\n\nKlassificer sentimentet i tweetet. Svar kun "
-    "med 'positiv', 'neutral' eller 'negativ'.",
+    "med 'positiv', 'neutral' eller 'negativ', og intet andet.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -103,7 +103,7 @@ NOREC_CONFIG = DatasetConfig(
         positive="positiv", neutral="nøytral", negative="negativ"
     ),
     instruction_prompt="Anmeldelse: {text}\n\nKlassifiser sentimentet i anmeldelsen. "
-    "Svar med 'positiv', 'nøytral' eller 'negativ'.",
+    "Svar med 'positiv', 'nøytral' eller 'negativ', og ikke noe annet.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -123,7 +123,7 @@ HOTTER_AND_COLDER_SENTIMENT_CONFIG = DatasetConfig(
         positive="jákvætt", neutral="hlutlaust", negative="neikvætt"
     ),
     instruction_prompt="Texti: {text}\n\nFlokkaðu tilfinninguna í textanum. "
-    "Svaraðu með 'jákvætt', 'hlutlaust' eða 'neikvætt'.",
+    "Svaraðu með 'jákvætt', 'hlutlaust' eða 'neikvætt', og engu öðru.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -143,7 +143,7 @@ SB10K_CONFIG = DatasetConfig(
         positive="positiv", neutral="neutral", negative="negativ"
     ),
     instruction_prompt="Tweet: {text}\n\nKlassifizieren Sie die Stimmung im Tweet. "
-    "Antworten Sie mit 'positiv', 'neutral' oder 'negativ'.",
+    "Antworten Sie mit 'positiv', 'neutral' oder 'negativ', und nichts anderes.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -163,7 +163,7 @@ DUTCH_SOCIAL_CONFIG = DatasetConfig(
         positive="positief", neutral="neutraal", negative="negatief"
     ),
     instruction_prompt="Tweet: {text}\n\nClassificeer het sentiment in de tweet. "
-    "Antwoord met 'positief', 'neutraal' of 'negatief'.",
+    "Antwoord met 'positief', 'neutraal' of 'negatief', en niets anders.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -181,7 +181,7 @@ DBRD_CONFIG = DatasetConfig(
     prompt_template="Tweet: {text}\nSentiment: {label}",
     prompt_label_mapping=dict(positive="positief", negative="negatief"),
     instruction_prompt="Tweet: {text}\n\nClassificeer het sentiment in de tweet. "
-    "Antwoord met 'positief' of 'negatief'.",
+    "Antwoord met 'positief' of 'negatief', en niets anders.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
     unofficial=True,
@@ -202,7 +202,7 @@ SST5_CONFIG = DatasetConfig(
         positive="positive", neutral="neutral", negative="negative"
     ),
     instruction_prompt="Text: {text}\n\nClassify the sentiment in the text. Answer "
-    "with 'positive', 'neutral' or 'negative'.",
+    "with 'positive', 'neutral' or 'negative', and nothing else.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -221,7 +221,7 @@ FOSENT_CONFIG = DatasetConfig(
         positive="positivt", neutral="neutralt", negative="negativt"
     ),
     instruction_prompt="Tekstur: {text}\n\nFlokka lyndið í tekstinum. Svara við "
-    "'positivt', 'neutralt' ella 'negativt'.",
+    "'positivt', 'neutralt' ella 'negativt', og einki annað.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -239,7 +239,7 @@ ALLOCINE_CONFIG = DatasetConfig(
     prompt_template="Texte: {text}\nSentiment: {label}",
     prompt_label_mapping=dict(positive="positif", negative="négatif"),
     instruction_prompt="Texte : {text}\nClassez le sentiment dans le texte. Répondez "
-    "par ‘positif' ou ‘négatif'.",
+    "par ‘positif' ou ‘négatif', et rien d'autre.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -731,7 +731,8 @@ SCALA_SV_CONFIG = DatasetConfig(
     prompt_template="Mening: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
     instruction_prompt="Mening: {text}\n\nBestäm om meningen är grammatiskt korrekt "
-    "eller inte. Svara med 'ja' om meningen är korrekt och 'nej' om den inte är.",
+    "eller inte. Svara med 'ja' om meningen är korrekt och 'nej' om den inte är, "
+    "och inget annat.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -747,7 +748,8 @@ SCALA_DA_CONFIG = DatasetConfig(
     prompt_template="Sætning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nej"),
     instruction_prompt="Sætning: {text}\n\nBestem om sætningen er grammatisk korrekt "
-    "eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er.",
+    "eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er, "
+    "og intet andet.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -762,7 +764,8 @@ SCALA_NB_CONFIG = DatasetConfig(
     prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
     prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
     instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
-    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
+    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er, "
+    "og ikke noe annet.",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
     max_generated_tokens=5,
@@ -779,7 +782,8 @@ SCALA_NN_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
-    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.",
+    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er, "
+    "og ikke noe annet.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -796,7 +800,7 @@ SCALA_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
     "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
-    "ekki.",
+    "ekki, og engu öðru.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -813,7 +817,7 @@ SCALA_FO_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     instruction_prompt="Setningur: {text}\n\nGreinið hvort setningurin er mállæruliga "
     "rættur ella ikki. Svarið skal vera 'ja' um setningurin er rættur og 'nei' um "
-    "hann ikki er.",
+    "hann ikki er, og einki annað.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -830,7 +834,7 @@ SCALA_DE_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nein"),
     instruction_prompt="Satz: {text}\n\nBestimmen Sie, ob der Satz grammatikalisch "
     "korrekt ist oder nicht. Antworten Sie mit 'ja', wenn der Satz korrekt ist und "
-    "'nein', wenn er es nicht ist.",
+    "'nein', wenn er es nicht ist, und nichts anderes.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -846,7 +850,8 @@ SCALA_NL_CONFIG = DatasetConfig(
     prompt_template="Zin: {text}\nGrammaticaal correct: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nee"),
     instruction_prompt="Zin: {text}\n\nBepaal of de zin grammaticaal correct is of "
-    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is.",
+    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is, "
+    "en niets anders.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -864,7 +869,7 @@ SCALA_EN_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="yes", incorrect="no"),
     instruction_prompt="Sentence: {text}\n\nDetermine whether the sentence is "
     "grammatically correct or not. Reply with 'yes' if the sentence is correct and "
-    "'no' if it is not.",
+    "'no' if it is not, and nothing else.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -882,7 +887,7 @@ SCALA_FR_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="oui", incorrect="non"),
     instruction_prompt="Phrase: {text}\n\nDéterminez si la phrase est grammaticalement "
     "correcte ou non. Répondez par 'oui' si la phrase est correcte et par 'non' si "
-    "elle ne l'est pas.",
+    "elle ne l'est pas, et rien d'autre.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -900,7 +905,8 @@ DUTCH_COLA_CONFIG = DatasetConfig(
     prompt_template="Zin: {text}\nGrammaticaal correct: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nee"),
     instruction_prompt="Zin: {text}\n\nBepaal of de zin grammaticaal correct is of "
-    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is.",
+    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is, "
+    "en niets anders.",
     num_few_shot_examples=12,
     max_generated_tokens=3,
     unofficial=True,
@@ -918,7 +924,8 @@ DUTCH_COLA_FULL_CONFIG = DatasetConfig(
     prompt_template="Zin: {text}\nGrammaticaal correct: {label}",
     prompt_label_mapping=dict(correct="ja", incorrect="nee"),
     instruction_prompt="Zin: {text}\n\nBepaal of de zin grammaticaal correct is of "
-    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is.",
+    "niet. Antwoord met 'ja' als de zin correct is en 'nee' als dat niet het geval is, "
+    "en niets anders.",
     num_few_shot_examples=12,
     max_generated_tokens=3,
     unofficial=True,
@@ -936,7 +943,7 @@ ICE_EC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
     "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
-    "ekki.",
+    "ekki, og engu öðru.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
     unofficial=True,
@@ -953,7 +960,8 @@ ICE_EC_FULL_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
-    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki.",
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki, "
+    "og engu öðru.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
     unofficial=True,
@@ -971,7 +979,7 @@ ICE_LINGUISTIC_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
     "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
-    "ekki.",
+    "ekki, og engu öðru.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
     unofficial=True,
@@ -1316,6 +1324,21 @@ SCHIBSTED_NO_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+PERSONAL_SUM_CONFIG = DatasetConfig(
+    name="personal-sum",
+    pretty_name="the Norwegian summarisation dataset personal-sum",
+    huggingface_id="ScandEval/personal-sum",
+    task=SUMM,
+    languages=[NB, NN, NO],
+    prompt_prefix="Her følger nyhetsartikler med tilhørende sammendrag.",
+    prompt_template="Nyhetsartikkel: {text}\nSammendrag: {target_text}",
+    instruction_prompt="Nyhetsartikkel: {text}\n\nSkriv et sammendrag av den "
+    "ovennevnte artikkelen.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+    unofficial=True,
+)
+
 ORANGE_SUM_CONFIG = DatasetConfig(
     name="orange-sum",
     pretty_name="the truncated version of the French summarisation dataset "
@@ -1416,6 +1439,23 @@ MMLU_IS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
     "'b', 'c' eða 'd', og engu öðru.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+    unofficial=True,
+)
+
+ICELANDIC_KNOWLEDGE_CONFIG = DatasetConfig(
+    name="icelandic-knowledge",
+    pretty_name="the IcelandicQA dataset phrased as a knowledge dataset",
+    huggingface_id="ScandEval/icelandic-knowledge",
+    task=KNOW,
+    languages=[IS],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Eftirfarandi eru fjölvalsspurningar (með svörum).",
+    prompt_template="Spurningar: {text}\nSvara: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Spurningar: {text}\n\nSvaraðu eftirfarandi spurningum með 'a', "
+    "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,

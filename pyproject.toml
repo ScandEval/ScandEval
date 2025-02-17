@@ -1,6 +1,6 @@
 [project]
 name = "ScandEval"
-version = "14.4.0.dev"
+version = "15.1.0.dev"
 description = "Evaluation of pretrained language models on mono- or multilingual language tasks."
 readme = "README.md"
 authors = [
@@ -35,15 +35,10 @@ dependencies = [
     "rouge-score>=0.1.2",
     "bert-score>=0.3.13",
     "levenshtein>=0.24.0",
-    "scikit-learn<1.6.0",  # 1.6.0 breaks evaluate - remove when evaluate has fixes this issue: https://github.com/huggingface/evaluate/issues/655
+    "scikit-learn<1.6.0",
 ]
 
 [project.optional-dependencies]
-jax = [
-    "jax>=0.4.24",
-    "jaxlib>=0.4.24",
-    "flax>=0.8.1",
-]
 generative = [
     "demjson3>=3.0.6",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
@@ -54,9 +49,6 @@ human_evaluation = [
     "gradio>=4.26.0",
 ]
 all = [
-    "jax>=0.4.24",
-    "jaxlib>=0.4.24",
-    "flax>=0.8.1",
     "demjson3>=3.0.6",
     "bitsandbytes>=0.43.1; platform_system == 'Linux'",
     "vllm>=0.6.3,<0.6.5; platform_system == 'Linux'",
@@ -64,9 +56,6 @@ all = [
     "gradio>=4.26.0",
 ]
 test = [
-    "jax>=0.4.24",
-    "jaxlib>=0.4.24",
-    "flax>=0.8.1",
     "gradio>=4.26.0",
 ]
 
@@ -100,6 +89,19 @@ dev-dependencies = [
     "mkapi>=3.0.22",
     "pip>=24.3.1",
     "setuptools>=75.6.0",
+    "cffi>=1.17.1",
+    "cryptography>=44.0.0",
+    "pycparser>=2.22",
+    "types-aiofiles>=24.1.0.20241221",
+    "types-cffi>=1.16.0.20241221",
+    "types-pyopenssl>=24.1.0.20240722",
+    "types-pytz>=2024.2.0.20241221",
+    "types-pyyaml>=6.0.12.20241230",
+    "types-redis>=4.6.0.20241004",
+    "types-requests>=2.32.0.20241016",
+    "types-tabulate>=0.9.0.20241207",
+    "types-setuptools>=75.8.0.20250110",
+    "types-ujson>=5.10.0.20240515",
 ]
 
 [tool.ruff]

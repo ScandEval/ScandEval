@@ -47,6 +47,7 @@ def build_benchmark_config(
     api_version: str | None,
     debug: bool,
     run_with_cli: bool,
+    only_allow_safetensors: bool,
     first_time: bool = False,
 ) -> BenchmarkConfig:
     """Create a benchmark configuration.
@@ -111,6 +112,8 @@ def build_benchmark_config(
             Whether to run the benchmark in debug mode.
         run_with_cli:
             Whether the benchmark is being run with the CLI.
+        only_allow_safetensors:
+            Whether to only allow evaluations of models stored as safetensors.
         first_time:
             Whether this is the first time the benchmark configuration is being created.
             Defaults to False.
@@ -184,6 +187,7 @@ def build_benchmark_config(
         api_version=api_version,
         debug=debug,
         run_with_cli=run_with_cli,
+        only_allow_safetensors=only_allow_safetensors,
     )
 
 

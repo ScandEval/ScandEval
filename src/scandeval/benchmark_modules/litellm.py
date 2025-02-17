@@ -30,9 +30,20 @@ from litellm.types.utils import ModelResponse
 from requests.exceptions import RequestException
 from transformers import Trainer
 
-from ..constants import MAX_LOGPROBS, TASK_GROUPS_USING_LOGPROBS, TASKS_USING_JSON
+from ..constants import (
+    MAX_LOGPROBS,
+    REASONING_MAX_TOKENS,
+    TASK_GROUPS_USING_LOGPROBS,
+    TASKS_USING_JSON,
+)
 from ..data_models import BenchmarkConfig, GenerativeModelOutput, ModelConfig, Task
-from ..enums import BatchingPreference, Framework, ModelType, TaskGroup
+from ..enums import (
+    BatchingPreference,
+    GenerativeType,
+    InferenceBackend,
+    ModelType,
+    TaskGroup,
+)
 from ..exceptions import (
     InvalidBenchmark,
     NeedsAdditionalArgument,
@@ -64,6 +75,7 @@ VOCAB_SIZE_MAPPING = {
     "gpt-4-(vision|turbo)(-preview)?": 100_256,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": 100_256,
     "gpt-4o(-mini)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 200_019,
+    "o[1-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
     # Anthropic models
     "claude-[1-9](-[1-9])?-(opus|sonnet|haiku)-[0-9]{8}": -1,
 }
@@ -84,12 +96,16 @@ MODEL_MAX_LENGTH_MAPPING = {
     "gpt-4-(vision|turbo)(-preview)?": 128_000,
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": 4_095,
     "gpt-4o(-mini)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 128_000,
+    "o1-(mini|preview)(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 128_000,
+    "o1(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 200_000,
+    "o[2-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": 200_000,
     # Anthropic models
     "claude-[1-9](-[1-9])?-(opus|sonnet|haiku)-[0-9]{8}": 200_000,
 }
 
 
 NUM_PARAMS_MAPPING = {
+    # OpenAI models
     "(text-)?ada(-001)?": 350_000_000,
     "(text-)?babbage(-001)?": 3_000_000_000,
     "(text-)?curie(-001)?": 13_000_000_000,
@@ -101,17 +117,35 @@ NUM_PARAMS_MAPPING = {
     "gpt-3.5-turbo-instruct(-[0-9]{4})?": -1,
     "gpt-4o(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
     "gpt-4o-mini(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
+    "o[1-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?": -1,
     # Anthropic models
     "claude-[1-9](-[1-9])?-(opus|sonnet|haiku)-[0-9]{8}": -1,
 }
 
 
+REASONING_MODELS = ["o[1-9](-mini|-preview)?(-[0-9]{4}-[0-9]{2}-[0-9]{2})?"]
+
+
 class LiteLLMModel(BenchmarkModule):
     """A generative model from LiteLLM."""
 
-    _is_generative = True
+    fresh_model = False
     batching_preference = BatchingPreference.SINGLE_SAMPLE
     high_priority = False
+
+    @property
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if it has not been set yet.
+        """
+        if re.fullmatch(
+            pattern="|".join(REASONING_MODELS), string=self.model_config.model_id
+        ):
+            return GenerativeType.REASONING
+        else:
+            return GenerativeType.INSTRUCTION_TUNED
 
     def generate(self, inputs: dict) -> GenerativeModelOutput:
         """Generate outputs from the model.
@@ -131,8 +165,12 @@ class LiteLLMModel(BenchmarkModule):
 
         generation_kwargs: dict[str, t.Any] = dict(
             model=self.model_config.model_id,
-            max_tokens=self.dataset_config.max_generated_tokens,
-            stop=["\n\n"],
+            max_completion_tokens=(
+                REASONING_MAX_TOKENS
+                if self.generative_type == GenerativeType.REASONING
+                else self.dataset_config.max_generated_tokens
+            ),
+            stop=[],
             temperature=0.0,
             seed=4242,
             api_key=self.benchmark_config.api_key,
@@ -144,7 +182,7 @@ class LiteLLMModel(BenchmarkModule):
             generation_kwargs["logprobs"] = True
             generation_kwargs["top_logprobs"] = MAX_LOGPROBS
 
-        if self.dataset_config.task.name in TASKS_USING_JSON:
+        if self.dataset_config.task in TASKS_USING_JSON:
             assert (
                 "json" in messages[0]["content"].lower()
             ), "Prompt must contain 'json' for JSON tasks."
@@ -163,11 +201,19 @@ class LiteLLMModel(BenchmarkModule):
                 )
                 break
             except BadRequestError as e:
-                if "stop_sequences" not in str(e).lower():
+                if "stop_sequences" in str(e).lower():
+                    generation_kwargs["stop"] = None
+                elif "you are not allowed to request logprobs" in str(e).lower():
+                    generation_kwargs.pop("logprobs")
+                    generation_kwargs.pop("top_logprobs")
+                elif (
+                    "'temperature' is not supported with this model." in str(e).lower()
+                ):
+                    generation_kwargs.pop("temperature")
+                else:
                     raise InvalidBenchmark(
                         f"Failed to generate text. The error message was: {e}"
                     )
-                generation_kwargs["stop"] = None
             except (
                 Timeout,
                 ServiceUnavailableError,
@@ -218,7 +264,7 @@ class LiteLLMModel(BenchmarkModule):
             The number of parameters in the model.
         """
         for key, value in NUM_PARAMS_MAPPING.items():
-            if re.match(pattern=key, string=self.model_config.model_id) is not None:
+            if re.fullmatch(pattern=key, string=self.model_config.model_id) is not None:
                 return value
 
         if self.model_config.model_id.startswith("huggingface/"):
@@ -278,7 +324,7 @@ class LiteLLMModel(BenchmarkModule):
             The vocabulary size of the model.
         """
         for key, value in VOCAB_SIZE_MAPPING.items():
-            if re.match(pattern=key, string=self.model_config.model_id) is not None:
+            if re.fullmatch(pattern=key, string=self.model_config.model_id) is not None:
                 return value
 
         if self.model_config.model_id.startswith("huggingface/"):
@@ -328,7 +374,7 @@ class LiteLLMModel(BenchmarkModule):
             The maximum length of the model.
         """
         for key, value in MODEL_MAX_LENGTH_MAPPING.items():
-            if re.match(pattern=key, string=self.model_config.model_id) is not None:
+            if re.fullmatch(pattern=key, string=self.model_config.model_id) is not None:
                 return value
 
         if self.model_config.model_id.startswith("huggingface/"):
@@ -537,13 +583,15 @@ class LiteLLMModel(BenchmarkModule):
         return ModelConfig(
             model_id=model_id,
             revision="main",
-            framework=Framework.API,
             task="text-generation",
             languages=list(),
+            merge=False,
+            inference_backend=InferenceBackend.LITELLM,
+            model_type=ModelType.GENERATIVE,
+            fresh=False,
             model_cache_dir=create_model_cache_dir(
                 cache_dir=benchmark_config.cache_dir, model_id=model_id
             ),
-            model_type=ModelType.API,
             adapter_base_model_id=None,
         )
 

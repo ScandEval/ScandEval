@@ -9,7 +9,7 @@ import torch
 
 from scandeval.data_models import BenchmarkConfig, MetricConfig, ModelConfig, Task
 from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
-from scandeval.enums import Framework, ModelType
+from scandeval.enums import InferenceBackend, ModelType
 from scandeval.languages import DA, get_all_languages
 from scandeval.tasks import SENT, SPEED, get_all_tasks
 
@@ -87,6 +87,7 @@ def benchmark_config(auth, device) -> Generator[BenchmarkConfig, None, None]:
         api_version=None,
         debug=False,
         run_with_cli=True,
+        only_allow_safetensors=False,
     )
 
 
@@ -157,10 +158,12 @@ def model_config() -> Generator[ModelConfig, None, None]:
     yield ModelConfig(
         model_id="model_id",
         revision="revision",
-        framework=Framework.PYTORCH,
         task="task",
         languages=[DA],
-        model_type=ModelType.FRESH,
+        merge=False,
+        inference_backend=InferenceBackend.TRANSFORMERS,
+        model_type=ModelType.ENCODER,
+        fresh=True,
         model_cache_dir="cache_dir",
         adapter_base_model_id=None,
     )

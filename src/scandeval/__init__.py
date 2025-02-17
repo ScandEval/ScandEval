@@ -13,6 +13,7 @@ from termcolor import colored
 warnings.filterwarnings("ignore", category=UserWarning)
 logging.getLogger("httpx").setLevel(logging.CRITICAL)
 logging.getLogger("datasets").setLevel(logging.CRITICAL)
+logging.getLogger("vllm").setLevel(logging.CRITICAL)
 
 # Set up logging
 fmt = colored("%(asctime)s", "light_blue") + " ⋅ " + colored("%(message)s", "green")
@@ -59,6 +60,10 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 # Set amount of threads per GPU - this is the default and is only set to prevent a
 # warning from showing
 os.environ["OMP_NUM_THREADS"] = "1"
+
+
+# Disable a warning from Ray regarding the detection of the number of CPUs
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
 
 
 # Set the HF_TOKEN env var to copy the HUGGINGFACE_API_KEY env var, as vLLM uses the

@@ -19,7 +19,7 @@ from ..data_models import (
     ModelConfig,
     Task,
 )
-from ..enums import BatchingPreference, TaskGroup
+from ..enums import BatchingPreference, GenerativeType, TaskGroup
 from ..exceptions import NeedsEnvironmentVariable, NeedsExtraInstalled
 from ..task_utils import (
     question_answering,
@@ -47,7 +47,7 @@ class BenchmarkModule(ABC):
             A buffer to store temporary data.
     """
 
-    _is_generative: bool | None
+    fresh_model: bool
     batching_preference: BatchingPreference
     high_priority: bool
 
@@ -125,19 +125,6 @@ class BenchmarkModule(ABC):
             f"{self.__class__.__name__}."
         )
 
-    @property
-    def is_generative(self) -> bool:
-        """Whether the model is generative.
-
-        Returns:
-            Whether the model is generative.
-        """
-        if self._is_generative is not None:
-            return self._is_generative
-        raise NotImplementedError(
-            "The model type must define whether it is generative or not."
-        )
-
     @cached_property
     @abstractmethod
     def num_params(self) -> int:
@@ -145,6 +132,16 @@ class BenchmarkModule(ABC):
 
         Returns:
             The number of parameters in the model.
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def generative_type(self) -> GenerativeType | None:
+        """Get the generative type of the model.
+
+        Returns:
+            The generative type of the model, or None if the model is not generative.
         """
         ...
 

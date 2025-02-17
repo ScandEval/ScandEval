@@ -10,8 +10,72 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 
-## [v14.4.0] - 2025-01-22
+## [v15.1.0] - 2025-02-12
 ### Added
+- Added new `--only-allow-safetensors` flag, which disallows evaluating models from the
+  Hugging Face Hub if they are not stored as safetensors. This ensures a high level of
+  security on the system running the evaluations, if this is necessary. This was
+  contributed by [@Mikeriess](https://github.com/Mikeriess) ✨
+
+### Fixed
+- Regex mismatch caused the wrong sequence length for GPT-4o models. This has been fixed
+  now.
+- Fixed a truncation issue when evaluating encoder models on some knowledge datasets,
+  which caused the evaluation to fail. This has been fixed now.
+- A bug occurred when locating a model's end of reasoning token (e.g., `</think>`) if
+  the model's tokenizer had no BOS token. This has been fixed now.
+- Fixed an issue with the loading of freshly initialised models, caused by attempting to
+  load the Hugging Face model configuration from the Hugging Face Hub instead of
+  manually creating it.
+
+
+## [v15.0.0] - 2025-02-02
+### Added
+- Added support for evaluating generative reasoning models, such as OpenAI o1 and
+  Deepseek R1. This is done by upping the maximal sequence length to 8,192 tokens, and
+  removing the reasoning part afterwards, to get the final answer.
+- Added `generative_type` to the output dictionaries, which can currently be either
+  'base', 'instruction_tuned' or 'reasoning'. This is now used in the leaderboards.
+- Added `merge` to the output dictionaries, on whether the model is the result of a
+  merge with other models.
+- Added the summarisation dataset
+  [personal-sum](https://github.com/SmartmediaAI/PersonalSum). It has been split into
+  121 / 64 / 256 samples for train / validation / test, respectively, and is set to
+  `unofficial` for now. This was contributed by
+  [@oliverkinch](https://github.com/oliverkinch) ✨
+- Added the Jentoft dataset - a linguistic acceptability dataset which was published in
+  [this Master's thesis](https://www.duo.uio.no/handle/10852/103885) by Matias Jentoft.
+  The original dataset consists of 85,771 / 10,827 / 10487 samples for training,
+  validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for
+  training, validation and test, respectively. In each split, the distribution of
+  `correct` and `incorrect` is 50/50. This dataset has been set to `unofficial` for now.
+  This was contributed by [@oliverkinch](https://github.com/oliverkinch) ✨
+- Added the dataset icelandic-knowledge, which is derived from the IcelandicQA dataset,
+  reformatted as a knowledge dataset with GPT-4o generated candidate answers. The split
+  is given by 845 / 128 / 1024 for train, val, and test, respectively. It is marked as
+  `unofficial` for now. This was contributed by
+  [@oliverkinch](https://github.com/oliverkinch) ✨
+
+### Changed
+- Changed the instruction prompts to all text classification tasks by specifying
+  that only the labels are allowed to be generated. This caused an issue with some of
+  the reasoning models, as they tended to output a more verbose answer.
+
+### Fixed
+- Only use double newlines as stop tokens for base decoder models, and not instruction
+  tuned models, as we only use the double newlines to separate the few-shot examples in
+  the base case.
+- A bug caused structured generation to not be used for generative models on named
+  entity recognition tasks. This affects models evaluated from v14.2.0.
+- Fixed an issue where some API models did not allow `logprobs`, `top_logprobs`,
+  `max_tokens` and/or `temperature`.
+
+### Removed
+- Removed support for JAX/Flax models to simplify the code, as they are incredibly rare,
+  and they usually have a PyTorch/Safetensors version available.
+
+
+## [v14.4.0] - 2025-01-22
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
   [Allocine](https://hf.co/datasets/tblard/allocine), the linguistic acceptability
   dataset ScaLA with the [French Universal
