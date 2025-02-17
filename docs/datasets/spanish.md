@@ -29,7 +29,8 @@ Here are a few examples from the training split:
 ```
 ```json
 {
-    "text": "Lavagna reforzó su discurso económico y pidió más consumo", "label": "positive"
+    "text": "Lavagna reforzó su discurso económico y pidió más consumo",
+    "label": "positive"
 }
 ```
 ```json
