@@ -270,8 +270,6 @@ When evaluating generative models, we use the following setup (see the
   Responda la pregunta anterior usando solo 'a', 'b', 'c' o 'd', y nada más.
   ```
 
-
-
 ## Common-sense Reasoning
 
 ### HellaSwag-es
