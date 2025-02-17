@@ -289,21 +289,18 @@ Here are a few examples from the training split:
 {
     "text": "[header] Cómo crear tinta de tatuaje de prisión [title] Encuentra una lata o un contenedor de metal. [step] Debe poder contener de 4 a 6 onzas de aceite para bebés, junto con un poco de algodón apretado. Prueba usando una lata de pulimento para botas vacía y limpia.\nOpciones:\na. [title] Usa alcohol isopropílico como lubricante. [step] Mientras que algunos pulidores de escritorio tradicionalmente utilizados para tatuajes se manchan o amenazan, mezcla ¼ taza de agua tibia y ¼ taza de detergente regular para platos.\nb. Si no tienes acceso a un contenedor pre-hecho: usa una herramienta afilada para cortar una lata de aluminio de 12 onzas por la mitad, y usa la mitad inferior como tu contenedor. [substeps] Puede que puedas comprar una lata de pulimento para botas en la tienda de la cárcel.\nc. No se recomienda el vidrio ya que se piensa que es muy frágil y es probable que reaccione mal al metal. [title] Quita cualquier objeto extranjero o bordado del contenedor.\nd. [title] Vierte el pulimento blanco en un tubo de plástico como fluido sellante. [step] Un tubo ligero y bastante delgado funciona mejor como reservorio.",
     "label": "b",
-    "activity_label": "Personal Care and Style"
 }
 ```
 ```json
 {
   "text": "Entonces, la niña baja firmemente sus manos hacia su costado, junta sus pies y hace una reverencia, continuando con una rutina de varios movimientos de karate. la niña\nOpciones:\na. luego da una triunfante ola mientras levanta una mano derecha en el aire y continúa su rutina.\nb. cae en un tatami alto en el aire y un hombre se acerca y le ayuda mientras desmonta.\nc. finalmente desmonta y coloca su instrumento en su soporte, sin hacer una reverencia, su postura seria cambia a una de plena concentración mientras levanta sus manos en el aire y eleva sus brazos.\nd. termina su rutina un poco más lejos del punto donde comenzó, baja firmemente sus manos hacia su costado y hace una pequeña reverencia, luego abre sus piernas a la altura de los hombros y vuelve a la misma posición en la que estaba cuando empezó.",
   "label": "d",
-  "activity_label": "Doing karate"
 }
 ```
 ```json
 {
 "text": "[header] Cómo llevar tu peinado del día a la noche [title] Humedece tu cabello. [step] Crear ondas a partir de un moño es una gran opción para cabello largo. Cuando quieras usar un moño para crear ondas en tu cabello, lo mejor es comenzar con el cabello al menos parcialmente húmedo.\nOpciones:\na. Así que antes de comenzar, usa una toalla para secar en el lugar donde quieres poner el cabello. [substeps] Una buena regla es secar el cabello con una toalla antes de ponerlo en un moño.\nb. Si te lavas el cabello por la mañana, sécalo con secadora o al aire hasta la mitad antes de hacer el moño. Si no planeas lavar tu cabello, rocíalo ligeramente con una botella rociadora llena de agua.\nc. [substeps] El cabello rizado se verá sin esfuerzo y más esponjado con la cabeza húmeda porque es suave y brillante. Si tu cabello no está tan seco como quieres, no te vuelvas loca.\nd. Si quieres dejarlo suelto durante la noche, usa una secadora. [substeps] Una secadora de cabello normalmente funciona mejor.",
 "label": "b",
-"activity_label": "Personal Care and Style"
 ```
 
 When evaluating generative models, we use the following setup (see the
