@@ -235,7 +235,7 @@ Here are a few examples from the training split:
 ```json
 {
   'context': "Lo studio del Corano e dell' Hadith prosperò in un' atmosfera così studiosa. Filosofia, Fiqh e teologia (kalaam) sono stati ulteriormente sviluppati, in particolare da Avicenna e dai suoi avversari. Al-Razi e Al-Farabi avevano fornito metodologie e conoscenze in medicina e filosofia. Avicenna ha avuto accesso alle grandi biblioteche di Balkh, Khwarezm, Gorgan, Rey, Isfahan e Hamadan. Vari testi (come il' Ahd con Bahmanyar') mostrano che egli ha dibattuto punti filosofici con i più grandi studiosi del tempo. Aruzi Samarqandi descrive come prima che Avicenna lasciasse Khwarezm aveva conosciuto Al-Biruni (un famoso scienziato e astronomo), Abu Nasr Iraqi (un famoso matematico), Abu Sahl Masihi (un illustre filosofo) e Abu al-Khayr Khammar (un grande medico).",
-  'question': 'Che cosa è stato un tema che Avicenna ha ulteriormente sviluppato?',
+  'question': "Che cosa è stato un tema che Avicenna ha ulteriormente sviluppato?",
   'answers': {
     'answer_start':  array([95]),
     'text': array(['teologia'], dtype=object)
@@ -440,35 +440,34 @@ $ scandeval --model <model-id> --dataset TODO: CSR_DATASET_NAME
 
 ## Summarization
 
-### TODO: SUMM_DATASET_NAME
+### IlPost
 
-This dataset was published in [this
-paper](https://aclanthology.org/2021.emnlp-main.740/) and consists of news articles from
-[Orange Actu](https://actu.orange.fr/). The summaries were written by the journalists
-themselves (the "abstract" field in the original dataset).
+This dataset was published in [this paper](https://www.mdpi.com/2078-2489/13/5/228) and
+consists of news articles from [Il Post](https://www.ilpost.it/). The summaries were
+written by the journalists themselves (the "target" field in the original dataset).
 
-The original full dataset consists of 21,401 / 1,500 / 1,500 samples for training,
-validation and testing, respectively. We use 1,024 / 256 / 1,024 samples for training,
+The original dataset consists of 35,201 / 4,400 / 4,400 samples for training,
+validation and testing, respectively. We use 1,024 / 256 / 2,048 samples for training,
 validation, and testing, respectively. All our splits are subsets of the original ones.
 
 Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Réclamé puis annoncé par Emmanuel Macron, le débat parlementaire sur l'immigration s'est ouvert ce lundi 7 octobre avec une allocution d'Edouard Philippe devant les députés. Le Premier ministre a commencé son discours en empruntant les mots d'un de ses prédécesseurs, Michel Rocard. Il a ensuite fait état d'un système français d'asile \"saturé\". \"En 2018, la France a enregistré le record de 123.000 demandes d'asile\", a t-il rappelé, estimant que la France \"n'a pas atteint tous\" ses objectifs en matière de politique migratoire et de lutte contre l'immigration irrégulière. \"La question d'un pilotage par objectifs de l'admission au séjour n'est pas tabou. Je n'ai pas peur de réfléchir à l'idée de quotas. Il nous faut donc regarder sujet après sujet. On sait depuis longtemps que les quotas ne s'appliquent ni à l'asile ni à l'immigration familiale. Pour autant, celle-ci ne pourrait échapper à toute maîtrise. Il faut lutter contre les abus et les fraudes, et resserrer les critères là où cela s'impose\" a t-il poursuivi.Le Premier ministre a en revanche balayé l'idée de la fin du droit du sol, réclamée par des élus de droite. \"Je ne vois pas bien en quoi à l'échelle du pays, la fin du droit du sol serait une réponse\". Il a également adressé une critique virulente à l'égard de la théorie de \"l'immigration de remplacement\", un \"vocable d'une laideur certaine qui fait appel aux ressorts les plus détestables du complotisme.Ces théories \"inspiraient encore récemment des discours dont j'ai eu l'occasion de dire qu'ils étaient profondément contraires à l'idée dont nous nous faisons de la France et de la République\" a t-il encore asséné, en référence à la récente \"Convention de la droite\" organisée le 28 septembre dernier autour de Marion Maréchal et Eric Zemmour.",
-  "target_text": "Le Premier ministre a ouvert ce lundi 7 octobre le débat sur l'immigration à l'Assemblée nationale, déclarant que le système français d'asile est aujourd'hui \"saturé\". Il a au passage pourfendu la théorie de \"l'immigration de remplacement\", qui fait selon lui appel \"aux ressorts les plus détestables du complotisme\"."
+  "text": "Mai come nel 2013 abbiamo riflettuto sulla quantità di dati e informazioni su ciascuno di noi che nel corso degli anni hanno immagazzinato le grandi società di Internet. Ne eravamo consapevoli anche prima, ma soprattutto in seguito alle rivelazioni sui sistemi usati dalla National Security Agency statunitense per spiare le attività di centinaia di milioni di persone in giro per il mondo abbiamo iniziato a farci qualche domanda in più su che fine facciano le email, le foto e gli aggiornamenti sui social network quando li carichiamo online. Sappiamo meglio di prima che tutte queste cose vengono consegnate alla rete “per sempre” e che continueranno a esistere su qualche server, anche se faremo clic sull’icona di un cestino o su un tasto rosso con scritto sopra “Cancella”. E forse proprio per questo motivo, in molti iniziano a provare sollievo nell’avere a disposizione servizi e applicazioni che fanno l’esatto contrario: che rendono effimera e del tutto temporanea l’esistenza di qualcosa di nostro online. Come spiega Farhad Manjoo sul Wall Street Journal, la cosa più rilevante in campo tecnologico nel 2013 è stata probabilmente Snapchat, un’applicazione basata su comunicazioni temporanee. In pochi anni ha ottenuto un successo considerevole, soprattutto negli Stati Uniti, attirando l’attenzione di alcune grandi società come Facebook e Google che si dice abbiano offerto diversi miliardi di dollari per acquisirla. Le offerte sono state fin qui rifiutate da quelli di Snapchat, che per ora sembrano essere solo interessati a migliorare e rendere ancora più diffusa la loro applicazione.",
+  "target_text": "Snapchat e l’Internet “temporanea”. Come funziona – e cosa implica, per gli utenti – la popolare applicazione per mandarsi messaggi e foto che spariscono dopo pochi secondi, contesa a colpi di offerte miliardarie."
 }
 ```
 ```json
 {
-  "text": "Un supermarché a été détruit par une explosion, samedi 2 janvier, à Grasse, dans les Alpes-Maritimes, a rapporté France 3. Aucun blessé n'est à déplorer.L'explosion s'est produite vers 6h du matin dans ce supermarché Aldi de Grasse. Elle a été suivie par un violent incendie. Le bâtiment a été \"totalement détruit\", selon le maire de la ville, qui a évoqué une cause \"accidentelle\" sur sa page Facebook. Une centaine de pompiers, ainsi que des policiers ont été mobilisés pour lutter contre le sinistre et sécuriser le périmètre.Selon Nice-Matin, deux employées du supermarché ont été soufflées par l'explosion en allumant la lumière au moment d'arriver sur leur lieu de travail. Aucune des deux n'a été blessée physiquement, mais elles sont très choquées.Vers 9h, le feu était maîtrisé, a indiqué à France 3 un porte-parole du Service d'incendie et de secours des Alpes-Maritimes. Soixante pompiers et 40 engins de secours étaient toujours mobilisés sur place.",
-  "target_text": "Une centaine de pompiers ont été mobilisés pour lutter contre l'incendie."
+  "text": "Con trovata da entertainer, nel suo discorso da sconfitto al ballottaggio delle primarie del centrosinistra, Matteo Renzi ha citato Bersani, “ma non Pierluigi, Samuele”. è sempre bellissima la cicatrice che mi ricorderà di esser stato felice",
+  "target_text": "Pesce d’aprile, Samuele Bersani. La canzone citata da Matteo Renzi nel suo \"concession speech\"."
 }
 ```
 ```json
 {
-  "text": "Trois ans et demi après la décision des Britanniques de quitter l'Union européenne, le Brexit est finalement intervenu vendredi 31 janvier. Une mesure qui va sérieusement changer la donne pour les Britanniques qui siègent aujourd'hui dans les conseils municipaux en France. Comme tous les citoyens européens, les Britanniques avaient jusqu'à présent le droit de vote et d'éligibilité aux élections municipales françaises. Actuellement sur 2.493 conseillers étrangers, 757 viennent du Royaume-Uni, soit environ 30%, selon le Répertoire national des élus. Ils sont nettement plus nombreux que les Belges (544 élus) et les Portugais (357). Ils résident pour la plupart dans un grand quart Sud-Ouest de la France : Charente (70 élus), Dordogne (59), Aude (52), Haute-Vienne (40), Lot-et-Garonne (31), Hérault (30), Deux Sèvres (28), Gers (26), Lot (23)...Or, avec le Brexit, ils ne pourront pas briguer de nouveau mandat, à moins d'avoir acquis une autre nationalité européenne depuis les dernières élections. C'est notamment le cas à Poupas, village de 85 habitants dans le Tarn-et-Garonne, où deux des trois conseillers municipaux britanniques, sur les 11 au total que compte la commune, ont obtenu la nationalité française. Le droit \"de payer et de se taire\"Pour certaines petites communes, où il est souvent difficile de trouver des candidats, c'est un vrai casse-tête. À Perriers-en-Beauficel, dans la Manche, Patrick Head , originaire du Wiltshire (sud de l'Angleterre), va ainsi terminer son mandat. Le sexagénaire avait raflé pas moins de 89,74% des suffrages dans ce petit village normand, où il a élu domicile en 2004. Soit le meilleur score de cette commune de 216 habitants, où les électeurs peuvent rayer ou ajouter un nom. \"Ça va nous manquer car Patrick nous aidait beaucoup\", regrette la maire Lydie Brionne, qui explique que son colistier faisait \"le lien\" avec la cinquantaine de Britanniques installés dans ce coin de campagne normande. À Perriers-en-Beauficel, sur les onze élus de 2014, deux sont Britanniques. \"Il va falloir trouver deux nouveaux candidats. C'est difficile de trouver des gens motivés dans une petite commune\", souligne la maire, par ailleurs éleveuse de vaches laitières. \"Depuis 20 ans, beaucoup de Britanniques se sont installés, ils ont repeuplé la commune, ça a donné du dynamisme\", raconte l'élue. Avec le Brexit, \"j'ai peur qu'ils soient obligés de repartir.\"Loin d'être isolé, le cas de ce village normand se retrouve partout où les Britanniques sont fortement implantés. À Bellegarde-du-Razès, commune de 240 habitants dans l'Aude, les deux élus d'Outre-Manche \"apportent une valeur ajoutée\" au village, avec \"leur importante implication dans le milieu associatif\", estime le maire Gilbert De Paoli. L'Écossaise Alisson Mackie, 63 ans, installée depuis 2011, est dépitée de ne plus pouvoir se représenter en mars. \"On a construit notre maison ici, on paye des impôts ici, on consomme ici mais on a été rayés des listes électorales\", déplore-t-elle.À Jouac, village de 180 habitants en Haute-Vienne, la maire Virginie Windridge, 39 ans, elle-même mariée à un Britannique, trouve aussi \"très injuste que des gens qui sont là depuis des années, payent des impôts et contribuent à la vie de la commune, aient du jour au lendemain le droit 'de payer et de se taire'\". \"C'est dur à avaler\", dit-elle.Les deux élus britanniques actuels ont \"un apport important\", souligne la maire. \"Déjà ils sont un relais avec la communauté britannique de la commune. Et puis ils apportent des idées différentes, une autre façon de fonctionner, de voir les choses\", décrit Mme Windridge. \"Ils amènent parfois un regard sur ce qui existe ou se fait ailleurs, une autre perspective\". \"Et, il faut bien le dire, culturellement, quelquefois, les Britanniques sont plus ouverts aux changements que nous, ont un peu moins peur de l'inconnu\", ajoute-t-elle en donnant en exemple la décision d'éteindre l'éclairage public nocturne. \"Les élus britanniques étaient naturellement les plus ouverts sur cette idée-là, ils voyaient de suite le gagnant-gagnant, pour l'environnement et le budget de la commune\", estime-t-elle.",
-  "target_text": "À l'heure actuelle, plus de 750 Britanniques siègent dans les conseils municipaux en France. Or, avec la sortie du Royaume-Uni de l'Union européenne, ils ne pourront pas se représenter en mars prochain."
+  "text": "Questa mattina i carabinieri hanno arrestato più di 50 persone accusate di essere a capo o affiliate al clan mafioso D’Abramo-Sforza. Gli arresti sono avvenuti a Bari, Altamura (Bari), Foggia, Cerignola (Foggia), Matera, Lecce e Roma. Le accuse contro gli arrestati sono di associazione armata di tipo mafioso, detenzione e porto d’armi anche da guerra, traffico di sostanze stupefacenti, omicidio, tentato omicidio, estorsione, turbativa d’asta. L’operazione è stata disposta dal gip di Bari su richiesta della Direzione distrettuale antimafia; le indagini sono state condotte dal nucleo investigativo del Comando provinciale Carabinieri di Bari.",
+  "target_text": "Sono state arrestate più di 50 persone accusate di far parte del clan mafioso D’Abramo-Sforza."
 }
 ```
 
@@ -478,22 +477,22 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 1
 - Prefix prompt:
   ```
-  Les articles suivants sont accompagnés d'un résumé.
+  Di seguito sono riportati gli articoli con i relativi riassunti.
   ```
 - Base prompt template:
   ```
-  Article de presse: {text}
-  Résumé: {target_text}
+  Articolo di cronaca: {text}
+  Sintesi: {target_text}
   ```
 - Instruction-tuned prompt template:
   ```
-  Article de presse: {text}
+  Articolo di cronaca: {text}
 
-  Rédigez un résumé de l'article ci-dessus.
+  Scrivete un riassunto dell'articolo sopra citato.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset TODO: SUMM_DATASET_NAME
+$ scandeval --model <model-id> --dataset ilpost-sum
 ```
