@@ -1369,6 +1369,20 @@ ORANGE_SUM_CONFIG = DatasetConfig(
     max_generated_tokens=256,
 )
 
+ILPOST_SUM_CONFIG = DatasetConfig(
+    name="ilpost-sum",
+    pretty_name="the truncated version of the Italian summarisation dataset IlPost",
+    huggingface_id="ScandEval/ilpost-sum",
+    task=SUMM,
+    languages=[IT],
+    prompt_prefix="Di seguito sono riportati gli articoli con i relativi riassunti.",
+    prompt_template="Articolo di cronaca: {text}\nSintesi: {target_text}",
+    instruction_prompt="Articolo di cronaca: {text}\n\nScrivete un riassunto "
+    "dell'articolo sopra citato.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+)
+
 # TODO: Faroese summarization
 
 
