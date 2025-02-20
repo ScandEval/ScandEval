@@ -219,48 +219,46 @@ $ scandeval --model <model-id> --dataset TODO: LA_DATASET_NAME
 
 ## Reading Comprehension
 
-### TODO: RC_DATASET_NAME
+### SQuAD-it
 
-paper](https://aclanthology.org/2020.findings-emnlp.107/), and is a manually annotated
-dataset of questions and answers from the French Wikipedia.
-
-The original full dataset consists of 20,731 / 3,188 / 2,189 samples for training,
-validation and testing, respectively. Note that the testing split is not publicly
-accessible, however, so we only use the training and validation split. We use 1,024 /
-256 / 2,048 samples for training, validation, and testing, respectively. Our training
-split is a subset of the original training split, and our validation and testing splits
-This dataset was published in [this
-are subsets of the original validation split.
+This dataset is derived from the SQuAD 1.1 dataset and was published in
+[this paper](https://link.springer.com/chapter/10.1007/978-3-030-03840-3_29).
+The questions and answers were obtained through "semi-automatic" translation of the
+SQuAD dataset to Italian. The dataset consists of 54,159 / 7,609 question/answer pairs
+for training and test respectively. We use 1,024 / 256 / 2,048 samples for training,
+validation, and testing, respectively. Our training split is a subset of the original
+training split, and our validation and testing splits are subsets of the original test
+split.
 
 Here are a few examples from the training split:
 
 ```json
 {
-  'context': "Parmi leurs thèmes récurrents, on en trouve qui sont communs à beaucoup d'autres groupes contemporains ou plus anciens : les Stranglers ont décrit, à plusieurs reprises, la vie d'un groupe de rock dans toutes ses dimensions (fans, autres groupes, vie en tournée). Le thème rebattu - chez les groupes des années 1960-1970 - de la drogue, est abordée sur une demi-douzaine de chansons (Don't Bring Harry), tandis que la vision angoissée du futur, dans le contexte de la guerre froide ou en lien avec les avancées de la science, a donné lieu à plusieurs titres (Curfew). On retrouve également chez eux des préoccupations écologiques (Dreamtime) ou sociales. La guerre, notamment les deux guerres mondiales (Northwinds), mais aussi les guerres contemporaines (I Don't Agree), sont à l'origine de divers textes. Mais le thème qui les a le plus inspirés, c'est de loin les femmes (The Man They Love to Hate).",
-  'question': 'Sur combien de chanson le thème de la drogue est il abordé ?',
+  'context': "Lo studio del Corano e dell' Hadith prosperò in un' atmosfera così studiosa. Filosofia, Fiqh e teologia (kalaam) sono stati ulteriormente sviluppati, in particolare da Avicenna e dai suoi avversari. Al-Razi e Al-Farabi avevano fornito metodologie e conoscenze in medicina e filosofia. Avicenna ha avuto accesso alle grandi biblioteche di Balkh, Khwarezm, Gorgan, Rey, Isfahan e Hamadan. Vari testi (come il' Ahd con Bahmanyar') mostrano che egli ha dibattuto punti filosofici con i più grandi studiosi del tempo. Aruzi Samarqandi descrive come prima che Avicenna lasciasse Khwarezm aveva conosciuto Al-Biruni (un famoso scienziato e astronomo), Abu Nasr Iraqi (un famoso matematico), Abu Sahl Masihi (un illustre filosofo) e Abu al-Khayr Khammar (un grande medico).",
+  'question': 'Che cosa è stato un tema che Avicenna ha ulteriormente sviluppato?',
   'answers': {
-    'answer_start': array([353]),
-    'text': array(['une demi-douzaine'], dtype=object)
+    'answer_start':  array([95]),
+    'text': array(['teologia'], dtype=object)
   }
 }
 ```
 ```json
 {
-  'context': "Au cours de cette période, Cavour se distingue par son talent de financier. Il contribue de manière prépondérante à la fusion de la Banque de Gênes et de la nouvelle Banque de Turin au sein de la Banque Nationale des États sardes (Banca Nazionale degli Stati Sardi). Après le succès électoral de décembre 1849, Cavour devient également une des figures dominantes de la politique piémontaise et il prend la fonction de porte-parole de la majorité modérée qui vient de se créer. Fort de cette position, il fait valoir que le moment des réformes est arrivé, favorisé par le Statut albertin qui a créé de réelles perspectives de progrès. Le Piémont peut ainsi s'éloigner du front catholique et réactionnaire, qui triomphe dans le reste de l'Italie. ",
-  'question': "En quel année sort-il vainqueur d'une élection ?",
+  'context': "Florida Alta Velocità ferroviaria è stata proposta ferroviaria ad alta velocità sostenuta dal governo che avrebbe collegato Miami, Orlando e Tampa. La prima fase è stata pianificata per collegare Orlando e Tampa ed è stato offerto un finanziamento federale, ma è stato respinto dal governatore Rick Scott nel 2011. La seconda fase della linea è stata prevista per collegare Miami. Entro il 2014, un progetto privato conosciuto come All Aboard Florida da parte di una società della storica Florida East Coast Railway ha iniziato la costruzione di una linea ferroviaria ad alta velocità nel sud della Florida che dovrebbe terminare all' aeroporto internazionale di Orlando.",
+  'question': "In quale anno ha iniziato All Aboard Florida?",
   'answers': {
-    'answer_start': array([305]),
-    'text': array(['1849'], dtype=object)
+    'answer_start': array([390]),
+    'text': array(['2014'], dtype=object)
   }
 }
 ```
 ```json
 {
-  'context': "Pour autant, le phénomène météorologique se décline sous d'autres variantes : ocelles du paon, évoquant les cent yeux d'Argus, fleurs champêtres et ornant les jardins où s'établit l'osmose entre couleurs complémentaires. La poésie tient en main la palette du peintre,, celle de Claude Gellée ou de Poussin. Pour autant, il ne s'agit pas là d'une posture habituelle chez lui, qui privilégie les paysages quasi-monochromes.",
-  'question': "Qu'est ce que l'auteur préfère décrire ?",
+  'context': "Gli insetti sociali, come le termiti, le formiche e molte api e vespe, sono la specie più familiare di animali eusociali. Vivono insieme in grandi colonie ben organizzate che possono essere così strettamente integrate e geneticamente simili che le colonie di alcune specie sono talvolta considerate superorganismi. Talvolta si sostiene che le varie specie di api da miele siano gli unici invertebrati (e addirittura uno dei pochi gruppi non umani) ad aver evoluto un sistema di comunicazione simbolica astratta in cui un comportamento viene utilizzato per rappresentare e trasmettere informazioni specifiche su qualcosa nell' ambiente. In questo sistema di comunicazione, chiamato linguaggio dance, l' angolo in cui una danza d' ape rappresenta una direzione relativa al sole, e la lunghezza della danza rappresenta la distanza da volare. 309-311 Anche se forse non così avanzato come le api mellifere, anche i bombi hanno potenzialmente alcuni comportamenti di comunicazione sociale.",
+  'question': "Termiti, api, vespe e quali altri insetti sono insetti sociali?",
   'answers': {
-    'answer_start': array([394]),
-    'text': array(['paysages'], dtype=object)
+    'answer_start': array([41]),
+    'text': array(['formiche'], dtype=object)
   }
 }
 ```
@@ -271,27 +269,27 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 4
 - Prefix prompt:
   ```
-  Les textes suivants sont accompagnés de questions et de réponses.
+  I testi che seguono sono accompagnati da domande e risposte.
   ```
 - Base prompt template:
   ```
-  Texte: {text}
-  Question: {question}
-  Réponse en 3 mots maximum: {label}
+  Testo: {text}
+  Domanda: {question}
+  Rispondere in massimo 3 parole: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Texte: {text}
+  Testo: {text}
 
-  Répondez à la question suivante sur le texte ci-dessus en 3 mots maximum.
+  Rispondi alla seguente domanda sul in un massimo di 3 parole.
 
-  Question: {question}
+  Domanda: {question}
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset TODO: RC_DATASET_NAME
+$ scandeval --model <model-id> --dataset squad-it
 ```
 
 
