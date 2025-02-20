@@ -1,7 +1,7 @@
 """All dataset configurations used in EuroEval."""
 
 from .data_models import DatasetConfig
-from .languages import DA, DE, EN, FO, FR, IS, NB, NL, NN, NO, SV, get_all_languages
+from .languages import DA, DE, EN, FO, FR, IS, IT, NB, NL, NN, NO, SV, get_all_languages
 from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
 
 
@@ -1135,6 +1135,23 @@ SQUAD_NL_CONFIG = DatasetConfig(
     "{label}",
     instruction_prompt="Tekst: {text}\n\nBeantwoord de volgende vraag over de "
     "bovenstaande tekst in maximaal 3 woorden.\n\nVraag: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
+
+SQUAD_IT_CONFIG = DatasetConfig(
+    name="squad-it",
+    pretty_name="the truncated version of the Italian reading comprehension dataset "
+    "SQuAD-it, translated from the English SQuAD dataset",
+    huggingface_id="ScandEval/squad-it-mini",
+    task=RC,
+    languages=[IT],
+    labels=["start_positions", "end_positions"],
+    prompt_prefix="I testi che seguono sono accompagnati da domande e risposte.",
+    prompt_template="Testo: {text}\nDomanda: {question}\nRispondere in massimo 3 parole: "
+    "{label}",
+    instruction_prompt="Testo: {text}\n\nRispondi alla seguente domanda sul "
+    "in un massimo di 3 parole.\n\nDomanda: {question}",
     num_few_shot_examples=4,
     max_generated_tokens=32,
 )
