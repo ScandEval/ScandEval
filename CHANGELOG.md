@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-- Added support for Italian 🇮🇹! This includes the common-sense reasoning dataset
+- Added support for Italian 🇮🇹! This includes the reading comprehension dataset
   [SQuAD-it](https://huggingface.co/datasets/crux82/squad_it), ...
 
 
