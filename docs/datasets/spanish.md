@@ -394,5 +394,5 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset mlsum-es-mini
+$ scandeval --model <model-id> --dataset mlsum-es
 ```
