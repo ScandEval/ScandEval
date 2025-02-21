@@ -244,6 +244,26 @@ ALLOCINE_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+SENTIPOLC_CONFIG = DatasetConfig(
+    name="sentipolc16",
+    pretty_name="the truncated version of the Italian sentiment classification "
+    "dataset Sentipolc-16",
+    huggingface_id="ScandEval/sentipolc16-mini",
+    task=SENT,
+    languages=[IT],
+    labels=["negative", "neutral", "positive"],
+    prompt_prefix="Di seguito sono riportati i testi e il loro sentimento, che può "
+    "essere 'positivo', 'neutro' o 'negativo'.",
+    prompt_template="Tweet: {text}\nSentimento: {label}",
+    prompt_label_mapping=dict(
+        positive="positivo", neutral="neutro", negative="negativo"
+    ),
+    instruction_prompt="Tweet: {text}\n\nClassificare il sentimento nel Tweet. "
+    "Rispondete con 'positivo', 'neutro' o 'negativo', e nient'altro.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
 
 ### NAMED ENTITY RECOGNITION DATASETS ###
 
