@@ -1241,9 +1241,9 @@ NORDJYLLAND_NEWS_CONFIG = DatasetConfig(
 )
 
 MLSUM_CONFIG = DatasetConfig(
-    name="mlsum",
+    name="mlsum-de",
     pretty_name="the truncated version of the German summarisation dataset MLSum",
-    huggingface_id="ScandEval/mlsum-mini",
+    huggingface_id="ScandEval/mlsum-de-mini",
     task=SUMM,
     languages=[DE],
     prompt_prefix="Im Folgenden finden Sie Nachrichtenartikel mit den dazugehörigen "
