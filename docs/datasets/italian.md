@@ -7,36 +7,34 @@ information about what these constitute.
 
 ## Sentiment Classification
 
-### TODO: SENTIMENT_DATASET_NAME
+### Sentipolc-16
 
-This dataset was published in [this Github
-repository](https://github.com/TheophileBlard/french-sentiment-analysis-with-bert) and
-features reviews from the French movie review website Allocine. The reviews range from
-0.5 to 5 (inclusive), with steps of 0.5. The negative samples are reviews with a rating
-of at most 2, and the positive ones are reviews with a rating of at least 4. The reviews
-in between were discarded.
+This dataset was published in [this paper](https://ceur-ws.org/Vol-1749/paper_026.pdf)
+and slightly modified in [this paper](https://aclanthology.org/2022.lrec-1.27.pdf).
+It is based on Italian tweets, which were manually annotated by three annotators.
 
-The original full dataset consists of 160,000 / 20,000 / 20,000 samples for training,
-validation, and testing, respectively. We use 1,024 / 256 / 2,048 samples for training,
-validation, and testing, respectively. All our splits are subsets of the original ones.
+The original full dataset consists of 1,839 / 324 / 870 samples, and we use a 1,024 /
+256 / 1,024 split for training, validation and testing, respectively. The splits are new
+and there can thus be some overlap between the original validation and test sets and our
+validation and test sets.
 
 Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Ce 7ème volet ne mérite pas de notre part une grande attention, au vu du précédent New Police Story. À la limite du huis clos, Jackie évolue dans une boîte de nuit, sorte de piège du méchant cherchant à se venger, ou du moins à découvrir la vérité sur la mort de sa sœur. Notre cascadeur acteur ne bénéficie pas d'un décors à la hauteur de son potentiel acrobatique et le film d'un scénario à la hauteur d'une production, et cette production d'une large distribution, ce qui explique son arrivée direct tout étagère.",
+  "text": "RT @user: Siamo dei falsi. I ragazzi vogliono le ragazze timide e poi stanno con le troie. Le ragazze vogliono i dolci e poi amano con…",
   "label": "negative"
 }
 ```
 ```json
 {
-  "text": "Meme pour ceux qui n'aime pas les Chevaliers du Fiel allez voir. 1 il est meilleur que le 1 et cela est rare de voir une suite qui est meilleur que le 1. Des scènes qui peuvent faire rire les petit et les grands. On ne s'ennuie pas. Super film allez le voir. L'interpretation des acteurs sont super. Bonne journée",
-  "label": "positive"
+  "text": "Ho aggiunto un video a una playlist di @user: http ROMA PRESENTAZIONE LIBRO SVIMEZ SULL’ECONOMIA DEL",
+  "label": "neutral"
 }
 ```
 ```json
 {
-  "text": "Une ambiance envoûtante, un récit où se mélangent sorcellerie, croyances indiennes, enquête policière sur fond de trafic de drogue, tout est conforme au livre de Tony Hillerman, même si ce dernier a \"renié\" le film. Personnellement j'adore. Hélas introuvable en France et diffusé seulement sur canal , il y a ..... un certain temps.",
+  "text": "RT @user: @user te lo auguro di cuore e farò il possibile affinché sia così. Un abbraccio",
   "label": "positive"
 }
 ```
@@ -47,24 +45,24 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 4
 - Prefix prompt:
   ```
-  Voici des textes et leur sentiment, qui peut être 'positif' ou 'négatif'.
+  Di seguito sono riportati i testi e il loro sentimento, che può essere 'positivo', 'neutro' o 'negativo'.
   ```
 - Base prompt template:
   ```
-  Texte: {text}
-  Sentiment: {label}
+  Tweet: {text}
+  Sentimento: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Texte: {text}
+  Tweet: {text}
 
-  Classez le sentiment dans le texte. Répondez par ‘positif' ou ‘négatif'.
+  Classificare il sentimento nel Tweet. Rispondete con 'positivo', 'neutro' o 'negativo', e nient'altro.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset # TODO: SENTIMENT_DATASET_NAME
+$ scandeval --model <model-id> --dataset sentipolc16
 ```
 
 
