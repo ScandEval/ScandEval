@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [v15.0.0] - 2025-02-02
+
+### Added
 - Added support for evaluating generative reasoning models, such as OpenAI o1 and
   Deepseek R1. This is done by upping the maximal sequence length to 8,192 tokens, and
   removing the reasoning part afterwards, to get the final answer.
