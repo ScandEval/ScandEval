@@ -403,6 +403,46 @@ def should_prefix_space_be_added_to_labels(
     return add_prefix_space
 
 
+def get_bos_token(tokenizer: "PreTrainedTokenizer") -> str:
+    """Get the beginning-of-sequence token from a tokenizer.
+
+    Args:
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The beginning-of-sequence token.
+    """
+    if isinstance(tokenizer.bos_token, str):
+        return tokenizer.bos_token
+
+    test_input_ids = tokenizer("Test")
+    tokens = tokenizer.convert_ids_to_tokens(
+        ids=test_input_ids.input_ids, skip_special_tokens=False
+    )
+    return tokens[0]
+
+
+def get_eos_token(tokenizer: "PreTrainedTokenizer") -> str:
+    """Get the end-of-sequence token from a tokenizer.
+
+    Args:
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        The end-of-sequence token.
+    """
+    if isinstance(tokenizer.eos_token, str):
+        return tokenizer.eos_token
+
+    test_input_ids = tokenizer("Test")
+    tokens = tokenizer.convert_ids_to_tokens(
+        ids=test_input_ids.input_ids, skip_special_tokens=False
+    )
+    return tokens[-1]
+
+
 def get_end_of_chat_token_ids(tokenizer: "PreTrainedTokenizer") -> list[int] | None:
     """Get the end token ID for chat models.
 
