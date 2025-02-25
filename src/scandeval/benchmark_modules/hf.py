@@ -862,7 +862,8 @@ def load_tokenizer(
         if add_prefix:
             loading_kwargs["add_prefix_space"] = True
 
-    while True:
+    num_retries = 5
+    for _ in range(num_retries):
         try:
             return AutoTokenizer.from_pretrained(model_id, **loading_kwargs)
         except (JSONDecodeError, OSError, TypeError):
@@ -871,6 +872,11 @@ def load_tokenizer(
             logger.info(f"Couldn't load tokenizer for {model_id!r}. Retrying.")
             sleep(5)
             continue
+    else:
+        raise InvalidModel(
+            f"Could not load tokenizer for model {model_id!r} after {num_retries} "
+            "attempts."
+        )
 
 
 def get_torch_dtype(
