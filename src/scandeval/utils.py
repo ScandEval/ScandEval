@@ -403,7 +403,7 @@ def should_prefix_space_be_added_to_labels(
     return add_prefix_space
 
 
-def get_bos_token(tokenizer: "PreTrainedTokenizer") -> str:
+def get_bos_token(tokenizer: "PreTrainedTokenizer") -> tuple[str, int]:
     """Get the beginning-of-sequence token from a tokenizer.
 
     Args:
@@ -411,19 +411,20 @@ def get_bos_token(tokenizer: "PreTrainedTokenizer") -> str:
             The tokenizer.
 
     Returns:
-        The beginning-of-sequence token.
+        A pair (token, token_id) representing the beginning-of-sequence token and its
+        token ID.
     """
-    if isinstance(tokenizer.bos_token, str):
-        return tokenizer.bos_token
+    if isinstance(tokenizer.bos_token, str) and isinstance(tokenizer.bos_token_id, int):
+        return tokenizer.bos_token, tokenizer.bos_token_id
 
     test_input_ids = tokenizer("Test")
     tokens = tokenizer.convert_ids_to_tokens(
         ids=test_input_ids.input_ids, skip_special_tokens=False
     )
-    return tokens[0]
+    return tokens[0], test_input_ids.input_ids[0]
 
 
-def get_eos_token(tokenizer: "PreTrainedTokenizer") -> str:
+def get_eos_token(tokenizer: "PreTrainedTokenizer") -> tuple[str, int]:
     """Get the end-of-sequence token from a tokenizer.
 
     Args:
@@ -431,16 +432,17 @@ def get_eos_token(tokenizer: "PreTrainedTokenizer") -> str:
             The tokenizer.
 
     Returns:
-        The end-of-sequence token.
+        A pair (token, token_id) representing the end-of-sequence token and its token
+        ID.
     """
-    if isinstance(tokenizer.eos_token, str):
-        return tokenizer.eos_token
+    if isinstance(tokenizer.eos_token, str) and isinstance(tokenizer.eos_token_id, int):
+        return tokenizer.eos_token, tokenizer.eos_token_id
 
     test_input_ids = tokenizer("Test")
     tokens = tokenizer.convert_ids_to_tokens(
         ids=test_input_ids.input_ids, skip_special_tokens=False
     )
-    return tokens[-1]
+    return tokens[-1], test_input_ids.input_ids[-1]
 
 
 def get_end_of_chat_token_ids(tokenizer: "PreTrainedTokenizer") -> list[int] | None:

@@ -1031,8 +1031,8 @@ def load_tokenizer(
         )
 
     # Ensure that BOS, EOS and PAD tokens are set
-    tokenizer.bos_token = get_bos_token(tokenizer=tokenizer)
-    tokenizer.eos_token = get_eos_token(tokenizer=tokenizer)
+    tokenizer.bos_token, tokenizer.bos_token_id = get_bos_token(tokenizer=tokenizer)
+    tokenizer.eos_token, tokenizer.eos_token_id = get_eos_token(tokenizer=tokenizer)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
 
