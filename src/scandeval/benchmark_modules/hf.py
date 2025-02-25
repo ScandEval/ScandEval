@@ -68,7 +68,9 @@ from ..types import ExtractLabelsFunction
 from ..utils import (
     block_terminal_output,
     create_model_cache_dir,
+    get_bos_token,
     get_class_by_name,
+    get_eos_token,
     internet_connection_available,
 )
 from .base import BenchmarkModule
@@ -865,7 +867,8 @@ def load_tokenizer(
     num_retries = 5
     for _ in range(num_retries):
         try:
-            return AutoTokenizer.from_pretrained(model_id, **loading_kwargs)
+            tokenizer = AutoTokenizer.from_pretrained(model_id, **loading_kwargs)
+            break
         except (JSONDecodeError, OSError, TypeError):
             raise InvalidModel(f"Could not load tokenizer for model {model_id!r}.")
         except (TimeoutError, RequestError):
@@ -877,6 +880,12 @@ def load_tokenizer(
             f"Could not load tokenizer for model {model_id!r} after {num_retries} "
             "attempts."
         )
+
+    # Ensure that BOS, EOS and PAD tokens are set
+    tokenizer.bos_token, tokenizer.bos_token_id = get_bos_token(tokenizer=tokenizer)
+    tokenizer.eos_token, tokenizer.eos_token_id = get_eos_token(tokenizer=tokenizer)
+
+    return tokenizer
 
 
 def get_torch_dtype(
