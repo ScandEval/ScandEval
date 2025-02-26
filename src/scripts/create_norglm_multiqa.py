@@ -144,7 +144,7 @@ def main():
 
     # Remove non-word start and end characters from answers
     df_no_context.loc[:, "answer"] = df_no_context["answer"].str.replace(
-        "(^\W|\W$)", "", regex=True
+        r"(^\W|\W$)", "", regex=True
     )
 
     # Only keep the rephrased answers where the answer could be found in the context
