@@ -23,7 +23,7 @@ from requests.exceptions import RequestException
 from transformers import PreTrainedTokenizer
 from transformers import logging as tf_logging
 
-from .exceptions import NaNValueInModelOutput
+from .exceptions import InvalidModel, NaNValueInModelOutput
 
 if importlib.util.find_spec("ray") is not None:
     import ray
@@ -401,6 +401,68 @@ def should_prefix_space_be_added_to_labels(
             break
 
     return add_prefix_space
+
+
+def get_bos_token(tokenizer: "PreTrainedTokenizer") -> tuple[str, int]:
+    """Get the beginning-of-sequence token from a tokenizer.
+
+    Args:
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        A pair (token, token_id) representing the beginning-of-sequence token and its
+        token ID.
+    """
+    if isinstance(tokenizer.bos_token, str) and isinstance(tokenizer.bos_token_id, int):
+        return tokenizer.bos_token, tokenizer.bos_token_id
+
+    vocab: dict[str, int] = tokenizer.get_vocab()
+
+    candidate_bos_tokens = ["<s>", "<|begin_of_text|>", "[CLS]"]
+    for candidate_bos_token in candidate_bos_tokens:
+        if candidate_bos_token in vocab:
+            bos_token = candidate_bos_token
+            bos_token_id = vocab[bos_token]
+            break
+    else:
+        raise InvalidModel(
+            "The model does not have a beginning-of-sequence token. Please ensure that "
+            "this has been set in the tokenizer's configuration."
+        )
+
+    return bos_token, bos_token_id
+
+
+def get_eos_token(tokenizer: "PreTrainedTokenizer") -> tuple[str, int]:
+    """Get the end-of-sequence token from a tokenizer.
+
+    Args:
+        tokenizer:
+            The tokenizer.
+
+    Returns:
+        A pair (token, token_id) representing the end-of-sequence token and its token
+        ID.
+    """
+    if isinstance(tokenizer.eos_token, str) and isinstance(tokenizer.eos_token_id, int):
+        return tokenizer.eos_token, tokenizer.eos_token_id
+
+    vocab: dict[str, int] = tokenizer.get_vocab()
+
+    candidate_eos_tokens = ["</s>", "<|end_of_text|>", "[SEP]"]
+    for candidate_eos_token in candidate_eos_tokens:
+        if candidate_eos_token in vocab:
+            eos_token = candidate_eos_token
+            eos_token_id = vocab[eos_token]
+            break
+    else:
+        raise InvalidModel(
+            "The model does not have an end-of-sequence token. Please ensure that this "
+            "has been set in the tokenizer's configuration."
+        )
+
+    return eos_token, eos_token_id
 
 
 def get_end_of_chat_token_ids(tokenizer: "PreTrainedTokenizer") -> list[int] | None:

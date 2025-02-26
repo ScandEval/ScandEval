@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Fixed
+- If a tokenizer has not specified BOS and/or EOS token in its config, we now extract
+  this manually.
 
 
 ## [v15.1.0] - 2025-02-12
