@@ -127,14 +127,15 @@ skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
 select = [
-    # isort
+    # isort (imports)
     "I",
-    # pydocstyle
+    # pydocstyle (docstrings)
     "D",
-    # pycodestyle errors
+    # pycodestyle errors and warnings (PEP8)
     "E",
-    # pycodestyle warnings
     "W",
+    # flake-annotations (type hints)
+    "ANN",
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]

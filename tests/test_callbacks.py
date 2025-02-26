@@ -22,7 +22,7 @@ class FakeEvalDataloader:
 
     dataset: Sized = (1, 2, 3)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return the length of the dataloader."""
         return len(self.dataset)
 
@@ -41,11 +41,13 @@ class TestNeverLeaveProgressCallback:
         yield FakeState(is_local_process_zero=True)
 
     @pytest.fixture(scope="class")
-    def eval_dataloader(self):
+    def eval_dataloader(self) -> Generator[FakeEvalDataloader, None, None]:
         """Yields an evaluation dataloader."""
         yield FakeEvalDataloader()
 
-    def test_on_train_begin_initialises_not_leaving_pbar(self, callback, state):
+    def test_on_train_begin_initialises_not_leaving_pbar(
+        self, callback: NeverLeaveProgressCallback, state: FakeState
+    ) -> None:
         """Test that the `leave` attribute on the training progress bar is False."""
         assert callback.training_bar is None
         callback.on_train_begin(args=None, state=state, control=None)
@@ -53,8 +55,11 @@ class TestNeverLeaveProgressCallback:
         assert not callback.training_bar.leave
 
     def test_on_prediction_step_initialises_not_leaving_pbar(
-        self, callback, state, eval_dataloader
-    ):
+        self,
+        callback: NeverLeaveProgressCallback,
+        state: FakeState,
+        eval_dataloader: FakeEvalDataloader,
+    ) -> None:
         """Test that the `leave` attribute on the prediction progress bar is False."""
         assert callback.prediction_bar is None
         callback.on_prediction_step(

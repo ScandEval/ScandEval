@@ -19,7 +19,7 @@ from requests import HTTPError
 load_dotenv()
 
 
-def main():
+def main() -> None:
     """Create the NorGLM NO-multi question answering dataset and upload to HF Hub."""
     dataset_id = "NorGLM/NO-Multi-QA-Sum"
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])

@@ -32,7 +32,8 @@ install: ## Install dependencies
 	@$(MAKE) --quiet install-uv
 	@$(MAKE) --quiet install-dependencies
 	@$(MAKE) --quiet setup-environment-variables
-	@echo "Installed the 'ScandEval' project. If you want to use pre-commit hooks, run 'make install-pre-commit'."
+	@$(MAKE) --quiet install-pre-commit
+	@echo "Installed the 'ScandEval' project."
 
 install-rust:
 	@if [ "$(shell which rustup)" = "" ]; then \
@@ -62,8 +63,9 @@ setup-environment-variables:
 setup-environment-variables-non-interactive:
 	@uv run python src/scripts/fix_dot_env_file.py --non-interactive
 
-install-pre-commit:  ## Install pre-commit hooks
+install-pre-commit:
 	@uv run pre-commit install
+	@uv run pre-commit autoupdate
 
 docs:  ## View documentation locally
 	@echo "Viewing documentation - run 'make publish-docs' to publish the documentation website."
