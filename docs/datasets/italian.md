@@ -221,12 +221,12 @@ $ scandeval --model <model-id> --dataset TODO: LA_DATASET_NAME
 
 This dataset is derived from the SQuAD 1.1 dataset and was published in
 [this paper](https://link.springer.com/chapter/10.1007/978-3-030-03840-3_29).
-The questions and answers were obtained through "semi-automatic" translation of the
-SQuAD dataset to Italian. The dataset consists of 54,159 / 7,609 question/answer pairs
-for training and test respectively. We use 1,024 / 256 / 2,048 samples for training,
-validation, and testing, respectively. Our training split is a subset of the original
-training split, and our validation and testing splits are subsets of the original test
-split.
+The questions and answers were obtained through "semi-automatic" translation, using
+DeepL, of the SQuAD dataset to Italian. The dataset consists of 54,159 / 7,609
+question/answer pairs for training and test respectively. We use 1,024 / 256 / 2,048
+samples for training, validation, and testing, respectively. Our training split is a
+subset of the original training split, and our validation and testing splits are subsets
+of the original test split.
 
 Here are a few examples from the training split:
 
@@ -438,7 +438,7 @@ $ scandeval --model <model-id> --dataset TODO: CSR_DATASET_NAME
 
 ## Summarization
 
-### IlPost
+### IlPost-sum
 
 This dataset was published in [this paper](https://www.mdpi.com/2078-2489/13/5/228) and
 consists of news articles from [Il Post](https://www.ilpost.it/). The summaries were
