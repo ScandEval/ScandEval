@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+- Changed the name of the benchmark to `EuroEval`, to reflect the fact that the
+  benchmark is not only for Scandinavian languages anymore. This is fully backwards
+  compatible, however: you can still install the `scandeval` package, 'scandeval.com'
+  redirects to the new 'euroeval.com' website, and the `scandeval` command line
+  interface is still available.
 - Update `litellm` to the stable version v1.16.13.
 
 ### Fixed
