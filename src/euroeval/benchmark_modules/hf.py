@@ -76,7 +76,7 @@ from ..utils import (
 )
 from .base import BenchmarkModule
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class HuggingFaceEncoderModel(BenchmarkModule):

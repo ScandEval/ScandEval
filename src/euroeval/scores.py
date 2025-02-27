@@ -10,7 +10,7 @@ if t.TYPE_CHECKING:
     from .data_models import MetricConfig
     from .types import ScoreDict
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def log_scores(

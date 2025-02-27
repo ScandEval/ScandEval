@@ -6,14 +6,14 @@ import time
 
 from datasets import Dataset, DatasetDict, load_dataset
 from datasets.exceptions import DatasetsError
-from huggingface_hub.utils import HfHubHTTPError
+from huggingface_hub.errors import HfHubHTTPError
 from numpy.random import Generator
 
 from .data_models import BenchmarkConfig, DatasetConfig
 from .exceptions import InvalidBenchmark
 from .utils import unscramble
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def load_data(

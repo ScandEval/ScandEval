@@ -18,7 +18,7 @@ if t.TYPE_CHECKING:
     from datasets import Dataset
 
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class ModelCache:

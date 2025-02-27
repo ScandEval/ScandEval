@@ -30,7 +30,7 @@ from ..task_utils import (
 from ..types import ComputeMetricsFunction, ExtractLabelsFunction
 from ..utils import log_once
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class BenchmarkModule(ABC):

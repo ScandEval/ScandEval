@@ -25,7 +25,7 @@ from pandas.errors import SettingWithCopyWarning
 from requests.exceptions import HTTPError
 from tqdm.auto import tqdm
 
-from scandeval.utils import block_terminal_output
+from euroeval.utils import block_terminal_output
 
 
 def main() -> None:
@@ -117,7 +117,7 @@ def main() -> None:
             )
 
             # Create dataset ID
-            dataset_id = f"ScandEval/scala-{lang}"
+            dataset_id = f"EuroEval/scala-{lang}"
 
             # Remove the dataset from Hugging Face Hub if it already exists
             try:

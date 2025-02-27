@@ -24,7 +24,7 @@ if importlib.util.find_spec("demjson3") is not None:
     import demjson3
 
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def compute_metrics(

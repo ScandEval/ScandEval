@@ -1,4 +1,4 @@
-"""Data models used in ScandEval."""
+"""Data models used in EuroEval."""
 
 import collections.abc as c
 import importlib.metadata
@@ -121,7 +121,7 @@ class BenchmarkConfig:
         progress_bar:
             Whether to show a progress bar.
         save_results:
-            Whether to save the benchmark results to 'scandeval_benchmark_results.json'.
+            Whether to save the benchmark results to 'euroeval_benchmark_results.json'.
         device:
             The device to use for benchmarking.
         verbose:
@@ -228,7 +228,7 @@ class BenchmarkResult(pydantic.BaseModel):
     generative_type: str | None
     few_shot: bool
     validation_split: bool
-    scandeval_version: str = importlib.metadata.version("scandeval")
+    euroeval_version: str = importlib.metadata.version("euroeval")
 
     @classmethod
     def from_dict(cls, config: dict) -> "BenchmarkResult":

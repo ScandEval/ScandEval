@@ -1,4 +1,4 @@
-"""ScandEval - A benchmarking framework for language models."""
+"""EuroEval - A benchmarking framework for language models."""
 
 ### STAGE 1 ###
 ### Block unwanted terminal output that happens on importing external modules ###
@@ -42,7 +42,7 @@ block_terminal_output()
 
 
 # Fetches the version of the package as defined in pyproject.toml
-__version__ = importlib.metadata.version("scandeval")
+__version__ = importlib.metadata.version("euroeval")
 
 
 # Loads environment variables

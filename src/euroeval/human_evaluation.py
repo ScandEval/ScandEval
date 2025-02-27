@@ -31,11 +31,11 @@ if importlib.util.find_spec("gradio") is not None:
     import gradio as gr
     from gradio.components import HTML, Button, Dropdown, Markdown, Textbox
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class HumanEvaluator:
-    """An app for evaluating human performance on the ScandEval benchmark."""
+    """An app for evaluating human performance on the EuroEval benchmark."""
 
     def __init__(
         self,
@@ -258,7 +258,7 @@ class HumanEvaluator:
             device=None,
             batch_size=1,
             raise_errors=False,
-            cache_dir=".scandeval_cache",
+            cache_dir=".euroeval_cache",
             api_key=None,
             force=False,
             verbose=False,
@@ -293,7 +293,7 @@ class HumanEvaluator:
         self.sample_idx = 0
 
         dataset_path = (
-            Path(".scandeval_cache")
+            Path(".euroeval_cache")
             / "human-evaluation"
             / dataset_name
             / f"human-{iteration}.csv"
@@ -553,7 +553,7 @@ class HumanEvaluator:
         )
 
         dataset_path = (
-            Path(".scandeval_cache")
+            Path(".euroeval_cache")
             / "human-evaluation"
             / dataset_name
             / f"human-{annotator_id}.csv"
@@ -641,7 +641,7 @@ class HumanEvaluator:
         # Load previous human results, if any. We do this since the human evaluation is
         # only a single iteration, so the results from the current annotation should be
         # added to the previous results.
-        results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
+        results_path = Path.cwd() / "euroeval_benchmark_results.jsonl"
         results: ScoreDict = defaultdict(list)
         if results_path.exists():
             all_results = [
@@ -712,7 +712,7 @@ def main(annotator_id: int) -> None:
 
     evaluator = HumanEvaluator(
         annotator_id=annotator_id,
-        title="ScandEval Human Evaluation",
+        title="EuroEval Human Evaluation",
         description="""
         In this app we will evaluate your performance on a variety of tasks, with the
         goal of comparing human performance to language model performance.

@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from scandeval.benchmarker import (
+from euroeval.benchmarker import (
     Benchmarker,
     BenchmarkResult,
     adjust_logging_level,
@@ -17,9 +17,9 @@ from scandeval.benchmarker import (
     model_has_been_benchmarked,
     prepare_dataset_configs,
 )
-from scandeval.data_models import DatasetConfig, Language, Task
-from scandeval.dataset_configs import ANGRY_TWEETS_CONFIG, DANSK_CONFIG
-from scandeval.exceptions import HuggingFaceHubDown
+from euroeval.data_models import DatasetConfig, Language, Task
+from euroeval.dataset_configs import ANGRY_TWEETS_CONFIG, DANSK_CONFIG
+from euroeval.exceptions import HuggingFaceHubDown
 
 
 @pytest.fixture(scope="module")
@@ -58,7 +58,7 @@ def test_benchmark_generative(
     benchmarker: Benchmarker, task: Task, language: Language, generative_model_id: str
 ) -> None:
     """Test that a generative model can be benchmarked."""
-    from scandeval.benchmark_modules.vllm import clear_vllm
+    from euroeval.benchmark_modules.vllm import clear_vllm
 
     for _ in range(10):
         clear_vllm()
@@ -85,7 +85,7 @@ def test_benchmark_generative_adapter(
     generative_adapter_model_id: str,
 ) -> None:
     """Test that a generative adapter model can be benchmarked."""
-    from scandeval.benchmark_modules.vllm import clear_vllm
+    from euroeval.benchmark_modules.vllm import clear_vllm
 
     for _ in range(10):
         clear_vllm()
@@ -403,7 +403,7 @@ class TestClearCacheFn:
 
     def test_clear_existing_cache(self) -> None:
         """Test that a cache can be cleared."""
-        cache_dir = Path(".test_scandeval_cache")
+        cache_dir = Path(".test_euroeval_cache")
         model_cache_dir = cache_dir / "model_cache"
         example_model_dir = model_cache_dir / "example_model"
         dir_to_be_deleted = example_model_dir / "dir_to_be_deleted"

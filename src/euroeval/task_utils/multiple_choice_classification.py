@@ -13,7 +13,7 @@ from transformers import BatchEncoding, PreTrainedTokenizer, Trainer
 if t.TYPE_CHECKING:
     from ..types import Labels, Predictions
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class MultipleChoiceClassificationTrainer(Trainer):

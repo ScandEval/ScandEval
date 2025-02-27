@@ -117,7 +117,7 @@ class NeedsExtraInstalled(InvalidModel):
         self.message = (
             f"The model you are trying to load requires the `{extra}` extra to be "
             f"installed. To install the `{extra}` extra, please run `pip install "
-            f"scandeval[{extra}]` or `pip install scandeval[all]`."
+            f"euroeval[{extra}]` or `pip install euroeval[all]`."
         )
         super().__init__(self.message)
 
@@ -141,7 +141,7 @@ class NeedsManualDependency(InvalidModel):
 
 
 class NeedsAdditionalArgument(InvalidModel):
-    """The evaluation requires additional arguments to the `scandeval` command."""
+    """The evaluation requires additional arguments to the `euroeval` command."""
 
     def __init__(
         self, cli_argument: str, script_argument: str, run_with_cli: bool
@@ -150,7 +150,7 @@ class NeedsAdditionalArgument(InvalidModel):
 
         Args:
             cli_argument:
-                The argument that needs to be passed to the `scandeval` command.
+                The argument that needs to be passed to the `euroeval` command.
             script_argument:
                 The argument that needs to be passed to the `Benchmarker` class.
             run_with_cli:
@@ -161,7 +161,7 @@ class NeedsAdditionalArgument(InvalidModel):
         if run_with_cli:
             self.message = (
                 f"The model you are trying to load requires the `{cli_argument}` "
-                "argument to be passed to the `scandeval` command. Please pass the "
+                "argument to be passed to the `euroeval` command. Please pass the "
                 "argument and try again."
             )
         else:

@@ -1,4 +1,4 @@
-"""All benchmarks tasks used in ScandEval."""
+"""All benchmarks tasks used in EuroEval."""
 
 from .data_models import MetricConfig, Task
 from .enums import TaskGroup

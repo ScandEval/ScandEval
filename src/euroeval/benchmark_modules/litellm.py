@@ -64,7 +64,7 @@ from ..utils import create_model_cache_dir
 from .base import BenchmarkModule
 from .hf import HuggingFaceEncoderModel, load_hf_model_config, load_tokenizer
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 VOCAB_SIZE_MAPPING = {
