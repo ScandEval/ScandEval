@@ -799,6 +799,150 @@ class Benchmarker:
                     raise e
                 return e
 
+    def __call__(
+        self,
+        model: list[str] | str,
+        task: str | list[str] | None = None,
+        dataset: list[str] | str | None = None,
+        progress_bar: bool | None = None,
+        save_results: bool | None = None,
+        language: str | list[str] | None = None,
+        model_language: str | list[str] | None = None,
+        dataset_language: str | list[str] | None = None,
+        device: Device | None = None,
+        batch_size: int | None = None,
+        raise_errors: bool | None = None,
+        cache_dir: str | None = None,
+        api_key: str | None = None,
+        force: bool | None = None,
+        verbose: bool | None = None,
+        trust_remote_code: bool | None = None,
+        use_flash_attention: bool | None = None,
+        clear_model_cache: bool | None = None,
+        evaluate_test_split: bool | None = None,
+        few_shot: bool | None = None,
+        num_iterations: int | None = None,
+        only_allow_safetensors: bool | None = None,
+    ) -> list[BenchmarkResult]:
+        """Benchmarks models on datasets.
+
+        Args:
+            model:
+                The full Hugging Face Hub path(s) to the pretrained transformer model.
+                The specific model version to use can be added after the suffix '@':
+                "model@v1.0.0". It can be a branch name, a tag name, or a commit id,
+                and defaults to the latest version if not specified.
+            task:
+                The tasks benchmark the model(s) on. Mutually exclusive with `dataset`.
+                If both `task` and `dataset` are None then all datasets will be
+                benchmarked. Defaults to None.
+            dataset:
+                The datasets to benchmark on. Mutually exclusive with `task`. If both
+                `task` and `dataset` are None then all datasets will be benchmarked.
+                Defaults to None.
+            progress_bar:
+                Whether progress bars should be shown. Defaults to the value specified
+                when initialising the benchmarker.
+            save_results:
+                Whether to save the benchmark results to
+                'scandeval_benchmark_results.jsonl'. Defaults to the value specified
+                when initialising the benchmarker.
+            language:
+                The language codes of the languages to include, both for models and
+                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
+                to 'all' if all languages (also non-Scandinavian) should be considered.
+                Defaults to the value specified when initialising the benchmarker.
+            model_language:
+                The language codes of the languages to include for models. If specified
+                then this overrides the `language` parameter for model languages.
+                Defaults to the value specified when initialising the benchmarker.
+            dataset_language:
+                The language codes of the languages to include for datasets. If
+                specified then this overrides the `language` parameter for dataset
+                languages. Defaults to the value specified when initialising the
+                benchmarker.
+            device:
+                The device to use for benchmarking. Defaults to the value specified when
+                initialising the benchmarker.
+            batch_size:
+                The batch size to use. Defaults to the value specified when initialising
+                the benchmarker.
+            raise_errors:
+                Whether to raise errors instead of skipping the model evaluation.
+            cache_dir:
+                Directory to store cached models. Defaults to the value specified when
+                initialising the benchmarker.
+            api_key:
+                The API key to use for a given inference server. Defaults to the value
+                specified when initialising the benchmarker.
+            force:
+                Whether to force evaluations of models, even if they have been
+                benchmarked already. Defaults to the value specified when initialising
+                the benchmarker.
+            verbose:
+                Whether to output additional output. Defaults to the value specified
+                when initialising the benchmarker.
+            trust_remote_code:
+                Whether to trust remote code when loading models. Defaults to the value
+                specified when initialising the benchmarker.
+            use_flash_attention:
+                Whether to use Flash Attention. Defaults to the value specified when
+                initialising the benchmarker.
+            clear_model_cache:
+                Whether to clear the model cache after benchmarking each model. Defaults
+                to the value specified when initialising the benchmarker.
+            evaluate_test_split:
+                Whether to evaluate the test split of the datasets. Defaults to the
+                value specified when initialising the benchmarker.
+            few_shot:
+                Whether to only evaluate the model using few-shot evaluation. Only
+                relevant if the model is generative. Defaults to the value specified
+                when initialising the benchmarker.
+            num_iterations:
+                The number of times each model should be evaluated. This is only meant
+                to be used for power users, and scores will not be allowed on the
+                leaderboards if this is changed. Defaults to the value specified when
+                initialising the benchmarker.
+            only_allow_safetensors:
+                Whether to only allow models that use the safetensors format. Defaults
+                to the value specified when initialising the benchmarker.
+
+        Returns:
+            A list of benchmark results.
+
+        Raises:
+            ValueError:
+                If both `task` and `dataset` are specified.
+        """
+        logger.warning(
+            "Calling the `Benchmarker` class directly is deprecated. Please use the "
+            "`benchmark` function instead. This will be removed in a future version."
+        )
+        return self.benchmark(
+            model=model,
+            task=task,
+            dataset=dataset,
+            progress_bar=progress_bar,
+            save_results=save_results,
+            language=language,
+            model_language=model_language,
+            dataset_language=dataset_language,
+            device=device,
+            batch_size=batch_size,
+            raise_errors=raise_errors,
+            cache_dir=cache_dir,
+            api_key=api_key,
+            force=force,
+            verbose=verbose,
+            trust_remote_code=trust_remote_code,
+            use_flash_attention=use_flash_attention,
+            clear_model_cache=clear_model_cache,
+            evaluate_test_split=evaluate_test_split,
+            few_shot=few_shot,
+            num_iterations=num_iterations,
+            only_allow_safetensors=only_allow_safetensors,
+        )
+
 
 def model_has_been_benchmarked(
     model_id: str,
