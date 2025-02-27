@@ -14,8 +14,11 @@ from time import sleep
 import litellm
 from datasets import DatasetDict
 from huggingface_hub import HfApi
-from huggingface_hub.hf_api import RepositoryNotFoundError, RevisionNotFoundError
-from huggingface_hub.utils import HFValidationError
+from huggingface_hub.errors import (
+    HFValidationError,
+    RepositoryNotFoundError,
+    RevisionNotFoundError,
+)
 from litellm.exceptions import (
     APIConnectionError,
     APIError,
@@ -249,8 +252,11 @@ class LiteLLMModel(BenchmarkModule):
         model_output = GenerativeModelOutput(sequences=[generation_output])
         if hasattr(model_response_choices, "logprobs"):
             logprobs_list: list[list[tuple[str, float]]] = [
-                [(dct["token"], dct["logprob"]) for dct in content["top_logprobs"]]
-                for content in model_response_choices.logprobs["content"]
+                [
+                    (top_logprob.token, top_logprob.logprob)
+                    for top_logprob in content.top_logprobs
+                ]
+                for content in model_response_choices.logprobs.content or list()
             ]
             model_output.scores = [logprobs_list]
 
