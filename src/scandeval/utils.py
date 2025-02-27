@@ -12,6 +12,7 @@ import typing as t
 import warnings
 from functools import cache
 from pathlib import Path
+from types import TracebackType
 
 import litellm
 import numpy as np
@@ -53,7 +54,7 @@ def create_model_cache_dir(cache_dir: str, model_id: str) -> str:
     return str(cache_dir_path)
 
 
-def clear_memory():
+def clear_memory() -> None:
     """Clears the memory of unused items."""
     for gc_generation in range(3):
         gc.collect(generation=gc_generation)
@@ -63,7 +64,7 @@ def clear_memory():
         torch.mps.empty_cache()
 
 
-def enforce_reproducibility(seed: int = 4242):
+def enforce_reproducibility(seed: int = 4242) -> np.random.Generator:
     """Ensures reproducibility of experiments.
 
     Args:
@@ -110,7 +111,7 @@ def is_module_installed(module: str) -> bool:
     return module.lower() in installed_modules
 
 
-def block_terminal_output():
+def block_terminal_output() -> None:
     """Blocks libraries from writing output to the terminal.
 
     This filters warnings from some libraries, sets the logging level to ERROR for some
@@ -285,14 +286,19 @@ def get_special_token_metadata(tokenizer: "PreTrainedTokenizer") -> dict:
 class HiddenPrints:
     """Context manager which removes all terminal output."""
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Enter the context manager."""
         self._original_stdout = sys.stdout
         self._original_stderr = sys.stderr
         sys.stdout = open(os.devnull, "w")
         sys.stderr = open(os.devnull, "w")
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: t.Type[BaseException],
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ) -> None:
         """Exit the context manager."""
         sys.stdout.close()
         sys.stderr.close()

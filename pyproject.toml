@@ -126,9 +126,16 @@ docstring-code-format = true
 skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
-extend-select = [
+select = [
+    # isort (imports)
     "I",
+    # pydocstyle (docstrings)
     "D",
+    # pycodestyle errors and warnings (PEP8)
+    "E",
+    "W",
+    # flake-annotations (type hints)
+    "ANN",
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]
