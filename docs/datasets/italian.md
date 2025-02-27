@@ -150,38 +150,38 @@ $ scandeval --model <model-id> --dataset TODO: NER_DATASET_NAME
 
 ## Linguistic Acceptability
 
-### TODO: LA_DATASET_NAME
+### ScaLA-it
 
-This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.20/)
-and was automatically created from the [French Universal Dependencies
-treebank](https://github.com/UniversalDependencies/UD_French-GSD/tree/master) by
-assuming that the documents in the treebank are correct, and corrupting the samples to
-create grammatically incorrect samples. The corruptions were done by either removing a
+This dataset was published in [this paper](https://aclanthology.org/W13-2308/)
+is automatically created from the [Italian Universal Dependencies
+treebank](https://github.com/UniversalDependencies/UD_Italian-ISDT) by assuming that
+the documents in the treebank are correct, and corrupting the samples to create
+grammatically incorrect samples. The corruptions were done by either removing a
 word from a sentence, or by swapping two neighbouring words in a sentence. To ensure
-that this does indeed break the grammaticality of the sentence, a set of rules were used
-on the part-of-speech tags of the words in the sentence.
+that this does indeed break the grammaticality of the sentence, a set of rules were
+used on the part-of-speech tags of the words in the sentence.
 
-The original full dataset consists of 1,024 / 256 / 2,048 samples for training,
-validation and testing, respectively (so 3,328 samples used in total). These splits are
-used as-is in the framework.
+The original full dataset consists of 13,121 / 564 / 482 samples for training,
+validation and testing, respectively. We use 512 / 128 / 1,024, sampled from a
+combination of all the splits.
 
 Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Le dessert est une part minuscule de gâteau.",
+  "text": "Il Presidente della di la Repubblica non è responsabile degli di gli atti compiuti nell' in l' esercizio delle di le sue funzioni, tranne che per alto tradimento o per attentato alla a la Costituzione.",
   "label": "correct"
 }
 ```
 ```json
 {
-  "text": "Le trafic international sera normal vendredi sur Eurostar, Thalys, et sur les trains à grande vitesse à destination de l', a indiqué la SNCF dans un communiqué.",
-  "label": "incorrect"
+  "text": "Ottimamente ha retto invece il cuore nuovo di Saverio Pallucca - alle a le spalle tre infarti, quattro by-pass, un trapianto cardiaco meno di due anni fa - nell' in l' ultima edizione della di la famosa maratona di New York.",
+  "label": "correct"
 }
 ```
 ```json
 {
-  "text": "Certains craignent qu' un avantage compétitif trop net et trop durable favorise les positions dominantes, monopoles et oligopoles, qui limitent la et concurrence finissent par peser sur le consommateur.",
+  "text": "Un secondo gruppo di problemi riguarda la necessità di garantire che il sistema economico venga percepito come fondamentalmente equo, che rappresenta la chiave della la di sua sostenibilità politica.",
   "label": "incorrect"
 }
 ```
@@ -192,26 +192,27 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  Følgende er sætninger og om de er grammatisk korrekte.
+  Di seguito sono riportate le frasi e la loro correttezza grammaticale.
+  ```
 - Base prompt template:
   ```
-  Sætning: {text}
-  Grammatisk korrekt: {label}
+  Frase: {text}
+  Grammaticalmente corretto: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Sætning: {text}
+  Frase: {text}
 
-  Bestem om sætningen er grammatisk korrekt eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er.
+  Stabilite se la frase è grammaticalmente corretta o meno. Rispondete con 'si' se la frase è corretta e con 'no' se non lo è, e nient'altro.
   ```
 - Label mapping:
-    - `correct` ➡️ `ja`
-    - `incorrect` ➡️ `nej`
+    - `correct` ➡️ `si`
+    - `incorrect` ➡️ `no`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset TODO: LA_DATASET_NAME
+$ scandeval --model <model-id> --dataset scala-it
 ```
 
 
