@@ -1,7 +1,7 @@
 """All dataset configurations used in ScandEval."""
 
 from .data_models import DatasetConfig
-from .languages import DA, DE, EN, FO, FR, IS, NB, NL, NN, NO, SV, get_all_languages
+from .languages import DA, DE, EN, FO, FR, IS, IT, NB, NL, NN, NO, SV, get_all_languages
 from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
 
 
@@ -240,6 +240,26 @@ ALLOCINE_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(positive="positif", negative="négatif"),
     instruction_prompt="Texte : {text}\nClassez le sentiment dans le texte. Répondez "
     "par ‘positif' ou ‘négatif', et rien d'autre.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
+SENTIPOLC_CONFIG = DatasetConfig(
+    name="sentipolc16",
+    pretty_name="the truncated version of the Italian sentiment classification "
+    "dataset Sentipolc-16",
+    huggingface_id="ScandEval/sentipolc16-mini",
+    task=SENT,
+    languages=[IT],
+    labels=["negative", "neutral", "positive"],
+    prompt_prefix="Di seguito sono riportati i testi e il loro sentimento, che può "
+    "essere 'positivo', 'neutro' o 'negativo'.",
+    prompt_template="Tweet: {text}\nSentimento: {label}",
+    prompt_label_mapping=dict(
+        positive="positivo", neutral="neutro", negative="negativo"
+    ),
+    instruction_prompt="Tweet: {text}\n\nClassificare il sentimento nel Tweet. "
+    "Rispondete con 'positivo', 'neutro' o 'negativo', e nient'altro.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
 )
@@ -893,6 +913,24 @@ SCALA_FR_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+SCALA_IT_CONFIG = DatasetConfig(
+    name="scala-it",
+    pretty_name="the Italian part of the linguistic acceptability dataset ScaLA",
+    huggingface_id="ScandEval/scala-it",
+    task=LA,
+    languages=[IT],
+    labels=["incorrect", "correct"],
+    prompt_prefix="Di seguito sono riportate le frasi e la loro correttezza "
+    "grammaticale.",
+    prompt_template="Frase : {text}\nGrammaticalmente corretto : {label}",
+    prompt_label_mapping=dict(correct="si", incorrect="no"),
+    instruction_prompt="Frase: {text}\n\nStabilite se la frase è grammaticalmente "
+    "corretta o meno. Rispondete con 'si' se la frase è corretta e con 'no' se "
+    "non lo è, e nient'altro.",
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
 DUTCH_COLA_CONFIG = DatasetConfig(
     name="dutch-cola",
     pretty_name="the truncated version of the Dutch linguistic acceptability dataset "
@@ -1139,6 +1177,23 @@ SQUAD_NL_CONFIG = DatasetConfig(
     max_generated_tokens=32,
 )
 
+SQUAD_IT_CONFIG = DatasetConfig(
+    name="squad-it",
+    pretty_name="the truncated version of the Italian reading comprehension dataset "
+    "SQuAD-it, translated from the English SQuAD dataset",
+    huggingface_id="ScandEval/squad-it-mini",
+    task=RC,
+    languages=[IT],
+    labels=["start_positions", "end_positions"],
+    prompt_prefix="I testi che seguono sono accompagnati da domande e risposte.",
+    prompt_template="Testo: {text}\nDomanda: {question}\nRispondere in massimo "
+    "3 parole: {label}",
+    instruction_prompt="Testo: {text}\n\nRispondi alla seguente domanda sul "
+    "in un massimo di 3 parole.\n\nDomanda: {question}",
+    num_few_shot_examples=4,
+    max_generated_tokens=32,
+)
+
 ICELANDIC_QA_CONFIG = DatasetConfig(
     name="icelandic-qa",
     pretty_name="the Icelandic reading comprehension dataset about Icelandic culture "
@@ -1348,6 +1403,20 @@ ORANGE_SUM_CONFIG = DatasetConfig(
     prompt_template="Article de presse: {text}\nRésumé: {target_text}",
     instruction_prompt="Article de presse: {text}\n\nRédigez un résumé de l'article "
     "ci-dessus.",
+    num_few_shot_examples=1,
+    max_generated_tokens=256,
+)
+
+ILPOST_SUM_CONFIG = DatasetConfig(
+    name="ilpost-sum",
+    pretty_name="the truncated version of the Italian summarisation dataset IlPost",
+    huggingface_id="ScandEval/ilpost-sum",
+    task=SUMM,
+    languages=[IT],
+    prompt_prefix="Di seguito sono riportati gli articoli con i relativi riassunti.",
+    prompt_template="Articolo di cronaca: {text}\nSintesi: {target_text}",
+    instruction_prompt="Articolo di cronaca: {text}\n\nScrivete un riassunto "
+    "dell'articolo sopra citato.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -1825,6 +1894,23 @@ HELLASWAG_FR_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Question: {text}\n\nRépondez à la question ci-dessus par 'a', "
     "'b', 'c' ou 'd', et rien d'autre.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
+HELLASWAG_IT_CONFIG = DatasetConfig(
+    name="hellaswag-it",
+    pretty_name="the truncated version of the Italian common-sense reasoning dataset "
+    "HellaSwag-it, translated from the English HellaSwag dataset",
+    huggingface_id="ScandEval/hellaswag-it-mini",
+    task=COMMON_SENSE,
+    languages=[IT],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Le seguenti sono domande a scelta multipla (con relative risposte).",
+    prompt_template="Domanda: {text}\nRéponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Domanda: {text}\n\nRispondete alla domanda precedente con "
+    "'a', 'b', 'c' o 'd' e nient'altro.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
