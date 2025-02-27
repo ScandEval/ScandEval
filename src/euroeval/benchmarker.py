@@ -37,7 +37,7 @@ logger = logging.getLogger("euroeval")
 
 
 class Benchmarker:
-    """Benchmarking all the Scandinavian language models.
+    """Benchmarking all the language models.
 
     Attributes:
         benchmark_config_default_params:
@@ -264,9 +264,9 @@ class Benchmarker:
                 when initialising the benchmarker.
             language:
                 The language codes of the languages to include, both for models and
-                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
-                to 'all' if all languages (also non-Scandinavian) should be considered.
-                Defaults to the value specified when initialising the benchmarker.
+                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
+                'all' if all languages should be considered. Defaults to the value
+                specified when initialising the benchmarker.
             model_language:
                 The language codes of the languages to include for models. If specified
                 then this overrides the `language` parameter for model languages.
@@ -849,9 +849,9 @@ class Benchmarker:
                 when initialising the benchmarker.
             language:
                 The language codes of the languages to include, both for models and
-                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
-                to 'all' if all languages (also non-Scandinavian) should be considered.
-                Defaults to the value specified when initialising the benchmarker.
+                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
+                'all' if all languages should be considered. Defaults to the value
+                specified when initialising the benchmarker.
             model_language:
                 The language codes of the languages to include for models. If specified
                 then this overrides the `language` parameter for model languages.

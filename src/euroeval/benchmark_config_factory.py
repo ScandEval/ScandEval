@@ -66,7 +66,7 @@ def build_benchmark_config(
         language:
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
-            to 'all' if all languages (also non-Scandinavian) should be considered.
+            to 'all' if all languages should be considered.
         model_language:
             The language codes of the languages to include for models. If None then
             the `language` parameter will be used.
@@ -198,7 +198,7 @@ def get_correct_language_codes(language_codes: str | list[str]) -> list[str]:
         language_codes:
             The language codes of the languages to include, both for models and
             datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
-            to 'all' if all languages (also non-Scandinavian) should be considered.
+            to 'all' if all languages should be considered.
 
     Returns:
         The correct language codes.
