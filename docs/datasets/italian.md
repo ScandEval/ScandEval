@@ -367,7 +367,7 @@ $ scandeval --model <model-id> --dataset mmlu-fr
 
 ## Common-sense Reasoning
 
-### TODO: CSR_DATASET_NAME
+### HellaSwag-it
 
 This dataset is a machine translated version of the English [HellaSwag
 dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
@@ -375,27 +375,27 @@ video descriptions from ActivityNet as well as how-to articles from WikiHow. The
 was translated by the University of Oregon as part of [this
 paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
-The original full dataset consists of 9,310 samples. We use a 1,024 / 256 / 2,048 split
+The original full dataset consists of 9,193 samples. We use a 1,024 / 256 / 2,048 split
 for training, validation and testing, respectively (so 3,328 samples used in total).
 
 Here are a few examples from the training split:
 
 ```json
 {
-  "text": "[header] Comment dire à vos enfants que vous allez divorcer [title] Contrôlez vos émotions. [step] Vos enfants seront probablement en colère et bouleversés lorsque vous leur annoncerez le divorce, essayez donc de ne pas réagir de la même manière. Attendez de rompre la nouvelle lorsque vous pourrez discuter du sujet de manière efficace et rester maître de vos émotions.\nChoix:\na. Rappelez-vous, le but de la discussion est d'être là pour les enfants - ils ne devraient pas avoir à vous réconforter. [title] Essayez de le faire ensemble, si possible.\nb. [substeps] Trouvez un moyen d'éviter que vos enfants ne vous agressent verbalement. Assurez-vous d'être calme et posé et ne donnez pas l'impression que la nouvelle du divorce est quelque chose qui vous dérange.\nc. [substeps] Si vos enfants ont du mal à comprendre la nouvelle à distance, posez-leur des questions lors d'une conversation intime et privée. Laissez-les utiliser les questions pour traiter et comprendre ce qu'ils ressentent à propos de l'annonce.\nd. [substeps] Si vous ne voulez pas qu'ils le sachent immédiatement, partez en silence et réfléchissez un peu plus longtemps avant de leur dire. Cherchez un endroit confortable pour vous deux pour parler en privé, afin que vous puissiez tous deux prendre du temps pour traiter vos sentiments et accepter la situation.",
-  "label": "a"
+    "text": "[header] Come pulire il tappeto stainmaster [title] Aspirare lo sporco. [step] In primo luogo, si può rimuovere molta della sporcizia con un aspirapolvere. Poi, si possono affrontare le macchie rimanenti con sapone e acqua.\nScelte:\na. Quindi, iniziare a spolverare e aspirare. Non usare prodotti chimici aggressivi, come detergenti abrasivi, poiché questi possono causare la formazione di muffe sul tappeto.\nb. [substeps] Fai spolverare la superficie prima di aspirare. Puoi farlo con un panno in microfibra o una spazzola.\nc. [title] Usare sapone e acqua sulla macchia. [step] Mescolare acqua e ¼ di tazza (21 grammi) di sapone liquido in una bottiglia spray e poi spruzzare direttamente questa miscela sulla macchia.\nd. Cerca fango o macchie nere che puoi pulire localmente. [substeps] Se il tuo tappeto stainmaster non è pulito, potrebbe essere necessario pulirlo da un professionista.",
+    "label": "c"
 }
 ```
 ```json
 {
-  "text": "Certains stands servent des hot-dogs aux gens alors qu'ils pêchent sur la glace. Un petit garçon et une petite fille tentent d'attraper un poisson. ils\nChoix:\na. attrapent un poisson et continuent de nager.\nb. sont interviewés pendant qu'ils pêchent.\nc. essaient à plusieurs reprises, errant tout près de leur poisson.\nd. sont rapidement emportés par le courant alors qu'ils luttent pour s'éloigner du banc de la rivière et pagayent pour échapper à de légères infestations de poissons dans l'eau",
-  "label": "b"
+    "text": "[header] Come sapere perché un bambino (sotto i 2 anni) sta piangendo [title] Ascolta il pianto forte, quasi un lamento. [step] Questo di solito significa \"ho dolore\" o \"sono malato\". Il bambino farà una pausa, poi urlerà di nuovo e ripeterà il processo.\nScelte:\na. Questo tipo di pianto è di solito solo un segnale di avvertimento della fame. Un bambino piangerà anche leggermente di più se ha fame.\nb. Questo può essere molto sconvolgente da guardare, quindi fai venire un genitore ad aiutare il bambino. [substeps] Solo un genitore può giudicare l'età del loro bambino.\nc. Questo di solito finirà dopo circa tre minuti. [title] Fai attenzione agli occhi chiusi del bambino.\nd. È persistente, penetrante e inequivocabile. Se senti questo pianto, vai immediatamente dal bambino.",
+    "label": "d"
 }
 ```
 ```json
 {
-  "text": "[header] Comment se calmer [title] Respirer. [step] Respirer. Lentement.\nChoix:\na. Concentrez-vous sur votre respiration et détendez votre corps. Continuez à inspirer et expirer lentement par le nez, en mettant une pression sur votre diaphragme et vos muscles fessiers (vos poumons).\nb. Si votre cœur bat vite ou fort, vous pourriez être en danger de tachycardie, d'AVC ou de toute autre crise cardiaque. [title] Allongez-vous sur le dos et inspirez et expirez profondément.\nc. Inspirez pendant 5 secondes; retenez votre souffle pendant 5 secondes, puis expirez pendant 5 secondes. Cela fonctionne parce que vous faites l'opposé de ce qu'une personne excitée ferait.\nd. Inspirez pendant un compte de cinq et abaissez-vous. Expirez, expirez quatre fois de plus, aussi profondément que vous pouvez sentir, et répétez pour un total de dix.",
-  "label": "c"
+    "text": "Una donna mostra come asciugare la superficie del bancone e il lavandino dall'acqua schizzata dal rubinetto con un asciugamano di carta. una donna\nScelte:\na. mostra il suo metodo preparatorio meticoloso per il bancone e il pavimento sui quali applicherà un asciugamano.\nb. sta in cucina accanto al lavandino e parla alla telecamera.\nc. impugna un asciugamano di carta e inizia a pulire una bevanda appoggiata sulla superficie del bancone e del lavandino.\nd. sta di fronte ad un set di utensili sul bancone, prende un asciugacapelli con le sue parti accessorie fissate e sicure con una barra sul lavandino asciutto.",
+    "label": "b"
 }
 ```
 
@@ -405,12 +405,12 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  Les questions suivantes sont des questions à choix multiples (avec réponses).
+  Le seguenti sono domande a scelta multipla (con relative risposte).
   ```
 - Base prompt template:
   ```
-  Question: {text}
-  Choix:
+  Domanda: {text}
+  Opzioni:
   a. {option_a}
   b. {option_b}
   c. {option_c}
@@ -419,20 +419,20 @@ When evaluating generative models, we use the following setup (see the
   ```
 - Instruction-tuned prompt template:
   ```
-  Question: {text}
-  Choix:
+  Domanda: {text}
+  Opzioni:
   a. {option_a}
   b. {option_b}
   c. {option_c}
   d. {option_d}
 
-  Répondez à la question ci-dessus par 'a', 'b', 'c' ou 'd', et rien d'autre.
+  Rispondete alla domanda precedente con 'a', 'b', 'c' o 'd' e nient'altro.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset TODO: CSR_DATASET_NAME
+$ scandeval --model <model-id> --dataset hellaswag-it
 ```
 
 
