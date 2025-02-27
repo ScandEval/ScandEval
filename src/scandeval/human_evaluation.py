@@ -13,7 +13,7 @@ from datasets import Dataset
 from .benchmark_config_factory import build_benchmark_config
 from .data_loading import load_data
 from .data_models import BenchmarkResult, GenerativeModelOutput
-from .dataset_configs import SPEED_CONFIG, get_all_dataset_configs
+from .dataset_configs import get_all_dataset_configs
 from .enums import GenerativeType, TaskGroup
 from .exceptions import NeedsExtraInstalled
 from .scores import aggregate_scores
@@ -73,14 +73,12 @@ class HumanEvaluator:
             {
                 cfg.task.name.replace("-", " ").title()
                 for cfg in self.dataset_configs.values()
-                if cfg != SPEED_CONFIG
             }
         )
         self.languages = sorted(
             {
                 language.name
                 for cfg in self.dataset_configs.values()
-                if cfg != SPEED_CONFIG
                 for language in cfg.languages
                 if language.name not in {"Norwegian Bokmål", "Norwegian Nynorsk"}
             }
