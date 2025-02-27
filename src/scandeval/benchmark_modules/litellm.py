@@ -158,9 +158,9 @@ class LiteLLMModel(BenchmarkModule):
             The generated model outputs.
         """
         assert "messages" in inputs, "The input must contain a 'messages' key."
-        assert (
-            len(inputs["messages"]) == 1
-        ), "API models only support single-sample batching."
+        assert len(inputs["messages"]) == 1, (
+            "API models only support single-sample batching."
+        )
         messages = inputs["messages"][0]
 
         generation_kwargs: dict[str, t.Any] = dict(
@@ -183,9 +183,9 @@ class LiteLLMModel(BenchmarkModule):
             generation_kwargs["top_logprobs"] = MAX_LOGPROBS
 
         if self.dataset_config.task in TASKS_USING_JSON:
-            assert (
-                "json" in messages[0]["content"].lower()
-            ), "Prompt must contain 'json' for JSON tasks."
+            assert "json" in messages[0]["content"].lower(), (
+                "Prompt must contain 'json' for JSON tasks."
+            )
             generation_kwargs["response_format"] = dict(type="json_object")
 
         # This drops generation kwargs that are not supported by the model
@@ -781,7 +781,7 @@ class LiteLLMModel(BenchmarkModule):
             The example with the few-shot examples applied.
         """
 
-        def create_prompt(**kwargs) -> tuple[str, str]:
+        def create_prompt(**kwargs: str) -> tuple[str, str]:
             """Create a prompt from the given keyword arguments.
 
             Args:

@@ -1,26 +1,28 @@
 """Unit tests for the `callbacks` module."""
 
-from collections.abc import Sized
 from dataclasses import dataclass
 from typing import Generator
 
 import pytest
+from datasets import Dataset
+from torch.utils.data import DataLoader
+from transformers import TrainerControl, TrainerState, TrainingArguments
 
 from scandeval.callbacks import NeverLeaveProgressCallback
 
 
 @dataclass
-class FakeState:
+class FakeState(TrainerState):
     """Dummy state class for testing."""
 
     is_local_process_zero: bool = True
 
 
 @dataclass
-class FakeEvalDataloader:
+class FakeEvalDataloader(DataLoader):
     """Dummy evaluation dataloader class for testing."""
 
-    dataset: Sized = (1, 2, 3)
+    dataset: Dataset = Dataset.from_dict({"value": [1, 2, 3]})
 
     def __len__(self) -> int:
         """Return the length of the dataloader."""
@@ -50,7 +52,9 @@ class TestNeverLeaveProgressCallback:
     ) -> None:
         """Test that the `leave` attribute on the training progress bar is False."""
         assert callback.training_bar is None
-        callback.on_train_begin(args=None, state=state, control=None)
+        callback.on_train_begin(
+            args=TrainingArguments(), state=state, control=TrainerControl()
+        )
         assert callback.training_bar is not None
         assert not callback.training_bar.leave
 
@@ -63,7 +67,10 @@ class TestNeverLeaveProgressCallback:
         """Test that the `leave` attribute on the prediction progress bar is False."""
         assert callback.prediction_bar is None
         callback.on_prediction_step(
-            args=None, state=state, control=None, eval_dataloader=eval_dataloader
+            args=TrainingArguments(),
+            state=state,
+            control=TrainerControl(),
+            eval_dataloader=eval_dataloader,
         )
         assert callback.prediction_bar is not None
         assert not callback.prediction_bar.leave

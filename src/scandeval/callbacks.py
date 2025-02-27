@@ -23,7 +23,7 @@ class NeverLeaveProgressCallback(ProgressCallback):
         args: TrainingArguments,
         state: TrainerState,
         control: TrainerControl,
-        **kwargs: dict,
+        **kwargs: str,
     ) -> None:
         """Callback actions when training begins."""
         if state.is_local_process_zero:
@@ -41,7 +41,7 @@ class NeverLeaveProgressCallback(ProgressCallback):
         args: TrainingArguments,
         state: TrainerState,
         control: TrainerControl,
-        **kwargs: dict,
+        **kwargs: str,
     ) -> None:
         """Callback actions when a training step ends."""
         if state.is_local_process_zero and self.training_bar is not None:
@@ -54,7 +54,7 @@ class NeverLeaveProgressCallback(ProgressCallback):
         state: TrainerState,
         control: TrainerControl,
         eval_dataloader: DataLoader | None = None,
-        **kwargs: dict,
+        **kwargs: str,
     ) -> None:
         """Callback actions when a prediction step ends."""
         if eval_dataloader is None:
