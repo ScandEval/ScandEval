@@ -881,9 +881,9 @@ SCALA_FR_CONFIG = DatasetConfig(
     task=LA,
     languages=[FR],
     labels=["incorrect", "correct"],
-    prompt_prefix="The following are sentences and whether they are grammatically "
-    "correct.",
-    prompt_template="Phrase : {text}\nCorrect du point de vue grammatical : {label}",
+    prompt_prefix="Les phrases suivantes indiquent si elles sont grammaticalement ",
+    "correctes.",
+    prompt_template="Phrase : {text}\nCorrect du point de vue grammatical: {label}",
     prompt_label_mapping=dict(correct="oui", incorrect="non"),
     instruction_prompt="Phrase: {text}\n\nDéterminez si la phrase est grammaticalement "
     "correcte ou non. Répondez par 'oui' si la phrase est correcte et par 'non' si "
