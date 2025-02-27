@@ -1177,9 +1177,6 @@ def task_group_to_class_name(task_group: TaskGroup) -> str:
         The class name.
     """
     pascal_case = task_group.title().replace("_", "")
-    special_case_mapping = dict(
-        MultipleChoiceClassification="SequenceClassification",
-        Speed="SequenceClassification",
-    )
+    special_case_mapping = dict(MultipleChoiceClassification="SequenceClassification")
     pascal_case = special_case_mapping.get(pascal_case, pascal_case)
     return f"AutoModelFor{pascal_case}"

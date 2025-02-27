@@ -132,8 +132,6 @@ class TaskGroup(AutoStrEnum):
             Extractive question answering.
         TEXT_TO_TEXT:
             Text-to-text generation.
-        SPEED:
-            Speed benchmark.
     """
 
     SEQUENCE_CLASSIFICATION = auto()
@@ -141,4 +139,3 @@ class TaskGroup(AutoStrEnum):
     TOKEN_CLASSIFICATION = auto()
     QUESTION_ANSWERING = auto()
     TEXT_TO_TEXT = auto()
-    SPEED = auto()

@@ -2,7 +2,7 @@
 
 from .data_models import DatasetConfig
 from .languages import DA, DE, EN, FO, FR, IS, NB, NL, NN, NO, SV, get_all_languages
-from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SPEED, SUMM
+from .tasks import COMMON_SENSE, KNOW, LA, MCRC, NER, RC, SENT, SUMM
 
 
 def get_all_dataset_configs() -> dict[str, DatasetConfig]:
@@ -1982,20 +1982,4 @@ BELEBELE_CONFIG = DatasetConfig(
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
-)
-
-
-### SPEED ESTIMATION DATASETS ###
-
-SPEED_CONFIG = DatasetConfig(
-    name="speed",
-    pretty_name="the speed estimation benchmark",
-    huggingface_id="",
-    task=SPEED,
-    languages=list(get_all_languages().values()),
-    prompt_prefix="",
-    prompt_template="",
-    instruction_prompt="",
-    num_few_shot_examples=0,
-    max_generated_tokens=5,
 )

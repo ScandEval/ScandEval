@@ -178,25 +178,3 @@ COMMON_SENSE = Task(
         ),
     ],
 )
-
-
-SPEED = Task(
-    name="speed",
-    task_group=TaskGroup.SPEED,
-    metrics=[
-        MetricConfig(
-            name="speed",
-            pretty_name="Tokens per second",
-            huggingface_id="",
-            results_key="speed",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:,.0f}"),
-        ),
-        MetricConfig(
-            name="speed_short",
-            pretty_name="Tokens per second on short documents",
-            huggingface_id="",
-            results_key="speed",
-            postprocessing_fn=lambda raw_score: (raw_score, f"{raw_score:,.0f}"),
-        ),
-    ],
-)

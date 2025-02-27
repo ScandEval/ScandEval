@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Deprecated the ability to call the `Benchmarker` objects directly. Instead, please use
   the `benchmark` method.
 
+### Removed
+- Removed the speed benchmark, as it provided unreliable results and was not used in
+  practice.
+
 
 ## [v15.1.0] - 2025-02-12
 ### Added

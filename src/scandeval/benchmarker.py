@@ -24,8 +24,6 @@ from .generation import generate
 from .model_config import get_model_config
 from .model_loading import load_model
 from .scores import log_scores
-from .speed_benchmark import benchmark_speed
-from .tasks import SPEED
 from .utils import enforce_reproducibility
 
 if t.TYPE_CHECKING:
@@ -707,36 +705,30 @@ class Benchmarker:
                     )
                 assert model is not None
 
-                if dataset_config.task == SPEED:
-                    scores = benchmark_speed(
-                        model=model, benchmark_config=self.benchmark_config
+                bootstrapped_datasets = load_data(
+                    rng=rng,
+                    dataset_config=dataset_config,
+                    benchmark_config=benchmark_config,
+                )
+                prepared_datasets = model.prepare_datasets(
+                    datasets=bootstrapped_datasets, task=dataset_config.task
+                )
+                if model_config.model_type == ModelType.GENERATIVE:
+                    scores = generate(
+                        model=model,
+                        datasets=prepared_datasets,
+                        model_config=model_config,
+                        dataset_config=dataset_config,
+                        benchmark_config=self.benchmark_config,
                     )
-
                 else:
-                    bootstrapped_datasets = load_data(
-                        rng=rng,
+                    scores = finetune(
+                        model=model,
+                        datasets=prepared_datasets,
+                        model_config=model_config,
                         dataset_config=dataset_config,
                         benchmark_config=benchmark_config,
                     )
-                    prepared_datasets = model.prepare_datasets(
-                        datasets=bootstrapped_datasets, task=dataset_config.task
-                    )
-                    if model_config.model_type == ModelType.GENERATIVE:
-                        scores = generate(
-                            model=model,
-                            datasets=prepared_datasets,
-                            model_config=model_config,
-                            dataset_config=dataset_config,
-                            benchmark_config=self.benchmark_config,
-                        )
-                    else:
-                        scores = finetune(
-                            model=model,
-                            datasets=prepared_datasets,
-                            model_config=model_config,
-                            dataset_config=dataset_config,
-                            benchmark_config=benchmark_config,
-                        )
 
                 results = log_scores(
                     dataset_name=dataset_config.pretty_name,

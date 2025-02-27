@@ -8,10 +8,10 @@ import pytest
 import torch
 
 from scandeval.data_models import BenchmarkConfig, MetricConfig, ModelConfig, Task
-from scandeval.dataset_configs import SPEED_CONFIG, get_all_dataset_configs
+from scandeval.dataset_configs import get_all_dataset_configs
 from scandeval.enums import InferenceBackend, ModelType
 from scandeval.languages import DA, get_all_languages
-from scandeval.tasks import SENT, SPEED, get_all_tasks
+from scandeval.tasks import SENT, get_all_tasks
 
 
 def pytest_configure() -> None:
@@ -27,11 +27,7 @@ def pytest_unconfigure() -> None:
 ACTIVE_LANGUAGES = {
     language_code: language
     for language_code, language in get_all_languages().items()
-    if any(
-        language in cfg.languages
-        for cfg in get_all_dataset_configs().values()
-        if cfg != SPEED_CONFIG
-    )
+    if any(language in cfg.languages for cfg in get_all_dataset_configs().values())
 }
 
 
@@ -106,8 +102,8 @@ def metric_config() -> Generator[MetricConfig, None, None]:
 
 @pytest.fixture(
     scope="session",
-    params=[task for task in get_all_tasks().values() if task != SPEED],
-    ids=[name for name, task in get_all_tasks().items() if task != SPEED],
+    params=list(get_all_tasks().values()),
+    ids=list(get_all_tasks().keys()),
 )
 def task(request: pytest.FixtureRequest) -> Generator[Task, None, None]:
     """Yields a dataset task used in tests."""
