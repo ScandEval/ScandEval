@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Fixed
+- If a tokenizer has not specified BOS and/or EOS token in its config, we now extract
+  this manually.
+
 ### Deprecated
 - Deprecated the ability to call the `Benchmarker` objects directly. Instead, please use
   the `benchmark` method.
