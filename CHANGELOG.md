@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Changed
+- Update `litellm` to the stable version v1.16.13.
+
 ### Fixed
 - If a tokenizer has not specified BOS and/or EOS token in its config, we now extract
   this manually.

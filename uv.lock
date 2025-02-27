@@ -3678,7 +3678,7 @@ requires-dist = [
     { name = "gradio", marker = "extra == 'test'", specifier = ">=4.26.0" },
     { name = "huggingface-hub", specifier = ">=0.24.0" },
     { name = "levenshtein", specifier = ">=0.24.0" },
-    { name = "litellm", specifier = ">=1.53.1" },
+    { name = "litellm", specifier = ">=1.61.13" },
     { name = "more-itertools", specifier = ">=10.5.0" },
     { name = "numpy", specifier = ">=1.23.0,<2.0.0" },
     { name = "pandas", specifier = ">=2.2.0" },
