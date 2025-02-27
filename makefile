@@ -27,13 +27,13 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install dependencies
-	@echo "Installing the 'ScandEval' project..."
+	@echo "Installing the 'EuroEval' project..."
 	@$(MAKE) --quiet install-rust
 	@$(MAKE) --quiet install-uv
 	@$(MAKE) --quiet install-dependencies
 	@$(MAKE) --quiet setup-environment-variables
 	@$(MAKE) --quiet install-pre-commit
-	@echo "Installed the 'ScandEval' project."
+	@echo "Installed the 'EuroEval' project."
 
 install-rust:
 	@if [ "$(shell which rustup)" = "" ]; then \
@@ -74,7 +74,7 @@ docs:  ## View documentation locally
 
 publish-docs:  ## Publish documentation to GitHub Pages
 	@uv run mkdocs gh-deploy
-	@echo "Updated documentation website: https://scandeval.com/"
+	@echo "Updated documentation website: https://euroeval.com/"
 
 test:  ## Run tests
 	@uv run pytest && uv run readme-cov

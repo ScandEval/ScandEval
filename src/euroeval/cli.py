@@ -104,7 +104,7 @@ from .tasks import get_all_tasks
 @click.option(
     "--cache-dir",
     "-c",
-    default=".scandeval_cache",
+    default=".euroeval_cache",
     show_default=True,
     help="The directory where models are datasets are cached.",
 )
@@ -124,7 +124,7 @@ from .tasks import get_all_tasks
     default=False,
     show_default=True,
     help="""Whether to force evaluation of models which have already been evaluated,
-    with scores lying in the 'scandeval_benchmark_results.jsonl' file.""",
+    with scores lying in the 'euroeval_benchmark_results.jsonl' file.""",
 )
 @click.option(
     "--device",

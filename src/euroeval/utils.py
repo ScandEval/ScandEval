@@ -33,7 +33,7 @@ if t.TYPE_CHECKING:
     from .types import Predictions
 
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def create_model_cache_dir(cache_dir: str, model_id: str) -> str:

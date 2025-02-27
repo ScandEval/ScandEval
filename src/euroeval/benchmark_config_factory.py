@@ -19,7 +19,7 @@ if t.TYPE_CHECKING:
     from .data_models import Language, Task
 
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def build_benchmark_config(

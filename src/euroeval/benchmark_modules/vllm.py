@@ -85,7 +85,7 @@ if t.TYPE_CHECKING or importlib.util.find_spec("vllm") is not None:
 if t.TYPE_CHECKING or importlib.util.find_spec("ray") is not None:
     import ray
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class VLLMModel(HuggingFaceEncoderModel):
