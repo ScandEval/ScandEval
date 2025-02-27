@@ -194,27 +194,27 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 12
 - Prefix prompt:
   ```
-  Følgende er sætninger og om de er grammatisk korrekte.
+  Les phrases suivantes indiquent si elles sont grammaticalement correctes.
   ```
 - Base prompt template:
   ```
-  Sætning: {text}
-  Grammatisk korrekt: {label}
+  Phrase: {text}
+  Correct du point de vue grammatical: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Sætning: {text}
+  Phrase: {text}
 
-  Bestem om sætningen er grammatisk korrekt eller ej. Svar med 'ja', hvis sætningen er korrekt, og 'nej', hvis den ikke er.
+  Déterminez si la phrase est grammaticalement correcte ou non. Répondez par 'oui' si la phrase est correcte et par 'non' si elle ne l'est pas, et rien d'autre.
   ```
 - Label mapping:
-    - `correct` ➡️ `ja`
-    - `incorrect` ➡️ `nej`
+    - `correct` ➡️ `oui`
+    - `incorrect` ➡️ `non`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset scala-da
+$ scandeval --model <model-id> --dataset scala-fr
 ```
 
 
