@@ -1880,6 +1880,23 @@ HELLASWAG_FR_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+HELLASWAG_IT_CONFIG = DatasetConfig(
+    name="hellaswag-it",
+    pretty_name="the truncated version of the Italian common-sense reasoning dataset "
+    "HellaSwag-it, translated from the English HellaSwag dataset",
+    huggingface_id="ScandEval/hellaswag-it-mini",
+    task=COMMON_SENSE,
+    languages=[IT],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Le seguenti sono domande a scelta multipla (con relative risposte).",
+    prompt_template="Domanda: {text}\Réponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Domanda: {text}\n\nRispondete alla domanda precedente con "
+    "'a', 'b', 'c' o 'd' e nient'altro.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
 # TODO: Faroese common sense reasoning
 
 
