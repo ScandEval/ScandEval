@@ -1168,8 +1168,8 @@ SQUAD_IT_CONFIG = DatasetConfig(
     languages=[IT],
     labels=["start_positions", "end_positions"],
     prompt_prefix="I testi che seguono sono accompagnati da domande e risposte.",
-    prompt_template="Testo: {text}\nDomanda: {question}\nRispondere in massimo 3 parole: "
-    "{label}",
+    prompt_template="Testo: {text}\nDomanda: {question}\nRispondere in massimo "
+    "3 parole: {label}",
     instruction_prompt="Testo: {text}\n\nRispondi alla seguente domanda sul "
     "in un massimo di 3 parole.\n\nDomanda: {question}",
     num_few_shot_examples=4,
@@ -1889,7 +1889,7 @@ HELLASWAG_IT_CONFIG = DatasetConfig(
     languages=[IT],
     labels=["a", "b", "c", "d"],
     prompt_prefix="Le seguenti sono domande a scelta multipla (con relative risposte).",
-    prompt_template="Domanda: {text}\Réponse: {label}",
+    prompt_template="Domanda: {text}\nRéponse: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Domanda: {text}\n\nRispondete alla domanda precedente con "
     "'a', 'b', 'c' o 'd' e nient'altro.",
