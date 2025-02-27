@@ -35,6 +35,3 @@ EuroEval is maintained by [Dan Saattrup Nielsen](https://www.saattrupdan.com/) f
 [Alexandra Institute](https://alexandra.dk) and [Kenneth
 Enevoldsen](https://www.kennethenevoldsen.com/) from [Aarhus University](https://au.dk),
 and is funded by the EU project [TrustLLM](https://trustllm.eu/).
-
-_The image used in the logo has been created by the amazing [Scandinavia and the
-World](https://satwcomic.com/) team. Go check them out!_
