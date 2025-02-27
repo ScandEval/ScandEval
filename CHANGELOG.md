@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added support for Spanish! 🇪🇸This includes the Spanish part of the reading comprehension
+  dataset [XQuAD](https://huggingface.co/datasets/google/xquad/viewer/xquad.es),
+  [sentiment-headlines dataset](https://huggingface.co/datasets/pysentimiento/spanish-targeted-sentiment-headlines), the linguistic acceptability dataset ScaLA with the [Spanish Universal
+  Dependencies](https://github.com/UniversalDependencies/UD_Spanish-AnCora), the Spanish part of [mlsum](https://huggingface.co/datasets/reciTAL/mlsum), the knowledge dataset [MMLU-es](https://huggingface.co/datasets/ScandEval/mmlu-es-mini), and the common-sense reasoning dataset [HellaSwag-es](https://huggingface.co/datasets/ScandEval/hellaswag-es-mini).
+
 ### Changed
 - Update `litellm` to the stable version v1.16.13.
 
@@ -20,11 +26,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [v15.1.0] - 2025-02-12
+
 ### Added
 - Added new `--only-allow-safetensors` flag, which disallows evaluating models from the
   Hugging Face Hub if they are not stored as safetensors. This ensures a high level of
   security on the system running the evaluations, if this is necessary. This was
   contributed by [@Mikeriess](https://github.com/Mikeriess) ✨
+
 
 ### Fixed
 - Regex mismatch caused the wrong sequence length for GPT-4o models. This has been fixed
@@ -39,6 +47,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [v15.0.0] - 2025-02-02
+
 ### Added
 - Added support for evaluating generative reasoning models, such as OpenAI o1 and
   Deepseek R1. This is done by upping the maximal sequence length to 8,192 tokens, and
@@ -85,6 +94,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [v14.4.0] - 2025-01-22
+
+### Added
 - Added support for French! 🇫🇷This includes the sentiment classification dataset
   [Allocine](https://hf.co/datasets/tblard/allocine), the linguistic acceptability
   dataset ScaLA with the [French Universal
