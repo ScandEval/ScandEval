@@ -1816,7 +1816,7 @@ HELLASWAG_CONFIG = DatasetConfig(
 HELLASWAG_FR_CONFIG = DatasetConfig(
     name="hellaswag-fr",
     pretty_name="the truncated version of the French common-sense reasoning dataset "
-    "HellaSwag-nl, translated from the English HellaSwag dataset",
+    "HellaSwag-fr, translated from the English HellaSwag dataset",
     huggingface_id="ScandEval/hellaswag-fr-mini",
     task=COMMON_SENSE,
     languages=[FR],
