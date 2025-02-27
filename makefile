@@ -130,6 +130,12 @@ publish:
 		$(MAKE) --quiet check \
 			&& uv build \
 			&& uv publish --username "__token__" --password ${PYPI_API_TOKEN} \
+			&& sed -i 's/^name = "EuroEval"$/name = "ScandEval"/' pyproject.toml \
+			&& mv src/euroeval src/scandeval \
+			&& uv build \
+			&& uv publish --username "__token__" --password ${PYPI_API_TOKEN} \
+			&& sed -i 's/^name = "ScandEval"$/name = "EuroEval"/' pyproject.toml \
+			&& mv src/scandeval src/euroeval \
 			&& $(MAKE) --quiet publish-docs \
 			&& $(MAKE) --quiet add-dev-version \
 			&& echo "Published!"; \
