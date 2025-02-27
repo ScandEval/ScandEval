@@ -577,7 +577,8 @@ CONLL_EN_CONFIG = DatasetConfig(
         "b-misc",
         "i-misc",
     ],
-    prompt_prefix="Below are sentences and JSON dictionaries with the named entities that occur in the given sentence.",
+    prompt_prefix="Below are sentences and JSON dictionaries with the named entities "
+    "that occur in the given sentence.",
     prompt_template="Sentence: {text}\nNamed entities: {label}",
     prompt_label_mapping={
         "b-per": "person",
@@ -960,8 +961,8 @@ ICE_EC_FULL_CONFIG = DatasetConfig(
     prompt_template="Setning: {text}\nMálfræðilega rétt: {label}",
     prompt_label_mapping=dict(correct="já", incorrect="nei"),
     instruction_prompt="Setning: {text}\n\nGreinið hvort setningin er málfræðilega "
-    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er ekki, "
-    "og engu öðru.",
+    "rétt eða ekki. Svarið skal vera 'já' ef setningin er rétt og 'nei' ef hún er "
+    "ekki, og engu öðru.",
     num_few_shot_examples=12,
     max_generated_tokens=5,
     unofficial=True,
@@ -1107,8 +1108,7 @@ GERMANQUAD_CONFIG = DatasetConfig(
 
 SQUAD_CONFIG = DatasetConfig(
     name="squad",
-    pretty_name="the truncated version of the English question answering "
-    "dataset SQuAD",
+    pretty_name="the truncated version of the English question answering dataset SQuAD",
     huggingface_id="ScandEval/squad-mini",
     task=RC,
     languages=[EN],
@@ -1289,8 +1289,7 @@ CNN_DAILYMAIL_CONFIG = DatasetConfig(
     languages=[EN],
     prompt_prefix="The following are articles with accompanying summaries.",
     prompt_template="News article: {text}\nSummary: {target_text}",
-    instruction_prompt="News article: {text}\n\nWrite a summary of the above "
-    "article.",
+    instruction_prompt="News article: {text}\n\nWrite a summary of the above article.",
     num_few_shot_examples=1,
     max_generated_tokens=256,
 )
@@ -1341,8 +1340,7 @@ PERSONAL_SUM_CONFIG = DatasetConfig(
 
 ORANGE_SUM_CONFIG = DatasetConfig(
     name="orange-sum",
-    pretty_name="the truncated version of the French summarisation dataset "
-    "OrangeSum",
+    pretty_name="the truncated version of the French summarisation dataset OrangeSum",
     huggingface_id="ScandEval/orange-sum-mini",
     task=SUMM,
     languages=[FR],
@@ -1489,8 +1487,8 @@ MMLU_NL_CONFIG = DatasetConfig(
     prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd', en niets anders.",
+    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
+    "'b', 'c' of 'd', en niets anders.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1647,8 +1645,8 @@ ARC_NL_CONFIG = DatasetConfig(
     prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd', en niets anders.",
+    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
+    "'b', 'c' of 'd', en niets anders.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
     unofficial=True,
@@ -1790,8 +1788,8 @@ HELLASWAG_NL_CONFIG = DatasetConfig(
     prompt_prefix="Hieronder staan meerkeuzevragen (met antwoorden).",
     prompt_template="Vraag: {text}\nAntwoord: {label}",
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
-    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', 'b', "
-    "'c' of 'd', en niets anders.",
+    instruction_prompt="Vraag: {text}\n\nBeantwoord de bovenstaande vraag met 'a', "
+    "'b', 'c' of 'd', en niets anders.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )

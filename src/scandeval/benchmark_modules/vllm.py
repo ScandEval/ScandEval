@@ -629,7 +629,7 @@ class VLLMModel(HuggingFaceEncoderModel):
             The example with the few-shot examples applied.
         """
 
-        def create_prompt(**kwargs) -> tuple[str, str]:
+        def create_prompt(**kwargs: str) -> tuple[str, str]:
             """Create a prompt from the given keyword arguments.
 
             Args:
@@ -642,9 +642,9 @@ class VLLMModel(HuggingFaceEncoderModel):
             """
             label_key = "label" if "label" in kwargs else "target_text"
             label = kwargs.pop(label_key)
-            assert (
-                label is not None
-            ), f"Found a None label for the prompt: {kwargs}. This should not happen."
+            assert label is not None, (
+                f"Found a None label for the prompt: {kwargs}. This should not happen."
+            )
             label_mapping = self.dataset_config.prompt_label_mapping
             label = label_mapping.get(label, label)
             if self.buffer["instruction_model"]:
