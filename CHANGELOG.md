@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+
+
+## [v15.2.0] - 2025-02-28
 ### Changed
 - Changed the name of the benchmark to `EuroEval`, to reflect the fact that the
   benchmark is not only for Scandinavian languages anymore. This is fully backwards
