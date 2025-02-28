@@ -1614,6 +1614,23 @@ MMLU_FR_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+MMLU_IT_CONFIG = DatasetConfig(
+    name="mmlu-it",
+    pretty_name="the truncated version of the French knowledge dataset MMLU-it, "
+    "translated from the English MMLU dataset",
+    huggingface_id="EuroEval/mmlu-it-mini",
+    task=KNOW,
+    languages=[IT],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Le seguenti sono domande a scelta multipla (con relative risposte).",
+    prompt_template="Domanda: {text}\nRéponse: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Domanda: {text}\n\nRispondete alla domanda precedente con "
+    "'a', 'b', 'c' o 'd' e nient'altro.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
 ARC_DA_CONFIG = DatasetConfig(
     name="arc-da",
     pretty_name="the truncated version of the Danish knowledge dataset ARC-da, "
