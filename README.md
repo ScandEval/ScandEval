@@ -1,5 +1,5 @@
 <div align='center'>
-<img src="https://raw.githubusercontent.com/EuroEval/EuroEval/main/gfx/euroeval.png" width="500" height="372">
+<img src="https://raw.githubusercontent.com/EuroEval/EuroEval/main/gfx/euroeval.png" height="500" width="372">
 </div>
 
 ### The robust European language model benchmark.
