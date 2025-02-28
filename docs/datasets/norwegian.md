@@ -1,6 +1,6 @@
 # 🇳🇴 Norwegian
 
-This is an overview of all the datasets used in the Norwegian part of ScandEval. The
+This is an overview of all the datasets used in the Norwegian part of EuroEval. The
 datasets are grouped by their task - see the [task overview](/tasks) for more
 information about what these constitute.
 
@@ -66,7 +66,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset norec
+$ euroeval --model <model-id> --dataset norec
 ```
 
 
@@ -149,7 +149,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset norne-nb
+$ euroeval --model <model-id> --dataset norne-nb
 ```
 
 
@@ -230,7 +230,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset norne-nn
+$ euroeval --model <model-id> --dataset norne-nn
 ```
 
 
@@ -298,7 +298,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset scala-nb
+$ euroeval --model <model-id> --dataset scala-nb
 ```
 
 
@@ -364,7 +364,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset scala-nn
+$ euroeval --model <model-id> --dataset scala-nn
 ```
 
 ### Unofficial: Jentoft
@@ -419,7 +419,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset jentoft
+$ euroeval --model <model-id> --dataset jentoft
 ```
 
 ## Reading Comprehension
@@ -494,7 +494,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset norquad
+$ euroeval --model <model-id> --dataset norquad
 ```
 
 
@@ -505,7 +505,7 @@ features a manually annotated reading comprehension dataset based on Norwegian n
 articles. This dataset is an _abstractive_ question answering dataset, meaning that the
 answers do not always feature in the context. To fix this, they were rephrased using
 [this
-script](https://github.com/ScandEval/ScandEval/blob/main/src/scripts/create_norglm_multiqa.py),
+script](https://github.com/EuroEval/EuroEval/blob/main/src/scripts/create_norglm_multiqa.py),
 which utilised the `gpt-4o-2024-05-13` model.
 
 The original dataset contains 2,406 samples, which we split into 1,024 / 256 / 1,126
@@ -570,7 +570,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset norglm-multi-qa
+$ euroeval --model <model-id> --dataset norglm-multi-qa
 ```
 
 
@@ -644,7 +644,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset mmlu-no
+$ euroeval --model <model-id> --dataset mmlu-no
 ```
 
 
@@ -714,7 +714,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset arc-no
+$ euroeval --model <model-id> --dataset arc-no
 ```
 
 
@@ -785,7 +785,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset hellaswag-no
+$ euroeval --model <model-id> --dataset hellaswag-no
 ```
 
 
@@ -849,7 +849,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset no-sammendrag
+$ euroeval --model <model-id> --dataset no-sammendrag
 ```
 
 
@@ -905,7 +905,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset norglm-multi-sum
+$ euroeval --model <model-id> --dataset norglm-multi-sum
 ```
 
 
@@ -962,7 +962,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset schibsted-no
+$ euroeval --model <model-id> --dataset schibsted-no
 ```
 
 
@@ -1019,5 +1019,5 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset personal-sum
+$ euroeval --model <model-id> --dataset personal-sum
 ```

@@ -22,7 +22,7 @@ from .utils import clear_memory
 if t.TYPE_CHECKING:
     from .data_models import BenchmarkConfig, DatasetConfig, ModelConfig
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def generate(

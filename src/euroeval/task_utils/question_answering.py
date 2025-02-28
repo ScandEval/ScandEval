@@ -34,7 +34,7 @@ if t.TYPE_CHECKING:
 
     from ..types import Labels, Predictions
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class QuestionAnsweringTrainer(Trainer):

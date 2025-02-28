@@ -16,7 +16,7 @@ from .data_models import BenchmarkConfig
 from .exceptions import InvalidBenchmark
 from .utils import clear_memory
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def benchmark_speed(

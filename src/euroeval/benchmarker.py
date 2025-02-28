@@ -1,4 +1,4 @@
-"""Class that benchmarks Scandinavian language models."""
+"""Class that benchmarks language models."""
 
 import json
 import logging
@@ -33,11 +33,11 @@ if t.TYPE_CHECKING:
     from .data_models import BenchmarkConfig, DatasetConfig, ModelConfig
 
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 class Benchmarker:
-    """Benchmarking all the Scandinavian language models.
+    """Benchmarking all the language models.
 
     Attributes:
         benchmark_config_default_params:
@@ -65,7 +65,7 @@ class Benchmarker:
         device: Device | None = None,
         batch_size: int = 32,
         raise_errors: bool = False,
-        cache_dir: str = ".scandeval_cache",
+        cache_dir: str = ".euroeval_cache",
         api_key: str | None = None,
         force: bool = False,
         verbose: bool = False,
@@ -88,7 +88,7 @@ class Benchmarker:
                 Whether progress bars should be shown. Defaults to True.
             save_results:
                 Whether to save the benchmark results to
-                'scandeval_benchmark_results.jsonl'. Defaults to True.
+                'euroeval_benchmark_results.jsonl'. Defaults to True.
             task:
                 The tasks benchmark the model(s) on. Mutually exclusive with `dataset`.
                 If both `task` and `dataset` are None then all datasets will be
@@ -116,7 +116,7 @@ class Benchmarker:
                 Whether to raise errors instead of skipping the model evaluation.
                 Defaults to False.
             cache_dir:
-                Directory to store cached models. Defaults to '.scandeval_cache'.
+                Directory to store cached models. Defaults to '.euroeval_cache'.
             api_key:
                 The API key to use for a given inference API.
             force:
@@ -198,7 +198,7 @@ class Benchmarker:
         # Initialise variable storing model lists, so we only have to fetch it once
         self._model_lists: dict[str, list[str]] | None = None
 
-        self.results_path = Path.cwd() / "scandeval_benchmark_results.jsonl"
+        self.results_path = Path.cwd() / "euroeval_benchmark_results.jsonl"
         adjust_logging_level(verbose=self.benchmark_config.verbose)
 
     @property
@@ -260,13 +260,13 @@ class Benchmarker:
                 when initialising the benchmarker.
             save_results:
                 Whether to save the benchmark results to
-                'scandeval_benchmark_results.jsonl'. Defaults to the value specified
+                'euroeval_benchmark_results.jsonl'. Defaults to the value specified
                 when initialising the benchmarker.
             language:
                 The language codes of the languages to include, both for models and
-                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
-                to 'all' if all languages (also non-Scandinavian) should be considered.
-                Defaults to the value specified when initialising the benchmarker.
+                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
+                'all' if all languages should be considered. Defaults to the value
+                specified when initialising the benchmarker.
             model_language:
                 The language codes of the languages to include for models. If specified
                 then this overrides the `language` parameter for model languages.
@@ -507,7 +507,7 @@ class Benchmarker:
                 be updated.
             save_results:
                 Whether to save the benchmark results to
-                'scandeval_benchmark_results.jsonl'. If None, then this value will not
+                'euroeval_benchmark_results.jsonl'. If None, then this value will not
                 be updated.
             task:
                 The tasks benchmark the model(s) on. If None, then this value will not
@@ -845,13 +845,13 @@ class Benchmarker:
                 when initialising the benchmarker.
             save_results:
                 Whether to save the benchmark results to
-                'scandeval_benchmark_results.jsonl'. Defaults to the value specified
+                'euroeval_benchmark_results.jsonl'. Defaults to the value specified
                 when initialising the benchmarker.
             language:
                 The language codes of the languages to include, both for models and
-                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this
-                to 'all' if all languages (also non-Scandinavian) should be considered.
-                Defaults to the value specified when initialising the benchmarker.
+                datasets. Here 'no' means both Bokmål (nb) and Nynorsk (nn). Set this to
+                'all' if all languages should be considered. Defaults to the value
+                specified when initialising the benchmarker.
             model_language:
                 The language codes of the languages to include for models. If specified
                 then this overrides the `language` parameter for model languages.

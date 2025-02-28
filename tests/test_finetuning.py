@@ -5,9 +5,9 @@ import torch
 from tokenizers.models import Model
 from transformers import IntervalStrategy, TrainingArguments
 
-from scandeval.data_models import BenchmarkConfig, ModelConfig
-from scandeval.enums import DataType
-from scandeval.finetuning import get_training_args
+from euroeval.data_models import BenchmarkConfig, ModelConfig
+from euroeval.enums import DataType
+from euroeval.finetuning import get_training_args
 
 
 # TODO

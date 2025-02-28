@@ -10,7 +10,7 @@ if t.TYPE_CHECKING:
     from .data_models import BenchmarkConfig, ModelConfig
 
 
-logger = logging.getLogger("scandeval")
+logger = logging.getLogger("euroeval")
 
 
 def get_model_config(
@@ -65,8 +65,8 @@ def get_model_config(
             msg += (
                 " However, it is possible that the model exists, but a package "
                 "needs to be installed to check if it exists. Please try running "
-                f"`pip install scandeval[{','.join(needs_extras)}]` or `pip install "
-                "scandeval[all]`, and try again."
+                f"`pip install euroeval[{','.join(needs_extras)}]` or `pip install "
+                "euroeval[all]`, and try again."
             )
         elif needs_env_vars:
             msg += (

@@ -1,6 +1,6 @@
 # 🇫🇷 French
 
-This is an overview of all the datasets used in the French part of ScandEval. The
+This is an overview of all the datasets used in the French part of EuroEval. The
 datasets are grouped by their task - see the [task overview](/tasks) for more
 information about what these constitute.
 
@@ -64,7 +64,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset allocine
+$ euroeval --model <model-id> --dataset allocine
 ```
 
 
@@ -146,7 +146,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset eltec
+$ euroeval --model <model-id> --dataset eltec
 ```
 
 
@@ -214,7 +214,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset scala-fr
+$ euroeval --model <model-id> --dataset scala-fr
 ```
 
 
@@ -292,7 +292,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset fquad
+$ euroeval --model <model-id> --dataset fquad
 ```
 
 
@@ -366,7 +366,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset mmlu-fr
+$ euroeval --model <model-id> --dataset mmlu-fr
 ```
 
 
@@ -437,7 +437,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset hellaswag-fr
+$ euroeval --model <model-id> --dataset hellaswag-fr
 ```
 
 
@@ -498,5 +498,5 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset orange-sum
+$ euroeval --model <model-id> --dataset orange-sum
 ```
