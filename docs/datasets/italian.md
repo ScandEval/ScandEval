@@ -294,12 +294,12 @@ $ euroeval --model <model-id> --dataset squad-it
 
 ## Knowledge
 
-### TODO: KNOW_DATASET_NAME
+### MMLU-it
 
 This dataset is a machine translated version of the English [MMLU
 dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
 different topics, such as elementary mathematics, US history and law. The translation to
-French was done by the University of Oregon as part of [this
+Italian was done by the University of Oregon as part of [this
 paper](https://aclanthology.org/2023.emnlp-demo.28/), using GPT-3.5-turbo.
 
 The original full dataset consists of 269 / 1,410 / 13,200 samples for training,
@@ -312,19 +312,19 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "text": "En 2013, la part des personnes en Ethiopie qui pensent que les partis politiques sont corrompus est\nChoix:\na. 24%\nb. 44%\nc. 64%\nd. 84%",
+  "text": "Quale delle seguenti situazioni è meglio modellata dalla distribuzione binomiale?\nScelte:\na. Il numero di minuti in un'ora in cui la media Dow-Jones è superiore alla sua media iniziale del giorno.\nb. Il numero di città tra le 10 più grandi dello Stato di New York in cui il tempo è nuvoloso per la maggior parte di un determinato giorno.\nc. Il numero di conducenti che indossano le cinture di sicurezza se 10 conducenti consecutivi vengono fermati in un posto di blocco della polizia.\nd. Nessuna delle precedenti.",
+  "label": "d"
+}
+```
+```json
+{
+  "text": "Il 'nuovo razzismo' si riferisce a:\nScelte:\na. una forma più sottile di pregiudizio, mascherata dall'orgoglio nazionale\nb. una decostruzione post-moderna delle idee razziste per rivelarne la mancanza di profondità\nc. pratiche razziste riscontrabili in aree sociali di recente emergenza, come il cyberspazio\nd. un movimento antifascista che sfida le politiche nazionaliste",
   "label": "a"
 }
 ```
 ```json
 {
-  "text": "Combien de nombres entiers positifs et négatifs $12$ est-il un multiple?\nChoix:\na. 3\nb. 12\nc. 4\nd. 6",
-  "label": "b"
-}
-```
-```json
-{
-  "text": "Quelle affirmation suivante concernant les réactions dépendantes de la lumière de la photosynthèse est correcte?\nChoix:\na. Ils fournissent le carbone qui est incorporé dans le sucre.\nb. Ils produisent du PGA, qui est converti en glucose par la fixation du carbone dans les réactions indépendantes de la lumière.\nc. L'eau est séparée en fournissant des ions hydrogène et des électrons à la NADP pour un stockage temporaire.\nd. Ils se produisent dans le stroma des chloroplastes.",
+  "text": "Tutti i seguenti possono agire come messaggeri intracellulari, TRANNE\nScelte:\na. ioni di calcio\nb. cAMP\nc. acetilcolina\nd. inositolo 1,4,5-trifosfato",
   "label": "c"
 }
 ```
@@ -335,12 +335,12 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 5
 - Prefix prompt:
   ```
-  Les questions suivantes sont des questions à choix multiples (avec réponses).
+  Le seguenti sono domande a scelta multipla (con relative risposte).
   ```
 - Base prompt template:
   ```
-  Question: {text}
-  Choix:
+  Domanda: {text}
+  Scelte:
   a. {option_a}
   b. {option_b}
   c. {option_c}
@@ -349,20 +349,20 @@ When evaluating generative models, we use the following setup (see the
   ```
 - Instruction-tuned prompt template:
   ```
-  Question: {text}
-  Choix:
+  Domanda: {text}
+  Scelte:
   a. {option_a}
   b. {option_b}
   c. {option_c}
   d. {option_d}
 
-  Répondez à la question ci-dessus par 'a', 'b', 'c' ou 'd', et rien d'autre.
+  Rispondete alla domanda precedente con 'a', 'b', 'c' o 'd' e nient'altro.
   ```
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ euroeval --model <model-id> --dataset mmlu-fr
+$ euroeval --model <model-id> --dataset mmlu-it
 ```
 
 
@@ -411,7 +411,7 @@ When evaluating generative models, we use the following setup (see the
 - Base prompt template:
   ```
   Domanda: {text}
-  Opzioni:
+  Scelte:
   a. {option_a}
   b. {option_b}
   c. {option_c}
@@ -421,7 +421,7 @@ When evaluating generative models, we use the following setup (see the
 - Instruction-tuned prompt template:
   ```
   Domanda: {text}
-  Opzioni:
+  Scelte:
   a. {option_a}
   b. {option_b}
   c. {option_c}
