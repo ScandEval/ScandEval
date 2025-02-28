@@ -1,6 +1,6 @@
 # 🇮🇹 Italian
 
-This is an overview of all the datasets used in the Italian part of ScandEval. The
+This is an overview of all the datasets used in the Italian part of EuroEval. The
 datasets are grouped by their task - see the [task overview](/tasks) for more
 information about what these constitute.
 
@@ -62,7 +62,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset sentipolc16
+$ euroeval --model <model-id> --dataset sentipolc16
 ```
 
 
@@ -144,7 +144,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset TODO: NER_DATASET_NAME
+$ euroeval --model <model-id> --dataset TODO: NER_DATASET_NAME
 ```
 
 
@@ -212,7 +212,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset scala-it
+$ euroeval --model <model-id> --dataset scala-it
 ```
 
 
@@ -288,7 +288,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset squad-it
+$ euroeval --model <model-id> --dataset squad-it
 ```
 
 
@@ -362,7 +362,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset mmlu-fr
+$ euroeval --model <model-id> --dataset mmlu-fr
 ```
 
 
@@ -433,7 +433,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset hellaswag-it
+$ euroeval --model <model-id> --dataset hellaswag-it
 ```
 
 
@@ -493,5 +493,5 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ scandeval --model <model-id> --dataset ilpost-sum
+$ euroeval --model <model-id> --dataset ilpost-sum
 ```
