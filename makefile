@@ -128,18 +128,34 @@ publish:
 	else \
 		echo "Publishing to PyPI..."; \
 		$(MAKE) --quiet check \
-			&& uv build \
-			&& uv publish --username "__token__" --password ${PYPI_API_TOKEN} \
-			&& sed -i 's/^name = "EuroEval"$/name = "ScandEval"/' pyproject.toml \
-			&& mv src/euroeval src/scandeval \
-			&& uv build \
-			&& uv publish --username "__token__" --password ${PYPI_API_TOKEN} \
-			&& sed -i 's/^name = "ScandEval"$/name = "EuroEval"/' pyproject.toml \
-			&& mv src/scandeval src/euroeval \
+			&& $(MAKE) --quiet publish-euroeval \
+			&& $(MAKE) --quiet publish-scandeval \
 			&& $(MAKE) --quiet publish-docs \
 			&& $(MAKE) --quiet add-dev-version \
 			&& echo "Published!"; \
 	fi
+
+publish-euroeval:
+	@rm -rf build/ dist/
+	@uv build
+	@uv publish --username "__token__" --password ${EUROEVAL_PYPI_API_TOKEN}
+
+publish-scandeval:
+	@if [ $$(uname) = "Darwin" ]; then \
+		sed -i '' 's/^name = "EuroEval"/name = "ScandEval"/' pyproject.toml; \
+	else \
+		sed -i 's/^name = "EuroEval"/name = "ScandEval"/' pyproject.toml; \
+	fi
+	@mv src/euroeval src/scandeval
+	@rm -rf build/ dist/
+	@uv build
+	@uv publish --username "__token__" --password ${SCANDEVAL_PYPI_API_TOKEN}
+	@if [ $$(uname) = "Darwin" ]; then \
+		sed -i '' 's/^name = "ScandEval"/name = "EuroEval"/' pyproject.toml; \
+	else \
+		sed -i 's/^name = "ScandEval"/name = "EuroEval"/' pyproject.toml; \
+	fi
+	@mv src/scandeval src/euroeval
 
 publish-major: bump-major publish  ## Publish a major version
 
