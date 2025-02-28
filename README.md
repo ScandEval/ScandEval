@@ -4,6 +4,8 @@
 
 ### The robust European language model benchmark.
 
+_(formerly known as ScandEval)_
+
 ______________________________________________________________________
 [![Documentation](https://img.shields.io/badge/docs-passing-green)](https://euroeval.com)
 [![PyPI Status](https://badge.fury.io/py/euroeval.svg)](https://pypi.org/project/euroeval/)
