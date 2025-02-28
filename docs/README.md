@@ -5,7 +5,7 @@ hide:
 ---
 #
 <div align='center'>
-<img src="https://raw.githubusercontent.com/EuroEval/EuroEval/main/gfx/euroeval.png" width="517" height="217">
+<img src="https://raw.githubusercontent.com/EuroEval/EuroEval/main/gfx/euroeval.png">
 <h3>A Robust Multilingual Evaluation Framework for Language Models</h3>
 </div>
 
