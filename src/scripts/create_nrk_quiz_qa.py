@@ -62,6 +62,9 @@ def main() -> None:
     top_quizzes = quiz_counts.head(256).index
     df = df[df.quiz.isin(top_quizzes)]
 
+    # Sanity check that there are never more than 4 options
+    assert df.choices.apply(lambda x: len(x["text"])).max() <= 4
+
     # Make a `text` column with all the options in it
     df["text"] = [
         row.instruction.replace("\n", " ").strip() + "\n"
