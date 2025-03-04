@@ -90,7 +90,7 @@ def main() -> None:
     train_df = pd.concat([train_df, new_train_samples], ignore_index=True)
 
     # Create validation split
-    val_size = 64
+    val_size = 128
     val_df = df.sample(val_size, random_state=4242)
     df.drop(index=val_df.index.tolist(), inplace=True)
 

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the old MMLU-no as the official Norwegian knowledge dataset.
 - Added the new Norwegian common-sense reasoning dataset NorCommonSenseQA, which is a
   manually translated and localised version of the English CommonsenseQA dataset, in
-  both Bokmål and Nynorsk. The dataset has been split into 128 / 64 / 851 samples for
+  both Bokmål and Nynorsk. The dataset has been split into 128 / 128 / 787 samples for
   train, val, and test, respectively. This replaces the old HellaSwag-no as the official
   Norwegian common-sense reasoning dataset.
 

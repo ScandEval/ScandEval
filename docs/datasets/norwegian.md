@@ -792,8 +792,8 @@ This dataset was published in [this paper](https://doi.org/10.48550/arXiv.2501.1
 and is a manually translated and localised version of the English CommonSenseQA dataset.
 There are samples in both Bokmål and Nynorsk, but with the vast majority being Bokmål.
 
-The original dataset contains 1,093 samples. We use a 128 / 64 / 851 split for training,
-validation and testing, respectively.
+The original dataset contains 1,093 samples. We use a 128 / 128 / 787 split for
+training, validation and testing, respectively.
 
 Here are a few examples from the training split:
 
