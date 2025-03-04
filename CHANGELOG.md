@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
-
+### Changed
+- Updated the Danish Citizen Tests dataset to include the newer 2024 tests, Further,
+  rather than splitting the dataset randomly, we include all the citizenship tests in
+  the test split, and prioritise the newer permanent residence tests in the test and
+  validation splits.
 
 
 ## [v15.2.0] - 2025-02-28
