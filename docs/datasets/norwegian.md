@@ -578,9 +578,10 @@ $ euroeval --model <model-id> --dataset norglm-multi-qa
 
 ### NRK Quiz QA
 
-This dataset is a multiple-choice question answering (QA) dataset designed for
-evaluation of the Norwegian language and culture, including both Bokmål and Nynorsk. The
-dataset consists of quizzes from NRK, the national public broadcaster in Norway.
+This dataset was published in [this paper](https://doi.org/10.48550/arXiv.2501.11128)
+and is a multiple-choice question answering (QA) dataset designed for evaluation of the
+Norwegian language and culture, including both Bokmål and Nynorsk. The dataset consists
+of quizzes from NRK, the national public broadcaster in Norway.
 
 The original dataset contains 4,930 samples, spread across 549 quizzes. We keep the
 top-256 quizzes, allowing us to create splits stratified across all the remaining
@@ -846,7 +847,7 @@ When evaluating generative models, we use the following setup (see the
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ euroeval --model <model-id> --dataset hellaswag-no
+$ euroeval --model <model-id> --dataset nor-common-sense-qa
 ```
 
 
