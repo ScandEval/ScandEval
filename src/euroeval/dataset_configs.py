@@ -1377,15 +1377,15 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
 DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     name="danish-citizen-tests",
     pretty_name="the Danish knowledge dataset Danish Citizen Tests",
-    huggingface_id="EuroEval/danish-citizen-tests",
+    huggingface_id="EuroEval/danish-citizen-tests-updated",
     task=KNOW,
     languages=[DA],
     labels=["a", "b", "c", "d"],
     prompt_prefix="Følgende er multiple choice spørgsmål (med svar).",
     prompt_template="Spørgsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    prompt_label_mapping=dict(a="a", b="b", c="c"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
-    "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
+    "svare med 'a', 'b' eller 'c', og intet andet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
