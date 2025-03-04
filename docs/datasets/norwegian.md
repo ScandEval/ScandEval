@@ -620,7 +620,6 @@ When evaluating generative models, we use the following setup (see the
   b. {option_b}
   c. {option_c}
   d. {option_d}
-  e. {option_e}
   Svar: {label}
   ```
 - Instruction-tuned prompt template:
@@ -631,9 +630,8 @@ When evaluating generative models, we use the following setup (see the
   b. {option_b}
   c. {option_c}
   d. {option_d}
-  e. {option_e}
 
-  Besvar følgende spørsmål med 'a', 'b', 'c', 'd' eller 'e', og engu öðru.
+  Besvar følgende spørsmål med 'a', 'b', 'c', eller 'd', og ikke noe annet.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -705,7 +703,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og engu öðru.
+  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og ikke noe annet.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -775,7 +773,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og engu öðru.
+  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og ikke noe annet.
   ```
 
 You can evaluate this dataset directly as follows:
@@ -787,7 +785,72 @@ $ euroeval --model <model-id> --dataset arc-no
 
 ## Common-sense Reasoning
 
-### HellaSwag-no
+### NorCommonSenseQA
+
+This dataset was published in [this paper](https://doi.org/10.48550/arXiv.2501.11128)
+and is a translated and localised version of the English CommonSenseQA dataset.
+
+The original dataset contains 1,093 samples. We use a 128 / 64 / 851 split for training,
+validation and testing, respectively.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Hvor er det sannsynlig at en fugl lager hjemmet sitt?\nSvaralternativer:\na. I skogen\nb. I et rede\nc. På taket\nd. På blader\ne. I himmelen",
+  "label": "a"
+}```
+```json
+{
+  "text": "Hvis et hjem har et abonnoment, hva får de sannsyneligvis hver dag i posten?\nSvaralternativer:\na. Delestykker\nb. En avis\nc. En gate\nd. En vaskemaskin\ne. Jordas overflate",
+  "label": "b"
+}```
+```json
+{
+  "text": "Når du ikke klarer å gjøre noe ferdig, hva feilet du i da?\nSvaralternativer:\na. Å vinne\nb. Å bestå\nc. Å fullfør\nd. Å gjøre det bra\ne. Å lykkes",
+  "label": "c"
+}```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Følgende er flervalgsspørsmål (med svar).
+  ```
+- Base prompt template:
+  ```
+  Spørsmål: {text}
+  Svaralternativer:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  e. {option_e}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Spørsmål: {text}
+  Svaralternativer:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  e. {option_e}
+
+  Besvar følgende spørsmål med 'a', 'b', 'c', 'd' eller 'e', og ikke noe annet.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ euroeval --model <model-id> --dataset hellaswag-no
+```
+
+
+### Unofficial: HellaSwag-no
 
 This dataset is a machine translated version of the English [HellaSwag
 dataset](https://aclanthology.org/P19-1472/). The original dataset was based on both
@@ -846,7 +909,7 @@ When evaluating generative models, we use the following setup (see the
   c. {option_c}
   d. {option_d}
 
-  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og engu öðru.
+  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og ikke noe annet.
   ```
 
 You can evaluate this dataset directly as follows:
