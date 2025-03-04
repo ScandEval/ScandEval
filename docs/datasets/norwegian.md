@@ -789,7 +789,8 @@ $ euroeval --model <model-id> --dataset arc-no
 ### NorCommonSenseQA
 
 This dataset was published in [this paper](https://doi.org/10.48550/arXiv.2501.11128)
-and is a translated and localised version of the English CommonSenseQA dataset.
+and is a manually translated and localised version of the English CommonSenseQA dataset.
+There are samples in both Bokmål and Nynorsk, but with the vast majority being Bokmål.
 
 The original dataset contains 1,093 samples. We use a 128 / 64 / 851 split for training,
 validation and testing, respectively.
