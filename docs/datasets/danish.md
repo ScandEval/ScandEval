@@ -429,7 +429,7 @@ $ euroeval --model <model-id> --dataset danske-talemaader
 ### Danish Citizen Tests
 
 This dataset was created by scraping the Danish citizenship tests (indfødsretsprøven)
-and permanent residency tests (medborgerskabsprøven) from 2016 to 2023. These are
+and permanent residency tests (medborgerskabsprøven) from 2016 to 2024. These are
 available on the [official website of the Danish Ministry of International Recruitment
 and Integration](https://danskogproever.dk/).
 
