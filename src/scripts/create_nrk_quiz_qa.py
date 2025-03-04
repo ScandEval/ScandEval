@@ -19,7 +19,7 @@ warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
 
 def main() -> None:
-    """Create the MMLU-mini datasets and upload them to the HF Hub."""
+    """Create the NRK-Quiz-QA-mini dataset and upload them to the HF Hub."""
     # Define the base download URL
     repo_id = "ltg/nrk_quiz_qa"
 
