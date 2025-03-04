@@ -413,7 +413,7 @@ $ euroeval --model <model-id> --dataset nqii
 ### Unofficial: IcelandicQA
 
 This dataset was published
-[here](https://huggingface.co/datasets/mideind/icelandic_qa_euroeval) and consists of
+[here](https://huggingface.co/datasets/mideind/icelandic_qa_scandeval) and consists of
 an automatically created Icelandic question-answering dataset based on the Icelandic
 Wikipedia as well as Icelandic news articles from the RÚV corpus.
 
