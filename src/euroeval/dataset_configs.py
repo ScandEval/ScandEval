@@ -1712,7 +1712,7 @@ NOR_COMMON_SENSE_QA_CONFIG = DatasetConfig(
     name="nor-common-sense-qa",
     pretty_name="the truncated version of the Norwegian common-sense reasoning dataset "
     "NorCommonSenseQA",
-    huggingface_id="EuroEval/nor-common-sense-qa-mini",
+    huggingface_id="EuroEval/nor-common-sense-qa",
     task=COMMON_SENSE,
     languages=[NB, NN, NO],
     labels=["a", "b", "c", "d"],
