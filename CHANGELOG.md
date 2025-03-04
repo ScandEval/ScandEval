@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Added the new Norwegian knowledge dataset NRK-Quiz-QA, consisting of quizzes on the
-  Norwegian language and culture. The dataset has been split into 635 / 256 / 2,048
-  samples for train, val, and test, respectively. This replaces the old MMLU-no as the
-  official Norwegian knowledge dataset.
+  Norwegian language and culture, in both Bokmål and Nynorsk. The dataset has been split
+  into 635 / 256 / 2,048 samples for train, val, and test, respectively. This replaces
+  the old MMLU-no as the official Norwegian knowledge dataset.
+- Added the new Norwegian common-sense reasoning dataset NorCommonSenseQA, which is a
+  manually translated and localised version of the English CommonsenseQA dataset, in
+  both Bokmål and Nynorsk. The dataset has been split into 128 / 64 / 851 samples for
+  train, val, and test, respectively. This replaces the old HellaSwag-no as the official
+  Norwegian common-sense reasoning dataset.
 
 ### Changed
 - Updated the Danish Citizen Tests dataset to include the newer 2024 tests, Further,
