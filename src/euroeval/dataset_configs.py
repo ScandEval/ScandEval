@@ -1390,6 +1390,22 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+NRK_QUIZ_QA_CONFIG = DatasetConfig(
+    name="nrk-quiz-qa",
+    pretty_name="the truncated version of the Norwegian knowledge dataset NRK Quiz QA",
+    huggingface_id="EuroEval/nrk-quiz-qa-mini",
+    task=KNOW,
+    languages=[NB, NN, NO],
+    labels=["a", "b", "c", "d", "e"],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d", e="e"),
+    instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
+    "'c', 'd' eller 'e', og ikke noe annet.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
 MMLU_NO_CONFIG = DatasetConfig(
     name="mmlu-no",
     pretty_name="the truncated version of the Norwegian knowledge dataset MMLU-no, "
@@ -1405,6 +1421,7 @@ MMLU_NO_CONFIG = DatasetConfig(
     "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 MMLU_SV_CONFIG = DatasetConfig(

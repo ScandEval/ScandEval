@@ -576,7 +576,74 @@ $ euroeval --model <model-id> --dataset norglm-multi-qa
 
 ## Knowledge
 
-### MMLU-no
+### NRK Quiz QA
+
+This dataset is a multiple-choice question answering (QA) dataset designed for
+evaluation of the Norwegian language and culture, including both Bokmål and Nynorsk. The
+dataset consists of quizzes from NRK, the national public broadcaster in Norway.
+
+The original dataset contains 4,930 samples, spread across 549 quizzes. We keep the
+top-256 quizzes, allowing us to create splits stratified across all the remaining
+quizzes. We 635 / 256 / 2048 samples for training, validation and test, respectively.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Gunnar har hatt plutselige og sterke smerteanfall siden han var liten gutt. Det var vondt å tisse og det gjorde vondt i ryggen og magen. Det hjalp litt å drikke vann. Reseptbelagte medisiner kan være nødvendig under anfall.\nSvaralternativer:\na. Nyrestein, kronisk\nb. Irritabel tarmsyndrom\nc. Angst\nd. Urinveisinfeksjon",
+  "label": "a"
+}```
+```json
+{
+  "text": "80 år gamle Harrison Ford er nok ein gong aktuell i rolla som Indiana Jones. Kva heiter filmen?\nSvaralternativer:\na. Indiana Jones and the Nasty Nazis\nb. Indiana Jones and the Dial of Destiny\nc. Indiana Jones and the Hunt for Power\nd. Indiana Jones Forever",
+  "label": "b"
+}```
+```json
+{
+  "text": "I 1980 måtte denne bassisten overnatte ni netter i fengsel i Japan fordi han prøvde å få med seg ca. 200 gram marihuana inn i landet. Hvem var det?\nSvaralternativer:\na. Sting\nb. Lemmy Kilmister\nc. Paul McCartney\nd. Bootsy Collins",
+  "label": "c"
+}```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+  ```
+  Følgende er flervalgsspørsmål (med svar).
+  ```
+- Base prompt template:
+  ```
+  Spørsmål: {text}
+  Svaralternativer:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  e. {option_e}
+  Svar: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Spørsmål: {text}
+  Svaralternativer:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  e. {option_e}
+
+  Besvar følgende spørsmål med 'a', 'b', 'c', 'd' eller 'e', og engu öðru.
+  ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ euroeval --model <model-id> --dataset nrk-quiz-qa
+```
+
+
+### Unofficial: MMLU-no
 
 This dataset is a machine translated version of the English [MMLU
 dataset](https://openreview.net/forum?id=d7KBjmI3GmQ) and features questions within 57
