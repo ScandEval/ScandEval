@@ -1151,7 +1151,7 @@ def get_end_of_reasoning_token_id(
     ):
         log_once(
             message=(
-                f"Detected reasoning token {reasoning_token!r} and end of reasoning "
+                f"Detected reasoning token {reasoning_token!r} and end-of-reasoning "
                 f"token {end_of_reasoning_token!r}, but one of them is not registered "
                 "as a special token, so assuming it is not a real reasoning token."
             ),
@@ -1160,7 +1160,11 @@ def get_end_of_reasoning_token_id(
         return None
 
     log_once(
-        message=f"Detected reasoning token {reasoning_token!r}.", level=logging.DEBUG
+        message=(
+            f"Detected reasoning token {reasoning_token!r} and end-of-reasoning "
+            f"token {end_of_reasoning_token!r}."
+        ),
+        level=logging.DEBUG,
     )
 
     # Encode the end of reasoning token and return its ID
