@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Added the new Norwegian knowledge dataset NRK-Quiz-QA, consisting of 500 quizzes on
+  the Norwegian language and culture. TODO
+
 ### Changed
 - Updated the Danish Citizen Tests dataset to include the newer 2024 tests, Further,
   rather than splitting the dataset randomly, we include all the citizenship tests in
