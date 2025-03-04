@@ -1,4 +1,4 @@
-"""Create the NRK-Quiz-QA-mini dataset and upload them to the HF Hub."""
+"""Create the NorCommonSenseQA dataset and upload them to the HF Hub."""
 
 import warnings
 from collections import Counter
@@ -13,19 +13,18 @@ from datasets import Dataset, DatasetDict, Split, load_dataset
 from huggingface_hub import HfApi
 from pandas.errors import SettingWithCopyWarning
 from requests import HTTPError
-from sklearn.model_selection import train_test_split
 
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 
 
 def main() -> None:
-    """Create the NRK-Quiz-QA-mini dataset and upload them to the HF Hub."""
+    """Create the NorCommonSenseQA dataset and upload them to the HF Hub."""
     # Define the base download URL
-    repo_id = "ltg/nrk_quiz_qa"
+    repo_id = "ltg/norcommonsenseqa"
 
     # Download the dataset
-    nb_dataset = load_dataset(path=repo_id, name="nb", token=True, split="test")
-    nn_dataset = load_dataset(path=repo_id, name="nn", token=True, split="test")
+    nb_dataset = load_dataset(path=repo_id, name="nb", token=True, split="train")
+    nn_dataset = load_dataset(path=repo_id, name="nn", token=True, split="train")
     assert isinstance(nb_dataset, Dataset) and isinstance(nn_dataset, Dataset)
 
     # Convert the dataset to a dataframe
@@ -56,15 +55,6 @@ def main() -> None:
     df = df[~df.instruction.apply(is_repetitive)]
     assert isinstance(df, pd.DataFrame)
 
-    # We can have at most 256 quizzes, as this is the size of the validation split and
-    # we are stratifying by quiz, so we keep only the top-256 quizzes by count
-    quiz_counts = df.quiz.value_counts()
-    top_quizzes = quiz_counts.head(256).index
-    df = df[df.quiz.isin(top_quizzes)]
-
-    # Sanity check that there are never more than 4 options
-    assert df.choices.apply(lambda x: len(x["text"])).max() <= 4
-
     # Make a `text` column with all the options in it
     df["text"] = [
         row.instruction.replace("\n", " ").strip() + "\n"
@@ -72,7 +62,7 @@ def main() -> None:
         + "\n".join(
             [
                 f"{char}. {clean_text(text=option)}"
-                for char, option in zip("abcd", row.choices["text"])
+                for char, option in zip("abcde", row.choices["text"])
             ]
         )
         for _, row in df.iterrows()
@@ -81,34 +71,32 @@ def main() -> None:
     # Make the `label` column case-consistent with the `text` column
     df.label = df.label.str.lower()
 
-    # Only keep the `text`, `label` and `quiz` columns
-    df = df[["text", "label", "quiz"]]
+    # Only keep the `text` and `label` columns
+    df = df[["text", "label", "curated"]]
     assert isinstance(df, pd.DataFrame)
 
     # Remove duplicates
     df.drop_duplicates(inplace=True)
     df.reset_index(drop=True, inplace=True)
 
+    # Create train split, where we add all the non-curated samples and top up with
+    # random curated samples
+    train_size = 128
+    train_df = df.query("curated == False")
+    df.drop(index=train_df.index.tolist(), inplace=True)
+    samples_to_add = max(0, train_size - len(train_df))
+    new_train_samples = df.sample(samples_to_add, random_state=4242)
+    df.drop(index=new_train_samples.index.tolist(), inplace=True)
+    train_df = pd.concat([train_df, new_train_samples], ignore_index=True)
+
     # Create validation split
-    val_size = 256
-    traintest_arr, val_arr = train_test_split(
-        df, test_size=val_size, random_state=4242, stratify=df.quiz
-    )
-    traintest_df = pd.DataFrame(traintest_arr, columns=df.columns)
-    val_df = pd.DataFrame(val_arr, columns=df.columns)
+    val_size = 128
+    val_df = df.sample(val_size, random_state=4242)
+    df.drop(index=val_df.index.tolist(), inplace=True)
 
     # Create test split
-    test_size = 2048
-    train_arr, test_arr = train_test_split(
-        traintest_df, test_size=test_size, random_state=4242, stratify=traintest_df.quiz
-    )
-    train_df = pd.DataFrame(train_arr, columns=df.columns)
-    test_df = pd.DataFrame(test_arr, columns=df.columns)
-
-    # Create train split
-    max_train_size = 1024
-    if len(train_df) > max_train_size:
-        train_df = train_df.sample(max_train_size, random_state=4242)
+    test_df = df
+    assert len(test_df) > 850
 
     # Reset the index
     train_df = train_df.reset_index(drop=True)
@@ -123,7 +111,7 @@ def main() -> None:
     )
 
     # Create dataset ID
-    dataset_id = "EuroEval/nrk-quiz-qa-mini"
+    dataset_id = "EuroEval/nor-common-sense-qa"
 
     # Remove the dataset from Hugging Face Hub if it already exists
     try:

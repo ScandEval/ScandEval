@@ -1396,12 +1396,12 @@ NRK_QUIZ_QA_CONFIG = DatasetConfig(
     huggingface_id="EuroEval/nrk-quiz-qa-mini",
     task=KNOW,
     languages=[NB, NN, NO],
-    labels=["a", "b", "c", "d", "e"],
+    labels=["a", "b", "c", "d"],
     prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
     prompt_template="Spørsmål: {text}\nSvar: {label}",
-    prompt_label_mapping=dict(a="a", b="b", c="c", d="d", e="e"),
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
-    "'c', 'd' eller 'e', og ikke noe annet.",
+    "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1708,6 +1708,23 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+NOR_COMMON_SENSE_QA_CONFIG = DatasetConfig(
+    name="nor-common-sense-qa",
+    pretty_name="the truncated version of the Norwegian common-sense reasoning dataset "
+    "NorCommonSenseQA",
+    huggingface_id="EuroEval/nor-common-sense-qa",
+    task=COMMON_SENSE,
+    languages=[NB, NN, NO],
+    labels=["a", "b", "c", "d", "e"],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d", e="e"),
+    instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
+    "'c' eller 'd', og ikke noe annet.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
 HELLASWAG_NO_CONFIG = DatasetConfig(
     name="hellaswag-no",
     pretty_name="the truncated version of the Norwegian common-sense reasoning dataset "
@@ -1723,6 +1740,7 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
     "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 HELLASWAG_SV_CONFIG = DatasetConfig(
