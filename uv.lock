@@ -2490,7 +2490,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.65.2"
+version = "1.65.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -2502,9 +2502,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/03/0bbf201a7e44920d892db0445874c8111be4255cb9495379df18d6d36ea1/openai-1.65.2.tar.gz", hash = "sha256:729623efc3fd91c956f35dd387fa5c718edd528c4bed9f00b40ef290200fb2ce", size = 359185 }
+sdist = { url = "https://files.pythonhosted.org/packages/32/4f/b34b6fad12e1f6b3f42922214c161d5ef74a50fa97d9ae7d680db0958ff4/openai-1.65.3.tar.gz", hash = "sha256:9b7cd8f79140d03d77f4ed8aeec6009be5dcd79bbc02f03b0e8cd83356004f71", size = 358821 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2c/3b/722ed868cb56f70264190ed479b38b3e46d14daa267d559a3fe3bd9061cf/openai-1.65.2-py3-none-any.whl", hash = "sha256:27d9fe8de876e31394c2553c4e6226378b6ed85e480f586ccfe25b7193fb1750", size = 473206 },
+    { url = "https://files.pythonhosted.org/packages/86/d5/b8378be0f4cf192992aa3080eb9ddcdca3109b399be61984424aaa79f847/openai-1.65.3-py3-none-any.whl", hash = "sha256:a155fa5d60eccda516384d3d60d923e083909cc126f383fe4a350f79185c232a", size = 472758 },
 ]
 
 [[package]]
@@ -4328,11 +4328,14 @@ wheels = [
 
 [[package]]
 name = "types-setuptools"
-version = "75.8.2.20250301"
+version = "75.8.2.20250305"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f6/02/5f476d1a4f2bb23ba47c3aac6246cae1159d430937171e58860a9f1f47f8/types_setuptools-75.8.2.20250301.tar.gz", hash = "sha256:c900bceebfffc92a4abc3cfd4b3c39ead1a2298a73dae37e6bc09da7baf797a0", size = 48468 }
+dependencies = [
+    { name = "setuptools" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4f/18/a996861f5225e7d533a8d8b6aa61bcc9183429a6b8bc93b850aa2e22974d/types_setuptools-75.8.2.20250305.tar.gz", hash = "sha256:a987269b49488f21961a1d99aa8d281b611625883def6392a93855b31544e405", size = 42609 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/d8/aba63d60951fbec2917a9d2c8673605a57fdbfc9134268802988c99c7a4c/types_setuptools-75.8.2.20250301-py3-none-any.whl", hash = "sha256:3cc3e751db9e84eddf1e6d4f8c46bef2c77e6c25b0cd096f729ffa57d3d6a83a", size = 71841 },
+    { url = "https://files.pythonhosted.org/packages/d9/5b/bb33f99239a6d54ed1d8220a088d96d2ccacac7abb317df0d68d2500f3be/types_setuptools-75.8.2.20250305-py3-none-any.whl", hash = "sha256:ba80953fd1f5f49e552285c024f75b5223096a38a5138a54d18ddd3fa8f6a2d4", size = 63727 },
 ]
 
 [[package]]
