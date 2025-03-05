@@ -1160,8 +1160,7 @@ SQUAD_NL_CONFIG = DatasetConfig(
 
 ICELANDIC_QA_CONFIG = DatasetConfig(
     name="icelandic-qa",
-    pretty_name="the Icelandic reading comprehension dataset about Icelandic culture "
-    "and history",
+    pretty_name="the Icelandic reading comprehension dataset IcelandicQA",
     huggingface_id="EuroEval/icelandic-qa",
     task=RC,
     languages=[IS],
@@ -1480,7 +1479,8 @@ MMLU_IS_CONFIG = DatasetConfig(
 
 ICELANDIC_KNOWLEDGE_CONFIG = DatasetConfig(
     name="icelandic-knowledge",
-    pretty_name="the IcelandicQA dataset phrased as a knowledge dataset",
+    pretty_name="the Icelandic knowledge dataset IcelandicKnowledge, derived from the "
+    "IcelandicQA dataset",
     huggingface_id="EuroEval/icelandic-knowledge",
     task=KNOW,
     languages=[IS],
