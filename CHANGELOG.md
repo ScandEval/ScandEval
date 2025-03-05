@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   rather than splitting the dataset randomly, we include all the citizenship tests in
   the test split, and prioritise the newer permanent residence tests in the test and
   validation splits.
+- Changed the IcelandicKnowledge dataset to be the new official Icelandic knowledge
+  dataset, as it is more specific to Icelandic culture and history than the previous
+  machine translated ARC-is dataset.
 
 
 ## [v15.2.0] - 2025-02-28

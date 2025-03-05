@@ -1492,7 +1492,6 @@ ICELANDIC_KNOWLEDGE_CONFIG = DatasetConfig(
     "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
-    unofficial=True,
 )
 
 MMLU_DE_CONFIG = DatasetConfig(
@@ -1650,6 +1649,7 @@ ARC_IS_CONFIG = DatasetConfig(
     "'b', 'c' eða 'd', og engu öðru.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 ARC_DE_CONFIG = DatasetConfig(
