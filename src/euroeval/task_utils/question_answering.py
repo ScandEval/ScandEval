@@ -21,12 +21,9 @@ if t.TYPE_CHECKING:
     import torch.nn as nn
     from datasets.arrow_dataset import Dataset
     from transformers import (
-        BaseImageProcessor,
         EvalPrediction,
-        FeatureExtractionMixin,
         PreTrainedModel,
         PreTrainedTokenizerBase,
-        ProcessorMixin,
         TrainerCallback,
         TrainingArguments,
     )
