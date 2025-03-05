@@ -805,6 +805,7 @@ NO_COLA_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(correct="ja", incorrect="nei"),
     num_few_shot_examples=12,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 SCALA_IS_CONFIG = DatasetConfig(
