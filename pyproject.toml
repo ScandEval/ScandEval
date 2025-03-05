@@ -137,6 +137,8 @@ select = [
     "W",
     # flake-annotations (type hints)
     "ANN",
+    # Pyflakes
+    "F",
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]

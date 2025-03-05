@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   both Bokmål and Nynorsk. The dataset has been split into 128 / 128 / 787 samples for
   train, val, and test, respectively. This replaces the old HellaSwag-no as the official
   Norwegian common-sense reasoning dataset.
+- Added the Norwegian linguistic acceptability dataset NoCoLA, which is based on the
+  annotated language learner corpus ASK. The dataset has been split into 1,024 / 256 /
+  2,048 samples and converted into a binary correct/incorrect dataset, but
+  stratified across the error categories.
 
 ### Changed
 - Updated the Danish Citizen Tests dataset to include the newer 2024 tests, Further,

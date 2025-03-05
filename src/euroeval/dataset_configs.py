@@ -789,6 +789,24 @@ SCALA_NN_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+NO_COLA_CONFIG = DatasetConfig(
+    name="no-cola",
+    pretty_name="the truncated version of the Norwegian linguistic acceptability "
+    "dataset NoCoLA",
+    huggingface_id="EuroEval/no-cola-mini",
+    task=LA,
+    languages=[NB, NO],
+    labels=["incorrect", "correct"],
+    prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
+    prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
+    instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
+    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er, "
+    "og ikke noe annet.",
+    prompt_label_mapping=dict(correct="ja", incorrect="nei"),
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+)
+
 SCALA_IS_CONFIG = DatasetConfig(
     name="scala-is",
     pretty_name="the Icelandic part of the linguistic acceptability dataset ScaLA",

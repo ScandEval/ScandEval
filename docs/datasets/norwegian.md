@@ -367,10 +367,77 @@ You can evaluate this dataset directly as follows:
 $ euroeval --model <model-id> --dataset scala-nn
 ```
 
+
+### Unofficial: NoCoLA
+
+This dataset was published in [this paper](https://aclanthology.org/2023.nodalida-1.60/)
+and is based on the annotated language learner corpus
+[ASK](https://aclanthology.org/L06-1345/). Notably, the individual types of errors are
+also annotated in this dataset. We use the error types to ensure that there is an equal
+representation of each error type, but then collapse the error types into `correct` and
+`incorrect`.
+
+The original dataset consists of 116,199 / 14,293 / 14,387 samples for training,
+validation and test, respectively. We use 1,024 / 256 / 2,048 samples for training,
+validation and test, respectively, where we sample each error type equally. All splits
+are subsets of the original splits.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Vi har hatt krig i nesten ti år. Jeg føler meg noen ganger trist fordi jeg har mistet flere venner og min far på grunn av krigen.",
+  "label": "correct"
+}```
+```json
+{
+  "text": "Hvis jeg ikke sier in n genting, kan han spille hele dagen.",
+  "label": "incorrect"
+}```
+```json
+{
+  "text": "De føler at samfunnet trenger ikke dem.",
+  "label": "incorrect"
+}```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 12
+- Prefix prompt:
+  ```
+  Følgende er setninger og hvorvidt de er grammatisk korrekte.
+  ```
+- Base prompt template:
+  ```
+  Setning: {text}
+  Grammatisk korrekt: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Setning: {text}
+
+  Bestem om setningen er grammatisk korrekt eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er.
+  ```
+- Label mapping:
+    - `correct` ➡️ `ja`
+    - `incorrect` ➡️ `nei`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ euroeval --model <model-id> --dataset no-cola-binary
+```
+
+
 ### Unofficial: Jentoft
+
 This dataset was published in [this Master's thesis](https://www.duo.uio.no/handle/10852/103885) by Matias Jentoft.
 
-The original dataset consists of 85,771 / 10,827 / 10487 samples for training, validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for training, validation and test, respectively. In each split, the distribution of `correct` and `incorrect` is 50/50.
+The original dataset consists of 85,771 / 10,827 / 10487 samples for training,
+validation and test, respectively. We use a split of 1,024 / 256 / 2,048 samples for
+training, validation and test, respectively. In each split, the distribution of
+`correct` and `incorrect` is 50/50.
 
 Here are a few examples from the training split:
 
