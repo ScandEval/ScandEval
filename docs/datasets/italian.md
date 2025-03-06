@@ -72,7 +72,7 @@ $ euroeval --model <model-id> --dataset sentipolc16
 
 This dataset was published in [this
 paper](https://aclanthology.org/2022.findings-naacl.60/) and
-consists of sentences from Wikipedia and Wikinews in 10 different languages. It an
+consists of sentences from Wikipedia and Wikinews in 10 different languages. It is an
 extension of the combination of
 (WikiNEuRal)[https://www.github.com/Babelscape/wikineural] and
 (NER4EL)[https://www.github.com/Babelscape/ner4el]. The original test set was created
@@ -299,7 +299,7 @@ $ euroeval --model <model-id> --dataset scala-it
 ### SQuAD-it
 
 This dataset is derived from the SQuAD 1.1 dataset and was published in
-[this paper](https://link.springer.com/chapter/10.1007/978-3-030-03840-3_29).
+[this paper](https://doi.org/10.1007/978-3-030-03840-3_29).
 The questions and answers were obtained through "semi-automatic" translation, using
 DeepL, of the SQuAD dataset to Italian. The dataset consists of 54,159 / 7,609
 question/answer pairs for training and test respectively. We use 1,024 / 256 / 2,048
