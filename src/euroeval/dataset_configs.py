@@ -815,7 +815,6 @@ MULTINERD_IT_CONFIG = DatasetConfig(
     "nominate di quel tipo, esattamente come appaiono nella frase.",
     num_few_shot_examples=8,
     max_generated_tokens=128,
-    unofficial=True,
 )
 
 
