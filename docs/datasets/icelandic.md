@@ -516,30 +516,27 @@ completion = client.beta.chat.completions.parse(
 
 where `CandidateAnswers` is a Pydantic model that is used to ensure [structured outputs](https://platform.openai.com/docs/guides/structured-outputs).
 
-The original dataset has 2,000 samples, but only 1,997 unique questions, and the total
-length of this dataset is therefore 1,997. The split is given by 845 / 128 / 1024 for
+The original dataset has 2,000 samples, but only 1,994 unique questions, and the total
+length of this dataset is therefore 1,994. The split is given by 842 / 128 / 1024 for
 train, val, and test, respectively.
 
 Here are a few examples from the training split:
 
 ```json
 {
-    "text": "Hvaða gamla verðeining var jafngildi einnar kýr að verðmæti?\nSvarmöguleikar:\na. Sauðfé\nb. Kúgildi\nc. Mjólkurtollur\nd. Hrossgildi",
-    "label": "b"
-}
-```
+  "text": "Hver var talinn heilagur maður eftir dauða sinn, er tákngervingur alþýðuhreyfingar vestanlands og talinn góður til áheita?\nSvarmöguleikar:\na. Þórður Jónsson helgi\nb. Guðmundur Arason\nc. Snorri Þorgrímsson\nd. Jón Hreggviðsson",
+  "label": "a"
+}```
 ```json
 {
-    "text": "Hvenær komu Íslendingar fyrst til Gimli í Manitoba?\nSvarmöguleikar:\na. 15. september 1875\nb. 25. október 1874\nc. 10. október 1876\nd. 21. október 1875",
-    "label": "d"
-}
-```
+  "text": "Í kringum hvaða ár hófst verslun á Arngerðareyri?\nSvarmöguleikar:\na. 1895\nb. 1884\nc. 1870\nd. 1902",
+  "label": "b"
+}```
 ```json
 {
-    "text": "Hvaða ár var byggingin sem gaf Barónsstíg í Reykjavík nafn reist?\nSvarmöguleikar:\na. 1901\nb. 1897\nc. 1899\nd. 1898",
-    "label": "c"
-}
-```
+  "text": "Hvenær var ákveðið að uppstigningardagur skyldi vera kirkjudagur aldraðra á Íslandi?\nSvarmöguleikar:\na. Árið 1975\nb. Árið 1985\nc. Árið 1982\nd. Árið 1990",
+  "label": "c"
+}```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):
