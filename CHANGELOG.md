@@ -42,7 +42,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   validation splits.
 - Changed the IcelandicKnowledge dataset to be the new official Icelandic knowledge
   dataset, as it is more specific to Icelandic culture and history than the previous
-  machine translated ARC-is dataset.
+  machine translated ARC-is dataset. It has also been improved, as some of the generated
+  alternative answers were formatted incorrectly.
 
 
 ## [v15.2.0] - 2025-02-28
