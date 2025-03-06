@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added support for evaluating Italian 🇮🇹! This includes the reading comprehension
+  dataset [SQuAD-it](https://hf.co/datasets/crux82/squad_it), the summarization
+  dataset [IlPost](https://hf.co/datasets/ARTeLab/ilpost), the sentiment
+  classification
+  [Sentipolc-16](https://hf.co/datasets/cardiffnlp/tweet_sentiment_multilingual),
+  the common-sense reasoning dataset
+  [HellaSwag-it](https://hf.co/datasets/alexandrainst/m_hellaswag), the linguistic acceptability
+  dataset ScaLA with the [Italian Universal Dependencies
+  treebank](https://github.com/UniversalDependencies/UD_Italian-ISDT), the knowledge
+  dataset [MMLU-it](https://hf.co/datasets/alexandrainst/m_mmlu), and the named entity
+  recognition dataset [MultiNERD
+  IT](https://hf.co/datasets/Babelscape/multinerd) (and unofficially
+  [WikiNEuRal IT](https://hf.co/datasets/Babelscape/wikineural)).
 - Added the new Norwegian knowledge dataset NRK-Quiz-QA, consisting of quizzes on the
   Norwegian language and culture, in both Bokmål and Nynorsk. The dataset has been split
   into 635 / 256 / 2,048 samples for train, val, and test, respectively. This replaces
