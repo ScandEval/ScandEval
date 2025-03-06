@@ -778,6 +778,46 @@ WIKINEURAL_IT_CONFIG = DatasetConfig(
     unofficial=True,
 )
 
+MULTINERD_IT_CONFIG = DatasetConfig(
+    name="multinerd-it",
+    pretty_name="the truncated version and Italian part of the multilingual named "
+    "entity recognition dataset MultiNERD",
+    huggingface_id="EuroEval/multinerd-mini-it",
+    task=NER,
+    languages=[IT],
+    labels=[
+        "o",
+        "b-loc",
+        "i-loc",
+        "b-org",
+        "i-org",
+        "b-per",
+        "i-per",
+        "b-misc",
+        "i-misc",
+    ],
+    prompt_prefix="Di seguito sono riportate le frasi e i dizionari JSON con le entità "
+    "denominate presenti nella frase data.",
+    prompt_template="Frase: {text}\nEntità denominate: {label}",
+    prompt_label_mapping={
+        "b-per": "persona",
+        "i-per": "persona",
+        "b-loc": "posizione",
+        "i-loc": "posizione",
+        "b-org": "organizzazione",
+        "i-org": "organizzazione",
+        "b-misc": "varie",
+        "i-misc": "varie",
+    },
+    instruction_prompt="Frase: {text}\n\nIdentificare le entità nominate nella frase. "
+    "Il risultato dovrebbe essere un dizionario JSON con le chiavi 'persona', "
+    "'posizione', 'organizzazione' e 'varie'. I valori devono essere elenchi di entità "
+    "nominate di quel tipo, esattamente come appaiono nella frase.",
+    num_few_shot_examples=8,
+    max_generated_tokens=128,
+    unofficial=True,
+)
+
 
 ### LINGUISTIC ACCEPTABILITY DATASETS ###
 
