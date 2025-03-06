@@ -516,7 +516,9 @@ completion = client.beta.chat.completions.parse(
 
 where `CandidateAnswers` is a Pydantic model that is used to ensure [structured outputs](https://platform.openai.com/docs/guides/structured-outputs).
 
-The original dataset has 2,000 samples, but only 1,997 unique questions, and the total length of this dataset is therefore 1,997. The split is given by 845 / 128 / 1024 for train, val, and test, respectively.
+The original dataset has 2,000 samples, but only 1,997 unique questions, and the total
+length of this dataset is therefore 1,997. The split is given by 845 / 128 / 1024 for
+train, val, and test, respectively.
 
 Here are a few examples from the training split:
 
