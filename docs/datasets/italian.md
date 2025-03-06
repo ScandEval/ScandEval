@@ -107,20 +107,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "tokens": "['Alcune' 'statue' 'che' 'la' 'rappresentano' 'vennero' 'ritrovate' 'non' 'lontano' 'da' 'Tani' ',' 'anche' 'se' 'in' 'nessuna' 'di' 'queste' 'si' 'è' 'conservato' 'il' 'volto' ',' 'mentre' 'nella' 'seconda' 'cateratta' 'è' 'registrata' 'una' 'piena' 'del' 'Nilo' 'datata' 'al' 'suo' '3º' 'anno' 'di' 'regno' '.']",
-  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
+  "tokens": array(['Alcune' 'statue' 'che' 'la' 'rappresentano' 'vennero' 'ritrovate' 'non' 'lontano' 'da' 'Tani' ',' 'anche' 'se' 'in' 'nessuna' 'di' 'queste' 'si' 'è' 'conservato' 'il' 'volto' ',' 'mentre' 'nella' 'seconda' 'cateratta' 'è' 'registrata' 'una' 'piena' 'del' 'Nilo' 'datata' 'al' 'suo' '3º' 'anno' 'di' 'regno' '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  "tokens": "['Nella' 'seconda' 'metà' 'del' 'XX' 'secolo' 'gli' 'infinitesimi' 'sono' 'stati' 'recuperati' ',' 'in' 'una' 'prospettiva' 'rigorosa' ',' 'da' 'Abraham' 'Robinson' ',' 'nella' 'formulazione' 'di' 'quella' 'che' 'lui' 'chiamò' 'analisi' 'non' 'standard' '.']",
-  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
+  "tokens": array(['Nella' 'seconda' 'metà' 'del' 'XX' 'secolo' 'gli' 'infinitesimi' 'sono' 'stati' 'recuperati' ',' 'in' 'una' 'prospettiva' 'rigorosa' ',' 'da' 'Abraham' 'Robinson' ',' 'nella' 'formulazione' 'di' 'quella' 'che' 'lui' 'chiamò' 'analisi' 'non' 'standard' '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 ```json
 {
-  "tokens": "['Il' 'monumento' 'a' 'Carlo' 'Emanuele' 'III' 'di' 'Savoia' 'è' 'ubicato' 'nella' 'piazza' 'omonima' 'sul' 'lungomare' '.']",
-  "labels": "['O', 'O', 'O', 'B-PER', 'I-PER', 'I-PER', 'I-PER', 'I-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
+  "tokens": array(['Il' 'monumento' 'a' 'Carlo' 'Emanuele' 'III' 'di' 'Savoia' 'è' 'ubicato' 'nella' 'piazza' 'omonima' 'sul' 'lungomare' '.'], dtype=object),
+  "labels": array(['O', 'O', 'O', 'B-PER', 'I-PER', 'I-PER', 'I-PER', 'I-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
 }
 ```
 
@@ -174,20 +174,20 @@ Here are a few examples from the training split:
 
 ```json
 {
-  "tokens": "['Comunque' ',' 'il' 'poema' 'sarebbe' 'stato' 'influenzato' 'da' 'una' '"' 'tematica' 'di' 'regime' '"' 'voluta' 'dalla' 'politica' 'culturale' 'di' 'Domiziano' 'nella' 'quale' 'rientrano' 'anche' 'i' '"' 'Punica' '"' 'di' 'Silio' 'Italico' '.']",
-  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'B-PER', 'I-PER', 'O']"
+  "tokens": array(['Comunque' ',' 'il' 'poema' 'sarebbe' 'stato' 'influenzato' 'da' 'una' '"' 'tematica' 'di' 'regime' '"' 'voluta' 'dalla' 'politica' 'culturale' 'di' 'Domiziano' 'nella' 'quale' 'rientrano' 'anche' 'i' '"' 'Punica' '"' 'di' 'Silio' 'Italico' '.']),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'B-PER', 'I-PER', 'O'])
 }
 ```
 ```json
 {
-  "tokens": "['È' 'stato' 'uno' 'degli' 'artisti' 'più' 'importanti' "dell'" 'etichetta' 'discografica' 'di' 'musica' 'soul' 'Stax' 'Records' 'che' 'negli' 'anni' 'sessanta' 'e' 'settanta' 'era' 'la' 'principale' 'antagonista' 'della' 'Motown' 'nel' 'campo' 'della' 'black' 'music' '.']",
-  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'O', 'O', 'O', 'O', 'O', 'O']"
+  "tokens": array(['È' 'stato' 'uno' 'degli' 'artisti' 'più' 'importanti' "dell'" 'etichetta' 'discografica' 'di' 'musica' 'soul' 'Stax' 'Records' 'che' 'negli' 'anni' 'sessanta' 'e' 'settanta' 'era' 'la' 'principale' 'antagonista' 'della' 'Motown' 'nel' 'campo' 'della' 'black' 'music' '.']),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'O', 'O', 'O', 'O', 'O', 'O'])
 }
 ```
 ```json
 {
-  "tokens": "['Decise' 'di' 'scrivere' 'una' 'serie' 'di' 'saggi' 'e' 'presentarli' 'in' 'un' 'periodico' 'intitolato' '"' 'The' 'Rambler' '"' 'che' 'sarebbe' 'stato' 'messo' 'in' 'vendita' 'per' 'pochi' 'centesimi' 'ogni' 'martedì' 'e' 'sabato' '.']",
-  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
+  "tokens": array(['Decise' 'di' 'scrivere' 'una' 'serie' 'di' 'saggi' 'e' 'presentarli' 'in' 'un' 'periodico' 'intitolato' '"' 'The' 'Rambler' '"' 'che' 'sarebbe' 'stato' 'messo' 'in' 'vendita' 'per' 'pochi' 'centesimi' 'ogni' 'martedì' 'e' 'sabato' '.']),
+  "labels": array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'])
 }
 ```
 
