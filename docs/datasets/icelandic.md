@@ -505,7 +505,7 @@ using the following prompt for each `row` in the original dataset:
 messages = [
     {
         "role": "user",
-        "content": f"For the question: {row.question} where the correct answer is: {row.answer}, please provide 3 plausible alternatives in Icelandic.",
+        "content": f"For the question: {row.question} where the correct answer is: {row.answer}, please provide 3 plausible alternatives in Icelandic. You should return the alternatives in a JSON dictionary, with keys 'first', 'second', and 'third'. The values should be the alternatives only, without any numbering or formatting. The alternatives should be unique and not contain the correct answer."
     }
 ]
 
