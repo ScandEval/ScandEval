@@ -79,9 +79,10 @@ extension of the combination of
 from manual annotations, while the training set is based on an automatic annotation
 pipeline.
 
-The Italian part of the original dataset consists of 181,000 sentences. We use the given
-training, validation and testing sets, and use 1,024 / 256 / 2,048 samples for training,
-validation, and testing, respectively.
+The Italian part of the original dataset consists of 181,927 sentences, split into
+145,520 / 18,190 / 18,217 for training, validation, and testing respectively. We use
+given splits, and use 1,024 / 256 / 2,048 samples for training, validation, and testing,
+respectively.
 
 We have furthermore converted their fine-grained labelling scheme to the CoNLL-2003
 labelling scheme, which is more common in the NER literature. The mapping is as follows:
@@ -166,9 +167,10 @@ paper](https://aclanthology.org/2021.findings-emnlp.215) and
 consists of sentences from Wikipedia in 9 different languages. The annotations are
 automatic but at the time novel and state-of-the-art methodologies.
 
-The Italian part of the original dataset consists of 111,000 sentences. We use the given
-training, validation and testing sets, and use 1,024 / 256 / 2,048 samples for training,
-validation, and testing, respectively.
+The Italian part of the original dataset consists of 110,519 sentences, split into
+88,400 / 11,050 / 11,069 for training, validation, and testing respectively. We use
+given splits, and use 1,024 / 256 / 2,048 samples for training, validation, and testing,
+respectively.
 
 Here are a few examples from the training split:
 
