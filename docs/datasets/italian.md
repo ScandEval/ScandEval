@@ -10,7 +10,7 @@ information about what these constitute.
 ### Sentipolc-16
 
 This dataset was published in [this paper](https://ceur-ws.org/Vol-1749/paper_026.pdf)
-and slightly modified in [this paper](https://aclanthology.org/2022.lrec-1.27.pdf).
+and slightly modified in [this paper](https://aclanthology.org/2022.lrec-1.27).
 It is based on Italian tweets, which were manually annotated by three annotators.
 
 The original full dataset consists of 1,839 / 324 / 870 samples, and we use a 1,024 /
@@ -68,46 +68,59 @@ $ euroeval --model <model-id> --dataset sentipolc16
 
 ## Named Entity Recognition
 
-### TODO: NER_DATASET_NAME
+### MultiNERD IT
 
-This dataset was published in [this paper](https://doi.org/10.3828/mlo.v0i0.364) and
-consists of sentences from 100 novels in French during the period 1840-1920, all of
-which are in the public domain. These novels were automatically labelled with named
-entities using Stanza-NER, and then manually corrected.
+This dataset was published in [this
+paper](https://aclanthology.org/2022.findings-naacl.60/) and
+consists of sentences from Wikipedia and Wikinews in 10 different languages. It an
+extension of the combination of
+(WikiNEuRal)[https://www.github.com/Babelscape/wikineural] and
+(NER4EL)[https://www.github.com/Babelscape/ner4el]. The original test set was created
+from manual annotations, while the training set is based on an automatic annotation
+pipeline.
 
-The original dataset consists of 100 samples, one for each novel. We split the novels
-into sentences using the French NLTK sentence splitter, resulting in 4,815 samples. We
-use 1,024 / 256 / 2,048 samples for training, validation, and testing, respectively.
+The Italian part of the original dataset consists of 181,000 sentences. We use the given
+training, validation and testing sets, and use 1,024 / 256 / 2,048 samples for training,
+validation, and testing, respectively.
 
-We have furthermore converted the OntoNotes 5.0 labelling scheme to the CoNLL-2003
+We have furthermore converted their fine-grained labelling scheme to the CoNLL-2003
 labelling scheme, which is more common in the NER literature. The mapping is as follows:
 
 - `PERS` ➡️ `PER`
 - `LOC` ➡️ `LOC`
 - `ORG` ➡️ `ORG`
-- `OTHER` ➡️ `MISC`
-- `DEMO` ➡️ `O`
-- `ROLE` ➡️ `O`
-- `EVENT` ➡️ `O`
+- `MISC` ➡️ `MISC`
+- `TIME` ➡️ `O`
+- `ANIM` ➡️ `MISC`
+- `BIO` ➡️ `MISC`
+- `CEL` ➡️ `MISC`
+- `DIS` ➡️ `MISC`
+- `EVE` ➡️ `MISC`
+- `FOOD` ➡️ `MISC`
+- `INST` ➡️ `MISC`
+- `MEDIA` ➡️ `MISC`
+- `MYTH` ➡️ `MISC`
+- `PLANT` ➡️ `MISC`
+- `VEHI` ➡️ `MISC`
 
 Here are a few examples from the training split:
 
 ```json
 {
-  'tokens': array(['Jamais', 'ils', 'ne', 'firent', 'de', 'provisions', ',', 'excepté', 'quelques', 'bottes', "d'ail", 'ou', "d'oignons", 'qui', 'ne', 'craignaient', 'rien', 'et', 'ne', 'coûtaient', 'pas', "grand'chose", ';', 'le', 'peu', 'de', 'bois', "qu'ils", 'consommaient', 'en', 'hiver', ',', 'la', 'Sauviat', "l'achetait", 'aux', 'fagotteurs', 'qui', 'passaient', ',', 'et', 'au', 'jour', 'le', 'jour', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": "['Alcune' 'statue' 'che' 'la' 'rappresentano' 'vennero' 'ritrovate' 'non' 'lontano' 'da' 'Tani' ',' 'anche' 'se' 'in' 'nessuna' 'di' 'queste' 'si' 'è' 'conservato' 'il' 'volto' ',' 'mentre' 'nella' 'seconda' 'cateratta' 'è' 'registrata' 'una' 'piena' 'del' 'Nilo' 'datata' 'al' 'suo' '3º' 'anno' 'di' 'regno' '.']",
+  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
 }
 ```
 ```json
 {
-  'tokens': array(['I', 'Il', 'y', 'avait', 'plus', 'de', 'soixante', 'ans', 'que', "l'empereur", 'Napoléon', ',', 'pressé', "d'argent", ',', 'avait', 'vendu', 'les', 'provinces', 'de', 'la', 'Louisiane', 'à', 'la', 'République', 'des', 'États-Unis', ';', 'mais', ',', 'en', 'dépit', 'de', "l'infiltration", 'yankee', ',', 'les', 'traditions', 'des', 'créoles', 'français', 'se', 'perpétuaient', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'B-ORG', 'I-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": "['Nella' 'seconda' 'metà' 'del' 'XX' 'secolo' 'gli' 'infinitesimi' 'sono' 'stati' 'recuperati' ',' 'in' 'una' 'prospettiva' 'rigorosa' ',' 'da' 'Abraham' 'Robinson' ',' 'nella' 'formulazione' 'di' 'quella' 'che' 'lui' 'chiamò' 'analisi' 'non' 'standard' '.']",
+  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'I-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
 }
 ```
 ```json
 {
-  'tokens': array(['Les', 'fenêtres', 'de', 'la', 'vieille', 'demeure', 'royale', ',', 'ordinairement', 'si', 'sombres', ',', 'étaient', 'ardemment', 'éclairées', ';', 'les', 'places', 'et', 'les', 'rues', 'attenantes', ',', 'habituellement', 'si', 'solitaires', ',', 'dès', 'que', 'neuf', 'heures', 'sonnaient', 'à', "Saint-Germain-l'Auxerrois", ',', 'étaient', ',', "quoiqu'il", 'fût', 'minuit', ',', 'encombrées', 'de', 'populaire', '.'], dtype=object),
-  'labels': array(['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-LOC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'], dtype=object)
+  "tokens": "['Il' 'monumento' 'a' 'Carlo' 'Emanuele' 'III' 'di' 'Savoia' 'è' 'ubicato' 'nella' 'piazza' 'omonima' 'sul' 'lungomare' '.']",
+  "labels": "['O', 'O', 'O', 'B-PER', 'I-PER', 'I-PER', 'I-PER', 'I-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
 }
 ```
 
@@ -117,36 +130,101 @@ When evaluating generative models, we use the following setup (see the
 - Number of few-shot examples: 8
 - Prefix prompt:
   ```
-  Vous trouverez ci-dessous des phrases et des dictionnaires JSON avec les entités nommées qui apparaissent dans la phrase donnée.
+  Di seguito sono riportate le frasi e i dizionari JSON con le entità denominate presenti nella frase data.
   ```
 - Base prompt template:
   ```
-  Sentence: {text}
-  Entités nommées: {label}
+  Frase: {text}
+  Entità denominate: {label}
   ```
 - Instruction-tuned prompt template:
   ```
-  Sentence: {text}
+  Frase: {text}
 
-  Identifiez les entités nommées dans la phrase. Vous devez produire ceci sous forme de dictionnaire JSON avec les clés 'personne', 'lieu', 'organisation' et 'divers'. Les valeurs doivent être des listes des entités nommées de ce type, exactement comme elles apparaissent dans la phrase.
+  Identificare le entità nominate nella frase. Il risultato dovrebbe essere un dizionario JSON con le chiavi 'persona', 'posizione', 'organizzazione' e 'varie'. I valori devono essere elenchi di entità nominate di quel tipo, esattamente come appaiono nella frase.
   ```
-
 - Label mapping:
-    - `B-PER` ➡️ `personne`
-    - `I-PER` ➡️ `personne`
-    - `B-LOC` ➡️ `lieu`
-    - `I-LOC` ➡️ `lieu`
-    - `B-ORG` ➡️ `organisation`
-    - `I-ORG` ➡️ `organisation`
-    - `B-MISC` ➡️ `divers`
-    - `I-MISC` ➡️ `divers`
+    - `B-PER` ➡️ `persona`
+    - `I-PER` ➡️ `persona`
+    - `B-LOC` ➡️ `posizione`
+    - `I-LOC` ➡️ `posizione`
+    - `B-ORG` ➡️ `organizzazione`
+    - `I-ORG` ➡️ `organizzazione`
+    - `B-MISC` ➡️ `varie`
+    - `I-MISC` ➡️ `varie`
 
 You can evaluate this dataset directly as follows:
 
 ```bash
-$ euroeval --model <model-id> --dataset TODO: NER_DATASET_NAME
+$ euroeval --model <model-id> --dataset multinerd-it
 ```
 
+### Unofficial: WikiNEuRal IT
+
+This dataset was published in [this
+paper](https://aclanthology.org/2021.findings-emnlp.215) and
+consists of sentences from Wikipedia in 9 different languages. The annotations are
+automatic but at the time novel and state-of-the-art methodologies.
+
+The Italian part of the original dataset consists of 111,000 sentences. We use the given
+training, validation and testing sets, and use 1,024 / 256 / 2,048 samples for training,
+validation, and testing, respectively.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "tokens": "['Comunque' ',' 'il' 'poema' 'sarebbe' 'stato' 'influenzato' 'da' 'una' '"' 'tematica' 'di' 'regime' '"' 'voluta' 'dalla' 'politica' 'culturale' 'di' 'Domiziano' 'nella' 'quale' 'rientrano' 'anche' 'i' '"' 'Punica' '"' 'di' 'Silio' 'Italico' '.']",
+  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-PER', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'O', 'O', 'B-PER', 'I-PER', 'O']"
+}
+```
+```json
+{
+  "tokens": "['È' 'stato' 'uno' 'degli' 'artisti' 'più' 'importanti' "dell'" 'etichetta' 'discografica' 'di' 'musica' 'soul' 'Stax' 'Records' 'che' 'negli' 'anni' 'sessanta' 'e' 'settanta' 'era' 'la' 'principale' 'antagonista' 'della' 'Motown' 'nel' 'campo' 'della' 'black' 'music' '.']",
+  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'I-ORG', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-ORG', 'O', 'O', 'O', 'O', 'O', 'O']"
+}
+```
+```json
+{
+  "tokens": "['Decise' 'di' 'scrivere' 'una' 'serie' 'di' 'saggi' 'e' 'presentarli' 'in' 'un' 'periodico' 'intitolato' '"' 'The' 'Rambler' '"' 'che' 'sarebbe' 'stato' 'messo' 'in' 'vendita' 'per' 'pochi' 'centesimi' 'ogni' 'martedì' 'e' 'sabato' '.']",
+  "labels": "['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'B-MISC', 'I-MISC', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 8
+- Prefix prompt:
+  ```
+  Di seguito sono riportate le frasi e i dizionari JSON con le entità denominate presenti nella frase data.
+  ```
+- Base prompt template:
+  ```
+  Frase: {text}
+  Entità denominate: {label}
+  ```
+- Instruction-tuned prompt template:
+  ```
+  Frase: {text}
+
+  Identificare le entità nominate nella frase. Il risultato dovrebbe essere un dizionario JSON con le chiavi 'persona', 'posizione', 'organizzazione' e 'varie'. I valori devono essere elenchi di entità nominate di quel tipo, esattamente come appaiono nella frase.
+  ```
+- Label mapping:
+    - `B-PER` ➡️ `persona`
+    - `I-PER` ➡️ `persona`
+    - `B-LOC` ➡️ `posizione`
+    - `I-LOC` ➡️ `posizione`
+    - `B-ORG` ➡️ `organizzazione`
+    - `I-ORG` ➡️ `organizzazione`
+    - `B-MISC` ➡️ `varie`
+    - `I-MISC` ➡️ `varie`
+
+You can evaluate this dataset directly as follows:
+
+```bash
+$ euroeval --model <model-id> --dataset wikineural-it
+```
 
 ## Linguistic Acceptability
 
