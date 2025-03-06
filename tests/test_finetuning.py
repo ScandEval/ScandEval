@@ -2,7 +2,6 @@
 
 import pytest
 import torch
-from tokenizers.models import Model
 from transformers import IntervalStrategy, TrainingArguments
 
 from euroeval.data_models import BenchmarkConfig, ModelConfig

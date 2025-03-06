@@ -429,33 +429,34 @@ $ euroeval --model <model-id> --dataset danske-talemaader
 ### Danish Citizen Tests
 
 This dataset was created by scraping the Danish citizenship tests (indfødsretsprøven)
-and permanent residency tests (medborgerskabsprøven) from 2016 to 2023. These are
+and permanent residency tests (medborgerskabsprøven) from 2016 to 2024. These are
 available on the [official website of the Danish Ministry of International Recruitment
 and Integration](https://danskogproever.dk/).
 
-The original full dataset consists of 720 samples. We use an 80 / 128 / 512 split for
-training, validation and testing, respectively (so 720 samples used in total).
+The original full dataset consists of 870 samples. We use an 345 / 90 / 525 split for
+training, validation and testing, respectively. Here all the citizenship tests belong to
+the test split, as well as the newest permanent residency tests. The validation split
+contains the newer permanent residency tests after the ones in the test split, and the
+training split contains the oldest permanent residency tests.
 
 Here are a few examples from the training split:
 
 ```json
 {
-  "text": "Hvilke lande er med i rigsfællesskab et?\nSvarmuligheder:\na. Danmark, Grønland og Færøerne\nb. Danmark, Island og Norge",
+  "text": "Hvilket parti tilhørte Lars Løkke Rasmussen, da han var statsminister i perioderne 2009-11 og 2015-19?\nSvarmuligheder:\na. Venstre\nb. Socialdemokratiet\nc. Det Konservative Folkeparti",
   "label": "a"
 }
 ```
 ```json
 {
-  "text": "Hvor mange medlemmer har Folketinget?\nSvarmuligheder:\na. 87\nb. 179\nc. 265",
+  "text": "Hvilket af følgende områder har kommunerne ansvaret for driften af?\nSvarmuligheder:\na. Domstole\nb. Vuggestuer\nc. Sygehuse",
   "label": "b"
-}
-```
+}```
 ```json
 {
-  "text": "Hvem kan blive biskop i den danske folkekirke?\nSvarmuligheder:\na. Kun mænd\nb. Kun kvinder\nc. Både m ænd og kvinder",
+  "text": "Hvilken organisation blev Danmark medlem af i 1945?\nSvarmuligheder:\na. Verdenshandelsorganisationen (WTO)\nb. Den Europæiske Union (EU)\nc. De Forenede Nationer (FN)",
   "label": "c"
-}
-```
+}```
 
 When evaluating generative models, we use the following setup (see the
 [methodology](/methodology) for more information on how these are used):

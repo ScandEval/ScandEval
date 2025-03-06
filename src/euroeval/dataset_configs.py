@@ -809,6 +809,25 @@ SCALA_NN_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+NO_COLA_CONFIG = DatasetConfig(
+    name="no-cola",
+    pretty_name="the truncated version of the Norwegian linguistic acceptability "
+    "dataset NoCoLA",
+    huggingface_id="EuroEval/no-cola-mini",
+    task=LA,
+    languages=[NB, NO],
+    labels=["incorrect", "correct"],
+    prompt_prefix="Følgende er setninger og hvorvidt de er grammatisk korrekte.",
+    prompt_template="Setning: {text}\nGrammatisk korrekt: {label}",
+    instruction_prompt="Setning: {text}\n\nBestem om setningen er grammatisk korrekt "
+    "eller ikke. Svar med 'ja' hvis setningen er korrekt og 'nei' hvis den ikke er, "
+    "og ikke noe annet.",
+    prompt_label_mapping=dict(correct="ja", incorrect="nei"),
+    num_few_shot_examples=12,
+    max_generated_tokens=5,
+    unofficial=True,
+)
+
 SCALA_IS_CONFIG = DatasetConfig(
     name="scala-is",
     pretty_name="the Icelandic part of the linguistic acceptability dataset ScaLA",
@@ -1196,8 +1215,7 @@ SQUAD_IT_CONFIG = DatasetConfig(
 
 ICELANDIC_QA_CONFIG = DatasetConfig(
     name="icelandic-qa",
-    pretty_name="the Icelandic reading comprehension dataset about Icelandic culture "
-    "and history",
+    pretty_name="the Icelandic reading comprehension dataset IcelandicQA",
     huggingface_id="EuroEval/icelandic-qa",
     task=RC,
     languages=[IS],
@@ -1446,7 +1464,7 @@ DANSKE_TALEMAADER_CONFIG = DatasetConfig(
 DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     name="danish-citizen-tests",
     pretty_name="the Danish knowledge dataset Danish Citizen Tests",
-    huggingface_id="EuroEval/danish-citizen-tests",
+    huggingface_id="EuroEval/danish-citizen-tests-updated",
     task=KNOW,
     languages=[DA],
     labels=["a", "b", "c", "d"],
@@ -1455,6 +1473,22 @@ DANISH_CITIZEN_TESTS_CONFIG = DatasetConfig(
     prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
     instruction_prompt="Spørgsmål: {text}\n\nBesvar ovenstående spørgsmål ved at "
     "svare med 'a', 'b', 'c' eller 'd', og intet andet.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
+NRK_QUIZ_QA_CONFIG = DatasetConfig(
+    name="nrk-quiz-qa",
+    pretty_name="the truncated version of the Norwegian knowledge dataset NRK Quiz QA",
+    huggingface_id="EuroEval/nrk-quiz-qa-mini",
+    task=KNOW,
+    languages=[NB, NN, NO],
+    labels=["a", "b", "c", "d"],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d"),
+    instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
+    "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
 )
@@ -1474,6 +1508,7 @@ MMLU_NO_CONFIG = DatasetConfig(
     "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 MMLU_SV_CONFIG = DatasetConfig(
@@ -1513,7 +1548,8 @@ MMLU_IS_CONFIG = DatasetConfig(
 
 ICELANDIC_KNOWLEDGE_CONFIG = DatasetConfig(
     name="icelandic-knowledge",
-    pretty_name="the IcelandicQA dataset phrased as a knowledge dataset",
+    pretty_name="the Icelandic knowledge dataset IcelandicKnowledge, derived from the "
+    "IcelandicQA dataset",
     huggingface_id="EuroEval/icelandic-knowledge",
     task=KNOW,
     languages=[IS],
@@ -1525,7 +1561,6 @@ ICELANDIC_KNOWLEDGE_CONFIG = DatasetConfig(
     "'b', 'c' eða 'd'.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
-    unofficial=True,
 )
 
 MMLU_DE_CONFIG = DatasetConfig(
@@ -1700,6 +1735,7 @@ ARC_IS_CONFIG = DatasetConfig(
     "'b', 'c' eða 'd', og engu öðru.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 ARC_DE_CONFIG = DatasetConfig(
@@ -1777,6 +1813,23 @@ HELLASWAG_DA_CONFIG = DatasetConfig(
     max_generated_tokens=5,
 )
 
+NOR_COMMON_SENSE_QA_CONFIG = DatasetConfig(
+    name="nor-common-sense-qa",
+    pretty_name="the truncated version of the Norwegian common-sense reasoning dataset "
+    "NorCommonSenseQA",
+    huggingface_id="EuroEval/nor-common-sense-qa",
+    task=COMMON_SENSE,
+    languages=[NB, NN, NO],
+    labels=["a", "b", "c", "d", "e"],
+    prompt_prefix="Følgende er flervalgsspørsmål (med svar).",
+    prompt_template="Spørsmål: {text}\nSvar: {label}",
+    prompt_label_mapping=dict(a="a", b="b", c="c", d="d", e="e"),
+    instruction_prompt="Spørsmål: {text}\n\nBesvar følgende spørsmål med 'a', 'b', "
+    "'c' eller 'd', og ikke noe annet.",
+    num_few_shot_examples=5,
+    max_generated_tokens=5,
+)
+
 HELLASWAG_NO_CONFIG = DatasetConfig(
     name="hellaswag-no",
     pretty_name="the truncated version of the Norwegian common-sense reasoning dataset "
@@ -1792,6 +1845,7 @@ HELLASWAG_NO_CONFIG = DatasetConfig(
     "'c' eller 'd', og ikke noe annet.",
     num_few_shot_examples=5,
     max_generated_tokens=5,
+    unofficial=True,
 )
 
 HELLASWAG_SV_CONFIG = DatasetConfig(
