@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   treebank](https://github.com/UniversalDependencies/UD_Italian-ISDT), the knowledge
   dataset [MMLU-it](https://hf.co/datasets/alexandrainst/m_mmlu), and the named entity
   recognition dataset [MultiNERD
-  IT](https://hf.co/datasets/Babelscape/multinerd/) (and unofficially
-  [WikiNEuRal IT](hhttps://hf.co/datasets/Babelscape/wikineural)).
+  IT](https://hf.co/datasets/Babelscape/multinerd) (and unofficially
+  [WikiNEuRal IT](https://hf.co/datasets/Babelscape/wikineural) ).
 - Added the new Norwegian knowledge dataset NRK-Quiz-QA, consisting of quizzes on the
   Norwegian language and culture, in both Bokmål and Nynorsk. The dataset has been split
   into 635 / 256 / 2,048 samples for train, val, and test, respectively. This replaces
