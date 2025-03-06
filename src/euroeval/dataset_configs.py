@@ -248,7 +248,7 @@ SENTIPOLC_CONFIG = DatasetConfig(
     name="sentipolc16",
     pretty_name="the truncated version of the Italian sentiment classification "
     "dataset Sentipolc-16",
-    huggingface_id="ScandEval/sentipolc16-mini",
+    huggingface_id="EuroEval/sentipolc16-mini",
     task=SENT,
     languages=[IT],
     labels=["negative", "neutral", "positive"],
@@ -740,7 +740,7 @@ WIKIANN_FO_CONFIG = DatasetConfig(
 
 WIKINEURAL_IT_CONFIG = DatasetConfig(
     name="wikineural-it",
-    pretty_name="the truncated version of the multilingual named "
+    pretty_name="the truncated version of the Italian named "
     "entity recognition dataset WikiNEuRal IT",
     huggingface_id="EuroEval/wikineural-mini-it",
     task=NER,
@@ -780,7 +780,7 @@ WIKINEURAL_IT_CONFIG = DatasetConfig(
 
 MULTINERD_IT_CONFIG = DatasetConfig(
     name="multinerd-it",
-    pretty_name="the truncated version and Italian part of the multilingual named "
+    pretty_name="the truncated version of the Italian part of the named "
     "entity recognition dataset MultiNERD",
     huggingface_id="EuroEval/multinerd-mini-it",
     task=NER,
@@ -1014,7 +1014,7 @@ SCALA_FR_CONFIG = DatasetConfig(
 SCALA_IT_CONFIG = DatasetConfig(
     name="scala-it",
     pretty_name="the Italian part of the linguistic acceptability dataset ScaLA",
-    huggingface_id="ScandEval/scala-it",
+    huggingface_id="EuroEval/scala-it",
     task=LA,
     languages=[IT],
     labels=["incorrect", "correct"],
@@ -1279,7 +1279,7 @@ SQUAD_IT_CONFIG = DatasetConfig(
     name="squad-it",
     pretty_name="the truncated version of the Italian reading comprehension dataset "
     "SQuAD-it, translated from the English SQuAD dataset",
-    huggingface_id="ScandEval/squad-it-mini",
+    huggingface_id="EuroEval/squad-it-mini",
     task=RC,
     languages=[IT],
     labels=["start_positions", "end_positions"],
@@ -1507,7 +1507,7 @@ ORANGE_SUM_CONFIG = DatasetConfig(
 ILPOST_SUM_CONFIG = DatasetConfig(
     name="ilpost-sum",
     pretty_name="the truncated version of the Italian summarisation dataset IlPost",
-    huggingface_id="ScandEval/ilpost-sum",
+    huggingface_id="EuroEval/ilpost-sum",
     task=SUMM,
     languages=[IT],
     prompt_prefix="Di seguito sono riportati gli articoli con i relativi riassunti.",
@@ -1730,7 +1730,7 @@ MMLU_FR_CONFIG = DatasetConfig(
 
 MMLU_IT_CONFIG = DatasetConfig(
     name="mmlu-it",
-    pretty_name="the truncated version of the French knowledge dataset MMLU-it, "
+    pretty_name="the truncated version of the Italian knowledge dataset MMLU-it, "
     "translated from the English MMLU dataset",
     huggingface_id="EuroEval/mmlu-it-mini",
     task=KNOW,
@@ -2052,7 +2052,7 @@ HELLASWAG_IT_CONFIG = DatasetConfig(
     name="hellaswag-it",
     pretty_name="the truncated version of the Italian common-sense reasoning dataset "
     "HellaSwag-it, translated from the English HellaSwag dataset",
-    huggingface_id="ScandEval/hellaswag-it-mini",
+    huggingface_id="EuroEval/hellaswag-it-mini",
     task=COMMON_SENSE,
     languages=[IT],
     labels=["a", "b", "c", "d"],
