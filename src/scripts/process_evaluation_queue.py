@@ -663,7 +663,7 @@ def _skip_accepted_marker(body: str, number: int) -> bool:
     return True
 
 
-def process_issue(
+def process_issue(  # noqa: PLR0912
     issue: dict,
     model_id: str,
     groups: list[str],
@@ -743,6 +743,13 @@ def process_issue(
         with _coordinator_issue_lock(number) as coordinator_lock:
             if coordinator_lock is not None:
                 coordinator_lock.ensure_healthy()
+            if _has_cross_issue_public_collision(
+                number=number, model_id=model_id, languages=set(languages)
+            ):
+                logger.info(
+                    f"#{number}: skipping -- model/language already owned elsewhere."
+                )
+                return
             if not issue_is_still_claimable(number=number):
                 logger.info(
                     f"#{number}: skipping -- no longer open and unassigned "
@@ -831,15 +838,27 @@ def _coordinator_issue_lock(number: int) -> t.Iterator[_CoordinatorIssueLock | N
     lock_url = (
         base if base.endswith("/coordinator-lock") else f"{base}/coordinator-lock"
     )
-    token = _coordinator_request(lock_url, number=number, secret=secret)
-    lock = _CoordinatorIssueLock(
-        number=number, secret=secret, lock_url=lock_url, token=token
+    # Same fixed positive safe integer as api/worker/claim.ts. Acquire global
+    # before issue mutex everywhere to keep the cross-issue scan atomic.
+    global_number = 9_007_199_254_740_991
+    global_token = _coordinator_request(lock_url, number=global_number, secret=secret)
+    global_lock = _CoordinatorIssueLock(
+        number=global_number, secret=secret, lock_url=lock_url, token=global_token
     )
-    lock.start()
+    global_lock.start()
     try:
-        yield lock
+        global_lock.ensure_healthy()
+        token = _coordinator_request(lock_url, number=number, secret=secret)
+        lock = _CoordinatorIssueLock(
+            number=number, secret=secret, lock_url=lock_url, token=token
+        )
+        lock.start()
+        try:
+            yield lock
+        finally:
+            lock.close()
     finally:
-        lock.close()
+        global_lock.close()
 
 
 def _coordinator_request(
@@ -889,6 +908,44 @@ def _coordinator_request(
     if value.get("status") != expected_status:
         raise RuntimeError(f"coordinator lock {operation} was not acknowledged")
     return token
+
+
+def _has_cross_issue_public_collision(
+    number: int, model_id: str, languages: set[str]
+) -> bool:
+    """Check fresh open queue snapshots for signed public model/language claims.
+
+    Returns:
+        Whether a collision exists or the queue could not be fetched safely.
+    """
+    issues = _list_queue_issues(assignee="none")
+    assigned = _list_queue_issues(assignee="*")
+    if issues is None or assigned is None:
+        return True
+    by_number = {item.get("number"): item for item in [*issues, *assigned]}
+    for other in by_number.values():
+        other_number = other.get("number")
+        if other_number == number or not isinstance(other_number, int):
+            continue
+        body = other.get("body") or ""
+        if extract_model_id(title=other.get("title", ""), body=body) != model_id:
+            continue
+        marker = trusted_community_marker(number=other_number, body=body)
+        if marker is not None:
+            active = marker.submission in {"active", "submitted", "accepted"}
+            if active and any(
+                lease.get("language") in languages for lease in marker.leases
+            ):
+                return True
+        # Local VM ownership is not a signed broker marker. The marker itself
+        # records the selected groups, so conservatively block matching model.
+        if VM_MARKER_RE.search(body) and languages.intersection(
+            language
+            for group in extract_language_groups(body)
+            for language in LANGUAGE_GROUP_CODES[group]
+        ):
+            return True
+    return False
 
 
 def _local_work_is_owned(number: int, vm_id: str, assignee: str) -> bool:
