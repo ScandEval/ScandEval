@@ -133,8 +133,9 @@ The volunteer path consists of these components:
   validates staged evidence, records a durable decision, and calls the broker's
   promotion transition.
 - **Legacy/local queue:** `src/scripts/process_evaluation_queue.py` may still process
-  non-volunteer work. Its issue claims must use the same broker coordinator mutex as
-  volunteer claims.
+  non-volunteer work. Both claim paths take a shared cross-issue mutex before the
+  per-issue mutex and recheck open requests for matching model/language ownership.
+  This prevents a local claim on another issue from racing a public lease.
 
 The normal data flow is worker authentication, issue claim, evaluation, one result
 upload per identity, finalisation into a private manifest, maintainer review, and

@@ -323,11 +323,19 @@ def process_queue_once(
 class _CoordinatorIssueLock:
     """A coordinator lock with a renewal thread and a loss fence."""
 
-    def __init__(self, number: int, secret: str, lock_url: str, token: str) -> None:
+    def __init__(
+        self,
+        number: int,
+        secret: str,
+        lock_url: str,
+        token: str,
+        parent: "_CoordinatorIssueLock | None" = None,
+    ) -> None:
         self.number = number
         self.secret = secret
         self.lock_url = lock_url
         self.token = token
+        self.parent = parent
         self._stop = threading.Event()
         self._lost = threading.Event()
         self._thread = threading.Thread(
@@ -381,6 +389,8 @@ class _CoordinatorIssueLock:
         Raises:
             RuntimeError: If the renewal thread has lost the lock.
         """
+        if self.parent is not None:
+            self.parent.ensure_healthy()
         if self._lost.is_set():
             raise RuntimeError("coordinator lock renewal was lost")
 
@@ -663,7 +673,7 @@ def _skip_accepted_marker(body: str, number: int) -> bool:
     return True
 
 
-def process_issue(  # noqa: PLR0912
+def process_issue(
     issue: dict,
     model_id: str,
     groups: list[str],
@@ -745,15 +755,10 @@ def process_issue(  # noqa: PLR0912
                 coordinator_lock.ensure_healthy()
             if _has_cross_issue_public_collision(
                 number=number, model_id=model_id, languages=set(languages)
-            ):
+            ) or not issue_is_still_claimable(number=number):
                 logger.info(
-                    f"#{number}: skipping -- model/language already owned elsewhere."
-                )
-                return
-            if not issue_is_still_claimable(number=number):
-                logger.info(
-                    f"#{number}: skipping -- no longer open and unassigned "
-                    "at claim time."
+                    f"#{number}: skipping -- no longer claimable or model/language "
+                    "already owned elsewhere."
                 )
                 return
             # Set the VM marker BEFORE assigning so a crash between the two leaves
@@ -850,7 +855,11 @@ def _coordinator_issue_lock(number: int) -> t.Iterator[_CoordinatorIssueLock | N
         global_lock.ensure_healthy()
         token = _coordinator_request(lock_url, number=number, secret=secret)
         lock = _CoordinatorIssueLock(
-            number=number, secret=secret, lock_url=lock_url, token=token
+            number=number,
+            secret=secret,
+            lock_url=lock_url,
+            token=token,
+            parent=global_lock,
         )
         lock.start()
         try:
@@ -930,13 +939,15 @@ def _has_cross_issue_public_collision(
         body = other.get("body") or ""
         if extract_model_id(title=other.get("title", ""), body=body) != model_id:
             continue
-        marker = trusted_community_marker(number=other_number, body=body)
-        if marker is not None:
-            active = marker.submission in {"active", "submitted", "accepted"}
-            if active and any(
-                lease.get("language") in languages for lease in marker.leases
-            ):
-                return True
+        if languages.intersection(
+            public_marker_protected_languages(body, issue_number=other_number)
+        ):
+            return True
+        if (
+            issue_has_community_marker(body)
+            and trusted_community_marker(number=other_number, body=body) is None
+        ):
+            return True
         # Local VM ownership is not a signed broker marker. The marker itself
         # records the selected groups, so conservatively block matching model.
         if VM_MARKER_RE.search(body) and languages.intersection(

@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import time
+from contextlib import nullcontext
 from pathlib import Path
 
 import pytest
@@ -189,6 +190,53 @@ def test_coordinator_lock_is_renewed_and_released(
     assert calls[0] == ("release", None)
     assert ("renew", "lock-token") in calls
     assert calls[-1] == ("release", "lock-token")
+
+
+@pytest.mark.parametrize("status", ["active", "submitted"])
+def test_local_claim_rechecks_cross_issue_public_work(
+    monkeypatch: pytest.MonkeyPatch, status: str
+) -> None:
+    """A new public reservation on another issue fences a stale local candidate."""
+    monkeypatch.setenv("VOLUNTEER_MARKER_SECRET", "test-marker-secret")
+    issue = _issue(1)
+    other = _issue(
+        2, _signed_public_marker(issue_number=2, language="el", status=status)
+    )
+    other["title"] = issue["title"]
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "_list_queue_issues",
+        lambda assignee: [other] if assignee == "none" else [],
+    )
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "extract_model_id",
+        lambda title, body: title.removeprefix("Evaluate "),
+    )
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "_coordinator_issue_lock",
+        lambda number: nullcontext(None),
+    )
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "cached_model_summary",
+        lambda model_id: {"gated": False},
+    )
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "set_vm_marker",
+        lambda **kwargs: pytest.fail("local claim bypassed public reservation"),
+    )
+
+    process_evaluation_queue.process_issue(
+        issue=issue,
+        model_id="model-1",
+        groups=["Greek"],
+        assignee="runner",
+        vm_id="vm",
+        gpu_memory_utilization=None,
+    )
 
 
 def test_local_queue_code_has_no_coordinator_login_setting() -> None:

@@ -165,34 +165,26 @@ export default async function handler(req: Request): Promise<Response> {
       try {
         await globalMutex.assertOwned();
         const freshIssues = await listOpenIssues();
-        let collision = false;
+        const blockedLanguages = new Set<string>();
         for (const candidate of freshIssues) {
           if (candidate.number === listed.number ||
               extractModelId(candidate.title, candidate.body) !== modelId) continue;
-          const candidateLanguages = selectedLanguages(candidate.body);
-          const matchesLanguage = candidateLanguages.some((language) =>
-            requestedLanguage ? language === requestedLanguage : true);
-          if (!matchesLanguage) continue;
-          if (candidate.body && VM_MARKER_RE.test(candidate.body)) {
-            collision = true;
-            break;
-          }
+          const selected = selectedLanguages(candidate.body);
+          const markerPresent = VOLUNTEER_MARKER_RE.test(candidate.body || "");
           const marker = parseVolunteerMarker(candidate.body);
-          if (!marker || !(await verifyVolunteerMarker(candidate.number, marker))) continue;
-          const marked = marker.submission === "submitted" || marker.submission === "accepted" ||
-            marker.submission === "active" && marker.leases.some((lease) =>
-              Date.parse(lease.expires_at) > Date.now());
-          if (marked && (marker.leases.some((lease) =>
-            candidateLanguages.includes(lease.language) &&
-            (requestedLanguage ? lease.language === requestedLanguage : true)) ||
-            (marker.submissions || []).some((submission) =>
-              typeof submission.language === "string" && candidateLanguages.includes(submission.language) &&
-              (requestedLanguage ? submission.language === requestedLanguage : true)))) {
-            collision = true;
-            break;
+          if (candidate.body && VM_MARKER_RE.test(candidate.body) ||
+              markerPresent && (!marker || !(await verifyVolunteerMarker(candidate.number, marker))) ||
+              !markerPresent && (candidate.assignees || []).length > 0) {
+            selected.forEach((language) => blockedLanguages.add(language));
+            continue;
           }
+          if (!marker || !(await verifyVolunteerMarker(candidate.number, marker))) continue;
+          marker.leases.filter((lease) => Date.parse(lease.expires_at) > Date.now())
+            .forEach((lease) => blockedLanguages.add(lease.language));
+          (marker.submissions || []).filter((submission) =>
+            submission.status === "submitted" || submission.status === "accepted")
+            .forEach((submission) => blockedLanguages.add(submission.language));
         }
-        if (collision) continue;
         await globalMutex.assertOwned();
         const mutex = await acquireRenewableIssueMutex(listed.number); if (!mutex) continue;
         try {
@@ -211,8 +203,9 @@ export default async function handler(req: Request): Promise<Response> {
         const selected = selectedLanguages(snapshot.body);
         const current = activeMarker(parseVolunteerMarker(snapshot.body));
         const available = claimableLanguages(selected, current);
-        const language = requestedLanguage || available[0];
-        if (!language || !available.includes(language)) continue;
+        const language = available.find((item) =>
+          (!requestedLanguage || item === requestedLanguage) && !blockedLanguages.has(item));
+        if (!language) continue;
         const staleLease = await getLeaseForIssue(snapshot.number, language);
         if (staleLease && Date.parse(staleLease.expires_at) <= Date.now() &&
             !(await reclaimExpiredLease(staleLease))) continue;
