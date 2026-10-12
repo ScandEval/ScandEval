@@ -55,6 +55,91 @@ def test_claim_recheck_excludes_issue_that_gains_community_marker(
     assert not process_evaluation_queue.issue_is_still_claimable(number=9)
 
 
+def test_claim_recheck_rejects_public_lease_added_after_candidate_snapshot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The claim-time fetch fences a broker lease racing candidate discovery."""
+    monkeypatch.setenv("VOLUNTEER_MARKER_SECRET", "test-marker-secret")
+    current = _issue(5, _signed_public_marker(issue_number=5, language="el"))
+    current["state"] = "open"
+    monkeypatch.setattr(process_evaluation_queue, "gh_request", lambda path: current)
+
+    assert not process_evaluation_queue.issue_is_still_claimable(number=5)
+
+
+def _issue(number: int, body: str = "") -> dict[str, object]:
+    """Build the minimal issue object used by candidate selection.
+
+    Returns:
+        A minimal GitHub issue dictionary.
+    """
+    return {
+        "number": number,
+        "title": f"Evaluate model-{number}",
+        "body": body,
+        "labels": [],
+        "created_at": "2026-01-01T00:00:00Z",
+    }
+
+
+def _signed_public_marker(
+    *, issue_number: int, language: str, status: str = "active"
+) -> str:
+    """Build valid issue-bound public marker evidence for queue tests.
+
+    Returns:
+        A serialized issue-bound marker.
+    """
+    secret = "test-marker-secret"
+    payload = {
+        "protocol_version": 1,
+        "coordinator": "community",
+        "submission": status,
+        "leases": [],
+        "submissions": [],
+    }
+    if status == "active":
+        payload["leases"] = [
+            {
+                "lease_id": "lease-1",
+                "language": language,
+                "worker": "worker-1",
+                "contributor": "volunteer",
+                "expires_at": "2999-01-01T00:00:00+00:00",
+                "ownership_mode": "public",
+            }
+        ]
+    else:
+        payload["submissions"] = [
+            {
+                "submission_id": "submission-1",
+                "language": language,
+                "manifest_path": "manifest.json",
+                "submitted_at": "2026-01-01T00:00:00Z",
+                "verified_contributor": "volunteer",
+                "result_count": 1,
+                "status": status,
+                "ownership_mode": "public",
+            }
+        ]
+    unsigned = {
+        "domain": "euroeval-volunteer-marker",
+        "version": 1,
+        "issue_number": issue_number,
+        "marker": payload,
+    }
+    encoded = json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
+    payload["signature"] = (
+        base64.urlsafe_b64encode(
+            hmac.new(secret.encode(), encoded, hashlib.sha256).digest()
+        )
+        .decode()
+        .rstrip("=")
+    )
+    body = "request\n\n<!-- euroeval-volunteer-worker:v1 "
+    return body + json.dumps(payload, separators=(",", ":")) + " -->\n"
+
+
 @pytest.mark.parametrize(
     ("assignees", "expected"),
     [([], True), ([{"login": "runner"}], False), ([{"login": "other"}], False)],
@@ -144,6 +229,42 @@ def test_local_work_is_fenced_after_manual_reassignment(
     assert uploaded == []
 
 
+def test_public_lease_language_blocks_local_candidate_collision(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A signed public lease protects its language across unassigned issues."""
+    monkeypatch.setenv("VOLUNTEER_MARKER_SECRET", "test-marker-secret")
+    issues = [
+        _issue(1, _signed_public_marker(issue_number=1, language="el")),
+        _issue(2),
+        _issue(3, "english"),
+    ]
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "_list_queue_issues",
+        lambda assignee: issues if assignee == "none" else [],
+    )
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "extract_model_id",
+        lambda title, body: title.removeprefix("Evaluate "),
+    )
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "extract_language_groups",
+        lambda body: ["English"] if body == "english" else ["Greek"],
+    )
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "cached_model_summary",
+        lambda model_id: {"param_count": 1, "generative": True, "gated": False},
+    )
+
+    candidates = process_evaluation_queue._queue_candidates()
+
+    assert [candidate[5]["number"] for candidate in candidates] == [3]
+
+
 def test_queue_candidates_exclude_active_community_marker(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -172,21 +293,6 @@ def test_queue_candidates_exclude_active_community_marker(
     candidates = process_evaluation_queue._queue_candidates()
 
     assert [candidate[5]["number"] for candidate in candidates] == [1]
-
-
-def _issue(number: int, body: str = "") -> dict[str, object]:
-    """Build the minimal issue object used by candidate selection.
-
-    Returns:
-        A minimal GitHub issue dictionary.
-    """
-    return {
-        "number": number,
-        "title": f"Evaluate model-{number}",
-        "body": body,
-        "labels": [],
-        "created_at": "2026-01-01T00:00:00Z",
-    }
 
 
 def test_queue_candidates_paginate_past_first_hundred(
@@ -314,3 +420,35 @@ def test_reclaim_keeps_accepted_marker_before_results_ready(
     )
 
     assert released == []
+
+
+def test_unsigned_public_marker_fails_closed_for_unassigned_issue(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Unsigned public ownership cannot authorize an unassigned queue candidate."""
+    payload = {
+        "protocol_version": 1,
+        "coordinator": "community",
+        "submission": "active",
+        "leases": [
+            {
+                "lease_id": "lease-1",
+                "language": "el",
+                "worker": "worker-1",
+                "contributor": "volunteer",
+                "expires_at": "2999-01-01T00:00:00+00:00",
+                "ownership_mode": "public",
+            }
+        ],
+    }
+    unsigned_body = (
+        "request\\n\\n<!-- euroeval-volunteer-worker:v1 " + json.dumps(payload) + " -->"
+    )
+    issue = _issue(1, unsigned_body)
+    monkeypatch.setattr(
+        process_evaluation_queue,
+        "_list_queue_issues",
+        lambda assignee: [issue] if assignee == "none" else [],
+    )
+
+    assert process_evaluation_queue._queue_candidates() == []

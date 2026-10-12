@@ -167,15 +167,27 @@ def parse_community_marker(
         if (
             not isinstance(submission, dict)
             or set(submission)
-            != {
-                "submission_id",
-                "language",
-                "manifest_path",
-                "submitted_at",
-                "verified_contributor",
-                "result_count",
-                "status",
-            }
+            not in (
+                {
+                    "submission_id",
+                    "language",
+                    "manifest_path",
+                    "submitted_at",
+                    "verified_contributor",
+                    "result_count",
+                    "status",
+                },
+                {
+                    "submission_id",
+                    "language",
+                    "manifest_path",
+                    "submitted_at",
+                    "verified_contributor",
+                    "result_count",
+                    "status",
+                    "ownership_mode",
+                },
+            )
             or not all(
                 isinstance(submission[key], str) and submission[key]
                 for key in {
@@ -191,6 +203,8 @@ def parse_community_marker(
             or isinstance(submission["result_count"], bool)
             or submission["result_count"] <= 0
             or submission["status"] not in {"submitted", "accepted", "rejected"}
+            or submission.get("ownership_mode", "assignee")
+            not in {"assignee", "public"}
         ):
             return None
         submissions.append(submission)
@@ -233,16 +247,38 @@ def parse_community_marker(
         if (
             not isinstance(lease, dict)
             or set(lease)
-            != {"lease_id", "language", "worker", "contributor", "expires_at"}
+            not in (
+                {"lease_id", "language", "worker", "contributor", "expires_at"},
+                {
+                    "lease_id",
+                    "language",
+                    "worker",
+                    "contributor",
+                    "expires_at",
+                    "ownership_mode",
+                },
+            )
             or not all(isinstance(lease[key], str) and lease[key] for key in lease)
+            or lease.get("ownership_mode", "assignee") not in {"assignee", "public"}
             or not _expiry_active(lease["expires_at"])
         ):
             # Expired leases are retained for recovery but still validated.
             if (
                 not isinstance(lease, dict)
                 or set(lease)
-                != {"lease_id", "language", "worker", "contributor", "expires_at"}
+                not in (
+                    {"lease_id", "language", "worker", "contributor", "expires_at"},
+                    {
+                        "lease_id",
+                        "language",
+                        "worker",
+                        "contributor",
+                        "expires_at",
+                        "ownership_mode",
+                    },
+                )
                 or not all(isinstance(lease[key], str) and lease[key] for key in lease)
+                or lease.get("ownership_mode", "assignee") not in {"assignee", "public"}
             ):
                 return None
         try:
@@ -317,6 +353,34 @@ def issue_has_terminal_queue_submission(
         and issue_number is not None
         and _trusted_issue_marker(issue_number, body) is not None
     )
+
+
+def public_marker_protected_languages(body: str, *, issue_number: int) -> set[str]:
+    """Return languages protected by trusted public leases or submissions.
+
+    Args:
+        body: The issue body containing the broker marker.
+        issue_number: GitHub issue number bound into the marker signature.
+
+    Returns:
+        Languages with active public leases or submitted/accepted public results.
+    """
+    marker = _trusted_issue_marker(number=issue_number, body=body)
+    if marker is None or marker.signature is None:
+        return set()
+    languages = {
+        lease["language"]
+        for lease in marker.leases
+        if lease.get("ownership_mode") == "public"
+        and _expiry_active(lease["expires_at"])
+    }
+    languages.update(
+        str(submission["language"])
+        for submission in marker.submissions
+        if submission.get("ownership_mode") == "public"
+        and submission.get("status") in {"submitted", "accepted"}
+    )
+    return languages
 
 
 def release_issue_if_owned(number: int, vm_id: str, assignee: str) -> bool:
