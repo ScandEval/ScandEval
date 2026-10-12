@@ -12,6 +12,9 @@ import {
 } from "./_lib.js";
 import type { Lease, VolunteerLeaseMarker } from "./_lib.js";
 
+// Reserved only as a Redis mutex key; never used for a GitHub API request.
+const GLOBAL_CLAIM_MUTEX = Number.MAX_SAFE_INTEGER;
+
 export const config = { runtime: "edge" };
 
 async function recoverExpiredOwnership(
@@ -155,8 +158,44 @@ export default async function handler(req: Request): Promise<Response> {
       }
       const selectedHardwareGpu = selectedGpu(body.hardware);
       if (!selectedHardwareGpu || !fitsGpu(model, body.hardware, selectedHardwareGpu)) continue;
-      const mutex = await acquireRenewableIssueMutex(listed.number); if (!mutex) continue;
+      // Serialize the final cross-issue scan and claim transaction. Metadata was
+      // resolved above so neither Hub latency nor evaluation work holds this fence.
+      const globalMutex = await acquireRenewableIssueMutex(GLOBAL_CLAIM_MUTEX);
+      if (!globalMutex) continue;
       try {
+        await globalMutex.assertOwned();
+        const freshIssues = await listOpenIssues();
+        let collision = false;
+        for (const candidate of freshIssues) {
+          if (candidate.number === listed.number ||
+              extractModelId(candidate.title, candidate.body) !== modelId) continue;
+          const candidateLanguages = selectedLanguages(candidate.body);
+          const matchesLanguage = candidateLanguages.some((language) =>
+            requestedLanguage ? language === requestedLanguage : true);
+          if (!matchesLanguage) continue;
+          if (candidate.body && VM_MARKER_RE.test(candidate.body)) {
+            collision = true;
+            break;
+          }
+          const marker = parseVolunteerMarker(candidate.body);
+          if (!marker || !(await verifyVolunteerMarker(candidate.number, marker))) continue;
+          const marked = marker.submission === "submitted" || marker.submission === "accepted" ||
+            marker.submission === "active" && marker.leases.some((lease) =>
+              Date.parse(lease.expires_at) > Date.now());
+          if (marked && (marker.leases.some((lease) =>
+            candidateLanguages.includes(lease.language) &&
+            (requestedLanguage ? lease.language === requestedLanguage : true)) ||
+            (marker.submissions || []).some((submission) =>
+              typeof submission.language === "string" && candidateLanguages.includes(submission.language) &&
+              (requestedLanguage ? submission.language === requestedLanguage : true)))) {
+            collision = true;
+            break;
+          }
+        }
+        if (collision) continue;
+        await globalMutex.assertOwned();
+        const mutex = await acquireRenewableIssueMutex(listed.number); if (!mutex) continue;
+        try {
         let snapshot = await fetchIssue(listed.number);
         if (snapshot.state !== "open" || snapshot.body && VM_MARKER_RE.test(snapshot.body)) continue;
         if (extractModelId(snapshot.title, snapshot.body) !== modelId) continue;
@@ -218,6 +257,7 @@ export default async function handler(req: Request): Promise<Response> {
             warnings: trusted.warnings || [],
           },
         };
+        await globalMutex.assertOwned();
         if (!(await putLease(lease))) {
           continue;
         };
@@ -229,6 +269,7 @@ export default async function handler(req: Request): Promise<Response> {
         };
         try {
           const signedMarker = await signVolunteerMarker(snapshot.number, nextMarker);
+          await globalMutex.assertOwned();
           await mutex.assertOwned();
           await patchIssue(snapshot.number, replaceVolunteerMarker(snapshot.body || "", signedMarker));
           await mutex.assertOwned();
@@ -266,7 +307,8 @@ export default async function handler(req: Request): Promise<Response> {
           expected_scope: lease.expected_scope,
           contamination_canary: lease.contamination_canary,
         });
-      } finally { await mutex.release(); }
+        } finally { await mutex.release(); }
+      } finally { await globalMutex.release(); }
     }
     return json(200, { protocol_version: PROTOCOL_VERSION, status: "no_work" });
   } catch (error) {
