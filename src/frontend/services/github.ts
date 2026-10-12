@@ -54,6 +54,7 @@ export interface QueueEntry {
   modelId: string;
   languageGroups: string[];
   status: QueueStatus;
+  publicVolunteer: boolean;
   evaluators: QueueEvaluator[];
   createdAt: string;
 }
@@ -139,7 +140,7 @@ export function issueStatus(
   return "Waiting";
 }
 
-export function toQueueEntry(issue: RawIssue): QueueEntry | null {
+export function toQueueEntry(issue: RawIssue, publicIssueNumbers: ReadonlySet<number> = new Set()): QueueEntry | null {
   const modelId = extractModelId(issue.title, issue.body);
   if (!modelId) return null;
   // The queue can't run GGUF models. We rely on the GGUF_LABEL applied by the
@@ -156,6 +157,7 @@ export function toQueueEntry(issue: RawIssue): QueueEntry | null {
     modelId,
     languageGroups: extractLanguageGroups(issue.body),
     status: issueStatus(issue, failed, gated, resultsReady),
+    publicVolunteer: publicIssueNumbers.has(issue.number),
     evaluators: evaluatorsFromIssue(issue),
     createdAt: issue.created_at,
   };
@@ -182,6 +184,13 @@ export async function listOpenEvalIssues(
     raw.push(...chunk);
     if (chunk.length < 100) break;
   }
+  let publicIssueNumbers = new Set<number>();
+  try {
+    const projection = await fetch("/api/hall-of-fame?projection=queue", init);
+    if (projection.ok) publicIssueNumbers = new Set((await projection.json()) as number[]);
+  } catch {
+    // Queue loading remains available if the optional trusted projection is unavailable.
+  }
   const order: Record<QueueStatus, number> = {
     "Awaiting publish": 0,
     Evaluating: 1,
@@ -190,7 +199,7 @@ export async function listOpenEvalIssues(
     Error: 4,
   };
   return raw
-    .map(toQueueEntry)
+    .map((issue) => toQueueEntry(issue, publicIssueNumbers))
     .filter((e): e is QueueEntry => e !== null)
     .sort((a, b) => {
       if (a.status !== b.status) return order[a.status] - order[b.status];

@@ -8,7 +8,8 @@ const EXCLUDE = new Set(["saattrupdan"]);
 const MAX_PAGES = 10;
 const PER_PAGE = 100;
 
-import { sha256 } from "./worker/_lib/protocol.js";
+import { sha256, verifyVolunteerMarker } from "./worker/_lib/protocol.js";
+import { parseVolunteerMarker } from "./worker/_lib/markers.js";
 import { redis } from "./worker/_lib/redis.js";
 
 interface RawAssignee { login: string; avatar_url?: string; }
@@ -33,9 +34,41 @@ export function creditLogins(issue: RawIssue): string[] {
   });
 }
 
+async function trustedMarker(issue: RawIssue) {
+  const marker = parseVolunteerMarker(issue.body);
+  if (!marker) return null;
+  try {
+    return await verifyVolunteerMarker(issue.number, marker) ? marker : null;
+  } catch {
+    // Public ownership is fail-closed when the runtime signing secret is absent.
+    return null;
+  }
+}
+
+async function hasVerifiedPublicOwnership(issue: RawIssue): Promise<boolean> {
+  const marker = await trustedMarker(issue);
+  if (!marker) return false;
+  const now = Date.now();
+  return marker.leases.some((lease) => lease.ownership_mode === "public" && Date.parse(lease.expires_at) > now) ||
+    (marker.submissions ?? []).some((submission) => submission.ownership_mode === "public" && submission.status === "submitted");
+}
+
+export async function verifiedPublicLogins(issue: RawIssue): Promise<string[]> {
+  const marker = await trustedMarker(issue);
+  if (!marker) return [];
+  const seen = new Set<string>();
+  return (marker.submissions ?? []).flatMap((submission) => {
+    const login = submission.verified_contributor.trim();
+    const key = login.toLowerCase();
+    if (submission.status !== "accepted" || submission.ownership_mode !== "public" || !login || EXCLUDE.has(key) || seen.has(key)) return [];
+    seen.add(key);
+    return [login];
+  });
+}
+
 function json(status: number, body: unknown, extra?: HeadersInit): Response { return new Response(status === 204 ? null : typeof body === "string" ? body : JSON.stringify(body), { status, headers: { "content-type": "application/json", "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS", "access-control-allow-headers": "content-type", "cache-control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400", ...(extra ?? {}) } }); }
-async function fetchPage(page: number, headers: Record<string, string>): Promise<RawIssue[]> {
-  const url = `https://api.github.com/repos/${REPO}/issues?state=closed&per_page=${PER_PAGE}&page=${page}&labels=${encodeURIComponent(LABEL)}`;
+async function fetchPage(page: number, headers: Record<string, string>, state: "closed" | "open" = "closed"): Promise<RawIssue[]> {
+  const url = `https://api.github.com/repos/${REPO}/issues?state=${state}&per_page=${PER_PAGE}&page=${page}&labels=${encodeURIComponent(LABEL)}`;
   let lastErr: unknown = null;
   for (let attempt = 0; attempt < 3; attempt++) { try { const response = await fetch(url, { headers }); if (response.ok) return await response.json() as RawIssue[]; if (response.status >= 500 || response.status === 429) lastErr = new Error(`GitHub ${response.status}`); else throw new Error(`GitHub ${response.status}: ${await response.text()}`); } catch (error) { lastErr = error; } await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1))); }
   throw lastErr instanceof Error ? lastErr : new Error("GitHub fetch failed");
@@ -44,9 +77,25 @@ export default async function handler(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return json(204, ""); if (req.method !== "GET") return json(405, { error: "Method not allowed" });
   if (!(await withinPublicRateLimit(req))) return json(429, { error: "Too many requests." }, { "retry-after": "60" });
   const token = process.env.GITHUB_TOKEN; const headers: Record<string, string> = { accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28" }; if (token) headers.authorization = `Bearer ${token}`;
+  if (new URL(req.url).searchParams.get("projection") === "queue") {
+    try {
+      const issueNumbers: number[] = [];
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const chunk = await fetchPage(page, headers, "open");
+        for (const issue of chunk) if (await hasVerifiedPublicOwnership(issue)) issueNumbers.push(issue.number);
+        if (chunk.length < PER_PAGE) break;
+      }
+      return json(200, issueNumbers);
+    } catch (error) {
+      return json(502, { error: (error as Error).message });
+    }
+  }
   const counts = new Map<string, EvaluatorCount>();
   try { for (let page = 1; page <= MAX_PAGES; page++) { const chunk = await fetchPage(page, headers); for (const issue of chunk) {        if (!extractModelId(issue.title, issue.body)) continue;
-        for (const login of creditLogins(issue)) {
+        const credited = new Map<string, string>();
+        for (const login of creditLogins(issue)) credited.set(login.toLowerCase(), login);
+        for (const login of await verifiedPublicLogins(issue)) credited.set(login.toLowerCase(), login);
+        for (const login of credited.values()) {
           const avatarUrl = issue.assignees?.find((assignee) => assignee.login.toLowerCase() === login.toLowerCase())?.avatar_url ||
             (issue.assignee?.login.toLowerCase() === login.toLowerCase() ? issue.assignee.avatar_url : "") ||
             `https://github.com/${encodeURIComponent(login)}.png?size=64`;
