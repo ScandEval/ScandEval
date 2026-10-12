@@ -14,6 +14,7 @@ export function parseVolunteerMarker(body: string | null): VolunteerLeaseMarker 
       !!lease && typeof lease === "object" && typeof lease.lease_id === "string" &&
       typeof lease.language === "string" && typeof lease.worker === "string" &&
       typeof lease.contributor === "string" && typeof lease.expires_at === "string" &&
+      (lease.ownership_mode === undefined || lease.ownership_mode === "assignee" || lease.ownership_mode === "public") &&
       !Number.isNaN(Date.parse(lease.expires_at)));
     if (leases.length !== parsed.leases.length || new Set(leases.map((item) => item.lease_id)).size !== leases.length || new Set(leases.map((item) => item.language)).size !== leases.length) return null;
     const submissions = Array.isArray(parsed.submissions) ? parsed.submissions.filter((item): item is VolunteerSubmission =>
@@ -22,6 +23,7 @@ export function parseVolunteerMarker(body: string | null): VolunteerLeaseMarker 
       typeof item.submitted_at === "string" && !Number.isNaN(Date.parse(item.submitted_at)) &&
       typeof item.verified_contributor === "string" && !!item.verified_contributor &&
       Number.isSafeInteger(item.result_count) && item.result_count > 0 &&
+      (item.ownership_mode === undefined || item.ownership_mode === "assignee" || item.ownership_mode === "public") &&
       ["submitted", "accepted", "rejected"].includes(item.status)) : undefined;
     if (parsed.submissions !== undefined && (submissions === undefined || submissions.length !== parsed.submissions.length || new Set(submissions.map((item) => item.submission_id)).size !== submissions.length)) return null;
     const completed = Array.isArray(parsed.completed_languages) ? parsed.completed_languages.filter((item): item is string => typeof item === "string" && !!item) : undefined;
@@ -63,23 +65,25 @@ export function volunteerAssigneesMatch(
   const expected = new Set<string>();
   const optional = new Set<string>();
   for (const lease of marker.leases) {
+    if (lease.ownership_mode === "public") continue;
     const contributor = lease.contributor.toLowerCase();
     if (Date.parse(lease.expires_at) > now) {
       expected.add(contributor);
     } else if (includeExpiredLeases) {
       expected.add(contributor);
       if (allowExpiredUnassigned && !marker.leases.some((other) =>
-        other.lease_id !== lease.lease_id &&
+        other.lease_id !== lease.lease_id && other.ownership_mode !== "public" &&
         Date.parse(other.expires_at) > now &&
         other.contributor.toLowerCase() === contributor,
       ) && !(marker.submissions || []).some((submission) =>
         ["submitted", "accepted"].includes(submission.status) &&
+        submission.ownership_mode !== "public" &&
         submission.verified_contributor.toLowerCase() === contributor,
       )) optional.add(contributor);
     }
   }
   for (const submission of marker.submissions || []) {
-    if (["submitted", "accepted"].includes(submission.status)) {
+    if (["submitted", "accepted"].includes(submission.status) && submission.ownership_mode !== "public") {
       expected.add(submission.verified_contributor.toLowerCase());
     }
   }

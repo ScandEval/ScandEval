@@ -71,11 +71,13 @@ from leaderboards.queue_env import (
 )
 from leaderboards.queue_hf_cache import cached_model_summary
 from leaderboards.queue_markers import (
+    CommunityMarker,
     clear_vm_marker,
     issue_has_active_queue_ownership,
     issue_has_community_marker,
     issue_has_terminal_queue_submission,
     parse_community_marker,
+    public_marker_protected_languages,
     release_issue_if_owned,
     set_vm_marker,
     trusted_community_marker,
@@ -321,11 +323,19 @@ def process_queue_once(
 class _CoordinatorIssueLock:
     """A coordinator lock with a renewal thread and a loss fence."""
 
-    def __init__(self, number: int, secret: str, lock_url: str, token: str) -> None:
+    def __init__(
+        self,
+        number: int,
+        secret: str,
+        lock_url: str,
+        token: str,
+        parent: "_CoordinatorIssueLock | None" = None,
+    ) -> None:
         self.number = number
         self.secret = secret
         self.lock_url = lock_url
         self.token = token
+        self.parent = parent
         self._stop = threading.Event()
         self._lost = threading.Event()
         self._thread = threading.Thread(
@@ -379,6 +389,8 @@ class _CoordinatorIssueLock:
         Raises:
             RuntimeError: If the renewal thread has lost the lock.
         """
+        if self.parent is not None:
+            self.parent.ensure_healthy()
         if self._lost.is_set():
             raise RuntimeError("coordinator lock renewal was lost")
 
@@ -424,6 +436,15 @@ def _queue_candidates(
         seen = {issue.get("number") for issue in issues}
         issues.extend(issue for issue in assigned if issue.get("number") not in seen)
 
+    protected_languages = set().union(
+        *(
+            public_marker_protected_languages(
+                issue.get("body") or "", issue_number=issue["number"]
+            )
+            for issue in issues
+            if isinstance(issue.get("number"), int)
+        )
+    )
     candidates: list[tuple[int, int, int, int, float, dict, str, list[str]]] = []
     for issue in (issue for issue in issues if "pull_request" not in issue):
         body = issue.get("body") or ""
@@ -435,14 +456,17 @@ def _queue_candidates(
         if RESULTS_READY_LABEL in label_names:
             continue
         if issue_has_active_queue_ownership(body):
-            logger.info(
-                f"#{issue['number']}: skipping -- active community/coordinator "
-                "work is present."
-            )
-            continue
+            if _has_legacy_active_ownership(number=issue["number"], body=body):
+                logger.info(
+                    f"#{issue['number']}: skipping -- active community/coordinator "
+                    "work is present."
+                )
+                continue
         marker = trusted_community_marker(number=issue["number"], body=body)
-        if issue_has_community_marker(body) and marker is None:
-            logger.info(f"#{issue['number']}: skipping -- untrusted broker marker.")
+        if issue_has_community_marker(body) and (
+            marker is None or _is_unsigned_public_marker(marker)
+        ):
+            logger.warning(f"#{issue['number']}: skipping -- untrusted broker marker.")
             continue
         if _skip_accepted_marker(body=body, number=issue["number"]):
             continue
@@ -465,6 +489,9 @@ def _queue_candidates(
             continue
 
         groups = extract_language_groups(body=body)
+        groups = _filter_protected_language_groups(
+            groups=groups, protected_languages=protected_languages
+        )
         if not groups:
             logger.info(f"#{number}: skipping -- no language groups selected.")
             continue
@@ -524,9 +551,62 @@ def _queue_candidates(
     return candidates
 
 
+def _filter_protected_language_groups(
+    groups: list[str], protected_languages: set[str]
+) -> list[str]:
+    """Drop selected groups that overlap a public broker reservation.
+
+    Returns:
+        Groups that contain no protected public language.
+    """
+    return [
+        group
+        for group in groups
+        if not set(LANGUAGE_GROUP_CODES[group]).intersection(protected_languages)
+    ]
+
+
+def _has_legacy_active_ownership(number: int, body: str) -> bool:
+    """Return whether active broker work should retain issue-wide queue blocking."""
+    marker = trusted_community_marker(number=number, body=body)
+    return (
+        marker is None
+        or (
+            marker.submission == "submitted"
+            and (
+                not marker.submissions
+                or any(
+                    submission.get("ownership_mode") != "public"
+                    for submission in marker.submissions
+                )
+            )
+        )
+        or (
+            marker.submission == "active"
+            and (
+                not marker.leases
+                or any(
+                    lease.get("ownership_mode") != "public" for lease in marker.leases
+                )
+            )
+        )
+    )
+
+
 def _has_matching_vm_marker(body: str, vm_id: str) -> bool:
     matches = list(VM_MARKER_RE.finditer(body))
     return len(matches) == 1 and matches[0].group(1) == vm_id
+
+
+def _is_unsigned_public_marker(marker: CommunityMarker) -> bool:
+    """Return whether an otherwise parsed marker claims public ownership unsigned."""
+    return marker.signature is None and (
+        any(lease.get("ownership_mode") == "public" for lease in marker.leases)
+        or any(
+            submission.get("ownership_mode") == "public"
+            for submission in marker.submissions
+        )
+    )
 
 
 def _list_queue_issues(*, assignee: str) -> list[dict[str, t.Any]] | None:
@@ -579,6 +659,12 @@ def _skip_accepted_marker(body: str, number: int) -> bool:
     """
     marker = parse_community_marker(body)
     if marker is None or marker.submission != "accepted":
+        return False
+    if any(
+        submission.get("ownership_mode") == "public"
+        and submission.get("status") == "accepted"
+        for submission in marker.submissions
+    ):
         return False
     if issue_has_terminal_queue_submission(body, issue_number=number):
         logger.info(f"#{number}: skipping -- accepted broker submission.")
@@ -667,10 +753,15 @@ def process_issue(
         with _coordinator_issue_lock(number) as coordinator_lock:
             if coordinator_lock is not None:
                 coordinator_lock.ensure_healthy()
-            if not issue_is_still_claimable(number=number):
+            if (
+                coordinator_lock is not None
+                and _has_cross_issue_public_collision(
+                    number=number, model_id=model_id, languages=set(languages)
+                )
+            ) or not issue_is_still_claimable(number=number):
                 logger.info(
-                    f"#{number}: skipping -- no longer open and unassigned "
-                    "at claim time."
+                    f"#{number}: skipping -- no longer claimable or model/language "
+                    "already owned elsewhere."
                 )
                 return
             # Set the VM marker BEFORE assigning so a crash between the two leaves
@@ -755,15 +846,31 @@ def _coordinator_issue_lock(number: int) -> t.Iterator[_CoordinatorIssueLock | N
     lock_url = (
         base if base.endswith("/coordinator-lock") else f"{base}/coordinator-lock"
     )
-    token = _coordinator_request(lock_url, number=number, secret=secret)
-    lock = _CoordinatorIssueLock(
-        number=number, secret=secret, lock_url=lock_url, token=token
+    # Same fixed positive safe integer as api/worker/claim.ts. Acquire global
+    # before issue mutex everywhere to keep the cross-issue scan atomic.
+    global_number = 9_007_199_254_740_991
+    global_token = _coordinator_request(lock_url, number=global_number, secret=secret)
+    global_lock = _CoordinatorIssueLock(
+        number=global_number, secret=secret, lock_url=lock_url, token=global_token
     )
-    lock.start()
+    global_lock.start()
     try:
-        yield lock
+        global_lock.ensure_healthy()
+        token = _coordinator_request(lock_url, number=number, secret=secret)
+        lock = _CoordinatorIssueLock(
+            number=number,
+            secret=secret,
+            lock_url=lock_url,
+            token=token,
+            parent=global_lock,
+        )
+        lock.start()
+        try:
+            yield lock
+        finally:
+            lock.close()
     finally:
-        lock.close()
+        global_lock.close()
 
 
 def _coordinator_request(
@@ -813,6 +920,46 @@ def _coordinator_request(
     if value.get("status") != expected_status:
         raise RuntimeError(f"coordinator lock {operation} was not acknowledged")
     return token
+
+
+def _has_cross_issue_public_collision(
+    number: int, model_id: str, languages: set[str]
+) -> bool:
+    """Check fresh open queue snapshots for signed public model/language claims.
+
+    Returns:
+        Whether a collision exists or the queue could not be fetched safely.
+    """
+    issues = _list_queue_issues(assignee="none")
+    assigned = _list_queue_issues(assignee="*")
+    if issues is None or assigned is None:
+        return True
+    by_number = {item.get("number"): item for item in [*issues, *assigned]}
+    for other in by_number.values():
+        other_number = other.get("number")
+        if other_number == number or not isinstance(other_number, int):
+            continue
+        body = other.get("body") or ""
+        if extract_model_id(title=other.get("title", ""), body=body) != model_id:
+            continue
+        if languages.intersection(
+            public_marker_protected_languages(body, issue_number=other_number)
+        ):
+            return True
+        if (
+            issue_has_community_marker(body)
+            and trusted_community_marker(number=other_number, body=body) is None
+        ):
+            return True
+        # Local VM ownership is not a signed broker marker. The marker itself
+        # records the selected groups, so conservatively block matching model.
+        if VM_MARKER_RE.search(body) and languages.intersection(
+            language
+            for group in extract_language_groups(body)
+            for language in LANGUAGE_GROUP_CODES[group]
+        ):
+            return True
+    return False
 
 
 def _local_work_is_owned(number: int, vm_id: str, assignee: str) -> bool:

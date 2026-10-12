@@ -108,10 +108,10 @@ The volunteer path consists of these components:
   `api/worker/`. Vercel's `api/` convention maps each file to its matching HTTP route.
   The broker authenticates workers, finds GitHub issues, fences claims, validates
   results, and writes staged objects.
-- **GitHub:** `EuroEval/EuroEval` is the work queue and audit log. Issue assignees are
-  the mutable, authoritative active evaluators and credit identities for both manual
-  and volunteer paths. Signed markers in issue bodies are audit and integrity
-  evidence; they do not override current assignees.
+- **GitHub:** `EuroEval/EuroEval` is the work queue and audit log. Public volunteers
+  need no repository access: their authenticated account, broker lease, and signed
+  issue marker fence active work; accepted signed submissions provide credit. Manual
+  work and historical assignee-backed leases retain their assignee rules.
 - **GitHub OAuth device flow:** A volunteer authorises the OAuth app in a browser. The
   broker exchanges and immediately revokes the short-lived GitHub grant, then gives the
   worker an opaque, time-limited broker credential. GitHub and project secrets are never
@@ -133,20 +133,21 @@ The volunteer path consists of these components:
   validates staged evidence, records a durable decision, and calls the broker's
   promotion transition.
 - **Legacy/local queue:** `src/scripts/process_evaluation_queue.py` may still process
-  non-volunteer work. Its issue claims must use the same broker coordinator mutex as
-  volunteer claims.
+  non-volunteer work. Both claim paths take a shared cross-issue mutex before the
+  per-issue mutex and recheck open requests for matching model/language ownership.
+  This prevents a local claim on another issue from racing a public lease.
 
 The normal data flow is worker authentication, issue claim, evaluation, one result
 upload per identity, finalisation into a private manifest, maintainer review, and
 promotion or rejection. Acceptance copies only verified records to the canonical bucket.
-Issue assignees are the mutable, authoritative active evaluators and credit
-identities for manual and volunteer evaluations. A request may have multiple assignees
-when multiple volunteers contribute different languages; retain every assignee whose
-submission is accepted. Maintainers may transfer ownership or credit by changing the
-assignees, which fences old volunteer leases. Remove an assignee only when their work is
-rejected or intentionally released. Signed marker contributors are retained as audit and
-integrity evidence only. A complete set of accepted languages adds `results-ready`;
-credit follows the accepted assignees, while an individual accepted language does not.
+New public volunteer leases do not change issue assignees. The broker verifies the
+signed, issue-bound marker and matching lease identity before accepting work; the local
+queue respects its active and submitted languages under the shared coordinator lock.
+Accepted signed submissions provide public volunteer credit only after review. Manual
+work and historical assignee-backed leases continue to use issue assignees for
+ownership and credit. Do not remove or edit signed markers to transfer public work;
+release or reject it through the broker. A complete set of accepted languages adds
+`results-ready`.
 
 ## One-time prerequisites
 
@@ -196,10 +197,9 @@ credential should be issued.
 
 Create a maintainer-owned GitHub token with the least privilege that permits the broker
 to read and update issues, assignees, labels, and comments in `EuroEval/EuroEval`. Store
-it only in Vercel's encrypted environment variables. The broker uses this token to read
-and update issues, assignees, labels, and comments. Every volunteer OAuth login must be
-GitHub-assignable in this repository; otherwise claim stops with an actionable error and
-the volunteer must use an eligible account.
+it only in Vercel's encrypted environment variables. The broker uses this token for
+issue markers, labels, comments, and historical assignee-backed leases. Public volunteers
+only authenticate with GitHub; they do not need an invitation or repository access.
 
 Create these labels in `EuroEval/EuroEval` with these exact names:
 
@@ -208,9 +208,9 @@ Create these labels in `EuroEval/EuroEval` with these exact names:
 - `results-ready` — added when all selected languages have accepted submissions.
 
 If the legacy/local queue will remain active, also retain its labels `evaluation-failed`
-and `gated`. Maintainers transfer ownership or credit by changing issue assignees.
-Changing assignees fences old volunteer leases. Do not treat signed marker contributors
-as current ownership; they are retained for audit and integrity checks.
+and `gated`. Configure its shared coordinator lock and `VOLUNTEER_MARKER_SECRET` before
+running it alongside public volunteers; otherwise it must not claim issues. Changing
+assignees still fences historical assignee-backed leases, not new public leases.
 
 ### 4. Reuse the existing Vercel KV database
 
@@ -578,9 +578,9 @@ same outcome; an opposite outcome is refused.
 
 Do not manually copy staged files, edit issue markers, delete audit manifests, or award
 credit. A rejected language becomes leaseable again while its signed audit history
-remains. When all selected languages are accepted, the broker adds `results-ready` and
-retains the assignees whose submissions were accepted. If several volunteers contributed,
-keep multiple assignees; remove an assignee only after rejection or intentional release.
+remains. When all selected languages are accepted, the broker adds `results-ready`;
+accepted signed public submissions provide volunteer credit without issue assignment.
+Historical assignee-backed submissions retain their assignee credit rules.
 
 ## Image publishing and canary
 

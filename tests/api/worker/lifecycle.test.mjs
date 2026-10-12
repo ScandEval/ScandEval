@@ -129,7 +129,7 @@ test("claim rejects an issue model edited during metadata resolution", async () 
   }
 });
 
-test("claim resumes after expired contributor unassignment interruption", async () => {
+test("claim resumes after expired ownership recovery without assigning the issue", async () => {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
   process.env.VOLUNTEER_MARKER_SECRET = "marker-secret";
@@ -146,14 +146,29 @@ test("claim resumes after expired contributor unassignment interruption", async 
   }] });
   const language = "Scandinavian languages (Danish, Faroese, Icelandic, Norwegian, Swedish)";
   const expired = { ...lease, expires_at: "2020-01-01T00:00:00.000Z" };
+  const publicLease = { lease_id: "public-lease", language: "fr", worker: "public-worker",
+    contributor: "alice", expires_at: new Date(Date.now() + 120_000).toISOString(), ownership_mode: "public" };
   const signed = await signVolunteerMarker(issueNumber, {
     protocol_version: "volunteer-worker/v1", coordinator: "coordinator", submission: "active",
     leases: [{ lease_id: expired.lease_id, language: expired.language, worker: expired.worker,
-      contributor: expired.contributor, expires_at: expired.expires_at }],
+      contributor: expired.contributor, expires_at: expired.expires_at }, publicLease],
+    submissions: [{ submission_id: "public-submission", language: "fr", manifest_path: "manifest",
+      submitted_at: "2026-09-06T10:00:00Z", verified_contributor: "alice", result_count: 1,
+      status: "accepted", ownership_mode: "public" }],
   });
   const issue = { number: issueNumber, title: "[MODEL EVALUATION REQUEST] org/model",
     body: `### Model ID\n\norg/model\n\n- [x] ${language}\n\n${markerBody(signed)}`,
+    state: "open", assignees: [{ login: "alice" }], labels: [] };
+  const competing = await signVolunteerMarker(issueNumber + 1, {
+    protocol_version: "volunteer-worker/v1", coordinator: "coordinator", submission: "active",
+    leases: [{ lease_id: "competing-lease", language: "da", worker: "another-worker",
+      contributor: "another-user", expires_at: new Date(Date.now() + 120_000).toISOString(),
+      ownership_mode: "public" }],
+  });
+  const otherIssue = { number: issueNumber + 1, title: issue.title,
+    body: `### Model ID\n\norg/model\n\n- [x] ${language}\n\n<!-- euroeval-volunteer-worker:v1 ${JSON.stringify(competing)} -->`,
     state: "open", assignees: [], labels: [] };
+  let competingClaim = true;
   const credentialKey = `euroeval:worker:credential:${await sha256("credential")}`;
   const leaseKey = `euroeval:worker:lease:${issueNumber}:da`;
   const values = new Map([[credentialKey, JSON.stringify({ contributor: "alice" })],
@@ -171,7 +186,7 @@ test("claim resumes after expired contributor unassignment interruption", async 
       return Response.json({ result: command[0] === "SET" ? "OK" : 1 });
     }
     if (url.includes("/repos/EuroEval/EuroEval/assignees/")) return new Response(null, { status: 204 });
-    if (url.includes("/repos/EuroEval/EuroEval/issues?")) return Response.json([issue]);
+    if (url.includes("/repos/EuroEval/EuroEval/issues?")) return Response.json(competingClaim ? [issue, otherIssue] : [issue]);
     if (url.includes("huggingface.co/api/models/org/model")) return Response.json({
       id: "org/model", sha: "a".repeat(40), private: false, gated: false,
       pipeline_tag: "fill-mask", siblings: [{ rfilename: "model.safetensors", size: 100 }],
@@ -180,6 +195,7 @@ test("claim resumes after expired contributor unassignment interruption", async 
       return Response.json({ model_type: "bert", architectures: ["BertModel"] });
     }
     if (url.endsWith(`/issues/${issueNumber}`) && method === "GET") return Response.json(issue);
+    if (url.endsWith(`/issues/${issueNumber + 1}`) && method === "GET") return Response.json(otherIssue);
     if (url.endsWith(`/issues/${issueNumber}`) && method === "PATCH") {
       mutations.push("patch"); issue.body = JSON.parse(init.body).body; return Response.json(issue);
     }
@@ -192,19 +208,28 @@ test("claim resumes after expired contributor unassignment interruption", async 
     throw new Error(`Unexpected request: ${method} ${url}`);
   };
   try {
-    const response = await claim(new Request("https://euroeval.test/api/worker/claim", {
+    const claimRequest = () => new Request("https://euroeval.test/api/worker/claim", {
       method: "POST", headers: { authorization: "Bearer credential", "content-type": "application/json" },
       body: JSON.stringify({ protocol_version: "volunteer-worker/v1", worker_version: "1.0.0",
         hardware: { architecture: "amd64", free_disk_bytes: 1_000_000,
           gpu_memory_utilisation: 0.8, selected_gpu_index: 0, selected_gpu_uuid: "gpu",
           gpus: [{ index: 0, name: "GPU", uuid: "gpu", free_memory_bytes: 1_000_000,
             total_memory_bytes: 1_000_000 }] } }),
-    }));
+    });
+    const blocked = await claim(claimRequest());
+    const blockedBody = await blocked.json();
+    assert.equal(blockedBody.status, "no_work", JSON.stringify(blockedBody));
+    assert.deepEqual(mutations, ["unassign", "patch"]);
+    assert.ok(parseVolunteerMarker(issue.body).leases.every((item) => item.lease_id !== expired.lease_id));
+    competingClaim = false;
+    const response = await claim(claimRequest());
     assert.equal(response.status, 200, await response.text());
-    assert.deepEqual(mutations, ["patch", "patch", "assign"]);
-    assert.deepEqual(issue.assignees, [{ login: "alice" }]);
-    assert.equal(parseVolunteerMarker(issue.body).leases.length, 1);
-    assert.notEqual(parseVolunteerMarker(issue.body).leases[0].lease_id, expired.lease_id);
+    assert.deepEqual(mutations, ["unassign", "patch", "patch"]);
+    assert.deepEqual(issue.assignees, []);
+    assert.equal(parseVolunteerMarker(issue.body).leases.length, 2);
+    assert.ok(parseVolunteerMarker(issue.body).leases.some((item) => item.lease_id === publicLease.lease_id));
+    assert.ok(parseVolunteerMarker(issue.body).leases.every((item) => item.lease_id !== expired.lease_id));
+    assert.equal(parseVolunteerMarker(issue.body).submissions[0].ownership_mode, "public");
   } finally {
     globalThis.fetch = originalFetch;
     process.env = originalEnv;
@@ -461,6 +486,54 @@ test("release re-signs while preserving history and other leases", async () => {
     assert.deepEqual(issue.assignees, [{ login: "bob" }]);
     assert.match(issue.body, /harmless comment/);
     assert.match(issue.body, /- \[x\] Greek/);
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env = originalEnv;
+  }
+});
+
+test("release unassigns legacy ownership despite matching public lease and submission", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalEnv = { ...process.env };
+  process.env.VOLUNTEER_MARKER_SECRET = "marker-secret";
+  process.env.UPSTASH_REDIS_REST_URL = "https://redis.test";
+  process.env.UPSTASH_REDIS_REST_TOKEN = "redis-token";
+  process.env.GITHUB_TOKEN = "github-token";
+  const publicLease = { lease_id: "public-lease", language: "fr", worker: "public-worker",
+    contributor: "alice", expires_at: new Date(Date.now() + 120_000).toISOString(), ownership_mode: "public" };
+  const publicSubmission = { submission_id: "public-submission", language: "fr", manifest_path: "manifest",
+    submitted_at: "2026-09-06T10:00:00Z", verified_contributor: "alice", result_count: 1,
+    status: "accepted", ownership_mode: "public" };
+  const signed = await signVolunteerMarker(issueNumber, {
+    protocol_version: "volunteer-worker/v1", coordinator: "coordinator", submission: "submitted",
+    leases: [{ lease_id: lease.lease_id, language: lease.language, worker: lease.worker,
+      contributor: lease.contributor, expires_at: lease.expires_at }, publicLease],
+    submissions: [publicSubmission], completed_languages: [],
+  });
+  const issue = { number: issueNumber, body: markerBody(signed), state: "open", assignees: [{ login: "alice" }] };
+  const values = new Map();
+  values.set(`euroeval:worker:credential:${await sha256("credential")}`, JSON.stringify({ contributor: "alice" }));
+  values.set(`euroeval:worker:lease-id:${lease.lease_id}`, JSON.stringify(lease));
+  values.set(`euroeval:worker:lease:${issueNumber}:da`, JSON.stringify(lease));
+  const mutations = [];
+  const broker = mockBroker(issue, values);
+  globalThis.fetch = async (input, init = {}) => {
+    if (new URL(String(input)).origin === "https://api.github.com" && (init.method || "GET") !== "GET") {
+      mutations.push((init.method || "GET") + (String(input).includes("/assignees") ? ":assignee" : ":issue"));
+    }
+    return broker(input, init);
+  };
+  try {
+    const response = await release(new Request("https://euroeval.test/api/worker/release", {
+      method: "POST", headers: { authorization: "Bearer credential", "content-type": "application/json" },
+      body: JSON.stringify({ protocol_version: "volunteer-worker/v1", lease_id: lease.lease_id }),
+    }));
+    assert.equal(response.status, 200, await response.text());
+    assert.deepEqual(issue.assignees, []);
+    const released = parseVolunteerMarker(issue.body);
+    assert.deepEqual(released.leases, [publicLease]);
+    assert.deepEqual(released.submissions, [publicSubmission]);
+    assert.ok(mutations.includes("DELETE:assignee"));
   } finally {
     globalThis.fetch = originalFetch;
     process.env = originalEnv;
