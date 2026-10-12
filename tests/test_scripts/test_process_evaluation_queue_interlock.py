@@ -7,6 +7,7 @@ import json
 import time
 from contextlib import nullcontext
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -213,10 +214,11 @@ def test_local_claim_rechecks_cross_issue_public_work(
         "extract_model_id",
         lambda title, body: title.removeprefix("Evaluate "),
     )
+    coordinator = SimpleNamespace(ensure_healthy=lambda: None)
     monkeypatch.setattr(
         process_evaluation_queue,
         "_coordinator_issue_lock",
-        lambda number: nullcontext(None),
+        lambda number: nullcontext(coordinator),
     )
     monkeypatch.setattr(
         process_evaluation_queue,

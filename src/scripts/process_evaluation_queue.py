@@ -753,8 +753,11 @@ def process_issue(
         with _coordinator_issue_lock(number) as coordinator_lock:
             if coordinator_lock is not None:
                 coordinator_lock.ensure_healthy()
-            if _has_cross_issue_public_collision(
-                number=number, model_id=model_id, languages=set(languages)
+            if (
+                coordinator_lock is not None
+                and _has_cross_issue_public_collision(
+                    number=number, model_id=model_id, languages=set(languages)
+                )
             ) or not issue_is_still_claimable(number=number):
                 logger.info(
                     f"#{number}: skipping -- no longer claimable or model/language "
