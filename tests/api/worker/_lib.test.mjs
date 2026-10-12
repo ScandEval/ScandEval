@@ -89,6 +89,17 @@ test("unassignable contributors receive a stable actionable error", async () => 
   }
 });
 
+test("public ownership markers are signed-contract data without assignee requirements", () => {
+  const marker = { protocol_version: "volunteer-worker/v1", coordinator: "sentinel", submission: "active", leases: [{
+    lease_id: "public-lease", language: "da", worker: "worker", contributor: "alice",
+    expires_at: new Date(Date.now() + 60_000).toISOString(), ownership_mode: "public",
+  }] };
+  const parsed = parseVolunteerMarker(renderVolunteerMarker(marker));
+  assert.equal(parsed.leases[0].ownership_mode, "public");
+  assert.equal(volunteerAssigneesMatch([], parsed), true);
+  assert.equal(volunteerAssigneesMatch([{ login: "unrelated" }], parsed), false);
+});
+
 test("assignee ownership is case-insensitive and excludes manual identities", () => {
   const marker = { protocol_version: "volunteer-worker/v1", coordinator: "sentinel", submission: "active", leases: [{
     lease_id: "lease", language: "da", worker: "worker", contributor: "Alice",

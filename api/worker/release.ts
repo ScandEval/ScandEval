@@ -9,9 +9,9 @@ import type { VolunteerLeaseMarker } from "./_lib.js";
 export const config = { runtime: "edge" };
 
 function expectedAssignees(marker: VolunteerLeaseMarker): Set<string> {
-  const expected = new Set(marker.leases.map((item) => item.contributor.toLowerCase()));
+  const expected = new Set(marker.leases.filter((item) => item.ownership_mode !== "public").map((item) => item.contributor.toLowerCase()));
   for (const item of marker.submissions || []) {
-    if (["submitted", "accepted"].includes(item.status)) {
+    if (["submitted", "accepted"].includes(item.status) && item.ownership_mode !== "public") {
       expected.add(item.verified_contributor.toLowerCase());
     }
   }
@@ -49,8 +49,11 @@ export default async function handler(req: Request): Promise<Response> {
         if (VOLUNTEER_MARKER_RE.test(current.body || "")) {
           throw new BrokerError(409, "GitHub ownership marker is missing, unsigned, or malformed.");
         }
-        // A process may have completed the GitHub mutation and stopped before
-        // deleting Redis. Never infer permission to unassign from this state.
+        // Legacy release retries may have completed the GitHub mutation before
+        // Redis cleanup. Public leases require their signed marker as ownership proof.
+        if (lease.ownership_mode === "public") {
+          throw new BrokerError(409, "GitHub ownership marker is missing, unsigned, or malformed.");
+        }
         await deleteLease(lease);
         return json(200, { protocol_version: PROTOCOL_VERSION, status: "released", lease_id: lease.lease_id });
       }
@@ -64,6 +67,11 @@ export default async function handler(req: Request): Promise<Response> {
         return json(200, { protocol_version: PROTOCOL_VERSION, status: "released", lease_id: lease.lease_id });
       }
       const contributor = lease.contributor.toLowerCase();
+      const ownedMarkerLease = marker.leases.find((item) => item.lease_id === lease.lease_id);
+      if (!ownedMarkerLease || ownedMarkerLease.contributor.toLowerCase() !== contributor ||
+          (ownedMarkerLease.ownership_mode || "assignee") !== (lease.ownership_mode || "assignee")) {
+        throw new BrokerError(409, "GitHub release ownership fence lost.");
+      }
       const markerExpected = expectedAssignees(marker);
       const retained = marker.leases.some((item) => item.lease_id !== lease.lease_id &&
           item.contributor.toLowerCase() === contributor) ||
@@ -79,7 +87,7 @@ export default async function handler(req: Request): Promise<Response> {
       const assigned = (current.assignees || []).find(
         (item) => item.login.toLowerCase() === contributor,
       );
-      if (assigned && !retained) {
+      if (lease.ownership_mode !== "public" && assigned && !retained) {
         await mutex.assertOwned();
         try {
           await unassignIssue(lease.issue_number, assigned.login);

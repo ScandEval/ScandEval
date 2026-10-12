@@ -1,7 +1,7 @@
 import {
   BrokerError, ConfigurationError, PROTOCOL_VERSION, acquireRenewableIssueMutex, authenticate,
   brokerErrorBody, enforceRateLimit, fetchIssue, getLeaseById, json, leaseTtl, method, parseVolunteerMarker,
-  requireAssignee,
+  requireLeaseOwnership,
   patchIssue, readJson, requireProtocol, replaceVolunteerMarker,
   saveLease, signVolunteerMarker, verifyVolunteerMarker,
 } from "./_lib.js";
@@ -20,7 +20,7 @@ export default async function handler(req: Request): Promise<Response> {
     if (!mutex) throw new BrokerError(409, "Issue is busy; retry heartbeat.");
     try {
       const issue = await fetchIssue(lease.issue_number);
-      await requireAssignee(issue, lease.contributor);
+      await requireLeaseOwnership(issue, lease);
       const marker = parseVolunteerMarker(issue.body);
       const markerLease = marker?.leases.find((item) => item.lease_id === lease.lease_id);
       if (!marker || !markerLease || !(await verifyVolunteerMarker(issue.number, marker))) throw new BrokerError(409, "GitHub ownership marker is missing, unsigned, or malformed.");
@@ -41,7 +41,7 @@ export default async function handler(req: Request): Promise<Response> {
           !fenced.leases.some((item) => item.lease_id === lease.lease_id && item.expires_at === expiresAt)) {
         throw new BrokerError(409, "GitHub heartbeat fence lost.");
       }
-      await requireAssignee(fencedIssue, lease.contributor);
+      await requireLeaseOwnership(fencedIssue, lease);
       lease.expires_at = expiresAt;
       if (!(await saveLease(lease))) throw new BrokerError(409, "Lease was replaced or expired before it could be renewed.");
       return json(200, { protocol_version: PROTOCOL_VERSION, lease_id: lease.lease_id, expires_at: expiresAt });

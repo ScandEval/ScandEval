@@ -129,7 +129,7 @@ test("claim rejects an issue model edited during metadata resolution", async () 
   }
 });
 
-test("claim resumes after expired contributor unassignment interruption", async () => {
+test("claim resumes after expired ownership recovery without assigning the issue", async () => {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
   process.env.VOLUNTEER_MARKER_SECRET = "marker-secret";
@@ -201,9 +201,10 @@ test("claim resumes after expired contributor unassignment interruption", async 
             total_memory_bytes: 1_000_000 }] } }),
     }));
     assert.equal(response.status, 200, await response.text());
-    assert.deepEqual(mutations, ["patch", "patch", "assign"]);
-    assert.deepEqual(issue.assignees, [{ login: "alice" }]);
+    assert.deepEqual(mutations, ["patch", "patch"]);
+    assert.deepEqual(issue.assignees, []);
     assert.equal(parseVolunteerMarker(issue.body).leases.length, 1);
+    assert.equal(parseVolunteerMarker(issue.body).leases[0].ownership_mode, "public");
     assert.notEqual(parseVolunteerMarker(issue.body).leases[0].lease_id, expired.lease_id);
   } finally {
     globalThis.fetch = originalFetch;
