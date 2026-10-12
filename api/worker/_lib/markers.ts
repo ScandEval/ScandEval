@@ -72,11 +72,12 @@ export function volunteerAssigneesMatch(
     } else if (includeExpiredLeases) {
       expected.add(contributor);
       if (allowExpiredUnassigned && !marker.leases.some((other) =>
-        other.lease_id !== lease.lease_id &&
+        other.lease_id !== lease.lease_id && other.ownership_mode !== "public" &&
         Date.parse(other.expires_at) > now &&
         other.contributor.toLowerCase() === contributor,
       ) && !(marker.submissions || []).some((submission) =>
         ["submitted", "accepted"].includes(submission.status) &&
+        submission.ownership_mode !== "public" &&
         submission.verified_contributor.toLowerCase() === contributor,
       )) optional.add(contributor);
     }
