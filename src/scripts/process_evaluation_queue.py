@@ -559,9 +559,27 @@ def _filter_protected_language_groups(
 def _has_legacy_active_ownership(number: int, body: str) -> bool:
     """Return whether active broker work should retain issue-wide queue blocking."""
     marker = trusted_community_marker(number=number, body=body)
-    return marker is None or (
-        marker.submission == "active"
-        and not any(lease.get("ownership_mode") == "public" for lease in marker.leases)
+    return (
+        marker is None
+        or (
+            marker.submission == "submitted"
+            and (
+                not marker.submissions
+                or any(
+                    submission.get("ownership_mode") != "public"
+                    for submission in marker.submissions
+                )
+            )
+        )
+        or (
+            marker.submission == "active"
+            and (
+                not marker.leases
+                or any(
+                    lease.get("ownership_mode") != "public" for lease in marker.leases
+                )
+            )
+        )
     )
 
 

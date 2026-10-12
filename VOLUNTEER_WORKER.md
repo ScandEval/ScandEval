@@ -79,9 +79,8 @@ value for later runs if the deployment must remain pinned.
 
 ## How volunteer evaluation works
 
-1. The worker completes the broker-mediated GitHub device flow. The OAuth login must be
-   assignable to issues in the EuroEval repository; otherwise the worker stops with
-   instructions to use an eligible GitHub account.
+1. The worker completes the broker-mediated GitHub device flow. Any GitHub account can
+   participate without repository or organisation membership.
 2. It reports NVIDIA hardware and asks for a compatible queued model/language.
 3. The broker anonymously verifies that the queued Hugging Face model is public,
    ungated, pinned to an immutable revision, safetensors-only, free of repository Python
@@ -99,12 +98,11 @@ value for later runs if the deployment must remain pinned.
    broker lease field remains control-plane metadata.
 7. The broker validates the complete lease and marks it ready for review.
 
-Issue assignees are the mutable, authoritative active evaluators and credit identities
-for both manual and volunteer work. Maintainers can transfer ownership or credit by
-changing assignees; that fences old volunteer leases. Multiple assignees are valid when
-multiple volunteers contribute different languages, and accepted assignees are retained.
-An assignee is removed only after rejection or intentional release. Signed marker
-contributors are audit and integrity evidence only, not authoritative identity.
+Public volunteer leases are owned by the authenticated account, the broker's short-lived
+lease, and a signed issue marker; volunteers do not become issue assignees. Accepted
+signed submissions provide volunteer credit. Manual evaluations and older assignee-backed
+volunteer leases retain their existing assignee ownership and credit rules. The broker
+fences a public lease if its signed marker is removed or replaced.
 
 A worker can be interrupted safely. The local state and exact result bytes remain in the
 named volume. Restarting before lease expiry resumes the same lease; after expiry, the

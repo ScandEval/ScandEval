@@ -92,7 +92,7 @@ def _signed_public_marker(
     """
     secret = "test-marker-secret"
     payload = {
-        "protocol_version": 1,
+        "protocol_version": "volunteer-worker/v1",
         "coordinator": "community",
         "submission": status,
         "leases": [],
@@ -239,6 +239,9 @@ def test_public_lease_language_blocks_local_candidate_collision(
         _issue(2),
         _issue(3, "english"),
     ]
+    assert process_evaluation_queue.public_marker_protected_languages(
+        str(issues[0]["body"]), issue_number=1
+    ) == {"el"}
     monkeypatch.setattr(
         process_evaluation_queue,
         "_list_queue_issues",
@@ -249,10 +252,15 @@ def test_public_lease_language_blocks_local_candidate_collision(
         "extract_model_id",
         lambda title, body: title.removeprefix("Evaluate "),
     )
+    west_germanic = next(
+        group
+        for group, codes in process_evaluation_queue.LANGUAGE_GROUP_CODES.items()
+        if "en" in codes
+    )
     monkeypatch.setattr(
         process_evaluation_queue,
         "extract_language_groups",
-        lambda body: ["English"] if body == "english" else ["Greek"],
+        lambda body: [west_germanic] if body == "english" else ["Greek"],
     )
     monkeypatch.setattr(
         process_evaluation_queue,
@@ -427,7 +435,7 @@ def test_unsigned_public_marker_fails_closed_for_unassigned_issue(
 ) -> None:
     """Unsigned public ownership cannot authorize an unassigned queue candidate."""
     payload = {
-        "protocol_version": 1,
+        "protocol_version": "volunteer-worker/v1",
         "coordinator": "community",
         "submission": "active",
         "leases": [
