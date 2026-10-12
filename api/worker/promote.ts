@@ -139,7 +139,8 @@ export default async function handler(req: Request): Promise<Response> {
         await mutex.assertOwned();
         await removeIssueLabel(issueNumber, reviewLabel);
       }
-      if (plan.releaseContributor) {
+      const promotedSubmission = marker.submissions?.find((item) => item.submission_id === submissionId);
+      if (plan.releaseContributor && promotedSubmission?.ownership_mode !== "public") {
         const currentIssue = await fetchIssue(issueNumber);
         const contributor = plan.releaseContributor.toLowerCase();
         const assigned = (currentIssue.assignees || []).find((item) => item.login.toLowerCase() === contributor);

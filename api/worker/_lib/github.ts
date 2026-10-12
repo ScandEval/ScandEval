@@ -1,4 +1,6 @@
-import { BrokerError, REPO, REQUEST_LABEL, env } from "./protocol.js";
+import { BrokerError, REPO, REQUEST_LABEL, env, type Lease } from "./protocol.js";
+import { parseVolunteerMarker } from "./markers.js";
+import { verifyVolunteerMarker } from "./protocol.js";
 import { fetchWithRetry } from "./http.js";
 
 
@@ -18,6 +20,17 @@ export const fetchIssue = getIssue;
 
 export function hasIssueAssignee(issue: Pick<GithubIssue, "assignees">, login: string): boolean {
   return (issue.assignees || []).some((assignee) => assignee.login.toLowerCase() === login.toLowerCase());
+}
+
+export async function requireLeaseOwnership(issue: GithubIssue, lease: Lease): Promise<void> {
+  const marker = parseVolunteerMarker(issue.body);
+  const markerLease = marker?.leases.find((item) => item.lease_id === lease.lease_id);
+  if (!marker || !markerLease || !(await verifyVolunteerMarker(issue.number, marker)) ||
+      markerLease.contributor.toLowerCase() !== lease.contributor.toLowerCase() ||
+      (markerLease.ownership_mode || "assignee") !== (lease.ownership_mode || "assignee")) {
+    throw new BrokerError(409, "The signed issue ownership marker is missing, invalid, or no longer owns this lease.", "lease_ownership_lost");
+  }
+  if (lease.ownership_mode !== "public") await requireAssignee(issue, lease.contributor);
 }
 
 export async function requireAssignee(issue: Pick<GithubIssue, "assignees">, login: string): Promise<void> {

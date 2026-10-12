@@ -30,6 +30,8 @@ export interface VolunteerSubmission {
   verified_contributor: string;
   result_count: number;
   status: "submitted" | "accepted" | "rejected";
+  /** Missing means historical assignee-backed credit. */
+  ownership_mode?: "assignee" | "public";
 }
 
 export interface PromotionRecord {
@@ -61,7 +63,7 @@ export interface VolunteerLeaseMarker {
   protocol_version: typeof PROTOCOL_VERSION;
   coordinator: string;
   submission: "active" | "submitted" | "accepted" | "rejected";
-  leases: Array<{ lease_id: string; language: string; worker: string; contributor: string; expires_at: string }>;
+  leases: Array<{ lease_id: string; language: string; worker: string; contributor: string; expires_at: string; ownership_mode?: "assignee" | "public" }>;
   submissions?: VolunteerSubmission[];
   completed_languages?: string[];
   signature?: string;
@@ -109,6 +111,8 @@ export interface Lease {
   selected_gpu_uuid: string;
   expires_at: string;
   lease_id: string;
+  /** Missing means the historical GitHub-assignee ownership contract. */
+  ownership_mode?: "assignee" | "public";
   /** Internal tombstone used to make release retries idempotent. */
   released?: boolean;
   result_count?: number;

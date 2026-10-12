@@ -1,6 +1,6 @@
 import {
   BrokerError, ConfigurationError, GROUPS, PROTOCOL_VERSION, VM_MARKER_RE, VOLUNTEER_MARKER_RE,
-  acquireRenewableIssueMutex, assignIssue, assertAssignable, authenticate, brokerErrorBody,
+  acquireRenewableIssueMutex, authenticate, brokerErrorBody,
   claimableLanguages, env, expectedScope,
   extractModelId, enforceRateLimit, fitsGpu, fetchIssue, json, languageGroup, leaseTtl, selectedGpu,
   listOpenIssues, method,
@@ -42,7 +42,7 @@ async function recoverExpiredOwnership(
     const assigned = (current.assignees || []).find(
       (assignee) => assignee.login.toLowerCase() === contributor,
     );
-    if (assigned && !retained) {
+    if (expiredLease.ownership_mode !== "public" && assigned && !retained) {
       await mutex.assertOwned();
       try {
         await unassignIssue(current.number, assigned.login);
@@ -135,7 +135,6 @@ export default async function handler(req: Request): Promise<Response> {
     const imageDigest = env("VOLUNTEER_WORKER_IMAGE_DIGEST");
     const euroevalVersion = env("EUROEVAL_VERSION").replace(/\.dev$/, ".dev0");
     const requiredWorkerVersion = env("VOLUNTEER_WORKER_VERSION");
-    await assertAssignable(identity.contributor);
     if (body.worker_version !== requiredWorkerVersion) throw new BrokerError(422, "Unsupported worker version.");
     const requestedLanguage = typeof body.language === "string" ? body.language : null;
     const issues = await listOpenIssues();
@@ -206,6 +205,7 @@ export default async function handler(req: Request): Promise<Response> {
           selected_gpu_uuid: body.hardware.selected_gpu_uuid as string,
           expires_at: expiresAt,
           lease_id: leaseId,
+          ownership_mode: "public",
           model_type: model.model_type,
           model_metadata: model.model_metadata,
           contamination_canary: contaminationCanary,
@@ -222,29 +222,23 @@ export default async function handler(req: Request): Promise<Response> {
         };
         const nextMarker: VolunteerLeaseMarker = {
           protocol_version: PROTOCOL_VERSION, coordinator: "coordinator", submission: "active",
-          leases: [...(current?.leases || []), { lease_id: lease.lease_id, language, worker: lease.worker, contributor: identity.contributor, expires_at: expiresAt }],
+          leases: [...(current?.leases || []), { lease_id: lease.lease_id, language, worker: lease.worker, contributor: identity.contributor, expires_at: expiresAt, ownership_mode: "public" }],
           ...(current?.submissions ? { submissions: current.submissions } : {}),
           ...(current?.completed_languages ? { completed_languages: current.completed_languages } : {}),
         };
-        let hadAssignment = false;
         try {
           const signedMarker = await signVolunteerMarker(snapshot.number, nextMarker);
           await mutex.assertOwned();
           await patchIssue(snapshot.number, replaceVolunteerMarker(snapshot.body || "", signedMarker));
-          await mutex.assertOwned();
-          hadAssignment = (snapshot.assignees || []).some((item) =>
-            item.login.toLowerCase() === identity.contributor.toLowerCase());
-          await assignIssue(snapshot.number, identity.contributor);
           await mutex.assertOwned();
           const after = await fetchIssue(snapshot.number);
           await mutex.assertOwned();
           const afterMarker = parseVolunteerMarker(after.body);
           if (VM_MARKER_RE.test(after.body || "") || !afterMarker ||
               !(await verifyVolunteerMarker(snapshot.number, afterMarker)) ||
-              !afterMarker.leases.some((item) => item.lease_id === lease.lease_id) ||
-               !volunteerAssigneesMatch(after.assignees, afterMarker) ||
-               !(after.assignees || []).some((item) =>
-                 item.login.toLowerCase() === identity.contributor.toLowerCase())) {
+              !afterMarker.leases.some((item) => item.lease_id === lease.lease_id &&
+                item.ownership_mode === "public") ||
+              !volunteerAssigneesMatch(after.assignees, afterMarker)) {
             throw new BrokerError(409, "GitHub ownership fence lost during claim.");
           }
         } catch (error) {
@@ -259,14 +253,6 @@ export default async function handler(req: Request): Promise<Response> {
             }))).catch(() => undefined);
           }
           const cleanup = live ? await fetchIssue(snapshot.number).catch(() => live) : null;
-          if (cleanup && !hadAssignment && (cleanup.assignees || []).some((item) =>
-            item.login.toLowerCase() === identity.contributor.toLowerCase()) &&
-            !parseVolunteerMarker(cleanup.body)?.leases.some((item) => item.lease_id === lease.lease_id)) {
-            await mutex.assertOwned();
-            const assigned = (cleanup.assignees || []).find((item) =>
-              item.login.toLowerCase() === identity.contributor.toLowerCase());
-            if (assigned) await unassignIssue(snapshot.number, assigned.login).catch(() => undefined);
-          }
           await deleteLease(lease).catch(() => undefined);
           throw error;
         }

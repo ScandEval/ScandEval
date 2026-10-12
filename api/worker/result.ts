@@ -1,6 +1,6 @@
 import {
   BrokerError, ConfigurationError, PROTOCOL_VERSION, acquireRenewableIssueMutex, authenticate, brokerErrorBody,
-  enforceRateLimit, fetchIssue, getLeaseById, json, method, readJson, requireAssignee, sha256, redis, redisGet,
+  enforceRateLimit, fetchIssue, getLeaseById, json, method, readJson, requireLeaseOwnership, sha256, redis, redisGet,
   reserveResultIdentity, completeResultIdentity, abortResultIdentity, releaseResultReservation,
   requireProtocol,
 } from "./_lib.js";
@@ -21,7 +21,7 @@ export async function fetch(req: Request): Promise<Response> {
     if (typeof body.lease_id !== "string" || typeof body.language !== "string" || typeof body.model_id !== "string" || typeof body.model_revision !== "string" || typeof body.euroeval_version !== "string" || typeof body.image_digest !== "string" || typeof body.worker_version !== "string" || typeof body.record_json !== "string" || typeof body.digest !== "string" || typeof body.issue_number !== "number" || !Number.isSafeInteger(body.issue_number)) throw new BrokerError(400, "Result contract fields have invalid types.");
     const lease = await getLeaseById(body.lease_id);
     if (!lease || lease.released || lease.contributor.toLowerCase() !== identity.contributor.toLowerCase() || Date.parse(lease.expires_at) <= Date.now()) throw new BrokerError(409, "Lease is absent, expired, or belongs to another contributor.");
-    await requireAssignee(await fetchIssue(lease.issue_number), lease.contributor);
+    await requireLeaseOwnership(await fetchIssue(lease.issue_number), lease);
     if (body.issue_number !== lease.issue_number || body.language !== lease.language || body.model_id !== lease.model_id || body.model_revision !== lease.model_revision || body.euroeval_version !== lease.euroeval_version || body.image_digest !== lease.image_digest || body.worker_version !== lease.worker_version) throw new BrokerError(422, "Result contract does not exactly match the active lease.");
     if (Date.parse(lease.expires_at) <= Date.now()) throw new BrokerError(409, "Lease is absent, expired, or belongs to another contributor.");
     const digest = await sha256(body.record_json);
@@ -43,7 +43,7 @@ export async function fetch(req: Request): Promise<Response> {
     let claim: Awaited<ReturnType<typeof reserveResultIdentity>>;
     try {
       await reservationMutex.assertOwned();
-      await requireAssignee(await fetchIssue(lease.issue_number), lease.contributor);
+      await requireLeaseOwnership(await fetchIssue(lease.issue_number), lease);
       claim = await reserveResultIdentity(
         identityKey, JSON.stringify(reservation), digest, lease.lease_id, 24 * 60 * 60,
         `euroeval:worker:reservations:${lease.lease_id}`,
@@ -65,12 +65,12 @@ export async function fetch(req: Request): Promise<Response> {
       if (!completionMutex) throw new BrokerError(409, "Issue is busy; retry result submission.");
       try {
         await completionMutex.assertOwned();
-        await requireAssignee(await fetchIssue(lease.issue_number), lease.contributor);
+        await requireLeaseOwnership(await fetchIssue(lease.issue_number), lease);
         reservation.status = "uploaded";
         if (!(await completeResultIdentity(identityKey, JSON.stringify(reservation), digest, lease.lease_id, 30 * 24 * 60 * 60))) throw new BrokerError(409, "Result reservation was replaced during upload; retry safely.");
         completed = true;
         await completionMutex.assertOwned();
-        await requireAssignee(await fetchIssue(lease.issue_number), lease.contributor);
+        await requireLeaseOwnership(await fetchIssue(lease.issue_number), lease);
         await redis("SADD", `euroeval:worker:results:${lease.lease_id}`, JSON.stringify({ digest, identity: checked.identity, path, warnings: checked.warnings }));
         await redis("SADD", `euroeval:worker:reservations:${lease.lease_id}`, JSON.stringify({ digest, identity: checked.identity }));
         await redis("EXPIRE", `euroeval:worker:results:${lease.lease_id}`, String(30 * 24 * 60 * 60));
