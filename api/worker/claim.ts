@@ -32,10 +32,11 @@ async function recoverExpiredOwnership(
         Date.parse(redisLease.expires_at) > Date.now())) return null;
     if (!volunteerAssigneesMatch(current.assignees, currentMarker, Date.now(), true, true)) return null;
     const retained = currentMarker.leases.some(
-      (lease) => lease.lease_id !== expiredLease.lease_id &&
+      (lease) => lease.lease_id !== expiredLease.lease_id && lease.ownership_mode !== "public" &&
         lease.contributor.toLowerCase() === contributor,
     ) || (currentMarker.submissions || []).some(
       (submission) => ["submitted", "accepted"].includes(submission.status) &&
+        submission.ownership_mode !== "public" &&
         submission.verified_contributor.toLowerCase() === contributor,
     );
 

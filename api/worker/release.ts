@@ -74,9 +74,9 @@ export default async function handler(req: Request): Promise<Response> {
       }
       const markerExpected = expectedAssignees(marker);
       const retained = marker.leases.some((item) => item.lease_id !== lease.lease_id &&
-          item.contributor.toLowerCase() === contributor) ||
+          item.ownership_mode !== "public" && item.contributor.toLowerCase() === contributor) ||
         (marker.submissions || []).some((item) => ["submitted", "accepted"].includes(item.status) &&
-          item.verified_contributor.toLowerCase() === contributor);
+          item.ownership_mode !== "public" && item.verified_contributor.toLowerCase() === contributor);
       const withoutContributor = new Set(markerExpected);
       if (!retained) withoutContributor.delete(contributor);
       if (!assigneesMatch(current.assignees, markerExpected) &&
