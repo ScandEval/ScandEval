@@ -459,14 +459,20 @@ def test_discover_hardware_does_not_import_torch_in_worker(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Report GB10 data while avoiding CUDA initialisation in the worker process."""
-    monkeypatch.setattr(hardware, "_discover_spark_memory", lambda gpu: gpu)
+    monkeypatch.setattr(
+        hardware,
+        "_discover_spark_memory",
+        lambda gpu: dataclasses.replace(
+            gpu, free_memory_bytes=10, total_memory_bytes=20
+        ),
+    )
     monkeypatch.setattr(hardware, "_ram_bytes", lambda: 128 * 1024**3)
     monkeypatch.setattr(hardware, "_pytorch_version", lambda: None)
     gpu_output = "0, NVIDIA GB10, GPU-test, 0, 0, 12.1\n"
     report = discover_hardware(
         runner=lambda command: (
             gpu_output
-            if "--query-gpu" in command
+            if any(argument.startswith("--query-gpu=") for argument in command)
             else "Driver Version: 1.0 CUDA Version: 12.1"
         )
     )
@@ -875,7 +881,7 @@ def test_gb10_n_a_memory_uses_verified_cuda_fallback(
         return type(
             "Completed",
             (),
-            {"stdout": '{"uuid":"GPU-test","free":14000000000,"total":130000000000}'},
+            {"stdout": '{"uuid":"test","free":14000000000,"total":130000000000}'},
         )()
 
     monkeypatch.setattr(hardware.subprocess, "run", fake_run)

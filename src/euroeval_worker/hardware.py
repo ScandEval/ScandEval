@@ -140,7 +140,8 @@ def _discover_spark_memory(gpu: Gpu) -> Gpu:
         host_available = _host_available_bytes()
         if (
             not isinstance(reported_uuid, str)
-            or reported_uuid.lower() != gpu.uuid.lower()
+            or reported_uuid.lower().removeprefix("gpu-")
+            != gpu.uuid.lower().removeprefix("gpu-")
             or free < 0
             or total <= 0
             or free > total
