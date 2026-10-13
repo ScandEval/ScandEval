@@ -126,7 +126,12 @@ class EuroEvalEvaluator(Evaluator):
         self.cache_dir = cache_dir
         self.gpu_memory_utilisation = gpu_memory_utilisation
 
-    def evaluate(self, lease: Lease, output_path: Path) -> list[EEERecord]:
+    def evaluate(
+        self,
+        lease: Lease,
+        output_path: Path,
+        gpu_memory_utilisation: float | None = None,
+    ) -> list[EEERecord]:
         """Run validation-only EuroEval with remote code disabled.
 
         Args:
@@ -134,10 +139,18 @@ class EuroEvalEvaluator(Evaluator):
                 Broker-issued evaluation lease.
             output_path:
                 JSONL path to receive the isolated evaluation records.
+            gpu_memory_utilisation:
+                Effective fraction of total GPU memory to offer vLLM. Defaults to the
+                configured utilisation when omitted.
 
         Returns:
             EEE records produced by the evaluation.
         """
+        gpu_memory_utilisation = (
+            self.gpu_memory_utilisation
+            if gpu_memory_utilisation is None
+            else gpu_memory_utilisation
+        )
         canary_required = (
             lease.contamination_canary is not None
             and lease.contamination_canary.status == "required"
@@ -156,7 +169,7 @@ class EuroEvalEvaluator(Evaluator):
             trust_remote_code=False,
             evaluate_test_split=False,
             requires_safetensors=True,
-            gpu_memory_utilization=self.gpu_memory_utilisation,
+            gpu_memory_utilization=gpu_memory_utilisation,
             few_shot=ShotMode.AUTO,
             force=True,
             raise_errors=True,
@@ -172,7 +185,7 @@ class EuroEvalEvaluator(Evaluator):
             trust_remote_code=False,
             evaluate_test_split=False,
             requires_safetensors=True,
-            gpu_memory_utilization=self.gpu_memory_utilisation,
+            gpu_memory_utilization=gpu_memory_utilisation,
             few_shot=ShotMode.AUTO,
             force=True,
             raise_errors=True,
