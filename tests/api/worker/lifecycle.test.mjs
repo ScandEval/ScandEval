@@ -210,7 +210,8 @@ for (const transientConfigError of [false, true]) test(
   }
 });
 
-test("claim bounds a stalled marker PATCH and cleans its Redis lease", async () => {
+for (const stalledOperation of ["marker PATCH", "lease response"]) test(
+  `claim bounds a stalled ${stalledOperation} and cleans its Redis lease`, async () => {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
   Object.assign(process.env, { VOLUNTEER_MARKER_SECRET: "marker-secret",
@@ -219,12 +220,12 @@ test("claim bounds a stalled marker PATCH and cleans its Redis lease", async () 
     UPSTASH_REDIS_REST_TOKEN: "redis-token", GITHUB_TOKEN: "github-token",
     VOLUNTEER_SCOPE_POLICY_JSON: JSON.stringify({ policy_version: "test-policy", policies: [{
       euroeval_version: "1.0.0", model_type: "encoder", language: "da", language_group: "da",
-      allowed_identity_suffix_sets: [[JSON.stringify(["slow", false, true])]],
+      allowed_identity_suffix_sets: [[JSON.stringify(["recovered", false, true])]],
       task_groups: ["sequence_classification"], warnings: [],
     }] }) });
   const language = "Scandinavian languages (Danish, Faroese, Icelandic, Norwegian, Swedish)";
   const issue = { number: issueNumber, title: "[MODEL EVALUATION REQUEST] org/model",
-    body: `### Model ID\\n\\norg/model\\n\\n- [x] ${language}\\n`, state: "open", assignees: [] };
+    body: `### Model ID\n\norg/model\n\n- [x] ${language}\n`, state: "open", assignees: [] };
   const credentialKey = `euroeval:worker:credential:${await sha256("credential")}`;
   const values = new Map([[credentialKey, JSON.stringify({ contributor: "alice" })]]);
   globalThis.fetch = async (input, init = {}) => {
@@ -235,6 +236,12 @@ test("claim bounds a stalled marker PATCH and cleans its Redis lease", async () 
       if (command[0] === "INCR") return Response.json({ result: 1 });
       if (command[0] === "EVAL" && command[1].includes("local issue=redis.call")) {
         values.set(command[3], command[5]); values.set(command[4], command[5]);
+        if (stalledOperation === "lease response") {
+          await new Promise((resolve, reject) => {
+            const timer = setTimeout(resolve, 30_000);
+            init.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(init.signal.reason); }, { once: true });
+          });
+        }
         return Response.json({ result: 1 });
       }
       if (command[0] === "EVAL" && command[1].includes("released=true")) {
@@ -252,10 +259,12 @@ test("claim bounds a stalled marker PATCH and cleans its Redis lease", async () 
     }
     if (url.endsWith(`/issues/${issueNumber}`) && method === "GET") return Response.json(issue);
     if (url.endsWith(`/issues/${issueNumber}`) && method === "PATCH") {
-      await new Promise((resolve, reject) => {
-        const timer = setTimeout(resolve, 30_000);
-        init.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(init.signal.reason); }, { once: true });
-      });
+      if (stalledOperation === "marker PATCH") {
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, 30_000);
+          init.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(init.signal.reason); }, { once: true });
+        });
+      }
       issue.body = JSON.parse(init.body).body;
       return Response.json(issue);
     }
@@ -270,7 +279,7 @@ test("claim bounds a stalled marker PATCH and cleans its Redis lease", async () 
           selected_gpu_index: 0, selected_gpu_uuid: "gpu", gpus: [{ index: 0, name: "GPU", uuid: "gpu",
             free_memory_bytes: 1_000_000, total_memory_bytes: 1_000_000 }] } }),
     }));
-    assert.equal(response.status, 503);
+    assert.equal(response.status, 503, JSON.stringify({ body: await response.clone().json(), keys: [...values.keys()] }));
     assert.match((await response.json()).error, /retry claim/i);
     assert.ok(Date.now() - started < 8_000, "stalled claim exceeded its cleanup budget");
     assert.equal([...values.keys()].some((key) => key.startsWith("euroeval:worker:lease:")), false);
