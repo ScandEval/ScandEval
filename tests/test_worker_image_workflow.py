@@ -3,6 +3,7 @@
 from pathlib import Path
 
 WORKFLOW = Path(__file__).parents[1] / ".github/workflows/worker-image.yaml"
+DOCKERFILE = Path(__file__).parents[1] / "Dockerfile.worker"
 
 
 def test_amd64_publication_remains_separate_from_spark_candidate() -> None:
@@ -83,3 +84,20 @@ def test_spark_arm64_is_a_distinct_candidate_and_not_promotable() -> None:
     assert "pending a physical DGX Spark canary" in spark_job
     assert "latest" not in spark_job
     assert "type=sha,format=long,prefix=sha-" not in spark_job
+
+
+def test_worker_runtime_includes_pinned_nvcc() -> None:
+    """Provide nvcc for generative startup without changing amd64 publication."""
+    dockerfile = DOCKERFILE.read_text(encoding="utf-8")
+    runtime = dockerfile.split("\nFROM ", maxsplit=2)[-1]
+
+    assert (
+        "nvidia/cuda:13.1.1-devel-ubuntu24.04@sha256:"
+        "9cf8694a27722418a1f175d90f85d5afb5a728fd4a9907d7f0565efecfa14d32" in runtime
+    )
+    assert "PATH=/opt/euroeval/.venv/bin:/usr/local/cuda/bin:$PATH" in runtime
+    assert "USER worker" in runtime
+
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    amd64_job = workflow[: workflow.index("  spark-arm64-candidate:")]
+    assert "platforms: linux/amd64" in amd64_job
