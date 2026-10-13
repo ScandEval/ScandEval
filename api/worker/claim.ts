@@ -179,6 +179,7 @@ export default async function handler(req: Request): Promise<Response> {
     const resolved = new Map<string, Awaited<ReturnType<typeof resolveModel>> | null>();
     const mayFit = new Map<string, boolean | null>();
     let incompleteDiscovery = false;
+    let claimMutexBusy = false;
     const checkDeadline = (): void => {
       if (Date.now() >= deadline) throw new BrokerError(503, "Claim deadline exceeded; retry claim.");
     };
@@ -220,7 +221,7 @@ export default async function handler(req: Request): Promise<Response> {
       if (!model || !fitsGpu(model, body.hardware, selectedHardwareGpu)) continue;
       // Serialize final fresh metadata, cross-issue scan, and claim transaction.
       const globalMutex = await acquireRenewableIssueMutex(GLOBAL_CLAIM_MUTEX);
-      if (!globalMutex) continue;
+      if (!globalMutex) { claimMutexBusy = true; continue; }
       try {
         await globalMutex.assertOwned();
         const freshIssues = await listOpenIssues(controller.signal);
@@ -245,7 +246,8 @@ export default async function handler(req: Request): Promise<Response> {
             .forEach((submission) => blockedLanguages.add(submission.language));
         }
         await globalMutex.assertOwned();
-        const mutex = await acquireRenewableIssueMutex(listed.number); if (!mutex) continue;
+        const mutex = await acquireRenewableIssueMutex(listed.number);
+        if (!mutex) { claimMutexBusy = true; continue; }
         try {
         let snapshot = await fetchIssue(listed.number);
         if (snapshot.state !== "open" || snapshot.body && VM_MARKER_RE.test(snapshot.body)) continue;
@@ -393,6 +395,7 @@ export default async function handler(req: Request): Promise<Response> {
       }
       }
     }
+    if (claimMutexBusy) throw new BrokerError(503, "Claim is busy; retry claim.", "claim_busy");
     if (incompleteDiscovery) throw new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
     return json(200, { protocol_version: PROTOCOL_VERSION, status: "no_work" });
   } catch (error) {

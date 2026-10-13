@@ -24,9 +24,16 @@ def _run(command: list[str]) -> str:
 
 
 def discover_hardware(
-    runner: c.Callable[[list[str]], str] | None = None,
+    runner: c.Callable[[list[str]], str] | None = None, *, state_dir: Path | None = None
 ) -> HardwareReport:
     """Discover host facts and fail clearly when nvidia-smi finds no GPU.
+
+    Args:
+        runner (optional):
+            Command runner used for hardware discovery.
+        state_dir (optional):
+            Worker state and model-cache directory. Defaults to the current working
+            directory for backwards compatibility.
 
     Returns:
         A hardware report suitable for the broker claim.
@@ -40,7 +47,7 @@ def discover_hardware(
     return HardwareReport(
         architecture=platform.machine(),
         ram_bytes=_ram_bytes(),
-        free_disk_bytes=shutil.disk_usage(Path.cwd()).free,
+        free_disk_bytes=shutil.disk_usage(state_dir or Path.cwd()).free,
         driver_version=driver,
         cuda_version=cuda,
         pytorch_version=_pytorch_version(),
