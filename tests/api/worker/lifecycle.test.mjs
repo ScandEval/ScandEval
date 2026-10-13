@@ -136,7 +136,9 @@ for (const upstreamSlow of [false, true]) test(
   }
 });
 
-test("claim rejects an issue model edited during metadata resolution", async () => {
+for (const transientConfigError of [false, true]) test(
+  `claim ${transientConfigError ? "retries transient config failure" : "rejects model edited during metadata resolution"}`,
+  async () => {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
   process.env.VOLUNTEER_MARKER_SECRET = "marker-secret";
@@ -168,8 +170,10 @@ test("claim rejects an issue model edited during metadata resolution", async () 
     if (url.includes("/repos/EuroEval/EuroEval/assignees/")) return new Response(null, { status: 204 });
     if (url.includes("/repos/EuroEval/EuroEval/issues?")) return Response.json([issue]);
     if (url.includes("huggingface.co/api/models/org/model")) {
-      issue.title = "[MODEL EVALUATION REQUEST] org/edited";
-      issue.body = issue.body.replace("org/model", "org/edited");
+      if (!transientConfigError) {
+        issue.title = "[MODEL EVALUATION REQUEST] org/edited";
+        issue.body = issue.body.replace("org/model", "org/edited");
+      }
       return Response.json({ id: "org/model", sha: "a".repeat(40), private: false, gated: false,
         pipeline_tag: "fill-mask", siblings: [
         { rfilename: "model.safetensors", size: 100 }, { rfilename: "config.json", size: 10 },
@@ -177,7 +181,8 @@ test("claim rejects an issue model edited during metadata resolution", async () 
       ] });
     }
     if (url.includes(`/org/model/raw/${"a".repeat(40)}/config.json`)) {
-      return Response.json({ model_type: "bert", architectures: ["BertModel"] });
+      return transientConfigError ? new Response(null, { status: 429 }) :
+        Response.json({ model_type: "bert", architectures: ["BertModel"] });
     }
     if (url.endsWith(`/issues/${issueNumber}`) && requestMethod === "GET") return Response.json(issue);
     if (url.includes(`/issues/${issueNumber}`)) { githubMutations++; return Response.json(issue); }
@@ -192,8 +197,10 @@ test("claim rejects an issue model edited during metadata resolution", async () 
           gpus: [{ index: 0, name: "GPU", uuid: "gpu", free_memory_bytes: 1_000_000,
             total_memory_bytes: 1_000_000 }] } }),
     }));
-    assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { protocol_version: "volunteer-worker/v1", status: "no_work" });
+    assert.equal(response.status, transientConfigError ? 503 : 200);
+    const result = await response.json();
+    if (transientConfigError) assert.match(result.error, /retry claim/i);
+    else assert.deepEqual(result, { protocol_version: "volunteer-worker/v1", status: "no_work" });
     assert.equal(githubMutations, 0);
     assert.equal(redisCommands.some((command) => command.some((item) =>
       typeof item === "string" && item.startsWith("euroeval:worker:lease"))), false);

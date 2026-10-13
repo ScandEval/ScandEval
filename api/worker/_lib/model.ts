@@ -59,7 +59,8 @@ async function fetchModel(input: string, signal?: AbortSignal): Promise<Response
 export async function resolveModel(modelId: string, signal?: AbortSignal): Promise<ResolvedModel> {
   const encoded = modelId.split("/").map(encodeURIComponent).join("/");
   const infoResponse = await fetchModel(`https://huggingface.co/api/models/${encoded}?blobs=true`, signal);
-  if (!infoResponse.ok) throw new BrokerError(422, `Hugging Face model ${modelId} could not be resolved.`);
+  if (!infoResponse.ok) throw new BrokerError(infoResponse.status >= 500 || infoResponse.status === 429 ? 503 : 422,
+    `Hugging Face model ${modelId} could not be resolved.`);
   const info = await infoResponse.json() as {
     id?: string; sha?: string; gated?: boolean | string; private?: boolean;
     pipeline_tag?: unknown;
@@ -93,7 +94,8 @@ export async function resolveModel(modelId: string, signal?: AbortSignal): Promi
     throw new BrokerError(422, "The model must use safetensors only and contain no custom repository Python.");
   }
   const configResponse = await fetchModel(`https://huggingface.co/${encoded}/raw/${encodeURIComponent(info.sha)}/config.json`, signal);
-  if (!configResponse.ok) throw new BrokerError(422, "The model config could not be resolved at its immutable revision.");
+  if (!configResponse.ok) throw new BrokerError(configResponse.status >= 500 || configResponse.status === 429 ? 503 : 422,
+    "The model config could not be resolved at its immutable revision.");
   const config = await configResponse.json() as Record<string, unknown>;
   if (config.auto_map || config.custom_code || config.trust_remote_code) {
     throw new BrokerError(422, "Models with auto_map or custom code are not supported.");
