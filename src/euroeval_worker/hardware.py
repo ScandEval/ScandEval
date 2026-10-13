@@ -1,12 +1,16 @@
 """NVIDIA and host hardware discovery for worker claims."""
 
 import collections.abc as c
+import dataclasses
+import importlib.metadata
+import json
 import logging
 import os
 import platform
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from .types import Gpu, HardwareReport
@@ -33,15 +37,13 @@ def discover_hardware(
     summary = run(["nvidia-smi"])
     driver = _match(summary, r"Driver Version\s*:\s*([^\s]+)")
     cuda = _match(summary, r"CUDA Version\s*:\s*([^\s]+)")
-    import torch  # noqa: PLC0415
-
     return HardwareReport(
         architecture=platform.machine(),
         ram_bytes=_ram_bytes(),
         free_disk_bytes=shutil.disk_usage(Path.cwd()).free,
         driver_version=driver,
         cuda_version=cuda,
-        pytorch_version=torch.__version__,
+        pytorch_version=_pytorch_version(),
         gpus=tuple(gpus),
         selected_gpu_index=selected.index,
         selected_gpu_uuid=selected.uuid,
@@ -51,6 +53,13 @@ def discover_hardware(
 def _match(text: str, pattern: str) -> str | None:
     match = re.search(pattern, text)
     return match.group(1) if match else None
+
+
+def _pytorch_version() -> str | None:
+    try:
+        return importlib.metadata.version("torch")
+    except importlib.metadata.PackageNotFoundError:
+        return None
 
 
 def _ram_bytes() -> int:
@@ -88,6 +97,10 @@ def discover_gpus(runner: c.Callable[[list[str]], str] | None = None) -> list[Gp
                 "on a GPU host before claiming work"
             ) from error
     gpus = _parse_gpu_csv(output)
+    gpus = [
+        _discover_spark_memory(gpu) if _needs_spark_memory_fallback(gpu) else gpu
+        for gpu in gpus
+    ]
     if not gpus:
         raise NoGpuError(
             "nvidia-smi returned no GPUs; check the NVIDIA driver and container "
@@ -98,6 +111,65 @@ def discover_gpus(runner: c.Callable[[list[str]], str] | None = None) -> list[Gp
 
 class NoGpuError(RuntimeError):
     """Raised when no usable NVIDIA GPU is available."""
+
+
+def _discover_spark_memory(gpu: Gpu) -> Gpu:
+    script = (
+        "import json, torch; "
+        "p=torch.cuda.get_device_properties(0); "
+        "u=getattr(p, 'uuid', None); "
+        "f,t=torch.cuda.mem_get_info(0); "
+        "print(json.dumps({'uuid': str(u) if u is not None else None, "
+        "'free': f, 'total': t}))"
+    )
+    environment = os.environ.copy()
+    environment["CUDA_VISIBLE_DEVICES"] = gpu.uuid
+    try:
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            env=environment,
+        )
+        measurement = json.loads(result.stdout)
+        free = int(measurement["free"])
+        total = int(measurement["total"])
+        reported_uuid = measurement["uuid"]
+        host_available = _host_available_bytes()
+        if (
+            not isinstance(reported_uuid, str)
+            or reported_uuid.lower() != gpu.uuid.lower()
+            or free < 0
+            or total <= 0
+            or free > total
+            or host_available is None
+        ):
+            raise ValueError("Unverified unified-memory measurement")
+        usable_free = min(free, max(0, host_available - 1024**3))
+        return dataclasses.replace(
+            gpu, free_memory_bytes=usable_free, total_memory_bytes=total
+        )
+    except (OSError, subprocess.SubprocessError, ValueError, KeyError, TypeError):
+        logger.warning("Could not verify GB10 unified-memory availability")
+        return dataclasses.replace(gpu, free_memory_bytes=0, total_memory_bytes=0)
+
+
+def _host_available_bytes() -> int | None:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1]) * 1024
+    except (OSError, ValueError, IndexError):
+        return None
+    return None
+
+
+def _needs_spark_memory_fallback(gpu: Gpu) -> bool:
+    return "gb10" in gpu.name.lower() and (
+        gpu.free_memory_bytes == 0 or gpu.total_memory_bytes == 0
+    )
 
 
 def _parse_gpu_csv(output: str) -> list[Gpu]:
@@ -123,8 +195,8 @@ def _parse_gpu_csv(output: str) -> list[Gpu]:
                 Gpu(
                     name=fields[offset],
                     uuid=fields[offset + 1],
-                    free_memory_bytes=int(float(fields[offset + 2]) * 1024**2),
-                    total_memory_bytes=int(float(fields[offset + 3]) * 1024**2),
+                    free_memory_bytes=_memory_value(fields[offset + 2]),
+                    total_memory_bytes=_memory_value(fields[offset + 3]),
                     compute_capability=capability,
                     index=index,
                 )
@@ -132,6 +204,12 @@ def _parse_gpu_csv(output: str) -> list[Gpu]:
         except ValueError:
             logger.warning("Ignoring malformed nvidia-smi row")
     return gpus
+
+
+def _memory_value(value: str) -> int:
+    if value.strip().lower() in {"n/a", "na", "[n/a]"}:
+        return 0
+    return int(float(value) * 1024**2)
 
 
 def select_gpu(gpus: c.Iterable[Gpu]) -> Gpu:
