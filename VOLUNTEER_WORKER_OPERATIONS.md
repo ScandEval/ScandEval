@@ -84,8 +84,9 @@ Pi/I to execute now; neither imports `.env` or mutates a file.
 
 5. **MANUAL** - publish the candidate image using the workflow, carry its digest from
    the non-secret job summary/artifact, run the physical Linux `amd64` NVIDIA GPU
-   canary, and manually promote that exact digest. Pi/I cannot perform a physical GPU
-   canary without hardware. Publication and production deployment require explicit
+   canary, and manually promote that exact digest. The separate Linux `arm64` candidate
+   remains unpromotable until its physical DGX Spark canary and a multi-platform
+   promotion have passed. Publication and production deployment require explicit
    approval.
 
 6. **AUTOMATED CHECK** - after deployment, run safe route probes. They issue only GET,
@@ -585,15 +586,15 @@ Historical assignee-backed submissions retain their assignee credit rules.
 ## Image publishing and canary
 
 This is a per-release process, not a one-time prerequisite. The
-`.github/workflows/worker-image.yaml` workflow builds only `linux/amd64` with BuildKit
-layer caching. Pull requests do not publish or attest an image: they load the local
-image and smoke its normal entrypoint as UID 10001 without a GPU. Trusted runs publish
-only the immutable commit-SHA candidate with provenance and an SBOM, verify the public
-GHCR package, inspect the exact candidate manifest anonymously with `docker manifest
-inspect` using a fresh empty Docker config (and no `BUILDX_BUILDER`), and print the
-digest. The check resolves both the digest reference and SHA tag, compares their
-canonical manifest content, and requires a non-null `linux/amd64` child digest.
-The workflow never creates or updates `latest`.
+`.github/workflows/worker-image.yaml` workflow builds separate `linux/amd64` and
+`linux/arm64` candidates with BuildKit layer caching. Pull requests do not publish or
+attest an image: they load each local image and smoke its normal entrypoint as UID
+10001 without a GPU. Trusted runs publish distinct immutable commit-SHA candidates
+with provenance and an SBOM. They verify each public GHCR tag against its exact digest
+anonymously with a fresh empty Docker config and require a matching platform child
+digest. The workflow never creates or updates `latest`. The ARM64 candidate is not a
+production image until it passes a physical DGX Spark canary; do not promote its
+single-platform digest or configure the broker to attest it for AMD64 volunteers.
 
 After the package is public and the workflow has printed a verified digest, run this on
 a physical Linux `amd64` NVIDIA host:

@@ -101,3 +101,4 @@ def test_worker_runtime_includes_pinned_nvcc() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     amd64_job = workflow[: workflow.index("  spark-arm64-candidate:")]
     assert "platforms: linux/amd64" in amd64_job
+    assert workflow.count('docker run --rm --entrypoint nvcc "$IMAGE" --version') == 2

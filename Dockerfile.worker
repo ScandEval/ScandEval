@@ -39,7 +39,8 @@ COPY src/euroeval_worker ./src/euroeval_worker
 RUN --mount=type=cache,target=/cache/uv,sharing=locked \
     uv sync --frozen --no-dev --extra generative --python /usr/bin/python3.12
 
-# Keep compilers, Git, uv, and the build cache out of the runtime image.
+# EuroEval checks for nvcc before loading generative CUDA models. Keep Git, uv,
+# and the build cache out of the runtime image while retaining the CUDA toolchain.
 FROM nvidia/cuda:13.1.1-devel-ubuntu24.04@sha256:9cf8694a27722418a1f175d90f85d5afb5a728fd4a9907d7f0565efecfa14d32
 
 ENV DEBIAN_FRONTEND=noninteractive \
