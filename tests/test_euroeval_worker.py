@@ -480,6 +480,34 @@ def test_discover_hardware_does_not_import_torch_in_worker(
     assert report.selected_gpu_uuid == "GPU-test"
 
 
+def test_discover_hardware_uses_supplied_state_filesystem(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Measure free space on the supplied cache rather than the working directory."""
+    state_dir = tmp_path / "mounted-cache"
+    state_dir.mkdir()
+    measured: list[Path] = []
+    disk_usage = hardware.shutil.disk_usage
+    monkeypatch.setattr(hardware, "_ram_bytes", lambda: 128 * 1024**3)
+    monkeypatch.setattr(hardware, "_pytorch_version", lambda: None)
+
+    def record_disk_path(path: Path) -> object:
+        measured.append(path)
+        return disk_usage(path)
+
+    monkeypatch.setattr(hardware.shutil, "disk_usage", record_disk_path)
+    gpu_output = "0, A100, GPU-test, 100, 200, 8.0\n"
+    discover_hardware(
+        runner=lambda command: (
+            gpu_output
+            if any(argument.startswith("--query-gpu=") for argument in command)
+            else "Driver Version: 1.0 CUDA Version: 12.1"
+        ),
+        state_dir=state_dir,
+    )
+    assert measured == [state_dir]
+
+
 def test_eee_record_rejects_non_finite_values() -> None:
     """Prevent NaN and Infinity from entering a digest-stable envelope."""
     with pytest.raises(ValueError):
@@ -1220,6 +1248,32 @@ def test_worker_caps_vllm_utilisation_to_fresh_free_gpu_memory(
 
     assert observed["utilisation"] == pytest.approx(0.8 * 96 / 130)
     assert broker.finalised
+
+
+def test_worker_measures_disk_on_its_state_filesystem(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Pass the state/model-cache path to default hardware discovery."""
+    state_dir = tmp_path / "mounted-cache"
+    state_dir.mkdir()
+    measured: list[Path] = []
+    monkeypatch.setattr(
+        runtime, "authenticate", lambda client, state: ("cred", "login")
+    )
+
+    def discover(*, state_dir: Path) -> HardwareReport:
+        measured.append(state_dir)
+        return HARDWARE
+
+    monkeypatch.setattr(runtime, "discover_hardware", discover)
+
+    class NoWorkBroker(Broker):
+        def claim(self, credential: str, hardware: HardwareReport) -> Claim:
+            return Claim(None)
+
+    runtime.Worker(client=NoWorkBroker(), state=StateStore(state_dir)).run(once=True)
+
+    assert measured == [state_dir]
 
 
 def test_worker_retries_idempotently_and_finalises(
