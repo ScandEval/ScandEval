@@ -442,7 +442,8 @@ for (const contention of ["global", "issue-only", "issue-later"]) test(
     if (url === "https://redis.test") {
       const command = JSON.parse(init.body);
       if (command[0] === "GET") return Response.json({ result: values.get(command[1]) || null });
-      if (command[0] === "INCR") return Response.json({ result: 1 });
+      if (command[0] === "SMEMBERS") return Response.json({ result: [] });
+      if (command[0] === "INCR" || command[0] === "EXPIRE") return Response.json({ result: 1 });
       if (command[0] === "SET" && command[1] === "euroeval:worker:mutex:9007199254740991" && contention === "global") {
         return Response.json({ result: null });
       }
@@ -469,6 +470,9 @@ for (const contention of ["global", "issue-only", "issue-later"]) test(
     if (issue && method === "PATCH") {
       mutations.push(issue.number); issue.body = JSON.parse(init.body).body; return Response.json(issue);
     }
+    if (url === "https://redis.test") {
+      throw new Error(`Unexpected Redis command: ${JSON.parse(init.body)[0]}`);
+    }
     throw new Error(`Unexpected request: ${method} ${url}`);
   };
   try {
@@ -482,7 +486,7 @@ for (const contention of ["global", "issue-only", "issue-later"]) test(
     });
     const response = await claim(makeRequest());
     if (contention !== "issue-later") {
-      assert.equal(response.status, 503);
+      assert.equal(response.status, 503, await response.clone().text());
       assert.deepEqual(await response.json(), { protocol_version: "volunteer-worker/v1",
         error: "Claim is busy; retry claim.", code: "claim_busy" });
       assert.deepEqual(mutations, []);
