@@ -62,7 +62,9 @@ function mockBroker(issue, values) {
   };
 }
 
-test("claim discovers all paginated candidates with bounded metadata fan-out and skips config for non-fitting models", async () => {
+for (const upstreamSlow of [false, true]) test(
+  `claim scans 148 candidates without GPU allocation${upstreamSlow ? " and bounds slow Hub retries" : ""}`,
+  async () => {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
   Object.assign(process.env, { VOLUNTEER_MARKER_SECRET: "marker-secret",
@@ -98,6 +100,9 @@ test("claim discovers all paginated candidates with bounded metadata fan-out and
       await new Promise((resolve) => setTimeout(resolve, 2));
       inFlight--;
       const id = url.split("/api/models/")[1].split("?")[0];
+      if (upstreamSlow && id === "org/model-0") {
+        return new Response(null, { status: 429, headers: { "retry-after": "30" } });
+      }
       return Response.json({ id, private: false, gated: false, siblings: [
         { rfilename: "model.safetensors", size: 100 }, { rfilename: "config.json", size: 10 },
       ] });
@@ -106,6 +111,7 @@ test("claim discovers all paginated candidates with bounded metadata fan-out and
     throw new Error(`Unexpected request: ${init.method || "GET"} ${url}`);
   };
   try {
+    const started = Date.now();
     const response = await claim(new Request("https://euroeval.test/api/worker/claim", {
       method: "POST", headers: { authorization: "Bearer credential", "content-type": "application/json" },
       body: JSON.stringify({ protocol_version: "volunteer-worker/v1", worker_version: "1.0.0",
@@ -113,9 +119,15 @@ test("claim discovers all paginated candidates with bounded metadata fan-out and
           selected_gpu_index: 0, selected_gpu_uuid: "gpu", gpus: [{ index: 0, name: "GPU", uuid: "gpu",
             free_memory_bytes: 1_000_000, total_memory_bytes: 1_000_000 }] } }),
     }));
-    assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { protocol_version: "volunteer-worker/v1", status: "no_work" });
-    assert.equal(metadataCalls, 148);
+    assert.equal(response.status, upstreamSlow ? 503 : 200);
+    const result = await response.json();
+    if (upstreamSlow) {
+      assert.match(result.error, /retry claim/i);
+      assert.ok(Date.now() - started < 5_000, "slow Hub retry exceeded the request budget");
+    } else {
+      assert.deepEqual(result, { protocol_version: "volunteer-worker/v1", status: "no_work" });
+    }
+    assert.ok(metadataCalls >= 148);
     assert.ok(maxInFlight <= 6);
     assert.equal(configCalls, 0);
   } finally {
@@ -191,7 +203,9 @@ test("claim rejects an issue model edited during metadata resolution", async () 
   }
 });
 
-test("claim resumes after expired ownership recovery without assigning the issue", async () => {
+for (const lateCandidate of [false, true]) test(
+  `claim resumes expired ownership${lateCandidate ? " with a viable issue on page two" : " without assigning the issue"}`,
+  async () => {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
   process.env.VOLUNTEER_MARKER_SECRET = "marker-secret";
@@ -230,7 +244,13 @@ test("claim resumes after expired ownership recovery without assigning the issue
   const otherIssue = { number: issueNumber + 1, title: issue.title,
     body: `### Model ID\n\norg/model\n\n- [x] ${language}\n\n<!-- euroeval-volunteer-worker:v1 ${JSON.stringify(competing)} -->`,
     state: "open", assignees: [], labels: [] };
+  const laterIssues = Array.from({ length: 146 }, (_, index) => ({
+    number: 1_000 + index, title: `[MODEL EVALUATION REQUEST] org/model-${index}`,
+    body: `### Model ID\n\norg/model-${index}\n\n- [x] ${language}`,
+    state: "open", assignees: [], labels: [],
+  }));
   let competingClaim = true;
+  let metadataCalls = 0;
   const credentialKey = `euroeval:worker:credential:${await sha256("credential")}`;
   const leaseKey = `euroeval:worker:lease:${issueNumber}:da`;
   const values = new Map([[credentialKey, JSON.stringify({ contributor: "alice" })],
@@ -248,11 +268,19 @@ test("claim resumes after expired ownership recovery without assigning the issue
       return Response.json({ result: command[0] === "SET" ? "OK" : 1 });
     }
     if (url.includes("/repos/EuroEval/EuroEval/assignees/")) return new Response(null, { status: 204 });
-    if (url.includes("/repos/EuroEval/EuroEval/issues?")) return Response.json(competingClaim ? [issue, otherIssue] : [issue]);
-    if (url.includes("huggingface.co/api/models/org/model")) return Response.json({
+    if (url.includes("/repos/EuroEval/EuroEval/issues?")) {
+      const page = Number(new URL(url).searchParams.get("page"));
+      const listed = competingClaim ? [issue, otherIssue, ...laterIssues] :
+        lateCandidate ? [...laterIssues, issue] : [issue, ...laterIssues];
+      return Response.json(listed.slice((page - 1) * 100, page * 100));
+    }
+    if (url.includes("huggingface.co/api/models/org/model")) {
+      metadataCalls++;
+      return Response.json({
       id: "org/model", sha: "a".repeat(40), private: false, gated: false,
       pipeline_tag: "fill-mask", siblings: [{ rfilename: "model.safetensors", size: 100 }],
-    });
+      });
+    }
     if (url.includes(`/org/model/raw/${"a".repeat(40)}/config.json`)) {
       return Response.json({ model_type: "bert", architectures: ["BertModel"] });
     }
@@ -284,8 +312,11 @@ test("claim resumes after expired ownership recovery without assigning the issue
     assert.deepEqual(mutations, ["unassign", "patch"]);
     assert.ok(parseVolunteerMarker(issue.body).leases.every((item) => item.lease_id !== expired.lease_id));
     competingClaim = false;
+    metadataCalls = 0;
     const response = await claim(claimRequest());
     assert.equal(response.status, 200, await response.text());
+    if (lateCandidate) assert.ok(metadataCalls >= 147, `did not reach page-two issue (${metadataCalls} models)`);
+    else assert.ok(metadataCalls <= 7, `inspected ${metadataCalls} models before the first fit`);
     assert.deepEqual(mutations, ["unassign", "patch", "patch"]);
     assert.deepEqual(issue.assignees, []);
     assert.equal(parseVolunteerMarker(issue.body).leases.length, 2);

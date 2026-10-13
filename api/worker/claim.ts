@@ -6,7 +6,7 @@ import {
   listOpenIssues, method,
   patchIssue, putLease, randomToken, readJson, deleteLease, unassignIssue,
   getLeaseForIssue, reclaimExpiredLease,
-  parseVolunteerMarker, resolveModel, selectedLanguages, volunteerAssigneesMatch,
+  modelMayFit, parseVolunteerMarker, resolveModel, selectedLanguages, volunteerAssigneesMatch,
   requireProtocol, signVolunteerMarker, verifyVolunteerMarker, markerSecret, replaceVolunteerMarker,
   reserveCanary,
 } from "./_lib.js";
@@ -130,7 +130,9 @@ function validHardware(value: unknown): value is Record<string, unknown> {
 
 export default async function handler(req: Request): Promise<Response> {
   const rejected = method(req); if (rejected) return rejected;
-  let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = Date.now() + 18_000;
+  const controller = new AbortController();
+  const deadlineTimer = setTimeout(() => controller.abort(), 12_000);
   try {
     const identity = await authenticate(req); await enforceRateLimit(`euroeval:worker:limit:claim:${identity.hash}`, 120, 3600);
     const body = await readJson(req, 32 * 1024); requireProtocol(body);
@@ -142,7 +144,7 @@ export default async function handler(req: Request): Promise<Response> {
     const requiredWorkerVersion = env("VOLUNTEER_WORKER_VERSION");
     if (body.worker_version !== requiredWorkerVersion) throw new BrokerError(422, "Unsupported worker version.");
     const requestedLanguage = typeof body.language === "string" ? body.language : null;
-    const issues = await listOpenIssues();
+    const issues = await listOpenIssues(controller.signal);
     const selectedHardwareGpu = selectedGpu(body.hardware);
     const candidates = issues.flatMap((listed) => {
       const modelId = extractModelId(listed.title, listed.body);
@@ -154,30 +156,46 @@ export default async function handler(req: Request): Promise<Response> {
     });
     // Resolve candidates in issue-priority batches. Do not inspect later issues
     // until every earlier candidate has either been ruled out or attempted.
-    const deadline = Date.now() + 18_000; // reserve at least six seconds for the claim transaction
-    const controller = new AbortController();
     const resolved = new Map<string, Awaited<ReturnType<typeof resolveModel>> | null>();
+    const mayFit = new Map<string, boolean | null>();
+    let incompleteDiscovery = false;
     const checkDeadline = (): void => {
-      if (Date.now() >= deadline) throw new BrokerError(503, "Model discovery deadline exceeded; retry claim.");
+      if (Date.now() >= deadline) throw new BrokerError(503, "Claim deadline exceeded; retry claim.");
     };
-    deadlineTimer = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now() - 6_000));
+    const checkDiscoveryDeadline = (): void => {
+      if (controller.signal.aborted || Date.now() >= deadline - 6_000) {
+        throw new BrokerError(503, "Model discovery deadline exceeded; retry claim.");
+      }
+    };
     const batchSize = 6;
     for (let start = 0; start < candidates.length; start += batchSize) {
-      checkDeadline();
+      checkDiscoveryDeadline();
       const batch = candidates.slice(start, start + batchSize);
       const batchModels = [...new Set(batch.map(({ modelId }) => modelId))]
-        .filter((modelId) => !resolved.has(modelId));
+        .filter((modelId) => !mayFit.has(modelId));
       const outcomes = await Promise.all(batchModels.map(async (modelId) => {
-        try { return [modelId, await resolveModel(modelId, controller.signal)] as const; }
+        try { return [modelId, await modelMayFit(modelId, body.hardware as Record<string, unknown>, selectedHardwareGpu, controller.signal)] as const; }
         catch (error) {
-          if (error instanceof BrokerError && error.status === 422) return [modelId, null] as const;
-          throw new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
+          if (error instanceof BrokerError && error.status === 422) return [modelId, false] as const;
+          return [modelId, null] as const;
         }
       }));
-      outcomes.forEach(([modelId, model]) => resolved.set(modelId, model));
-      checkDeadline();
+      outcomes.forEach(([modelId, fits]) => {
+        if (fits === null) incompleteDiscovery = true;
+        mayFit.set(modelId, fits);
+      });
+      checkDiscoveryDeadline();
       for (const { listed, modelId } of batch) {
-      checkDeadline();
+      checkDiscoveryDeadline();
+      if (!mayFit.get(modelId)) continue;
+      if (!resolved.has(modelId)) {
+        try { resolved.set(modelId, await resolveModel(modelId, controller.signal)); }
+        catch (error) {
+          if (error instanceof BrokerError && error.status === 422) resolved.set(modelId, null);
+          else throw new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
+        }
+      }
+      checkDiscoveryDeadline();
       const model = resolved.get(modelId);
       if (!model || !fitsGpu(model, body.hardware, selectedHardwareGpu)) continue;
       // Serialize final fresh metadata, cross-issue scan, and claim transaction.
@@ -185,7 +203,7 @@ export default async function handler(req: Request): Promise<Response> {
       if (!globalMutex) continue;
       try {
         await globalMutex.assertOwned();
-        const freshIssues = await listOpenIssues();
+        const freshIssues = await listOpenIssues(controller.signal);
         const blockedLanguages = new Set<string>();
         for (const candidate of freshIssues) {
           if (candidate.number === listed.number ||
@@ -331,11 +349,14 @@ export default async function handler(req: Request): Promise<Response> {
       } finally { await globalMutex.release(); }
       }
     }
-    clearTimeout(deadlineTimer);
+    if (incompleteDiscovery) throw new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
     return json(200, { protocol_version: PROTOCOL_VERSION, status: "no_work" });
   } catch (error) {
+    const failure = controller.signal.aborted
+      ? new BrokerError(503, "Claim discovery deadline exceeded; retry claim.") : error;
+    const status = failure instanceof BrokerError ? failure.status : failure instanceof ConfigurationError ? 503 : 502;
+    return json(status, brokerErrorBody(failure, "Unable to claim an evaluation."));
+  } finally {
     clearTimeout(deadlineTimer);
-    const status = error instanceof BrokerError ? error.status : error instanceof ConfigurationError ? 503 : 502;
-    return json(status, brokerErrorBody(error, "Unable to claim an evaluation."));
   }
 }

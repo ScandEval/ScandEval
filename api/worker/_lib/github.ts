@@ -53,10 +53,10 @@ export async function assertAssignable(login: string): Promise<void> {
       "assignee_eligibility_unavailable");
   }
 }
-export async function listOpenIssues(): Promise<GithubIssue[]> {
+export async function listOpenIssues(signal?: AbortSignal): Promise<GithubIssue[]> {
   const result: GithubIssue[] = [];
   for (let page = 1; page <= 10; page++) {
-    const chunk = await github(`/repos/${REPO}/issues?state=open&labels=${encodeURIComponent(REQUEST_LABEL)}&per_page=100&page=${page}`) as GithubIssue[];
+    const chunk = await github(`/repos/${REPO}/issues?state=open&labels=${encodeURIComponent(REQUEST_LABEL)}&per_page=100&page=${page}`, { signal }) as GithubIssue[];
     for (const issue of chunk) if (!issue.pull_request) result.push(issue);
     if (chunk.length < 100) break;
   }

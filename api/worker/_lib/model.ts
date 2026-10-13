@@ -19,7 +19,7 @@ export interface ResolvedModel {
 export async function modelMayFit(modelId: string, hardware: Record<string, unknown>,
   selected?: Record<string, unknown> | null, signal?: AbortSignal): Promise<boolean> {
   const encoded = modelId.split("/").map(encodeURIComponent).join("/");
-  const response = await fetchWithRetry(`https://huggingface.co/api/models/${encoded}?blobs=true`, { signal });
+  const response = await fetchModel(`https://huggingface.co/api/models/${encoded}?blobs=true`, signal);
   if (!response.ok) throw new BrokerError(response.status >= 500 || response.status === 429 ? 503 : 422,
     `Hugging Face model ${modelId} could not be inspected.`);
   const info = await response.json() as {
