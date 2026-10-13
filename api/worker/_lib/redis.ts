@@ -1,12 +1,14 @@
 import { BrokerError, env, optionalEnv, randomToken, sha256 } from "./protocol.js";
 import type { Lease } from "./protocol.js";
 
-async function redisRequest(command: unknown[]): Promise<unknown> {
+async function redisRequest(command: unknown[], signal?: AbortSignal): Promise<unknown> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
+      signal?.throwIfAborted();
       const response = await fetch(env("UPSTASH_REDIS_REST_URL"), {
         method: "POST",
+        signal,
         headers: { authorization: `Bearer ${env("UPSTASH_REDIS_REST_TOKEN")}`, "content-type": "application/json" },
         body: JSON.stringify(command),
       });
@@ -16,6 +18,7 @@ async function redisRequest(command: unknown[]): Promise<unknown> {
       return payload.result;
     } catch (error) {
       lastError = error;
+      if (signal?.aborted) throw error;
       if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
     }
   }
@@ -94,8 +97,8 @@ export async function acquireIssueMutex(issue: number): Promise<string | null> {
 
 export interface RenewableIssueMutex {
   token: string;
-  assertOwned(): Promise<void>;
-  release(): Promise<void>;
+  assertOwned(signal?: AbortSignal): Promise<void>;
+  release(signal?: AbortSignal): Promise<void>;
 }
 
 /**
@@ -127,27 +130,29 @@ export async function acquireRenewableIssueMutex(
   (timer as unknown as { unref?: () => void }).unref?.();
   return {
     token,
-    async assertOwned(): Promise<void> {
-      if (!await renew()) {
-        throw new BrokerError(409, "Issue mutex was lost before a mutation.");
-      }
+    async assertOwned(signal?: AbortSignal): Promise<void> {
+      const owned = signal ? await renewIssueMutex(issue, token, signal) : await renew();
+      if (!owned) throw new BrokerError(409, "Issue mutex was lost before a mutation.");
     },
-    async release(): Promise<void> {
+    async release(signal?: AbortSignal): Promise<void> {
       stopped = true;
       clearInterval(timer);
-      if (!lost && await renewIssueMutex(issue, token)) {
-        await releaseIssueMutex(issue, token);
+      if (!lost && await renewIssueMutex(issue, token, signal)) {
+        await releaseIssueMutex(issue, token, signal);
       }
     },
   };
 }
-export async function releaseIssueMutex(issue: number, token: string): Promise<void> {
-  await redis("EVAL", "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) else return 0 end", "1", `euroeval:worker:mutex:${issue}`, token);
+export async function releaseIssueMutex(issue: number, token: string, signal?: AbortSignal): Promise<void> {
+  const command = ["EVAL", "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) else return 0 end", "1", `euroeval:worker:mutex:${issue}`, token];
+  if (signal) await redisRequest(command, signal);
+  else await redisRequest(command);
 }
 
 /** Renew an issue mutex only while its opaque token still owns it. */
-export async function renewIssueMutex(issue: number, token: string): Promise<boolean> {
-  const result = await redis("EVAL", "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('EXPIRE',KEYS[1],ARGV[2]) else return 0 end", "1", `euroeval:worker:mutex:${issue}`, token, String(ISSUE_MUTEX_TTL));
+export async function renewIssueMutex(issue: number, token: string, signal?: AbortSignal): Promise<boolean> {
+  const command = ["EVAL", "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('EXPIRE',KEYS[1],ARGV[2]) else return 0 end", "1", `euroeval:worker:mutex:${issue}`, token, String(ISSUE_MUTEX_TTL)];
+  const result = signal ? await redisRequest(command, signal) : await redisRequest(command);
   return result === 1 || result === "1";
 }
 
@@ -226,9 +231,9 @@ export async function releaseResultReservations(
 export function leaseKey(leaseId: string): string {
 return `euroeval:worker:lease-id:${leaseId}`; }
 export async function getLeaseById(leaseId: string): Promise<Lease | null> { return redisGet<Lease>(leaseKey(leaseId)); }
-export async function putLease(lease: Lease): Promise<boolean> {
+export async function putLease(lease: Lease, signal?: AbortSignal): Promise<boolean> {
   const ttl = Math.max(60, Math.ceil((Date.parse(lease.expires_at) - Date.now()) / 1000)) + LEASE_TOMBSTONE_TTL;
-  const result = await redis("EVAL", "local issue=redis.call('GET',KEYS[1]); local byid=redis.call('GET',KEYS[2]); if issue or byid then if not issue or not byid or issue ~= ARGV[1] or byid ~= ARGV[1] then return 0 end; local item=cjson.decode(issue); if item.lease_id ~= ARGV[3] then return 0 end; return 1 end; redis.call('SET',KEYS[1],ARGV[1],'EX',ARGV[2]); redis.call('SET',KEYS[2],ARGV[1],'EX',ARGV[2]); return 1", "2", issueLeaseKey(lease.issue_number, lease.language), leaseKey(lease.lease_id), JSON.stringify(lease), String(ttl), lease.lease_id);
+  const result = await redisRequest(["EVAL", "local issue=redis.call('GET',KEYS[1]); local byid=redis.call('GET',KEYS[2]); if issue or byid then if not issue or not byid or issue ~= ARGV[1] or byid ~= ARGV[1] then return 0 end; local item=cjson.decode(issue); if item.lease_id ~= ARGV[3] then return 0 end; return 1 end; redis.call('SET',KEYS[1],ARGV[1],'EX',ARGV[2]); redis.call('SET',KEYS[2],ARGV[1],'EX',ARGV[2]); return 1", "2", issueLeaseKey(lease.issue_number, lease.language), leaseKey(lease.lease_id), JSON.stringify(lease), String(ttl), lease.lease_id], signal);
   return result === 1 || result === "1";
 }
 export async function saveLease(lease: Lease): Promise<boolean> {
@@ -236,11 +241,12 @@ export async function saveLease(lease: Lease): Promise<boolean> {
   const result = await redis("EVAL", "local current=redis.call('GET',KEYS[1]); if not current then return 0 end; local item=cjson.decode(current); if item.lease_id ~= ARGV[1] then return 0 end; redis.call('SET',KEYS[1],ARGV[2],'EX',ARGV[3]); redis.call('SET',KEYS[2],ARGV[2],'EX',ARGV[3]); return 1", "2", issueLeaseKey(lease.issue_number, lease.language), leaseKey(lease.lease_id), lease.lease_id, JSON.stringify(lease), String(ttl));
   return result === 1 || result === "1";
 }
-export async function deleteLease(lease: Lease): Promise<void> {
-  await redis("EVAL", `local current=redis.call('GET',KEYS[1]);
+export async function deleteLease(lease: Lease, signal?: AbortSignal): Promise<void> {
+  const command = ["EVAL", `local current=redis.call('GET',KEYS[1]);
     if current then local item=cjson.decode(current); if item.lease_id == ARGV[1] then redis.call('DEL',KEYS[1]) end end;
     local byid=redis.call('GET',KEYS[2]); if byid then local item=cjson.decode(byid);
       if item.lease_id == ARGV[1] then item.released=true; redis.call('SET',KEYS[2],cjson.encode(item),'EX',ARGV[2]) end
     end; return 1`, "2", issueLeaseKey(lease.issue_number, lease.language), leaseKey(lease.lease_id), lease.lease_id,
-    String(LEASE_TOMBSTONE_TTL));
+    String(LEASE_TOMBSTONE_TTL)];
+  await redisRequest(command, signal);
 }

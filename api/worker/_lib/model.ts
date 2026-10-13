@@ -16,10 +16,51 @@ export interface ResolvedModel {
   model_metadata: ModelMetadataEvidence;
 }
 
-export async function resolveModel(modelId: string): Promise<ResolvedModel> {
+export async function modelMayFit(modelId: string, hardware: Record<string, unknown>,
+  selected?: Record<string, unknown> | null, signal?: AbortSignal): Promise<boolean> {
   const encoded = modelId.split("/").map(encodeURIComponent).join("/");
-  const infoResponse = await fetchWithRetry(`https://huggingface.co/api/models/${encoded}?blobs=true`);
-  if (!infoResponse.ok) throw new BrokerError(422, `Hugging Face model ${modelId} could not be resolved.`);
+  const response = await fetchModel(`https://huggingface.co/api/models/${encoded}?blobs=true`, signal);
+  if (!response.ok) throw new BrokerError(response.status >= 500 || response.status === 429 ? 503 : 422,
+    `Hugging Face model ${modelId} could not be inspected.`);
+  const info = await response.json() as {
+    id?: string; private?: boolean; gated?: boolean | string;
+    siblings?: Array<{ rfilename?: string; size?: number }>;
+  };
+  if (typeof info.id !== "string" || info.id.toLowerCase() !== modelId.toLowerCase() ||
+      typeof info.private !== "boolean" || typeof info.gated !== "boolean" && info.gated !== "false" ||
+      !Array.isArray(info.siblings) || info.siblings.some((file) =>
+        !file || typeof file.rfilename !== "string" || !file.rfilename)) {
+    throw new BrokerError(422, "Hugging Face returned incomplete model metadata.");
+  }
+  if (info.private || info.gated === true) return false;
+  const files = info.siblings;
+  const weights = files.filter((file) => file.rfilename!.toLowerCase().endsWith(".safetensors"));
+  if (!weights.length || files.some((file) => /\\.(bin|pt|pth|ckpt|gguf|onnx|h5|msgpack)$/i.test(file.rfilename || "") ||
+      file.rfilename?.toLowerCase().endsWith(".py"))) return false;
+  const weightBytes = weights.reduce((total, file) => total +
+    (typeof file.size === "number" && Number.isSafeInteger(file.size) && file.size >= 0 ? file.size : 0), 0);
+  const repoBytes = files.reduce((total, file) => total +
+    (typeof file.size === "number" && Number.isSafeInteger(file.size) && file.size >= 0 ? file.size : 0), 0);
+  if (!weightBytes || !repoBytes || files.some((file) => typeof file.size !== "number" ||
+      !Number.isSafeInteger(file.size) || file.size < 0)) throw new BrokerError(422, "Incomplete model file sizes.");
+  const utilization = hardware.gpu_memory_utilisation;
+  const largestFree = selected && typeof selected.free_memory_bytes === "number"
+    ? selected.free_memory_bytes : 0;
+  return typeof hardware.free_disk_bytes === "number" && hardware.free_disk_bytes >= repoBytes &&
+    typeof utilization === "number" && weightBytes * 1.35 <= largestFree * utilization;
+}
+
+async function fetchModel(input: string, signal?: AbortSignal): Promise<Response> {
+  const requestTimeout = AbortSignal.timeout(2_500);
+  const requestSignal = signal ? AbortSignal.any([signal, requestTimeout]) : requestTimeout;
+  return fetchWithRetry(input, { signal: requestSignal });
+}
+
+export async function resolveModel(modelId: string, signal?: AbortSignal): Promise<ResolvedModel> {
+  const encoded = modelId.split("/").map(encodeURIComponent).join("/");
+  const infoResponse = await fetchModel(`https://huggingface.co/api/models/${encoded}?blobs=true`, signal);
+  if (!infoResponse.ok) throw new BrokerError(infoResponse.status >= 500 || infoResponse.status === 429 ? 503 : 422,
+    `Hugging Face model ${modelId} could not be resolved.`);
   const info = await infoResponse.json() as {
     id?: string; sha?: string; gated?: boolean | string; private?: boolean;
     pipeline_tag?: unknown;
@@ -52,8 +93,9 @@ export async function resolveModel(modelId: string): Promise<ResolvedModel> {
   if (!weights.length || unsafe || files.some((file) => file.rfilename?.toLowerCase().endsWith(".py"))) {
     throw new BrokerError(422, "The model must use safetensors only and contain no custom repository Python.");
   }
-  const configResponse = await fetchWithRetry(`https://huggingface.co/${encoded}/raw/${encodeURIComponent(info.sha)}/config.json`);
-  if (!configResponse.ok) throw new BrokerError(422, "The model config could not be resolved at its immutable revision.");
+  const configResponse = await fetchModel(`https://huggingface.co/${encoded}/raw/${encodeURIComponent(info.sha)}/config.json`, signal);
+  if (!configResponse.ok) throw new BrokerError(configResponse.status >= 500 || configResponse.status === 429 ? 503 : 422,
+    "The model config could not be resolved at its immutable revision.");
   const config = await configResponse.json() as Record<string, unknown>;
   if (config.auto_map || config.custom_code || config.trust_remote_code) {
     throw new BrokerError(422, "Models with auto_map or custom code are not supported.");

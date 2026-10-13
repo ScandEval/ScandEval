@@ -15,7 +15,7 @@ export async function github(path: string, init: RequestInit = {}): Promise<any>
   if (response.status === 204) return null;
   return response.json();
 }
-export async function getIssue(number: number): Promise<GithubIssue> { return github(`/repos/${REPO}/issues/${number}`) as Promise<GithubIssue>; }
+export async function getIssue(number: number, signal?: AbortSignal): Promise<GithubIssue> { return github(`/repos/${REPO}/issues/${number}`, { signal }) as Promise<GithubIssue>; }
 export const fetchIssue = getIssue;
 
 export function hasIssueAssignee(issue: Pick<GithubIssue, "assignees">, login: string): boolean {
@@ -53,17 +53,17 @@ export async function assertAssignable(login: string): Promise<void> {
       "assignee_eligibility_unavailable");
   }
 }
-export async function listOpenIssues(): Promise<GithubIssue[]> {
+export async function listOpenIssues(signal?: AbortSignal): Promise<GithubIssue[]> {
   const result: GithubIssue[] = [];
   for (let page = 1; page <= 10; page++) {
-    const chunk = await github(`/repos/${REPO}/issues?state=open&labels=${encodeURIComponent(REQUEST_LABEL)}&per_page=100&page=${page}`) as GithubIssue[];
+    const chunk = await github(`/repos/${REPO}/issues?state=open&labels=${encodeURIComponent(REQUEST_LABEL)}&per_page=100&page=${page}`, { signal }) as GithubIssue[];
     for (const issue of chunk) if (!issue.pull_request) result.push(issue);
     if (chunk.length < 100) break;
   }
   return result;
 }
-export async function patchIssue(number: number, body: string): Promise<void> {
-  await github(`/repos/${REPO}/issues/${number}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ body }) });
+export async function patchIssue(number: number, body: string, signal?: AbortSignal): Promise<void> {
+  await github(`/repos/${REPO}/issues/${number}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ body }), signal });
 }
 export async function assignIssue(number: number, login: string): Promise<void> {
   await github(`/repos/${REPO}/issues/${number}/assignees`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ assignees: [login] }) });
