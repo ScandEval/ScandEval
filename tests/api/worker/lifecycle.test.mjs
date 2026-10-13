@@ -416,6 +416,87 @@ for (const lateCandidate of [false, true]) test(
   }
 });
 
+for (const contention of ["global", "issue-only", "issue-later"]) test(
+  `claim retries on ${contention} mutex contention${contention === "issue-later" ? " and claims a later candidate" : ""}`,
+  async () => {
+  const originalFetch = globalThis.fetch;
+  const originalEnv = { ...process.env };
+  Object.assign(process.env, { VOLUNTEER_MARKER_SECRET: "marker-secret",
+    VOLUNTEER_WORKER_IMAGE_DIGEST: "sha256:image", EUROEVAL_VERSION: "1.0.0",
+    VOLUNTEER_WORKER_VERSION: "1.0.0", UPSTASH_REDIS_REST_URL: "https://redis.test",
+    UPSTASH_REDIS_REST_TOKEN: "redis-token", GITHUB_TOKEN: "github-token",
+    VOLUNTEER_SCOPE_POLICY_JSON: JSON.stringify({ policy_version: "test-policy", policies: [{
+      euroeval_version: "1.0.0", model_type: "encoder", language: "da", language_group: "da",
+      allowed_identity_suffix_sets: [[JSON.stringify(["race", false, true])]],
+      task_groups: ["sequence_classification"], warnings: [],
+    }] }) });
+  const language = "Scandinavian languages (Danish, Faroese, Icelandic, Norwegian, Swedish)";
+  const issueNumbers = contention === "issue-only" ? [12] : [12, 13];
+  const issues = issueNumbers.map((number) => ({ number, title: "[MODEL EVALUATION REQUEST] org/model",
+    body: `### Model ID\n\norg/model\n\n- [x] ${language}\n`, state: "open", assignees: [] }));
+  const credentialKey = `euroeval:worker:credential:${await sha256("credential")}`;
+  const values = new Map([[credentialKey, JSON.stringify({ contributor: "alice" })]]);
+  const mutations = [];
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input); const method = init.method || "GET";
+    if (url === "https://redis.test") {
+      const command = JSON.parse(init.body);
+      if (command[0] === "GET") return Response.json({ result: values.get(command[1]) || null });
+      if (command[0] === "INCR") return Response.json({ result: 1 });
+      if (command[0] === "SET" && command[1] === "euroeval:worker:mutex:9007199254740991" && contention === "global") {
+        return Response.json({ result: null });
+      }
+      if (command[0] === "SET" && command[1] === "euroeval:worker:mutex:12" && contention.startsWith("issue")) {
+        return Response.json({ result: null });
+      }
+      if (command[0] === "SET") { values.set(command[1], command[2]); return Response.json({ result: "OK" }); }
+      if (command[0] === "EVAL") {
+        if (String(command[1]).includes("released=true")) values.delete(command[3]);
+        else if (String(command[1]).includes("redis.call('SET'")) values.set(command[3], command[5]);
+        return Response.json({ result: 1 });
+      }
+    }
+    if (url.includes("/repos/EuroEval/EuroEval/assignees/")) return new Response(null, { status: 204 });
+    if (url.includes("/repos/EuroEval/EuroEval/issues?")) return Response.json(issues);
+    if (url.includes("huggingface.co/api/models/org/model")) return Response.json({ id: "org/model",
+      sha: "a".repeat(40), private: false, gated: false, pipeline_tag: "fill-mask",
+      siblings: [{ rfilename: "model.safetensors", size: 100 }, { rfilename: "config.json", size: 10 }] });
+    if (url.includes(`/org/model/raw/${"a".repeat(40)}/config.json`)) {
+      return Response.json({ model_type: "bert", architectures: ["BertModel"] });
+    }
+    const issue = issues.find((item) => url.endsWith(`/issues/${item.number}`));
+    if (issue && method === "GET") return Response.json(issue);
+    if (issue && method === "PATCH") {
+      mutations.push(issue.number); issue.body = JSON.parse(init.body).body; return Response.json(issue);
+    }
+    throw new Error(`Unexpected request: ${method} ${url}`);
+  };
+  try {
+    const makeRequest = () => new Request("https://euroeval.test/api/worker/claim", {
+      method: "POST", headers: { authorization: "Bearer credential", "content-type": "application/json" },
+      body: JSON.stringify({ protocol_version: "volunteer-worker/v1", worker_version: "1.0.0",
+        hardware: { architecture: "amd64", free_disk_bytes: 1_000_000,
+          gpu_memory_utilisation: 0.8, selected_gpu_index: 0, selected_gpu_uuid: "gpu",
+          gpus: [{ index: 0, name: "GPU", uuid: "gpu", free_memory_bytes: 1_000_000,
+            total_memory_bytes: 1_000_000 }] } }),
+    });
+    const response = await claim(makeRequest());
+    if (contention !== "issue-later") {
+      assert.equal(response.status, 503);
+      assert.deepEqual(await response.json(), { protocol_version: "volunteer-worker/v1",
+        error: "Claim is busy; retry claim.", code: "claim_busy" });
+      assert.deepEqual(mutations, []);
+    } else {
+      assert.equal(response.status, 200, await response.clone().text());
+      assert.equal((await response.json()).issue_number, 13);
+      assert.deepEqual(mutations, [13]);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env = originalEnv;
+  }
+});
+
 async function finaliseSuccessfulScope(language, suffixes) {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
