@@ -50,9 +50,15 @@ export async function modelMayFit(modelId: string, hardware: Record<string, unkn
     typeof utilization === "number" && weightBytes * 1.35 <= largestFree * utilization;
 }
 
-export async function resolveModel(modelId: string): Promise<ResolvedModel> {
+async function fetchModel(input: string, signal?: AbortSignal): Promise<Response> {
+  const requestTimeout = AbortSignal.timeout(2_500);
+  const requestSignal = signal ? AbortSignal.any([signal, requestTimeout]) : requestTimeout;
+  return fetchWithRetry(input, { signal: requestSignal });
+}
+
+export async function resolveModel(modelId: string, signal?: AbortSignal): Promise<ResolvedModel> {
   const encoded = modelId.split("/").map(encodeURIComponent).join("/");
-  const infoResponse = await fetchWithRetry(`https://huggingface.co/api/models/${encoded}?blobs=true`);
+  const infoResponse = await fetchModel(`https://huggingface.co/api/models/${encoded}?blobs=true`, signal);
   if (!infoResponse.ok) throw new BrokerError(422, `Hugging Face model ${modelId} could not be resolved.`);
   const info = await infoResponse.json() as {
     id?: string; sha?: string; gated?: boolean | string; private?: boolean;
@@ -86,7 +92,7 @@ export async function resolveModel(modelId: string): Promise<ResolvedModel> {
   if (!weights.length || unsafe || files.some((file) => file.rfilename?.toLowerCase().endsWith(".py"))) {
     throw new BrokerError(422, "The model must use safetensors only and contain no custom repository Python.");
   }
-  const configResponse = await fetchWithRetry(`https://huggingface.co/${encoded}/raw/${encodeURIComponent(info.sha)}/config.json`);
+  const configResponse = await fetchModel(`https://huggingface.co/${encoded}/raw/${encodeURIComponent(info.sha)}/config.json`, signal);
   if (!configResponse.ok) throw new BrokerError(422, "The model config could not be resolved at its immutable revision.");
   const config = await configResponse.json() as Record<string, unknown>;
   if (config.auto_map || config.custom_code || config.trust_remote_code) {
