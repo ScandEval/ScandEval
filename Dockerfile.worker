@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1.7
 
-# Keep the builder toolchain separate from the runtime image. The digest pins the
-# CUDA userspace while NVIDIA Container Toolkit supplies the host driver at run time.
+# The pinned CUDA manifest is multi-arch (linux/amd64 and linux/arm64). BuildKit
+# selects the target child; NVIDIA Container Toolkit supplies the host driver at run time.
+# Keep the builder toolchain separate from the runtime image.
 FROM ghcr.io/astral-sh/uv:0.8.22@sha256:9874eb7afe5ca16c363fe80b294fe700e460df29a55532bbfea234a0f12eddb1 AS uv
 FROM nvidia/cuda:13.1.1-base-ubuntu24.04@sha256:e8c8679ccd042249d4c4080a3fab5a6bb52ab6e771addffa2e6e4eafea797bd2 AS build
 
@@ -38,8 +39,9 @@ COPY src/euroeval_worker ./src/euroeval_worker
 RUN --mount=type=cache,target=/cache/uv,sharing=locked \
     uv sync --frozen --no-dev --extra generative --python /usr/bin/python3.12
 
-# Keep compilers, Git, uv, and the build cache out of the runtime image.
-FROM nvidia/cuda:13.1.1-base-ubuntu24.04@sha256:e8c8679ccd042249d4c4080a3fab5a6bb52ab6e771addffa2e6e4eafea797bd2
+# EuroEval checks for nvcc before loading generative CUDA models. Keep Git, uv,
+# and the build cache out of the runtime image while retaining the CUDA toolchain.
+FROM nvidia/cuda:13.1.1-devel-ubuntu24.04@sha256:9cf8694a27722418a1f175d90f85d5afb5a728fd4a9907d7f0565efecfa14d32
 
 ENV DEBIAN_FRONTEND=noninteractive \
     HF_HOME=/cache/huggingface \
@@ -48,7 +50,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TRANSFORMERS_CACHE=/cache/huggingface/transformers \
     XDG_CACHE_HOME=/cache/xdg \
     HOME=/home/worker \
-    PATH=/opt/euroeval/.venv/bin:$PATH
+    PATH=/opt/euroeval/.venv/bin:/usr/local/cuda/bin:$PATH
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \

@@ -3,6 +3,19 @@
 from pathlib import Path
 
 WORKFLOW = Path(__file__).parents[1] / ".github/workflows/worker-image.yaml"
+DOCKERFILE = Path(__file__).parents[1] / "Dockerfile.worker"
+
+
+def test_amd64_publication_remains_separate_from_spark_candidate() -> None:
+    """The existing amd64 candidate and its strict manifest check stay unchanged."""
+    contents = WORKFLOW.read_text(encoding="utf-8")
+    amd64_job = contents[: contents.index("  spark-arm64-candidate:")]
+
+    assert "platforms: linux/amd64" in amd64_job
+    assert (
+        '(.platform.os == "linux" and .platform.architecture == "amd64")' in amd64_job
+    )
+    assert "prefix=spark-arm64-sha-" not in amd64_job
 
 
 def test_anonymous_verification_proves_tag_digest_and_amd64() -> None:
@@ -50,3 +63,42 @@ def test_metadata_and_upload_are_gated_after_verification() -> None:
     assert verification < metadata < upload
     assert "if: success() && github.event_name != 'pull_request'" in contents[metadata:]
     assert "if: success() && github.event_name != 'pull_request'" in contents[upload:]
+
+
+def test_spark_arm64_is_a_distinct_candidate_and_not_promotable() -> None:
+    """ARM64 must publish to an isolated candidate tag, never the amd64 channel."""
+    contents = WORKFLOW.read_text(encoding="utf-8")
+    spark_job = contents[contents.index("  spark-arm64-candidate:") :]
+
+    assert "runs-on: ubuntu-24.04-arm" in spark_job
+    assert "platforms: linux/arm64" in spark_job
+    assert "prefix=spark-arm64-sha-" in spark_job
+    assert (
+        '(.platform.os == "linux" and .platform.architecture == "arm64")' in spark_job
+    )
+    assert (
+        "Spark candidate manifest does not contain a linux/arm64 child digest."
+        in spark_job
+    )
+    assert "blocked-pending-physical-spark-canary" in spark_job
+    assert "pending a physical DGX Spark canary" in spark_job
+    assert "latest" not in spark_job
+    assert "type=sha,format=long,prefix=sha-" not in spark_job
+
+
+def test_worker_runtime_includes_pinned_nvcc() -> None:
+    """Provide nvcc for generative startup without changing amd64 publication."""
+    dockerfile = DOCKERFILE.read_text(encoding="utf-8")
+    runtime = dockerfile.split("\nFROM ", maxsplit=2)[-1]
+
+    assert (
+        "nvidia/cuda:13.1.1-devel-ubuntu24.04@sha256:"
+        "9cf8694a27722418a1f175d90f85d5afb5a728fd4a9907d7f0565efecfa14d32" in runtime
+    )
+    assert "PATH=/opt/euroeval/.venv/bin:/usr/local/cuda/bin:$PATH" in runtime
+    assert "USER worker" in runtime
+
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    amd64_job = workflow[: workflow.index("  spark-arm64-candidate:")]
+    assert "platforms: linux/amd64" in amd64_job
+    assert workflow.count('docker run --rm --entrypoint nvcc "$IMAGE" --version') == 2

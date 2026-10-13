@@ -8,10 +8,10 @@ from pathlib import Path
 import pytest
 
 from euroeval.enums import ShotMode
-from euroeval_worker import evaluator, runtime
+from euroeval_worker import evaluator, hardware, runtime
 from euroeval_worker.auth import authenticate
 from euroeval_worker.broker import BrokerClient, BrokerError
-from euroeval_worker.hardware import NoGpuError, discover_gpus
+from euroeval_worker.hardware import NoGpuError, discover_gpus, discover_hardware
 from euroeval_worker.safety import ModelMetadata, SafetyError, check_model_safety
 from euroeval_worker.state import PendingRecord, StateStore
 from euroeval_worker.types import (
@@ -455,6 +455,31 @@ def test_canary_corpus_outage_does_not_block_results(
     assert not broker.releases
 
 
+def test_discover_hardware_does_not_import_torch_in_worker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Report GB10 data while avoiding CUDA initialisation in the worker process."""
+    monkeypatch.setattr(
+        hardware,
+        "_discover_spark_memory",
+        lambda gpu: dataclasses.replace(
+            gpu, free_memory_bytes=10, total_memory_bytes=20
+        ),
+    )
+    monkeypatch.setattr(hardware, "_ram_bytes", lambda: 128 * 1024**3)
+    monkeypatch.setattr(hardware, "_pytorch_version", lambda: None)
+    gpu_output = "0, NVIDIA GB10, GPU-test, 0, 0, 12.1\n"
+    report = discover_hardware(
+        runner=lambda command: (
+            gpu_output
+            if any(argument.startswith("--query-gpu=") for argument in command)
+            else "Driver Version: 1.0 CUDA Version: 12.1"
+        )
+    )
+    assert report.pytorch_version is None
+    assert report.selected_gpu_uuid == "GPU-test"
+
+
 def test_eee_record_rejects_non_finite_values() -> None:
     """Prevent NaN and Infinity from entering a digest-stable envelope."""
     with pytest.raises(ValueError):
@@ -777,6 +802,97 @@ def test_finalise_response_loss_is_idempotently_retried(
     assert state.load_active() is None
 
 
+def test_gb10_contention_caps_reported_free_memory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Respect host contention even when CUDA reports substantially more free."""
+    monkeypatch.setattr(
+        hardware.subprocess,
+        "run",
+        lambda *_args, **_kwargs: type(
+            "Completed",
+            (),
+            {"stdout": '{"uuid":"GPU-test","free":14000000000,"total":130000000000}'},
+        )(),
+    )
+    monkeypatch.setattr(hardware, "_host_available_bytes", lambda: 2 * 1024**3)
+    gpu = discover_gpus(
+        runner=lambda _command: "0, NVIDIA GB10, GPU-test, N/A, N/A, 12.1\n"
+    )[0]
+    assert gpu.free_memory_bytes == 1024**3
+
+
+def test_gb10_discovery_fails_closed_on_unverified_memory(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Do not report availability if device identity cannot be verified."""
+    monkeypatch.setattr(
+        hardware.subprocess,
+        "run",
+        lambda *_args, **_kwargs: type(
+            "Completed",
+            (),
+            {"stdout": '{"uuid":"GPU-other","free":10000000000,"total":130000000000}'},
+        )(),
+    )
+    monkeypatch.setattr(hardware, "_host_available_bytes", lambda: 8 * 1024**3)
+    gpu = discover_gpus(
+        runner=lambda _command: "0, NVIDIA GB10, GPU-test, N/A, N/A, 12.1\n"
+    )[0]
+    assert gpu.free_memory_bytes == 0
+    assert gpu.total_memory_bytes == 0
+
+
+def test_gb10_malformed_and_failed_fallback_reports_no_capacity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Ignore malformed rows and fail closed when isolated CUDA probing fails."""
+    monkeypatch.setattr(
+        hardware.subprocess,
+        "run",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            hardware.subprocess.CalledProcessError(1, "python")
+        ),
+    )
+    output = (
+        "bad row\n"
+        "0, NVIDIA GB10, GPU-test, N/A, N/A, 12.1\n"
+        "1, NVIDIA A100, GPU-discrete, 1024, 4096, 8.0\\n"
+    )
+    gpus = discover_gpus(runner=lambda _command: output)
+    assert len(gpus) == 2
+    assert gpus[0].free_memory_bytes == 0
+    assert gpus[0].total_memory_bytes == 0
+    assert gpus[1].free_memory_bytes == 1024**3
+    assert gpus[1].total_memory_bytes == 4 * 1024**3
+
+
+def test_gb10_n_a_memory_uses_verified_cuda_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Use isolated CUDA measurements and cap free memory by host availability."""
+    output = "0, NVIDIA GB10, GPU-test, N/A, N/A, 12.1\n"
+    measured: list[str] = []
+
+    def fake_run(command: list[str], **kwargs: object) -> object:
+        environment = kwargs.get("env")
+        assert isinstance(environment, dict)
+        measured.append(str(environment.get("CUDA_VISIBLE_DEVICES")))
+        return type(
+            "Completed",
+            (),
+            {"stdout": '{"uuid":"test","free":14000000000,"total":130000000000}'},
+        )()
+
+    monkeypatch.setattr(hardware.subprocess, "run", fake_run)
+    monkeypatch.setattr(hardware, "_host_available_bytes", lambda: 4 * 1024**3)
+    gpu = discover_gpus(runner=lambda _command: output)[0]
+
+    assert gpu.free_memory_bytes == 3 * 1024**3
+    assert gpu.total_memory_bytes == 130000000000
+    assert measured == ["GPU-test"]
+
+
 def test_interruption_resumes_pre_evaluation_lease(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -1064,6 +1180,46 @@ def test_state_round_trip_preserves_scope_alternatives_and_canary(
 
     assert active is not None
     assert active.lease == lease
+
+
+def test_worker_caps_vllm_utilisation_to_fresh_free_gpu_memory(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Scale vLLM's total-memory reservation to current free memory."""
+    monkeypatch.setattr(
+        runtime, "authenticate", lambda client, state: ("cred", "login")
+    )
+    monkeypatch.setattr(
+        runtime, "check_model_safety", lambda lease, gpus, free_disk_bytes=None: None
+    )
+    initial = HARDWARE
+    contended_gpu = dataclasses.replace(
+        GPU, free_memory_bytes=96 * 1024**3, total_memory_bytes=130 * 1024**3
+    )
+    fresh = dataclasses.replace(initial, gpus=(contended_gpu,))
+    reports = iter((initial, fresh))
+    observed: dict[str, object] = {}
+
+    class CapturingEvaluator:
+        def evaluate(
+            self,
+            lease: Lease,
+            output_path: Path,
+            gpu_memory_utilisation: float | None = None,
+        ) -> list[EEERecord]:
+            observed["utilisation"] = gpu_memory_utilisation
+            return [EEERecord({"id": "one"})]
+
+    broker = Broker()
+    runtime.Worker(
+        client=broker,
+        state=StateStore(tmp_path),
+        evaluator=CapturingEvaluator(),
+        hardware_factory=lambda: next(reports),
+    ).run(once=True)
+
+    assert observed["utilisation"] == pytest.approx(0.8 * 96 / 130)
+    assert broker.finalised
 
 
 def test_worker_retries_idempotently_and_finalises(

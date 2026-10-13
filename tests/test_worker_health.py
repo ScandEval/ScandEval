@@ -58,6 +58,7 @@ class FakeCuda:
     def __init__(self, available: bool) -> None:
         """Initialise the fake CUDA availability state."""
         self.available = available
+        self.uuid = GPU.uuid
         self.set_device_calls: list[int] = []
 
     def current_device(self) -> int:
@@ -71,7 +72,7 @@ class FakeCuda:
     def get_device_properties(self, device: int) -> types.SimpleNamespace:
         """Return properties for the selected logical device."""
         assert device == 0
-        return types.SimpleNamespace(uuid=GPU.uuid)
+        return types.SimpleNamespace(uuid=self.uuid)
 
     def is_available(self) -> bool:
         """Report whether CUDA is available.
@@ -148,10 +149,14 @@ def test_gpu_health_check_fails_without_gpu() -> None:
     assert not imported
 
 
-def test_gpu_health_check_imports_after_pinning_and_runs_operation() -> None:
+@pytest.mark.parametrize("cuda_uuid", ["GPU-test", "test"])
+def test_gpu_health_check_imports_after_pinning_and_runs_operation(
+    cuda_uuid: str,
+) -> None:
     """Pin the selected UUID before importing torch and vLLM."""
     imported: list[str] = []
     torch = FakeTorch(available=True)
+    torch.cuda.uuid = cuda_uuid
     vllm = types.SimpleNamespace(__version__="test-vllm")
     original = os.environ.get("CUDA_VISIBLE_DEVICES")
     os.environ["CUDA_VISIBLE_DEVICES"] = "original"
