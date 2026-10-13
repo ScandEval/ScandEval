@@ -152,7 +152,7 @@ class Worker:
         state: StateStore,
         evaluator: Evaluator | None = None,
         gpu_memory_utilisation: float = 0.8,
-        hardware_factory: c.Callable[[], HardwareReport] = discover_hardware,
+        hardware_factory: c.Callable[[], HardwareReport] | None = None,
     ) -> None:
         """Initialise a worker.
 
@@ -174,7 +174,7 @@ class Worker:
         self.evaluator = evaluator or EuroEvalEvaluator(
             cache_dir=state.directory, gpu_memory_utilisation=gpu_memory_utilisation
         )
-        self.hardware_factory = hardware_factory
+        self.hardware_factory = hardware_factory or discover_hardware
         self.last_submission_id: str | None = None
         self._credential = ""
         self._login = ""
@@ -211,7 +211,7 @@ class Worker:
                 )
                 self.state.archive_active()
                 active = None
-            discovered = self.hardware_factory()
+            discovered = self._discover_hardware()
             if active is not None:
                 selected = _gpu_for_lease(discovered.gpus, active.lease)
                 hardware = self._hardware_with_selected(discovered, selected)
@@ -283,6 +283,16 @@ class Worker:
             return new_credential, self.client.claim(
                 credential=new_credential, hardware=hardware
             )
+
+    def _discover_hardware(self) -> HardwareReport:
+        """Discover hardware against the worker's writable state filesystem.
+
+        Returns:
+            A report measured on the state and model-cache filesystem.
+        """
+        if self.hardware_factory is discover_hardware:
+            return discover_hardware(state_dir=self.state.directory)
+        return self.hardware_factory()
 
     def _hardware_with_selected(
         self, hardware: HardwareReport, selected: Gpu
@@ -372,7 +382,7 @@ class Worker:
                     self.state.archive_active()
                     raise
                 try:
-                    fresh_hardware = self.hardware_factory()
+                    fresh_hardware = self._discover_hardware()
                     fresh_gpu = _gpu_for_lease(fresh_hardware.gpus, lease)
                     if (
                         fresh_gpu.total_memory_bytes <= 0
