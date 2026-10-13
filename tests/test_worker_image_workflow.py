@@ -5,6 +5,18 @@ from pathlib import Path
 WORKFLOW = Path(__file__).parents[1] / ".github/workflows/worker-image.yaml"
 
 
+def test_amd64_publication_remains_separate_from_spark_candidate() -> None:
+    """The existing amd64 candidate and its strict manifest check stay unchanged."""
+    contents = WORKFLOW.read_text(encoding="utf-8")
+    amd64_job = contents[: contents.index("  spark-arm64-candidate:")]
+
+    assert "platforms: linux/amd64" in amd64_job
+    assert (
+        '(.platform.os == "linux" and .platform.architecture == "amd64")' in amd64_job
+    )
+    assert "prefix=spark-arm64-sha-" not in amd64_job
+
+
 def test_anonymous_verification_proves_tag_digest_and_amd64() -> None:
     """Both references and the required platform descriptor are checked."""
     step = _verification_step()
@@ -50,3 +62,24 @@ def test_metadata_and_upload_are_gated_after_verification() -> None:
     assert verification < metadata < upload
     assert "if: success() && github.event_name != 'pull_request'" in contents[metadata:]
     assert "if: success() && github.event_name != 'pull_request'" in contents[upload:]
+
+
+def test_spark_arm64_is_a_distinct_candidate_and_not_promotable() -> None:
+    """ARM64 must publish to an isolated candidate tag, never the amd64 channel."""
+    contents = WORKFLOW.read_text(encoding="utf-8")
+    spark_job = contents[contents.index("  spark-arm64-candidate:") :]
+
+    assert "runs-on: ubuntu-24.04-arm" in spark_job
+    assert "platforms: linux/arm64" in spark_job
+    assert "prefix=spark-arm64-sha-" in spark_job
+    assert (
+        '(.platform.os == "linux" and .platform.architecture == "arm64")' in spark_job
+    )
+    assert (
+        "Spark candidate manifest does not contain a linux/arm64 child digest."
+        in spark_job
+    )
+    assert "blocked-pending-physical-spark-canary" in spark_job
+    assert "pending a physical DGX Spark canary" in spark_job
+    assert "latest" not in spark_job
+    assert "type=sha,format=long,prefix=sha-" not in spark_job

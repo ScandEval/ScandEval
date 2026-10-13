@@ -180,3 +180,141 @@ jobs:
           name: volunteer-worker-image-metadata
           path: worker-image-metadata.json
           if-no-files-found: error
+
+  spark-arm64-candidate:
+    name: Build ARM64 Spark candidate (not promotable)
+    # Native ARM builds verify that the locked generative stack is installable on Spark.
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Prepare isolated Docker config
+        run: |
+          set -euo pipefail
+          DOCKER_CONFIG_DIR="$RUNNER_TEMP/euroeval-worker-spark-docker"
+          mkdir -m 700 -p "$DOCKER_CONFIG_DIR"
+          echo "DOCKER_CONFIG=$DOCKER_CONFIG_DIR" >> "$GITHUB_ENV"
+
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR for Spark candidate publication
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Derive Spark candidate metadata
+        id: spark-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/euroeval/euroeval-worker
+          tags: |
+            type=sha,format=long,prefix=spark-arm64-sha-
+
+      - name: Build and publish immutable Spark candidate
+        id: spark-build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.worker
+          platforms: linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
+          tags: ${{ steps.spark-meta.outputs.tags }}
+          labels: ${{ steps.spark-meta.outputs.labels }}
+          provenance: ${{ github.event_name != 'pull_request' }}
+          sbom: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=gha,scope=euroeval-worker-spark-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=euroeval-worker-spark-${{ github.ref_name }}
+
+      - name: Smoke entrypoint and non-root runtime
+        if: github.event_name == 'pull_request'
+        env:
+          IMAGE: ${{ steps.spark-meta.outputs.tags }}
+        run: |
+          test "$(docker image inspect "$IMAGE" --format '{{.Config.User}}')" = "worker"
+          test "$(docker run --rm --entrypoint id "$IMAGE" -u)" = "10001"
+          docker run --rm "$IMAGE" --version
+
+      - name: Verify Spark candidate manifest anonymously
+        if: github.event_name != 'pull_request'
+        env:
+          IMAGE: ghcr.io/euroeval/euroeval-worker
+          SPARK_SHA_TAG: ${{ steps.spark-meta.outputs.tags }}
+          DIGEST: ${{ steps.spark-build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          PREVIOUS_DOCKER_CONFIG="${DOCKER_CONFIG:-}"
+          ANONYMOUS_DOCKER_CONFIG="$RUNNER_TEMP/euroeval-worker-spark-anonymous-docker"
+          rm -rf "$ANONYMOUS_DOCKER_CONFIG"
+          mkdir -m 700 -p "$ANONYMOUS_DOCKER_CONFIG"
+          export DOCKER_CONFIG="$ANONYMOUS_DOCKER_CONFIG"
+          unset BUILDX_BUILDER DOCKER_AUTH_CONFIG
+          cleanup() {
+            rm -rf "$ANONYMOUS_DOCKER_CONFIG"
+            if [ -n "$PREVIOUS_DOCKER_CONFIG" ]; then
+              rm -rf "$PREVIOUS_DOCKER_CONFIG"
+            fi
+          }
+          trap cleanup EXIT
+          if [[ ! "$DIGEST" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
+            echo "::error::Spark build did not return a valid candidate digest."
+            exit 1
+          fi
+          if [ -z "$SPARK_SHA_TAG" ]; then
+            echo "::error::Spark build did not return a candidate SHA tag."
+            exit 1
+          fi
+          REFERENCE="$IMAGE@$DIGEST"
+          digest_manifest="$(docker manifest inspect "$REFERENCE")"
+          tag_manifest="$(docker manifest inspect "$SPARK_SHA_TAG")"
+          if [ "$(printf '%s\n' "$digest_manifest" | jq -S -c .)" != "$(printf '%s\n' "$tag_manifest" | jq -S -c .)" ]; then
+            echo "::error::Spark candidate SHA tag does not match its digest reference."
+            exit 1
+          fi
+          printf '%s\n' "$digest_manifest" | jq -e '
+            any((.manifests // [])[]?;
+              (.platform.os == "linux" and .platform.architecture == "arm64")
+              and (.digest != null)
+              and (.digest | type == "string")
+            )
+          ' >/dev/null || {
+            echo "::error::Spark candidate manifest does not contain a linux/arm64 child digest."
+            exit 1
+          }
+          echo "Verified immutable Spark candidate manifest anonymously."
+
+      - name: Publish Spark candidate metadata
+        if: success() && github.event_name != 'pull_request'
+        env:
+          COMMIT: ${{ github.sha }}
+          IMAGE: ghcr.io/euroeval/euroeval-worker
+          PLATFORM: linux/arm64
+          SPARK_SHA_TAG: ${{ steps.spark-meta.outputs.tags }}
+          DIGEST: ${{ steps.spark-build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          printf '{"commit":"%s","image":"%s","platform":"%s","sha_tag":"%s","digest":"%s","promotion":"blocked-pending-physical-spark-canary"}\n' \
+            "$COMMIT" "$IMAGE" "$PLATFORM" "$SPARK_SHA_TAG" "$DIGEST" > worker-image-spark-arm64-metadata.json
+          {
+            echo "## Volunteer worker Spark ARM64 candidate (not promotable)"
+            printf -- '- Commit: `%s`\n' "$COMMIT"
+            printf -- '- Image: `%s`\n' "$IMAGE"
+            printf -- '- Platform: `%s`\n' "$PLATFORM"
+            printf -- '- Candidate-only SHA tag: `%s`\n' "$SPARK_SHA_TAG"
+            printf -- '- Digest: `%s`\n' "$DIGEST"
+            echo '- Promotion: blocked pending a physical DGX Spark canary.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Spark candidate metadata
+        if: success() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: volunteer-worker-spark-arm64-image-metadata
+          path: worker-image-spark-arm64-metadata.json
+          if-no-files-found: error
