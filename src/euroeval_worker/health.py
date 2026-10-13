@@ -132,7 +132,9 @@ def _check_cuda(torch_module: _Torch, selected: Gpu) -> None:
         )
     properties = cuda.get_device_properties(0)
     device_uuid = getattr(properties, "uuid", None)
-    if device_uuid is not None and _normalise_uuid(device_uuid) != selected.uuid:
+    if device_uuid is not None and _normalise_uuid(device_uuid).lower().removeprefix(
+        "gpu-"
+    ) != selected.uuid.lower().removeprefix("gpu-"):
         raise GpuHealthError(
             f"CUDA UUID {_normalise_uuid(device_uuid)} does not match nvidia-smi "
             f"UUID {selected.uuid}"
