@@ -62,6 +62,68 @@ function mockBroker(issue, values) {
   };
 }
 
+test("claim discovers all paginated candidates with bounded metadata fan-out and skips config for non-fitting models", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalEnv = { ...process.env };
+  Object.assign(process.env, { VOLUNTEER_MARKER_SECRET: "marker-secret",
+    VOLUNTEER_WORKER_IMAGE_DIGEST: "sha256:image", EUROEVAL_VERSION: "1.0.0",
+    VOLUNTEER_WORKER_VERSION: "1.0.0", UPSTASH_REDIS_REST_URL: "https://redis.test",
+    UPSTASH_REDIS_REST_TOKEN: "redis-token", GITHUB_TOKEN: "github-token" });
+  const credentialKey = `euroeval:worker:credential:${await sha256("credential")}`;
+  const issues = Array.from({ length: 148 }, (_, index) => ({
+    number: index + 1, title: `[MODEL EVALUATION REQUEST] org/model-${index}`,
+    body: `### Model ID\\n\\norg/model-${index}\\n\\n- [x] Scandinavian languages (Danish, Faroese, Icelandic, Norwegian, Swedish)`,
+    state: "open", assignees: [],
+  }));
+  let inFlight = 0;
+  let maxInFlight = 0;
+  let metadataCalls = 0;
+  let configCalls = 0;
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input);
+    if (url === "https://redis.test") {
+      const command = JSON.parse(init.body);
+      if (command[0] === "GET") return Response.json({ result: command[1] === credentialKey
+        ? JSON.stringify({ contributor: "alice" }) : null });
+      return Response.json({ result: command[0] === "SET" ? "OK" : 1 });
+    }
+    if (url.includes("/repos/EuroEval/EuroEval/issues?")) {
+      const page = Number(new URL(url).searchParams.get("page"));
+      return Response.json(issues.slice((page - 1) * 100, page * 100));
+    }
+    if (url.includes("huggingface.co/api/models/")) {
+      metadataCalls++;
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 2));
+      inFlight--;
+      const id = url.split("/api/models/")[1].split("?")[0];
+      return Response.json({ id, private: false, gated: false, siblings: [
+        { rfilename: "model.safetensors", size: 100 }, { rfilename: "config.json", size: 10 },
+      ] });
+    }
+    if (url.includes("/raw/") && url.endsWith("/config.json")) configCalls++;
+    throw new Error(`Unexpected request: ${init.method || "GET"} ${url}`);
+  };
+  try {
+    const response = await claim(new Request("https://euroeval.test/api/worker/claim", {
+      method: "POST", headers: { authorization: "Bearer credential", "content-type": "application/json" },
+      body: JSON.stringify({ protocol_version: "volunteer-worker/v1", worker_version: "1.0.0",
+        hardware: { architecture: "amd64", free_disk_bytes: 0, gpu_memory_utilisation: 0.8,
+          selected_gpu_index: 0, selected_gpu_uuid: "gpu", gpus: [{ index: 0, name: "GPU", uuid: "gpu",
+            free_memory_bytes: 1_000_000, total_memory_bytes: 1_000_000 }] } }),
+    }));
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { protocol_version: "volunteer-worker/v1", status: "no_work" });
+    assert.equal(metadataCalls, 148);
+    assert.ok(maxInFlight <= 6);
+    assert.equal(configCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env = originalEnv;
+  }
+});
+
 test("claim rejects an issue model edited during metadata resolution", async () => {
   const originalFetch = globalThis.fetch;
   const originalEnv = { ...process.env };
