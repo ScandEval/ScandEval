@@ -16,6 +16,40 @@ export interface ResolvedModel {
   model_metadata: ModelMetadataEvidence;
 }
 
+export async function modelMayFit(modelId: string, hardware: Record<string, unknown>,
+  selected?: Record<string, unknown> | null, signal?: AbortSignal): Promise<boolean> {
+  const encoded = modelId.split("/").map(encodeURIComponent).join("/");
+  const response = await fetchWithRetry(`https://huggingface.co/api/models/${encoded}?blobs=true`, { signal });
+  if (!response.ok) throw new BrokerError(response.status >= 500 || response.status === 429 ? 503 : 422,
+    `Hugging Face model ${modelId} could not be inspected.`);
+  const info = await response.json() as {
+    id?: string; private?: boolean; gated?: boolean | string;
+    siblings?: Array<{ rfilename?: string; size?: number }>;
+  };
+  if (typeof info.id !== "string" || info.id.toLowerCase() !== modelId.toLowerCase() ||
+      typeof info.private !== "boolean" || typeof info.gated !== "boolean" && info.gated !== "false" ||
+      !Array.isArray(info.siblings) || info.siblings.some((file) =>
+        !file || typeof file.rfilename !== "string" || !file.rfilename)) {
+    throw new BrokerError(422, "Hugging Face returned incomplete model metadata.");
+  }
+  if (info.private || info.gated === true) return false;
+  const files = info.siblings;
+  const weights = files.filter((file) => file.rfilename!.toLowerCase().endsWith(".safetensors"));
+  if (!weights.length || files.some((file) => /\\.(bin|pt|pth|ckpt|gguf|onnx|h5|msgpack)$/i.test(file.rfilename || "") ||
+      file.rfilename?.toLowerCase().endsWith(".py"))) return false;
+  const weightBytes = weights.reduce((total, file) => total +
+    (typeof file.size === "number" && Number.isSafeInteger(file.size) && file.size >= 0 ? file.size : 0), 0);
+  const repoBytes = files.reduce((total, file) => total +
+    (typeof file.size === "number" && Number.isSafeInteger(file.size) && file.size >= 0 ? file.size : 0), 0);
+  if (!weightBytes || !repoBytes || files.some((file) => typeof file.size !== "number" ||
+      !Number.isSafeInteger(file.size) || file.size < 0)) throw new BrokerError(422, "Incomplete model file sizes.");
+  const utilization = hardware.gpu_memory_utilisation;
+  const largestFree = selected && typeof selected.free_memory_bytes === "number"
+    ? selected.free_memory_bytes : 0;
+  return typeof hardware.free_disk_bytes === "number" && hardware.free_disk_bytes >= repoBytes &&
+    typeof utilization === "number" && weightBytes * 1.35 <= largestFree * utilization;
+}
+
 export async function resolveModel(modelId: string): Promise<ResolvedModel> {
   const encoded = modelId.split("/").map(encodeURIComponent).join("/");
   const infoResponse = await fetchWithRetry(`https://huggingface.co/api/models/${encoded}?blobs=true`);
