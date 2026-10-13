@@ -2,7 +2,7 @@ import {
   BrokerError, ConfigurationError, GROUPS, PROTOCOL_VERSION, VM_MARKER_RE, VOLUNTEER_MARKER_RE,
   acquireRenewableIssueMutex, authenticate, brokerErrorBody,
   claimableLanguages, env, expectedScope,
-  extractModelId, enforceRateLimit, fitsGpu, fetchIssue, json, languageGroup, leaseTtl, selectedGpu, modelMayFit,
+  extractModelId, enforceRateLimit, fitsGpu, fetchIssue, json, languageGroup, leaseTtl, selectedGpu,
   listOpenIssues, method,
   patchIssue, putLease, randomToken, readJson, deleteLease, unassignIssue,
   getLeaseForIssue, reclaimExpiredLease,
@@ -130,6 +130,7 @@ function validHardware(value: unknown): value is Record<string, unknown> {
 
 export default async function handler(req: Request): Promise<Response> {
   const rejected = method(req); if (rejected) return rejected;
+  let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
   try {
     const identity = await authenticate(req); await enforceRateLimit(`euroeval:worker:limit:claim:${identity.hash}`, 120, 3600);
     const body = await readJson(req, 32 * 1024); requireProtocol(body);
@@ -151,43 +152,34 @@ export default async function handler(req: Request): Promise<Response> {
           listed.assignees, parseVolunteerMarker(listed.body), Date.now(), true, true,
         ) ? [{ listed, modelId }] : [];
     });
-    // Bound anonymous Hub discovery fan-out; keep issue ordering so candidate
-    // priority remains deterministic. A timeout or transient Hub failure cannot
-    // be mistaken for a complete no-work scan.
-    const deadline = Date.now() + 18_000;
+    // Resolve candidates in issue-priority batches. Do not inspect later issues
+    // until every earlier candidate has either been ruled out or attempted.
+    const deadline = Date.now() + 18_000; // reserve at least six seconds for the claim transaction
     const controller = new AbortController();
-    const fits = new Map<string, boolean>();
-    const discoveryModels = [...new Set(candidates.map(({ modelId }) => modelId))];
-    let next = 0;
-    let discoveryError: unknown;
-    const discovery = async (): Promise<void> => {
-      while (next < discoveryModels.length && !discoveryError) {
-        const modelId = discoveryModels[next++];
-        try {
-          if (Date.now() >= deadline) throw new BrokerError(503, "Model discovery deadline exceeded; retry claim.");
-          fits.set(modelId, await modelMayFit(modelId, body.hardware, selectedHardwareGpu, controller.signal));
-        } catch (error) {
-          if (error instanceof BrokerError && error.status === 422) fits.set(modelId, false);
-          else discoveryError = error;
-        }
-      }
+    const resolved = new Map<string, Awaited<ReturnType<typeof resolveModel>> | null>();
+    const checkDeadline = (): void => {
+      if (Date.now() >= deadline) throw new BrokerError(503, "Model discovery deadline exceeded; retry claim.");
     };
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    const timer = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now()));
-    try {
-      await Promise.race([Promise.all(Array.from({ length: Math.min(6, discoveryModels.length) }, discovery)),
-        new Promise<never>((_, reject) => {
-          timeout = setTimeout(() => reject(
-            new BrokerError(503, "Model discovery deadline exceeded; retry claim.")), Math.max(0, deadline - Date.now()));
-        })]);
-    } catch (error) {
-      controller.abort();
-      throw error instanceof BrokerError ? error : new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
-    } finally { clearTimeout(timer); if (timeout) clearTimeout(timeout); }
-    if (discoveryError) throw discoveryError instanceof BrokerError && discoveryError.status === 503
-      ? discoveryError : new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
-    for (const { listed, modelId } of candidates) {
-      if (!fits.get(modelId)) continue;
+    deadlineTimer = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now() - 6_000));
+    const batchSize = 6;
+    for (let start = 0; start < candidates.length; start += batchSize) {
+      checkDeadline();
+      const batch = candidates.slice(start, start + batchSize);
+      const batchModels = [...new Set(batch.map(({ modelId }) => modelId))]
+        .filter((modelId) => !resolved.has(modelId));
+      const outcomes = await Promise.all(batchModels.map(async (modelId) => {
+        try { return [modelId, await resolveModel(modelId, controller.signal)] as const; }
+        catch (error) {
+          if (error instanceof BrokerError && error.status === 422) return [modelId, null] as const;
+          throw new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
+        }
+      }));
+      outcomes.forEach(([modelId, model]) => resolved.set(modelId, model));
+      checkDeadline();
+      for (const { listed, modelId } of batch) {
+      checkDeadline();
+      const model = resolved.get(modelId);
+      if (!model || !fitsGpu(model, body.hardware, selectedHardwareGpu)) continue;
       // Serialize final fresh metadata, cross-issue scan, and claim transaction.
       const globalMutex = await acquireRenewableIssueMutex(GLOBAL_CLAIM_MUTEX);
       if (!globalMutex) continue;
@@ -224,6 +216,7 @@ export default async function handler(req: Request): Promise<Response> {
         const marker = parseVolunteerMarker(snapshot.body);
         if (markerPresent && (!marker || !(await verifyVolunteerMarker(snapshot.number, marker)))) continue;
         if (!volunteerAssigneesMatch(snapshot.assignees, marker, Date.now(), true, true)) continue;
+        checkDeadline();
         const recovered = marker
           ? await recoverExpiredOwnership(snapshot, marker, mutex)
           : { issue: snapshot, marker: null };
@@ -248,18 +241,13 @@ export default async function handler(req: Request): Promise<Response> {
         const refreshedSelected = selectedLanguages(snapshot.body);
         const refreshedAvailable = claimableLanguages(refreshedSelected, refreshedCurrent);
         if (!refreshedAvailable.includes(language)) continue;
-        // Revalidate current public metadata and the immutable config while both
-        // global and issue fences are held; discovery metadata is only a filter.
-        let model;
-        try { model = await resolveModel(modelId); } catch (error) {
-          if (error instanceof BrokerError && error.status === 422) continue;
-          throw error;
-        }
-        if (!fitsGpu(model, body.hardware, selectedHardwareGpu)) continue;
+        // Use the immutable revision/config resolved before taking either mutex;
+        // identity and ownership are rechecked against fresh GitHub state above.
         const group = languageGroup(language); if (!group || !GROUPS[group]) continue;
         let trusted;
         try { trusted = expectedScope(euroevalVersion, model.model_type, language); }
         catch (error) { if (error instanceof BrokerError && error.status === 422) continue; throw error; }
+        checkDeadline();
         const expiresAt = new Date(Date.now() + leaseTtl() * 1000).toISOString();
         const leaseId = randomToken(18);
         const contaminationCanary = await reserveCanary(
@@ -287,6 +275,7 @@ export default async function handler(req: Request): Promise<Response> {
             warnings: trusted.warnings || [],
           },
         };
+        checkDeadline();
         await globalMutex.assertOwned();
         if (!(await putLease(lease))) {
           continue;
@@ -299,6 +288,7 @@ export default async function handler(req: Request): Promise<Response> {
         };
         try {
           const signedMarker = await signVolunteerMarker(snapshot.number, nextMarker);
+          checkDeadline();
           await globalMutex.assertOwned();
           await mutex.assertOwned();
           await patchIssue(snapshot.number, replaceVolunteerMarker(snapshot.body || "", signedMarker));
@@ -339,9 +329,12 @@ export default async function handler(req: Request): Promise<Response> {
         });
         } finally { await mutex.release(); }
       } finally { await globalMutex.release(); }
+      }
     }
+    clearTimeout(deadlineTimer);
     return json(200, { protocol_version: PROTOCOL_VERSION, status: "no_work" });
   } catch (error) {
+    clearTimeout(deadlineTimer);
     const status = error instanceof BrokerError ? error.status : error instanceof ConfigurationError ? 503 : 502;
     return json(status, brokerErrorBody(error, "Unable to claim an evaluation."));
   }
