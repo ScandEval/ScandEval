@@ -371,11 +371,49 @@ class Worker:
                     )
                     self.state.archive_active()
                     raise
+                try:
+                    fresh_hardware = self.hardware_factory()
+                    fresh_gpu = _gpu_for_lease(fresh_hardware.gpus, lease)
+                    if (
+                        fresh_gpu.total_memory_bytes <= 0
+                        or fresh_gpu.free_memory_bytes <= 0
+                    ):
+                        raise NoGpuError("leased GPU has no usable memory measurement")
+                    effective_utilisation = min(
+                        self.gpu_memory_utilisation,
+                        self.gpu_memory_utilisation
+                        * fresh_gpu.free_memory_bytes
+                        / fresh_gpu.total_memory_bytes,
+                    )
+                except Exception as error:  # noqa: BLE001 - measurement must fail closed
+                    self.client.release(
+                        credential=self._credential,
+                        lease_id=lease.lease_id,
+                        reason="gpu_unavailable",
+                    )
+                    self.state.archive_active()
+                    raise NoGpuError(
+                        f"cannot safely evaluate on the leased GPU: {error}"
+                    ) from error
                 heartbeat.start()
                 output = self.state.directory / "results" / f"{lease.lease_id}.jsonl"
                 corpus_path = self._canary_corpus_path(lease=lease)
                 with _pin_gpu(selected_gpu), _pin_canary_corpus(corpus_path):
-                    evaluated = self.evaluator.evaluate(lease=lease, output_path=output)
+                    evaluate_parameters = inspect.signature(
+                        self.evaluator.evaluate
+                    ).parameters
+                    evaluate_kwargs: dict[str, object] = {
+                        "lease": lease,
+                        "output_path": output,
+                    }
+                    if "gpu_memory_utilisation" in evaluate_parameters:
+                        evaluate_kwargs["gpu_memory_utilisation"] = (
+                            effective_utilisation
+                        )
+                    evaluate = t.cast(
+                        c.Callable[..., list[EEERecord]], self.evaluator.evaluate
+                    )
+                    evaluated = evaluate(**evaluate_kwargs)
                 heartbeat.check()
                 try:
                     records = self._durable_records(active=active, evaluated=evaluated)

@@ -1182,6 +1182,46 @@ def test_state_round_trip_preserves_scope_alternatives_and_canary(
     assert active.lease == lease
 
 
+def test_worker_caps_vllm_utilisation_to_fresh_free_gpu_memory(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Scale vLLM's total-memory reservation to current free memory."""
+    monkeypatch.setattr(
+        runtime, "authenticate", lambda client, state: ("cred", "login")
+    )
+    monkeypatch.setattr(
+        runtime, "check_model_safety", lambda lease, gpus, free_disk_bytes=None: None
+    )
+    initial = HARDWARE
+    contended_gpu = dataclasses.replace(
+        GPU, free_memory_bytes=96 * 1024**3, total_memory_bytes=130 * 1024**3
+    )
+    fresh = dataclasses.replace(initial, gpus=(contended_gpu,))
+    reports = iter((initial, fresh))
+    observed: dict[str, object] = {}
+
+    class CapturingEvaluator:
+        def evaluate(
+            self,
+            lease: Lease,
+            output_path: Path,
+            gpu_memory_utilisation: float | None = None,
+        ) -> list[EEERecord]:
+            observed["utilisation"] = gpu_memory_utilisation
+            return [EEERecord({"id": "one"})]
+
+    broker = Broker()
+    runtime.Worker(
+        client=broker,
+        state=StateStore(tmp_path),
+        evaluator=CapturingEvaluator(),
+        hardware_factory=lambda: next(reports),
+    ).run(once=True)
+
+    assert observed["utilisation"] == pytest.approx(0.8 * 96 / 130)
+    assert broker.finalised
+
+
 def test_worker_retries_idempotently_and_finalises(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
