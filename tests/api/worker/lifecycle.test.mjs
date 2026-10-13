@@ -210,6 +210,77 @@ for (const transientConfigError of [false, true]) test(
   }
 });
 
+test("claim bounds a stalled marker PATCH and cleans its Redis lease", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalEnv = { ...process.env };
+  Object.assign(process.env, { VOLUNTEER_MARKER_SECRET: "marker-secret",
+    VOLUNTEER_WORKER_IMAGE_DIGEST: "sha256:image", EUROEVAL_VERSION: "1.0.0",
+    VOLUNTEER_WORKER_VERSION: "1.0.0", UPSTASH_REDIS_REST_URL: "https://redis.test",
+    UPSTASH_REDIS_REST_TOKEN: "redis-token", GITHUB_TOKEN: "github-token",
+    VOLUNTEER_SCOPE_POLICY_JSON: JSON.stringify({ policy_version: "test-policy", policies: [{
+      euroeval_version: "1.0.0", model_type: "encoder", language: "da", language_group: "da",
+      allowed_identity_suffix_sets: [[JSON.stringify(["slow", false, true])]],
+      task_groups: ["sequence_classification"], warnings: [],
+    }] }) });
+  const language = "Scandinavian languages (Danish, Faroese, Icelandic, Norwegian, Swedish)";
+  const issue = { number: issueNumber, title: "[MODEL EVALUATION REQUEST] org/model",
+    body: `### Model ID\\n\\norg/model\\n\\n- [x] ${language}\\n`, state: "open", assignees: [] };
+  const credentialKey = `euroeval:worker:credential:${await sha256("credential")}`;
+  const values = new Map([[credentialKey, JSON.stringify({ contributor: "alice" })]]);
+  globalThis.fetch = async (input, init = {}) => {
+    const url = String(input); const method = init.method || "GET";
+    if (url === "https://redis.test") {
+      const command = JSON.parse(init.body);
+      if (command[0] === "GET") return Response.json({ result: values.get(command[1]) || null });
+      if (command[0] === "INCR") return Response.json({ result: 1 });
+      if (command[0] === "EVAL" && command[1].includes("local issue=redis.call")) {
+        values.set(command[3], command[5]); values.set(command[4], command[5]);
+        return Response.json({ result: 1 });
+      }
+      if (command[0] === "EVAL" && command[1].includes("released=true")) {
+        values.delete(command[3]); values.delete(command[4]);
+        return Response.json({ result: 1 });
+      }
+      return Response.json({ result: command[0] === "SET" ? "OK" : 1 });
+    }
+    if (url.includes("/repos/EuroEval/EuroEval/issues?")) return Response.json([issue]);
+    if (url.includes("huggingface.co/api/models/org/model")) return Response.json({ id: "org/model",
+      sha: "a".repeat(40), private: false, gated: false, pipeline_tag: "fill-mask",
+      siblings: [{ rfilename: "model.safetensors", size: 100 }, { rfilename: "config.json", size: 10 }] });
+    if (url.includes(`/org/model/raw/${"a".repeat(40)}/config.json`)) {
+      return Response.json({ model_type: "bert", architectures: ["BertModel"] });
+    }
+    if (url.endsWith(`/issues/${issueNumber}`) && method === "GET") return Response.json(issue);
+    if (url.endsWith(`/issues/${issueNumber}`) && method === "PATCH") {
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(resolve, 30_000);
+        init.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(init.signal.reason); }, { once: true });
+      });
+      issue.body = JSON.parse(init.body).body;
+      return Response.json(issue);
+    }
+    throw new Error(`Unexpected request: ${method} ${url}`);
+  };
+  try {
+    const started = Date.now();
+    const response = await claim(new Request("https://euroeval.test/api/worker/claim", {
+      method: "POST", headers: { authorization: "Bearer credential", "content-type": "application/json" },
+      body: JSON.stringify({ protocol_version: "volunteer-worker/v1", worker_version: "1.0.0",
+        hardware: { architecture: "amd64", free_disk_bytes: 1_000_000, gpu_memory_utilisation: 0.8,
+          selected_gpu_index: 0, selected_gpu_uuid: "gpu", gpus: [{ index: 0, name: "GPU", uuid: "gpu",
+            free_memory_bytes: 1_000_000, total_memory_bytes: 1_000_000 }] } }),
+    }));
+    assert.equal(response.status, 503);
+    assert.match((await response.json()).error, /retry claim/i);
+    assert.ok(Date.now() - started < 8_000, "stalled claim exceeded its cleanup budget");
+    assert.equal([...values.keys()].some((key) => key.startsWith("euroeval:worker:lease:")), false);
+    assert.equal(parseVolunteerMarker(issue.body), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env = originalEnv;
+  }
+});
+
 for (const lateCandidate of [false, true]) test(
   `claim resumes expired ownership${lateCandidate ? " with a viable issue on page two" : " without assigning the issue"}`,
   async () => {

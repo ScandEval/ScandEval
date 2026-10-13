@@ -14,6 +14,21 @@ import type { Lease, VolunteerLeaseMarker } from "./_lib.js";
 
 // Reserved only as a Redis mutex key; never used for a GitHub API request.
 const GLOBAL_CLAIM_MUTEX = Number.MAX_SAFE_INTEGER;
+const CLAIM_IO_TIMEOUT_MS = 2_000;
+const CLAIM_CLEANUP_TIMEOUT_MS = 1_200;
+
+async function boundedClaimIo<T>(operation: (signal: AbortSignal) => Promise<T>, timeoutMs: number): Promise<T> {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new BrokerError(503, "Claim transaction timed out; retry claim."));
+    }, timeoutMs);
+  });
+  try { return await Promise.race([operation(controller.signal), timeout]); }
+  finally { if (timer) clearTimeout(timer); }
+}
 
 export const config = { runtime: "edge" };
 
@@ -295,9 +310,16 @@ export default async function handler(req: Request): Promise<Response> {
         };
         checkDeadline();
         await globalMutex.assertOwned();
-        if (!(await putLease(lease))) {
-          continue;
-        };
+        let leaseStored: boolean;
+        try { leaseStored = await boundedClaimIo((signal) => putLease(lease, signal), CLAIM_IO_TIMEOUT_MS); }
+        catch (error) {
+          // EVAL may have committed despite a lost/aborted response. Delete is
+          // lease-id fenced, so reconciliation cannot remove another worker's lease.
+          await boundedClaimIo((signal) => deleteLease(lease, signal), CLAIM_CLEANUP_TIMEOUT_MS)
+            .catch(() => undefined);
+          throw error;
+        }
+        if (!leaseStored) continue;
         const nextMarker: VolunteerLeaseMarker = {
           protocol_version: PROTOCOL_VERSION, coordinator: "coordinator", submission: "active",
           leases: [...(current?.leases || []), { lease_id: lease.lease_id, language, worker: lease.worker, contributor: identity.contributor, expires_at: expiresAt, ownership_mode: "public" }],
@@ -307,12 +329,13 @@ export default async function handler(req: Request): Promise<Response> {
         try {
           const signedMarker = await signVolunteerMarker(snapshot.number, nextMarker);
           checkDeadline();
-          await globalMutex.assertOwned();
-          await mutex.assertOwned();
-          await patchIssue(snapshot.number, replaceVolunteerMarker(snapshot.body || "", signedMarker));
-          await mutex.assertOwned();
-          const after = await fetchIssue(snapshot.number);
-          await mutex.assertOwned();
+          await boundedClaimIo((signal) => globalMutex.assertOwned(signal), CLAIM_IO_TIMEOUT_MS);
+          await boundedClaimIo((signal) => mutex.assertOwned(signal), CLAIM_IO_TIMEOUT_MS);
+          await boundedClaimIo((signal) => patchIssue(snapshot.number,
+            replaceVolunteerMarker(snapshot.body || "", signedMarker), signal), CLAIM_IO_TIMEOUT_MS);
+          await boundedClaimIo((signal) => mutex.assertOwned(signal), CLAIM_IO_TIMEOUT_MS);
+          const after = await boundedClaimIo((signal) => fetchIssue(snapshot.number, signal), CLAIM_IO_TIMEOUT_MS);
+          await boundedClaimIo((signal) => mutex.assertOwned(signal), CLAIM_IO_TIMEOUT_MS);
           const afterMarker = parseVolunteerMarker(after.body);
           if (VM_MARKER_RE.test(after.body || "") || !afterMarker ||
               !(await verifyVolunteerMarker(snapshot.number, afterMarker)) ||
@@ -324,16 +347,26 @@ export default async function handler(req: Request): Promise<Response> {
         } catch (error) {
           // Never restore a stale body: another lease may have been added while
           // GitHub was unavailable. Remove only our reservation when still present.
-          const live = await fetchIssue(snapshot.number).catch(() => null);
+          const live = await boundedClaimIo((signal) => fetchIssue(snapshot.number, signal), CLAIM_CLEANUP_TIMEOUT_MS).catch(() => null);
           const liveMarker = live ? parseVolunteerMarker(live.body) : null;
           if (live && liveMarker?.leases.some((item) => item.lease_id === lease.lease_id)) {
-            await mutex.assertOwned();
-            await patchIssue(snapshot.number, replaceVolunteerMarker(live.body || "", await signVolunteerMarker(live.number, {
+            await boundedClaimIo((signal) => mutex.assertOwned(signal), CLAIM_CLEANUP_TIMEOUT_MS);
+            const cleanupMarker = await signVolunteerMarker(live.number, {
               ...liveMarker, leases: liveMarker.leases.filter((item) => item.lease_id !== lease.lease_id),
-            }))).catch(() => undefined);
+            });
+            await boundedClaimIo((signal) => patchIssue(snapshot.number,
+              replaceVolunteerMarker(live.body || "", cleanupMarker), signal), CLAIM_CLEANUP_TIMEOUT_MS)
+              .catch(() => undefined);
           }
-          const cleanup = live ? await fetchIssue(snapshot.number).catch(() => live) : null;
-          await deleteLease(lease).catch(() => undefined);
+          const cleanup = live ? await boundedClaimIo((signal) => fetchIssue(snapshot.number, signal),
+            CLAIM_CLEANUP_TIMEOUT_MS).catch(() => null) : null;
+          const cleanupMarker = cleanup ? parseVolunteerMarker(cleanup.body) : null;
+          const markerAbsent = !!live && !liveMarker?.leases.some((item) => item.lease_id === lease.lease_id);
+          const markerRemoved = !!cleanup && !cleanupMarker?.leases.some((item) => item.lease_id === lease.lease_id);
+          // If GitHub state cannot be observed after an ambiguous PATCH, retain
+          // the lease rather than risk making a committed marker unbacked.
+          if (markerAbsent || markerRemoved) await boundedClaimIo((signal) => deleteLease(lease, signal),
+            CLAIM_CLEANUP_TIMEOUT_MS).catch(() => undefined);
           throw error;
         }
         return json(200, {
@@ -345,8 +378,12 @@ export default async function handler(req: Request): Promise<Response> {
           expected_scope: lease.expected_scope,
           contamination_canary: lease.contamination_canary,
         });
-        } finally { await mutex.release(); }
-      } finally { await globalMutex.release(); }
+        } finally {
+          await boundedClaimIo((signal) => mutex.release(signal), CLAIM_CLEANUP_TIMEOUT_MS).catch(() => undefined);
+        }
+      } finally {
+        await boundedClaimIo((signal) => globalMutex.release(signal), CLAIM_CLEANUP_TIMEOUT_MS).catch(() => undefined);
+      }
       }
     }
     if (incompleteDiscovery) throw new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
