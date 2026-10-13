@@ -2,7 +2,7 @@ import {
   BrokerError, ConfigurationError, GROUPS, PROTOCOL_VERSION, VM_MARKER_RE, VOLUNTEER_MARKER_RE,
   acquireRenewableIssueMutex, authenticate, brokerErrorBody,
   claimableLanguages, env, expectedScope,
-  extractModelId, enforceRateLimit, fitsGpu, fetchIssue, json, languageGroup, leaseTtl, selectedGpu,
+  extractModelId, enforceRateLimit, fitsGpu, fetchIssue, json, languageGroup, leaseTtl, selectedGpu, modelMayFit,
   listOpenIssues, method,
   patchIssue, putLease, randomToken, readJson, deleteLease, unassignIssue,
   getLeaseForIssue, reclaimExpiredLease,
@@ -142,24 +142,53 @@ export default async function handler(req: Request): Promise<Response> {
     if (body.worker_version !== requiredWorkerVersion) throw new BrokerError(422, "Unsupported worker version.");
     const requestedLanguage = typeof body.language === "string" ? body.language : null;
     const issues = await listOpenIssues();
-    for (const listed of issues) {
-      const modelId = extractModelId(listed.title, listed.body); if (!modelId) continue;
+    const selectedHardwareGpu = selectedGpu(body.hardware);
+    const candidates = issues.flatMap((listed) => {
+      const modelId = extractModelId(listed.title, listed.body);
       const languages = selectedLanguages(listed.body);
-      if (!languages.length || requestedLanguage && !languages.includes(requestedLanguage)) continue;
-      if (listed.body && VM_MARKER_RE.test(listed.body)) continue;
-      if (!volunteerAssigneesMatch(
-        listed.assignees, parseVolunteerMarker(listed.body), Date.now(), true, true,
-      )) continue;
-
-      // Resolve immutable metadata before taking the short issue mutex. Hub latency
-      // must never hold the lock used by another worker claiming another language.
-      let model; try { model = await resolveModel(modelId); } catch (error) {
-        if (error instanceof BrokerError && error.status === 422) continue; throw error;
+      return modelId && languages.length && !(requestedLanguage && !languages.includes(requestedLanguage)) &&
+        !(listed.body && VM_MARKER_RE.test(listed.body)) && volunteerAssigneesMatch(
+          listed.assignees, parseVolunteerMarker(listed.body), Date.now(), true, true,
+        ) ? [{ listed, modelId }] : [];
+    });
+    // Bound anonymous Hub discovery fan-out; keep issue ordering so candidate
+    // priority remains deterministic. A timeout or transient Hub failure cannot
+    // be mistaken for a complete no-work scan.
+    const deadline = Date.now() + 18_000;
+    const controller = new AbortController();
+    const fits = new Map<string, boolean>();
+    const discoveryModels = [...new Set(candidates.map(({ modelId }) => modelId))];
+    let next = 0;
+    let discoveryError: unknown;
+    const discovery = async (): Promise<void> => {
+      while (next < discoveryModels.length && !discoveryError) {
+        const modelId = discoveryModels[next++];
+        try {
+          if (Date.now() >= deadline) throw new BrokerError(503, "Model discovery deadline exceeded; retry claim.");
+          fits.set(modelId, await modelMayFit(modelId, body.hardware, selectedHardwareGpu, controller.signal));
+        } catch (error) {
+          if (error instanceof BrokerError && error.status === 422) fits.set(modelId, false);
+          else discoveryError = error;
+        }
       }
-      const selectedHardwareGpu = selectedGpu(body.hardware);
-      if (!selectedHardwareGpu || !fitsGpu(model, body.hardware, selectedHardwareGpu)) continue;
-      // Serialize the final cross-issue scan and claim transaction. Metadata was
-      // resolved above so neither Hub latency nor evaluation work holds this fence.
+    };
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const timer = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now()));
+    try {
+      await Promise.race([Promise.all(Array.from({ length: Math.min(6, discoveryModels.length) }, discovery)),
+        new Promise<never>((_, reject) => {
+          timeout = setTimeout(() => reject(
+            new BrokerError(503, "Model discovery deadline exceeded; retry claim.")), Math.max(0, deadline - Date.now()));
+        })]);
+    } catch (error) {
+      controller.abort();
+      throw error instanceof BrokerError ? error : new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
+    } finally { clearTimeout(timer); if (timeout) clearTimeout(timeout); }
+    if (discoveryError) throw discoveryError instanceof BrokerError && discoveryError.status === 503
+      ? discoveryError : new BrokerError(503, "Model discovery is temporarily unavailable; retry claim.");
+    for (const { listed, modelId } of candidates) {
+      if (!fits.get(modelId)) continue;
+      // Serialize final fresh metadata, cross-issue scan, and claim transaction.
       const globalMutex = await acquireRenewableIssueMutex(GLOBAL_CLAIM_MUTEX);
       if (!globalMutex) continue;
       try {
@@ -219,6 +248,14 @@ export default async function handler(req: Request): Promise<Response> {
         const refreshedSelected = selectedLanguages(snapshot.body);
         const refreshedAvailable = claimableLanguages(refreshedSelected, refreshedCurrent);
         if (!refreshedAvailable.includes(language)) continue;
+        // Revalidate current public metadata and the immutable config while both
+        // global and issue fences are held; discovery metadata is only a filter.
+        let model;
+        try { model = await resolveModel(modelId); } catch (error) {
+          if (error instanceof BrokerError && error.status === 422) continue;
+          throw error;
+        }
+        if (!fitsGpu(model, body.hardware, selectedHardwareGpu)) continue;
         const group = languageGroup(language); if (!group || !GROUPS[group]) continue;
         let trusted;
         try { trusted = expectedScope(euroevalVersion, model.model_type, language); }
