@@ -42,11 +42,6 @@ def all_dataset_names() -> frozenset[str]:
 def _iter_all_dataset_configs() -> tuple[DatasetConfig, ...]:
     """Collect every ``DatasetConfig`` defined in ``euroeval.dataset_configs``.
 
-    All built-in configs are re-exported into the ``euroeval.dataset_configs``
-    namespace, so we read them straight off the module. Cached because the
-    leaderboard pipeline calls into this module once per language and the set is
-    fixed per process.
-
     Returns:
         Every ``DatasetConfig`` exported by the lib.
     """
