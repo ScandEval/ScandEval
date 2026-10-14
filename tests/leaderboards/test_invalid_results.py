@@ -23,9 +23,11 @@ VALID_ENTRY = (
 )
 
 
-def test_bundled_file_has_no_entries() -> None:
-    """The bundled file ships without entries, so leaderboards are unchanged."""
-    assert load_invalid_results() == []
+def test_bundled_file_loads() -> None:
+    """The bundled file passes validation, whatever entries it holds."""
+    invalid_results = load_invalid_results()
+
+    assert all(isinstance(result, InvalidResult) for result in invalid_results)
 
 
 @pytest.mark.parametrize("content", ["", "# Only a comment.\n", "[]\n"])
