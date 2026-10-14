@@ -160,25 +160,25 @@ class TestInvalidResults:
     def test_empty_list_leaves_leaderboard_unchanged(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        """The bundled empty list and an explicit empty list give identical CSVs."""
-        bundled = self._generate(
+        """An empty invalid-results file leaves every model ranked and unmarked."""
+        empty_file = tmp_path / "invalid_results.yaml"
+        empty_file.write_text("# No entries.\n", encoding="utf-8")
+        from_file = self._generate(
             monkeypatch=monkeypatch,
-            tmp_path=tmp_path / "bundled",
+            tmp_path=tmp_path / "file",
             scores=self._scores(),
-            invalid_results=load_invalid_results(),
+            invalid_results=load_invalid_results(path=empty_file),
         )
-        empty = self._generate(
+        from_list = self._generate(
             monkeypatch=monkeypatch,
-            tmp_path=tmp_path / "empty",
+            tmp_path=tmp_path / "list",
             scores=self._scores(),
             invalid_results=[],
         )
 
-        assert bundled == empty
-        assert "(invalid)" not in bundled[0]
-        simplified = pd.read_csv(
-            tmp_path / "empty" / "danish_generative_simplified.csv"
-        )
+        assert from_file == from_list
+        assert "(invalid)" not in from_file[0]
+        simplified = pd.read_csv(tmp_path / "list" / "danish_generative_simplified.csv")
         assert sorted(simplified["model"]) == ["org/a", "org/b", "org/c"]
 
     @staticmethod
@@ -187,6 +187,7 @@ class TestInvalidResults:
         tmp_path: Path,
         scores: dict[str, dict[str, list[tuple[list[float], float, float]]]],
         invalid_results: list[InvalidResult],
+        generative_type: str = "base",
     ) -> tuple[str, str]:
         """Generate a Danish generative leaderboard from the given scores.
 
@@ -199,13 +200,16 @@ class TestInvalidResults:
                 Model ID to dataset to scores.
             invalid_results:
                 The invalid (model, dataset) results to apply.
+            generative_type (optional):
+                The generative type of every model. Orthogonal scores are only
+                shown for instruction-tuned and reasoning models.
 
         Returns:
             The full and the simplified leaderboard CSV contents.
         """
         metadata = {
             model_id: {
-                "generative_type": "base",
+                "generative_type": generative_type,
                 "model_type": None,
                 "parameters": 100,
                 "vocabulary_size": math.nan,
@@ -233,6 +237,7 @@ class TestInvalidResults:
             lambda language: {
                 ANGRY_TWEETS_CONFIG.task.name: [ANGRY_TWEETS_CONFIG.name],
                 DALA_CONFIG.task.name: [DALA_CONFIG.name],
+                VALEU_DA_CONFIG.task.name: [VALEU_DA_CONFIG.name],
             },
         )
         monkeypatch.setattr(
@@ -251,7 +256,7 @@ class TestInvalidResults:
 
     @staticmethod
     def _scores() -> dict[str, dict[str, list[tuple[list[float], float, float]]]]:
-        """Create scores for three models on two Danish datasets.
+        """Create scores for three models on three Danish datasets.
 
         Returns:
             Model ID to dataset to scores.
@@ -260,9 +265,64 @@ class TestInvalidResults:
             model_id: {
                 ANGRY_TWEETS_CONFIG.name: [([score, score + 2.0], score + 1.0, 1.0)],
                 DALA_CONFIG.name: [([score, score + 4.0], score + 2.0, 2.0)],
+                VALEU_DA_CONFIG.name: [([30.0, 40.0], 35.0, 0.1)],
             }
             for model_id, score in (("org/a", 70.0), ("org/b", 60.0), ("org/c", 50.0))
         }
+
+    def test_invalid_orthogonal_result_is_shown_and_marked(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """An invalid orthogonal result keeps its score, marked, and ranks are kept."""
+        with_invalid = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path / "invalid",
+            scores=self._scores(),
+            invalid_results=[
+                self._invalid_result(model="org/a", dataset=VALEU_DA_CONFIG.name)
+            ],
+            generative_type="instruction_tuned",
+        )
+        without_entry = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path / "valid",
+            scores=self._scores(),
+            invalid_results=[],
+            generative_type="instruction_tuned",
+        )
+
+        full = pd.read_csv(tmp_path / "invalid" / "danish_generative.csv", skiprows=1)
+        valid = pd.read_csv(tmp_path / "valid" / "danish_generative.csv", skiprows=1)
+        pd.testing.assert_frame_equal(
+            full[["Model", "Rank", "Rank score"]],
+            valid[["Model", "Rank", "Rank score"]],
+        )
+        assert with_invalid[1] == without_entry[1]
+        values_col = next(col for col in full.columns if "European Values" in col)
+        values = full.set_index("Model")[values_col]
+        assert values["org/a"] == "35.00 ± 0.20 (invalid)"
+        assert values.drop(index="org/a").tolist() == ["35.00 ± 0.20"] * 2
+
+    @staticmethod
+    def _invalid_result(model: str, dataset: str = DALA_CONFIG.name) -> InvalidResult:
+        """Create an invalid result for a model.
+
+        Args:
+            model:
+                The model ID.
+            dataset (optional):
+                The dataset name. Defaults to DaLA.
+
+        Returns:
+            The invalid result.
+        """
+        return InvalidResult(
+            model=model,
+            dataset=dataset,
+            reason="Trained on the test split.",
+            source="https://example.com/model-card",
+            date=dt.date(2026, 1, 13),
+        )
 
     def test_invalid_result_is_shown_but_not_ranked(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
@@ -312,25 +372,6 @@ class TestInvalidResults:
             tmp_path / "invalid" / "danish_generative_simplified.csv"
         )
         assert sorted(simplified["model"]) == ["org/b", "org/c"]
-
-    @staticmethod
-    def _invalid_result(model: str) -> InvalidResult:
-        """Create an invalid DaLA result for a model.
-
-        Args:
-            model:
-                The model ID.
-
-        Returns:
-            The invalid result.
-        """
-        return InvalidResult(
-            model=model,
-            dataset=DALA_CONFIG.name,
-            reason="Trained on the test split.",
-            source="https://example.com/model-card",
-            date=dt.date(2026, 1, 13),
-        )
 
     def test_unknown_model_raises(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path

@@ -470,7 +470,7 @@ def _generate_dataframe(
         )
 
         orthogonal_scores_by_plain = _collect_orthogonal_scores(
-            model_results=ranked_model_results,
+            model_results=model_results,
             category=category,
             category_to_orthogonal_datasets=category_to_orthogonal_datasets,
         )
@@ -724,8 +724,8 @@ def _build_model_row_data(
         metadata_dict:
             The metadata dictionary.
         invalid_datasets:
-            The datasets on which this model's result is invalid. Their scores are
-            marked as invalid.
+            The datasets on which this model's result is invalid. Their scores, and
+            the orthogonal task scores they contribute to, are marked as invalid.
 
     Returns:
         Dictionary with all values for this model row.
@@ -768,11 +768,14 @@ def _build_model_row_data(
     }
 
     orthogonal_scores: dict[str, list[tuple[float, float | None]]] = defaultdict(list)
+    invalid_orthogonal_tasks: set[str] = set()
     for dataset, score_and_std_err in orthogonal_scores_by_plain.get(
         plain_model_id(model_id), {}
     ).items():
         orthogonal_task = category_to_orthogonal_datasets[category][dataset]
         orthogonal_scores[orthogonal_task].append(score_and_std_err)
+        if dataset in invalid_datasets:
+            invalid_orthogonal_tasks.add(orthogonal_task)
 
     total_results = {}
     for dataset in category_to_datasets[category]:
@@ -816,6 +819,11 @@ def _build_model_row_data(
             orthogonal_task_scores[task] = (
                 f"{point:,.2f}" if task == "european-values" else point
             )
+        if task in invalid_orthogonal_tasks:
+            task_score = orthogonal_task_scores[task]
+            if not isinstance(task_score, str):
+                task_score = f"{task_score:,.2f}"
+            orthogonal_task_scores[task] = f"{task_score} {INVALID_SCORE_MARKER}"
 
     metadata = {
         key: value
