@@ -167,6 +167,10 @@ const NUMERIC_COLS = new Set([
   "hallucination rate",
 ]);
 
+// Orthogonal score columns. Only their cells can end with a note such as
+// "(invalid)", so only they have the note split off before sorting.
+const SCORE_NOTE_COLS = new Set(["european values", "hallucination rate"]);
+
 const ICON_COLS = new Set([
   "type",
   "commercial",
@@ -275,7 +279,11 @@ const computeSizeBuckets = (
     .filter((l) => seen.has(l));
 };
 
-export function parseCell(raw: string, kind: CellKind): ParsedCell {
+export function parseCell(
+  raw: string,
+  kind: CellKind,
+  key = "",
+): ParsedCell {
   const { display, sort } = splitDisplaySort(raw);
   let text = stripTags(display);
   if (kind === "icon") text = normalizeIconText(text);
@@ -295,7 +303,9 @@ export function parseCell(raw: string, kind: CellKind): ParsedCell {
   } else if (kind === "number") {
     // Orthogonal metric columns may carry a confidence-interval halfwidth and a
     // trailing note. Their numeric sort value is always the point estimate.
-    const { value } = splitScoreNote(text);
+    const value = SCORE_NOTE_COLS.has(key.toLowerCase())
+      ? splitScoreNote(text).value
+      : text;
     const interval = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*±/.exec(value);
     const n = parseNumberSafe(interval?.[1] ?? value);
     sortKey = n !== null ? n : Number.POSITIVE_INFINITY;
@@ -473,7 +483,7 @@ export function parseLeaderboard(csvText: string): LeaderboardTable {
     .filter((r) => r.length > 1 && stripTags(r[0]).trim() !== "")
     .map((r) => {
       const cells = visibleColIndexes.map((i) =>
-        parseCell(r[i] ?? "", columns[i].kind),
+        parseCell(r[i] ?? "", columns[i].kind, columns[i].key),
       );
       const readCompanion = (i: number): number | null =>
         parseNumberSafe(stripTags(splitDisplaySort(r[i] ?? "").display));
