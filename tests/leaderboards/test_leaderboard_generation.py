@@ -21,6 +21,7 @@ from euroeval.dataset_configs.danish import (
     RAGTRUTH_DA_CONFIG,
     VALEU_DA_CONFIG,
 )
+from euroeval.dataset_configs.norwegian import NOREC_CONFIG
 from euroeval.dataset_configs.swedish import SCALA_SV_CONFIG, SWEREC_CONFIG
 from src.leaderboards import leaderboard_generation
 from src.leaderboards.enums import LeaderboardCategory
@@ -207,8 +208,8 @@ class TestInvalidResults:
                 The generative type of every model. Orthogonal scores are only
                 shown for instruction-tuned and reasoning models.
             language_names (optional):
-                The leaderboard languages, Danish and/or Swedish. Several languages
-                give a multilingual leaderboard named after the languages.
+                The leaderboard languages: Danish, Swedish and/or Norwegian. Several
+                languages give a multilingual leaderboard named after the languages.
             force (optional):
                 Whether to force writing the leaderboard files.
 
@@ -249,6 +250,7 @@ class TestInvalidResults:
                 SWEREC_CONFIG.task.name: [SWEREC_CONFIG.name],
                 SCALA_SV_CONFIG.task.name: [SCALA_SV_CONFIG.name],
             },
+            "norwegian": {NOREC_CONFIG.task.name: [NOREC_CONFIG.name]},
         }
         monkeypatch.setattr(
             leaderboard_generation,
@@ -276,7 +278,7 @@ class TestInvalidResults:
 
     @staticmethod
     def _scores() -> dict[str, dict[str, list[tuple[list[float], float, float]]]]:
-        """Create scores for three models on three Danish and two Swedish datasets.
+        """Create scores for three models on Danish, Swedish and Norwegian datasets.
 
         Returns:
             Model ID to dataset to scores.
@@ -288,6 +290,7 @@ class TestInvalidResults:
                 VALEU_DA_CONFIG.name: [([30.0, 40.0], 35.0, 0.1)],
                 SWEREC_CONFIG.name: [([score, score + 2.0], score + 1.0, 1.0)],
                 SCALA_SV_CONFIG.name: [([score, score + 4.0], score + 2.0, 2.0)],
+                NOREC_CONFIG.name: [([score, score + 2.0], score + 1.0, 1.0)],
             }
             for model_id, score in (("org/a", 70.0), ("org/b", 60.0), ("org/c", 50.0))
         }
@@ -394,6 +397,45 @@ class TestInvalidResults:
             tmp_path / "invalid" / "danish_generative_simplified.csv"
         )
         assert sorted(simplified["model"]) == ["org/b", "org/c"]
+
+    def test_new_entry_rewrites_language_rank_without_force(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """A non-forced run rewrites a language rank that a new entry removes.
+
+        The model has no Norwegian result, so it is unranked overall but ranked in
+        Danish and Swedish. Invalidating a Danish result removes only its Danish rank.
+        """
+        scores = self._scores()
+        scores["org/d"] = {
+            dataset: score
+            for dataset, score in scores["org/c"].items()
+            if dataset != NOREC_CONFIG.name
+        }
+        language_names = ("danish", "swedish", "norwegian")
+        self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path,
+            scores=scores,
+            invalid_results=[],
+            language_names=language_names,
+        )
+        full_path = tmp_path / "danish_swedish_norwegian_generative.csv"
+        before = pd.read_csv(full_path, skiprows=1).set_index("Model")
+        self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path,
+            scores=scores,
+            invalid_results=[self._invalid_result(model="org/d")],
+            language_names=language_names,
+            force=False,
+        )
+        after = pd.read_csv(full_path, skiprows=1).set_index("Model")
+
+        assert before.loc["org/d", ["Rank score", "Norwegian"]].tolist() == ["-", "-"]
+        assert "-" not in before.loc["org/d", ["Danish", "Swedish"]].tolist()
+        assert after.loc["org/d", ["Rank score", "Danish"]].tolist() == ["-", "-"]
+        assert after.loc["org/d", "Swedish"] != "-"
 
     def test_new_entry_rewrites_multilingual_leaderboard_without_force(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path

@@ -238,23 +238,43 @@ def generate_leaderboard(
                         )  # type: ignore[attr-defined]
                         if has_new_scores and model_id not in new_records:
                             new_records.append(model_id)
+
+            # A model entering or leaving a ranking, e.g. through an invalid result,
+            # only changes the rank-score columns, which the comparison above leaves
+            # out, and multilingual leaderboards have no dataset columns. Compare
+            # which models have a score in the overall and per-language rank columns.
+            def ranked_models(frame: pd.DataFrame, column: str) -> set[str]:
+                """Return the models with a rank score in a column.
+
+                Args:
+                    frame:
+                        The leaderboard.
+                    column:
+                        The rank-score column.
+
+                Returns:
+                    The models whose score in the column is not a placeholder.
+                """
+                return {
+                    str(model)
+                    for model, score in zip(frame["Model"], frame[column])
+                    if not pd.isna(score)
+                    and str(score).strip() not in {"-", "N/A", "?", ""}
+                }
+
+            for column in sorted(rank_score_columns):
+                if column not in df.columns or column not in old_df.columns:
+                    continue
+                changed_models = ranked_models(frame=old_df, column=column) ^ (
+                    ranked_models(frame=df, column=column)
+                )
+                new_records += [
+                    model
+                    for model in sorted(changed_models)
+                    if model not in new_records
+                ]
         else:
             new_records = df.Model.tolist()
-
-        # A model entering or leaving the ranking, e.g. through an invalid result, only
-        # changes the rank columns, which the comparison above leaves out. Multilingual
-        # leaderboards have no dataset columns either, so compare the ranked models in
-        # the simplified leaderboard directly.
-        if simplified_leaderboard_path.exists():
-            old_ranked_models = set(
-                pd.read_csv(simplified_leaderboard_path)["model"].astype(str)
-            )
-            new_ranked_models = set(df_simplified["model"].astype(str))
-            new_records += [
-                model
-                for model in sorted(old_ranked_models ^ new_ranked_models)
-                if model not in new_records
-            ]
 
         # Determine if file should be written: schema changed, models added/removed/
         # modified, or force flag
