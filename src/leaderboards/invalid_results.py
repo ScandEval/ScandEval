@@ -146,6 +146,7 @@ def _parse_entry(entry: object, index: int, path: Path) -> InvalidResult:
             If the entry is not a mapping, has missing or unknown fields, or has an
             empty or malformed value.
     """
+    # The entry must be a mapping with exactly the InvalidResult fields.
     if not isinstance(entry, dict):
         raise ValueError(f"Entry {index} in {path} must be a mapping.")
     fields = [field.name for field in dataclasses.fields(InvalidResult)]
@@ -156,6 +157,8 @@ def _parse_entry(entry: object, index: int, path: Path) -> InvalidResult:
             f"Entry {index} in {path} has missing fields {missing_fields} and "
             f"unknown fields {unknown_fields}. The fields must be exactly {fields}."
         )
+
+    # The date must be a plain YYYY-MM-DD date.
     date = entry["date"]
     if isinstance(date, dt.datetime) or normalise_release_date(value=date) is None:
         raise ValueError(
@@ -163,6 +166,8 @@ def _parse_entry(entry: object, index: int, path: Path) -> InvalidResult:
         )
     if isinstance(date, str):
         date = dt.date.fromisoformat(date)
+
+    # The remaining fields must be non-empty text.
     text_values = {field: entry[field] for field in fields if field != "date"}
     empty_fields = [
         field
@@ -173,6 +178,7 @@ def _parse_entry(entry: object, index: int, path: Path) -> InvalidResult:
         raise ValueError(
             f"Entry {index} in {path} must have non-empty text in {empty_fields}."
         )
+
     return InvalidResult(
         model=text_values["model"].strip(),
         dataset=text_values["dataset"].strip(),
