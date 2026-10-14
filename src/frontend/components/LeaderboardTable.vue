@@ -5,6 +5,7 @@ import {
   CONTEXT_BUCKETS,
   PARAM_BUCKETS,
   VOCAB_BUCKETS,
+  splitScoreNote,
 } from "@/leaderboard";
 import type { Column, LeaderboardTable, Row } from "@/leaderboard";
 import { matchesQuery } from "@/filter";
@@ -246,20 +247,22 @@ const cellDisplayHtml = (cell: { html: string; text: string; sortKey: number | s
     return cell.text || "?";
   }
   if (isPercentCol(col)) {
-    const interval = cell.text.match(
+    const { value, note } = splitScoreNote(cell.text);
+    const suffix = note ? ` ${note}` : "";
+    const interval = value.match(
       /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*±\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/,
     );
-    if (interval) return `${interval[1]}% ± ${interval[2]}%`;
+    if (interval) return `${interval[1]}% ± ${interval[2]}%${suffix}`;
     // Preserve the legacy display for cells without a confidence interval.
     const num =
       typeof cell.sortKey === "number"
         ? cell.sortKey
-        : Number.parseFloat(cell.text);
+        : Number.parseFloat(value);
     if (Number.isFinite(num)) {
       return col.key.toLowerCase() === "european values" ||
         col.key.toLowerCase() === "hallucination rate"
-        ? `${num.toFixed(2)}%`
-        : `${Math.round(num)}%`;
+        ? `${num.toFixed(2)}%${suffix}`
+        : `${Math.round(num)}%${suffix}`;
     }
     return cell.text || "?";
   }

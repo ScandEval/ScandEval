@@ -7,6 +7,7 @@ import {
   watch,
 } from "vue";
 import type { LeaderboardTable } from "@/leaderboard";
+import { splitScoreNote } from "@/leaderboard";
 import { matchesQuery } from "@/filter";
 
 type XAxis = "parameters" | "releaseDate";
@@ -101,14 +102,16 @@ const formatMetaValue = (key: string, cell: { text: string; sortKey: number | st
     return formatCompact(cell.sortKey);
   }
   if (PERCENT_KEYS.has(key)) {
-    const interval = cell.text.match(
+    const { value, note } = splitScoreNote(cell.text);
+    const suffix = note ? ` ${note}` : "";
+    const interval = value.match(
       /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*±\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))$/,
     );
-    if (interval) return `${interval[1]}% ± ${interval[2]}%`;
+    if (interval) return `${interval[1]}% ± ${interval[2]}%${suffix}`;
     if (typeof cell.sortKey === "number" && Number.isFinite(cell.sortKey)) {
       return key === "hallucination rate"
-        ? `${cell.sortKey.toFixed(2)}%`
-        : `${Math.round(cell.sortKey)}%`;
+        ? `${cell.sortKey.toFixed(2)}%${suffix}`
+        : `${Math.round(cell.sortKey)}%${suffix}`;
     }
   }
   return cell.text;

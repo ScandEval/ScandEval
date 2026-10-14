@@ -188,6 +188,14 @@ const parseNumberSafe = (s: string): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
+// A score may end with a parenthesised note from the leaderboard CSV, e.g.
+// "35.00 ± 0.20 (invalid)" for a result left out of the rank score. Formatters
+// split the note off, format the value and append the note unchanged.
+export const splitScoreNote = (text: string): { value: string; note: string } => {
+  const match = /^(.*\S)\s+(\([\w .,-]*\))$/.exec(text);
+  return match ? { value: match[1], note: match[2] } : { value: text, note: "" };
+};
+
 const isIsoDate = (s: string): boolean => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
   if (!match) return false;
@@ -285,10 +293,11 @@ export function parseCell(raw: string, kind: CellKind): ParsedCell {
     const n = parseNumberSafe(sort);
     sortKey = n !== null ? n : sort.toLowerCase();
   } else if (kind === "number") {
-    // Orthogonal metric columns may carry a confidence-interval halfwidth.
-    // Their numeric sort value is always the point estimate before ±.
-    const interval = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*±/.exec(text);
-    const n = parseNumberSafe(interval?.[1] ?? text);
+    // Orthogonal metric columns may carry a confidence-interval halfwidth and a
+    // trailing note. Their numeric sort value is always the point estimate.
+    const { value } = splitScoreNote(text);
+    const interval = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*±/.exec(value);
+    const n = parseNumberSafe(interval?.[1] ?? value);
     sortKey = n !== null ? n : Number.POSITIVE_INFINITY;
   } else if (kind === "score") {
     // Score cells look like "60.17 ± 1.40 / 72.92 ± 1.18" — sort by the
