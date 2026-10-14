@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from euroeval.dataset_configs.danish import ANGRY_TWEETS_CONFIG
+from euroeval.dataset_configs.danish import ANGRY_TWEETS_CONFIG, DALA_CONFIG
 from leaderboards.invalid_results import (
     InvalidResult,
     invalid_datasets_by_model,
@@ -72,13 +72,35 @@ def test_entry_matches_every_variant_of_the_model() -> None:
         "org/other",
     ]
 
+    model_datasets = {model_id: {ANGRY_TWEETS_CONFIG.name} for model_id in model_ids}
+
     assert invalid_datasets_by_model(
-        invalid_results=[invalid_result], model_ids=model_ids
+        invalid_results=[invalid_result], model_datasets=model_datasets
     ) == {
         model_id: {ANGRY_TWEETS_CONFIG.name}
         for model_id in model_ids
         if model_id not in {"org/model-large", "org/other"}
     }
+
+
+def test_entry_without_result_on_dataset_raises() -> None:
+    """An entry for a dataset that no variant of the model has a result on fails."""
+    invalid_result = InvalidResult(
+        model="org/model",
+        dataset=DALA_CONFIG.name,
+        reason="Trained on the test split.",
+        source="https://example.com/model-card",
+        date=dt.date(2026, 1, 13),
+    )
+
+    with pytest.raises(ValueError, match=f"org/model, {DALA_CONFIG.name}"):
+        invalid_datasets_by_model(
+            invalid_results=[invalid_result],
+            model_datasets={
+                "org/model": {ANGRY_TWEETS_CONFIG.name},
+                "org/model (val)": {ANGRY_TWEETS_CONFIG.name},
+            },
+        )
 
 
 @pytest.mark.parametrize(
@@ -104,7 +126,12 @@ def test_missing_field_raises(tmp_path: Path) -> None:
 
 def test_no_entries_give_no_invalid_datasets() -> None:
     """Without entries no model has invalid datasets."""
-    assert invalid_datasets_by_model(invalid_results=[], model_ids=["org/model"]) == {}
+    assert (
+        invalid_datasets_by_model(
+            invalid_results=[], model_datasets={"org/model": {ANGRY_TWEETS_CONFIG.name}}
+        )
+        == {}
+    )
 
 
 def test_single_entry_is_parsed(tmp_path: Path) -> None:
@@ -151,5 +178,6 @@ def test_unknown_model_raises() -> None:
 
     with pytest.raises(ValueError, match="org/missing"):
         invalid_datasets_by_model(
-            invalid_results=[invalid_result], model_ids=["org/model"]
+            invalid_results=[invalid_result],
+            model_datasets={"org/model": {ANGRY_TWEETS_CONFIG.name}},
         )

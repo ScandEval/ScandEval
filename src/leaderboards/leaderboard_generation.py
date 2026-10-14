@@ -90,7 +90,7 @@ def generate_leaderboard(
     ] = group_results_by_model(results=results)
     global_model_results = drop_val_duplicates(model_results=global_model_results)
     invalid_datasets = invalid_datasets_by_model(
-        invalid_results=load_invalid_results(), model_ids=global_model_results
+        invalid_results=load_invalid_results(), model_datasets=global_model_results
     )
     model_results = {
         model_id: {

@@ -48,7 +48,8 @@ class InvalidResult:
 
 
 def invalid_datasets_by_model(
-    invalid_results: c.Sequence[InvalidResult], model_ids: c.Iterable[str]
+    invalid_results: c.Sequence[InvalidResult],
+    model_datasets: c.Mapping[str, c.Collection[str]],
 ) -> dict[str, set[str]]:
     """Map each result model ID to the datasets on which its result is invalid.
 
@@ -59,8 +60,9 @@ def invalid_datasets_by_model(
     Args:
         invalid_results:
             The invalid results, as returned by `load_invalid_results`.
-        model_ids:
-            The model IDs of all loaded results.
+        model_datasets:
+            The model IDs of all loaded results, each mapped to the datasets it has
+            results on.
 
     Returns:
         A mapping from model ID to its invalid datasets. Model IDs without invalid
@@ -68,22 +70,26 @@ def invalid_datasets_by_model(
 
     Raises:
         ValueError:
-            If an entry matches none of the model IDs.
+            If no model matching an entry has a result on the entry's dataset.
     """
     invalid_datasets: dict[str, set[str]] = {}
-    unmatched_models = {result.model for result in invalid_results}
-    for model_id in model_ids:
+    unmatched_results = {(result.model, result.dataset) for result in invalid_results}
+    for model_id, datasets in model_datasets.items():
         plain_id = plain_model_id(model_id=model_id)
         for result in invalid_results:
             if plain_id == result.model or plain_id.startswith(
                 (f"{result.model}@", f"{result.model}#")
             ):
                 invalid_datasets.setdefault(model_id, set()).add(result.dataset)
-                unmatched_models.discard(result.model)
-    if unmatched_models:
+                if result.dataset in datasets:
+                    unmatched_results.discard((result.model, result.dataset))
+    if unmatched_results:
+        pairs = ", ".join(
+            f"({model}, {dataset})" for model, dataset in sorted(unmatched_results)
+        )
         raise ValueError(
-            "The invalid results refer to models without any loaded results: "
-            f"{', '.join(sorted(unmatched_models))}."
+            "The invalid results refer to (model, dataset) pairs without a loaded "
+            f"result: {pairs}."
         )
     return invalid_datasets
 
