@@ -15,6 +15,8 @@ from pathlib import Path
 
 from yaml import safe_load
 
+from euroeval.date_utils import normalise_release_date
+
 from .constants import INVALID_RESULTS_CONFIG
 from .records import plain_model_id
 from .task_metadata import all_dataset_names
@@ -155,15 +157,12 @@ def _parse_entry(entry: object, index: int, path: Path) -> InvalidResult:
             f"unknown fields {unknown_fields}. The fields must be exactly {fields}."
         )
     date = entry["date"]
+    if isinstance(date, dt.datetime) or normalise_release_date(value=date) is None:
+        raise ValueError(
+            f"Entry {index} in {path} has a date that is not YYYY-MM-DD: {date!r}."
+        )
     if isinstance(date, str):
-        try:
-            date = dt.date.fromisoformat(date)
-        except ValueError as e:
-            raise ValueError(
-                f"Entry {index} in {path} has a date that is not YYYY-MM-DD: {date!r}."
-            ) from e
-    if not isinstance(date, dt.date) or isinstance(date, dt.datetime):
-        raise ValueError(f"Entry {index} in {path} has a date that is not YYYY-MM-DD.")
+        date = dt.date.fromisoformat(date)
     text_values = {field: entry[field] for field in fields if field != "date"}
     empty_fields = [
         field

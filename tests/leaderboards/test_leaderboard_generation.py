@@ -21,6 +21,7 @@ from euroeval.dataset_configs.danish import (
     RAGTRUTH_DA_CONFIG,
     VALEU_DA_CONFIG,
 )
+from euroeval.dataset_configs.swedish import SCALA_SV_CONFIG, SWEREC_CONFIG
 from src.leaderboards import leaderboard_generation
 from src.leaderboards.enums import LeaderboardCategory
 from src.leaderboards.invalid_results import InvalidResult, load_invalid_results
@@ -188,8 +189,10 @@ class TestInvalidResults:
         scores: dict[str, dict[str, list[tuple[list[float], float, float]]]],
         invalid_results: list[InvalidResult],
         generative_type: str = "base",
+        language_names: tuple[str, ...] = ("danish",),
+        force: bool = True,
     ) -> tuple[str, str]:
-        """Generate a Danish generative leaderboard from the given scores.
+        """Generate a generative leaderboard from the given scores.
 
         Args:
             monkeypatch:
@@ -203,6 +206,11 @@ class TestInvalidResults:
             generative_type (optional):
                 The generative type of every model. Orthogonal scores are only
                 shown for instruction-tuned and reasoning models.
+            language_names (optional):
+                The leaderboard languages, Danish and/or Swedish. Several languages
+                give a multilingual leaderboard named after the languages.
+            force (optional):
+                Whether to force writing the leaderboard files.
 
         Returns:
             The full and the simplified leaderboard CSV contents.
@@ -231,32 +239,44 @@ class TestInvalidResults:
         monkeypatch.setattr(
             leaderboard_generation, "extract_model_metadata", lambda results: metadata
         )
-        monkeypatch.setattr(
-            leaderboard_generation,
-            "official_datasets_for_language",
-            lambda language: {
+        configs = {
+            "danish": {
                 ANGRY_TWEETS_CONFIG.task.name: [ANGRY_TWEETS_CONFIG.name],
                 DALA_CONFIG.task.name: [DALA_CONFIG.name],
                 VALEU_DA_CONFIG.task.name: [VALEU_DA_CONFIG.name],
             },
+            "swedish": {
+                SWEREC_CONFIG.task.name: [SWEREC_CONFIG.name],
+                SCALA_SV_CONFIG.task.name: [SCALA_SV_CONFIG.name],
+            },
+        }
+        monkeypatch.setattr(
+            leaderboard_generation,
+            "official_datasets_for_language",
+            lambda language: configs[language],
         )
         monkeypatch.setattr(
             leaderboard_generation, "load_invalid_results", lambda: invalid_results
         )
+        leaderboard_name = "_".join(language_names)
         leaderboard_generation.generate_leaderboard(
-            leaderboard_name="danish",
-            language_names=["danish"],
+            leaderboard_name=leaderboard_name,
+            language_names=list(language_names),
             categories=[LeaderboardCategory.GENERATIVE],
-            force=True,
+            force=force,
         )
         return (
-            (tmp_path / "danish_generative.csv").read_text(encoding="utf-8"),
-            (tmp_path / "danish_generative_simplified.csv").read_text(encoding="utf-8"),
+            (tmp_path / f"{leaderboard_name}_generative.csv").read_text(
+                encoding="utf-8"
+            ),
+            (tmp_path / f"{leaderboard_name}_generative_simplified.csv").read_text(
+                encoding="utf-8"
+            ),
         )
 
     @staticmethod
     def _scores() -> dict[str, dict[str, list[tuple[list[float], float, float]]]]:
-        """Create scores for three models on three Danish datasets.
+        """Create scores for three models on three Danish and two Swedish datasets.
 
         Returns:
             Model ID to dataset to scores.
@@ -266,6 +286,8 @@ class TestInvalidResults:
                 ANGRY_TWEETS_CONFIG.name: [([score, score + 2.0], score + 1.0, 1.0)],
                 DALA_CONFIG.name: [([score, score + 4.0], score + 2.0, 2.0)],
                 VALEU_DA_CONFIG.name: [([30.0, 40.0], 35.0, 0.1)],
+                SWEREC_CONFIG.name: [([score, score + 2.0], score + 1.0, 1.0)],
+                SCALA_SV_CONFIG.name: [([score, score + 4.0], score + 2.0, 2.0)],
             }
             for model_id, score in (("org/a", 70.0), ("org/b", 60.0), ("org/c", 50.0))
         }
@@ -372,6 +394,35 @@ class TestInvalidResults:
             tmp_path / "invalid" / "danish_generative_simplified.csv"
         )
         assert sorted(simplified["model"]) == ["org/b", "org/c"]
+
+    def test_new_entry_rewrites_multilingual_leaderboard_without_force(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """A non-forced run rewrites a multilingual leaderboard after a new entry."""
+        before = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path,
+            scores=self._scores(),
+            invalid_results=[],
+            language_names=("danish", "swedish"),
+        )
+        after = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path,
+            scores=self._scores(),
+            invalid_results=[self._invalid_result(model="org/a")],
+            language_names=("danish", "swedish"),
+            force=False,
+        )
+
+        assert after != before
+        simplified = pd.read_csv(tmp_path / "danish_swedish_generative_simplified.csv")
+        assert sorted(simplified["model"]) == ["org/b", "org/c"]
+        full = pd.read_csv(tmp_path / "danish_swedish_generative.csv", skiprows=1)
+        row = full.set_index("Model").loc["org/a"]
+        assert row["Rank score"] == "-"
+        assert row["Danish"] == "-"
+        assert row["Swedish"] != "-"
 
     def test_unknown_model_raises(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path

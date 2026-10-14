@@ -81,9 +81,12 @@ def test_entry_matches_every_variant_of_the_model() -> None:
     }
 
 
-def test_malformed_date_raises(tmp_path: Path) -> None:
-    """A date that is not YYYY-MM-DD is rejected."""
-    content = VALID_ENTRY.replace("2026-01-13", "'13/01/2026'")
+@pytest.mark.parametrize(
+    "date", ["'13/01/2026'", "'20260113'", "'2026-W03-2'", "2026-01-13 10:00:00"]
+)
+def test_malformed_date_raises(tmp_path: Path, date: str) -> None:
+    """A date that is not exactly YYYY-MM-DD is rejected."""
+    content = VALID_ENTRY.replace("2026-01-13", date)
     path = _write(tmp_path=tmp_path, content=content)
 
     with pytest.raises(ValueError, match="YYYY-MM-DD"):

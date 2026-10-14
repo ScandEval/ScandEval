@@ -241,6 +241,21 @@ def generate_leaderboard(
         else:
             new_records = df.Model.tolist()
 
+        # A model entering or leaving the ranking, e.g. through an invalid result, only
+        # changes the rank columns, which the comparison above leaves out. Multilingual
+        # leaderboards have no dataset columns either, so compare the ranked models in
+        # the simplified leaderboard directly.
+        if simplified_leaderboard_path.exists():
+            old_ranked_models = set(
+                pd.read_csv(simplified_leaderboard_path)["model"].astype(str)
+            )
+            new_ranked_models = set(df_simplified["model"].astype(str))
+            new_records += [
+                model
+                for model in sorted(old_ranked_models ^ new_ranked_models)
+                if model not in new_records
+            ]
+
         # Determine if file should be written: schema changed, models added/removed/
         # modified, or force flag
         should_write = bool(new_records) or schema_changed or force
