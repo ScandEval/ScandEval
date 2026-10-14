@@ -7,6 +7,7 @@ and ordinal ranks remain pan-leaderboard.
 
 from __future__ import annotations
 
+import datetime as dt
 import math
 from pathlib import Path
 
@@ -16,11 +17,13 @@ import pytest
 
 from euroeval.dataset_configs.danish import (
     ANGRY_TWEETS_CONFIG,
+    DALA_CONFIG,
     RAGTRUTH_DA_CONFIG,
     VALEU_DA_CONFIG,
 )
 from src.leaderboards import leaderboard_generation
 from src.leaderboards.enums import LeaderboardCategory
+from src.leaderboards.invalid_results import InvalidResult, load_invalid_results
 from src.leaderboards.leaderboard_generation import (
     _build_category_dataset_maps,
     _compute_eligible_models_and_ranks,
@@ -149,6 +152,197 @@ class TestGlobalVariantSelection:
         assert [
             model for model in european["model"] if model.startswith("org/model")
         ] == ["org/model (val)"]
+
+
+class TestInvalidResults:
+    """Tests for leaving invalid (model, dataset) results out of aggregated scores."""
+
+    def test_empty_list_leaves_leaderboard_unchanged(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """The bundled empty list and an explicit empty list give identical CSVs."""
+        bundled = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path / "bundled",
+            scores=self._scores(),
+            invalid_results=load_invalid_results(),
+        )
+        empty = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path / "empty",
+            scores=self._scores(),
+            invalid_results=[],
+        )
+
+        assert bundled == empty
+        assert "(invalid)" not in bundled[0]
+        simplified = pd.read_csv(
+            tmp_path / "empty" / "danish_generative_simplified.csv"
+        )
+        assert sorted(simplified["model"]) == ["org/a", "org/b", "org/c"]
+
+    @staticmethod
+    def _generate(
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+        scores: dict[str, dict[str, list[tuple[list[float], float, float]]]],
+        invalid_results: list[InvalidResult],
+    ) -> tuple[str, str]:
+        """Generate a Danish generative leaderboard from the given scores.
+
+        Args:
+            monkeypatch:
+                The pytest monkeypatch fixture.
+            tmp_path:
+                The directory to write the leaderboards to.
+            scores:
+                Model ID to dataset to scores.
+            invalid_results:
+                The invalid (model, dataset) results to apply.
+
+        Returns:
+            The full and the simplified leaderboard CSV contents.
+        """
+        metadata = {
+            model_id: {
+                "generative_type": "base",
+                "model_type": None,
+                "parameters": 100,
+                "vocabulary_size": math.nan,
+                "context": math.nan,
+                "release_date": None,
+                "open": True,
+                "commercial": False,
+                "merge": False,
+                "trained_from_scratch": False,
+            }
+            for model_id in scores
+        }
+        monkeypatch.setattr(leaderboard_generation, "OUTPUT_DIR", tmp_path)
+        monkeypatch.setattr(leaderboard_generation, "NUM_BOOTSTRAPS", 20)
+        monkeypatch.setattr(leaderboard_generation, "load_raw_results", lambda: [{}])
+        monkeypatch.setattr(
+            leaderboard_generation, "group_results_by_model", lambda results: scores
+        )
+        monkeypatch.setattr(
+            leaderboard_generation, "extract_model_metadata", lambda results: metadata
+        )
+        monkeypatch.setattr(
+            leaderboard_generation,
+            "official_datasets_for_language",
+            lambda language: {
+                ANGRY_TWEETS_CONFIG.task.name: [ANGRY_TWEETS_CONFIG.name],
+                DALA_CONFIG.task.name: [DALA_CONFIG.name],
+            },
+        )
+        monkeypatch.setattr(
+            leaderboard_generation, "load_invalid_results", lambda: invalid_results
+        )
+        leaderboard_generation.generate_leaderboard(
+            leaderboard_name="danish",
+            language_names=["danish"],
+            categories=[LeaderboardCategory.GENERATIVE],
+            force=True,
+        )
+        return (
+            (tmp_path / "danish_generative.csv").read_text(encoding="utf-8"),
+            (tmp_path / "danish_generative_simplified.csv").read_text(encoding="utf-8"),
+        )
+
+    @staticmethod
+    def _scores() -> dict[str, dict[str, list[tuple[list[float], float, float]]]]:
+        """Create scores for three models on two Danish datasets.
+
+        Returns:
+            Model ID to dataset to scores.
+        """
+        return {
+            model_id: {
+                ANGRY_TWEETS_CONFIG.name: [([score, score + 2.0], score + 1.0, 1.0)],
+                DALA_CONFIG.name: [([score, score + 4.0], score + 2.0, 2.0)],
+            }
+            for model_id, score in (("org/a", 70.0), ("org/b", 60.0), ("org/c", 50.0))
+        }
+
+    def test_invalid_result_is_shown_but_not_ranked(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """An invalid result is marked and ranked as if it were missing."""
+        with_invalid = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path / "invalid",
+            scores=self._scores(),
+            invalid_results=[self._invalid_result(model="org/a")],
+        )
+        scores_without_dala = self._scores()
+        del scores_without_dala["org/a"][DALA_CONFIG.name]
+        without_result = self._generate(
+            monkeypatch=monkeypatch,
+            tmp_path=tmp_path / "missing",
+            scores=scores_without_dala,
+            invalid_results=[],
+        )
+
+        full = pd.read_csv(tmp_path / "invalid" / "danish_generative.csv", skiprows=1)
+        missing = pd.read_csv(
+            tmp_path / "missing" / "danish_generative.csv", skiprows=1
+        )
+        pd.testing.assert_frame_equal(
+            full[["Model", "Rank", "Rank score"]],
+            missing[["Model", "Rank", "Rank score"]],
+        )
+        assert with_invalid[1] == without_result[1]
+
+        row = full.set_index("Model").loc["org/a"]
+        dala_col, angry_tweets_col = (
+            next(
+                col
+                for col in full.columns
+                if col.endswith(f">{config.name.replace('-', '_')}</a>")
+            )
+            for config in (DALA_CONFIG, ANGRY_TWEETS_CONFIG)
+        )
+        assert row[dala_col] == "72.00 ± 2.00 (invalid)"
+        assert row[angry_tweets_col] == "71.00 ± 1.00"
+        assert row["Rank score"] == "-"
+        other_rows = full.set_index("Model").drop(index="org/a")
+        assert not other_rows[dala_col].str.contains("(invalid)", regex=False).any()
+
+        simplified = pd.read_csv(
+            tmp_path / "invalid" / "danish_generative_simplified.csv"
+        )
+        assert sorted(simplified["model"]) == ["org/b", "org/c"]
+
+    @staticmethod
+    def _invalid_result(model: str) -> InvalidResult:
+        """Create an invalid DaLA result for a model.
+
+        Args:
+            model:
+                The model ID.
+
+        Returns:
+            The invalid result.
+        """
+        return InvalidResult(
+            model=model,
+            dataset=DALA_CONFIG.name,
+            reason="Trained on the test split.",
+            source="https://example.com/model-card",
+            date=dt.date(2026, 1, 13),
+        )
+
+    def test_unknown_model_raises(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """An entry for a model without results stops leaderboard generation."""
+        with pytest.raises(ValueError, match="org/missing"):
+            self._generate(
+                monkeypatch=monkeypatch,
+                tmp_path=tmp_path,
+                scores=self._scores(),
+                invalid_results=[self._invalid_result(model="org/missing")],
+            )
 
 
 class TestMultilingualPerLanguageRankScores:

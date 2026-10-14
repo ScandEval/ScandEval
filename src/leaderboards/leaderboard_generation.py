@@ -15,8 +15,14 @@ import pandas as pd
 from euroeval.constants import ORTHOGONAL_TASKS
 
 from .bootstrap_cis import bootstrap_confidence_intervals, bootstrap_rank_scores
-from .constants import NUM_BOOTSTRAPS, OUTPUT_DIR, VARIANT_SUFFIX_RE
+from .constants import (
+    INVALID_SCORE_MARKER,
+    NUM_BOOTSTRAPS,
+    OUTPUT_DIR,
+    VARIANT_SUFFIX_RE,
+)
 from .enums import LeaderboardCategory
+from .invalid_results import invalid_datasets_by_model, load_invalid_results
 from .link_generation import generate_task_link
 from .records import drop_val_duplicates, plain_model_id, strip_note_item
 from .result_loading import load_raw_results
@@ -83,6 +89,9 @@ def generate_leaderboard(
         str, dict[str, list[tuple[list[float], float, float]]]
     ] = group_results_by_model(results=results)
     global_model_results = drop_val_duplicates(model_results=global_model_results)
+    invalid_datasets = invalid_datasets_by_model(
+        invalid_results=load_invalid_results(), model_ids=global_model_results
+    )
     model_results = {
         model_id: {
             dataset: scores
@@ -109,6 +118,7 @@ def generate_leaderboard(
         leaderboard_configs=configs,
         include_dataset_columns=include_dataset_columns,
         language_rank_cache=language_rank_cache,
+        invalid_datasets=invalid_datasets,
     )
 
     for category, df_pair in zip(categories, df_pairs):
@@ -398,6 +408,7 @@ def _generate_dataframe(
     include_dataset_columns: bool,
     language_rank_cache: dict[tuple[str, str, tuple[str, ...], tuple[str, ...]], dict]
     | None = None,
+    invalid_datasets: dict[str, set[str]] | None = None,
 ) -> list[tuple[pd.DataFrame, pd.DataFrame]]:
     """Generate DataFrames from the model results.
 
@@ -414,6 +425,9 @@ def _generate_dataframe(
             Whether to include dataset columns in the DataFrame.
         language_rank_cache (optional):
             Shared cache for monolingual rank-score confidence intervals.
+        invalid_datasets (optional):
+            Model ID to the datasets on which its result is invalid. These results
+            are shown, marked as invalid, but left out of aggregated scores and ranks.
 
     Returns:
         A list of pairs (df, df_simplified), where df is the full leaderboard DataFrame
@@ -422,6 +436,17 @@ def _generate_dataframe(
     if model_results == {}:
         logger.error("No model results found, skipping leaderboard generation.")
         return []
+
+    if invalid_datasets is None:
+        invalid_datasets = {}
+    ranked_model_results = {
+        model_id: {
+            dataset: scores
+            for dataset, scores in results.items()
+            if dataset not in invalid_datasets.get(model_id, set())
+        }
+        for model_id, results in model_results.items()
+    }
 
     category_to_datasets, category_to_orthogonal_datasets = (
         _build_category_dataset_maps(categories, leaderboard_configs)
@@ -435,7 +460,7 @@ def _generate_dataframe(
             ranks,
             all_standard_ranks,
         ) = _compute_eligible_models_and_ranks(
-            model_results=model_results,
+            model_results=ranked_model_results,
             category=category,
             category_to_datasets=category_to_datasets,
             category_to_orthogonal_datasets=category_to_orthogonal_datasets,
@@ -445,7 +470,7 @@ def _generate_dataframe(
         )
 
         orthogonal_scores_by_plain = _collect_orthogonal_scores(
-            model_results=model_results,
+            model_results=ranked_model_results,
             category=category,
             category_to_orthogonal_datasets=category_to_orthogonal_datasets,
         )
@@ -488,6 +513,7 @@ def _generate_dataframe(
                 category_to_orthogonal_datasets=category_to_orthogonal_datasets,
                 orthogonal_scores_by_plain=orthogonal_scores_by_plain,
                 metadata_dict=metadata_dict,
+                invalid_datasets=invalid_datasets.get(model_id, set()),
             )
             for key, value in model_values.items():
                 data_dict[key].append(value)
@@ -668,6 +694,7 @@ def _build_model_row_data(
     category_to_orthogonal_datasets: dict[str, dict[str, str]],
     orthogonal_scores_by_plain: dict[str, dict[str, tuple[float, float | None]]],
     metadata_dict: dict[str, dict],
+    invalid_datasets: set[str],
 ) -> dict[str, t.Any]:
     """Build the data dictionary entry for a single model row.
 
@@ -696,6 +723,9 @@ def _build_model_row_data(
             Orthogonal scores by plain model id.
         metadata_dict:
             The metadata dictionary.
+        invalid_datasets:
+            The datasets on which this model's result is invalid. Their scores are
+            marked as invalid.
 
     Returns:
         Dictionary with all values for this model row.
@@ -765,6 +795,8 @@ def _build_model_row_data(
             )
         else:
             score_str = "-"
+        if dataset in invalid_datasets and score_str != "-":
+            score_str = f"{score_str} {INVALID_SCORE_MARKER}"
         total_results[dataset] = score_str
 
     orthogonal_task_scores: dict[str, float | str] = {}
