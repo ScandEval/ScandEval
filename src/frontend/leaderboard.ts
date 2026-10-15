@@ -167,6 +167,10 @@ const NUMERIC_COLS = new Set([
   "hallucination rate",
 ]);
 
+// Orthogonal score columns. Only their cells can end with a note such as
+// "(invalid)", so only they have the note split off before sorting.
+const SCORE_NOTE_COLS = new Set(["european values", "hallucination rate"]);
+
 const ICON_COLS = new Set([
   "type",
   "commercial",
@@ -186,6 +190,14 @@ const parseNumberSafe = (s: string): number | null => {
   const cleaned = s.replace(/,/g, "");
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : null;
+};
+
+// A score may end with a parenthesised note from the leaderboard CSV, e.g.
+// "35.00 ± 0.20 (invalid)" for a result left out of the rank score. Formatters
+// split the note off, format the value and append the note unchanged.
+export const splitScoreNote = (text: string): { value: string; note: string } => {
+  const match = /^(.*\S)\s+(\([\w .,-]*\))$/.exec(text);
+  return match ? { value: match[1], note: match[2] } : { value: text, note: "" };
 };
 
 const isIsoDate = (s: string): boolean => {
@@ -267,7 +279,11 @@ const computeSizeBuckets = (
     .filter((l) => seen.has(l));
 };
 
-export function parseCell(raw: string, kind: CellKind): ParsedCell {
+export function parseCell(
+  raw: string,
+  kind: CellKind,
+  key = "",
+): ParsedCell {
   const { display, sort } = splitDisplaySort(raw);
   let text = stripTags(display);
   if (kind === "icon") text = normalizeIconText(text);
@@ -285,10 +301,13 @@ export function parseCell(raw: string, kind: CellKind): ParsedCell {
     const n = parseNumberSafe(sort);
     sortKey = n !== null ? n : sort.toLowerCase();
   } else if (kind === "number") {
-    // Orthogonal metric columns may carry a confidence-interval halfwidth.
-    // Their numeric sort value is always the point estimate before ±.
-    const interval = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*±/.exec(text);
-    const n = parseNumberSafe(interval?.[1] ?? text);
+    // Orthogonal metric columns may carry a confidence-interval halfwidth and a
+    // trailing note. Their numeric sort value is always the point estimate.
+    const value = SCORE_NOTE_COLS.has(key.toLowerCase())
+      ? splitScoreNote(text).value
+      : text;
+    const interval = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*±/.exec(value);
+    const n = parseNumberSafe(interval?.[1] ?? value);
     sortKey = n !== null ? n : Number.POSITIVE_INFINITY;
   } else if (kind === "score") {
     // Score cells look like "60.17 ± 1.40 / 72.92 ± 1.18" — sort by the
@@ -464,7 +483,7 @@ export function parseLeaderboard(csvText: string): LeaderboardTable {
     .filter((r) => r.length > 1 && stripTags(r[0]).trim() !== "")
     .map((r) => {
       const cells = visibleColIndexes.map((i) =>
-        parseCell(r[i] ?? "", columns[i].kind),
+        parseCell(r[i] ?? "", columns[i].kind, columns[i].key),
       );
       const readCompanion = (i: number): number | null =>
         parseNumberSafe(stripTags(splitDisplaySort(r[i] ?? "").display));

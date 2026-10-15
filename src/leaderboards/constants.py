@@ -115,6 +115,15 @@ CORE_MODELS_CONFIG: Path = PACKAGE_DIR / "core_models.yaml"
 # results despite no URL being found, so we don't re-prompt every run.
 MODELS_WITHOUT_URLS_CACHE: Path = PACKAGE_DIR / "models_without_urls_cache.yaml"
 
+# Public list of (model, dataset) results that are left out of a model's aggregated
+# score and rank, e.g. because the model was trained on the dataset (see
+# `invalid_results.py`).
+INVALID_RESULTS_CONFIG: Path = PACKAGE_DIR / "invalid_results.yaml"
+
+# Appended to a dataset score on the leaderboards when the (model, dataset) result
+# is listed in `INVALID_RESULTS_CONFIG`.
+INVALID_SCORE_MARKER = "(invalid)"
+
 # Persistent cache of per-dataset split sizes (keyed by Hugging Face source),
 # used to turn raw failure counts into proportions on the leaderboard. Split
 # sizes effectively never change; if a dataset is ever resized, delete its

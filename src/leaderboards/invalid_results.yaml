@@ -1,0 +1,15 @@
+# (model, dataset) results that are left out of a model's aggregated score and rank,
+# e.g. because the model was trained on the dataset. The dataset score is still shown
+# on the leaderboards, marked as invalid. An entry covers every variant of the model,
+# including `@revision` and `#parameter` variants.
+#
+# Every field is required. Unknown models, unknown datasets and unknown fields raise an
+# error when the leaderboards are generated.
+#
+# Example entry:
+#
+# - model: org/model
+#   dataset: scala-da
+#   reason: The model card states that the model was trained on the ScaLA-da test split.
+#   source: https://huggingface.co/org/model
+#   date: 2026-01-13

@@ -29,6 +29,27 @@ from .constants import LEADERBOARD_TASKS, NLU_TASK_GROUPS
 from .enums import LeaderboardCategory
 
 
+def all_dataset_names() -> frozenset[str]:
+    """Return the name of every dataset defined in ``euroeval.dataset_configs``.
+
+    Returns:
+        The dataset names, both official and unofficial.
+    """
+    return frozenset(cfg.name for cfg in _iter_all_dataset_configs())
+
+
+@cache
+def _iter_all_dataset_configs() -> tuple[DatasetConfig, ...]:
+    """Collect every ``DatasetConfig`` defined in ``euroeval.dataset_configs``.
+
+    Returns:
+        Every ``DatasetConfig`` exported by the lib.
+    """
+    return tuple(
+        value for value in vars(_ds_module).values() if isinstance(value, DatasetConfig)
+    )
+
+
 def category_includes_task(category: LeaderboardCategory, task: str) -> bool:
     """Check whether a task is scored within a leaderboard category.
 
@@ -104,23 +125,6 @@ def dataset_sources() -> dict[str, str]:
         for cfg in _iter_all_dataset_configs()
         if isinstance(cfg.source, str) and cfg.source.strip()
     }
-
-
-@cache
-def _iter_all_dataset_configs() -> tuple[DatasetConfig, ...]:
-    """Collect every ``DatasetConfig`` defined in ``euroeval.dataset_configs``.
-
-    All built-in configs are re-exported into the ``euroeval.dataset_configs``
-    namespace, so we read them straight off the module. Cached because the
-    leaderboard pipeline calls into this module once per language and the set is
-    fixed per process.
-
-    Returns:
-        Every ``DatasetConfig`` exported by the lib.
-    """
-    return tuple(
-        value for value in vars(_ds_module).values() if isinstance(value, DatasetConfig)
-    )
 
 
 def languages_with_official_datasets() -> list[str]:
