@@ -847,40 +847,47 @@ euroeval --model <model-id> --dataset eu-mmlu-it
 
 ### Unofficial: MKQA-it
 
-This dataset is a Italian version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+This dataset is an Italian version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
 (Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
 sampled from Google's Natural Questions, with the questions and short answers
 translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
 knowledge task: each question gets four options, namely the correct answer and three
 answers to other questions with the same answer type (entity, date, number, number with
-unit or short phrase). Questions with yes/no, long or no answers, and questions with
-very short or long texts, are left out, which leaves about 6,600 questions.
+unit or short phrase). For numbers with a unit, the distractors also have the same unit,
+and for dates the same format, such as a year or a full date, so that the format of an
+option does not give away the answer. Questions with yes/no, long or no answers, and
+questions with very short or long texts, are left out, which leaves about 6,600
+questions, before duplicates and questions without three comparable distractors are
+removed.
 
-The original dataset has no splits. We shuffle the questions with a fixed seed, so a
-question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+The original dataset has no splits. Rows that have the same question in at least one
+language are grouped, and the groups are shuffled with a fixed seed and divided into
+splits, so a question is in the same split in all MKQA languages. Within a split, a
+question that occurs more than once is kept only once. We use a 1,024 / 256 / 2,048
 split for training, validation and testing, respectively (so 3,328 samples used in
-total). The options of a question come from the answers in its own split.
+total). The options of a question come from the answers to the other questions in its
+own split.
 
 Here are a few examples from the training split:
 
 ```json
 {
-  "text": "qual è la religione più diffusa in corea del sud\nScelte:\na. Ali Payami\nb. cristianesimo\nc. Amy Carlson\nd. Vesuvio",
-  "label": "b"
+  "text": "chi disse it is well with my soul\nScelte:\na. Sogni dipinti\nb. Squadra di basket femminile irlandese Notre Dame Fighting\nc. Lori Lieberman\nd. Horatio Spafford",
+  "label": "d"
 }
 ```
 
 ```json
 {
-  "text": "Da quando le banconote da 5 sterline non hanno più corso legale?\nScelte:\na. 2017-05-05\nb. 1972-09-04\nc. 2020-02-09\nd. 2020-05-01",
-  "label": "a"
+  "text": "chi ha scritto la canzone mary did you know\nScelte:\na. Roger Federer\nb. Fred Savage\nc. Tughlak\nd. Mark Lowry",
+  "label": "d"
 }
 ```
 
 ```json
 {
-  "text": "quando è stata creata la dichiarazione universale dei diritti umani\nScelte:\na. 1948-12-10\nb. 2021-01-03\nc. 1917-03-08\nd. 2017-05-26",
-  "label": "a"
+  "text": "Chi interpreta Brady Black nel film Il tempo della nostra vita\nScelte:\na. Cina\nb. Bill Murray\nc. Lord Voldemort\nd. Kyle Lowder",
+  "label": "d"
 }
 ```
 
@@ -918,6 +925,12 @@ When evaluating generative models, we use the following setup (see the
 
   Rispondete alla domanda precedente con 'a', 'b', 'c' o 'd', e nient'altro.
   ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+euroeval --model <model-id> --dataset mkqa-it
+```
 
 ## Common-sense Reasoning
 

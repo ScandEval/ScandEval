@@ -909,33 +909,40 @@ sampled from Google's Natural Questions, with the questions and short answers
 translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
 knowledge task: each question gets four options, namely the correct answer and three
 answers to other questions with the same answer type (entity, date, number, number with
-unit or short phrase). Questions with yes/no, long or no answers, and questions with
-very short or long texts, are left out, which leaves about 6,600 questions.
+unit or short phrase). For numbers with a unit, the distractors also have the same unit,
+and for dates the same format, such as a year or a full date, so that the format of an
+option does not give away the answer. Questions with yes/no, long or no answers, and
+questions with very short or long texts, are left out, which leaves about 6,600
+questions, before duplicates and questions without three comparable distractors are
+removed.
 
-The original dataset has no splits. We shuffle the questions with a fixed seed, so a
-question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+The original dataset has no splits. Rows that have the same question in at least one
+language are grouped, and the groups are shuffled with a fixed seed and divided into
+splits, so a question is in the same split in all MKQA languages. Within a split, a
+question that occurs more than once is kept only once. We use a 1,024 / 256 / 2,048
 split for training, validation and testing, respectively (so 3,328 samples used in
-total). The options of a question come from the answers in its own split.
+total). The options of a question come from the answers to the other questions in its
+own split.
 
 Here are a few examples from the training split:
 
 ```json
 {
-  "text": "was ist die verbreiteste religion in südkorea\nAntwortmöglichkeiten:\na. Thomas Jefferson\nb. Christentum\nc. Volksrepublik China\nd. Liliana Mumy",
-  "label": "b"
+  "text": "Wer sagte \"It Is Well With My Soul\"?\nAntwortmöglichkeiten:\na. Horatio Spafford\nb. Hongkong\nc. Deutschland\nd. North Carolina",
+  "label": "a"
 }
 ```
 
 ```json
 {
-  "text": "wann wurde die 5 Pfund Note als gesetzliches Zahlungsmittel abgeschafft\nAntwortmöglichkeiten:\na. 2014\nb. 2018-08-31\nc. 2008-05-01\nd. 2017-05-05",
-  "label": "d"
+  "text": "wer hat das lied geschrieben mary did you know\nAntwortmöglichkeiten:\na. Mark Lowry\nb. Dionne Warwick\nc. Alvin Schwartz\nd. Cher",
+  "label": "a"
 }
 ```
 
 ```json
 {
-  "text": "wann wurde die Allgemeine Erklärung der Menschenrechte geschaffen\nAntwortmöglichkeiten:\na. 1980-12-19\nb. 1948-12-10\nc. 1917-03-08\nd. 2019-05-19",
+  "text": "wer spielt brady black in \"days of our lives\"\nAntwortmöglichkeiten:\na. Alun Wyn Jones\nb. Kyle Lowder\nc. Journey\nd. Hugh Laurie",
   "label": "b"
 }
 ```
@@ -974,6 +981,12 @@ When evaluating generative models, we use the following setup (see the
 
   Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd', und nichts anderes.
   ```
+
+You can evaluate this dataset directly as follows:
+
+```bash
+euroeval --model <model-id> --dataset mkqa-de
+```
 
 ## Common-sense Reasoning
 
