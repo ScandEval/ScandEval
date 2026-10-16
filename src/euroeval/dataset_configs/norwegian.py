@@ -436,3 +436,12 @@ ZEBRA_PUZZLE_HARD_NN_CONFIG = DatasetConfig(
     languages=[NORWEGIAN_NYNORSK, NORWEGIAN],
     unofficial=True,
 )
+
+MKQA_NO_CONFIG = DatasetConfig(
+    name="mkqa-no",
+    pretty_name="MKQA-no",
+    source="EuroEval/mkqa-no-mini",
+    task=KNOW,
+    languages=[NORWEGIAN_BOKMÅL, NORWEGIAN_NYNORSK, NORWEGIAN],
+    unofficial=True,
+)

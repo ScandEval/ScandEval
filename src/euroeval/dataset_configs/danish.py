@@ -341,3 +341,12 @@ MULTI_IFEVAL_DA_CONFIG = DatasetConfig(
     val_split=None,
     unofficial=True,
 )
+
+MKQA_DA_CONFIG = DatasetConfig(
+    name="mkqa-da",
+    pretty_name="MKQA-da",
+    source="EuroEval/mkqa-da-mini",
+    task=KNOW,
+    languages=[DANISH],
+    unofficial=True,
+)

@@ -211,3 +211,12 @@ IFEVAL_FI_CONFIG = DatasetConfig(
     val_split=None,
     unofficial=True,
 )
+
+MKQA_FI_CONFIG = DatasetConfig(
+    name="mkqa-fi",
+    pretty_name="MKQA-fi",
+    source="EuroEval/mkqa-fi-mini",
+    task=KNOW,
+    languages=[FINNISH],
+    unofficial=True,
+)

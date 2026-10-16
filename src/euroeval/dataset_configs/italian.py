@@ -256,3 +256,12 @@ EU_MMLU_IT_CONFIG = DatasetConfig(
     languages=[ITALIAN],
     unofficial=True,
 )
+
+MKQA_IT_CONFIG = DatasetConfig(
+    name="mkqa-it",
+    pretty_name="MKQA-it",
+    source="EuroEval/mkqa-it-mini",
+    task=KNOW,
+    languages=[ITALIAN],
+    unofficial=True,
+)
