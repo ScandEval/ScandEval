@@ -19,6 +19,7 @@ type.
 import gzip
 import io
 import json
+import logging
 import random
 import typing as t
 import unicodedata
@@ -33,6 +34,8 @@ from constants import (
 )
 from dataset_utils import MAX_TEST, MAX_TRAIN, MAX_VAL, SEED, upload_private
 from datasets import Dataset, DatasetDict
+
+logger = logging.getLogger(__name__)
 
 SOURCE_URL = "https://github.com/apple/ml-mkqa/raw/main/dataset/mkqa.jsonl.gz"
 
@@ -70,11 +73,11 @@ def main() -> None:
 
 
 def _normalise(text: str) -> str:
-    """Normalise an answer, so that answers can be compared.
+    """Normalise a question, answer or alias, so that they can be compared.
 
     Args:
         text:
-            The answer or alias.
+            The question, answer or alias.
 
     Returns:
         The text with Unicode compatibility forms folded, whitespace collapsed and
@@ -134,6 +137,27 @@ def _build_split(samples: list[Sample], pool: list[Sample], language: str) -> Da
     return Dataset.from_dict(mapping=dict(text=texts, label=labels))
 
 
+def _remove_duplicate_questions(samples: list[Sample]) -> list[Sample]:
+    """Keep only the first sample for each question.
+
+    Args:
+        samples:
+            The samples of a split.
+
+    Returns:
+        The samples, with the later ones with a question that an earlier one has
+        removed.
+    """
+    seen_questions: set[str] = set()
+    unique_samples: list[Sample] = []
+    for sample in samples:
+        question = _normalise(text=sample["question"])
+        if question not in seen_questions:
+            seen_questions.add(question)
+            unique_samples.append(sample)
+    return unique_samples
+
+
 class Answer(t.TypedDict):
     """An answer to an MKQA question in one language."""
 
@@ -175,17 +199,23 @@ def create_dataset(
         A dataset dictionary with the splits "train", "val" and "test", each with the
         columns "text" and "label".
     """
-    shuffled_rows = sorted(rows, key=lambda row: str(row["example_id"]))
-    random.Random(SEED).shuffle(shuffled_rows)
+    groups = _group_rows(rows=rows)
+    groups.sort(key=lambda group: min(str(row["example_id"]) for row in group))
+    random.Random(SEED).shuffle(groups)
 
     total_size = train_size + val_size + test_size
-    test_end = round(len(shuffled_rows) * test_size / total_size)
-    val_end = test_end + round(len(shuffled_rows) * val_size / total_size)
-    rows_by_split = dict(
-        train=shuffled_rows[val_end:],
-        val=shuffled_rows[test_end:val_end],
-        test=shuffled_rows[:test_end],
-    )
+    test_end = round(len(rows) * test_size / total_size)
+    val_end = test_end + round(len(rows) * val_size / total_size)
+    rows_by_split: dict[str, list[MkqaRow]] = dict(test=[], val=[], train=[])
+    num_rows = 0
+    for group in groups:
+        if num_rows < test_end:
+            rows_by_split["test"].extend(group)
+        elif num_rows < val_end:
+            rows_by_split["val"].extend(group)
+        else:
+            rows_by_split["train"].extend(group)
+        num_rows += len(group)
     max_size_by_split = dict(train=train_size, val=val_size, test=test_size)
 
     splits: dict[str, Dataset] = dict()
@@ -196,8 +226,14 @@ def create_dataset(
                 _get_sample(row=row, language=language) for row in split_rows
             )
             if sample is not None
-        ][: max_size_by_split[split]]
-        splits[split] = _build_split(samples=samples, pool=samples, language=language)
+        ]
+        unique_samples = _remove_duplicate_questions(samples=samples)
+        logger.info(
+            f"mkqa-{language}, {split}: left out "
+            f"{len(samples) - len(unique_samples)} duplicate questions"
+        )
+        kept = unique_samples[: max_size_by_split[split]]
+        splits[split] = _build_split(samples=kept, pool=kept, language=language)
     return DatasetDict({split: dataset for split, dataset in splits.items()})
 
 
@@ -240,6 +276,56 @@ def _get_sample(row: MkqaRow, language: str) -> Sample | None:
             if isinstance(text, str)
         },
     )
+
+
+def _group_rows(rows: list[MkqaRow]) -> list[list[MkqaRow]]:
+    """Group the rows that are the same question.
+
+    Two rows are in the same group if they have the same question in at least one
+    language, directly or through other rows. MKQA has such duplicates with different
+    example IDs, and keeping a group together puts all of them in the same split in all
+    languages.
+
+    Args:
+        rows:
+            The MKQA rows.
+
+    Returns:
+        The groups of rows, where the rows of a group are sorted by example ID.
+    """
+    parents = list(range(len(rows)))
+
+    def find_root(index: int) -> int:
+        """Find the root of the group that a row is in.
+
+        Args:
+            index:
+                The index of the row.
+
+        Returns:
+            The index of the row that is the root of the group.
+        """
+        while parents[index] != index:
+            parents[index] = parents[parents[index]]
+            index = parents[index]
+        return index
+
+    row_with_question: dict[tuple[str, str], int] = dict()
+    for index, row in enumerate(rows):
+        for language, query in row["queries"].items():
+            question = _normalise(text=query)
+            if not question:
+                continue
+            other_index = row_with_question.setdefault((language, question), index)
+            parents[find_root(index=index)] = find_root(index=other_index)
+
+    groups: dict[int, list[MkqaRow]] = dict()
+    for index, row in enumerate(rows):
+        groups.setdefault(find_root(index=index), []).append(row)
+    return [
+        sorted(group, key=lambda row: str(row["example_id"]))
+        for group in groups.values()
+    ]
 
 
 def load_rows() -> list[MkqaRow]:
