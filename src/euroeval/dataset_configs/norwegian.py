@@ -442,6 +442,6 @@ MKQA_NO_CONFIG = DatasetConfig(
     pretty_name="MKQA-no",
     source="EuroEval/mkqa-no-mini",
     task=KNOW,
-    languages=[NORWEGIAN_BOKMÅL, NORWEGIAN],
+    languages=[NORWEGIAN_BOKMÅL, NORWEGIAN_NYNORSK, NORWEGIAN],
     unofficial=True,
 )
