@@ -20,6 +20,29 @@ class TestCreateDataset:
         )
         assert again["test"].to_list() == dataset["test"].to_list()
 
+    def test_distractors_are_not_any_accepted_answer_or_alias(self) -> None:
+        """No distractor matches an accepted answer or alias of the question."""
+        rows = [
+            _row(
+                index=0,
+                extra_danish_answers=[
+                    dict(type="entity", text="svar 1", aliases=["  SVAR   2"])
+                ],
+            ),
+            *[_row(index=index) for index in range(1, 4)],
+        ]
+        dataset = create_mkqa.create_dataset(
+            rows=rows, language="da", train_size=0, val_size=0, test_size=4
+        )
+
+        questions = {sample["text"].split("\n")[0] for sample in dataset["test"]}
+        assert questions == {f"Spørgsmål nummer {index}?" for index in (1, 2, 3)}
+        for sample in dataset["test"]:
+            question, _, *options = sample["text"].split("\n")
+            number = question.removeprefix("Spørgsmål nummer ").removesuffix("?")
+            assert f"svar {number}" in {option[3:] for option in options}
+            assert len({option[3:] for option in options}) == 4
+
     def test_distractors_come_from_the_same_split(self, dataset: DatasetDict) -> None:
         """The options of a sample are answers to questions in the same split."""
         for split in dataset.values():
@@ -121,7 +144,10 @@ class TestCreateDataset:
 
 
 def _row(
-    index: int, answer_type: str = "entity", english_question: str | None = None
+    index: int,
+    answer_type: str = "entity",
+    english_question: str | None = None,
+    extra_danish_answers: list[dict[str, t.Any]] | None = None,
 ) -> dict[str, t.Any]:
     """Create an MKQA row with a Danish and an English question.
 
@@ -132,6 +158,8 @@ def _row(
             The MKQA answer type of the answer.
         english_question:
             The English question, or None to use a question that is unique to the row.
+        extra_danish_answers:
+            Further accepted Danish answers, after the first one.
 
     Returns:
         An MKQA row.
@@ -144,7 +172,10 @@ def _row(
             en=english_question or f"Question number {index}?",
         ),
         answers=dict(
-            da=[dict(type=answer_type, text=f"svar {index}", aliases=[])],
+            da=[
+                dict(type=answer_type, text=f"svar {index}", aliases=[]),
+                *(extra_danish_answers or []),
+            ],
             en=[dict(type=answer_type, text=f"answer {index}", aliases=[])],
         ),
     )

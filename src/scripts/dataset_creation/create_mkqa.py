@@ -21,6 +21,7 @@ import io
 import json
 import random
 import typing as t
+import unicodedata
 
 import requests
 from constants import (
@@ -150,12 +151,11 @@ def _build_split(
     labels: list[str] = []
     for sample in samples:
         rng = random.Random(f"{SEED}-{language}-{sample['example_id']}")
-        forbidden = {sample["answer"].casefold(), *sample["aliases"]}
         candidates = sorted(
             {
-                answer.casefold(): answer
+                _normalise(text=answer): answer
                 for answer in pool_by_type[sample["type"]]
-                if answer.casefold() not in forbidden
+                if _normalise(text=answer) not in sample["accepted"]
             }.values()
         )
         if len(candidates) < len(LETTERS) - 1:
@@ -170,6 +170,20 @@ def _build_split(
     return Dataset.from_dict(mapping=dict(text=texts, label=labels))
 
 
+def _normalise(text: str) -> str:
+    """Normalise an answer, so that answers can be compared.
+
+    Args:
+        text:
+            The answer or alias.
+
+    Returns:
+        The text with Unicode compatibility forms folded, whitespace collapsed and
+        case removed.
+    """
+    return " ".join(unicodedata.normalize("NFKC", text).split()).casefold()
+
+
 def _get_sample(row: dict[str, t.Any], language: str) -> dict[str, t.Any] | None:
     """Get the question and answer of a row, if they are usable.
 
@@ -180,8 +194,10 @@ def _get_sample(row: dict[str, t.Any], language: str) -> dict[str, t.Any] | None
             The MKQA language code.
 
     Returns:
-        The example ID, question, answer type, answer and aliases of the answer, or
-        None if the row cannot be used as a multiple choice question.
+        The example ID, question, answer type, answer and the normalised texts of all
+        accepted answers and their aliases, or None if the row cannot be used as a
+        multiple choice question. The first answer is the one that is used as the
+        correct option.
     """
     question = row["queries"][language].strip()
     answers = row["answers"][language]
@@ -197,7 +213,15 @@ def _get_sample(row: dict[str, t.Any], language: str) -> dict[str, t.Any] | None
         question=question,
         type=answers[0]["type"],
         answer=answer,
-        aliases={alias.strip().casefold() for alias in answers[0].get("aliases") or []},
+        accepted={
+            _normalise(text=text)
+            for accepted_answer in answers
+            for text in [
+                accepted_answer["text"],
+                *(accepted_answer.get("aliases") or []),
+            ]
+            if isinstance(text, str)
+        },
     )
 
 
