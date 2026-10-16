@@ -21,6 +21,7 @@ import io
 import json
 import logging
 import random
+import re
 import typing as t
 import unicodedata
 
@@ -91,50 +92,109 @@ class Sample(t.TypedDict):
 
     example_id: str
     question: str
-    answer_type: str
     answer: str
     accepted: set[str]
+    match_key: str
 
 
-def _build_split(samples: list[Sample], pool: list[Sample], language: str) -> Dataset:
-    """Build one split, with distractors taken from the same split.
+def _build_split(
+    samples: list[Sample], language: str, max_size: int
+) -> tuple[Dataset, int]:
+    """Build one split, with distractors taken from the questions in the split.
+
+    The distractors of a question are answers to other kept questions that have the
+    same match key, so that the format of an option, such as its unit, does not reveal
+    the correct option. Questions with fewer than three such answers are left out, and
+    the next questions take their place.
 
     Args:
         samples:
-            The usable questions and answers of the split.
-        pool:
-            The samples that the distractors are drawn from.
+            The usable, unique questions and answers of the split, in order.
         language:
             The MKQA language code.
+        max_size:
+            The maximum number of samples in the split.
 
     Returns:
-        A dataset with the columns "text" and "label".
+        A dataset with the columns "text" and "label", and the number of questions that
+        were left out because they had too few comparable options.
     """
-    pool_by_type: dict[str, list[str]] = {}
-    for sample in pool:
-        pool_by_type.setdefault(sample["answer_type"], []).append(sample["answer"])
+    kept = samples[:max_size]
+    remaining = samples[max_size:]
+    num_left_out = 0
+    while True:
+        pool_by_key: dict[str, list[str]] = {}
+        for sample in kept:
+            pool_by_key.setdefault(sample["match_key"], []).append(sample["answer"])
+        candidates_by_id = {
+            sample["example_id"]: sorted(
+                {
+                    _normalise(text=answer): answer
+                    for answer in pool_by_key[sample["match_key"]]
+                    if _normalise(text=answer) not in sample["accepted"]
+                }.values()
+            )
+            for sample in kept
+        }
+        ids_without_options = {
+            example_id
+            for example_id, candidates in candidates_by_id.items()
+            if len(candidates) < len(LETTERS) - 1
+        }
+        if not ids_without_options:
+            break
+        num_left_out += len(ids_without_options)
+        kept = [
+            sample for sample in kept if sample["example_id"] not in ids_without_options
+        ]
+        num_refills = max_size - len(kept)
+        kept += remaining[:num_refills]
+        remaining = remaining[num_refills:]
 
     texts: list[str] = []
     labels: list[str] = []
-    for sample in samples:
+    for sample in kept:
         rng = random.Random(f"{SEED}-{language}-{sample['example_id']}")
-        candidates = sorted(
-            {
-                _normalise(text=answer): answer
-                for answer in pool_by_type[sample["answer_type"]]
-                if _normalise(text=answer) not in sample["accepted"]
-            }.values()
+        distractors = rng.sample(
+            candidates_by_id[sample["example_id"]], k=len(LETTERS) - 1
         )
-        if len(candidates) < len(LETTERS) - 1:
-            continue
-        options = [sample["answer"], *rng.sample(candidates, k=len(LETTERS) - 1)]
+        options = [sample["answer"], *distractors]
         rng.shuffle(options)
         lines = [f"{letter}. {option}" for letter, option in zip(LETTERS, options)]
         texts.append(
             f"{sample['question']}\n{CHOICES_MAPPING[language]}:\n" + "\n".join(lines)
         )
         labels.append(LETTERS[options.index(sample["answer"])])
-    return Dataset.from_dict(mapping=dict(text=texts, label=labels))
+    return Dataset.from_dict(mapping=dict(text=texts, label=labels)), num_left_out
+
+
+def _get_match_key(answer_type: str, answer: str) -> str:
+    """Get the key that decides which answers can be distractors for each other.
+
+    Args:
+        answer_type:
+            The MKQA answer type.
+        answer:
+            The answer text.
+
+    Returns:
+        The answer type, extended with the unit of a number with a unit (and how many
+        numbers it has), or with the format of a date, such as a year or a full date.
+    """
+    text = _normalise(text=answer)
+    if answer_type == "number_with_unit":
+        tokens = text.split()
+        num_numbers = 0
+        while num_numbers < len(tokens) and re.fullmatch(
+            r"[+-]?\d[\d.,]*", tokens[num_numbers]
+        ):
+            num_numbers += 1
+        return f"{answer_type}:{num_numbers}:{' '.join(tokens[num_numbers:])}"
+    if answer_type == "date":
+        digits_as_nines = re.sub(r"\d+", lambda match: "9" * len(match.group()), text)
+        date_format = re.sub(r"[^\W\d_]+", "A", digits_as_nines)
+        return f"{answer_type}:{date_format}"
+    return answer_type
 
 
 def _remove_duplicate_questions(samples: list[Sample]) -> list[Sample]:
@@ -228,12 +288,15 @@ def create_dataset(
             if sample is not None
         ]
         unique_samples = _remove_duplicate_questions(samples=samples)
-        logger.info(
-            f"mkqa-{language}, {split}: left out "
-            f"{len(samples) - len(unique_samples)} duplicate questions"
+        dataset, num_without_options = _build_split(
+            samples=unique_samples, language=language, max_size=max_size_by_split[split]
         )
-        kept = unique_samples[: max_size_by_split[split]]
-        splits[split] = _build_split(samples=kept, pool=kept, language=language)
+        logger.info(
+            f"mkqa-{language}, {split}: kept {dataset.num_rows} samples, left out "
+            f"{len(samples) - len(unique_samples)} duplicate questions and "
+            f"{num_without_options} questions without enough comparable options"
+        )
+        splits[split] = dataset
     return DatasetDict({split: dataset for split, dataset in splits.items()})
 
 
@@ -247,10 +310,10 @@ def _get_sample(row: MkqaRow, language: str) -> Sample | None:
             The MKQA language code.
 
     Returns:
-        The example ID, question, answer type, answer and the normalised texts of all
-        accepted answers and their aliases, or None if the row cannot be used as a
-        multiple choice question. The first answer is the one that is used as the
-        correct option.
+        The example ID, question, answer, the key that decides which answers can be
+        distractors for it, and the normalised texts of all accepted answers and their
+        aliases, or None if the row cannot be used as a multiple choice question. The
+        first answer is the one that is used as the correct option.
     """
     question = row["queries"][language].strip()
     answers = row["answers"][language]
@@ -264,7 +327,6 @@ def _get_sample(row: MkqaRow, language: str) -> Sample | None:
     return Sample(
         example_id=str(row["example_id"]),
         question=question,
-        answer_type=answers[0]["type"],
         answer=answer,
         accepted={
             _normalise(text=text)
@@ -275,6 +337,7 @@ def _get_sample(row: MkqaRow, language: str) -> Sample | None:
             ]
             if isinstance(text, str)
         },
+        match_key=_get_match_key(answer_type=answers[0]["type"], answer=answer),
     )
 
 

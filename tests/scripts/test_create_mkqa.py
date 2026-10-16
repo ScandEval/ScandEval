@@ -1,5 +1,7 @@
 """Public-interface tests for creating the MKQA multiple choice datasets."""
 
+import re
+
 import pytest
 from datasets import DatasetDict
 
@@ -18,6 +20,35 @@ class TestCreateDataset:
         )
         assert again["test"].to_list() == dataset["test"].to_list()
 
+    def test_date_distractors_have_the_same_format(self) -> None:
+        """A date is never mixed with dates in another format."""
+        years = [("1900", 1), ("1950", 2), ("1960", 3), ("1970", 4), ("1980", 5)]
+        full_dates = [(f"20{day}-01-05", 10 + day) for day in range(10, 15)]
+        month_year = [("juli 2004", 20)]
+        rows = [
+            _row(index=index, answer_type="date", answer_text=text)
+            for text, index in years + full_dates + month_year
+        ]
+        dataset = create_mkqa.create_dataset(
+            rows=rows, language="da", train_size=0, val_size=0, test_size=len(rows)
+        )
+
+        formats = {
+            "year": re.compile(r"\d{4}"),
+            "full date": re.compile(r"\d{4}-\d{2}-\d{2}"),
+        }
+        assert dataset["test"].num_rows == len(years) + len(full_dates)
+        for sample in dataset["test"]:
+            options = [option[3:] for option in sample["text"].split("\n")[2:]]
+            kinds = {
+                name
+                for option in options
+                for name, pattern in formats.items()
+                if pattern.fullmatch(option)
+            }
+            assert len(kinds) == 1
+            assert not any(option == "juli 2004" for option in options)
+
     def test_distractors_are_not_any_accepted_answer_or_alias(self) -> None:
         """No distractor matches an accepted answer or alias of the question."""
         rows = [
@@ -29,14 +60,14 @@ class TestCreateDataset:
                     )
                 ],
             ),
-            *[_row(index=index) for index in range(1, 4)],
+            *[_row(index=index) for index in range(1, 5)],
         ]
         dataset = create_mkqa.create_dataset(
-            rows=rows, language="da", train_size=0, val_size=0, test_size=4
+            rows=rows, language="da", train_size=0, val_size=0, test_size=5
         )
 
         questions = {sample["text"].split("\n")[0] for sample in dataset["test"]}
-        assert questions == {f"Spørgsmål nummer {index}?" for index in (1, 2, 3)}
+        assert questions == {f"Spørgsmål nummer {index}?" for index in (1, 2, 3, 4)}
         for sample in dataset["test"]:
             question, _, *options = sample["text"].split("\n")
             number = question.removeprefix("Spørgsmål nummer ").removesuffix("?")
@@ -95,6 +126,34 @@ class TestCreateDataset:
                 number = question.removeprefix("Spørgsmål nummer ").removesuffix("?")
                 by_letter = {option[0]: option[3:] for option in options}
                 assert by_letter[sample["label"]] == f"svar {number}"
+
+    def test_number_with_unit_distractors_have_the_same_unit(self) -> None:
+        """A number with a unit is never mixed with numbers in another unit."""
+        rows = [
+            *[
+                _row(index=index, answer_type="number_with_unit", answer_text=text)
+                for index, text in enumerate(
+                    f"{number}.0 miles" for number in (10, 20, 30, 40, 50)
+                )
+            ],
+            *[
+                _row(index=index, answer_type="number_with_unit", answer_text=text)
+                for index, text in enumerate(
+                    (f"{number}.0 år" for number in (11, 21, 31, 41, 51)), start=10
+                )
+            ],
+            _row(index=20, answer_type="number_with_unit", answer_text="5.0 kg"),
+            _row(index=21, answer_type="number_with_unit", answer_text="3.5 6.9 miles"),
+        ]
+        dataset = create_mkqa.create_dataset(
+            rows=rows, language="da", train_size=0, val_size=0, test_size=len(rows)
+        )
+
+        assert dataset["test"].num_rows == 10
+        for sample in dataset["test"]:
+            options = [option[3:] for option in sample["text"].split("\n")[2:]]
+            assert len({option.split()[-1] for option in options}) == 1
+            assert not any("kg" in option or "6.9" in option for option in options)
 
     def test_questions_linked_in_any_language_share_a_split(self) -> None:
         """Rows are grouped when they have an equal question in some language."""
