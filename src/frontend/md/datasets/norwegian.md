@@ -1243,6 +1243,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset arc-no
 ```
 
+### Unofficial: MKQA-no
+
+This dataset is a Norwegian version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Hva er hovedreligionen i Sør-Korea\nSvaralternativer:\na. Kapp Horn\nb. Diana Ross\nc. Allen Iverson\nd. Kristendom",
+  "label": "d"
+}
+```
+
+```json
+{
+  "text": "Når sluttet papirer £5-lappen å være lovlige anbud\nSvaralternativer:\na. 1949\nb. 2010-06-18\nc. 2017-05-05\nd. 2020-02-09",
+  "label": "c"
+}
+```
+
+```json
+{
+  "text": "når ble menneskerettighetserklæringen laget\nSvaralternativer:\na. 1936\nb. 1986-06-11\nc. 1948-12-10\nd. 2007-01",
+  "label": "c"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Følgende er flervalgsspørsmål (med svar).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Spørsmål: {text}
+  Svaralternativer:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svar: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Spørsmål: {text}
+  Svaralternativer:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Besvar følgende spørsmål med 'a', 'b', 'c' eller 'd', og ikke noe annet.
+  ```
+
 ## Common-sense Reasoning
 
 ### NorCommonSenseQA

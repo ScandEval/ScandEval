@@ -619,6 +619,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset eu-mmlu-pl
 ```
 
+### Unofficial: MKQA-pl
+
+This dataset is a Polish version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "jaka jest główna religia w Korei Południowej\nOpcje:\na. chrześcijaństwo\nb. Emilia Clarke\nc. Alexander Gould\nd. Elizabeth Debicki",
+  "label": "a"
+}
+```
+
+```json
+{
+  "text": "kiedy papierowy banknot 5 funtów przestał być prawnym środkiem płatniczym\nOpcje:\na. 1981-09\nb. 2017-05-05\nc. 1933-04-07\nd. 1917-03-08",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "Kiedy utworzono powszechną deklaracje praw człowieka\nOpcje:\na. 2011-02-06\nb. 2020-07-22\nc. 2007-07-21\nd. 1948-12-10",
+  "label": "d"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Poniżej znajdują się pytania wielokrotnego wyboru (z odpowiedziami).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Pytanie: {text}
+  Opcje:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Odpowiedź: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Pytanie: {text}
+  Opcje:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Odpowiedz na powyższe pytanie, używając 'a', 'b', 'c' lub 'd' i niczego więcej.
+  ```
+
 ## Common-sense Reasoning
 
 ### Winogrande-pl

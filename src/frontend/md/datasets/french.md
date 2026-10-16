@@ -816,6 +816,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset eu-mmlu-fr
 ```
 
+### Unofficial: MKQA-fr
+
+This dataset is a French version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Quelle est la principale religion en Corée du Sud ?\nChoix:\na. Kodandera Madappa Cariappa\nb. christianisme\nc. The Jackson Five\nd. secrétaire à la Sécurité intérieure des États-Unis",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "quand les billets de 5 livres ont-ils cessé d'avoir cours légal\nChoix:\na. 1964-08-26\nb. 2008-09-01\nc. 1937\nd. 2017-05-05",
+  "label": "d"
+}
+```
+
+```json
+{
+  "text": "Quand a été créée la Déclaration Universelle des Droits de l'Homme\nChoix:\na. 1948-12-10\nb. 2017-03-31\nc. 1818\nd. 1976",
+  "label": "a"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Les questions suivantes sont des questions à choix multiples (avec réponses).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Question: {text}
+  Choix:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Réponse: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Question: {text}
+  Choix:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Répondez à la question ci-dessus par 'a', 'b', 'c' ou 'd', et rien d'autre.
+  ```
+
 ## Common-sense Reasoning
 
 ### HellaSwag-fr

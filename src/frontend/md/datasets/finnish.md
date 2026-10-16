@@ -541,6 +541,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset include-fi
 ```
 
+### Unofficial: MKQA-fi
+
+This dataset is a Finnish version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "mikä on etelä-korean tärkein uskonto\nVastausvaihtoehdot:\na. Thar\nb. kristinusko\nc. Buggles\nd. alcatraz",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "koska paperiset £5 setelit lakkasivat olemasta laillinen maksuväline\nVastausvaihtoehdot:\na. 2010-06-18\nb. 1948-12-10\nc. 2017-05-05\nd. 1937",
+  "label": "c"
+}
+```
+
+```json
+{
+  "text": "Milloin Ihmisoikeuksien yleismaailmallinen julistus tehtiin\nVastausvaihtoehdot:\na. 2017-09-03\nb. 1948-12-10\nc. 1942-06-05\nd. 2016",
+  "label": "b"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Seuraavat ovat monivalintakysymyksiä (vastauksineen).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Kysymys: {text}
+  Vastausvaihtoehdot:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Vastaus: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Kysymys: {text}
+  Vastausvaihtoehdot:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Vastaa yllä olevaan kysymykseen käyttämällä 'a', 'b', 'c' tai 'd', äläkä mitään muuta.
+  ```
+
 ## Common-sense Reasoning
 
 ### Winogrande-fi

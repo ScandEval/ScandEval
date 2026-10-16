@@ -230,3 +230,12 @@ ZEBRA_PUZZLE_HARD_EN_CONFIG = DatasetConfig(
     languages=[ENGLISH],
     unofficial=True,
 )
+
+MKQA_EN_CONFIG = DatasetConfig(
+    name="mkqa-en",
+    pretty_name="MKQA-en",
+    source="EuroEval/mkqa-en-mini",
+    task=KNOW,
+    languages=[ENGLISH],
+    unofficial=True,
+)

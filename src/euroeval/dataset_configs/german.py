@@ -283,3 +283,12 @@ EU_MMLU_DE_CONFIG = DatasetConfig(
     languages=[GERMAN],
     unofficial=True,
 )
+
+MKQA_DE_CONFIG = DatasetConfig(
+    name="mkqa-de",
+    pretty_name="MKQA-de",
+    source="EuroEval/mkqa-de-mini",
+    task=KNOW,
+    languages=[GERMAN],
+    unofficial=True,
+)

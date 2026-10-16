@@ -1466,6 +1466,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset danish-similarity-outlier
 ```
 
+### Unofficial: MKQA-da
+
+This dataset is a Danish version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Hvad er  hoved religionen i Sydkorea?\nSvarmuligheder:\na. John Miles\nb. Luis Fonsi\nc. Maddie Poppe\nd. Kristendom",
+  "label": "d"
+}
+```
+
+```json
+{
+  "text": "Hvornår holdt Paper £5 Notes op med at være lovligt betalingsmiddel\nSvarmuligheder:\na. 2017-05-05\nb. 1917-03-08\nc. 2026\nd. 1937",
+  "label": "a"
+}
+```
+
+```json
+{
+  "text": "hvornår blev verdenserklæringen om menneskerettigheder lavet\nSvarmuligheder:\na. 1776-08-02\nb. 2018-03-30\nc. 1902\nd. 1948-12-10",
+  "label": "d"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Følgende er multiple choice spørgsmål (med svar).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svar: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Spørgsmål: {text}
+  Svarmuligheder:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Besvar ovenstående spørgsmål ved at svare med 'a', 'b', 'c' eller 'd', og intet andet.
+  ```
+
 ## Common-sense Reasoning
 
 ### Winogrande-da

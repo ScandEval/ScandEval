@@ -688,6 +688,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset eu-mmlu-hu
 ```
 
+### Unofficial: MKQA-hu
+
+This dataset is a Hungarian version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Mi a fő vallás Dél-Koreában?\nVálaszlehetőségek:\na. Shailene Woodley\nb. kereszténység\nc. Németország\nd. Green Bay Packers",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "mikor fejeződött be az 5 font értékű papírok törvényes fizetőeszköznek\nVálaszlehetőségek:\na. 2012-10-22\nb. 2017-05-05\nc. 2017-08-15\nd. 1914-1-1",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "Mikor alkották az Emberi Jogok Egyetemes Nyilatkozatát?\nVálaszlehetőségek:\na. 1964-08-26\nb. 1948-12-10\nc. 1976-04-07\nd. 2018",
+  "label": "b"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Az alábbiakban több választási lehetőséget tartalmazó kérdések találhatók (válaszokkal együtt).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Kérdés: {text}
+  Válaszlehetőségek:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Válasz: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Kérdés: {text}
+  Válaszlehetőségek:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Válaszoljon a fenti kérdésre az elérhető lehetőségek közül 'a', 'b', 'c' vagy 'd' használatával, és semmi mással.
+  ```
+
 ## Common-sense Reasoning
 
 ### Winogrande-hu

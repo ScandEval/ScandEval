@@ -1089,6 +1089,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset eu-mmlu-pt
 ```
 
+### Unofficial: MKQA-pt
+
+This dataset is a Portuguese version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "Quando as notas de 5 libras deixaram de ter curso legal?\nOpções:\na. 2017-05-05\nb. 2020-02-09\nc. 2004\nd. 2017-10-10",
+  "label": "a"
+}
+```
+
+```json
+{
+  "text": "quando que a declaração universal dos direitos humanos foi criada\nOpções:\na. 1978\nb. 1948-12-10\nc. 1861-04-12\nd. 1885-02-05",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "qual é a população de fountain hills arizona\nOpções:\na. 22228.0\nb. 24583.0\nc. 7.0\nd. 56.0",
+  "label": "b"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  As seguintes são perguntas de escolha múltipla (com respostas).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Pergunta: {text}
+  Opções:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Resposta: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Pergunta: {text}
+  Opções:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Responde à pergunta acima usando só 'a', 'b', 'c' ou 'd', e nada mais.
+  ```
+
 ## Common-sense Reasoning
 
 ### Winogrande-pt

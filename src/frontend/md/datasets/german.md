@@ -901,6 +901,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset eu-mmlu-de
 ```
 
+### Unofficial: MKQA-de
+
+This dataset is a German version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "was ist die verbreiteste religion in südkorea\nAntwortmöglichkeiten:\na. Thomas Jefferson\nb. Christentum\nc. Volksrepublik China\nd. Liliana Mumy",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "wann wurde die 5 Pfund Note als gesetzliches Zahlungsmittel abgeschafft\nAntwortmöglichkeiten:\na. 2014\nb. 2018-08-31\nc. 2008-05-01\nd. 2017-05-05",
+  "label": "d"
+}
+```
+
+```json
+{
+  "text": "wann wurde die Allgemeine Erklärung der Menschenrechte geschaffen\nAntwortmöglichkeiten:\na. 1980-12-19\nb. 1948-12-10\nc. 1917-03-08\nd. 2019-05-19",
+  "label": "b"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Die folgenden Fragen sind Multiple-Choice-Fragen (mit Antworten).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Frage: {text}
+  Antwortmöglichkeiten:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Antwort: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Frage: {text}
+  Antwortmöglichkeiten:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Beantworten Sie die obige Frage mit 'a', 'b', 'c' oder 'd', und nichts anderes.
+  ```
+
 ## Common-sense Reasoning
 
 ### Winogrande-de

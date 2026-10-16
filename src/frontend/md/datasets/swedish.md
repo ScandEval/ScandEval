@@ -845,6 +845,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset multiloko-sv
 ```
 
+### Unofficial: MKQA-sv
+
+This dataset is a Swedish version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "vad är den främsta religionen i sydkorea\nSvarsalternativ:\na. kristendom\nb. Elaine Hendrix\nc. Liliana Mumy\nd. Caleb Johnson",
+  "label": "a"
+}
+```
+
+```json
+{
+  "text": "när slutade £5 papperssedlar vara lagliga betalningsmedel\nSvarsalternativ:\na. 1980-12-19\nb. 2017-05-05\nc. 2017-03-31\nd. 2020-11-03",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "när skapades FN:s deklaration om de mänskliga rättigheterna\nSvarsalternativ:\na. 1952\nb. 1948-12-10\nc. 2007-07-21\nd. juli 1940",
+  "label": "b"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  Följande är flervalsfrågor (med svar).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Fråga: {text}
+  Svarsalternativ:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Svar: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Fråga: {text}
+  Svarsalternativ:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Besvara följande fråga med 'a', 'b', 'c' eller 'd', och inget annat.
+  ```
+
 ## Common-sense Reasoning
 
 ### Winogrande-sv

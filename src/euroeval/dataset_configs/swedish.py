@@ -298,3 +298,12 @@ ZEBRA_PUZZLE_HARD_SV_CONFIG = DatasetConfig(
     languages=[SWEDISH],
     unofficial=True,
 )
+
+MKQA_SV_CONFIG = DatasetConfig(
+    name="mkqa-sv",
+    pretty_name="MKQA-sv",
+    source="EuroEval/mkqa-sv-mini",
+    task=KNOW,
+    languages=[SWEDISH],
+    unofficial=True,
+)

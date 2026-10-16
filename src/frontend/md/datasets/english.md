@@ -983,6 +983,80 @@ You can evaluate this dataset directly as follows:
 euroeval --model <model-id> --dataset multiloko-en
 ```
 
+### Unofficial: MKQA-en
+
+This dataset is a English version of [MKQA](https://aclanthology.org/2021.tacl-1.82/)
+(Multilingual Knowledge Questions and Answers), which has 10,000 open-domain questions
+sampled from Google's Natural Questions, with the questions and short answers
+translated into 26 languages. MKQA has no contexts, so we turn it into a multiple choice
+knowledge task: each question gets four options, namely the correct answer and three
+answers to other questions with the same answer type (entity, date, number, number with
+unit or short phrase). Questions with yes/no, long or no answers, and questions with
+very short or long texts, are left out, which leaves about 6,600 questions.
+
+The original dataset has no splits. We shuffle the questions with a fixed seed, so a
+question is in the same split in all MKQA languages, and use a 1,024 / 256 / 2,048
+split for training, validation and testing, respectively (so 3,328 samples used in
+total). The options of a question come from the answers in its own split.
+
+Here are a few examples from the training split:
+
+```json
+{
+  "text": "what is the main religion in south korea\nChoices:\na. Willie Nelson\nb. Christianity\nc. Joseph Gordon-Levitt\nd. I Dreamed a Dream",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "when did paper £5 notes stop being legal tender\nChoices:\na. 1942-06-05\nb. 2017-05-05\nc. 2013-11-22\nd. 2020",
+  "label": "b"
+}
+```
+
+```json
+{
+  "text": "when was the universal declaration of human rights created\nChoices:\na. 2019-07-29\nb. 1948-12-10\nc. 2022\nd. 1942-06-05",
+  "label": "b"
+}
+```
+
+When evaluating generative models, we use the following setup (see the
+[methodology](/methodology) for more information on how these are used):
+
+- Number of few-shot examples: 5
+- Prefix prompt:
+
+  ```text
+  The following are multiple choice questions (with answers).
+  ```
+
+- Base prompt template:
+
+  ```text
+  Question: {text}
+  Choices:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+  Answer: {label}
+  ```
+
+- Instruction-tuned prompt template:
+
+  ```text
+  Question: {text}
+  Choices:
+  a. {option_a}
+  b. {option_b}
+  c. {option_c}
+  d. {option_d}
+
+  Answer the above question by replying with 'a', 'b', 'c' or 'd', and nothing else.
+  ```
+
 ## Common-sense Reasoning
 
 ### HellaSwag
