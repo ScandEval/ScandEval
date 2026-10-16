@@ -78,8 +78,11 @@ def create_dataset(
     """Create the multiple choice dataset for one language.
 
     MKQA has no splits, so the questions are shuffled with the same seed for every
-    language and then divided into test, validation and training splits. A question
-    therefore ends up in the same split in all languages that keep it.
+    language and then divided into test, validation and training splits in proportion
+    to the requested split sizes. This is done on the example IDs before any
+    language-specific filtering, so a question that is rejected in one language does
+    not shift the split boundaries, and a question that is kept ends up in the same
+    split in all languages that keep it.
 
     Args:
         rows:
@@ -100,28 +103,27 @@ def create_dataset(
     shuffled_rows = sorted(rows, key=lambda row: str(row["example_id"]))
     random.Random(SEED).shuffle(shuffled_rows)
 
-    samples = [
-        sample
-        for sample in (_get_sample(row=row, language=language) for row in shuffled_rows)
-        if sample is not None
-    ]
-    test_samples = samples[:test_size]
-    val_samples = samples[test_size : test_size + val_size]
-    train_samples = samples[test_size + val_size : test_size + val_size + train_size]
-
-    return DatasetDict(
-        {
-            "train": _build_split(
-                samples=train_samples, pool=train_samples, language=language
-            ),
-            "val": _build_split(
-                samples=val_samples, pool=val_samples, language=language
-            ),
-            "test": _build_split(
-                samples=test_samples, pool=test_samples, language=language
-            ),
-        }
+    total_size = train_size + val_size + test_size
+    test_end = round(len(shuffled_rows) * test_size / total_size)
+    val_end = test_end + round(len(shuffled_rows) * val_size / total_size)
+    rows_by_split = dict(
+        train=shuffled_rows[val_end:],
+        val=shuffled_rows[test_end:val_end],
+        test=shuffled_rows[:test_end],
     )
+    max_size_by_split = dict(train=train_size, val=val_size, test=test_size)
+
+    splits: dict[str, Dataset] = dict()
+    for split, split_rows in rows_by_split.items():
+        samples = [
+            sample
+            for sample in (
+                _get_sample(row=row, language=language) for row in split_rows
+            )
+            if sample is not None
+        ][: max_size_by_split[split]]
+        splits[split] = _build_split(samples=samples, pool=samples, language=language)
+    return DatasetDict(splits)
 
 
 def _build_split(

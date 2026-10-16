@@ -67,6 +67,28 @@ class TestCreateDataset:
             ]
             assert danish_numbers == english_numbers
 
+    def test_split_does_not_depend_on_language_specific_filtering(self) -> None:
+        """A question rejected in one language does not shift splits in the others."""
+        rows = [
+            _row(index=index, english_question="Short?" if index % 5 == 0 else None)
+            for index in range(100)
+        ]
+        danish = create_mkqa.create_dataset(
+            rows=rows, language="da", train_size=10, val_size=5, test_size=20
+        )
+        english = create_mkqa.create_dataset(
+            rows=rows, language="en", train_size=10, val_size=5, test_size=20
+        )
+
+        danish_splits = _split_by_question_number(dataset=danish)
+        english_splits = _split_by_question_number(dataset=english)
+
+        shared = danish_splits.keys() & english_splits.keys()
+        assert {danish_splits[number] for number in shared} == {"train", "val", "test"}
+        for number in shared:
+            assert danish_splits[number] == english_splits[number]
+        assert not any(int(number) % 5 == 0 for number in english_splits)
+
     def test_splits_and_columns(self, dataset: DatasetDict) -> None:
         """The dataset has train, val and test splits with text and label."""
         assert set(dataset.keys()) == {"train", "val", "test"}
@@ -98,6 +120,53 @@ class TestCreateDataset:
             assert f"Spørgsmål nummer {index}?" not in questions
 
 
+def _row(
+    index: int, answer_type: str = "entity", english_question: str | None = None
+) -> dict[str, t.Any]:
+    """Create an MKQA row with a Danish and an English question.
+
+    Args:
+        index:
+            The index of the row, which makes the question and answer unique.
+        answer_type:
+            The MKQA answer type of the answer.
+        english_question:
+            The English question, or None to use a question that is unique to the row.
+
+    Returns:
+        An MKQA row.
+    """
+    return dict(
+        example_id=index,
+        query=f"question {index}",
+        queries=dict(
+            da=f"Spørgsmål nummer {index}?",
+            en=english_question or f"Question number {index}?",
+        ),
+        answers=dict(
+            da=[dict(type=answer_type, text=f"svar {index}", aliases=[])],
+            en=[dict(type=answer_type, text=f"answer {index}", aliases=[])],
+        ),
+    )
+
+
+def _split_by_question_number(dataset: DatasetDict) -> dict[str, str]:
+    """Map the number in each question to the split that the question is in.
+
+    Args:
+        dataset:
+            A dataset created from rows made with `_row`.
+
+    Returns:
+        A dictionary mapping question numbers to split names.
+    """
+    return {
+        sample["text"].split("\n")[0].split()[2].rstrip("?"): str(split)
+        for split, samples in dataset.items()
+        for sample in samples
+    }
+
+
 @pytest.fixture(scope="module")
 def dataset(rows: list[dict[str, t.Any]]) -> DatasetDict:
     """Create a small Danish dataset.
@@ -127,26 +196,3 @@ def rows() -> list[dict[str, t.Any]]:
         _row(index=102, answer_type="long_answer"),
     ]
     return [_row(index=index) for index in range(60)] + unusable
-
-
-def _row(index: int, answer_type: str = "entity") -> dict[str, t.Any]:
-    """Create an MKQA row with a Danish and an English question.
-
-    Args:
-        index:
-            The index of the row, which makes the question and answer unique.
-        answer_type:
-            The MKQA answer type of the answer.
-
-    Returns:
-        An MKQA row.
-    """
-    return dict(
-        example_id=index,
-        query=f"question {index}",
-        queries=dict(da=f"Spørgsmål nummer {index}?", en=f"Question number {index}?"),
-        answers=dict(
-            da=[dict(type=answer_type, text=f"svar {index}", aliases=[])],
-            en=[dict(type=answer_type, text=f"answer {index}", aliases=[])],
-        ),
-    )
