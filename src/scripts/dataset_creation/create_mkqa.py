@@ -69,21 +69,95 @@ def main() -> None:
         upload_private(dataset=dataset, repository_id=f"EuroEval/mkqa-{language}-mini")
 
 
+def _normalise(text: str) -> str:
+    """Normalise an answer, so that answers can be compared.
+
+    Args:
+        text:
+            The answer or alias.
+
+    Returns:
+        The text with Unicode compatibility forms folded, whitespace collapsed and
+        case removed.
+    """
+    return " ".join(unicodedata.normalize("NFKC", text).split()).casefold()
+
+
+class Sample(t.TypedDict):
+    """A usable MKQA question and its answer in one language."""
+
+    example_id: str
+    question: str
+    answer_type: str
+    answer: str
+    accepted: set[str]
+
+
+def _build_split(samples: list[Sample], pool: list[Sample], language: str) -> Dataset:
+    """Build one split, with distractors taken from the same split.
+
+    Args:
+        samples:
+            The usable questions and answers of the split.
+        pool:
+            The samples that the distractors are drawn from.
+        language:
+            The MKQA language code.
+
+    Returns:
+        A dataset with the columns "text" and "label".
+    """
+    pool_by_type: dict[str, list[str]] = {}
+    for sample in pool:
+        pool_by_type.setdefault(sample["answer_type"], []).append(sample["answer"])
+
+    texts: list[str] = []
+    labels: list[str] = []
+    for sample in samples:
+        rng = random.Random(f"{SEED}-{language}-{sample['example_id']}")
+        candidates = sorted(
+            {
+                _normalise(text=answer): answer
+                for answer in pool_by_type[sample["answer_type"]]
+                if _normalise(text=answer) not in sample["accepted"]
+            }.values()
+        )
+        if len(candidates) < len(LETTERS) - 1:
+            continue
+        options = [sample["answer"], *rng.sample(candidates, k=len(LETTERS) - 1)]
+        rng.shuffle(options)
+        lines = [f"{letter}. {option}" for letter, option in zip(LETTERS, options)]
+        texts.append(
+            f"{sample['question']}\n{CHOICES_MAPPING[language]}:\n" + "\n".join(lines)
+        )
+        labels.append(LETTERS[options.index(sample["answer"])])
+    return Dataset.from_dict(mapping=dict(text=texts, label=labels))
+
+
+class Answer(t.TypedDict):
+    """An answer to an MKQA question in one language."""
+
+    type: str
+    text: str | None
+    aliases: list[str] | None
+
+
+class MkqaRow(t.TypedDict):
+    """An MKQA question with its translations and answers in all languages."""
+
+    example_id: int | str
+    queries: dict[str, str]
+    answers: dict[str, list[Answer]]
+
+
 def create_dataset(
-    rows: list[dict[str, t.Any]],
+    rows: list[MkqaRow],
     language: str,
     train_size: int = MAX_TRAIN,
     val_size: int = MAX_VAL,
     test_size: int = MAX_TEST,
 ) -> DatasetDict:
     """Create the multiple choice dataset for one language.
-
-    MKQA has no splits, so the questions are shuffled with the same seed for every
-    language and then divided into test, validation and training splits in proportion
-    to the requested split sizes. This is done on the example IDs before any
-    language-specific filtering, so a question that is rejected in one language does
-    not shift the split boundaries, and a question that is kept ends up in the same
-    split in all languages that keep it.
 
     Args:
         rows:
@@ -124,67 +198,10 @@ def create_dataset(
             if sample is not None
         ][: max_size_by_split[split]]
         splits[split] = _build_split(samples=samples, pool=samples, language=language)
-    return DatasetDict(splits)
+    return DatasetDict({split: dataset for split, dataset in splits.items()})
 
 
-def _build_split(
-    samples: list[dict[str, t.Any]], pool: list[dict[str, t.Any]], language: str
-) -> Dataset:
-    """Build one split, with distractors taken from the same split.
-
-    Args:
-        samples:
-            The usable questions and answers of the split.
-        pool:
-            The samples that the distractors are drawn from.
-        language:
-            The MKQA language code.
-
-    Returns:
-        A dataset with the columns "text" and "label".
-    """
-    pool_by_type: dict[str, list[str]] = {}
-    for sample in pool:
-        pool_by_type.setdefault(sample["type"], []).append(sample["answer"])
-
-    texts: list[str] = []
-    labels: list[str] = []
-    for sample in samples:
-        rng = random.Random(f"{SEED}-{language}-{sample['example_id']}")
-        candidates = sorted(
-            {
-                _normalise(text=answer): answer
-                for answer in pool_by_type[sample["type"]]
-                if _normalise(text=answer) not in sample["accepted"]
-            }.values()
-        )
-        if len(candidates) < len(LETTERS) - 1:
-            continue
-        options = [sample["answer"], *rng.sample(candidates, k=len(LETTERS) - 1)]
-        rng.shuffle(options)
-        lines = [f"{letter}. {option}" for letter, option in zip(LETTERS, options)]
-        texts.append(
-            f"{sample['question']}\n{CHOICES_MAPPING[language]}:\n" + "\n".join(lines)
-        )
-        labels.append(LETTERS[options.index(sample["answer"])])
-    return Dataset.from_dict(mapping=dict(text=texts, label=labels))
-
-
-def _normalise(text: str) -> str:
-    """Normalise an answer, so that answers can be compared.
-
-    Args:
-        text:
-            The answer or alias.
-
-    Returns:
-        The text with Unicode compatibility forms folded, whitespace collapsed and
-        case removed.
-    """
-    return " ".join(unicodedata.normalize("NFKC", text).split()).casefold()
-
-
-def _get_sample(row: dict[str, t.Any], language: str) -> dict[str, t.Any] | None:
+def _get_sample(row: MkqaRow, language: str) -> Sample | None:
     """Get the question and answer of a row, if they are usable.
 
     Args:
@@ -203,15 +220,15 @@ def _get_sample(row: dict[str, t.Any], language: str) -> dict[str, t.Any] | None
     answers = row["answers"][language]
     if not answers or answers[0]["type"] not in ANSWER_TYPES:
         return None
-    answer = answers[0]["text"].strip()
+    answer = (answers[0]["text"] or "").strip()
     if not MIN_NUM_CHARS_IN_QUESTION <= len(question) <= MAX_NUM_CHARS_IN_QUESTION:
         return None
     if not MIN_NUM_CHARS_IN_OPTION <= len(answer) <= MAX_NUM_CHARS_IN_OPTION:
         return None
-    return dict(
+    return Sample(
         example_id=str(row["example_id"]),
         question=question,
-        type=answers[0]["type"],
+        answer_type=answers[0]["type"],
         answer=answer,
         accepted={
             _normalise(text=text)
@@ -225,11 +242,11 @@ def _get_sample(row: dict[str, t.Any], language: str) -> dict[str, t.Any] | None
     )
 
 
-def load_rows() -> list[dict[str, t.Any]]:
+def load_rows() -> list[MkqaRow]:
     """Download the MKQA questions and answers.
 
     Returns:
-        The 10,000 MKQA rows, with the queries and answers for all languages.
+        The MKQA rows, with the queries and answers for all languages.
     """
     response = requests.get(url=SOURCE_URL, timeout=300)
     response.raise_for_status()

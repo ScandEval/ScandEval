@@ -1,7 +1,5 @@
 """Public-interface tests for creating the MKQA multiple choice datasets."""
 
-import typing as t
-
 import pytest
 from datasets import DatasetDict
 
@@ -12,7 +10,7 @@ class TestCreateDataset:
     """Tests for the `create_dataset` function."""
 
     def test_creation_is_deterministic(
-        self, rows: list[dict[str, t.Any]], dataset: DatasetDict
+        self, rows: list[create_mkqa.MkqaRow], dataset: DatasetDict
     ) -> None:
         """Creating the dataset twice gives the same samples."""
         again = create_mkqa.create_dataset(
@@ -26,7 +24,9 @@ class TestCreateDataset:
             _row(
                 index=0,
                 extra_danish_answers=[
-                    dict(type="entity", text="svar 1", aliases=["  SVAR   2"])
+                    create_mkqa.Answer(
+                        type="entity", text="svar 1", aliases=["  SVAR   2"]
+                    )
                 ],
             ),
             *[_row(index=index) for index in range(1, 4)],
@@ -73,7 +73,7 @@ class TestCreateDataset:
                 assert by_letter[sample["label"]] == f"svar {number}"
 
     def test_same_questions_in_the_same_split_in_all_languages(
-        self, rows: list[dict[str, t.Any]], dataset: DatasetDict
+        self, rows: list[create_mkqa.MkqaRow], dataset: DatasetDict
     ) -> None:
         """A question is in the same split in Danish and English."""
         english = create_mkqa.create_dataset(
@@ -147,8 +147,8 @@ def _row(
     index: int,
     answer_type: str = "entity",
     english_question: str | None = None,
-    extra_danish_answers: list[dict[str, t.Any]] | None = None,
-) -> dict[str, t.Any]:
+    extra_danish_answers: list[create_mkqa.Answer] | None = None,
+) -> create_mkqa.MkqaRow:
     """Create an MKQA row with a Danish and an English question.
 
     Args:
@@ -164,19 +164,20 @@ def _row(
     Returns:
         An MKQA row.
     """
-    return dict(
+    return create_mkqa.MkqaRow(
         example_id=index,
-        query=f"question {index}",
         queries=dict(
             da=f"Spørgsmål nummer {index}?",
             en=english_question or f"Question number {index}?",
         ),
         answers=dict(
             da=[
-                dict(type=answer_type, text=f"svar {index}", aliases=[]),
+                create_mkqa.Answer(type=answer_type, text=f"svar {index}", aliases=[]),
                 *(extra_danish_answers or []),
             ],
-            en=[dict(type=answer_type, text=f"answer {index}", aliases=[])],
+            en=[
+                create_mkqa.Answer(type=answer_type, text=f"answer {index}", aliases=[])
+            ],
         ),
     )
 
@@ -199,7 +200,7 @@ def _split_by_question_number(dataset: DatasetDict) -> dict[str, str]:
 
 
 @pytest.fixture(scope="module")
-def dataset(rows: list[dict[str, t.Any]]) -> DatasetDict:
+def dataset(rows: list[create_mkqa.MkqaRow]) -> DatasetDict:
     """Create a small Danish dataset.
 
     Args:
@@ -215,7 +216,7 @@ def dataset(rows: list[dict[str, t.Any]]) -> DatasetDict:
 
 
 @pytest.fixture(scope="module")
-def rows() -> list[dict[str, t.Any]]:
+def rows() -> list[create_mkqa.MkqaRow]:
     """Provide 60 usable rows plus rows that cannot be used.
 
     Returns:
